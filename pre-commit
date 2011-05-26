@@ -223,7 +223,7 @@ test -z "$bad" || die "$bad"
 
 #-----------------------------------------------------------------------------
 # Style hooks.
-#. "$GIT_DIR/hooks/pre-commit-style"
+. "$GIT_DIR/hooks/pre-commit-style"
 
 #-----------------------------------------------------------------------------
 # Chain to project-specific hook.
