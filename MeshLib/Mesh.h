@@ -28,8 +28,6 @@ public:
         this->_x[1] = y;
         this->_x[2] = z;
     };
-
-
 };
 
 //-----------------------------------------------------------------------------
@@ -61,7 +59,7 @@ public:
 
     void setElementID(size_t id) {_element_id = id;};
     size_t getElementID() const {return _element_id;};
-    size_t setGroupID(size_t id) {_group_id = id;};
+    void setGroupID(size_t id) {_group_id = id;};
     size_t getGroupID() const {return _group_id;};
 
     virtual ElementType::type getElementType() const = 0;
@@ -118,6 +116,23 @@ typedef TemplateElement<ElementType::TETRAHEDRON, 4, 3, 4, 6> Tetrahedron;
 typedef TemplateElement<ElementType::PYRAMID, 5, 3, 5, 8> Pyramid;
 typedef TemplateElement<ElementType::PRISM, 6, 3, 5, 9> Prism;
 typedef TemplateElement<ElementType::HEXAHEDRON, 8, 3, 6, 12> Hexahedron;
+
+class ElemenetFactory
+{
+public:
+  static IElement* createNewElement(const ElementType::type t)
+  {
+    if (t == ElementType::LINE)	return new Line();
+    else if (t == ElementType::QUAD) return new Quadrirateral();
+    else if (t == ElementType::HEXAHEDRON) return new Hexahedron();
+    else if (t == ElementType::TRIANGLE) return new Triangle();
+    else if (t == ElementType::TETRAHEDRON) return new Tetrahedron();
+    else if (t == ElementType::PRISM) return new Prism();
+    else if (t == ElementType::PYRAMID) return new Pyramid();
+    return NULL;
+  };
+};
+
 
 //-----------------------------------------------------------------------------
 // Mesh
@@ -188,7 +203,7 @@ public:
     virtual IElement* getElemenet( size_t element_id ) const {
         assert(element_id<_list_elements.size());
         return _list_elements.at(element_id);
-    }
+    };
 };
 
 template <size_t N_DIM>
