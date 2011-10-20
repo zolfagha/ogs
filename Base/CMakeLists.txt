@@ -14,6 +14,7 @@ SET( HEADERS
 	TimeMeasurementBase.h
         uniqueListInsert.h
         wait.h
+	MemoryTools.h
 )
 
 SET( SOURCES
@@ -26,11 +27,14 @@ SET( SOURCES
 
 # Create the library
 ADD_LIBRARY( Base STATIC ${HEADERS} ${SOURCES} )
+IF (WIN32)
+        TARGET_LINK_LIBRARIES(Base Winmm.lib)
+ENDIF (WIN32)
 
 SET_TARGET_PROPERTIES(Base PROPERTIES LINKER_LANGUAGE CXX)
 
 INCLUDE_DIRECTORIES(
-        ../GEOLib
+        ../GeoLib
         ../MathLib
         .
 )

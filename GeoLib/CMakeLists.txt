@@ -46,7 +46,7 @@ set( HEADERS
 )
 
 # Create the library
-add_library( GEO STATIC
+add_library( GeoLib STATIC
 	${SOURCES}
 	${HEADERS}
 )
@@ -55,17 +55,17 @@ add_library( GEO STATIC
 include_directories(
 	.
 	../Base
-	../FEM
-	../FileIO
+#	../FEM
+#	../FileIO
 	../MathLib
-	../MSH
+#	../MeshLib
 )
 
 
 target_link_libraries (
-	GEO
+	GeoLib
 	Base
-	FEM
+#	FEM
 	MathLib
 )
 
