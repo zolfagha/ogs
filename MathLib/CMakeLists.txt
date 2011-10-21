@@ -22,12 +22,14 @@ SET( HEADERS
         LinAlg/Solvers/BiCGStab.h
         LinAlg/Solvers/CG.h
         LinAlg/Solvers/GMRes.h
+	LinAlg/Solvers/LisInterface.h
 	LinAlg/Sparse/amuxCRS.h
         LinAlg/Sparse/CRSMatrix.h
         LinAlg/Sparse/CRSMatrixPThreads.h
         LinAlg/Sparse/CRSMatrixOpenMP.h
         LinAlg/Sparse/CRSSymMatrix.h
         LinAlg/Sparse/SparseMatrixBase.h
+        LinAlg/Sparse/EigenInterface.h
 )
 
 SET( SOURCES
