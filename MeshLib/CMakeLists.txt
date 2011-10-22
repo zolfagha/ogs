@@ -1,16 +1,12 @@
 # Source files
-
-set( SOURCES
+SET ( MeshLib_Files
 	Mesh.h
 	MeshIO.h
 	MeshGenerator.h
-#	Core.h
-#	Edge.h
-#	Element.h
-#	Face.h
-#	MeshEnums.h
-#	Node.h
-)
+	)
+SOURCE_GROUP(MeshLib FILES ${MeshLib_Files})
+
+ADD_LIBRARY(MeshLib STATIC ${MeshLib_Files})
 
 include_directories(
 	.
@@ -25,12 +21,11 @@ IF (PARALLEL_USE_MPI)
 ENDIF (PARALLEL_USE_MPI)
 
 # Create the library
-ADD_LIBRARY( MeshLib STATIC ${SOURCES} )
 
 target_link_libraries (
 	MeshLib
 	Base
-	GEO
+	GeoLib
         MathLib
 )
 

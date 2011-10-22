@@ -1,5 +1,5 @@
 # Source files
-SET( HEADERS
+SET ( Base_Files
         binarySearch.h
         Configure.h.in
 	CPUTimeTimer.h
@@ -15,18 +15,16 @@ SET( HEADERS
         uniqueListInsert.h
         wait.h
 	MemoryTools.h
-)
-
-SET( SOURCES
 	binarySearch.cpp
 	DateTools.cpp
         CPUTimeTimer.cpp
 	RunTimeTimer.cpp
 	StringTools.cpp
-)
+	)
+SOURCE_GROUP( Base FILES ${Base_Files})
 
 # Create the library
-ADD_LIBRARY( Base STATIC ${HEADERS} ${SOURCES} )
+ADD_LIBRARY( Base STATIC ${Base_Files})
 IF (WIN32)
         TARGET_LINK_LIBRARIES(Base Winmm.lib)
 ENDIF (WIN32)

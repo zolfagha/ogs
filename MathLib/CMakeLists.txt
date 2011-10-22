@@ -1,5 +1,5 @@
-# Source files
-SET( HEADERS
+#Source files grouped by a directory
+SET ( MathLib_Files
 	AnalyticalGeometry.h        
 	LinearInterpolation.h  
 	MathTools.h
@@ -8,6 +8,14 @@ SET( HEADERS
 	max.h
         sparse.h
 	vector_io.h
+	AnalyticalGeometry.cpp        
+	LinearInterpolation.cpp  
+	MathTools.cpp
+	EarClippingTriangulation.cpp  
+	)
+SOURCE_GROUP( MathLib FILES ${MathLib_Files})
+
+SET ( MathLib_LinAlg_Files
 	LinAlg/MatrixBase.h
 	LinAlg/VectorNorms.h
 	LinAlg/Dense/Matrix.h
@@ -30,13 +38,6 @@ SET( HEADERS
         LinAlg/Sparse/CRSSymMatrix.h
         LinAlg/Sparse/SparseMatrixBase.h
         LinAlg/Sparse/EigenInterface.h
-)
-
-SET( SOURCES
-	AnalyticalGeometry.cpp        
-	LinearInterpolation.cpp  
-	MathTools.cpp
-	EarClippingTriangulation.cpp  
         LinAlg/Sparse/amuxCRS.cpp
         LinAlg/Solvers/BiCGStab.cpp
         LinAlg/Solvers/CG.cpp
@@ -44,16 +45,18 @@ SET( SOURCES
 	LinAlg/Solvers/GaussAlgorithm.cpp
         LinAlg/Solvers/TriangularSolve.cpp
 	LinAlg/Preconditioner/generateDiagPrecond.cpp
-)
+	)
+SOURCE_GROUP( MathLib\\LinAlg FILES ${MathLib_LinAlg_Files})
 
+# Create the library
+ADD_LIBRARY( MathLib STATIC ${MathLib_Files} ${MathLib_LinAlg_Files} )
+
+#Include
 INCLUDE_DIRECTORIES (
 	.
 	../Base
 	../GeoLib
 )
-
-# Create the library
-ADD_LIBRARY( MathLib STATIC ${HEADERS} ${SOURCES} )
 
 SET_TARGET_PROPERTIES(MathLib PROPERTIES LINKER_LANGUAGE CXX)
 

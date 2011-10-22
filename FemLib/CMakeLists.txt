@@ -1,10 +1,12 @@
-# Source files
-
-set( SOURCES
+#Source files grouped by a directory
+SET ( FemLib_Files
 	Fem.h
-)
+	)
+SOURCE_GROUP( FemLib FILES ${FemLib_Files})
 
-include_directories(
+ADD_LIBRARY(FemLib STATIC ${FemLib_Files})
+
+INCLUDE_DIRECTORIES(
 	.
 	../Base
 	../GeoLib
@@ -17,11 +19,8 @@ IF (PARALLEL_USE_MPI)
 	INCLUDE_DIRECTORIES(${MPI_INCLUDE_PATH})
 ENDIF (PARALLEL_USE_MPI)
 
-# Create the library
-add_library( FEM STATIC ${SOURCES} )
-
 target_link_libraries (
-	FEM
+	FemLib
 	BASE
         MathLib
 	GEO
