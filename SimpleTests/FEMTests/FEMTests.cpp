@@ -114,9 +114,7 @@ int main(int argc, char *argv[])
 
     //assembly EQS
     const size_t n_ele = msh->getNumberOfElements();
-    Eigen::Matrix3d local_M;
     Eigen::Matrix3d local_K;
-    double local_F[3];
 
     Triangle *ele;
     double x[3], y[3], z[3];
@@ -176,7 +174,7 @@ int main(int argc, char *argv[])
     //apply Dirichlet BC
     for (size_t i=0; i<list_dirichlet_bc.size(); i++) {
         IndexValue &bc = list_dirichlet_bc.at(i);
-        MathLib::EigenTools::SetKnownXi(eqsA, eqsRHS, bc.id, bc.val);
+        MathLib::EigenTools::setKnownXi(eqsA, eqsRHS, bc.id, bc.val);
     }
 
     //apply ST

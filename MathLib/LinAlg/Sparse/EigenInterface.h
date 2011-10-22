@@ -80,7 +80,7 @@ namespace EigenTools
 
     void outputEQS(const std::string &fileName, Eigen::DynamicSparseMatrix<double, Eigen::RowMajor> &A, double *x, double *b)
     {
-        std::ofstream of(fileName);
+        std::ofstream of(fileName.c_str());
         for (size_t i=0; i<A.rows(); i++) {
             for (size_t j=0; j<A.rows(); j++)
                 of << A.coeff(i,j) << "\t";
@@ -91,7 +91,7 @@ namespace EigenTools
         of.close();
     };
 
-    void SetKnownXi(Eigen::DynamicSparseMatrix<double, Eigen::RowMajor> &eqsA, double *eqsRHS, size_t id, double x) {
+    void setKnownXi(Eigen::DynamicSparseMatrix<double, Eigen::RowMajor> &eqsA, double *eqsRHS, size_t id, double x) {
         //A(k, j) = 0.
         for (size_t j=0; j<eqsA.cols(); j++)
             if (eqsA.coeff(id, j)!=.0)
