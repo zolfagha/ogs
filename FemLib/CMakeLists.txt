@@ -1,6 +1,7 @@
 #Source files grouped by a directory
 SET ( FemLib_Files
 	Fem.h
+	MeshSparseTable.h
 	)
 SOURCE_GROUP( FemLib FILES ${FemLib_Files})
 

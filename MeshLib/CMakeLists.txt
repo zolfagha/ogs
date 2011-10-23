@@ -1,12 +1,24 @@
 # Source files
 SET ( MeshLib_Files
 	Mesh.h
-	MeshIO.h
-	MeshGenerator.h
+	Node.h
+	Element.h
+	ElementFactory.h
 	)
 SOURCE_GROUP(MeshLib FILES ${MeshLib_Files})
 
-ADD_LIBRARY(MeshLib STATIC ${MeshLib_Files})
+SET ( MeshLib_IO_Files
+	IO/MeshIOOGSAscii.h
+	IO/MeshIOLegacyVtk.h
+	)
+SOURCE_GROUP(MeshLib\\IO FILES ${MeshLib_IO_Files})
+
+SET ( MeshLib_Tools_Files
+	Tools/MeshGenerator.h
+	)
+SOURCE_GROUP(MeshLib\\Tools FILES ${MeshLib_Tools_Files})
+
+ADD_LIBRARY(MeshLib STATIC ${MeshLib_Files} ${MeshLib_IO_Files} ${MeshLib_Tools_Files})
 
 include_directories(
 	.

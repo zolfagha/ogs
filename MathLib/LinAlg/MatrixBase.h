@@ -13,7 +13,8 @@ namespace MathLib {
 /**
  * class MatrixBase is the basis for all matrix classes (dense and sparse)
  */
-class MatrixBase {
+template<typename INT_TYPE>
+class TemplateMatrixBase {
 public:
 	/**
 	 * Constructor for initialization of the number of rows and columns
@@ -21,7 +22,7 @@ public:
 	 * @param ncols number of columns
 	 * @return
 	 */
-	MatrixBase(unsigned nrows=0, unsigned ncols=0) :
+	TemplateMatrixBase(INT_TYPE nrows=0, INT_TYPE ncols=0) :
 		_n_rows(nrows), _n_cols(ncols)
 	{}
 
@@ -30,7 +31,7 @@ public:
 	 * @param original the object that is copied
 	 * @return
 	 */
-	MatrixBase (MatrixBase const& original) :
+	TemplateMatrixBase (TemplateMatrixBase const& original) :
 		_n_rows (original._n_rows), _n_cols (original._n_cols)
 	{}
 
@@ -38,29 +39,30 @@ public:
 	 * destructor of the class.
 	 * @return
 	 */
-	virtual ~MatrixBase() {};
+	virtual ~TemplateMatrixBase() {};
 	/**
 	 * get the number of rows
 	 * @return the number of rows
 	 */
-	unsigned getNRows () const { return _n_rows; }
+	INT_TYPE getNRows () const { return _n_rows; }
 	/**
 	 * get the number of columns
 	 * @return the number of columns
 	 */
-	unsigned getNCols () const { return _n_cols; }
+	INT_TYPE getNCols () const { return _n_cols; }
 
 protected:
 	/**
 	 * the number of rows
 	 */
-	unsigned _n_rows;
+	INT_TYPE _n_rows;
 	/**
 	 * the number of columns
 	 */
-	unsigned _n_cols;
+	INT_TYPE _n_cols;
 };
 
+typedef TemplateMatrixBase<unsigned int> MatrixBase;
 }
 
 #endif /* MATRIXBASE_H_ */

@@ -5,7 +5,7 @@
 //#ifdef LIS
 #include "lis.h"
 //#endif
-#include "LinAlg/Sparse/CRSMatrix.h"
+#include "LinAlg/Sparse/SparseTableCRS.h"
 
 /*
 LIS matrix solver options
@@ -67,7 +67,7 @@ typedef struct {
     double ls_error_tolerance;
 } LIS_option;
 
-void solveWithLis(CRS *A, double *x, double *b, LIS_option &option)
+void solveWithLis(CRSSigned *A, double *x, double *b, LIS_option &option)
 {
     std::cout << "------------------------------------------------------------------" << std::endl;
     std::cout << "*** LIS solver computation" << std::endl;
@@ -84,8 +84,11 @@ void solveWithLis(CRS *A, double *x, double *b, LIS_option &option)
     const size_t MAX_ZEILE = 512;
     char solver_options[MAX_ZEILE], tol_option[MAX_ZEILE];
 
+    int nthreads = 1;
+    omp_set_num_threads (nthreads);
+
     sprintf(solver_options, "-i %d -p %d %s", option.ls_method, option.ls_precond, option.ls_extra_arg.c_str()); 
-    sprintf(tol_option, "-tol %e -maxiter %d", option.ls_error_tolerance, option.ls_max_iterations);
+    sprintf(tol_option, "-tol %e -maxiter %d -omp_num_threads %d", option.ls_error_tolerance, option.ls_max_iterations, nthreads);
 
     ierr = lis_matrix_set_crs(A->nonzero, A->row_ptr, A->col_idx, A->data, AA);
     ierr = lis_matrix_assemble(AA);
@@ -106,6 +109,7 @@ void solveWithLis(CRS *A, double *x, double *b, LIS_option &option)
     ierr = lis_solver_set_option(solver_options, solver);
     ierr = lis_solver_set_option(tol_option, solver);
     ierr = lis_solver_set_option("-print mem", solver);
+    
     ierr = lis_solve(AA, bb, xx, solver);
     int iter = 0;
     ierr = lis_solver_get_iters(solver, &iter);

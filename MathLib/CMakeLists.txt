@@ -18,8 +18,29 @@ SOURCE_GROUP( MathLib FILES ${MathLib_Files})
 SET ( MathLib_LinAlg_Files
 	LinAlg/MatrixBase.h
 	LinAlg/VectorNorms.h
+	)
+SOURCE_GROUP( MathLib\\LinAlg FILES ${MathLib_LinAlg_Files})
+
+SET ( MathLib_LinAlg_Dense_Files
 	LinAlg/Dense/Matrix.h
-        LinAlg/Preconditioner/generateDiagPrecond.h
+	LinAlg/Dense/TemplateMatrixNd.h
+	)
+SOURCE_GROUP( MathLib\\LinAlg\\Dense FILES ${MathLib_LinAlg_Dense_Files})
+
+SET ( MathLib_LinAlg_Sparse_Files
+	LinAlg/Sparse/amuxCRS.h
+        LinAlg/Sparse/CRSMatrix.h
+        LinAlg/Sparse/CRSMatrixPThreads.h
+        LinAlg/Sparse/CRSMatrixOpenMP.h
+        LinAlg/Sparse/CRSSymMatrix.h
+        LinAlg/Sparse/SparseMatrixBase.h
+        LinAlg/Sparse/EigenInterface.h
+        LinAlg/Sparse/amuxCRS.cpp
+        LinAlg/Sparse/SparseTableCRS.h
+	)
+SOURCE_GROUP( MathLib\\LinAlg\\Sparse FILES ${MathLib_LinAlg_Sparse_Files})
+
+SET ( MathLib_LinAlg_Solvers_Files
         LinAlg/Solvers/LinearSolver.h
         LinAlg/Solvers/DirectLinearSolver.h
         LinAlg/Solvers/DenseDirectLinearSolver.h
@@ -31,25 +52,30 @@ SET ( MathLib_LinAlg_Files
         LinAlg/Solvers/CG.h
         LinAlg/Solvers/GMRes.h
 	LinAlg/Solvers/LisInterface.h
-	LinAlg/Sparse/amuxCRS.h
-        LinAlg/Sparse/CRSMatrix.h
-        LinAlg/Sparse/CRSMatrixPThreads.h
-        LinAlg/Sparse/CRSMatrixOpenMP.h
-        LinAlg/Sparse/CRSSymMatrix.h
-        LinAlg/Sparse/SparseMatrixBase.h
-        LinAlg/Sparse/EigenInterface.h
-        LinAlg/Sparse/amuxCRS.cpp
         LinAlg/Solvers/BiCGStab.cpp
         LinAlg/Solvers/CG.cpp
         LinAlg/Solvers/GMRes.cpp
 	LinAlg/Solvers/GaussAlgorithm.cpp
         LinAlg/Solvers/TriangularSolve.cpp
+	)
+SOURCE_GROUP( MathLib\\LinAlg\\Solvers FILES ${MathLib_LinAlg_Solvers_Files})
+
+SET ( MathLib_LinAlg_Preconditioner_Files
+        LinAlg/Preconditioner/generateDiagPrecond.h
 	LinAlg/Preconditioner/generateDiagPrecond.cpp
 	)
-SOURCE_GROUP( MathLib\\LinAlg FILES ${MathLib_LinAlg_Files})
+SOURCE_GROUP( MathLib\\LinAlg\\Preconditioner FILES ${MathLib_LinAlg_Preconditioner_Files})
+
 
 # Create the library
-ADD_LIBRARY( MathLib STATIC ${MathLib_Files} ${MathLib_LinAlg_Files} )
+ADD_LIBRARY( MathLib STATIC 
+	${MathLib_Files} 
+	${MathLib_LinAlg_Files} 
+	${MathLib_LinAlg_Dense_Files}
+	${MathLib_LinAlg_Sparse_Files}
+	${MathLib_LinAlg_Solvers_Files}
+	${MathLib_LinAlg_Preconditioner_Files}
+	)
 
 #Include
 INCLUDE_DIRECTORIES (

@@ -23,8 +23,8 @@
  * @return the id of the element in the vector or, if not found,
  * the value std::numeric_limits<size_t>::max()
  */
-template <class T>
-size_t searchElement (const T& key, size_t beg, size_t end, const std::vector<T>& array)
+template <class T, class ARRAY_TYPE>
+size_t searchElement (const T& key, size_t beg, size_t end, ARRAY_TYPE& array)
 {
 	if (beg >= end) return std::numeric_limits<size_t>::max();
 	size_t m ((end+beg)/2);
