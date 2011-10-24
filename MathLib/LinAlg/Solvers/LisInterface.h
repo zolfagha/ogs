@@ -97,7 +97,7 @@ void solveWithLis(CRSSigned *A, double *x, double *b, LIS_option &option)
     // Assemble the vector, b, x
     ierr = lis_vector_duplicate(AA, &bb);
     ierr = lis_vector_duplicate(AA, &xx);
-//#pragma omp parallel for
+#pragma omp parallel for
     for(size_t i=0; i < A->dimension; ++i)
     {
         ierr = lis_vector_set_value(LIS_INS_VALUE, i, x[i], xx);
@@ -123,7 +123,7 @@ void solveWithLis(CRSSigned *A, double *x, double *b, LIS_option &option)
     //	lis_vector_print(bb);
 
     // Update the solution (answer) into the x vector
-//#pragma omp parallel for
+#pragma omp parallel for
     for(size_t i=0; i<A->dimension; ++i)
     {
         lis_vector_get_value(xx,i,&(x[i]));
