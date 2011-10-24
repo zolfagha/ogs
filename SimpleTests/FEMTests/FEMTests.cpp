@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 #ifdef USE_EIGEN
     Eigen::DynamicSparseMatrix<double, Eigen::RowMajor> eqsA(dim_eqs, dim_eqs);
 #else
-    MathLib::SparseTableCRS<int>* crs = generateSparseTableCRS<int>(msh);
+    MathLib::SparseTableCRS<unsigned>* crs = generateSparseTableCRS<unsigned>(msh);
     //MathLib::TemplateCRSMatrix<double, int> eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
 #endif
 
@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
     cout << "->export Matrix for LIS" << endl;
     MathLib::SparseTableCRS<int> *crsA = MathLib::EigenTools::buildCRSMatrixFromEigenMatrix(eqsA);
 #else
-    MathLib::SparseTableCRS<int> *crsA = crs;
+    MathLib::SparseTableCRS<unsigned> *crsA = crs;
 #endif
     MathLib::LIS_option option;
     option.ls_method = 1;
