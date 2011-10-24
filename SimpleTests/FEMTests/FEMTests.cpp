@@ -248,6 +248,7 @@ int main(int argc, char *argv[])
     cpu_timer2.stop();
 
     run_timer.stop();
+    cpu_timer.stop();
     cout.setf(std::ios::scientific,std::ios::floatfield);
     cout.precision(12);
     cout << "== Simulation time ==" << endl;
