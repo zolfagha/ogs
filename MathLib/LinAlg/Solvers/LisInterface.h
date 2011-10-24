@@ -2,6 +2,7 @@
 #pragma once
 
 #include <string>
+#include <omp.h>
 //#ifdef LIS
 #include "lis.h"
 //#endif
@@ -84,8 +85,8 @@ void solveWithLis(CRSSigned *A, double *x, double *b, LIS_option &option)
     const size_t MAX_ZEILE = 512;
     char solver_options[MAX_ZEILE], tol_option[MAX_ZEILE];
 
-    int nthreads = 1;
-    omp_set_num_threads (nthreads);
+    int nthreads = omp_get_num_threads();
+    //omp_set_num_threads (nthreads);
 
     sprintf(solver_options, "-i %d -p %d %s", option.ls_method, option.ls_precond, option.ls_extra_arg.c_str()); 
     sprintf(tol_option, "-tol %e -maxiter %d -omp_num_threads %d", option.ls_error_tolerance, option.ls_max_iterations, nthreads);

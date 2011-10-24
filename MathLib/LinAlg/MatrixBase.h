@@ -62,7 +62,7 @@ protected:
 	INT_TYPE _n_cols;
 };
 
-typedef TemplateMatrixBase<unsigned int> MatrixBase;
+typedef TemplateMatrixBase<unsigned> MatrixBase;
 }
 
 #endif /* MATRIXBASE_H_ */

@@ -95,7 +95,7 @@ public:
 
       size_t col_id_begin = _col_idx[_row_i_begin];
       size_t col_id_end = 0;
-      if (row==getNRows()-1)
+      if (row==this->getNRows()-1)
         col_id_end = _col_idx[_number_of_nonzero-1];
       else
         col_id_end = _col_idx[_row_ptr[row+1]];
@@ -158,7 +158,8 @@ public:
 
     virtual void amux(T d, T const * const x, T *y) const
     {
-      amuxCRS(d, TemplateMatrixBase::_n_rows, _row_ptr, _col_idx, _data, x, y);
+      amuxCRS(d, this->getNRows(), TemplateCRSMatrix<T, unsigned>::_row_ptr, TemplateCRSMatrix<T, unsigned>::_col_idx, TemplateCRSMatrix<T, unsigned>::_data, x, y);
+//      amuxCRS(d, TemplateCRSMatrix<T, unsigned>::_n_rows, _row_ptr, _col_idx, _data, x, y);
     }
 };
 

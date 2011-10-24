@@ -1,14 +1,12 @@
 
 #include <iostream>
 //#include <cmath>
-//#include "Point.h"
 //#include "LinAlg/Dense/Matrix.h"
 //#include "LinAlg/Dense/SymmetricMatrix.h"
-#include "LinAlg/Sparse/CRSMatrix.h"
+//#include "LinAlg/Sparse/CRSMatrix.h"
 #include "LinAlg/Sparse/SparseTableCRS.h"
 //#include "LinAlg/Solvers/CG.h"
-#include "LinAlg/Dense/TemplateMatrixNd.h"
-#include "LinAlg/Sparse/CRSMatrix.h"
+//#include "LinAlg/Dense/TemplateMatrixNd.h"
 #include "LinAlg/Sparse/EigenInterface.h"
 #include "Mesh.h"
 #include "IO/MeshIOOGSAscii.h"
@@ -17,8 +15,6 @@
 #include "CPUTimeTimer.h"
 #include "RunTimeTimer.h"
 #include <Eigen>
-//#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
-//#include <Sparse>
 #include "MeshSparseTable.h"
 
 #define LIS
@@ -29,22 +25,6 @@
 #endif
 
 using namespace std;
-
-#define TEST2
-
-#ifdef TEST1
-int main(int argc, char *argv[])
-{
-    cout << "Hello World!" << endl;
-    StaticUnstructuredMesh<3,10,10> mesh;
-    cout << "Nr. Nodes=" << mesh.getNumberOfNodes() << endl;
-    cout << "Nr. Elements=" << mesh.getNumberOfElements() << endl;
-    
-	return 0;
-}
-
-
-#elif defined TEST2
 
 typedef struct {
   size_t id;
@@ -97,8 +77,6 @@ int main(int argc, char *argv[])
     }
     vector<MeshLib::IMesh*> vec_mesh; 
     MeshLib::MeshIOOGS::readMesh(strMeshFile, vec_mesh);
-    //MeshGenerator::generateRegularMesh(2, 100, 100, 0.0, 0.0, 0.0, msh);
-    //MeshIOLegacyVtk::WriteAsciiFile("test.vtk", msh);
     if (vec_mesh.size()==0) {
         std::cout << "Fail to read a mesh file: " << strMeshFile << std::endl;
         return 0;
@@ -133,7 +111,7 @@ int main(int argc, char *argv[])
     Eigen::DynamicSparseMatrix<double, Eigen::RowMajor> eqsA(dim_eqs, dim_eqs);
 #else
     MathLib::SparseTableCRS<int>* crs = generateSparseTableCRS<int>(msh);
-    MathLib::TemplateCRSMatrix<double, int> eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
+    //MathLib::TemplateCRSMatrix<double, int> eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
 #endif
 
     double* eqsX(new double[dim_eqs]);
@@ -144,7 +122,6 @@ int main(int argc, char *argv[])
 
     //assembly EQS
     const size_t n_ele = msh->getNumberOfElements();
-    //MathLib::Matrix3d local_K(.0);
     Eigen::Matrix3d local_K = Eigen::Matrix3d::Zero();
     const size_t n_ele_nodes = 3;
     double nodes_x[n_ele_nodes], nodes_y[n_ele_nodes], nodes_z[n_ele_nodes];
@@ -248,6 +225,7 @@ int main(int argc, char *argv[])
     //-- solve EQS -----------------------------------------------
     //setup
 #ifdef USE_EIGEN
+    cout << "->export Matrix for LIS" << endl;
     MathLib::SparseTableCRS<int> *crsA = MathLib::EigenTools::buildCRSMatrixFromEigenMatrix(eqsA);
 #else
     MathLib::SparseTableCRS<int> *crsA = crs;
@@ -301,4 +279,3 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-#endif

@@ -19,8 +19,8 @@ template<class T>
 class SparseMatrixBase : public TemplateMatrixBase<unsigned>
 {
 public:
-  SparseMatrixBase(unsigned n1, unsigned n2) : TemplateMatrixBase<INT_TYPE> (n1,n2) {}
-  SparseMatrixBase() : TemplateMatrixBase<INT_TYPE> () {}
+  SparseMatrixBase(unsigned n1, unsigned n2) : TemplateMatrixBase<unsigned> (n1,n2) {}
+  SparseMatrixBase() : TemplateMatrixBase<unsigned> () {}
   virtual void amux(T d, T const * const x, T *y) const = 0;         // y +=d*Ax
   virtual ~SparseMatrixBase() { }
 };

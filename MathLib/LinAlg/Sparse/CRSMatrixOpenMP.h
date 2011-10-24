@@ -34,7 +34,7 @@ public:
 
 	virtual void amux(T d, T const * const x, T *y) const
 	{
-		amuxCRSParallelOpenMP(d, MatrixBase::_n_rows, CRSMatrix<T>::_row_ptr, CRSMatrix<T>::_col_idx, CRSMatrix<T>::_data, x, y, _num_of_threads);
+		amuxCRSParallelOpenMP(d, this->getNRows(), CRSMatrix<T>::_row_ptr, CRSMatrix<T>::_col_idx, CRSMatrix<T>::_data, x, y, _num_of_threads);
 	}
 
 private:
