@@ -94,7 +94,8 @@ MathLib::CRSSigned* buildCRSMatrixFromEigenMatrix(Eigen::DynamicSparseMatrix<dou
 };
 
 
-void outputEQS(const std::string &fileName, Eigen::DynamicSparseMatrix<double, Eigen::RowMajor> &A, double *x, double *b)
+template<class EigenSpMatrix>
+void outputEQS(const std::string &fileName, EigenSpMatrix &A, double *x, double *b)
 {
     std::ofstream of(fileName.c_str());
     for (size_t i=0; i<A.rows(); i++) {
@@ -107,14 +108,15 @@ void outputEQS(const std::string &fileName, Eigen::DynamicSparseMatrix<double, E
     of.close();
 };
 
-void setKnownXi(Eigen::DynamicSparseMatrix<double, Eigen::RowMajor> &eqsA, double *eqsRHS, size_t id, double x) 
+template<class EigenSpMatrix>
+void setKnownXi(EigenSpMatrix &eqsA, double *eqsRHS, size_t id, double x) 
 {
     const size_t n_cols = eqsA.cols();
     //A(k, j) = 0.
     //for (size_t j=0; j<n_cols; j++)
     //    if (eqsA.coeff(id, j)!=.0)
     //        eqsA.coeffRef(id, j) = .0;
-    for (Eigen::DynamicSparseMatrix<double, Eigen::RowMajor>::InnerIterator it(eqsA,id); it; ++it)
+    for (EigenSpMatrix::InnerIterator it(eqsA,id); it; ++it)
     {
       eqsA.coeffRef(id, it.col()) = .0;
     }
@@ -127,7 +129,7 @@ void setKnownXi(Eigen::DynamicSparseMatrix<double, Eigen::RowMajor> &eqsA, doubl
     {
       if (i==id) continue;
       double v_i_k = .0;
-      for (Eigen::DynamicSparseMatrix<double, Eigen::RowMajor>::InnerIterator it(eqsA,i); it; ++it)
+      for (EigenSpMatrix::InnerIterator it(eqsA,i); it; ++it)
       {
         if (it.col()==id) {
           v_i_k = eqsA.coeff(i, id);

@@ -23,6 +23,8 @@ public:
     virtual size_t getNumberOfElements() const = 0;
     virtual void getNodeCoordinates( size_t node_id, double pt[3] ) const = 0;
     virtual IElement* getElemenet( size_t element_id ) const = 0;
+
+    virtual Node* getNode( size_t id ) const = 0;
 };
 
 class StructuredMesh : public IMesh
@@ -80,6 +82,27 @@ public:
     virtual IElement* getElemenet( size_t element_id ) const {
         assert(element_id<_list_elements.size());
         return _list_elements.at(element_id);
+    };
+
+    virtual Node* getNode( size_t id ) const {
+        return _list_nodes.at(id);
+    };
+
+    void construct() {
+
+        //set node connectivity
+        const size_t n_ele = this->getNumberOfElements();
+        for (size_t i=0; i<n_ele; i++) {
+            const IElement* e = _list_elements[i];
+            for (size_t j=0; j<e->getNumberOfNodes(); j++) {
+                Node* nod_j = getNode(e->getNodeID(j));
+                for (size_t k=j+1; k<e->getNumberOfNodes(); k++) {
+                    Node* nod_k = getNode(e->getNodeID(k));
+                    nod_j->addConnectedNode(e->getNodeID(k));
+                    nod_k->addConnectedNode(e->getNodeID(j));
+                }
+            };
+        }
     };
 };
 
