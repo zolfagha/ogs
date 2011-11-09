@@ -3,7 +3,7 @@
 //#include <cmath>
 //#include "LinAlg/Dense/Matrix.h"
 //#include "LinAlg/Dense/SymmetricMatrix.h"
-//#include "LinAlg/Sparse/CRSMatrix.h"
+#include "LinAlg/Sparse/CRSMatrix.h"
 #include "LinAlg/Sparse/SparseTableCRS.h"
 //#include "LinAlg/Solvers/CG.h"
 //#include "LinAlg/Dense/TemplateMatrixNd.h"
@@ -18,10 +18,15 @@
 #include "MeshSparseTable.h"
 
 #define LIS
+#define USE_OPENMP
+
 #ifdef LIS
-#include <omp.h>
 #include "lis.h"
 #include "LinAlg/Solvers/LisInterface.h"
+#endif
+
+#ifdef USE_OPENMP
+#include <omp.h>
 #endif
 
 using namespace std;
@@ -56,15 +61,20 @@ void setDirichletBC_Case1(MeshLib::UnstructuredMesh *msh, vector<IndexValue> &li
   }
 }
 
+//#define USE_EIGEN
+#define CRS_MATRIX
+
 int main(int argc, char *argv[])
 {
 #ifdef LIS
     lis_initialize(&argc, &argv);
 #endif
+#ifdef USE_OPENMP
     int nthreads = 1;
     if (argc > 2)
-      sscanf(argv[2], "%d", &nthreads);
+        sscanf(argv[2], "%d", &nthreads);
     omp_set_num_threads (nthreads);
+#endif
     cout << "->Start OpenMP parallelization with " << omp_get_max_threads() << " threads" << endl;
     //-- setup a problem -----------------------------------------------
     //set mesh
@@ -107,14 +117,12 @@ int main(int argc, char *argv[])
     //-- construct EQS -----------------------------------------------
     //prepare EQS
     const size_t dim_eqs = msh->getNumberOfNodes();
-#define USE_EIGEN
+    MathLib::SparseTableCRS<int>* crs = FemLib::generateSparseTableCRS<int>(msh);
 #ifdef USE_EIGEN
     //Eigen::DynamicSparseMatrix<double, Eigen::RowMajor> eqsA(dim_eqs, dim_eqs);
-    MathLib::SparseTableCRS<int>* crs = FemLib::generateSparseTableCRS<int>(msh);
     Eigen::MappedSparseMatrix<double, Eigen::RowMajor> eqsA(dim_eqs, dim_eqs, crs->nonzero, crs->row_ptr, crs->col_idx, crs->data);
 #else
-    //MathLib::SparseTableCRS<unsigned>* crs = generateSparseTableCRS<unsigned>(msh);
-    //MathLib::TemplateCRSMatrix<double, int> eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
+    MathLib::CRSMatrix<double, int> eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
 #endif
 
     double* eqsX(new double[dim_eqs]);
@@ -197,11 +205,11 @@ int main(int argc, char *argv[])
     cout << "->apply BC" << endl;
 
     //apply Dirichlet BC
+#ifdef USE_EIGEN
     for (size_t i=0; i<list_dirichlet_bc.size(); i++) {
         IndexValue &bc = list_dirichlet_bc.at(i);
         const size_t id = bc.id;
         const double val = bc.val;
-#ifdef USE_EIGEN
         MathLib::EigenTools::setKnownXi(eqsA, eqsRHS, id, val);
         ////A(k, j) = 0.
         //size_t dataId_k_col_begin = crs->row_ptr[id];
@@ -223,24 +231,32 @@ int main(int argc, char *argv[])
         //    if (eqsA(j, id)!=.0 && j!=id)
         //        eqsA(j, id) = .0;
 
+    }
 #else
-        //A(k, j) = 0.
-        for (size_t j=0; j<eqsA.getNCols(); j++)
-          if (eqsA(id, j)!=.0)
-            eqsA(id, j) = .0;
-        //A(k, k) = val,
-        eqsA(id, id) = val;
+    vector<int> removed_rows(list_dirichlet_bc.size());
+    for (size_t i=0; i<list_dirichlet_bc.size(); i++) {
+        IndexValue &bc = list_dirichlet_bc.at(i);
+        const size_t id = bc.id;
+        const double val = bc.val;
+        removed_rows.at(i) = id;
+
         //b_i -= A(i,k)*val, i!=k
         for (size_t j=0; j<eqsA.getNCols(); j++)
-          eqsRHS[j] -= eqsA(j, id)*val;
+            eqsRHS[j] -= eqsA(j, id)*val;
         //b_k = A_kk*val
-        eqsRHS[id] = eqsA(id, id)*val;
-        //A(i, k) = 0., i!=k
-        for (size_t j=0; j<eqsA.getNCols(); j++)
-          if (eqsA(j, id)!=.0 && j!=id)
-            eqsA(j, id) = .0;
-#endif
+        eqsRHS[id] = val; //=eqsA(id, id)*val;
     }
+
+    //remove rows and columns
+    eqsA.eraseEntries(removed_rows.size(), &removed_rows[0], &removed_rows[0]);
+
+    ////set one to diagonal entries
+    //for (size_t i=0; i<list_dirichlet_bc.size(); i++) {
+    //    IndexValue &bc = list_dirichlet_bc.at(i);
+    //    const size_t id = bc.id;
+    //    eqsA(id, id) = 1.0; //=bc.val;
+    //}
+#endif
 
     //apply ST
     //MathLib::EigenTools::outputEQS("eqs2.txt", eqsA, eqsX, eqsRHS);
@@ -251,8 +267,15 @@ int main(int argc, char *argv[])
     cout << "->export Matrix for LIS" << endl;
     //MathLib::SparseTableCRS<int> *crsA = MathLib::EigenTools::buildCRSMatrixFromEigenMatrix(eqsA);
 #else
-    MathLib::SparseTableCRS<unsigned> *crsA = crs;
+    //MathLib::SparseTableCRS<unsigned> *crsA = crs;
 #endif
+    //solve EQS
+    cout << "->solve EQS" << endl;
+    CPUTimeTimer cpu_timer2;
+    RunTimeTimer run_timer2;
+    run_timer2.start();
+    cpu_timer2.start();
+#ifdef LIS
     MathLib::LIS_option option;
     option.ls_method = 1;
     option.ls_precond = 0;
@@ -260,13 +283,8 @@ int main(int argc, char *argv[])
     option.ls_max_iterations = 5000;
     option.ls_error_tolerance = 1e-10;
 
-    //solve EQS
-    cout << "->solve BC" << endl;
-    CPUTimeTimer cpu_timer2;
-    RunTimeTimer run_timer2;
-    run_timer2.start();
-    cpu_timer2.start();
     MathLib::solveWithLis(crs, eqsX, eqsRHS, option);
+#endif
     run_timer2.stop();
     cpu_timer2.stop();
 
