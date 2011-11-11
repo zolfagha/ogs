@@ -1,9 +1,12 @@
 
 #pragma once
 
+#include <iostream>
 #include <set>
 #include "Mesh.h"
 #include "LinAlg/Sparse/SparseTableCRS.h"
+
+using namespace std;
 
 namespace FemLib
 {
