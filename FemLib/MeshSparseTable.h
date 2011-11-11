@@ -36,22 +36,6 @@ MathLib::SparseTableCRS<INTTYPE>* generateSparseTableCRS(MeshLib::IMesh *mesh)
   }
   (*ptr)[n_nodes] = counter_ptr;
 
-#if 0
-  //output CRS
-  cout << "PTR:" << endl;
-  for (size_t i=0; i<A.rows()+1; i++)
-    cout << ptr[i] << ", "; 
-  cout << endl;
-  cout << "ColID:" << endl;
-  for (size_t i=0; i<nonzero; i++)
-    cout << col_idx[i] << ", "; 
-  cout << endl;
-  cout << "Data:" << endl;
-  for (size_t i=0; i<nonzero; i++)
-    cout << crs_data[i] << ", "; 
-  cout << endl;
-#endif
-
   MathLib::SparseTableCRS<INTTYPE> *crs(new MathLib::SparseTableCRS<INTTYPE>);
   crs->dimension = n_nodes;
   crs->row_ptr = &(*ptr)[0];
@@ -62,6 +46,24 @@ MathLib::SparseTableCRS<INTTYPE>* generateSparseTableCRS(MeshLib::IMesh *mesh)
       crs->data[i] = .0;
 
   return crs;
+}
+
+template<class INTTYPE>
+void outputSparseTableCRS(MathLib::SparseTableCRS<INTTYPE> *crs)
+{
+    //output CRS
+    cout << "PTR:" << endl;
+    for (size_t i=0; i<crs->dimension+1; i++)
+        cout << crs->row_ptr[i] << ", "; 
+    cout << endl;
+    cout << "ColID:" << endl;
+    for (size_t i=0; i<crs->nonzero; i++)
+        cout << crs->col_idx[i] << ", "; 
+    cout << endl;
+    cout << "Data:" << endl;
+    for (size_t i=0; i<crs->nonzero; i++)
+        cout << crs->data[i] << ", "; 
+    cout << endl;
 }
 
 }

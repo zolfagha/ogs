@@ -31,6 +31,15 @@
 
 using namespace std;
 
+//-----------------------------------------------------------------------------
+// Configuration
+//-----------------------------------------------------------------------------
+//#define USE_EIGEN
+#define CRS_MATRIX
+
+//-----------------------------------------------------------------------------
+// Tools for testing purpose
+//-----------------------------------------------------------------------------
 typedef struct {
   size_t id;
   double val;
@@ -61,9 +70,52 @@ void setDirichletBC_Case1(MeshLib::UnstructuredMesh *msh, vector<IndexValue> &li
   }
 }
 
-//#define USE_EIGEN
-#define CRS_MATRIX
+#ifndef USE_EIGEN
+void setKnownXi_ReduceSizeOfEQS(vector<IndexValue> &list_dirichlet_bc, MathLib::CRSMatrix<double, int> &eqsA, double* org_eqsRHS, double* org_eqsX, double** eqsRHS, double** eqsX, map<int,int> &map_solved_orgEqs) 
+{
+    const size_t n_org_rows = eqsA.getNRows();
+    vector<int> removed_rows(list_dirichlet_bc.size());
+    for (size_t i=0; i<list_dirichlet_bc.size(); i++) {
+        IndexValue &bc = list_dirichlet_bc.at(i);
+        const size_t id = bc.id;
+        const double val = bc.val;
+        removed_rows.at(i) = id;
 
+        //b_i -= A(i,k)*val, i!=k
+        for (size_t j=0; j<eqsA.getNCols(); j++)
+            org_eqsRHS[j] -= eqsA.getValue(j, id)*val;
+        //b_k = A_kk*val
+        org_eqsRHS[id] = val; //=eqsA(id, id)*val;
+        org_eqsX[id] = val; //=eqsA(id, id)*val;
+    }
+
+    //remove rows and columns
+    eqsA.eraseEntries(removed_rows.size(), &removed_rows[0], &removed_rows[0]);
+
+    //remove X,RHS
+    (*eqsX) = new double[n_org_rows-removed_rows.size()];
+    (*eqsRHS) = new double[n_org_rows-removed_rows.size()];
+    size_t new_id = 0;
+    for (size_t i=0; i<n_org_rows; i++) {
+        if (find(removed_rows.begin(), removed_rows.end(), i)!=removed_rows.end()) continue;
+        (*eqsRHS)[new_id] = org_eqsRHS[i];
+        (*eqsX)[new_id] = org_eqsX[i];
+        map_solved_orgEqs[new_id] = i;
+        new_id++;
+    }
+}
+
+void mapSolvedXToOriginalX(double *eqsX, size_t dim, map<int,int> &map_solved_orgEqs, double *org_eqsX)
+{
+    for (size_t i=0; i<dim; i++) {
+        org_eqsX[map_solved_orgEqs[i]] = eqsX[i];
+    }
+}
+#endif
+
+//-----------------------------------------------------------------------------
+// Test 1
+//-----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
 #ifdef LIS
@@ -118,18 +170,16 @@ int main(int argc, char *argv[])
     //prepare EQS
     const size_t dim_eqs = msh->getNumberOfNodes();
     MathLib::SparseTableCRS<int>* crs = FemLib::generateSparseTableCRS<int>(msh);
+    //FemLib::outputSparseTableCRS(crs);
 #ifdef USE_EIGEN
-    //Eigen::DynamicSparseMatrix<double, Eigen::RowMajor> eqsA(dim_eqs, dim_eqs);
     Eigen::MappedSparseMatrix<double, Eigen::RowMajor> eqsA(dim_eqs, dim_eqs, crs->nonzero, crs->row_ptr, crs->col_idx, crs->data);
 #else
     MathLib::CRSMatrix<double, int> eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
 #endif
-
     double* eqsX(new double[dim_eqs]);
     double* eqsRHS(new double[dim_eqs]);
     for (size_t i=0; i<dim_eqs; i++) eqsX[i] = .0;
     for (size_t i=0; i<dim_eqs; i++) eqsRHS[i] = .0;
-
 
     //assembly EQS
     const size_t n_ele = msh->getNumberOfElements();
@@ -194,7 +244,7 @@ int main(int argc, char *argv[])
 #ifdef USE_EIGEN
                 eqsA.coeffRef(dof_map[i], dof_map[j]) += local_K(i,j);
 #else
-              eqsA(dof_map[i], dof_map[j]) += local_K(i,j);
+              eqsA.addValue(dof_map[i], dof_map[j], local_K(i,j));
 #endif
             }
         }
@@ -211,65 +261,19 @@ int main(int argc, char *argv[])
         const size_t id = bc.id;
         const double val = bc.val;
         MathLib::EigenTools::setKnownXi(eqsA, eqsRHS, id, val);
-        ////A(k, j) = 0.
-        //size_t dataId_k_col_begin = crs->row_ptr[id];
-        //size_t dataId_k_col_next = crs->nonzero;
-        //if (id<dim_eqs-1)
-        //    dataId_k_col_next = crs->row_ptr[id+1];
-        //for (size_t j=dataId_k_col_begin; j<dataId_k_col_next; j++)
-        //    crs->data[j] = .0;
-
-        ////A(k, k) = val,
-        //eqsA(id, id) = val;
-        ////b_i -= A(i,k)*val, i!=k
-        //for (size_t j=0; j<eqsA.getNCols(); j++)
-        //    eqsRHS[j] -= eqsA(j, id)*val;
-        ////b_k = A_kk*val
-        //eqsRHS[id] = eqsA(id, id)*val;
-        ////A(i, k) = 0., i!=k
-        //for (size_t j=0; j<eqsA.getNCols(); j++)
-        //    if (eqsA(j, id)!=.0 && j!=id)
-        //        eqsA(j, id) = .0;
-
     }
 #else
-    vector<int> removed_rows(list_dirichlet_bc.size());
-    for (size_t i=0; i<list_dirichlet_bc.size(); i++) {
-        IndexValue &bc = list_dirichlet_bc.at(i);
-        const size_t id = bc.id;
-        const double val = bc.val;
-        removed_rows.at(i) = id;
-
-        //b_i -= A(i,k)*val, i!=k
-        for (size_t j=0; j<eqsA.getNCols(); j++)
-            eqsRHS[j] -= eqsA(j, id)*val;
-        //b_k = A_kk*val
-        eqsRHS[id] = val; //=eqsA(id, id)*val;
-    }
-
-    //remove rows and columns
-    eqsA.eraseEntries(removed_rows.size(), &removed_rows[0], &removed_rows[0]);
-
-    ////set one to diagonal entries
-    //for (size_t i=0; i<list_dirichlet_bc.size(); i++) {
-    //    IndexValue &bc = list_dirichlet_bc.at(i);
-    //    const size_t id = bc.id;
-    //    eqsA(id, id) = 1.0; //=bc.val;
-    //}
+    double *org_eqsX = eqsX;
+    double *org_eqsRHS = eqsRHS;
+    map<int,int> map_solved_orgEqs;
+    setKnownXi_ReduceSizeOfEQS(list_dirichlet_bc, eqsA, org_eqsRHS, org_eqsX, &eqsRHS, &eqsX, map_solved_orgEqs);
 #endif
 
     //apply ST
     //MathLib::EigenTools::outputEQS("eqs2.txt", eqsA, eqsX, eqsRHS);
 
     //-- solve EQS -----------------------------------------------
-    //setup
-#ifdef USE_EIGEN
-    cout << "->export Matrix for LIS" << endl;
-    //MathLib::SparseTableCRS<int> *crsA = MathLib::EigenTools::buildCRSMatrixFromEigenMatrix(eqsA);
-#else
-    //MathLib::SparseTableCRS<unsigned> *crsA = crs;
-#endif
-    //solve EQS
+    //set up
     cout << "->solve EQS" << endl;
     CPUTimeTimer cpu_timer2;
     RunTimeTimer run_timer2;
@@ -283,7 +287,24 @@ int main(int argc, char *argv[])
     option.ls_max_iterations = 5000;
     option.ls_error_tolerance = 1e-10;
 
+#ifdef USE_EIGEN
     MathLib::solveWithLis(crs, eqsX, eqsRHS, option);
+#else
+    crs = new MathLib::SparseTableCRS<int>();
+    crs->nonzero = eqsA.getNNZ();
+    crs->dimension = eqsA.getNRows();
+    crs->row_ptr = (int*)eqsA.getRowPtrArray();
+    crs->col_idx = (int*)eqsA.getColIdxArray();
+    crs->data = (double*)eqsA.getEntryArray();
+    //FemLib::outputSparseTableCRS(crs);
+
+    MathLib::solveWithLis(crs, eqsX, eqsRHS, option);
+
+    mapSolvedXToOriginalX(eqsX, crs->dimension, map_solved_orgEqs, org_eqsX);
+    double *temp_x = eqsX;
+    eqsX = org_eqsX;
+    org_eqsX = temp_x;
+#endif
 #endif
     run_timer2.stop();
     cpu_timer2.stop();
@@ -317,7 +338,12 @@ int main(int argc, char *argv[])
     //delete [] crs->row_ptr;
     //delete [] crs->col_idx;
     ////delete [] crs->data;
+#ifdef USE_EIGEN
     delete crs;
+#else
+    delete[] org_eqsX;
+    delete[] org_eqsRHS;
+#endif
     delete [] eqsX;
     delete [] eqsRHS;
 
