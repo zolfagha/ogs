@@ -8,6 +8,7 @@
 //#include "LinAlg/Solvers/CG.h"
 //#include "LinAlg/Dense/TemplateMatrixNd.h"
 #include "LinAlg/Sparse/EigenInterface.h"
+#include "LinAlg/Solvers/CG.h"
 #include "Mesh.h"
 #include "IO/MeshIOOGSAscii.h"
 #include "IO/MeshIOLegacyVtk.h"
@@ -17,12 +18,15 @@
 #include <Eigen>
 #include "MeshSparseTable.h"
 
-#define LIS
+//#define LIS
 #define USE_OPENMP
 
 #ifdef LIS
 #include "lis.h"
 #include "LinAlg/Solvers/LisInterface.h"
+#define INDEX_TYPE int
+#else
+#define INDEX_TYPE unsigned
 #endif
 
 #ifdef USE_OPENMP
@@ -71,10 +75,10 @@ void setDirichletBC_Case1(MeshLib::UnstructuredMesh *msh, vector<IndexValue> &li
 }
 
 #ifndef USE_EIGEN
-void setKnownXi_ReduceSizeOfEQS(vector<IndexValue> &list_dirichlet_bc, MathLib::CRSMatrix<double, int> &eqsA, double* org_eqsRHS, double* org_eqsX, double** eqsRHS, double** eqsX, map<int,int> &map_solved_orgEqs) 
+void setKnownXi_ReduceSizeOfEQS(vector<IndexValue> &list_dirichlet_bc, MathLib::CRSMatrix<double, INDEX_TYPE> &eqsA, double* org_eqsRHS, double* org_eqsX, double** eqsRHS, double** eqsX, map<INDEX_TYPE,INDEX_TYPE> &map_solved_orgEqs) 
 {
     const size_t n_org_rows = eqsA.getNRows();
-    vector<int> removed_rows(list_dirichlet_bc.size());
+    vector<INDEX_TYPE> removed_rows(list_dirichlet_bc.size());
     for (size_t i=0; i<list_dirichlet_bc.size(); i++) {
         IndexValue &bc = list_dirichlet_bc.at(i);
         const size_t id = bc.id;
@@ -105,7 +109,7 @@ void setKnownXi_ReduceSizeOfEQS(vector<IndexValue> &list_dirichlet_bc, MathLib::
     }
 }
 
-void mapSolvedXToOriginalX(double *eqsX, size_t dim, map<int,int> &map_solved_orgEqs, double *org_eqsX)
+void mapSolvedXToOriginalX(double *eqsX, size_t dim, map<INDEX_TYPE,INDEX_TYPE> &map_solved_orgEqs, double *org_eqsX)
 {
     for (size_t i=0; i<dim; i++) {
         org_eqsX[map_solved_orgEqs[i]] = eqsX[i];
@@ -169,12 +173,12 @@ int main(int argc, char *argv[])
     //-- construct EQS -----------------------------------------------
     //prepare EQS
     const size_t dim_eqs = msh->getNumberOfNodes();
-    MathLib::SparseTableCRS<int>* crs = FemLib::generateSparseTableCRS<int>(msh);
+    MathLib::SparseTableCRS<INDEX_TYPE>* crs = FemLib::generateSparseTableCRS<INDEX_TYPE>(msh);
     //FemLib::outputSparseTableCRS(crs);
 #ifdef USE_EIGEN
     Eigen::MappedSparseMatrix<double, Eigen::RowMajor> eqsA(dim_eqs, dim_eqs, crs->nonzero, crs->row_ptr, crs->col_idx, crs->data);
 #else
-    MathLib::CRSMatrix<double, int> eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
+    MathLib::CRSMatrix<double, INDEX_TYPE> eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
 #endif
     double* eqsX(new double[dim_eqs]);
     double* eqsRHS(new double[dim_eqs]);
@@ -265,7 +269,7 @@ int main(int argc, char *argv[])
 #else
     double *org_eqsX = eqsX;
     double *org_eqsRHS = eqsRHS;
-    map<int,int> map_solved_orgEqs;
+    map<INDEX_TYPE,INDEX_TYPE> map_solved_orgEqs;
     setKnownXi_ReduceSizeOfEQS(list_dirichlet_bc, eqsA, org_eqsRHS, org_eqsX, &eqsRHS, &eqsX, map_solved_orgEqs);
 #endif
 
@@ -304,6 +308,12 @@ int main(int argc, char *argv[])
     double *temp_x = eqsX;
     eqsX = org_eqsX;
     org_eqsX = temp_x;
+#endif
+#else
+#ifndef USE_EIGEN
+    double eps (1.0e-6);
+    unsigned steps (4000);
+    MathLib::CG (&eqsA, eqsRHS, eqsX, eps, steps, 1);
 #endif
 #endif
     run_timer2.stop();
