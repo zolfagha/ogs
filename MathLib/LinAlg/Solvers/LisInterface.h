@@ -130,7 +130,7 @@ void solveWithLis(CRSSigned *A, double *x, double *b, LIS_option &option)
     }
 
     // Clear memory
-    lis_matrix_destroy(AA);
+    //lis_matrix_destroy(AA);
     lis_vector_destroy(bb);
     lis_vector_destroy(xx);
     lis_solver_destroy(solver);
