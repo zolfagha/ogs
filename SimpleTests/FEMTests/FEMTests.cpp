@@ -33,9 +33,9 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // Configuration
 //-----------------------------------------------------------------------------
-//#define LIS
-//#define USE_EIGEN
-#define CRS_MATRIX
+#define LIS
+#define USE_EIGEN
+//#define CRS_MATRIX
 
 #ifdef LIS
 #include "lis.h"
@@ -129,11 +129,29 @@ int main(int argc, char *argv[])
 #ifdef LIS
     lis_initialize(&argc, &argv);
 #endif
+    double eps (1.0e-10);
+    unsigned steps (10000);
+    if (argc > 2)
+        sscanf(argv[2], "%lf", &eps);
+    if (argc > 3)
+        sscanf(argv[3], "%d", &steps);
 #ifdef USE_OPENMP
     int nthreads = 1;
-    if (argc > 2)
-        sscanf(argv[2], "%d", &nthreads);
+    if (argc > 4)
+        sscanf(argv[4], "%d", &nthreads);
     omp_set_num_threads (nthreads);
+#endif
+#ifdef LIS
+    MathLib::LIS_option option;
+    option.ls_method = 1;
+    option.ls_precond = 0;
+    option.ls_extra_arg = "";
+    option.ls_max_iterations = steps;
+    option.ls_error_tolerance = eps;
+    if (argc > 5)
+        sscanf(argv[5], "%d", &option.ls_method);
+    if (argc > 6)
+        sscanf(argv[6], "%d", &option.ls_precond);
 #endif
     cout << "->Start OpenMP parallelization with " << omp_get_max_threads() << " threads" << endl;
     //-- setup a problem -----------------------------------------------
@@ -297,16 +315,7 @@ int main(int argc, char *argv[])
     run_timer2.start();
     cpu_timer2.start();
 
-    double eps (1.0e-6);
-    unsigned steps (10000);
-
 #ifdef LIS
-    MathLib::LIS_option option;
-    option.ls_method = 1;
-    option.ls_precond = 0;
-    option.ls_extra_arg = "";
-    option.ls_max_iterations = steps;
-    option.ls_error_tolerance = eps;
 
 #ifdef USE_EIGEN
     MathLib::solveWithLis(crs, eqsX, eqsRHS, option);
