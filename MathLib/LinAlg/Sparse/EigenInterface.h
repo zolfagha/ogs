@@ -1,5 +1,9 @@
+#ifndef EIGENINTERFACE_H
+#define EIGENINTERFACE_H
 
-#pragma once
+#ifndef EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
+#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
+#endif
 
 #include <iostream>
 #include <fstream>
@@ -18,7 +22,7 @@ MathLib::CRSSigned* buildCRSMatrixFromEigenMatrix(Eigen::DynamicSparseMatrix<dou
     const size_t dimension = A.rows();
 
     size_t nonzero = 0;
-    for (size_t i=0; i<A.outerSize(); ++i) 
+    for (size_t i=0; i<A.outerSize(); ++i)
       for (Eigen::DynamicSparseMatrix<double, Eigen::RowMajor>::InnerIterator it(A,i); it; ++it)
         nonzero++;
     //for (size_t i=0; i<A.rows(); i++) {
@@ -30,7 +34,7 @@ MathLib::CRSSigned* buildCRSMatrixFromEigenMatrix(Eigen::DynamicSparseMatrix<dou
 
     double *crs_data = new double [nonzero];
     size_t temp_cnt = 0;
-    for (size_t i=0; i<A.outerSize(); ++i) 
+    for (size_t i=0; i<A.outerSize(); ++i)
       for (Eigen::DynamicSparseMatrix<double, Eigen::RowMajor>::InnerIterator it(A,i); it; ++it)
         crs_data[temp_cnt++] = it.value();
     //for (size_t i=0; i<A.rows(); i++) {
@@ -45,7 +49,7 @@ MathLib::CRSSigned* buildCRSMatrixFromEigenMatrix(Eigen::DynamicSparseMatrix<dou
     long counter_ptr = 0, counter_col_idx = 0;
     long cnt_row = 0;
 
-    for (size_t i=0; i<A.outerSize(); ++i) 
+    for (size_t i=0; i<A.outerSize(); ++i)
     {
       ptr[cnt_row++] = counter_ptr;         // starting point of the row
       for (Eigen::DynamicSparseMatrix<double, Eigen::RowMajor>::InnerIterator it(A,i); it; ++it)
@@ -72,15 +76,15 @@ MathLib::CRSSigned* buildCRSMatrixFromEigenMatrix(Eigen::DynamicSparseMatrix<dou
     //output CRS
     cout << "PTR:" << endl;
     for (size_t i=0; i<A.rows()+1; i++)
-        cout << ptr[i] << ", "; 
+        cout << ptr[i] << ", ";
     cout << endl;
     cout << "ColID:" << endl;
     for (size_t i=0; i<nonzero; i++)
-        cout << col_idx[i] << ", "; 
+        cout << col_idx[i] << ", ";
     cout << endl;
     cout << "Data:" << endl;
     for (size_t i=0; i<nonzero; i++)
-        cout << crs_data[i] << ", "; 
+        cout << crs_data[i] << ", ";
     cout << endl;
 #endif
 
@@ -109,14 +113,14 @@ void outputEQS(const std::string &fileName, EigenSpMatrix &A, double *x, double 
 };
 
 template<class EigenSpMatrix>
-void setKnownXi(EigenSpMatrix &eqsA, double *eqsRHS, size_t id, double x) 
+void setKnownXi(EigenSpMatrix &eqsA, double *eqsRHS, size_t id, double x)
 {
     const size_t n_cols = eqsA.cols();
     //A(k, j) = 0.
     //for (size_t j=0; j<n_cols; j++)
     //    if (eqsA.coeff(id, j)!=.0)
     //        eqsA.coeffRef(id, j) = .0;
-    for (EigenSpMatrix::InnerIterator it(eqsA,id); it; ++it)
+    for (typename EigenSpMatrix::InnerIterator it(eqsA,id); it; ++it)
     {
       eqsA.coeffRef(id, it.col()) = .0;
     }
@@ -125,11 +129,11 @@ void setKnownXi(EigenSpMatrix &eqsA, double *eqsRHS, size_t id, double x)
     //b_i -= A(i,k)*val, i!=k
     //for (size_t j=0; j<eqsA.cols(); j++)
     //    eqsRHS[j] -= eqsA.coeff(j, id)*x;
-    for (size_t i=0; i<eqsA.outerSize(); ++i) 
+    for (size_t i=0; i<eqsA.outerSize(); ++i)
     {
       if (i==id) continue;
       double v_i_k = .0;
-      for (EigenSpMatrix::InnerIterator it(eqsA,i); it; ++it)
+      for (typename EigenSpMatrix::InnerIterator it(eqsA,i); it; ++it)
       {
         if (it.col()==id) {
           v_i_k = eqsA.coeff(i, id);
@@ -151,3 +155,6 @@ void setKnownXi(EigenSpMatrix &eqsA, double *eqsRHS, size_t id, double x)
 
 } //namespace
 } //namespace
+
+#endif
+

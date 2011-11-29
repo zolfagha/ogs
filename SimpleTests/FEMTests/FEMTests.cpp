@@ -4,7 +4,11 @@
 //#include "LinAlg/Dense/Matrix.h"
 //#include "LinAlg/Dense/SymmetricMatrix.h"
 #include "LinAlg/Sparse/CRSMatrix.h"
+#include "LinAlg/Sparse/CRSMatrixDiagPrecond.h"
 #include "LinAlg/Sparse/SparseTableCRS.h"
+
+#include "sparse.h"
+
 //#include "LinAlg/Solvers/CG.h"
 //#include "LinAlg/Dense/TemplateMatrixNd.h"
 #include "LinAlg/Sparse/EigenInterface.h"
@@ -18,16 +22,7 @@
 #include <Eigen>
 #include "MeshSparseTable.h"
 
-//#define LIS
 #define USE_OPENMP
-
-#ifdef LIS
-#include "lis.h"
-#include "LinAlg/Solvers/LisInterface.h"
-#define INDEX_TYPE int
-#else
-#define INDEX_TYPE unsigned
-#endif
 
 #ifdef USE_OPENMP
 #include <omp.h>
@@ -38,8 +33,17 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // Configuration
 //-----------------------------------------------------------------------------
+//#define LIS
 //#define USE_EIGEN
 #define CRS_MATRIX
+
+#ifdef LIS
+#include "lis.h"
+#include "LinAlg/Solvers/LisInterface.h"
+#define INDEX_TYPE int
+#else
+#define INDEX_TYPE unsigned
+#endif
 
 //-----------------------------------------------------------------------------
 // Tools for testing purpose
@@ -49,7 +53,7 @@ typedef struct {
   double val;
 } IndexValue;
 
-void setDirichletBC_Case1(MeshLib::UnstructuredMesh *msh, vector<IndexValue> &list_dirichlet_bc) 
+void setDirichletBC_Case1(MeshLib::UnstructuredMesh *msh, vector<IndexValue> &list_dirichlet_bc)
 {
   const double head_left = 1.;
   const double head_right = 0.;
@@ -58,24 +62,24 @@ void setDirichletBC_Case1(MeshLib::UnstructuredMesh *msh, vector<IndexValue> &li
   //search x min/max
   for (size_t i=0; i<msh->getNumberOfNodes(); i++) {
     msh->getNodeCoordinates(i, pt);
-    if (pt[0]<x_min) x_min = pt[0]; 
-    if (pt[0]>x_max) x_max = pt[0]; 
+    if (pt[0]<x_min) x_min = pt[0];
+    if (pt[0]>x_max) x_max = pt[0];
   }
   //search nodes on min/max
   for (size_t i=0; i<msh->getNumberOfNodes(); i++) {
     msh->getNodeCoordinates(i, pt);
     if (abs(pt[0]-x_min)<numeric_limits<double>::epsilon()) {
       IndexValue idv={i, head_left};
-      list_dirichlet_bc.push_back(idv); 
+      list_dirichlet_bc.push_back(idv);
     } else if (abs(pt[0]-x_max)<numeric_limits<double>::epsilon()) {
       IndexValue idv={i, head_right};
-      list_dirichlet_bc.push_back(idv); 
+      list_dirichlet_bc.push_back(idv);
     }
   }
 }
 
 #ifndef USE_EIGEN
-void setKnownXi_ReduceSizeOfEQS(vector<IndexValue> &list_dirichlet_bc, MathLib::CRSMatrix<double, INDEX_TYPE> &eqsA, double* org_eqsRHS, double* org_eqsX, double** eqsRHS, double** eqsX, map<INDEX_TYPE,INDEX_TYPE> &map_solved_orgEqs) 
+void setKnownXi_ReduceSizeOfEQS(vector<IndexValue> &list_dirichlet_bc, MathLib::CRSMatrix<double, INDEX_TYPE> &eqsA, double* org_eqsRHS, double* org_eqsX, double** eqsRHS, double** eqsX, map<INDEX_TYPE,INDEX_TYPE> &map_solved_orgEqs)
 {
     const size_t n_org_rows = eqsA.getNRows();
     vector<INDEX_TYPE> removed_rows(list_dirichlet_bc.size());
@@ -94,7 +98,7 @@ void setKnownXi_ReduceSizeOfEQS(vector<IndexValue> &list_dirichlet_bc, MathLib::
     }
 
     //remove rows and columns
-    eqsA.eraseEntries(removed_rows.size(), &removed_rows[0], &removed_rows[0]);
+    eqsA.eraseEntries(removed_rows.size(), &removed_rows[0]);
 
     //remove X,RHS
     (*eqsX) = new double[n_org_rows-removed_rows.size()];
@@ -141,7 +145,7 @@ int main(int argc, char *argv[])
     } else {
       strMeshFile = argv[1];
     }
-    vector<MeshLib::IMesh*> vec_mesh; 
+    vector<MeshLib::IMesh*> vec_mesh;
     MeshLib::MeshIOOGS::readMesh(strMeshFile, vec_mesh);
     if (vec_mesh.size()==0) {
         std::cout << "Fail to read a mesh file: " << strMeshFile << std::endl;
@@ -179,6 +183,7 @@ int main(int argc, char *argv[])
     Eigen::MappedSparseMatrix<double, Eigen::RowMajor> eqsA(dim_eqs, dim_eqs, crs->nonzero, crs->row_ptr, crs->col_idx, crs->data);
 #else
     MathLib::CRSMatrix<double, INDEX_TYPE> eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
+//    MathLib::CRSMatrixDiagPrecond eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
 #endif
     double* eqsX(new double[dim_eqs]);
     double* eqsRHS(new double[dim_eqs]);
@@ -209,7 +214,7 @@ int main(int argc, char *argv[])
         for (size_t i=0; i<ele->getNumberOfNodes(); i++)
             dof_map[i] = ele->getNodeID(i);
         // xyz
-        for (int i=0; i<n_ele_nodes; i++) {
+        for (size_t i=0; i<n_ele_nodes; i++) {
             msh->getNodeCoordinates(ele->getNodeID(i), pt);
             nodes_x[i] = pt[0];
             nodes_y[i] = pt[1];
@@ -229,7 +234,7 @@ int main(int argc, char *argv[])
         c[2] = 0.5/A*(nodes_x[1]-nodes_x[0]);
 
         // assemble local EQS
-        // Int{w S ph/pt + div(w) K div(p)}dA = Int{w K div(p)}dL   
+        // Int{w S ph/pt + div(w) K div(p)}dA = Int{w K div(p)}dL
         local_K(0,0) = b[0]*b[0] + c[0]*c[0];
         local_K(0,1) = b[0]*b[1] + c[0]*c[1];
         local_K(0,2) = b[0]*b[2] + c[0]*c[2];
@@ -238,13 +243,13 @@ int main(int argc, char *argv[])
         local_K(2,2) = b[2]*b[2] + c[2]*c[2];
         local_K *= A;
         // symmetric
-        for (int i=0; i<n_ele_nodes; i++)
-            for (int j=0; j<i; j++)
+        for (size_t i=0; i<n_ele_nodes; i++)
+            for (size_t j=0; j<i; j++)
                 local_K(i,j) = local_K(j,i);
 
         // add into global EQS
-        for (int i=0; i<n_ele_nodes; i++) {
-            for (int j=0; j<n_ele_nodes; j++) {
+        for (size_t i=0; i<n_ele_nodes; i++) {
+            for (size_t j=0; j<n_ele_nodes; j++) {
 #ifdef USE_EIGEN
                 eqsA.coeffRef(dof_map[i], dof_map[j]) += local_K(i,j);
 #else
@@ -276,6 +281,14 @@ int main(int argc, char *argv[])
     //apply ST
     //MathLib::EigenTools::outputEQS("eqs2.txt", eqsA, eqsX, eqsRHS);
 
+#ifdef CRS_MATRIX
+    // output matrix
+//    std::cout << "writing matrix to matrix.bin ... " << std::flush;
+//    std::ofstream out ("matrix.bin", std::ios::binary);
+//    CS_write (out, eqsA.getNRows(), eqsA.getRowPtrArray(), eqsA.getColIdxArray(), eqsA.getEntryArray());
+//    std::cout << "ok" << std::endl;
+#endif
+
     //-- solve EQS -----------------------------------------------
     //set up
     cout << "->solve EQS" << endl;
@@ -283,13 +296,17 @@ int main(int argc, char *argv[])
     RunTimeTimer run_timer2;
     run_timer2.start();
     cpu_timer2.start();
+
+    double eps (1.0e-6);
+    unsigned steps (10000);
+
 #ifdef LIS
     MathLib::LIS_option option;
     option.ls_method = 1;
     option.ls_precond = 0;
     option.ls_extra_arg = "";
-    option.ls_max_iterations = 5000;
-    option.ls_error_tolerance = 1e-10;
+    option.ls_max_iterations = steps;
+    option.ls_error_tolerance = eps;
 
 #ifdef USE_EIGEN
     MathLib::solveWithLis(crs, eqsX, eqsRHS, option);
@@ -311,9 +328,14 @@ int main(int argc, char *argv[])
 #endif
 #else
 #ifndef USE_EIGEN
-    double eps (1.0e-6);
-    unsigned steps (4000);
+//    eqsA.calcPrecond();
+    std::cout << "solving system of " << eqsA.getNRows() << " linear equations (nnz = " << eqsA.getNNZ() << ")" << std::endl;
     MathLib::CG (&eqsA, eqsRHS, eqsX, eps, steps, 1);
+    std::cout << "MathLib::CG converged within " << steps << ", residuum is " << eps << std::endl;
+    mapSolvedXToOriginalX(eqsX, crs->dimension, map_solved_orgEqs, org_eqsX);
+	double *temp_x = eqsX;
+	eqsX = org_eqsX;
+	org_eqsX = temp_x;
 #endif
 #endif
     run_timer2.stop();
@@ -331,8 +353,7 @@ int main(int argc, char *argv[])
     cout << "CPU time = " << run_timer2.elapsed() << endl;
     cout << "Run time = " << cpu_timer2.elapsed() << endl;
 
-    //-- output results -----------------------------------------------
-    //output results
+    // output results
     cout << "->output results" << endl;
     std::vector<MeshLib::NodalScalarValue> nodalValues;
     string str = "Head";
