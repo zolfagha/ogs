@@ -126,6 +126,20 @@ void mapSolvedXToOriginalX(double *eqsX, size_t dim, map<INDEX_TYPE,INDEX_TYPE> 
 //-----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
+//output current setting	
+    std::cout << "##### CURRENT SETTING #####" << std::endl;	
+#ifdef LIS
+    std::cout << "- Linear Solver: LIS" << std::endl;
+#else
+    std::cout << "- Linear Solver: Tom" << std::endl;
+#endif
+#ifdef USE_EIGEN
+    std::cout << "- Matrix Library: Eigen" << std::endl;
+#else
+    std::cout << "- Matrix Library: CRSMatrix" << std::endl;
+#endif
+    std::cout << "###########################" << std::endl;
+
 #ifdef LIS
     lis_initialize(&argc, &argv);
 #endif
