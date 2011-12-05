@@ -22,9 +22,7 @@
 #include <Eigen>
 #include "MeshSparseTable.h"
 
-#define USE_OPENMP
-
-#ifdef USE_OPENMP
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
@@ -36,6 +34,7 @@ using namespace std;
 //#define LIS
 //#define USE_EIGEN
 #define CRS_MATRIX
+
 
 #ifdef LIS
 #include "lis.h"
@@ -138,7 +137,7 @@ int main(int argc, char *argv[])
         sscanf(argv[2], "%lf", &eps);
     if (argc > 3)
         sscanf(argv[3], "%d", &steps);
-#ifdef USE_OPENMP
+#ifdef _OPENMP
     int nthreads = 1;
     if (argc > 4)
         sscanf(argv[4], "%d", &nthreads);
@@ -203,9 +202,14 @@ int main(int argc, char *argv[])
 #ifdef USE_EIGEN
     Eigen::MappedSparseMatrix<double, Eigen::RowMajor> eqsA(dim_eqs, dim_eqs, crs->nonzero, crs->row_ptr, crs->col_idx, crs->data);
 #else
-//    MathLib::CRSMatrix<double, INDEX_TYPE> eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
-//    MathLib::CRSMatrixDiagPrecond eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
+
+#ifdef _OPENMP
     MathLib::CRSMatrixOpenMP<double> eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data, nthreads);
+#else
+    MathLib::CRSMatrix<double, INDEX_TYPE> eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
+//    MathLib::CRSMatrixDiagPrecond eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
+#endif
+
 #endif
     double* eqsX(new double[dim_eqs]);
     double* eqsRHS(new double[dim_eqs]);
@@ -284,6 +288,10 @@ int main(int argc, char *argv[])
     //MathLib::EigenTools::outputEQS("eqs1.txt", eqsA, eqsX, eqsRHS);
 
     cout << "->apply BC" << endl;
+    CPUTimeTimer cpu_timer3;
+    RunTimeTimer run_timer3;
+    run_timer3.start();
+    cpu_timer3.start();
 
     //apply Dirichlet BC
 #ifdef USE_EIGEN
@@ -299,11 +307,13 @@ int main(int argc, char *argv[])
     map<INDEX_TYPE,INDEX_TYPE> map_solved_orgEqs;
     setKnownXi_ReduceSizeOfEQS(list_dirichlet_bc, eqsA, org_eqsRHS, org_eqsX, &eqsRHS, &eqsX, map_solved_orgEqs);
 #endif
+    run_timer3.stop();
+    cpu_timer3.stop();
 
     //apply ST
     //MathLib::EigenTools::outputEQS("eqs2.txt", eqsA, eqsX, eqsRHS);
 
-#ifdef CRS_MATRIX
+#ifndef USE_EIGEN
     // output matrix
 //    std::cout << "writing matrix to matrix.bin ... " << std::flush;
 //    std::ofstream out ("matrix.bin", std::ios::binary);
@@ -374,6 +384,9 @@ int main(int argc, char *argv[])
     cout << "Total simulation:" << endl;
     cout << "CPU time = " << run_timer.elapsed() << endl;
     cout << "Run time = " << cpu_timer.elapsed() << endl;
+    cout << "Apply BC:" << endl;
+    cout << "CPU time = " << run_timer3.elapsed() << endl;
+    cout << "Run time = " << cpu_timer3.elapsed() << endl;
     cout << "Linear solver:" << endl;
     cout << "CPU time = " << run_timer2.elapsed() << endl;
     cout << "Run time = " << cpu_timer2.elapsed() << endl;
