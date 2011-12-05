@@ -31,7 +31,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // Configuration
 //-----------------------------------------------------------------------------
-//#define LIS
+#define LIS
 //#define USE_EIGEN
 #define CRS_MATRIX
 
@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
 #else
 
 #ifdef _OPENMP
-    MathLib::CRSMatrixOpenMP<double> eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data, nthreads);
+    MathLib::CRSMatrixOpenMP<double,int> eqsA(static_cast<unsigned>(crs->dimension), crs->row_ptr, crs->col_idx, crs->data, nthreads);
 #else
     MathLib::CRSMatrix<double, INDEX_TYPE> eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
 //    MathLib::CRSMatrixDiagPrecond eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
