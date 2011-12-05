@@ -9,6 +9,9 @@
 
 int main(int argc, char *argv[])
 {
+	(void) argc;
+	(void) argv;
+
 	// *** reading matrix in crs format from file
 	std::string fname("/work/fischeth/data/testmat.bin");
 //	std::ifstream in(fname.c_str(), std::ios::binary);
@@ -52,7 +55,7 @@ int main(int argc, char *argv[])
 //	double cg_time (cputime(0.0));
 	double eps (1.0e-6);
 	unsigned steps (4000);
-	CG (mat, b, x, eps, steps, 1);
+	CG (mat, b, x, eps, steps);
 //	cg_time = cputime(cg_time);
 	time(&end_time);
 	std::cout << " in " << steps << " iterations (residuum is " << eps << ") took " << /*cg_time <<*/ " sec time and " << (end_time-start_time) << " sec" << std::endl;

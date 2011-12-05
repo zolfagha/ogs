@@ -54,6 +54,7 @@ SET ( MathLib_LinAlg_Solvers_Files
 	LinAlg/Solvers/LisInterface.h
         LinAlg/Solvers/BiCGStab.cpp
         LinAlg/Solvers/CG.cpp
+        LinAlg/Solvers/CGParallel.cpp
         LinAlg/Solvers/GMRes.cpp
 	LinAlg/Solvers/GaussAlgorithm.cpp
         LinAlg/Solvers/TriangularSolve.cpp
