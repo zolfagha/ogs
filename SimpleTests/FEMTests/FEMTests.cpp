@@ -33,8 +33,8 @@ using namespace std;
 //-----------------------------------------------------------------------------
 #define LIS
 #define USE_EIGEN
-#define NO_SOLVER
 //#define CRS_MATRIX
+//#define NO_SOLVER
 
 
 #ifdef LIS
@@ -172,6 +172,27 @@ int main(int argc, char *argv[])
 #endif
 #ifdef _OPENMP
     cout << "->Start OpenMP parallelization with " << omp_get_max_threads() << " threads" << endl;
+#if 1
+    {
+      int a[1000000];
+      RunTimeTimer run_timer;
+      CPUTimeTimer cpu_timer;
+      run_timer.start();
+      cpu_timer.start();
+      double time0 = omp_get_wtime();
+      #pragma omp parallel for
+      for (int i=0; i<1000000; i++)
+        a[i] = 0;
+      run_timer.stop();
+      cpu_timer.stop();
+      double time1 = omp_get_wtime();
+      cout.setf(std::ios::scientific,std::ios::floatfield);
+      cout.precision(12);
+      cout << "CPU time = " << cpu_timer.elapsed() << endl;
+      cout << "Run time = " << run_timer.elapsed() << endl;
+      //cout << "Wall time= " << (time1-time0) << endl;
+    }
+#endif
 #endif
     //-- setup a problem -----------------------------------------------
     //set mesh
@@ -253,9 +274,14 @@ int main(int argc, char *argv[])
     CPUTimeTimer cpu_timer;
     run_timer.start();
     cpu_timer.start();
+    RunTimeTimer run_timer_assembly;
+    CPUTimeTimer cpu_timer_assembly;
+    run_timer_assembly.start();
+    cpu_timer_assembly.start();
+    double time0 = omp_get_wtime();
 
     #ifdef _OPENMP
-    #pragma omp parallel for
+    #pragma omp parallel for private(ele, dof_map, pt, nodes_x, nodes_y, nodes_z, a, b, c, local_K) shared(eqsA)
     #endif
     for (long i_ele=0; i_ele<static_cast<long>(n_ele); i_ele++) {
         ele = static_cast<MeshLib::Triangle*>(msh->getElemenet(i_ele));
@@ -308,6 +334,9 @@ int main(int argc, char *argv[])
             }
         }
     }
+    double time1 = omp_get_wtime();
+    run_timer_assembly.stop();
+    cpu_timer_assembly.stop();
 
     //MathLib::EigenTools::outputEQS("eqs1.txt", eqsA, eqsX, eqsRHS);
 
@@ -318,6 +347,7 @@ int main(int argc, char *argv[])
     cpu_timer3.start();
 
     //apply Dirichlet BC
+#if 1
 #ifdef USE_EIGEN
     for (size_t i=0; i<list_dirichlet_bc.size(); i++) {
         IndexValue &bc = list_dirichlet_bc.at(i);
@@ -333,6 +363,7 @@ int main(int argc, char *argv[])
 #endif
     run_timer3.stop();
     cpu_timer3.stop();
+#endif
 
     //apply ST
     //MathLib::EigenTools::outputEQS("eqs2.txt", eqsA, eqsX, eqsRHS);
@@ -410,9 +441,16 @@ int main(int argc, char *argv[])
     cout << "Total simulation:" << endl;
     cout << "CPU time = " << run_timer.elapsed() << endl;
     cout << "Run time = " << cpu_timer.elapsed() << endl;
+    cout << "---------------------" << endl;
+    cout << "Assembly:" << endl;
+    cout << "CPU time = " << cpu_timer_assembly.elapsed() << endl;
+    cout << "Run time = " << run_timer_assembly.elapsed() << endl;
+//    cout << "Wall time= " << (time1-time0) << endl;
+    cout << "---------------------" << endl;
     cout << "Apply BC:" << endl;
     cout << "CPU time = " << run_timer3.elapsed() << endl;
     cout << "Run time = " << cpu_timer3.elapsed() << endl;
+    cout << "---------------------" << endl;
     cout << "Linear solver:" << endl;
     cout << "CPU time = " << run_timer2.elapsed() << endl;
     cout << "Run time = " << cpu_timer2.elapsed() << endl;
