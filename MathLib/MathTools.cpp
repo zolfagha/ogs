@@ -9,6 +9,22 @@
 
 namespace MathLib {
 
+#ifdef _OPENMP
+double scpr(double const * const v, double const * const w, unsigned n)
+{
+	long double res (v[0]*w[0]);
+	unsigned k;
+
+	#pragma omp parallel for reduction (+:res)
+	for (k = 1; k<n; k++) {
+		res += v[k] * w[k];
+	}
+
+	return res;
+}
+#endif
+
+
 void crossProd(const double u[3], const double v[3], double r[3])
 {
 	r[0] = u[1] * v[2] - u[2] * v[1];

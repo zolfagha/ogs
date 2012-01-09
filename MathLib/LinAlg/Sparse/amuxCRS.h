@@ -8,9 +8,9 @@ void amuxCRS(FP_TYPE a, IDX_TYPE n, IDX_TYPE const * const iA, IDX_TYPE const * 
 				FP_TYPE const * const A, FP_TYPE const * const x, FP_TYPE* y)
 {
 	for (IDX_TYPE i(0); i < n; i++) {
-		y[i] = 0.0;
 		const IDX_TYPE end(iA[i + 1]);
-		for (IDX_TYPE j(iA[i]); j < end; j++) {
+		y[i] = A[iA[i]] * x[jA[iA[i]]];
+		for (IDX_TYPE j(iA[i]+1); j < end; j++) {
 			y[i] += A[j] * x[jA[j]];
 		}
 		y[i] *= a;
@@ -22,10 +22,26 @@ void amuxCRSParallelPThreads (double a,
         double const * const A, double const * const x, double* y,
 	unsigned num_of_pthreads);
 
-void amuxCRSParallelOpenMP (double a,
-	unsigned n, unsigned const * const iA, unsigned const * const jA,
-        double const * const A, double const * const x, double* y,
-	unsigned num_of_omp_threads);
+#ifdef _OPENMP
+template<typename FP_TYPE, typename IDX_TYPE>
+void amuxCRSParallelOpenMP (FP_TYPE a,
+				unsigned n, IDX_TYPE const * const __restrict__ iA, IDX_TYPE const * const __restrict__ jA,
+				FP_TYPE const * const A, FP_TYPE const * const __restrict__ x, FP_TYPE* __restrict__ y)
+{
+	unsigned i;
+	{
+#pragma omp parallel for
+		for (i = 0; i < n; i++) {
+			const IDX_TYPE end(iA[i + 1]);
+			y[i] = A[iA[i]] * x[jA[iA[i]]];
+			for (IDX_TYPE j(iA[i]+1); j < end; j++) {
+				y[i] += A[j] * x[jA[j]];
+			}
+			y[i] *= a;
+		}
+	}
+}
+#endif
 
 void amuxCRSSym (double a,
 	unsigned n, unsigned const * const iA, unsigned const * const jA,

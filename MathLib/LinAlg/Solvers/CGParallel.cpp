@@ -1,11 +1,13 @@
 /*
- * CG.cpp
+ * CGParallel.cpp
  *
- *  Created on: Sep 27, 2011
+ *  Created on: Dec 2, 2011
  *      Author: TF
  */
 
 #include <limits>
+
+#include <omp.h>
 
 #include "MathTools.h"
 #include "blas.h"
@@ -27,18 +29,20 @@
 
 namespace MathLib {
 
-unsigned CG(CRSMatrix<double,unsigned> const * mat, double const * const b,
-		double* const x, double& eps, unsigned& nsteps)
+#ifdef _OPENMP
+unsigned CGParallel(CRSMatrix<double,unsigned> const * mat, double const * const b,
+		double* const x, double& eps, unsigned& nsteps, unsigned num_threads)
 {
+	omp_set_num_threads(num_threads);
 	unsigned N = mat->getNRows();
-	double *p, *q, *r, *rhat, rho, rho1 = 0.0;
-
-	p = new double[4* N];
-	q = p + N;
-	r = q + N;
-	rhat = r + N;
+	double * __restrict__ p(new double[N]);
+	double * __restrict__ q(new double[N]);
+	double * __restrict__ r(new double[N]);
+	double * __restrict__ rhat(new double[N]);
+	double rho, rho1 = 0.0;
 
 	double nrmb = sqrt(scpr(b, b, N));
+
 	if (nrmb < std::numeric_limits<double>::epsilon()) {
 		blas::setzero(N, x);
 		eps = 0.0;
@@ -61,38 +65,61 @@ unsigned CG(CRSMatrix<double,unsigned> const * mat, double const * const b,
 		return 0;
 	}
 
+	unsigned k;
 	for (unsigned l = 1; l <= nsteps; ++l) {
 #ifndef NDEBUG
 		std::cout << "Step " << l << ", resid=" << resid / nrmb << std::endl;
 #endif
+
 		// r^ = C r
-		blas::copy(N, r, rhat);
+		// rhat = r
+//		blas::copy(N, r, rhat);
+		#pragma omp parallel for
+		for (k = 0; k < N; k++) {
+			rhat[k] = r[k];
+		}
 		mat->precondApply(rhat);
 
 		// rho = r * r^;
-		rho = scpr(r, rhat, N); // num_threads);
+		rho = scpr(r, rhat, N);
 
 		if (l > 1) {
 			double beta = rho / rho1;
 			// p = r^ + beta * p
-			unsigned k;
+			#pragma omp parallel for
 			for (k = 0; k < N; k++) {
 				p[k] = rhat[k] + beta * p[k];
 			}
-		} else blas::copy(N, rhat, p);
+		} else {
+//				blas::copy(N, rhat, p);
+			#pragma omp parallel for
+			for (k = 0; k < N; k++) {
+				p[k] = rhat[k];
+			}
+		}
 
 		// q = Ap
-		blas::setzero(N, q);
 		mat->amux(D_ONE, p, q);
 
 		// alpha = rho / p*q
 		double alpha = rho / scpr(p, q, N);
 
-		// x += alpha * p
-		blas::axpy(N, alpha, p, x);
+		#pragma omp parallel
+		{
+			// x += alpha * p
+			#pragma omp for nowait
+			for (k = 0; k < N; k++) {
+				x[k] += alpha * p[k];
+			}
 
-		// r -= alpha * q
-		blas::axpy(N, -alpha, q, r);
+			// r -= alpha * q
+			#pragma omp for nowait
+			for (k = 0; k < N; k++) {
+				r[k] -= alpha * q[k];
+			}
+
+			#pragma omp barrier
+		} // end #pragma omp parallel
 
 		resid = sqrt(scpr(r, r, N));
 
@@ -109,5 +136,6 @@ unsigned CG(CRSMatrix<double,unsigned> const * mat, double const * const b,
 	delete[] p;
 	return 1;
 }
+#endif
 
-} // end namespace MathLib
+} // end of namespace MathLib

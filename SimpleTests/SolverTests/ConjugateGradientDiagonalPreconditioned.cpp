@@ -61,7 +61,15 @@ int main(int argc, char *argv[])
 	run_timer.start();
 	cpu_timer.start();
 
-	MathLib::CG (mat, b, x, eps, steps, num_omp_threads);
+	if (num_omp_threads == 1) {
+		MathLib::CG(mat, b, x, eps, steps);
+	} else {
+		#ifdef _OPENMP
+		MathLib::CGParallel(mat, b, x, eps, steps, num_omp_threads);
+		#else
+		std::cout << "OpenMP is not switched on" << std::endl;
+		#endif
+	}
 
 	cpu_timer.stop();
 	run_timer.stop();

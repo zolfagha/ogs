@@ -3,13 +3,13 @@
 //#include <cmath>
 //#include "LinAlg/Dense/Matrix.h"
 //#include "LinAlg/Dense/SymmetricMatrix.h"
-#include "LinAlg/Sparse/CRSMatrix.h"
+#include "LinAlg/Sparse/CRSMatrixOpenMP.h"
 #include "LinAlg/Sparse/CRSMatrixDiagPrecond.h"
+#include "LinAlg/Sparse/CRSMatrix.h"
 #include "LinAlg/Sparse/SparseTableCRS.h"
 
 #include "sparse.h"
 
-//#include "LinAlg/Solvers/CG.h"
 //#include "LinAlg/Dense/TemplateMatrixNd.h"
 #include "LinAlg/Sparse/EigenInterface.h"
 #include "LinAlg/Solvers/CG.h"
@@ -22,9 +22,7 @@
 #include <Eigen>
 #include "MeshSparseTable.h"
 
-#define USE_OPENMP
-
-#ifdef USE_OPENMP
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
@@ -36,6 +34,8 @@ using namespace std;
 #define LIS
 #define USE_EIGEN
 #define NO_SOLVER
+//#define CRS_MATRIX
+
 
 #ifdef LIS
 #include "lis.h"
@@ -48,15 +48,19 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // Tools for testing purpose
 //-----------------------------------------------------------------------------
-typedef struct {
-  size_t id;
-  double val;
-} IndexValue;
+struct IndexValue {
+	IndexValue(size_t idx, double value) :
+		id(idx), val(value)
+	{};
+
+	size_t id;
+	double val;
+};
 
 void setDirichletBC_Case1(MeshLib::UnstructuredMesh *msh, vector<IndexValue> &list_dirichlet_bc)
 {
-  const double head_left = 1.;
-  const double head_right = 0.;
+  const double head_left = 1.0;
+  const double head_right = 0.0;
   double x_min=1e+99, x_max = -1e+99;
   double pt[3];
   //search x min/max
@@ -65,15 +69,14 @@ void setDirichletBC_Case1(MeshLib::UnstructuredMesh *msh, vector<IndexValue> &li
     if (pt[0]<x_min) x_min = pt[0];
     if (pt[0]>x_max) x_max = pt[0];
   }
+
   //search nodes on min/max
   for (size_t i=0; i<msh->getNumberOfNodes(); i++) {
     msh->getNodeCoordinates(i, pt);
     if (abs(pt[0]-x_min)<numeric_limits<double>::epsilon()) {
-      IndexValue idv={i, head_left};
-      list_dirichlet_bc.push_back(idv);
+      list_dirichlet_bc.push_back(IndexValue(i, head_left));
     } else if (abs(pt[0]-x_max)<numeric_limits<double>::epsilon()) {
-      IndexValue idv={i, head_right};
-      list_dirichlet_bc.push_back(idv);
+      list_dirichlet_bc.push_back(IndexValue(i, head_right));
     }
   }
 }
@@ -149,7 +152,7 @@ int main(int argc, char *argv[])
         sscanf(argv[2], "%lf", &eps);
     if (argc > 3)
         sscanf(argv[3], "%d", &steps);
-#ifdef USE_OPENMP
+#ifdef _OPENMP
     int nthreads = 1;
     if (argc > 4)
         sscanf(argv[4], "%d", &nthreads);
@@ -167,7 +170,9 @@ int main(int argc, char *argv[])
     if (argc > 6)
         sscanf(argv[6], "%d", &option.ls_precond);
 #endif
+#ifdef _OPENMP
     cout << "->Start OpenMP parallelization with " << omp_get_max_threads() << " threads" << endl;
+#endif
     //-- setup a problem -----------------------------------------------
     //set mesh
     std::string strMeshFile = "";
@@ -214,12 +219,22 @@ int main(int argc, char *argv[])
 #ifdef USE_EIGEN
     Eigen::MappedSparseMatrix<double, Eigen::RowMajor> eqsA(dim_eqs, dim_eqs, crs->nonzero, crs->row_ptr, crs->col_idx, crs->data);
 #else
+
+#ifdef _OPENMP
+#ifdef LIS
+    MathLib::CRSMatrixOpenMP<double,int> eqsA(static_cast<unsigned>(crs->dimension), crs->row_ptr, crs->col_idx, crs->data, nthreads);
+#else
+    MathLib::CRSMatrixOpenMP<double,unsigned> eqsA(static_cast<unsigned>(crs->dimension), crs->row_ptr, crs->col_idx, crs->data, nthreads);
+#endif
+#else
     MathLib::CRSMatrix<double, INDEX_TYPE> eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
 //    MathLib::CRSMatrixDiagPrecond eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
 #endif
+
+#endif
     double* eqsX(new double[dim_eqs]);
     double* eqsRHS(new double[dim_eqs]);
-    for (size_t i=0; i<dim_eqs; i++) eqsX[i] = .0;
+    for (size_t i=0; i<dim_eqs; i++) eqsX[i] = 0.0;
     for (size_t i=0; i<dim_eqs; i++) eqsRHS[i] = .0;
 
     //assembly EQS
@@ -239,7 +254,10 @@ int main(int argc, char *argv[])
     run_timer.start();
     cpu_timer.start();
 
-    for (size_t i_ele=0; i_ele<n_ele; i_ele++) {
+    #ifdef _OPENMP
+    #pragma omp parallel for
+    #endif
+    for (long i_ele=0; i_ele<static_cast<long>(n_ele); i_ele++) {
         ele = static_cast<MeshLib::Triangle*>(msh->getElemenet(i_ele));
         // setup element information
         // dof
@@ -359,9 +377,21 @@ int main(int argc, char *argv[])
 #else
 #ifndef USE_EIGEN
 //    eqsA.calcPrecond();
-    std::cout << "solving system of " << eqsA.getNRows() << " linear equations (nnz = " << eqsA.getNNZ() << ")" << std::endl;
-    MathLib::CG (&eqsA, eqsRHS, eqsX, eps, steps, 1);
+    std::cout << "solving system of " << eqsA.getNRows() << " linear equations (nnz = " << eqsA.getNNZ() << ") " << std::flush;
+#ifndef _OPENMP
+    std::cout << " with sequential solver" << std::endl;
+    MathLib::CG(&eqsA, eqsRHS, eqsX, eps, steps);
     std::cout << "MathLib::CG converged within " << steps << ", residuum is " << eps << std::endl;
+#else
+    if (nthreads == 1) {
+    	std::cout << " with sequential solver" << std::endl;
+    	MathLib::CG(&eqsA, eqsRHS, eqsX, eps, steps);
+    } else {
+    	std::cout << " with OpenMP parallelized solver" << std::endl;
+    	MathLib::CGParallel (&eqsA, eqsRHS, eqsX, eps, steps, nthreads);
+    }
+	std::cout << "MathLib::CGParallel converged within " << steps << ", residuum is " << eps << std::endl;
+#endif
     mapSolvedXToOriginalX(eqsX, crs->dimension, map_solved_orgEqs, org_eqsX);
 	double *temp_x = eqsX;
 	eqsX = org_eqsX;
@@ -388,12 +418,12 @@ int main(int argc, char *argv[])
     cout << "Run time = " << cpu_timer2.elapsed() << endl;
 
     // output results
-    cout << "->output results" << endl;
-    std::vector<MeshLib::NodalScalarValue> nodalValues;
-    string str = "Head";
-    MeshLib::NodalScalarValue temp("Head", eqsX);
-    nodalValues.push_back(temp);
-    MeshLib::MeshIOLegacyVtk4Simulation::WriteAsciiFile("output.vtk", *msh, 1, 1.0, nodalValues);
+//    cout << "->output results" << endl;
+//    std::vector<MeshLib::NodalScalarValue> nodalValues;
+//    string str = "Head";
+//    MeshLib::NodalScalarValue temp("Head", eqsX);
+//    nodalValues.push_back(temp);
+//    MeshLib::MeshIOLegacyVtk4Simulation::WriteAsciiFile("output.vtk", *msh, 1, 1.0, nodalValues);
 
     //release memory
 #ifdef LIS

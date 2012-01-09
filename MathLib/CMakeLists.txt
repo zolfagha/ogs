@@ -54,6 +54,7 @@ SET ( MathLib_LinAlg_Solvers_Files
 	LinAlg/Solvers/LisInterface.h
         LinAlg/Solvers/BiCGStab.cpp
         LinAlg/Solvers/CG.cpp
+        LinAlg/Solvers/CGParallel.cpp
         LinAlg/Solvers/GMRes.cpp
 	LinAlg/Solvers/GaussAlgorithm.cpp
         LinAlg/Solvers/TriangularSolve.cpp
@@ -83,6 +84,11 @@ INCLUDE_DIRECTORIES (
 	../Base
 	../GeoLib
 )
+
+if(LIS_FOUND)
+	INCLUDE_DIRECTORIES( ${LIS_INCLUDE_DIR} )
+endif(LIS_FOUND)
+
 
 SET_TARGET_PROPERTIES(MathLib PROPERTIES LINKER_LANGUAGE CXX)
 
