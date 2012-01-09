@@ -31,9 +31,9 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // Configuration
 //-----------------------------------------------------------------------------
-//#define LIS
-//#define USE_EIGEN
-#define CRS_MATRIX
+#define LIS
+#define USE_EIGEN
+//#define CRS_MATRIX
 
 
 #ifdef LIS
@@ -155,7 +155,9 @@ int main(int argc, char *argv[])
     if (argc > 6)
         sscanf(argv[6], "%d", &option.ls_precond);
 #endif
+#ifdef _OPENMP
     cout << "->Start OpenMP parallelization with " << omp_get_max_threads() << " threads" << endl;
+#endif
     //-- setup a problem -----------------------------------------------
     //set mesh
     std::string strMeshFile = "";
@@ -237,7 +239,10 @@ int main(int argc, char *argv[])
     run_timer.start();
     cpu_timer.start();
 
-    for (size_t i_ele=0; i_ele<n_ele; i_ele++) {
+    #ifdef _OPENMP
+    #pragma omp parallel for
+    #endif
+    for (long i_ele=0; i_ele<static_cast<long>(n_ele); i_ele++) {
         ele = static_cast<MeshLib::Triangle*>(msh->getElemenet(i_ele));
         // setup element information
         // dof
