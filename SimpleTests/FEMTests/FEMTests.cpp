@@ -35,6 +35,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 #define LIS
 #define USE_EIGEN
+#define NO_SOLVER
 
 #ifdef LIS
 #include "lis.h"
@@ -334,6 +335,7 @@ int main(int argc, char *argv[])
     run_timer2.start();
     cpu_timer2.start();
 
+#ifndef NO_SOLVER
 #ifdef LIS
 
 #ifdef USE_EIGEN
@@ -364,6 +366,7 @@ int main(int argc, char *argv[])
 	double *temp_x = eqsX;
 	eqsX = org_eqsX;
 	org_eqsX = temp_x;
+#endif
 #endif
 #endif
     run_timer2.stop();
