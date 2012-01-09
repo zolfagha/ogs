@@ -325,6 +325,27 @@ int main(int argc, char *argv[])
 //    std::cout << "ok" << std::endl;
 #endif
 
+	std::string fname_fem_out (strMeshFile);
+	fname_fem_out = fname_fem_out.substr(0,fname_fem_out.length()-4);
+	fname_fem_out += "_fem.bin";
+	std::ofstream os (fname_fem_out.c_str(), std::ios::binary);
+	if (os) {
+		std::cout << "writing FEM matrix to " << fname_fem_out << " ... " << std::flush;
+		CS_write(os, eqsA.getNRows(), eqsA.getRowPtrArray(), eqsA.getColIdxArray(), eqsA.getEntryArray());
+		std::cout << "ok" << std::endl;
+		os.close();
+		std::ofstream out_rhs("rhs.dat");
+		if (out_rhs) {
+			const unsigned n_entries(eqsA.getNRows());
+			for (unsigned k(0); k<n_entries; k++) {
+				out_rhs << eqsRHS[k] << std::endl;
+			}
+			out_rhs.close();
+		}
+	} else {
+		std::cout << "could not open file " << fname_fem_out << " for writing" << std::endl;
+	}
+
     //-- solve EQS -----------------------------------------------
     //set up
     cout << "->solve EQS" << endl;

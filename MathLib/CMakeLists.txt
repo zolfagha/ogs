@@ -57,13 +57,7 @@ ENDIF(METIS_FOUND)
 FILE(GLOB_RECURSE SOURCES . *.cpp)
 
 # Create the library
-ADD_LIBRARY( MathLib STATIC 
-	${MathLib_Files} 
-	${MathLib_LinAlg_Files} 
-	${MathLib_LinAlg_Dense_Files}
-	${MathLib_LinAlg_Sparse_Files}
-	${MathLib_LinAlg_Solvers_Files}
-	${MathLib_LinAlg_Preconditioner_Files}
+ADD_LIBRARY( MathLib STATIC ${HEADERS} ${SOURCES} 
 	)
 
 #Include
