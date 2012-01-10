@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
     double time0 = omp_get_wtime();
 
     #ifdef _OPENMP
-    #pragma omp parallel for private(ele, dof_map, pt, nodes_x, nodes_y, nodes_z, a, b, c, local_K) shared(eqsA)
+    #pragma omp parallel for default(none) private(ele, dof_map, pt, nodes_x, nodes_y, nodes_z, a, b, c, local_K) shared(msh, eqsA)
     #endif
     for (long i_ele=0; i_ele<static_cast<long>(n_ele); i_ele++) {
         ele = static_cast<MeshLib::Triangle*>(msh->getElemenet(i_ele));
@@ -327,7 +327,8 @@ int main(int argc, char *argv[])
         for (size_t i=0; i<n_ele_nodes; i++) {
             for (size_t j=0; j<n_ele_nodes; j++) {
 #ifdef USE_EIGEN
-                eqsA.coeffRef(dof_map[i], dof_map[j]) += local_K(i,j);
+              #pragma omp atomic
+              eqsA.coeffRef(dof_map[i], dof_map[j]) += local_K(i,j);
 #else
               eqsA.addValue(dof_map[i], dof_map[j], local_K(i,j));
 #endif
