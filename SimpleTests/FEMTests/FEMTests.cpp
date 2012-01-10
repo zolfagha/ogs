@@ -385,6 +385,8 @@ int main(int argc, char *argv[])
     run_timer2.start();
     cpu_timer2.start();
 
+    //omp_set_num_threads (1);
+
 #ifndef NO_SOLVER
 #ifdef LIS
 
@@ -440,8 +442,8 @@ int main(int argc, char *argv[])
     cout.precision(12);
     cout << "== Simulation time ==" << endl;
     cout << "Total simulation:" << endl;
-    cout << "CPU time = " << run_timer.elapsed() << endl;
-    cout << "Run time = " << cpu_timer.elapsed() << endl;
+    cout << "CPU time = " << cpu_timer.elapsed() << endl;
+    cout << "Run time = " << run_timer.elapsed() << endl;
     cout << "---------------------" << endl;
     cout << "Assembly:" << endl;
     cout << "CPU time = " << cpu_timer_assembly.elapsed() << endl;
@@ -449,21 +451,21 @@ int main(int argc, char *argv[])
 //    cout << "Wall time= " << (time1-time0) << endl;
     cout << "---------------------" << endl;
     cout << "Apply BC:" << endl;
-    cout << "CPU time = " << run_timer3.elapsed() << endl;
-    cout << "Run time = " << cpu_timer3.elapsed() << endl;
+    cout << "CPU time = " << cpu_timer3.elapsed() << endl;
+    cout << "Run time = " << run_timer3.elapsed() << endl;
     cout << "---------------------" << endl;
     cout << "Linear solver:" << endl;
-    cout << "CPU time = " << run_timer2.elapsed() << endl;
-    cout << "Run time = " << cpu_timer2.elapsed() << endl;
+    cout << "CPU time = " << cpu_timer2.elapsed() << endl;
+    cout << "Run time = " << run_timer2.elapsed() << endl;
 
     // output results
-//    cout << "->output results" << endl;
-//    std::vector<MeshLib::NodalScalarValue> nodalValues;
-//    string str = "Head";
-//    MeshLib::NodalScalarValue temp("Head", eqsX);
-//    nodalValues.push_back(temp);
-//    MeshLib::MeshIOLegacyVtk4Simulation::WriteAsciiFile("output.vtk", *msh, 1, 1.0, nodalValues);
-
+/*    cout << "->output results" << endl;
+    std::vector<MeshLib::NodalScalarValue> nodalValues;
+    string str = "Head";
+    MeshLib::NodalScalarValue temp("Head", eqsX);
+    nodalValues.push_back(temp);
+    MeshLib::MeshIOLegacyVtk4Simulation::WriteAsciiFile("output.vtk", *msh, 1, 1.0, nodalValues);
+*/
     //release memory
 #ifdef LIS
     lis_finalize();
