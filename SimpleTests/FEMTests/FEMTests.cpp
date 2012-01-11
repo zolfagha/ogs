@@ -31,11 +31,11 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // Configuration
 //-----------------------------------------------------------------------------
-#define LIS
-#define USE_EIGEN
-//#define CRS_MATRIX
+//#define LIS
+//#define USE_EIGEN
+#define CRS_MATRIX
 //#define NO_SOLVER
-
+//#define OUTPUT_VTK
 
 #ifdef LIS
 #include "lis.h"
@@ -141,6 +141,14 @@ int main(int argc, char *argv[])
 #else
     std::cout << "- Matrix Library: CRSMatrix" << std::endl;
 #endif
+    std::cout << "- Option: ";
+#ifdef NO_SOLVER
+    std::cout << "Skip solver / ";
+#endif
+#ifdef OUTPUT_VTK
+    std::cout << "Output VTK / ";
+#endif
+    std::cout << std::endl;
     std::cout << "###########################" << std::endl;
 
 #ifdef LIS
@@ -459,13 +467,14 @@ int main(int argc, char *argv[])
     cout << "Run time = " << run_timer2.elapsed() << endl;
 
     // output results
-/*    cout << "->output results" << endl;
+#ifdef OUTPUT_VTK
+    cout << "->output results" << endl;
     std::vector<MeshLib::NodalScalarValue> nodalValues;
     string str = "Head";
     MeshLib::NodalScalarValue temp("Head", eqsX);
     nodalValues.push_back(temp);
     MeshLib::MeshIOLegacyVtk4Simulation::WriteAsciiFile("output.vtk", *msh, 1, 1.0, nodalValues);
-*/
+#endif
     //release memory
 #ifdef LIS
     lis_finalize();
