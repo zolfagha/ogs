@@ -1,17 +1,25 @@
+/*
+ * FEMTest-OGS-6-CRS-OGS-6-CG-Perm.cpp
+ *
+ *  Created on: Jan 9, 2012
+ *      Author: TF
+ */
+
 
 #include <iostream>
-//#include <cmath>
-//#include "LinAlg/Dense/Matrix.h"
-//#include "LinAlg/Dense/SymmetricMatrix.h"
-#include "LinAlg/Sparse/CRSMatrixOpenMP.h"
-#include "LinAlg/Sparse/CRSMatrixDiagPrecond.h"
-#include "LinAlg/Sparse/CRSMatrix.h"
+#include <limits>
+#include <algorithm>
+#include <map>
+
+#include <Eigen>
+
+//#include "LinAlg/Sparse/CRSMatrixOpenMP.h"
+//#include "LinAlg/Sparse/CRSMatrixDiagPrecond.h"
+//#include "LinAlg/Sparse/CRSMatrix.h"
 #include "LinAlg/Sparse/SparseTableCRS.h"
 
 #include "sparse.h"
 
-//#include "LinAlg/Dense/TemplateMatrixNd.h"
-#include "LinAlg/Sparse/EigenInterface.h"
 #include "LinAlg/Solvers/CG.h"
 #include "Mesh.h"
 #include "IO/MeshIOOGSAscii.h"
@@ -19,34 +27,19 @@
 #include "Tools/MeshGenerator.h"
 #include "CPUTimeTimer.h"
 #include "RunTimeTimer.h"
-#include <Eigen>
 #include "MeshSparseTable.h"
+
+#include "LinAlg/Sparse/NestedDissectionPermutation/AdjMat.h"
+#include "LinAlg/Sparse/NestedDissectionPermutation/CRSMatrixReordered.h"
+#include "LinAlg/Sparse/NestedDissectionPermutation/Cluster.h"
+#include "LinAlg/Sparse/CRSMatrix.h"
 
 #ifdef _OPENMP
 #include <omp.h>
 #endif
 
-using namespace std;
-
-//-----------------------------------------------------------------------------
-// Configuration
-//-----------------------------------------------------------------------------
-//#define LIS
-//#define USE_EIGEN
-#define CRS_MATRIX
-
-
-#ifdef LIS
-#include "lis.h"
-#include "LinAlg/Solvers/LisInterface.h"
-#define INDEX_TYPE int
-#else
 #define INDEX_TYPE unsigned
-#endif
 
-//-----------------------------------------------------------------------------
-// Tools for testing purpose
-//-----------------------------------------------------------------------------
 struct IndexValue {
 	IndexValue(size_t idx, double value) :
 		id(idx), val(value)
@@ -72,42 +65,44 @@ void setDirichletBC_Case1(MeshLib::UnstructuredMesh *msh, vector<IndexValue> &li
   //search nodes on min/max
   for (size_t i=0; i<msh->getNumberOfNodes(); i++) {
     msh->getNodeCoordinates(i, pt);
-    if (abs(pt[0]-x_min)<numeric_limits<double>::epsilon()) {
+    if (abs(pt[0]-x_min)<std::numeric_limits<double>::epsilon()) {
       list_dirichlet_bc.push_back(IndexValue(i, head_left));
-    } else if (abs(pt[0]-x_max)<numeric_limits<double>::epsilon()) {
+    } else if (abs(pt[0]-x_max)<std::numeric_limits<double>::epsilon()) {
       list_dirichlet_bc.push_back(IndexValue(i, head_right));
     }
   }
 }
 
 #ifndef USE_EIGEN
-void setKnownXi_ReduceSizeOfEQS(vector<IndexValue> &list_dirichlet_bc, MathLib::CRSMatrix<double, INDEX_TYPE> &eqsA, double* org_eqsRHS, double* org_eqsX, double** eqsRHS, double** eqsX, map<INDEX_TYPE,INDEX_TYPE> &map_solved_orgEqs)
+void setKnownXi_ReduceSizeOfEQS(std::vector<IndexValue> &list_dirichlet_bc, MathLib::CRSMatrix<
+				double, INDEX_TYPE> &eqsA, double* org_eqsRHS, double* org_eqsX, double** eqsRHS,
+				double** eqsX, std::map<INDEX_TYPE, INDEX_TYPE> &map_solved_orgEqs)
 {
-    const size_t n_org_rows = eqsA.getNRows();
-    vector<INDEX_TYPE> removed_rows(list_dirichlet_bc.size());
-    for (size_t i=0; i<list_dirichlet_bc.size(); i++) {
-        IndexValue &bc = list_dirichlet_bc.at(i);
-        const size_t id = bc.id;
-        const double val = bc.val;
-        removed_rows.at(i) = id;
+	const size_t n_org_rows = eqsA.getNRows();
+	std::vector<INDEX_TYPE> removed_rows(list_dirichlet_bc.size());
+	for (size_t i = 0; i < list_dirichlet_bc.size(); i++) {
+		IndexValue &bc = list_dirichlet_bc.at(i);
+		const size_t id = bc.id;
+		const double val = bc.val;
+		removed_rows.at(i) = id;
 
-        //b_i -= A(i,k)*val, i!=k
-        for (size_t j=0; j<eqsA.getNCols(); j++)
-            org_eqsRHS[j] -= eqsA.getValue(j, id)*val;
-        //b_k = A_kk*val
-        org_eqsRHS[id] = val; //=eqsA(id, id)*val;
-        org_eqsX[id] = val; //=eqsA(id, id)*val;
-    }
+		//b_i -= A(i,k)*val, i!=k
+		for (size_t j = 0; j < eqsA.getNCols(); j++)
+			org_eqsRHS[j] -= eqsA.getValue(j, id) * val;
+		//b_k = A_kk*val
+		org_eqsRHS[id] = val; //=eqsA(id, id)*val;
+		org_eqsX[id] = val; //=eqsA(id, id)*val;
+	}
 
-    //remove rows and columns
-    eqsA.eraseEntries(removed_rows.size(), &removed_rows[0]);
+	//remove rows and columns
+	eqsA.eraseEntries(removed_rows.size(), &removed_rows[0]);
 
-    //remove X,RHS
-    (*eqsX) = new double[n_org_rows-removed_rows.size()];
+	//remove X,RHS
+	(*eqsX) = new double[n_org_rows - removed_rows.size()];
     (*eqsRHS) = new double[n_org_rows-removed_rows.size()];
     size_t new_id = 0;
     for (size_t i=0; i<n_org_rows; i++) {
-        if (find(removed_rows.begin(), removed_rows.end(), i)!=removed_rows.end()) continue;
+        if (std::find(removed_rows.begin(), removed_rows.end(), static_cast<unsigned>(i))!=removed_rows.end()) continue;
         (*eqsRHS)[new_id] = org_eqsRHS[i];
         (*eqsX)[new_id] = org_eqsX[i];
         map_solved_orgEqs[new_id] = i;
@@ -123,41 +118,22 @@ void mapSolvedXToOriginalX(double *eqsX, size_t dim, map<INDEX_TYPE,INDEX_TYPE> 
 }
 #endif
 
-//-----------------------------------------------------------------------------
-// Test 1
-//-----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-#ifdef LIS
-    lis_initialize(&argc, &argv);
-#endif
-    double eps (1.0e-10);
+    double eps (1.0e-6);
     unsigned steps (10000);
     if (argc > 2)
         sscanf(argv[2], "%lf", &eps);
     if (argc > 3)
         sscanf(argv[3], "%d", &steps);
+
 #ifdef _OPENMP
-    int nthreads = 1;
-    if (argc > 4)
-        sscanf(argv[4], "%d", &nthreads);
-    omp_set_num_threads (nthreads);
+	omp_set_num_threads(1);
 #endif
-#ifdef LIS
-    MathLib::LIS_option option;
-    option.ls_method = 1;
-    option.ls_precond = 0;
-    option.ls_extra_arg = "";
-    option.ls_max_iterations = steps;
-    option.ls_error_tolerance = eps;
-    if (argc > 5)
-        sscanf(argv[5], "%d", &option.ls_method);
-    if (argc > 6)
-        sscanf(argv[6], "%d", &option.ls_precond);
-#endif
-    cout << "->Start OpenMP parallelization with " << omp_get_max_threads() << " threads" << endl;
-    //-- setup a problem -----------------------------------------------
-    //set mesh
+//    std::cout << "->Start OpenMP parallelization with " << omp_get_max_threads() << " threads" << std::endl;
+
+    // *** setup a problem
+    // set mesh
     std::string strMeshFile = "";
     if (argc<2) {
       std::cout << "Input a mesh file name:" << endl;
@@ -186,57 +162,44 @@ int main(int argc, char *argv[])
     }
     msh->construct();
 
-    //set material properties
-    const double K = 1.e-8;
-    const double S = .0;
+    // set material properties
+//    const double K = 1.e-8;
+//    const double S = .0;
 
     //set Dirichlet BC
-    vector<IndexValue> list_dirichlet_bc;
+    std::vector<IndexValue> list_dirichlet_bc;
     setDirichletBC_Case1(msh, list_dirichlet_bc);
 
-    //-- construct EQS -----------------------------------------------
-    //prepare EQS
+    // *** construct EQS
+    // prepare EQS
     const size_t dim_eqs = msh->getNumberOfNodes();
     MathLib::SparseTableCRS<INDEX_TYPE>* crs = FemLib::generateSparseTableCRS<INDEX_TYPE>(msh);
-    //FemLib::outputSparseTableCRS(crs);
-#ifdef USE_EIGEN
-    Eigen::MappedSparseMatrix<double, Eigen::RowMajor> eqsA(dim_eqs, dim_eqs, crs->nonzero, crs->row_ptr, crs->col_idx, crs->data);
-#else
 
-#ifdef _OPENMP
-#ifdef LIS
-    MathLib::CRSMatrixOpenMP<double,int> eqsA(static_cast<unsigned>(crs->dimension), crs->row_ptr, crs->col_idx, crs->data, nthreads);
-#else
-    MathLib::CRSMatrixOpenMP<double,unsigned> eqsA(static_cast<unsigned>(crs->dimension), crs->row_ptr, crs->col_idx, crs->data, nthreads);
-#endif
-#else
-    MathLib::CRSMatrix<double, INDEX_TYPE> eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
-//    MathLib::CRSMatrixDiagPrecond eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
-#endif
+    MathLib::CRSMatrixReordered eqsA(static_cast<unsigned>(crs->dimension), crs->row_ptr, crs->col_idx, crs->data);
 
-#endif
     double* eqsX(new double[dim_eqs]);
     double* eqsRHS(new double[dim_eqs]);
     for (size_t i=0; i<dim_eqs; i++) eqsX[i] = 0.0;
-    for (size_t i=0; i<dim_eqs; i++) eqsRHS[i] = .0;
+    for (size_t i=0; i<dim_eqs; i++) eqsRHS[i] = 0.0;
 
-    //assembly EQS
+    // assembly EQS
     const size_t n_ele = msh->getNumberOfElements();
     Eigen::Matrix3d local_K = Eigen::Matrix3d::Zero();
     const size_t n_ele_nodes = 3;
     double nodes_x[n_ele_nodes], nodes_y[n_ele_nodes], nodes_z[n_ele_nodes];
-    double a[n_ele_nodes], b[n_ele_nodes], c[n_ele_nodes];
+    double a[n_ele_nodes];
+    double b[n_ele_nodes];
+    double c[n_ele_nodes];
     size_t dof_map[n_ele_nodes];
     MeshLib::Triangle *ele;
     double pt[3];
 
-    cout << "->assembly EQS" << endl;
+    std::cout << "-> assembly EQS" << std::endl;
 
     RunTimeTimer run_timer;
     CPUTimeTimer cpu_timer;
     run_timer.start();
     cpu_timer.start();
-
     for (size_t i_ele=0; i_ele<n_ele; i_ele++) {
         ele = static_cast<MeshLib::Triangle*>(msh->getElemenet(i_ele));
         // setup element information
@@ -280,51 +243,25 @@ int main(int argc, char *argv[])
         // add into global EQS
         for (size_t i=0; i<n_ele_nodes; i++) {
             for (size_t j=0; j<n_ele_nodes; j++) {
-#ifdef USE_EIGEN
-                eqsA.coeffRef(dof_map[i], dof_map[j]) += local_K(i,j);
-#else
               eqsA.addValue(dof_map[i], dof_map[j], local_K(i,j));
-#endif
             }
         }
     }
 
-    //MathLib::EigenTools::outputEQS("eqs1.txt", eqsA, eqsX, eqsRHS);
-
-    cout << "->apply BC" << endl;
+    cout << "-> apply BC" << endl;
     CPUTimeTimer cpu_timer3;
     RunTimeTimer run_timer3;
     run_timer3.start();
     cpu_timer3.start();
-
-    //apply Dirichlet BC
-#ifdef USE_EIGEN
-    for (size_t i=0; i<list_dirichlet_bc.size(); i++) {
-        IndexValue &bc = list_dirichlet_bc.at(i);
-        const size_t id = bc.id;
-        const double val = bc.val;
-        MathLib::EigenTools::setKnownXi(eqsA, eqsRHS, id, val);
-    }
-#else
+    // apply Dirichlet BC
     double *org_eqsX = eqsX;
     double *org_eqsRHS = eqsRHS;
     map<INDEX_TYPE,INDEX_TYPE> map_solved_orgEqs;
     setKnownXi_ReduceSizeOfEQS(list_dirichlet_bc, eqsA, org_eqsRHS, org_eqsX, &eqsRHS, &eqsX, map_solved_orgEqs);
-#endif
     run_timer3.stop();
     cpu_timer3.stop();
 
-    //apply ST
-    //MathLib::EigenTools::outputEQS("eqs2.txt", eqsA, eqsX, eqsRHS);
-
-#ifndef USE_EIGEN
-    // output matrix
-//    std::cout << "writing matrix to matrix.bin ... " << std::flush;
-//    std::ofstream out ("matrix.bin", std::ios::binary);
-//    CS_write (out, eqsA.getNRows(), eqsA.getRowPtrArray(), eqsA.getColIdxArray(), eqsA.getEntryArray());
-//    std::cout << "ok" << std::endl;
-#endif
-
+    // writing system of linear equations to file for external solver
 //	std::string fname_fem_out (strMeshFile);
 //	fname_fem_out = fname_fem_out.substr(0,fname_fem_out.length()-4);
 //	fname_fem_out += "_fem.bin";
@@ -346,78 +283,102 @@ int main(int argc, char *argv[])
 //		std::cout << "could not open file " << fname_fem_out << " for writing" << std::endl;
 //	}
 
-    //-- solve EQS -----------------------------------------------
-    //set up
-    cout << "->solve EQS" << endl;
+    bool verbose(true);
+    // *** permute matrix and rhs with nested dissection approach
+    // create time measurement objects
+	RunTimeTimer run_timer_nd;
+    // calculate the nested dissection reordering
+	if (verbose) {
+		std::cout << "-> calculating nested dissection reordering of matrix ... " << std::flush;
+	}
+	run_timer_nd.start();
+	const size_t n(eqsA.getNRows());
+	MathLib::Cluster cluster_tree(n, const_cast<unsigned*>(eqsA.getRowPtrArray()),
+					const_cast<unsigned*>(eqsA.getColIdxArray()));
+	unsigned *op_perm(new unsigned[n]);
+	unsigned *po_perm(new unsigned[n]);
+	for (unsigned k(0); k < n; k++)
+		op_perm[k] = po_perm[k] = k;
+	cluster_tree.createClusterTree(op_perm, po_perm, 1000);
+	run_timer_nd.stop();
+	if (verbose) {
+		std::cout << run_timer_nd.elapsed() << std::endl;
+	}
+	// applying the nested dissection reordering to matrix
+	RunTimeTimer run_timer_apl_nd;
+	if (verbose) {
+		std::cout << "-> applying nested dissection reordering to FEM matrix ... " << std::flush;
+	}
+	run_timer_apl_nd.start();
+	eqsA.reorderMatrix(op_perm, po_perm);
+	run_timer_apl_nd.stop();
+	if (verbose)
+		std::cout << run_timer_apl_nd.elapsed() << std::endl;
+
+	// applying the nested dissection reordering to rhs
+	if (verbose) {
+		std::cout << "-> applying nested dissection reordering to rhs ... " << std::flush;
+	}
+	double *tmp_rhs(new double[eqsA.getNRows()]);
+	for (size_t k(0); k<n; k++) tmp_rhs[k] = eqsRHS[op_perm[k]];
+	for (size_t k(0); k<n; k++) eqsRHS[k] = tmp_rhs[k];
+	delete [] tmp_rhs;
+	if (verbose) {
+		std::cout << "done" << std::endl;
+	}
+
+    // *** solve EQS
+    std::cout << "-> solve EQS" << std::endl;
     CPUTimeTimer cpu_timer2;
     RunTimeTimer run_timer2;
     run_timer2.start();
     cpu_timer2.start();
-
-#ifdef LIS
-
-#ifdef USE_EIGEN
-    MathLib::solveWithLis(crs, eqsX, eqsRHS, option);
-#else
-    crs = new MathLib::SparseTableCRS<int>();
-    crs->nonzero = eqsA.getNNZ();
-    crs->dimension = eqsA.getNRows();
-    crs->row_ptr = (int*)eqsA.getRowPtrArray();
-    crs->col_idx = (int*)eqsA.getColIdxArray();
-    crs->data = (double*)eqsA.getEntryArray();
-    //FemLib::outputSparseTableCRS(crs);
-
-    MathLib::solveWithLis(crs, eqsX, eqsRHS, option);
-
-    mapSolvedXToOriginalX(eqsX, crs->dimension, map_solved_orgEqs, org_eqsX);
-    double *temp_x = eqsX;
-    eqsX = org_eqsX;
-    org_eqsX = temp_x;
-#endif
-#else
-#ifndef USE_EIGEN
 //    eqsA.calcPrecond();
-    std::cout << "solving system of " << eqsA.getNRows() << " linear equations (nnz = " << eqsA.getNNZ() << ") " << std::flush;
-#ifndef _OPENMP
+    std::cout << "-> solving system of " << eqsA.getNRows() << " linear equations (nnz = " << eqsA.getNNZ() << ") " << std::flush;
     std::cout << " with sequential solver" << std::endl;
     MathLib::CG(&eqsA, eqsRHS, eqsX, eps, steps);
     std::cout << "MathLib::CG converged within " << steps << ", residuum is " << eps << std::endl;
-#else
-    if (nthreads == 1) {
-    	std::cout << " with sequential solver" << std::endl;
-    	MathLib::CG(&eqsA, eqsRHS, eqsX, eps, steps);
-    } else {
-    	std::cout << " with OpenMP parallelized solver" << std::endl;
-    	MathLib::CGParallel (&eqsA, eqsRHS, eqsX, eps, steps, nthreads);
-    }
-	std::cout << "MathLib::CGParallel converged within " << steps << ", residuum is " << eps << std::endl;
-#endif
+
+    // applying the nested dissection reordering to the solution
+	if (verbose) {
+		std::cout << "-> reverse the nested dissection reordering to solution x ... " << std::flush;
+	}
+    double *tmp_x(new double[eqsA.getNRows()]);
+	for (size_t k(0); k<n; k++) tmp_x[op_perm[k]] = eqsX[k];
+	for (size_t k(0); k<n; k++) eqsX[k] = tmp_x[k];
+	delete [] tmp_x;
+	if (verbose) {
+		std::cout << "done" << std::endl;
+	}
+
     mapSolvedXToOriginalX(eqsX, crs->dimension, map_solved_orgEqs, org_eqsX);
 	double *temp_x = eqsX;
 	eqsX = org_eqsX;
 	org_eqsX = temp_x;
-#endif
-#endif
-    run_timer2.stop();
+	run_timer2.stop();
     cpu_timer2.stop();
 
     run_timer.stop();
     cpu_timer.stop();
-    cout.setf(std::ios::scientific,std::ios::floatfield);
-    cout.precision(12);
-    cout << "== Simulation time ==" << endl;
-    cout << "Total simulation:" << endl;
-    cout << "CPU time = " << run_timer.elapsed() << endl;
-    cout << "Run time = " << cpu_timer.elapsed() << endl;
-    cout << "Apply BC:" << endl;
-    cout << "CPU time = " << run_timer3.elapsed() << endl;
-    cout << "Run time = " << cpu_timer3.elapsed() << endl;
-    cout << "Linear solver:" << endl;
-    cout << "CPU time = " << run_timer2.elapsed() << endl;
-    cout << "Run time = " << cpu_timer2.elapsed() << endl;
+    std::cout.setf(std::ios::scientific,std::ios::floatfield);
+    std::cout.precision(12);
+    std::cout << "== Simulation time ==" << std::endl;
+    std::cout << "Total simulation:" << std::endl;
+    std::cout << "CPU time = " << run_timer.elapsed() << std::endl;
+    std::cout << "Run time = " << cpu_timer.elapsed() << std::endl;
+    std::cout << "Apply BC:" << std::endl;
+    std::cout << "CPU time = " << run_timer3.elapsed() << std::endl;
+    std::cout << "Run time = " << cpu_timer3.elapsed() << std::endl;
+    std::cout << "Calculation nested dissection reordering (with Metis): " << std::endl;
+    std::cout << "Run time = " << run_timer_nd.elapsed() << std::endl;
+    std::cout << "Applying nested dissection reordering to matrix:" << std::endl;
+	std::cout << "Run time = " << run_timer_apl_nd.elapsed() << std::endl;
+    std::cout << "Linear solver:" << std::endl;
+    std::cout << "CPU time = " << run_timer2.elapsed() << std::endl;
+    std::cout << "Run time = " << cpu_timer2.elapsed() << std::endl;
 
     // output results
-//    cout << "->output results" << endl;
+//    cout << "-> output results" << endl;
 //    std::vector<MeshLib::NodalScalarValue> nodalValues;
 //    string str = "Head";
 //    MeshLib::NodalScalarValue temp("Head", eqsX);
@@ -425,19 +386,9 @@ int main(int argc, char *argv[])
 //    MeshLib::MeshIOLegacyVtk4Simulation::WriteAsciiFile("output.vtk", *msh, 1, 1.0, nodalValues);
 
     //release memory
-#ifdef LIS
-    lis_finalize();
-#endif
     destroyStdVectorWithPointers(vec_mesh);
-    //delete [] crs->row_ptr;
-    //delete [] crs->col_idx;
-    ////delete [] crs->data;
-#ifdef USE_EIGEN
-    delete crs;
-#else
     delete[] org_eqsX;
     delete[] org_eqsRHS;
-#endif
     delete [] eqsX;
     delete [] eqsRHS;
 
