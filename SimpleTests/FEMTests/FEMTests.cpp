@@ -34,7 +34,8 @@ using namespace std;
 //#define LIS
 //#define USE_EIGEN
 #define CRS_MATRIX
-
+//#define NO_SOLVER
+//#define OUTPUT_VTK
 
 #ifdef LIS
 #include "lis.h"
@@ -128,6 +129,28 @@ void mapSolvedXToOriginalX(double *eqsX, size_t dim, map<INDEX_TYPE,INDEX_TYPE> 
 //-----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
+//output current setting	
+    std::cout << "##### CURRENT SETTING #####" << std::endl;	
+#ifdef LIS
+    std::cout << "- Linear Solver: LIS" << std::endl;
+#else
+    std::cout << "- Linear Solver: Tom" << std::endl;
+#endif
+#ifdef USE_EIGEN
+    std::cout << "- Matrix Library: Eigen" << std::endl;
+#else
+    std::cout << "- Matrix Library: CRSMatrix" << std::endl;
+#endif
+    std::cout << "- Option: ";
+#ifdef NO_SOLVER
+    std::cout << "Skip solver / ";
+#endif
+#ifdef OUTPUT_VTK
+    std::cout << "Output VTK / ";
+#endif
+    std::cout << std::endl;
+    std::cout << "###########################" << std::endl;
+
 #ifdef LIS
     lis_initialize(&argc, &argv);
 #endif
@@ -155,7 +178,30 @@ int main(int argc, char *argv[])
     if (argc > 6)
         sscanf(argv[6], "%d", &option.ls_precond);
 #endif
+#ifdef _OPENMP
     cout << "->Start OpenMP parallelization with " << omp_get_max_threads() << " threads" << endl;
+#if 1
+    {
+      int a[1000000];
+      RunTimeTimer run_timer;
+      CPUTimeTimer cpu_timer;
+      run_timer.start();
+      cpu_timer.start();
+      double time0 = omp_get_wtime();
+      #pragma omp parallel for
+      for (int i=0; i<1000000; i++)
+        a[i] = 0;
+      run_timer.stop();
+      cpu_timer.stop();
+      double time1 = omp_get_wtime();
+      cout.setf(std::ios::scientific,std::ios::floatfield);
+      cout.precision(12);
+      cout << "CPU time = " << cpu_timer.elapsed() << endl;
+      cout << "Run time = " << run_timer.elapsed() << endl;
+      //cout << "Wall time= " << (time1-time0) << endl;
+    }
+#endif
+#endif
     //-- setup a problem -----------------------------------------------
     //set mesh
     std::string strMeshFile = "";
@@ -236,8 +282,16 @@ int main(int argc, char *argv[])
     CPUTimeTimer cpu_timer;
     run_timer.start();
     cpu_timer.start();
+    RunTimeTimer run_timer_assembly;
+    CPUTimeTimer cpu_timer_assembly;
+    run_timer_assembly.start();
+    cpu_timer_assembly.start();
+    double time0 = omp_get_wtime();
 
-    for (size_t i_ele=0; i_ele<n_ele; i_ele++) {
+    #ifdef _OPENMP
+    #pragma omp parallel for default(none) private(ele, dof_map, pt, nodes_x, nodes_y, nodes_z, a, b, c, local_K) shared(msh, eqsA)
+    #endif
+    for (long i_ele=0; i_ele<static_cast<long>(n_ele); i_ele++) {
         ele = static_cast<MeshLib::Triangle*>(msh->getElemenet(i_ele));
         // setup element information
         // dof
@@ -281,13 +335,17 @@ int main(int argc, char *argv[])
         for (size_t i=0; i<n_ele_nodes; i++) {
             for (size_t j=0; j<n_ele_nodes; j++) {
 #ifdef USE_EIGEN
-                eqsA.coeffRef(dof_map[i], dof_map[j]) += local_K(i,j);
+              #pragma omp atomic
+              eqsA.coeffRef(dof_map[i], dof_map[j]) += local_K(i,j);
 #else
               eqsA.addValue(dof_map[i], dof_map[j], local_K(i,j));
 #endif
             }
         }
     }
+    double time1 = omp_get_wtime();
+    run_timer_assembly.stop();
+    cpu_timer_assembly.stop();
 
     //MathLib::EigenTools::outputEQS("eqs1.txt", eqsA, eqsX, eqsRHS);
 
@@ -298,6 +356,7 @@ int main(int argc, char *argv[])
     cpu_timer3.start();
 
     //apply Dirichlet BC
+#if 1
 #ifdef USE_EIGEN
     for (size_t i=0; i<list_dirichlet_bc.size(); i++) {
         IndexValue &bc = list_dirichlet_bc.at(i);
@@ -313,6 +372,7 @@ int main(int argc, char *argv[])
 #endif
     run_timer3.stop();
     cpu_timer3.stop();
+#endif
 
     //apply ST
     //MathLib::EigenTools::outputEQS("eqs2.txt", eqsA, eqsX, eqsRHS);
@@ -354,6 +414,9 @@ int main(int argc, char *argv[])
     run_timer2.start();
     cpu_timer2.start();
 
+    //omp_set_num_threads (1);
+
+#ifndef NO_SOLVER
 #ifdef LIS
 
 #ifdef USE_EIGEN
@@ -398,6 +461,7 @@ int main(int argc, char *argv[])
 	org_eqsX = temp_x;
 #endif
 #endif
+#endif
     run_timer2.stop();
     cpu_timer2.stop();
 
@@ -407,23 +471,31 @@ int main(int argc, char *argv[])
     cout.precision(12);
     cout << "== Simulation time ==" << endl;
     cout << "Total simulation:" << endl;
-    cout << "CPU time = " << run_timer.elapsed() << endl;
-    cout << "Run time = " << cpu_timer.elapsed() << endl;
+    cout << "CPU time = " << cpu_timer.elapsed() << endl;
+    cout << "Run time = " << run_timer.elapsed() << endl;
+    cout << "---------------------" << endl;
+    cout << "Assembly:" << endl;
+    cout << "CPU time = " << cpu_timer_assembly.elapsed() << endl;
+    cout << "Run time = " << run_timer_assembly.elapsed() << endl;
+//    cout << "Wall time= " << (time1-time0) << endl;
+    cout << "---------------------" << endl;
     cout << "Apply BC:" << endl;
-    cout << "CPU time = " << run_timer3.elapsed() << endl;
-    cout << "Run time = " << cpu_timer3.elapsed() << endl;
+    cout << "CPU time = " << cpu_timer3.elapsed() << endl;
+    cout << "Run time = " << run_timer3.elapsed() << endl;
+    cout << "---------------------" << endl;
     cout << "Linear solver:" << endl;
-    cout << "CPU time = " << run_timer2.elapsed() << endl;
-    cout << "Run time = " << cpu_timer2.elapsed() << endl;
+    cout << "CPU time = " << cpu_timer2.elapsed() << endl;
+    cout << "Run time = " << run_timer2.elapsed() << endl;
 
     // output results
-//    cout << "->output results" << endl;
-//    std::vector<MeshLib::NodalScalarValue> nodalValues;
-//    string str = "Head";
-//    MeshLib::NodalScalarValue temp("Head", eqsX);
-//    nodalValues.push_back(temp);
-//    MeshLib::MeshIOLegacyVtk4Simulation::WriteAsciiFile("output.vtk", *msh, 1, 1.0, nodalValues);
-
+#ifdef OUTPUT_VTK
+    cout << "->output results" << endl;
+    std::vector<MeshLib::NodalScalarValue> nodalValues;
+    string str = "Head";
+    MeshLib::NodalScalarValue temp("Head", eqsX);
+    nodalValues.push_back(temp);
+    MeshLib::MeshIOLegacyVtk4Simulation::WriteAsciiFile("output.vtk", *msh, 1, 1.0, nodalValues);
+#endif
     //release memory
 #ifdef LIS
     lis_finalize();
