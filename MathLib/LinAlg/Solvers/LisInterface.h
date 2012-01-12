@@ -89,7 +89,7 @@ void solveWithLis(CRSSigned *A, double *x, double *b, LIS_option &option)
     //omp_set_num_threads (nthreads);
 
     sprintf(solver_options, "-i %d -p %d %s", option.ls_method, option.ls_precond, option.ls_extra_arg.c_str()); 
-    sprintf(tol_option, "-tol %e -maxiter %d -omp_num_threads %d", option.ls_error_tolerance, option.ls_max_iterations, nthreads);
+    sprintf(tol_option, "-tol %e -maxiter %d -omp_num_threads %d -initx_zeros 0", option.ls_error_tolerance, option.ls_max_iterations, nthreads);
 
     ierr = lis_matrix_set_crs(A->nonzero, A->row_ptr, A->col_idx, A->data, AA);
     ierr = lis_matrix_assemble(AA);

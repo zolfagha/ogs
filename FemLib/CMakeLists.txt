@@ -27,3 +27,6 @@ target_link_libraries (
 	GEO
 	MeshLib
 )
+
+SET_TARGET_PROPERTIES(FemLib PROPERTIES LINKER_LANGUAGE CXX)
+
