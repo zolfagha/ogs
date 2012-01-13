@@ -1,5 +1,5 @@
 # Source files
-set( SOURCES
+SET ( GeoLib_Files
 	AxisAlignedBoundingBox.cpp
 	BruteForceClosestPair.cpp
 	Color.cpp
@@ -15,10 +15,6 @@ set( SOURCES
 	Surface.cpp
 	Triangle.cpp
 	Raster.cpp
-)
-
-# Header files
-set( HEADERS
 	AxisAlignedBoundingBox.h
 	BruteForceClosestPair.h
 	ClosestPair.h
@@ -43,29 +39,23 @@ set( HEADERS
 	TemplateVec.h
 	Triangle.h
 	Raster.h
-)
+	)
+SOURCE_GROUP(GeoLib FILES ${GeoLib_Files})
 
 # Create the library
-add_library( GEO STATIC
-	${SOURCES}
-	${HEADERS}
-)
+ADD_LIBRARY(GeoLib STATIC ${GeoLib_Files})
 
 
 include_directories(
 	.
 	../Base
-	../FEM
-	../FileIO
 	../MathLib
-	../MSH
 )
 
 
 target_link_libraries (
-	GEO
+	GeoLib
 	Base
-	FEM
 	MathLib
 )
 
