@@ -3,6 +3,7 @@
 
 //#include <cmath>
 #include <set>
+#include "INode.h"
 #include "Point.h"
 
 //------------------------------------------------------------------------
@@ -12,7 +13,7 @@ namespace MeshLib
 //-----------------------------------------------------------------------------
 // Node
 //-----------------------------------------------------------------------------
-class Node : public GEOLIB::Point
+class Node : public INode, public GEOLIB::Point
 {
 private:
     size_t _node_id;
@@ -24,6 +25,9 @@ public:
         this->_x[1] = y;
         this->_x[2] = z;
     };
+
+    size_t getNodeID(size_t id) { return _node_id;};
+    void setNodeID(size_t id) { _node_id = id;};
 
     const std::set<size_t>& getConnectedNodes() const
     {

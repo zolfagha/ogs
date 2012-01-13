@@ -1,41 +1,14 @@
 
 #pragma once
 
-#include <cmath>
 #include <vector>
-#include "MemoryTools.h"
+#include "IMesh.h"
+#include "IElement.h"
 #include "Node.h"
-#include "Element.h"
-#include "ElementFactory.h"
+#include "MemoryTools.h"
 
-//------------------------------------------------------------------------
 namespace MeshLib
 {
-//-----------------------------------------------------------------------------
-// Mesh
-//-----------------------------------------------------------------------------
-class IMesh
-{
-public:
-    virtual ~IMesh(){};
-
-    virtual size_t getNumberOfNodes() const = 0;
-    virtual size_t getNumberOfElements() const = 0;
-    virtual void getNodeCoordinates( size_t node_id, double pt[3] ) const = 0;
-    virtual IElement* getElemenet( size_t element_id ) const = 0;
-
-    virtual Node* getNode( size_t id ) const = 0;
-};
-
-class StructuredMesh : public IMesh
-{
-private:
-    double _origin[3];
-    double _length[3];
-    double  _unit_length[3];
-    size_t  _number_of_nodes_per_dimension[3];
-public:
-};
 
 class UnstructuredMesh : public IMesh
 {
@@ -106,38 +79,4 @@ public:
     };
 };
 
-template <size_t N_DIM>
-class StaticStructuredMesh : public IMesh
-{
-private:
-    size_t  _dimensions[N_DIM];
-    double  _origin[N_DIM];
-    size_t  _number_of_nodes[N_DIM];
-    double  _unit_length[N_DIM];
-public:
-};
-
-template <size_t  N_DIM, size_t  N_NODES, size_t  N_ELEMENTS>
-class StaticUnstructuredMesh : public IMesh
-{
-private:
-    size_t  _nodes[N_NODES];
-    size_t  _elements[N_ELEMENTS];
-    size_t  _edges;
-    size_t  _faces;
-
-public:
-    StaticUnstructuredMesh(){};
-    virtual ~StaticUnstructuredMesh(){};
-
-    virtual size_t getNumberOfNodes() const { return N_NODES; };
-    virtual size_t getNumberOfElements() const { return N_ELEMENTS; };
-};
-
-class HierarchicalMesh : public IMesh
-{
-private:
-};
-
-} // end namespace
-
+}

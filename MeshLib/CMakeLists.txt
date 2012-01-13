@@ -1,11 +1,15 @@
 # Source files
-SET ( MeshLib_Files
-	Mesh.h
-	Node.h
-	Element.h
-	ElementFactory.h
+SET ( MeshLib_Core_Files
+	Core/IMesh.h
+	Core/INode.h
+	Core/IElement.h
+	Core/StructuredMesh.h
+	Core/UnstructuredMesh.h
+	Core/Node.h
+	Core/Element.h
+	Core/ElementFactory.h
 	)
-SOURCE_GROUP(MeshLib FILES ${MeshLib_Files})
+SOURCE_GROUP(MeshLib\\Core FILES ${MeshLib_Core_Files})
 
 SET ( MeshLib_IO_Files
 	IO/MeshIOOGSAscii.h
@@ -18,7 +22,12 @@ SET ( MeshLib_Tools_Files
 	)
 SOURCE_GROUP(MeshLib\\Tools FILES ${MeshLib_Tools_Files})
 
-ADD_LIBRARY(MeshLib STATIC ${MeshLib_Files} ${MeshLib_IO_Files} ${MeshLib_Tools_Files})
+SET ( MeshLib_Test_Files
+	Test/MeshLibTest.cpp
+	)
+SOURCE_GROUP(MeshLib\\Test FILES ${MeshLib_Test_Files})
+
+ADD_LIBRARY(MeshLib STATIC ${MeshLib_Core_Files} ${MeshLib_IO_Files} ${MeshLib_Tools_Files} ${MeshLib_Test_Files})
 
 include_directories(
 	.
