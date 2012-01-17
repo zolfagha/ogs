@@ -52,14 +52,12 @@ include_directories(
 #	../FEM
 #	../FileIO
 	../MathLib
-#	../MeshLib
 )
 
 
 target_link_libraries (
 	GeoLib
 	Base
-#	FEM
 	MathLib
 )
 

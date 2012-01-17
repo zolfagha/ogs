@@ -25,9 +25,6 @@ SOURCE_GROUP( Base FILES ${Base_Files})
 
 # Create the library
 ADD_LIBRARY( Base STATIC ${Base_Files})
-IF (WIN32)
-        TARGET_LINK_LIBRARIES(Base Winmm.lib)
-ENDIF (WIN32)
 
 SET_TARGET_PROPERTIES(Base PROPERTIES LINKER_LANGUAGE CXX)
 

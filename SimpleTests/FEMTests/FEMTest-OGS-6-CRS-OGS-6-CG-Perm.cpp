@@ -113,6 +113,9 @@ void setKnownXi_ReduceSizeOfEQS(std::vector<IndexValue> &list_dirichlet_bc, Math
 void mapSolvedXToOriginalX(double *eqsX, size_t dim, map<INDEX_TYPE,INDEX_TYPE> &map_solved_orgEqs, double *org_eqsX)
 {
     for (size_t i=0; i<dim; i++) {
+    	if (map_solved_orgEqs[i] >= dim) {
+    		std::cout << "map_solved_orgEqs[" << i << "]: " << map_solved_orgEqs[i] << std::endl;
+    	}
         org_eqsX[map_solved_orgEqs[i]] = eqsX[i];
     }
 }
@@ -351,6 +354,7 @@ int main(int argc, char *argv[])
 		std::cout << "done" << std::endl;
 	}
 
+	std::cout << "crs->dimension: " << crs->dimension << ", map_solved_orgEqs.size(): " << map_solved_orgEqs.size() << std::endl;
     mapSolvedXToOriginalX(eqsX, crs->dimension, map_solved_orgEqs, org_eqsX);
 	double *temp_x = eqsX;
 	eqsX = org_eqsX;
