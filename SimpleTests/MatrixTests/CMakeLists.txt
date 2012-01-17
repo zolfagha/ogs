@@ -26,6 +26,21 @@ ADD_EXECUTABLE( MatTestRemoveRowsCols
         ${HEADERS}
 )
 
+IF (METIS_FOUND)
+	ADD_EXECUTABLE( MatVecMultPerm
+        	MatVecMultPerm.cpp
+	        ${SOURCES}
+        	${HEADERS}
+	)
+
+	TARGET_LINK_LIBRARIES ( MatVecMultPerm
+		Base
+		MathLib
+		${METIS_LIBRARIES}
+	)
+ENDIF(METIS_FOUND)
+
+
 IF (WIN32)
         TARGET_LINK_LIBRARIES(MatMult Winmm.lib)
 ENDIF (WIN32)

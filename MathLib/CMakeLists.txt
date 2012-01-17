@@ -14,17 +14,20 @@ SET ( MathLib_Files
 	EarClippingTriangulation.cpp  
 )
 SOURCE_GROUP( MathLib FILES ${MathLib_Files})
+SET ( SOURCES ${SOURCES} ${MathLib_Files})
 
 SET ( MathLib_LinAlg_Files
 	LinAlg/MatrixBase.h
 	LinAlg/VectorNorms.h
 )
 SOURCE_GROUP( MathLib\\LinAlg FILES ${MathLib_LinAlg_Files})
+SET ( SOURCES ${SOURCES} ${MathLib_LinAlg_Files})
 
 SET ( MathLib_LinAlg_Dense_Files
 	LinAlg/Dense/Matrix.h
 )
 SOURCE_GROUP( MathLib\\LinAlg\\Dense FILES ${MathLib_LinAlg_Dense_Files})
+SET ( SOURCES ${SOURCES} ${MathLib_LinAlg_Dense_Files})
 
 SET ( MathLib_LinAlg_Sparse_Files
 	LinAlg/Sparse/amuxCRS.h
@@ -36,6 +39,7 @@ SET ( MathLib_LinAlg_Sparse_Files
         LinAlg/Sparse/amuxCRS.cpp
 )
 SOURCE_GROUP( MathLib\\LinAlg\\Sparse FILES ${MathLib_LinAlg_Sparse_Files})
+SET ( SOURCES ${SOURCES} ${MathLib_LinAlg_Sparse_Files})
 
 SET ( MathLib_LinAlg_Solvers_Files
         LinAlg/Solvers/LinearSolver.h
@@ -56,13 +60,31 @@ SET ( MathLib_LinAlg_Solvers_Files
         LinAlg/Solvers/TriangularSolve.cpp
 )
 SOURCE_GROUP( MathLib\\LinAlg\\Solvers FILES ${MathLib_LinAlg_Solvers_Files})
+SET ( SOURCES ${SOURCES} ${MathLib_LinAlg_Solvers_Files})
 
 SET ( MathLib_LinAlg_Preconditioner_Files
         LinAlg/Preconditioner/generateDiagPrecond.h
 	LinAlg/Preconditioner/generateDiagPrecond.cpp
 )
 SOURCE_GROUP( MathLib\\LinAlg\\Preconditioner FILES ${MathLib_LinAlg_Preconditioner_Files})
+SET ( SOURCES ${SOURCES} ${MathLib_LinAlg_Preconditioner_Files})
 
+IF (METIS_FOUND)
+	FILE(GLOB MathLib_LinAlg_Sparse_NestedDissectionPermutation_HEADERS
+		LinAlg/Sparse/NestedDissectionPermutation/*.h)
+
+	FILE(GLOB MathLib_LinAlg_Sparse_NestedDissectionPermutation_SOURCES
+		LinAlg/Sparse/NestedDissectionPermutation/*.cpp)
+
+	SOURCE_GROUP( MathLib\\LinAlg\\Sparse\\NestedDissectionPermutation FILES
+		${MathLib_LinAlg_Sparse_NestedDissectionPermutation_HEADERS}
+		${MathLib_LinAlg_Sparse_NestedDissectionPermutation_SOURCES}
+	)
+	SET (SOURCES ${SOURCES} 
+		${MathLib_LinAlg_Sparse_NestedDissectionPermutation_HEADERS}
+		${MathLib_LinAlg_Sparse_NestedDissectionPermutation_SOURCES}
+	)
+ENDIF ()
 
 INCLUDE_DIRECTORIES (
 	.
@@ -70,14 +92,15 @@ INCLUDE_DIRECTORIES (
 	../GeoLib
 )
 
+IF(METIS_FOUND)
+	INCLUDE_DIRECTORIES (
+		${METIS_INCLUDE_DIR}
+	)
+ENDIF()
+
 # Create the library
 ADD_LIBRARY( MathLib STATIC 
-	${MathLib_Files} 
-	${MathLib_LinAlg_Files} 
-	${MathLib_LinAlg_Dense_Files}
-	${MathLib_LinAlg_Sparse_Files}
-	${MathLib_LinAlg_Solvers_Files}
-	${MathLib_LinAlg_Preconditioner_Files}
+	${SOURCES}
 )
 
 SET_TARGET_PROPERTIES(MathLib PROPERTIES LINKER_LANGUAGE CXX)
