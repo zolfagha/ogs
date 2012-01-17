@@ -6,24 +6,25 @@ SET ( MathLib_Files
 	Vector3.h
 	EarClippingTriangulation.h  
 	max.h
-        sparse.h
+	sparse.h
 	vector_io.h
 	AnalyticalGeometry.cpp        
 	LinearInterpolation.cpp  
 	MathTools.cpp
 	EarClippingTriangulation.cpp  
-	)
+	Function.h
+)
 SOURCE_GROUP( MathLib FILES ${MathLib_Files})
 
 SET ( MathLib_LinAlg_Files
 	LinAlg/MatrixBase.h
 	LinAlg/VectorNorms.h
-	)
+)
 SOURCE_GROUP( MathLib\\LinAlg FILES ${MathLib_LinAlg_Files})
 
 SET ( MathLib_LinAlg_Dense_Files
 	LinAlg/Dense/Matrix.h
-	)
+)
 SOURCE_GROUP( MathLib\\LinAlg\\Dense FILES ${MathLib_LinAlg_Dense_Files})
 
 SET ( MathLib_LinAlg_Sparse_Files
@@ -35,11 +36,11 @@ SET ( MathLib_LinAlg_Sparse_Files
         LinAlg/Sparse/SparseMatrixBase.h
         LinAlg/Sparse/amuxCRS.cpp
         LinAlg/Sparse/SparseTableCRS.h
-	)
+)
 IF (USE_EIGEN)
-	SET ( MathLib_LinAlg_Sparse_Files ${MathLib_LinAlg_Sparse_Files}
+SET ( MathLib_LinAlg_Sparse_Files ${MathLib_LinAlg_Sparse_Files}
 	        LinAlg/Sparse/EigenInterface.h
-	)
+)
 ENDIF (USE_EIGEN)
 SOURCE_GROUP( MathLib\\LinAlg\\Sparse FILES ${MathLib_LinAlg_Sparse_Files})
 
@@ -58,22 +59,40 @@ SET ( MathLib_LinAlg_Solvers_Files
         LinAlg/Solvers/CG.cpp
         LinAlg/Solvers/CGParallel.cpp
         LinAlg/Solvers/GMRes.cpp
-	LinAlg/Solvers/GaussAlgorithm.cpp
+		LinAlg/Solvers/GaussAlgorithm.cpp
         LinAlg/Solvers/TriangularSolve.cpp
-	)
+)
 IF (USE_LIS)
 	SET ( MathLib_LinAlg_Solvers_Files ${MathLib_LinAlg_Solvers_Files}
 		LinAlg/Solvers/LisInterface.h
-	)
+)
 ENDIF (USE_LIS)
 SOURCE_GROUP( MathLib\\LinAlg\\Solvers FILES ${MathLib_LinAlg_Solvers_Files})
 
 SET ( MathLib_LinAlg_Preconditioner_Files
-        LinAlg/Preconditioner/generateDiagPrecond.h
-	LinAlg/Preconditioner/generateDiagPrecond.cpp
-	)
+		LinAlg/Preconditioner/generateDiagPrecond.h
+		LinAlg/Preconditioner/generateDiagPrecond.cpp
+)
 SOURCE_GROUP( MathLib\\LinAlg\\Preconditioner FILES ${MathLib_LinAlg_Preconditioner_Files})
 
+SET ( MathLib_Nonlinear_Files
+        Nonlinear/Picard.h
+        Nonlinear/NewtonRaphson.h
+        Nonlinear/Convergence.h
+)
+SOURCE_GROUP( MathLib\\Nonlinear FILES ${MathLib_Nonlinear_Files})
+
+SET ( MathLib_Integration_Files
+        Integration/GaussLegendre.h
+        Integration/NewtonCotes.h
+)
+SOURCE_GROUP( MathLib\\Integration FILES ${MathLib_Integration_Files})
+
+SET ( MathLib_ODE_Files
+        ODE/ForwardEuler.h
+        ODE/RungeKutta4.h
+)
+SOURCE_GROUP( MathLib\\ODE FILES ${MathLib_ODE_Files})
 
 # Create the library
 ADD_LIBRARY( MathLib STATIC 
@@ -83,13 +102,15 @@ ADD_LIBRARY( MathLib STATIC
 	${MathLib_LinAlg_Sparse_Files}
 	${MathLib_LinAlg_Solvers_Files}
 	${MathLib_LinAlg_Preconditioner_Files}
-	)
+	${MathLib_Nonlinear_Files}
+	${MathLib_Integration_Files}
+	${MathLib_ODE_Files}
+)
 
 #Include
 INCLUDE_DIRECTORIES (
 	.
 	../Base
-	../GeoLib
 )
 
 IF(USE_LIS)

@@ -1,18 +1,24 @@
 #Source files grouped by a directory
 SET ( FemLib_Files
 	Fem.h
+	FemFunction.h
 	MeshSparseTable.h
-	)
+	Integration.h
+	Mapping.h
+	WeightFunction.h
+	Test.cpp
+)
 SOURCE_GROUP( FemLib FILES ${FemLib_Files})
 
 ADD_LIBRARY(FemLib STATIC ${FemLib_Files})
 
 INCLUDE_DIRECTORIES(
 	.
-	../Base
-	../GeoLib
-	../MathLib
-	../MeshLib
+	..
+#	../Base
+#	../GeoLib
+#	../MathLib
+#	../MeshLib
 )
 
 
@@ -24,6 +30,6 @@ target_link_libraries (
 	FemLib
 	BASE
         MathLib
-	GEO
+	GeoLib
 	MeshLib
 )

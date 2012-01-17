@@ -1,6 +1,7 @@
 #Source files grouped by a directory
 SET ( ModelLib_Files
 	GROUNDWATER_FLOW.h
+	Test.cpp
 	)
 SOURCE_GROUP( ModelLib FILES ${ModelLib_Files})
 
@@ -8,11 +9,7 @@ ADD_LIBRARY(ModelLib STATIC ${ModelLib_Files})
 
 INCLUDE_DIRECTORIES(
 	.
-	../Base
-	../GeoLib
-	../MathLib
-	../MeshLib
-	../FemLib
+	..
 )
 
 
@@ -24,7 +21,7 @@ target_link_libraries (
 	ModelLib
 	BASE
         MathLib
-	GEO
+	GeoLib
 	MeshLib
 	FemLib
 )
