@@ -80,11 +80,12 @@ IF (METIS_FOUND)
 		${MathLib_LinAlg_Sparse_NestedDissectionPermutation_HEADERS}
 		${MathLib_LinAlg_Sparse_NestedDissectionPermutation_SOURCES}
 	)
+
 	SET (SOURCES ${SOURCES} 
 		${MathLib_LinAlg_Sparse_NestedDissectionPermutation_HEADERS}
 		${MathLib_LinAlg_Sparse_NestedDissectionPermutation_SOURCES}
 	)
-ENDIF ()
+ENDIF()
 
 INCLUDE_DIRECTORIES (
 	.
@@ -97,6 +98,10 @@ IF(METIS_FOUND)
 		${METIS_INCLUDE_DIR}
 	)
 ENDIF()
+
+IF(LIS_FOUND)
+	INCLUDE_DIRECTORIES( ${LIS_INCLUDE_DIR} )
+ENDIF(LIS_FOUND)
 
 # Create the library
 ADD_LIBRARY( MathLib STATIC 

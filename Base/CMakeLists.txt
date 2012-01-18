@@ -20,7 +20,8 @@ SET ( Base_Files
         CPUTimeTimer.cpp
 	RunTimeTimer.cpp
 	StringTools.cpp
-	)
+)
+
 SOURCE_GROUP( Base FILES ${Base_Files})
 
 # Create the library
