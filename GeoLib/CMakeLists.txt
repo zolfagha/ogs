@@ -49,17 +49,13 @@ ADD_LIBRARY(GeoLib STATIC ${GeoLib_Files})
 include_directories(
 	.
 	../Base
-#	../FEM
-#	../FileIO
 	../MathLib
-#	../MeshLib
 )
 
 
 target_link_libraries (
 	GeoLib
 	Base
-#	FEM
 	MathLib
 )
 
