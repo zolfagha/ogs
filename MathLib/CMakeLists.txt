@@ -79,20 +79,14 @@ IF (METIS_FOUND)
 	SOURCE_GROUP( MathLib\\LinAlg\\Sparse\\NestedDissectionPermutation FILES
 		${MathLib_LinAlg_Sparse_NestedDissectionPermutation_HEADERS}
 		${MathLib_LinAlg_Sparse_NestedDissectionPermutation_SOURCES}
-	${MathLib_Files} 
-	${MathLib_LinAlg_Files} 
-	${MathLib_LinAlg_Dense_Files}
-	${MathLib_LinAlg_Sparse_Files}
-	${MathLib_LinAlg_Solvers_Files}
-	${MathLib_LinAlg_Preconditioner_Files}
 	)
+
 	SET (SOURCES ${SOURCES} 
 		${MathLib_LinAlg_Sparse_NestedDissectionPermutation_HEADERS}
 		${MathLib_LinAlg_Sparse_NestedDissectionPermutation_SOURCES}
 	)
-ENDIF ()
+ENDIF()
 
-#Include
 INCLUDE_DIRECTORIES (
 	.
 	../Base
@@ -113,7 +107,6 @@ ENDIF(LIS_FOUND)
 ADD_LIBRARY( MathLib STATIC 
 	${SOURCES}
 )
-
 
 SET_TARGET_PROPERTIES(MathLib PROPERTIES LINKER_LANGUAGE CXX)
 
