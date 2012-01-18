@@ -14,7 +14,7 @@
 #include <cassert>
 
 // Base
-#include "swap.h"
+#include "Base/swap.h"
 
 // MathLib
 #include "SparseMatrixBase.h"

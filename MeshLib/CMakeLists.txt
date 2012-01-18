@@ -31,9 +31,7 @@ ADD_LIBRARY(MeshLib STATIC ${MeshLib_Core_Files} ${MeshLib_IO_Files} ${MeshLib_T
 
 include_directories(
 	.
-	../Base
-	../GeoLib
-	../MathLib
+	..
 )
 
 

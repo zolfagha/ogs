@@ -15,7 +15,7 @@
 
 #include "GeoObject.h"
 
-namespace GEOLIB {
+namespace GeoLib {
 
 /**
  * \ingroup GEOLIB

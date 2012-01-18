@@ -10,7 +10,7 @@
 
 #include "Polyline.h"
 
-namespace GEOLIB {
+namespace GeoLib {
 
 Polyline::Polyline(const std::vector<Point*>& pnt_vec) :
 	GeoObject(), _ply_pnts(pnt_vec)
@@ -47,7 +47,7 @@ void Polyline::addPoint(size_t point_id)
 	_ply_pnt_ids.push_back(point_id);
 
 	if (n_pnts > 0) {
-		double act_dist (sqrt(MathLib::sqrDist (_ply_pnts[_ply_pnt_ids[n_pnts-1]], _ply_pnts[point_id])));
+		double act_dist (sqrt(GeoLib::sqrDist (_ply_pnts[_ply_pnt_ids[n_pnts-1]], _ply_pnts[point_id])));
 		double dist_until_now (0.0);
 		if (n_pnts > 1)
 			dist_until_now = _length[n_pnts - 1];
@@ -115,7 +115,7 @@ Polyline* Polyline::constructPolylineFromSegments(const std::vector<Polyline*> &
 	size_t nLines = ply_vec.size();
 
 	Polyline* new_ply = new Polyline(*ply_vec[0]);
-	std::vector<GEOLIB::Point*> pnt_vec(new_ply->getPointsVec());
+	std::vector<GeoLib::Point*> pnt_vec(new_ply->getPointsVec());
 
 	std::vector<Polyline*> local_ply_vec;
 	for (size_t i = 1; i < nLines; i++) {
@@ -194,7 +194,7 @@ Polyline* Polyline::constructPolylineFromSegments(const std::vector<Polyline*> &
 bool Polyline::pointsAreIdentical(const std::vector<Point*> &pnt_vec, size_t i, size_t j, double prox)
 {
 	if (i==j) return true;
-	return (MathLib::checkDistance( *pnt_vec[i], *pnt_vec[j], prox ));
+	return (GeoLib::checkDistance( *pnt_vec[i], *pnt_vec[j], prox ));
 }
 
 Polyline* Polyline::closePolyline(const Polyline& ply)
@@ -210,24 +210,24 @@ Polyline* Polyline::closePolyline(const Polyline& ply)
 	return NULL;
 }
 
-Location::type Polyline::getLocationOfPoint (size_t k, GEOLIB::Point const & pnt) const
+Location::type Polyline::getLocationOfPoint (size_t k, GeoLib::Point const & pnt) const
 {
 	assert (k<_ply_pnt_ids.size()-1);
 
-	GEOLIB::Point const& source (*(_ply_pnts[_ply_pnt_ids[k]]));
-	GEOLIB::Point const& dest (*(_ply_pnts[_ply_pnt_ids[k+1]]));
-	GEOLIB::Point a (dest[0]-source[0], dest[1]-source[1], dest[2]-source[2]); // vector
-	GEOLIB::Point b (pnt[0]-source[0], pnt[1]-source[1], pnt[2]-source[2]); // vector
+	GeoLib::Point const& source (*(_ply_pnts[_ply_pnt_ids[k]]));
+	GeoLib::Point const& dest (*(_ply_pnts[_ply_pnt_ids[k+1]]));
+	GeoLib::Point a (dest[0]-source[0], dest[1]-source[1], dest[2]-source[2]); // vector
+	GeoLib::Point b (pnt[0]-source[0], pnt[1]-source[1], pnt[2]-source[2]); // vector
 
 	double det_2x2 (a[0]*b[1] - a[1]*b[0]);
 
 	if (det_2x2 > std::numeric_limits<double>::epsilon()) return Location::LEFT;
 	if (std::numeric_limits<double>::epsilon() < fabs(det_2x2)) return Location::RIGHT;
 	if (a[0]*b[0] < 0.0 || a[1]*b[1] < 0.0) return Location::BEHIND;
-	if (MathLib::sqrNrm2(&a) < MathLib::sqrNrm2(&b)) return Location::BEYOND;
-	if (MathLib::sqrDist (&pnt, _ply_pnts[_ply_pnt_ids[k]]) < sqrt(std::numeric_limits<double>::min()))
+	if (GeoLib::sqrNrm2(&a) < GeoLib::sqrNrm2(&b)) return Location::BEYOND;
+	if (GeoLib::sqrDist (&pnt, _ply_pnts[_ply_pnt_ids[k]]) < sqrt(std::numeric_limits<double>::min()))
 		return Location::SOURCE;
-	if (MathLib::sqrDist (&pnt, _ply_pnts[_ply_pnt_ids[k+1]]) < sqrt(std::numeric_limits<double>::min()))
+	if (GeoLib::sqrDist (&pnt, _ply_pnts[_ply_pnt_ids[k+1]]) < sqrt(std::numeric_limits<double>::min()))
 		return Location::DESTINATION;
 	return Location::BETWEEN;
 }

@@ -48,8 +48,7 @@ ADD_LIBRARY(GeoLib STATIC ${GeoLib_Files})
 
 include_directories(
 	.
-	../Base
-	../MathLib
+	..
 )
 
 

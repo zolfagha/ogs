@@ -23,18 +23,27 @@ namespace MathLib {
 template <class T> class Matrix
 {
 public:
+   Matrix();
    Matrix (size_t rows, size_t cols);
    Matrix (size_t rows, size_t cols, const T& val);
    Matrix (const Matrix &src);
 
    ~Matrix ();
 
+   void resize(size_t rows, size_t cols);
    size_t getNRows () const { return nrows; }
    size_t getNCols () const { return ncols; }
    /**
     * \f$ y = \alpha \cdot A x + \beta y\f$
     */
    void axpy ( T alpha, const T* x, T beta, T* y) const;
+
+   /**
+    * Add operation for all matrix entities
+    * @param a
+    * @return
+    */
+   Matrix<T>& operator= (T a);
 
    /**
     * Matrix vector multiplication
@@ -115,6 +124,23 @@ template<class T> Matrix<T>::Matrix (const Matrix& src) :
 template <class T> Matrix<T>::~Matrix ()
 {
    delete [] data;
+}
+
+template<class T> void Matrix<T>::resize (size_t rows, size_t cols) 
+{
+    if (rows!=nrows || cols!=ncols) {
+        delete [] data;
+        data = new T[nrows*ncols];
+    }
+}
+
+template<class T> Matrix<T>& Matrix<T>::operator= (T a)
+{
+   for (size_t i = 0; i < nrows; i++)
+      for (size_t j = 0; j < ncols; j++)
+         data[address(i,j)] = a;
+
+    return *this;
 }
 
 template<class T> void Matrix<T>::axpy ( T alpha, const T* x, T beta, T* y) const

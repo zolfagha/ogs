@@ -110,7 +110,7 @@ ADD_LIBRARY( MathLib STATIC
 #Include
 INCLUDE_DIRECTORIES (
 	.
-	../Base
+	..
 )
 
 IF(USE_LIS)

@@ -10,7 +10,7 @@
 
 #include "Point.h"
 
-namespace GEOLIB {
+namespace GeoLib {
 /**
  * class PointWithID is derived from class Point in
  * order to extend the class Point with an ID.

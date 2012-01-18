@@ -7,7 +7,7 @@
 
 #include "GeoType.h"
 
-namespace GEOLIB {
+namespace GeoLib {
 
 GEOTYPE convertGeoType (const std::string& geo_type_str)
 {

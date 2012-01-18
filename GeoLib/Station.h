@@ -17,7 +17,7 @@
 #include "PropertyBounds.h"
 
 
-namespace GEOLIB {
+namespace GeoLib {
 
 /**
  * \ingroup GEOLIB

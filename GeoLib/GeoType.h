@@ -10,7 +10,7 @@
 
 #include <string>
 
-namespace GEOLIB {
+namespace GeoLib {
 
 /**
  * \ingroup GEOLIB

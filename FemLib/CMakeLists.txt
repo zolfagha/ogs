@@ -1,13 +1,14 @@
 #Source files grouped by a directory
-SET ( FemLib_Files
-	Fem.h
-	FemFunction.h
-	MeshSparseTable.h
-	Integration.h
-	Mapping.h
-	WeightFunction.h
-	Test.cpp
-)
+#SET ( FemLib_Files
+#	Fem.h
+#	FemFunction.h
+#	MeshSparseTable.h
+#	Integration.h
+#	Mapping.h
+#	WeightFunction.h
+#	Test.cpp
+#)
+FILE(GLOB FemLib_Files *.h *.cpp)
 SOURCE_GROUP( FemLib FILES ${FemLib_Files})
 
 ADD_LIBRARY(FemLib STATIC ${FemLib_Files})

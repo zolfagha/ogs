@@ -16,7 +16,7 @@
 #include "Triangle.h"
 #include "AxisAlignedBoundingBox.h"
 
-namespace GEOLIB {
+namespace GeoLib {
 
 /**
  * \ingroup GEOLIB

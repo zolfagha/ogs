@@ -7,6 +7,10 @@ FIND_PROGRAM(DOT_TOOL_PATH dot DOC "Dot tool from graphviz")
 
 # Find doxygen
 FIND_PACKAGE(Doxygen)
+#IF (DOXYGEN_FOUND)
+#INCLUDE(scripts/cmake/cmake/DoxygenTargets.cmake)
+#add_doxygen(scripts/cmake/cmake/DoxygenTargets.doxyfile.in)
+#ENDIF(DOXYGEN_FOUND)
 
 # Find gnu profiler gprof
 FIND_PROGRAM(GPROF_PATH gprof DOC "GNU profiler gprof")

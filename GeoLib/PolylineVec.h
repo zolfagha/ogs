@@ -11,7 +11,7 @@
 #include "TemplateVec.h"
 #include "Polyline.h"
 
-namespace GEOLIB {
+namespace GeoLib {
 
 /**
  * \ingroup GEOLIB

@@ -22,7 +22,7 @@
 #ifndef POINTVEC_H_
 #define POINTVEC_H_
 
-namespace GEOLIB {
+namespace GeoLib {
 
 /**
  * \ingroup GEOLIB
@@ -143,10 +143,10 @@ public:
 	const std::vector<size_t>& getIDMap () const { return _pnt_id_map; }
 
 	double getShortestPointDistance () const;
-	const GEOLIB::AABB& getAxisAlignedBoundingBox () const;
+	const GeoLib::AABB& getAxisAlignedBoundingBox () const;
 
 private:
-	void makePntsUnique (std::vector<GEOLIB::Point*>* pnt_vec, std::vector<size_t> &pnt_id_map);
+	void makePntsUnique (std::vector<GeoLib::Point*>* pnt_vec, std::vector<size_t> &pnt_id_map);
 
 	/** copy constructor doesn't have an implementation */
 	// compiler does not create a (possible unwanted) copy constructor

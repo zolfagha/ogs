@@ -17,5 +17,14 @@ public:
     void getJacobians(double* natural_pt, double* jacob, double &jacob_det);
 };
 
+class FemAxisymmetric : public FemIsoparametricMapping
+{
+
+};
+
+class FemLowerDimension : public FemIsoparametricMapping
+{
+
+};
 
 }

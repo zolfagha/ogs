@@ -8,7 +8,7 @@
 #ifndef GEOOBJECT_H_
 #define GEOOBJECT_H_
 
-namespace GEOLIB {
+namespace GeoLib {
 
 /**
  * \ingroup GEOLIB

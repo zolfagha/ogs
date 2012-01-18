@@ -8,8 +8,7 @@ ADD_LIBRARY( MaterialLib STATIC ${MaterialLib_Files} )
 
 INCLUDE_DIRECTORIES(
 	.
-	../Base
-	../MathLib
+	..
 )
 
 target_link_libraries (

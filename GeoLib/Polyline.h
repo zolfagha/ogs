@@ -18,7 +18,7 @@
 #include <vector>
 #include <cmath>
 
-namespace GEOLIB {
+namespace GeoLib {
 
 class Location {
 public:
@@ -130,7 +130,7 @@ protected:
 	 * @param pnt the point
 	 * @return a value of enum LOCATION
 	 */
-	Location::type getLocationOfPoint (size_t k, GEOLIB::Point const & pnt) const;
+	Location::type getLocationOfPoint (size_t k, GeoLib::Point const & pnt) const;
 
 	static bool pointsAreIdentical(const std::vector<Point*> &pnt_vec, size_t i, size_t j, double prox);
 

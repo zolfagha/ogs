@@ -22,7 +22,7 @@
 #include "Color.h"
 #include "Station.h"
 
-namespace GEOLIB {
+namespace GeoLib {
 
 ///
 /**

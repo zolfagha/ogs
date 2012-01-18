@@ -7,7 +7,7 @@
 
 #include <cmath>
 #include "GaussAlgorithm.h"
-#include "swap.h"
+#include "Base/swap.h"
 
 namespace MathLib {
 

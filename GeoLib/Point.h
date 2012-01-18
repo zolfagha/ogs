@@ -9,7 +9,7 @@
 
 #include "TemplatePoint.h"
 
-namespace GEOLIB {
+namespace GeoLib {
 
 /**
  * \ingroup GEOLIB
@@ -46,6 +46,6 @@ bool lessZ (Point const & p0, Point const & p1);
 /**
  * lexicographic comparison of points
  */
-bool operator<= (GEOLIB::Point const & p0, GEOLIB::Point const & p1);
+bool operator<= (GeoLib::Point const & p0, GeoLib::Point const & p1);
 
 #endif /* POINT_H_ */

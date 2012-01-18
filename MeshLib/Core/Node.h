@@ -4,7 +4,7 @@
 //#include <cmath>
 #include <set>
 #include "INode.h"
-#include "Point.h"
+#include "GeoLib/Point.h"
 
 //------------------------------------------------------------------------
 namespace MeshLib
@@ -13,7 +13,7 @@ namespace MeshLib
 //-----------------------------------------------------------------------------
 // Node
 //-----------------------------------------------------------------------------
-class Node : public INode, public GEOLIB::Point
+class Node : public INode, public GeoLib::Point
 {
 private:
     size_t _node_id;

@@ -8,7 +8,7 @@
 #ifndef TEMPLATEVEC_H_
 #define TEMPLATEVEC_H_
 
-namespace GEOLIB {
+namespace GeoLib {
 
 /**
  * \ingroup GEOLIB
