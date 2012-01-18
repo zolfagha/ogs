@@ -119,6 +119,7 @@ void setKnownXi_ReduceSizeOfEQS(vector<IndexValue> &list_dirichlet_bc, MathLib::
 void mapSolvedXToOriginalX(double *eqsX, size_t dim, map<INDEX_TYPE,INDEX_TYPE> &map_solved_orgEqs, double *org_eqsX)
 {
     for (size_t i=0; i<dim; i++) {
+    	INDEX_TYPE idx (map_solved_orgEqs[i]);
         org_eqsX[idx] = eqsX[i];
     }
 }

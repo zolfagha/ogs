@@ -1,15 +1,3 @@
-
-FIND_PACKAGE ( Eigen REQUIRED )
-FIND_PACKAGE ( LIS REQUIRED )
-
-FIND_PACKAGE( Metis )
-IF (METIS_FOUND)
-        MESSAGE (STATUS "metis found.")
-ELSE(METIS_FOUND)
-        MESSAGE (STATUS "metis not found.")
-ENDIF(METIS_FOUND)
-
-
 IF(NOT MSVC)
 	## pthread ##
 	SET ( CMAKE_THREAD_PREFER_PTHREAD On )
@@ -40,12 +28,20 @@ ADD_EXECUTABLE( FEMTests
         ${SOURCES}
         ${HEADERS}
 )
-
-ADD_EXECUTABLE( FEMTest-OGS-6-CRS-OGS-6-CG-Perm
-	FEMTest-OGS-6-CRS-OGS-6-CG-Perm.cpp
-        ${SOURCES}
-        ${HEADERS}
-)
+IF (METIS_FOUND)
+	ADD_EXECUTABLE( FEMTest-OGS-6-CRS-OGS-6-CG-Perm
+		FEMTest-OGS-6-CRS-OGS-6-CG-Perm.cpp
+	        ${SOURCES}
+        	${HEADERS}
+	)
+	TARGET_LINK_LIBRARIES ( FEMTest-OGS-6-CRS-OGS-6-CG-Perm
+        	Base
+	        MathLib
+        	GeoLib
+		${METIS_LIBRARIES}	
+		${BLAS_LIBRARIES}
+	)
+ENDIF(METIS_FOUND)
 
 #IF (WIN32)
 #        TARGET_LINK_LIBRARIES(MatMult Winmm.lib)
@@ -65,14 +61,6 @@ TARGET_LINK_LIBRARIES ( FEMTests
 	GeoLib
 #	MeshLib
 #	FemLib
-)
-
-TARGET_LINK_LIBRARIES ( FEMTest-OGS-6-CRS-OGS-6-CG-Perm
-        Base
-        MathLib
-        GeoLib
-	${METIS_LIBRARIES}	
-	${BLAS_LIBRARIES}
 )
 
 
