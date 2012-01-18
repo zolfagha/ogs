@@ -451,7 +451,7 @@ int main(int argc, char *argv[])
     	MathLib::CG(&eqsA, eqsRHS, eqsX, eps, steps);
     } else {
     	std::cout << " with OpenMP parallelized solver" << std::endl;
-    	MathLib::CGParallel (&eqsA, eqsRHS, eqsX, eps, steps, nthreads);
+    	MathLib::CGParallel (&eqsA, eqsRHS, eqsX, eps, steps);
     }
 	std::cout << "MathLib::CGParallel converged within " << steps << ", residuum is " << eps << std::endl;
 #endif
