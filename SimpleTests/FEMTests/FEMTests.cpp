@@ -119,7 +119,7 @@ void setKnownXi_ReduceSizeOfEQS(vector<IndexValue> &list_dirichlet_bc, MathLib::
 void mapSolvedXToOriginalX(double *eqsX, size_t dim, map<INDEX_TYPE,INDEX_TYPE> &map_solved_orgEqs, double *org_eqsX)
 {
     for (size_t i=0; i<dim; i++) {
-        org_eqsX[map_solved_orgEqs[i]] = eqsX[i];
+        org_eqsX[idx] = eqsX[i];
     }
 }
 #endif
@@ -129,8 +129,8 @@ void mapSolvedXToOriginalX(double *eqsX, size_t dim, map<INDEX_TYPE,INDEX_TYPE> 
 //-----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-//output current setting	
-    std::cout << "##### CURRENT SETTING #####" << std::endl;	
+//output current setting
+    std::cout << "##### CURRENT SETTING #####" << std::endl;
 #ifdef LIS
     std::cout << "- Linear Solver: LIS" << std::endl;
 #else
@@ -430,7 +430,7 @@ int main(int argc, char *argv[])
     	MathLib::CG(&eqsA, eqsRHS, eqsX, eps, steps);
     } else {
     	std::cout << " with OpenMP parallelized solver" << std::endl;
-    	MathLib::CGParallel (&eqsA, eqsRHS, eqsX, eps, steps, nthreads);
+    	MathLib::CGParallel (&eqsA, eqsRHS, eqsX, eps, steps);
     }
 	std::cout << "MathLib::CGParallel converged within " << steps << ", residuum is " << eps << std::endl;
 #endif
