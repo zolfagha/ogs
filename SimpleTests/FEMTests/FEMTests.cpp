@@ -84,6 +84,9 @@ void setDirichletBC_Case1(MeshLib::UnstructuredMesh *msh, vector<IndexValue> &li
 #ifndef USE_EIGEN
 void setKnownXi_ReduceSizeOfEQS(vector<IndexValue> &list_dirichlet_bc, MathLib::CRSMatrix<double, INDEX_TYPE> &eqsA, double* org_eqsRHS, double* org_eqsX, double** eqsRHS, double** eqsX, map<INDEX_TYPE,INDEX_TYPE> &map_solved_orgEqs)
 {
+	std::cout << "first step of applying BC ... " << std::flush;
+	RunTimeTimer run;
+	run.start();
     const size_t n_org_rows = eqsA.getNRows();
     vector<INDEX_TYPE> removed_rows(list_dirichlet_bc.size());
     for (size_t i=0; i<list_dirichlet_bc.size(); i++) {
@@ -99,10 +102,18 @@ void setKnownXi_ReduceSizeOfEQS(vector<IndexValue> &list_dirichlet_bc, MathLib::
         org_eqsRHS[id] = val; //=eqsA(id, id)*val;
         org_eqsX[id] = val; //=eqsA(id, id)*val;
     }
+    run.stop();
+    std::cout << run.elapsed() << " s" << std::endl;
 
+    std::cout << "second step of applying BC (erase entries from matrix) ... " << std::flush;
+	run.start();
     //remove rows and columns
     eqsA.eraseEntries(removed_rows.size(), &removed_rows[0]);
+    run.stop();
+    std::cout << run.elapsed() << " s" << std::endl;
 
+    std::cout << "third step of applying BC (create new x and RHS) ... " << std::flush;
+	run.start();
     //remove X,RHS
     (*eqsX) = new double[n_org_rows-removed_rows.size()];
     (*eqsRHS) = new double[n_org_rows-removed_rows.size()];
@@ -114,13 +125,16 @@ void setKnownXi_ReduceSizeOfEQS(vector<IndexValue> &list_dirichlet_bc, MathLib::
         map_solved_orgEqs[new_id] = i;
         new_id++;
     }
+    run.stop();
+    std::cout << run.elapsed() << " s" << std::endl;
 }
 
 void mapSolvedXToOriginalX(double *eqsX, size_t dim, map<INDEX_TYPE,INDEX_TYPE> &map_solved_orgEqs, double *org_eqsX)
 {
     for (size_t i=0; i<dim; i++) {
     	INDEX_TYPE idx (map_solved_orgEqs[i]);
-        org_eqsX[idx] = eqsX[i];
+    	double tmp = eqsX[i];
+        org_eqsX[idx] = tmp;
     }
 }
 #endif
@@ -456,7 +470,7 @@ int main(int argc, char *argv[])
     }
 	std::cout << "MathLib::CGParallel converged within " << steps << ", residuum is " << eps << std::endl;
 #endif
-    mapSolvedXToOriginalX(eqsX, crs->dimension, map_solved_orgEqs, org_eqsX);
+    mapSolvedXToOriginalX(eqsX, eqsA.getNRows(), map_solved_orgEqs, org_eqsX);
 	double *temp_x = eqsX;
 	eqsX = org_eqsX;
 	org_eqsX = temp_x;
