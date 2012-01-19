@@ -14,6 +14,7 @@ SET ( Base_Files
 	TimeMeasurementBase.h
         uniqueListInsert.h
         wait.h
+	MemoryTools.h
 	binarySearch.cpp
 	DateTools.cpp
         CPUTimeTimer.cpp
