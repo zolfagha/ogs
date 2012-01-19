@@ -80,6 +80,17 @@ void setKnownXi_ReduceSizeOfEQS(std::vector<IndexValue> &list_dirichlet_bc, Math
 {
 	const size_t n_org_rows = eqsA.getNRows();
 	std::vector<INDEX_TYPE> removed_rows(list_dirichlet_bc.size());
+	std::cout << "[BC] (transpose matrix) ... " << std::flush;
+	RunTimeTimer run_trans;
+	run_trans.start();
+	MathLib::CRSMatrix<double, INDEX_TYPE>* transpose_mat (eqsA.getTranspose());
+	run_trans.stop();
+	std::cout << run_trans.elapsed() << " s" << std::endl;
+
+	INDEX_TYPE const*const row_ptr (transpose_mat->getRowPtrArray());
+	INDEX_TYPE const*const col_idx (transpose_mat->getColIdxArray());
+	double const*const data (transpose_mat->getEntryArray());
+
 	for (size_t i = 0; i < list_dirichlet_bc.size(); i++) {
 		IndexValue &bc = list_dirichlet_bc.at(i);
 		const size_t id = bc.id;
@@ -87,12 +98,20 @@ void setKnownXi_ReduceSizeOfEQS(std::vector<IndexValue> &list_dirichlet_bc, Math
 		removed_rows.at(i) = id;
 
 		//b_i -= A(i,k)*val, i!=k
-		for (size_t j = 0; j < eqsA.getNCols(); j++)
-			org_eqsRHS[j] -= eqsA.getValue(j, id) * val;
+//		for (size_t j = 0; j < eqsA.getNCols(); j++)
+//			org_eqsRHS[j] -= eqsA.getValue(j, id) * val;
+
+		const INDEX_TYPE end(row_ptr[id+1]);
+		for (INDEX_TYPE k(row_ptr[id]); k<end; k++) {
+			const INDEX_TYPE j(col_idx[k]);
+			org_eqsRHS[j] -= data[j] * val;
+		}
+
 		//b_k = A_kk*val
 		org_eqsRHS[id] = val; //=eqsA(id, id)*val;
 		org_eqsX[id] = val; //=eqsA(id, id)*val;
 	}
+	delete transpose_mat;
 
 	//remove rows and columns
 	eqsA.eraseEntries(removed_rows.size(), &removed_rows[0]);
