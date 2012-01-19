@@ -37,22 +37,75 @@ private:
 
 namespace FemLib
 {
+class DirichletBC //per variable?
+{
+public:
+    template<typename Tval, typename Tpos>
+    void set(FEMNodalFunction<Tval,Tpos> *fem, GeoLib::GeoObject *geo, MathLib::IDistribution *func)
+    {
+        throw std::exception("The method or operation is not implemented.");
+    }
 
-//----------------------------------------------------------
+    template<typename Tmat, typename Tvec>
+    void apply( Tmat* globalA, Tvec* globalRHS ) 
+    {
+        throw std::exception("The method or operation is not implemented.");
+    }
+
+
+private:
+    // node id, var id, value
+    //IDirichletBCMethod *_method;
+};
+
+class NeumannBC
+{
+public:
+    template<typename Tval, typename Tpos>
+    void set(FEMNodalFunction<Tval,Tpos> *fem, GeoLib::GeoObject *geo, MathLib::IDistribution *func) 
+    {
+        throw std::exception("The method or operation is not implemented.");
+    }
+
+    size_t getNumberOfConditions() const
+    {
+        throw std::exception("The method or operation is not implemented.");
+    }
+
+    size_t getConditionDoF( size_t i ) const
+    {
+        throw std::exception("The method or operation is not implemented.");
+    }
+
+    double getConditionValue( size_t i ) const
+    {
+        throw std::exception("The method or operation is not implemented.");
+    }
+
+    template<typename T>
+    void apply( T* globalRHS ) 
+    {
+        for (size_t i=0; i<this->getNumberOfConditions(); i++)
+            (*globalRHS)[this->getConditionDoF(i)] += this->getConditionValue(i);
+    }
+
+
+
+private:
+    // node id, var id, value
+};
+
+
 class CauchyBC
 {
 public:
     void set(FEMNodalFunction<double,double> *fem, int geo, int func);
 };
 
-
-//----------------------------------------------------------
-class NeumannBC
+class OpenBC
 {
 public:
     void set(FEMNodalFunction<double,double> *fem, int geo, int func);
-private:
-    // node id, var id, value
 };
 
 
@@ -63,17 +116,6 @@ class IDirichletBCMethod
 public:
 //    virtual void apply(int linearEqs, DirichletBC &bc) = 0;
 };
-
-class DirichletBC //per variable?
-{
-public:
-    template<typename Tval, typename Tpos>
-    void set(FEMNodalFunction<Tval,Tpos> *fem, GeoLib::GeoObject *geo, MathLib::IDistribution *func);
-private:
-    // node id, var id, value
-    IDirichletBCMethod *_method;
-};
-
 
 class DiagonizeMethod : public IDirichletBCMethod
 {

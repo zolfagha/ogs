@@ -11,7 +11,7 @@ INCLUDE_DIRECTORIES(
 
 target_link_libraries (
 	NumLib
-	BASE
+	Base
         MathLib
         MeshLib
         FemLib

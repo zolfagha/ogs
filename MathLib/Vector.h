@@ -7,6 +7,7 @@ template<typename T, unsigned N>
 class TemplateVector
 {
 public:
+    T* getRaw() {return _data;};
 private:
     T _data[N];
 };

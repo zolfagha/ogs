@@ -14,6 +14,7 @@
 #include <exception>
 #include <stdexcept>
 #include <iostream>
+#include <vector>
 
 namespace MathLib {
 
@@ -44,7 +45,7 @@ public:
     * @return
     */
    Matrix<T>& operator= (T a);
-
+   
    /**
     * Matrix vector multiplication
     * @param x
@@ -87,6 +88,13 @@ public:
     */
    void setSubMatrix (size_t b_row, size_t b_col, const Matrix<T>& sub_mat) throw (std::range_error);
 
+   /**
+    * add values of the matrix with the given symmetric matrix
+    * @param pos row and column positions in the matrix
+    * @param mat the given matrix
+    */
+   void add(std::vector<size_t> &pos, const Matrix<T>& mat);
+
    inline T & operator() (size_t row, size_t col) throw (std::range_error);
    inline T & operator() (size_t row, size_t col) const throw (std::range_error);
 
@@ -108,6 +116,10 @@ private:
    size_t ncols;
    T *data;
 };
+
+template<class T> Matrix<T>::Matrix ()
+    : nrows (0), ncols (0), data (0)
+{}
 
 template<class T> Matrix<T>::Matrix (size_t rows, size_t cols)
       : nrows (rows), ncols (cols), data (new T[nrows*ncols])
@@ -265,6 +277,16 @@ template<class T> void Matrix<T>::setSubMatrix(
 		}
 	}
 }
+
+template<class T> void Matrix<T>::add(std::vector<size_t> &pos, const Matrix<T>& mat)
+{
+    for (size_t i=0; i<pos.size(); i++) {
+        for (size_t j=0; j<pos.size(); j++) {
+			data[address(pos[i], pos[j])] += mat(i,j);
+        }
+    }
+}
+
 
 template<class T> T& Matrix<T>::operator() (size_t row, size_t col)
 	throw (std::range_error)

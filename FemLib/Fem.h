@@ -26,9 +26,18 @@ public:
     virtual void integrateShapeShape( void (*func)(double*), MathLib::Matrix<double> *) = 0;
     virtual void integrateShapeDShape( void (*func)(double*), MathLib::Matrix<double> *) = 0;
     virtual void integrateDShapeDShape( void (*func)(double*), MathLib::Matrix<double> *) = 0;
+    virtual const MathLib::Matrix<double> * computeGradShapeFunction( const double * pt) = 0; 
+
+    IFemIntegration * getIntegrationMethod() 
+    {
+        return _integration_method;
+    }
+
+
     //virtual void assembleNN(MathLib::Matrix _m, double func) = 0;
     //virtual void assembledNdN(MathLib::Matrix _m, double func) = 0;
-
+private:
+    IFemIntegration* _integration_method;
 };
 
 
@@ -48,7 +57,7 @@ public:
         // 
     }
 
-    IFemIntegration* getIntegration() {return &_integration;};
+    IFemIntegration* getIntegration() {return _integration;};
     void getShapeFunctions(int igp, double* shape, double* dshape, double *jacobian);
     double* getShapeFunction(int igp);
     MathLib::Matrix<double>* getGradShapeFunction(int igp);
@@ -56,20 +65,21 @@ public:
     MathLib::Matrix<double>* getGradTestFunction(int igp);
     double getDetJacobian(int igp);
 
-    double* computeShapeFunction( double * pt ) 
+    double* computeShapeFunction( const double * pt ) 
     {
         throw std::exception("The method or operation is not implemented.");
     }
-    double* computeTestFunction( double * pt ) 
+    double* computeTestFunction( const double * pt ) 
     {
         throw std::exception("The method or operation is not implemented.");
     }
 
-    MathLib::Matrix<double>* computeGradShapeFunction( double * pt ) 
+    const MathLib::Matrix<double> * computeGradShapeFunction( const double * pt)
     {
         throw std::exception("The method or operation is not implemented.");
     }
-    MathLib::Matrix<double>* computeGradTestFunction( double * pt ) 
+
+    MathLib::Matrix<double>* computeGradTestFunction( const double * pt ) 
     {
         throw std::exception("The method or operation is not implemented.");
     }
@@ -92,7 +102,7 @@ public:
 
 
 private:
-    IFemIntegration _integration;
+    IFemIntegration *_integration;
 
     int _ele_geo;
     int _shape_func;

@@ -15,6 +15,6 @@ INCLUDE_DIRECTORIES(
 
 target_link_libraries (
 	FdmLib
-	BASE
+	Base
         MathLib
 )

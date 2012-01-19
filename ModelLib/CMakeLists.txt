@@ -19,7 +19,7 @@ ENDIF (PARALLEL_USE_MPI)
 
 target_link_libraries (
 	ModelLib
-	BASE
+	Base
         MathLib
 	GeoLib
 	MeshLib

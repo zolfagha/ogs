@@ -10,6 +10,9 @@ class IFemIntegration
 {
 public:
 //    void integrate(int integrant, double val);
+
+    virtual size_t getNumberOfSamplingPoints() const = 0;
+    virtual const double* getSamplingPoint(int igp) const = 0;
 };
 
 class FemIntegrationGauss : IFemIntegration
@@ -19,9 +22,9 @@ public:
     FemIntegrationGauss(MeshLib::ElementType ele_type, int sampling_level) {
     }
 
-    size_t getNumberOfSamplingPoints();
-    std::vector<int> getSamplingPoints();
-    double* getSamplingPoint(int igp);
+    size_t getNumberOfSamplingPoints() const;
+    std::vector<int> getSamplingPoints() const;
+    const double* getSamplingPoint(int igp) const;
     double getWeight(int igp);
 };
 

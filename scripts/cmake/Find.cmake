@@ -17,6 +17,8 @@ FIND_PROGRAM(GPROF_PATH gprof DOC "GNU profiler gprof")
 
 FIND_PACKAGE(cppcheck)
 
+## gtest ##
+FIND_PACKAGE (GTest)
 
 ######################
 ### Find libraries ###

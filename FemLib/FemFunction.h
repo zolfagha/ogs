@@ -3,13 +3,9 @@
 
 #include "MeshLib/Core/IMesh.h"
 #include "NumLib/IFunction.h"
-#include "Projection.h"
 
 namespace FemLib
 {
-
-void mapNodeFunction2Element();
-void mapElementFunction2Node();
 
 struct LagrangeOrder
 {
@@ -43,9 +39,20 @@ public:
         throw std::exception("The method or operation is not implemented.");
     }
 
+    void setNodalValues( Tvalue* x ) 
+    {
+        for (size_t i=0; i<this->getNumberOfNodes(); i++)
+            _nodal_values[i] = x[i];
+    }
+
+    size_t getNumberOfNodes() const 
+    {
+        return _msh->getNumberOfNodes();
+    }
+
 private:
     Tvalue* _nodal_values;
-    FEMInterpolation* _fe;
+    //FEMInterpolation* _fe;
     MeshLib::IMesh* _msh;
     LagrangeOrder::type _order;
 };
@@ -78,11 +85,15 @@ public:
     Tvalue& getValue(size_t id) {
         return _ele_values[id];
     };
+    void setIntegrationPointValue( size_t i_e, size_t ip, Tvalue &q ) 
+    {
+        throw std::exception("The method or operation is not implemented.");
+    }
+
 private:
     Tvalue* _ele_values;
     MeshLib::IMesh* _msh;
 };
-
 
 
 }

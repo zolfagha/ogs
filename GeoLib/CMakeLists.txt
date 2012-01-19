@@ -39,6 +39,8 @@ SET ( GeoLib_Files
 	TemplateVec.h
 	Triangle.h
 	Raster.h
+	MathTools.h
+	MathTools.cpp
 	)
 SOURCE_GROUP(GeoLib FILES ${GeoLib_Files})
 

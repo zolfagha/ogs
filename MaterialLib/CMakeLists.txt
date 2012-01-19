@@ -13,6 +13,6 @@ INCLUDE_DIRECTORIES(
 
 target_link_libraries (
 	MaterialLib
-	BASE
+	Base
         MathLib
 )

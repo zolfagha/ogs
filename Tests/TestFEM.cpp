@@ -1,8 +1,9 @@
+#include <gtest/gtest.h>
 
-#include "Fem.h"
-#include "FemFunction.h"
-#include "BoundaryConditions.h"
-#include "Projection.h"
+#include "FemLib/Fem.h"
+#include "FemLib/FemFunction.h"
+#include "FemLib/BoundaryConditions.h"
+#include "FemLib/Projection.h"
 
 #include "MeshLib/Core/Mesh.h"
 #include "MeshLib/Tools/MeshGenerator.h"
@@ -18,7 +19,14 @@
 
 using namespace FemLib;
 
-void testFunction() 
+int add (int x, int y) {return x+y;};
+
+TEST(AddTest, Test1)
+{
+    ASSERT_EQ(2, add(1, 1));
+}
+
+TEST(FEM, testAll) 
 {
     //geo
     std::vector<GeoLib::Point*> pnt_vec;
@@ -100,42 +108,6 @@ void testFunction()
     mapFunctions(vel, nod_vel);
 };
 
-void testIntegration1() 
-{
-
-    //input
-    MeshLib::IElement *e;
-    FemLagrangeElement fem; //gauss, iso, Bubnov
-    fem.configure(e);
-    size_t dof = 3;
-    //output
-    MathLib::Matrix<double> M(dof, dof);
-    MathLib::Matrix<double> K(dof, dof);
-
-    //-----------------------------
-    // Int{N(x)^T N(x)}dV
-    // = Int{N(s)^T N(s) j(s)}dS
-    // = sum_i {N^T(si)N(si)j(si)w(si)}
-    FemIntegrationGauss *gauss = static_cast<FemIntegrationGauss*>(fem.getIntegration());
-    for (int i=0; i<gauss->getNumberOfSamplingPoints(); i++) {
-        //fem.getShapeFunctions(i, shape, dshape, &j_det);
-        double *shape = fem.getShapeFunction(i);
-        MathLib::Matrix<double> *dshape = fem.getGradShapeFunction(i);
-        double *test = fem.getTestFunction(i);
-        MathLib::Matrix<double> *dtest = fem.getGradTestFunction(i);
-        double fkt = gauss->getWeight(i)*fem.getDetJacobian(i);
-
-        //M
-        for (int j=0; j<dof; j++)
-            for (int k=0; k<dof; k++)
-                M(j,k) += test[j]*shape[k]*fkt;
-
-        //K
-        //K+= dshape^T dtest * fkt
-    }
-    
-}
-
 void calcMass(double *pt, MathLib::Matrix<double> *mat) {
     //W^T N
     FemLagrangeElement fem; //gauss, iso, Bubnov
@@ -159,13 +131,16 @@ void calcLap(double *pt, MathLib::Matrix<double> *mat) {
 // Method 2
 // - user only access FEM class
 // - FEM class hides mapping, integration, test function
-void testIntegration2()
+TEST(FEM, integral1)
 {
     //input
-    MeshLib::IElement *e;
+    MeshLib::UnstructuredMesh msh;
+    MeshLib::MeshGenerator::generateRegularMesh(2, 1.0, 1, .0, .0, .0, msh);
+    MeshLib::IElement *e = msh.getElemenet(0);
+
     FemLagrangeElement fem; //gauss, iso, Bubnov
     fem.configure(e);
-    size_t dof = 3;
+    size_t dof = e->getNumberOfNodes();
     //output
     MathLib::Matrix<double> M(dof, dof);
     MathLib::Matrix<double> K(dof, dof);
@@ -187,12 +162,3 @@ void testIntegration2()
 
 }
 
-
-int main(int argc, char* argv[]) {
-
-    testIntegration1();
-    testIntegration2();
-    testFunction();
-
-    return 0;
-}
