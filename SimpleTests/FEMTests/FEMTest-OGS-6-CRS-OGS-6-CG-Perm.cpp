@@ -80,7 +80,7 @@ void setKnownXi_ReduceSizeOfEQS(std::vector<IndexValue> &list_dirichlet_bc, Math
 {
 	const size_t n_org_rows = eqsA.getNRows();
 	std::vector<INDEX_TYPE> removed_rows(list_dirichlet_bc.size());
-	std::cout << "[BC] (transpose matrix) ... " << std::flush;
+	std::cout << "\t[BC] (transpose matrix) ... " << std::flush;
 	RunTimeTimer run_trans;
 	run_trans.start();
 	MathLib::CRSMatrix<double, INDEX_TYPE>* transpose_mat (eqsA.getTranspose());
@@ -91,7 +91,7 @@ void setKnownXi_ReduceSizeOfEQS(std::vector<IndexValue> &list_dirichlet_bc, Math
 	INDEX_TYPE const*const col_idx (transpose_mat->getColIdxArray());
 	double const*const data (transpose_mat->getEntryArray());
 
-	std::cout << "[BC] modifying first step of applying BC ... " << std::flush;
+	std::cout << "\t[BC] modifying rhs and solution vector ... " << std::flush;
 	RunTimeTimer run;
 	run.start();
 	for (size_t i = 0; i < list_dirichlet_bc.size(); i++) {
@@ -114,13 +114,20 @@ void setKnownXi_ReduceSizeOfEQS(std::vector<IndexValue> &list_dirichlet_bc, Math
 		org_eqsRHS[id] = val; //=eqsA(id, id)*val;
 		org_eqsX[id] = val; //=eqsA(id, id)*val;
 	}
-
+	run.stop();
+	std::cout << run.elapsed() << " s" << std::endl;
 	delete transpose_mat;
 
+	std::cout << "\t[BC] erasing rows and columns from matrix ... " << std::flush;
+	run.start();
 	//remove rows and columns
 	eqsA.eraseEntries(removed_rows.size(), &removed_rows[0]);
+	run.stop();
+	std::cout << run.elapsed() << " s" << std::endl;
 
 	//remove X,RHS
+	std::cout << "\t[BC] create mapping ... " << std::flush;
+	run.start();
 	(*eqsX) = new double[n_org_rows - removed_rows.size()];
     (*eqsRHS) = new double[n_org_rows-removed_rows.size()];
     size_t new_id = 0;
@@ -131,6 +138,8 @@ void setKnownXi_ReduceSizeOfEQS(std::vector<IndexValue> &list_dirichlet_bc, Math
         map_solved_orgEqs[new_id] = i;
         new_id++;
     }
+	run.stop();
+	std::cout << run.elapsed() << " s" << std::endl;
 }
 
 void mapSolvedXToOriginalX(double *eqsX, size_t dim, map<INDEX_TYPE,INDEX_TYPE> &map_solved_orgEqs, double *org_eqsX)
@@ -283,7 +292,8 @@ int main(int argc, char *argv[])
     setKnownXi_ReduceSizeOfEQS(list_dirichlet_bc, eqsA, org_eqsRHS, org_eqsX, &eqsRHS, &eqsX, map_solved_orgEqs);
     run_timer3.stop();
     cpu_timer3.stop();
-
+    std::cout << "\t[BC] sum CPU time = " << run_timer3.elapsed() << std::endl;
+    std::cout << "\t[BC] sum Run time = " << cpu_timer3.elapsed() << std::endl;
     // writing system of linear equations to file for external solver
 //	std::string fname_fem_out (strMeshFile);
 //	fname_fem_out = fname_fem_out.substr(0,fname_fem_out.length()-4);
@@ -325,7 +335,7 @@ int main(int argc, char *argv[])
 	cluster_tree.createClusterTree(op_perm, po_perm, 1000);
 	run_timer_nd.stop();
 	if (verbose) {
-		std::cout << run_timer_nd.elapsed() << std::endl;
+		std::cout << run_timer_nd.elapsed() << " s" << std::endl;
 	}
 	// applying the nested dissection reordering to matrix
 	RunTimeTimer run_timer_apl_nd;
@@ -336,9 +346,11 @@ int main(int argc, char *argv[])
 	eqsA.reorderMatrix(op_perm, po_perm);
 	run_timer_apl_nd.stop();
 	if (verbose)
-		std::cout << run_timer_apl_nd.elapsed() << std::endl;
+		std::cout << run_timer_apl_nd.elapsed() << " s" << std::endl;
 
 	// applying the nested dissection reordering to rhs
+	RunTimeTimer run_timer_apl_nd_rhs;
+	run_timer_apl_nd_rhs.start();
 	if (verbose) {
 		std::cout << "-> applying nested dissection reordering to rhs ... " << std::flush;
 	}
@@ -346,8 +358,9 @@ int main(int argc, char *argv[])
 	for (size_t k(0); k<n; k++) tmp_rhs[k] = eqsRHS[op_perm[k]];
 	for (size_t k(0); k<n; k++) eqsRHS[k] = tmp_rhs[k];
 	delete [] tmp_rhs;
+	run_timer_apl_nd_rhs.stop();
 	if (verbose) {
-		std::cout << "done" << std::endl;
+		std::cout << run_timer_apl_nd_rhs.elapsed() << " s" << std::endl;
 	}
 
     // *** solve EQS
@@ -401,10 +414,10 @@ int main(int argc, char *argv[])
     std::cout << "Apply BC:" << std::endl;
     std::cout << "CPU time = " << run_timer3.elapsed() << std::endl;
     std::cout << "Run time = " << cpu_timer3.elapsed() << std::endl;
-    std::cout << "Calculation nested dissection reordering (with Metis): " << std::endl;
-    std::cout << "Run time = " << run_timer_nd.elapsed() << std::endl;
-    std::cout << "Applying nested dissection reordering to matrix:" << std::endl;
-	std::cout << "Run time = " << run_timer_apl_nd.elapsed() << std::endl;
+    std::cout << "NestedDissection: " << std::endl;
+    std::cout << "Run time = " << run_timer_nd.elapsed() + run_timer_apl_nd.elapsed() + run_timer_apl_nd_rhs.elapsed() << std::endl;
+    std::cout << "ND + lin solver: " << std::endl;
+    std::cout << "CPU time = " << run_timer2.elapsed() + run_timer_nd.elapsed() + run_timer_apl_nd.elapsed() + run_timer_apl_nd_rhs.elapsed() << std::endl;
     std::cout << "Linear solver:" << std::endl;
     std::cout << "CPU time = " << run_timer2.elapsed() << std::endl;
     std::cout << "Run time = " << cpu_timer2.elapsed() << std::endl;
