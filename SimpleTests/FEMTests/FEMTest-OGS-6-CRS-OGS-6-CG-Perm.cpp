@@ -91,6 +91,9 @@ void setKnownXi_ReduceSizeOfEQS(std::vector<IndexValue> &list_dirichlet_bc, Math
 	INDEX_TYPE const*const col_idx (transpose_mat->getColIdxArray());
 	double const*const data (transpose_mat->getEntryArray());
 
+	std::cout << "[BC] modifying first step of applying BC ... " << std::flush;
+	RunTimeTimer run;
+	run.start();
 	for (size_t i = 0; i < list_dirichlet_bc.size(); i++) {
 		IndexValue &bc = list_dirichlet_bc.at(i);
 		const size_t id = bc.id;
@@ -104,13 +107,14 @@ void setKnownXi_ReduceSizeOfEQS(std::vector<IndexValue> &list_dirichlet_bc, Math
 		const INDEX_TYPE end(row_ptr[id+1]);
 		for (INDEX_TYPE k(row_ptr[id]); k<end; k++) {
 			const INDEX_TYPE j(col_idx[k]);
-			org_eqsRHS[j] -= data[j] * val;
+			org_eqsRHS[j] -= data[k] * val;
 		}
 
 		//b_k = A_kk*val
 		org_eqsRHS[id] = val; //=eqsA(id, id)*val;
 		org_eqsX[id] = val; //=eqsA(id, id)*val;
 	}
+
 	delete transpose_mat;
 
 	//remove rows and columns
@@ -132,9 +136,6 @@ void setKnownXi_ReduceSizeOfEQS(std::vector<IndexValue> &list_dirichlet_bc, Math
 void mapSolvedXToOriginalX(double *eqsX, size_t dim, map<INDEX_TYPE,INDEX_TYPE> &map_solved_orgEqs, double *org_eqsX)
 {
     for (size_t i=0; i<dim; i++) {
-    	if (map_solved_orgEqs[i] >= dim) {
-    		std::cout << "map_solved_orgEqs[" << i << "]: " << map_solved_orgEqs[i] << std::endl;
-    	}
         org_eqsX[map_solved_orgEqs[i]] = eqsX[i];
     }
 }
@@ -176,7 +177,7 @@ int main(int argc, char *argv[])
         std::cout << "Number of nodes   : " << vec_mesh[i]->getNumberOfNodes() << endl;
         std::cout << "Number of elements: " << vec_mesh[i]->getNumberOfElements() << endl;
     }
-    std::cout << endl;
+
     MeshLib::UnstructuredMesh *msh = static_cast<MeshLib::UnstructuredMesh*>(vec_mesh.at(0));
     if (msh->getElemenet(0)->getElementType()!=MeshLib::ElementType::TRIANGLE) {
         std::cout << "Only triangle elements are supported! " << endl;
@@ -366,15 +367,23 @@ int main(int argc, char *argv[])
 		std::cout << "-> reverse the nested dissection reordering to solution x ... " << std::flush;
 	}
     double *tmp_x(new double[eqsA.getNRows()]);
-	for (size_t k(0); k<n; k++) tmp_x[op_perm[k]] = eqsX[k];
+	for (size_t k(0); k<n; k++) tmp_x[k] = eqsX[po_perm[k]];
 	for (size_t k(0); k<n; k++) eqsX[k] = tmp_x[k];
 	delete [] tmp_x;
 	if (verbose) {
 		std::cout << "done" << std::endl;
 	}
 
-	std::cout << "crs->dimension: " << crs->dimension << ", map_solved_orgEqs.size(): " << map_solved_orgEqs.size() << std::endl;
-    mapSolvedXToOriginalX(eqsX, crs->dimension, map_solved_orgEqs, org_eqsX);
+//    mapSolvedXToOriginalX(eqsX, crs->dimension, map_solved_orgEqs, org_eqsX);
+    mapSolvedXToOriginalX(eqsX, eqsA.getNRows(), map_solved_orgEqs, org_eqsX);
+
+//	std::ofstream vec_out ("vector_perm.txt");
+//	if (vec_out) {
+//		vec_out.precision(3);
+//		for (size_t k(0); k<n; k++)
+//			vec_out << eqsX[k] << std::endl;
+//	}
+
 	double *temp_x = eqsX;
 	eqsX = org_eqsX;
 	org_eqsX = temp_x;
@@ -401,12 +410,12 @@ int main(int argc, char *argv[])
     std::cout << "Run time = " << cpu_timer2.elapsed() << std::endl;
 
     // output results
-//    cout << "-> output results" << endl;
-//    std::vector<MeshLib::NodalScalarValue> nodalValues;
-//    string str = "Head";
-//    MeshLib::NodalScalarValue temp("Head", eqsX);
-//    nodalValues.push_back(temp);
-//    MeshLib::MeshIOLegacyVtk4Simulation::WriteAsciiFile("output.vtk", *msh, 1, 1.0, nodalValues);
+    cout << "-> output results" << endl;
+    std::vector<MeshLib::NodalScalarValue> nodalValues;
+    string str = "Head";
+    MeshLib::NodalScalarValue temp("Head", eqsX);
+    nodalValues.push_back(temp);
+    MeshLib::MeshIOLegacyVtk4Simulation::WriteAsciiFile("output.vtk", *msh, 1, 1.0, nodalValues);
 
     //release memory
     destroyStdVectorWithPointers(vec_mesh);
