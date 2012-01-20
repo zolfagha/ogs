@@ -7,11 +7,19 @@
 #	Mapping.h
 #	WeightFunction.h
 #	Test.cpp
-#)
+#
 FILE(GLOB FemLib_Files *.h *.cpp)
 SOURCE_GROUP( FemLib FILES ${FemLib_Files})
+FILE(GLOB FemLib_Element_Files Element/*.h *.cpp)
+SOURCE_GROUP( FemLib\\Element FILES ${FemLib_Element_Files})
+FILE(GLOB FemLib_BC_Files BC/*.h *.cpp)
+SOURCE_GROUP( FemLib\\BC FILES ${FemLib_BC_Files})
 
-ADD_LIBRARY(FemLib STATIC ${FemLib_Files})
+ADD_LIBRARY(FemLib STATIC
+	${FemLib_Files}
+	${FemLib_Element_Files}
+	${FemLib_BC_Files}
+)
 
 INCLUDE_DIRECTORIES(
 	.

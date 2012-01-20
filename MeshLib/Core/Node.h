@@ -13,22 +13,29 @@ namespace MeshLib
 //-----------------------------------------------------------------------------
 // Node
 //-----------------------------------------------------------------------------
-class Node : public INode, public GeoLib::Point
+template<typename Tpos>
+class Node : public INode<Tpos>
 {
 private:
     size_t _node_id;
     std::set<size_t> _connected_nodes;
+    Tpos _x;
 public:
-    Node (size_t id, double x, double y, double z) {
+    Node (size_t id, const Tpos &x) {
         this->_node_id = id;
-        this->_x[0] = x;
-        this->_x[1] = y;
-        this->_x[2] = z;
+        this->_x = x;
     };
 
     size_t getNodeID(size_t id) { return _node_id;};
     void setNodeID(size_t id) { _node_id = id;};
-
+    virtual const Tpos* getData() const 
+    {
+        return &_x;
+    };
+    void setX(const Tpos &x) 
+    {
+        _x = x;
+    };
     const std::set<size_t>& getConnectedNodes() const
     {
         return _connected_nodes;

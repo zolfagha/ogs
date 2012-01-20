@@ -3,11 +3,12 @@
 
 #include "MeshLib/Core/IMesh.h"
 #include "NumLib/IFunction.h"
+#include "FemElement.h"
 
 namespace FemLib
 {
 
-struct LagrangeOrder
+struct PolynomialOrder
 {
     enum type {
         Linear = 1,
@@ -21,20 +22,24 @@ template<typename Tvalue, typename Tpos>
 class FEMNodalFunction : public NumLib::IFunction<Tvalue,Tpos>
 {
 public:
-    FEMNodalFunction(MeshLib::IMesh* msh, LagrangeOrder::type order) {
+    FEMNodalFunction(MeshLib::IMesh<Tpos>* msh, PolynomialOrder::type order) {
         _msh = msh;
         _order = order;
     }
 
-    Tvalue& getValue(Tpos &pt) {
+    const MeshLib::IMesh<Tpos>* getMesh() const {
+        return _msh;
+    }
+
+    Tvalue& getValue(Tpos &pt) const {
         return _nodal_values[0];
     };
 
-    Tvalue& getValue(int node_id) {
+    Tvalue& getValue(int node_id) const {
         return _nodal_values[node_id];
     }
 
-    IFiniteElement* getFiniteElement() 
+    IFiniteElement* getFiniteElement() const
     {
         throw std::exception("The method or operation is not implemented.");
     }
@@ -53,8 +58,8 @@ public:
 private:
     Tvalue* _nodal_values;
     //FEMInterpolation* _fe;
-    MeshLib::IMesh* _msh;
-    LagrangeOrder::type _order;
+    MeshLib::IMesh<Tpos>* _msh;
+    PolynomialOrder::type _order;
 };
 
 
@@ -62,10 +67,10 @@ template<typename Tvalue, typename Tpos>
 class FEMElementalFunction : public NumLib::IFunction<Tvalue,Tpos>
 {
 public:
-    Tvalue& getValue(Tpos &pt) {
+    Tvalue& getValue(Tpos &pt) const {
         return _ele_values[0];
     };
-    Tvalue& getValue(size_t id) {
+    Tvalue& getValue(size_t id) const {
         return _ele_values[id];
     };
 private:
@@ -76,13 +81,13 @@ template<typename Tvalue, typename Tpos>
 class FEMIntegrationPointFunction : public NumLib::IFunction<Tvalue,Tpos>
 {
 public:
-    FEMIntegrationPointFunction(MeshLib::IMesh* msh) {
+    FEMIntegrationPointFunction(MeshLib::IMesh<Tpos>* msh) {
         _msh = msh;
     };
-    Tvalue& getValue(Tpos &pt) {
+    Tvalue& getValue(Tpos &pt) const {
         return _ele_values[0];
     };
-    Tvalue& getValue(size_t id) {
+    Tvalue& getValue(size_t id) const {
         return _ele_values[id];
     };
     void setIntegrationPointValue( size_t i_e, size_t ip, Tvalue &q ) 
@@ -92,7 +97,7 @@ public:
 
 private:
     Tvalue* _ele_values;
-    MeshLib::IMesh* _msh;
+    MeshLib::IMesh<Tpos>* _msh;
 };
 
 

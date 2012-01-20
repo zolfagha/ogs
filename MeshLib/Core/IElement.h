@@ -51,6 +51,12 @@ public:
             e_node_id_list[i] = this->getNodeID(i);
     };
 
+    double getLocalX( size_t i_nod ) 
+    {
+        throw std::exception("The method or operation is not implemented.");
+    }
+
+
 
 };
 }

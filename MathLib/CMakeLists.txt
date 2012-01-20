@@ -4,6 +4,7 @@ SET ( MathLib_Files
 	LinearInterpolation.h  
 	MathTools.h
 	Vector3.h
+	Vector.h
 	EarClippingTriangulation.h  
 	max.h
 	sparse.h
@@ -12,7 +13,6 @@ SET ( MathLib_Files
 	LinearInterpolation.cpp  
 	MathTools.cpp
 	EarClippingTriangulation.cpp  
-	Function.h
 )
 SOURCE_GROUP( MathLib FILES ${MathLib_Files})
 
@@ -94,6 +94,12 @@ SET ( MathLib_ODE_Files
 )
 SOURCE_GROUP( MathLib\\ODE FILES ${MathLib_ODE_Files})
 
+SET ( MathLib_Function_Files
+        Function/Function.h
+)
+SOURCE_GROUP( MathLib\\Function FILES ${MathLib_Function_Files})
+
+
 # Create the library
 ADD_LIBRARY( MathLib STATIC 
 	${MathLib_Files} 
@@ -105,6 +111,7 @@ ADD_LIBRARY( MathLib STATIC
 	${MathLib_Nonlinear_Files}
 	${MathLib_Integration_Files}
 	${MathLib_ODE_Files}
+	${MathLib_Function_Files}
 )
 
 #Include

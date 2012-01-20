@@ -41,6 +41,7 @@ SET ( GeoLib_Files
 	Raster.h
 	MathTools.h
 	MathTools.cpp
+	GeoGenerator.h
 	)
 SOURCE_GROUP(GeoLib FILES ${GeoLib_Files})
 

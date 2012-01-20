@@ -1,63 +1,53 @@
 #include <gtest/gtest.h>
 
-#include "FemLib/Fem.h"
+#include "FemLib/FemElement.h"
 #include "FemLib/FemFunction.h"
-#include "FemLib/BoundaryConditions.h"
-#include "FemLib/Projection.h"
+#include "FemLib/FemFunctionProjection.h"
+#include "FemLib/BC/FemDirichletBC.h"
+#include "FemLib/BC/FemNeumannBC.h"
+#include "FemLib/Interpolation.h"
+#include "FemLib/Mapping.h"
 
-#include "MeshLib/Core/Mesh.h"
+#include "MeshLib/Core/UnstructuredMesh.h"
 #include "MeshLib/Tools/MeshGenerator.h"
 
 #include "MathLib/Vector.h"
 #include "MathLib/LinearInterpolation.h"
 #include "MathLib/LinAlg/Solvers/GaussAlgorithm.h"
+#include "MathLib/Function/Function.h"
 
 #include "GeoLib/Point.h"
 #include "GeoLib/Polyline.h"
+#include "GeoLib/GeoGenerator.h"
 
 #include <vector>
+#include <memory>
 
 using namespace FemLib;
-
-int add (int x, int y) {return x+y;};
-
-TEST(AddTest, Test1)
-{
-    ASSERT_EQ(2, add(1, 1));
-}
+using namespace GeoLib;
+using namespace MeshLib;
 
 TEST(FEM, testAll) 
 {
     //geo
-    std::vector<GeoLib::Point*> pnt_vec;
-    pnt_vec.push_back(new GeoLib::Point(0.0, 0.0, 0.0));
-    pnt_vec.push_back(new GeoLib::Point(2.0, 0.0, 0.0));
-    pnt_vec.push_back(new GeoLib::Point(2.0, 2.0, 0.0));
-    pnt_vec.push_back(new GeoLib::Point(0.0, 2.0, 0.0));
-    GeoLib::Polyline poly_left(pnt_vec);
-    poly_left.addPoint(0);
-    poly_left.addPoint(3);
-    GeoLib::Polyline poly_right(pnt_vec);
-    poly_left.addPoint(1);
-    poly_left.addPoint(2);
+    Rectangle rec(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
+    Polyline* poly_left = rec.getLeft();
+    Polyline* poly_right = rec.getRight();
     //mesh
-    MeshLib::UnstructuredMesh msh;
-    MeshLib::MeshGenerator::generateRegularMesh(2, 2.0, 2, .0, .0, .0, msh);
+    std::auto_ptr<UnstructuredMesh<MathLib::Vector2D>> msh = MeshGenerator::generateRegularMesh(2, 2.0, 2, .0, .0, .0);
     //mat
     const double K = 1.e-11;
 
     //define discretization
-    FEMNodalFunction<double, MathLib::Vector2D> head(&msh, LagrangeOrder::Linear);
-    FEMIntegrationPointFunction<MathLib::Vector2D, MathLib::Vector2D> vel(&msh);
+    FEMNodalFunction<double, MathLib::Vector2D> head(msh.get(), PolynomialOrder::Linear);
+    FEMIntegrationPointFunction<MathLib::Vector2D, MathLib::Vector2D> vel(msh.get());
 
     //prepare bc
-    DirichletBC bc1;
-    bc1.set(&head, &poly_right, &MathLib::DistributionConstant(.0));
-    NeumannBC bc2;
-    bc2.set(&head, &poly_left, &MathLib::DistributionConstant(1.e-5));
+    FemDirichletBC<double, MathLib::Vector2D, Polyline> bc1(&head, poly_right, &MathLib::FunctionConstant<double, MathLib::Vector2D>(.0));
+    FemNeumannBC<double, MathLib::Vector2D, Polyline> bc2(&head, poly_left, &MathLib::FunctionConstant<double, MathLib::Vector2D>(1.e-5));
 
     // global EQS
-    const size_t n_dof = msh.getNumberOfNodes();
+    const size_t n_dof = msh->getNumberOfNodes();
     MathLib::Matrix<double> globalA(n_dof, n_dof);
     std::vector<double> globalRHS(n_dof, .0);
 
@@ -65,13 +55,13 @@ TEST(FEM, testAll)
     IFiniteElement *fe = head.getFiniteElement();
     MathLib::Matrix<double> localK;
     std::vector<size_t> e_node_id_list;
-    for (size_t i_e=0; i_e<msh.getNumberOfElements(); i_e++) {
-        MeshLib::IElement *e = msh.getElemenet(i_e);
-        const size_t e_nnodes = e->getNumberOfNodes();
-        localK.resize(e_nnodes, e_nnodes);
-        localK = .0;
+    for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
+        MeshLib::IElement *e = msh->getElemenet(i_e);
         fe->configure(e);
-        fe->integrateShapeShape(0, &localK);
+        const size_t &n_dof = fe->getNumberOfDOFs();
+        localK.resize(n_dof, n_dof);
+        localK = .0;
+        fe->computeIntTestShape(0, &localK);
         e->getNodeIDList(e_node_id_list);
         globalA.add(e_node_id_list, localK); //TODO A(id_list) += K;
     }
@@ -89,25 +79,28 @@ TEST(FEM, testAll)
     head.setNodalValues(&x[0]);
 
     //calculate vel (vel=f(h))
-    for (size_t i_e=0; i_e<msh.getNumberOfElements(); i_e++) {
-        MeshLib::IElement* e = msh.getElemenet(i_e);
+    for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
+        MeshLib::IElement* e = msh->getElemenet(i_e);
         fe->configure(e);
         std::vector<double> local_h;
         // for each integration points
         IFemIntegration *integral = fe->getIntegrationMethod();
+        IFemMapping *mapping = fe->getMapping();
         for (size_t ip=0; ip<integral->getNumberOfSamplingPoints(); ip++) {
             MathLib::Vector2D q;
-            const MathLib::Matrix<double> *dN = fe->computeGradShapeFunction(integral->getSamplingPoint(ip));
+            mapping->computeMappingFunctions(integral->getSamplingPoint(ip), FemMapComputation::DSHAPE);
+            const MathLib::Matrix<double> *dN = mapping->getGradShapeFunction();
             dN->axpy(-K, &local_h[0], .0, q.getRaw()); //TODO  q = - K * dN * local_h;
             vel.setIntegrationPointValue(i_e, ip, q);
         }
     }
 
     //for output
-    FEMNodalFunction<MathLib::Vector2D, MathLib::Vector2D> nod_vel(&msh, LagrangeOrder::Linear);
+    FEMNodalFunction<MathLib::Vector2D, MathLib::Vector2D> nod_vel(msh.get(), PolynomialOrder::Linear);
     mapFunctions(vel, nod_vel);
 };
 
+#if 0
 void calcMass(double *pt, MathLib::Matrix<double> *mat) {
     //W^T N
     FemLagrangeElement fem; //gauss, iso, Bubnov
@@ -161,4 +154,5 @@ TEST(FEM, integral1)
     // localRHS(dof_map) += localRHS
 
 }
+#endif
 

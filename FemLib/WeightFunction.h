@@ -4,10 +4,14 @@
 namespace FemLib
 {
 
-class FemWeightFunction
+class IFemWeightFunction
 {
 
 };
 
+class FemWeightBubnovGalerkin
+{
+
+};
 
 }

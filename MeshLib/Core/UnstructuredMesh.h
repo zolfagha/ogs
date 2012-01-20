@@ -10,10 +10,11 @@
 namespace MeshLib
 {
 
-class UnstructuredMesh : public IMesh
+template<typename Tpos>
+class UnstructuredMesh : public IMesh<Tpos>
 {
 private:
-    std::vector<Node*> _list_nodes;
+    std::vector<Node<Tpos>*> _list_nodes;
     std::vector<IElement*> _list_elements;
 
 public:
@@ -25,23 +26,19 @@ public:
 
     virtual size_t getNumberOfNodes() const { return _list_nodes.size(); };
     virtual size_t getNumberOfElements() const { return _list_elements.size(); };
-    virtual void getNodeCoordinates(size_t node_id, double pt[3]) const {
-        Node* nod = _list_nodes[node_id];
-        pt[0] = (*nod)[0];
-        pt[1] = (*nod)[1];
-        pt[2] = (*nod)[2];
+    virtual void getNodeCoordinates(size_t node_id, Tpos &pt) const {
+        Node<Tpos>* nod = _list_nodes[node_id];
+        pt = *nod->getData();
     }
 
-    size_t setNode( size_t node_id, double x, double y, double z ) {
+    size_t setNode( size_t node_id, Tpos &x ) {
         size_t new_node_id = node_id;
         if (node_id<_list_nodes.size()) {
-            Node *node = this->_list_nodes.at(node_id);
-            (*node)[0] = x;
-            (*node)[1] = y;
-            (*node)[2] = z;
+            Node<Tpos> *node = this->_list_nodes.at(node_id);
+            node->setX(x);
         } else {
             new_node_id = this->_list_nodes.size();
-            this->_list_nodes.push_back(new Node(new_node_id, x, y, z));
+            this->_list_nodes.push_back(new Node<Tpos>(new_node_id, x));
         }
         return new_node_id;
     };
@@ -57,7 +54,7 @@ public:
         return _list_elements.at(element_id);
     };
 
-    virtual Node* getNode( size_t id ) const {
+    virtual INode<Tpos>* getNode( size_t id ) const {
         return _list_nodes.at(id);
     };
 
