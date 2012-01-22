@@ -12,8 +12,8 @@
 #include "AxisAlignedBoundingBox.h"
 
 // Base
-#include "quicksort.h"
-#include "binarySearch.h"
+#include "Base/quicksort.h"
+#include "Base/binarySearch.h"
 
 #include <vector>
 #include <string>

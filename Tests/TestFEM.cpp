@@ -34,7 +34,7 @@ TEST(FEM, testAll)
     Polyline* poly_left = rec.getLeft();
     Polyline* poly_right = rec.getRight();
     //mesh
-    std::auto_ptr<UnstructuredMesh<MathLib::Vector2D>> msh = MeshGenerator::generateRegularMesh(2, 2.0, 2, .0, .0, .0);
+    std::auto_ptr<UnstructuredMesh<MathLib::Vector2D,2>> msh = MeshGenerator::generateRegularMesh(2, 2.0, 2, .0, .0, .0);
     //mat
     const double K = 1.e-11;
 

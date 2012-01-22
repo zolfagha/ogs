@@ -6,7 +6,7 @@
  */
 
 #include "GEOObjects.h"
-#include "StringTools.h"
+#include "Base/StringTools.h"
 
 #include <fstream>
 

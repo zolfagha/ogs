@@ -27,6 +27,11 @@ public:
         _order = order;
     }
 
+    size_t getDimension() const
+    {
+      return _msh->getDimension();
+    }
+
     const MeshLib::IMesh<Tpos>* getMesh() const {
         return _msh;
     }
@@ -102,4 +107,6 @@ private:
 
 
 }
+
+
 

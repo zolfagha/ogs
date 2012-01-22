@@ -10,7 +10,7 @@
 #include <sstream>
 
 #include "Color.h"
-#include "StringTools.h"
+#include "Base/StringTools.h"
 
 namespace GeoLib {
 

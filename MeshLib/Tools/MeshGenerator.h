@@ -11,9 +11,9 @@ namespace MeshLib
 class MeshGenerator
 {
 public:
-    static std::auto_ptr<MeshLib::UnstructuredMesh<MathLib::Vector2D>> generateRegularMesh(const int dim, const double length, const size_t subdivision, const double origin_x, const double origin_y, const double origin_z) {
+    static std::auto_ptr<MeshLib::UnstructuredMesh<MathLib::Vector2D,2>> generateRegularMesh(const int dim, const double length, const size_t subdivision, const double origin_x, const double origin_y, const double origin_z) {
 
-        std::auto_ptr<MeshLib::UnstructuredMesh<MathLib::Vector2D>> msh(new MeshLib::UnstructuredMesh<MathLib::Vector2D>());
+        std::auto_ptr<MeshLib::UnstructuredMesh<MathLib::Vector2D,2>> msh(new MeshLib::UnstructuredMesh<MathLib::Vector2D,2>());
 
         size_t n_eles = static_cast<size_t>(pow(static_cast<double>(subdivision), dim));
         size_t n_nodes = static_cast<size_t>(pow(static_cast<double>(subdivision+1), dim));

@@ -6,9 +6,11 @@
  */
 
 // Base
-#include "swap.h"
+#include "Base/swap.h"
 
 #include "Polyline.h"
+
+#include <limits>
 
 namespace GeoLib {
 

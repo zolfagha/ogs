@@ -19,5 +19,8 @@ public:
     virtual IElement* getElemenet( size_t element_id ) const = 0;
 
     virtual INode<Tpos>* getNode( size_t id ) const = 0;
+    virtual size_t getDimension() const = 0;
 };
 }
+
+

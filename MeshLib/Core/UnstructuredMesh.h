@@ -10,7 +10,7 @@
 namespace MeshLib
 {
 
-template<typename Tpos>
+template<typename Tpos, size_t N_DIM>
 class UnstructuredMesh : public IMesh<Tpos>
 {
 private:
@@ -18,11 +18,18 @@ private:
     std::vector<IElement*> _list_elements;
 
 public:
-    UnstructuredMesh(){};
+    UnstructuredMesh()
+    {
+    };
     virtual ~UnstructuredMesh(){
         destroyStdVectorWithPointers(_list_nodes);
         destroyStdVectorWithPointers(_list_elements);
     };
+
+    virtual size_t getDimension() const
+    {
+      return N_DIM;
+    }
 
     virtual size_t getNumberOfNodes() const { return _list_nodes.size(); };
     virtual size_t getNumberOfElements() const { return _list_elements.size(); };
