@@ -425,10 +425,9 @@ int main(int argc, char *argv[])
     std::cout << "Apply BC:" << std::endl;
     std::cout << "CPU time = " << run_timer3.elapsed() << std::endl;
     std::cout << "Run time = " << cpu_timer3.elapsed() << std::endl;
-    std::cout << "NestedDissection: " << std::endl;
-    std::cout << "Run time = " << run_timer_nd.elapsed() + run_timer_apl_nd.elapsed() + run_timer_apl_nd_rhs.elapsed() << std::endl;
-    std::cout << "ND + lin solver: " << std::endl;
+    std::cout << "Linear solver with ND: " << std::endl;
     std::cout << "CPU time = " << run_timer2.elapsed() + run_timer_nd.elapsed() + run_timer_apl_nd.elapsed() + run_timer_apl_nd_rhs.elapsed() << std::endl;
+    std::cout << "Run time = " << cpu_timer2.elapsed() + run_timer_nd.elapsed() + run_timer_apl_nd.elapsed() + run_timer_apl_nd_rhs.elapsed() << std::endl;
     std::cout << "Linear solver:" << std::endl;
     std::cout << "CPU time = " << run_timer2.elapsed() << std::endl;
     std::cout << "Run time = " << cpu_timer2.elapsed() << std::endl;
