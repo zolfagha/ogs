@@ -129,8 +129,8 @@ void mapSolvedXToOriginalX(double *eqsX, size_t dim, map<INDEX_TYPE,INDEX_TYPE> 
 //-----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-//output current setting	
-    std::cout << "##### CURRENT SETTING #####" << std::endl;	
+//output current setting
+    std::cout << "##### CURRENT SETTING #####" << std::endl;
 #ifdef LIS
     std::cout << "- Linear Solver: LIS" << std::endl;
 #else
@@ -251,9 +251,9 @@ int main(int argc, char *argv[])
 
 #ifdef _OPENMP
 #ifdef LIS
-    MathLib::CRSMatrixOpenMP<double,int> eqsA(static_cast<unsigned>(crs->dimension), crs->row_ptr, crs->col_idx, crs->data, nthreads);
+    MathLib::CRSMatrixOpenMP<double,int> eqsA(static_cast<unsigned>(crs->dimension), crs->row_ptr, crs->col_idx, crs->data);
 #else
-    MathLib::CRSMatrixOpenMP<double,unsigned> eqsA(static_cast<unsigned>(crs->dimension), crs->row_ptr, crs->col_idx, crs->data, nthreads);
+    MathLib::CRSMatrixOpenMP<double,unsigned> eqsA(static_cast<unsigned>(crs->dimension), crs->row_ptr, crs->col_idx, crs->data);
 #endif
 #else
     MathLib::CRSMatrix<double, INDEX_TYPE> eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);
