@@ -4,6 +4,7 @@
 #include "FemLib/FemFunction.h"
 
 #include "MathLib/Function/Function.h"
+#include "GeoLib/Point.h"
 
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Tools/Tools.h"
@@ -13,22 +14,32 @@ namespace FemLib
 /**
  * DirichletBC class
  */
-template<typename Tval, typename Tpos, typename Tgeo>
+template<typename Tval>
 class FemDirichletBC //per variable?
 {
 public:
-    FemDirichletBC(FEMNodalFunction<Tval,Tpos> *fem, Tgeo *geo, MathLib::IFunction<Tval, Tpos> *func)
+    ///
+    FemDirichletBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, MathLib::IFunction<Tval, GeoLib::Point> *bc_func)
+    {
+        _var = var;
+        _geo = geo;
+        _bc_func = bc_func;
+    }
+
+    /// setup B.C.
+    void setup()
     {
         // pickup nodes on geo
-        MeshLib::findNodesOnGeometry(fem->getMesh(), geo, &_vec_nodes);
+        MeshLib::findNodesOnGeometry(_var->getMesh(), _geo, &_vec_nodes);
         // set values
         _vec_values.reserve(_vec_nodes.size());
         for (size_t i=0; i<_vec_nodes.size(); i++) {
-            const Tpos* x = _vec_nodes[i]->getData();
-            _vec_values[i] = func->eval(*x);
+            const GeoLib::Point* x = _vec_nodes[i]->getData();
+            _vec_values[i] = _bc_func->eval(*x);
         }
     }
 
+    /// apply B.C.
     template<typename Tmat, typename Tvec>
     void apply( Tmat* globalA, Tvec* globalRHS ) 
     {
@@ -37,7 +48,10 @@ public:
 
 
 private:
-    std::vector<MeshLib::Node<Tpos>*> _vec_nodes;
+    TemplateFEMNodalFunction<Tval> *_var;
+    GeoLib::GeoObject *_geo;
+    MathLib::IFunction<Tval, GeoLib::Point> *_bc_func;
+    std::vector<MeshLib::INode*> _vec_nodes;
     std::vector<Tval> _vec_values;
     // node id, var id, value
     //IDirichletBCMethod *_method;

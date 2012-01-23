@@ -29,23 +29,25 @@ using namespace MeshLib;
 
 TEST(FEM, testAll) 
 {
-    //geo
+    //#Define a problem
+    //geometry
     Rectangle rec(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
     Polyline* poly_left = rec.getLeft();
     Polyline* poly_right = rec.getRight();
     //mesh
-    std::auto_ptr<UnstructuredMesh<MathLib::Vector2D,2>> msh = MeshGenerator::generateRegularMesh(2, 2.0, 2, .0, .0, .0);
+    std::auto_ptr<UnstructuredMesh2d> msh = MeshGenerator::generateRegularMesh(2, 2.0, 2, .0, .0, .0);
     //mat
-    const double K = 1.e-11;
+    const double K = 1.e-11; // TODO: should be a function
+    //discretization
+    FemNodalFunctionScalar2d head(msh.get(), PolynomialOrder::Linear);
+    FEMIntegrationPointFunctionVector2d vel(msh.get());
+    //bc
+    FemDirichletBC<double> bc1(&head, poly_right, &MathLib::FunctionConstant<double, GeoLib::Point>(.0)); //TODO should BC objects be created by fe functions?
+    FemNeumannBC<double> bc2(&head, poly_left, &MathLib::FunctionConstant<double, GeoLib::Point>(1.e-5));
 
-    //define discretization
-    FEMNodalFunction<double, MathLib::Vector2D> head(msh.get(), PolynomialOrder::Linear);
-    FEMIntegrationPointFunction<MathLib::Vector2D, MathLib::Vector2D> vel(msh.get());
-
-    //prepare bc
-    FemDirichletBC<double, MathLib::Vector2D, Polyline> bc1(&head, poly_right, &MathLib::FunctionConstant<double, MathLib::Vector2D>(.0));
-    FemNeumannBC<double, MathLib::Vector2D, Polyline> bc2(&head, poly_left, &MathLib::FunctionConstant<double, MathLib::Vector2D>(1.e-5));
-
+    //#Solve
+    bc1.setup();
+    bc2.setup();
     // global EQS
     const size_t n_dof = msh->getNumberOfNodes();
     MathLib::Matrix<double> globalA(n_dof, n_dof);
@@ -90,13 +92,13 @@ TEST(FEM, testAll)
             MathLib::Vector2D q;
             mapping->computeMappingFunctions(integral->getSamplingPoint(ip), FemMapComputation::DSHAPE);
             const MathLib::Matrix<double> *dN = mapping->getGradShapeFunction();
-            dN->axpy(-K, &local_h[0], .0, q.getRaw()); //TODO  q = - K * dN * local_h;
+            dN->axpy(-K, &local_h[0], .0, q.getRawRef()); //TODO  q = - K * dN * local_h;
             vel.setIntegrationPointValue(i_e, ip, q);
         }
     }
 
     //for output
-    FEMNodalFunction<MathLib::Vector2D, MathLib::Vector2D> nod_vel(msh.get(), PolynomialOrder::Linear);
+    FemNodalFunctionVector2d nod_vel(msh.get(), PolynomialOrder::Linear);
     mapFunctions(vel, nod_vel);
 };
 

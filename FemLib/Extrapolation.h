@@ -5,27 +5,27 @@
 
 namespace FemLib
 {
-template<typename Tvalue, typename Tpos>
+template<typename Tvalue>
 class IFemExtrapolation
 {
 public:
-    virtual void extrapolate(FEMIntegrationPointFunction<Tvalue, Tpos> &ele, FEMNodalFunction<Tvalue, Tpos> &nod) = 0;
+    virtual void extrapolate(TemplateFEMIntegrationPointFunction<Tvalue> &ele, TemplateFEMNodalFunction<Tvalue> &nod) = 0;
 };
 
-template<typename Tvalue, typename Tpos>
-class FEMExtrapolationAverage : public IFemExtrapolation<typename Tvalue, typename Tpos>
+template<typename Tvalue>
+class FEMExtrapolationAverage : public IFemExtrapolation<typename Tvalue>
 {
 public:
-    void extrapolate(FEMIntegrationPointFunction<Tvalue, Tpos> &ele, FEMNodalFunction<Tvalue, Tpos> &nod)
+    void extrapolate(TemplateFEMIntegrationPointFunction<Tvalue> &ele, TemplateFEMNodalFunction<Tvalue> &nod)
     {
         throw std::exception("The method or operation is not implemented.");
     }
 };
 
-template<typename Tvalue, typename Tpos>
-class FEMExtrapolationLinear : public IFemExtrapolation<typename Tvalue, typename Tpos>
+template<typename Tvalue>
+class FEMExtrapolationLinear : public IFemExtrapolation<typename Tvalue>
 {
-    void extrapolate(FEMIntegrationPointFunction<Tvalue, Tpos> &ele, FEMNodalFunction<Tvalue, Tpos> &nod)
+    void extrapolate(TemplateFEMIntegrationPointFunction<Tvalue> &ele, TemplateFEMNodalFunction<Tvalue> &nod)
     {
         throw std::exception("The method or operation is not implemented.");
     }
@@ -42,17 +42,17 @@ struct FEMExtrapolationMethod
     };
 };
 
-template<typename Tvalue, typename Tpos>
+template<typename Tvalue>
 class FEMExtrapolationFactory
 {
 public:
-    static IFemExtrapolation<Tvalue, Tpos>* create(FEMExtrapolationMethod::type tp)
+    static IFemExtrapolation<Tvalue>* create(FEMExtrapolationMethod::type tp)
     {
         switch (tp) {
             case FEMExtrapolationMethod::Linear:
-                return new FEMExtrapolationLinear<Tvalue, Tpos>();
+                return new FEMExtrapolationLinear<Tvalue>();
             case FEMExtrapolationMethod::Average:
-                return new FEMExtrapolationAverage<Tvalue, Tpos>();
+                return new FEMExtrapolationAverage<Tvalue>();
         }
         return 0;
     };

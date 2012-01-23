@@ -44,6 +44,8 @@ public:
 	/** virtual destructor */
 	virtual ~TemplatePoint() {};
 
+    virtual GeoObjType::type getGeoType() const {return GeoObjType::POINT;};
+
 	/** \brief const access operator
 	 *  The access to the point coordinates is like the access to a field. Code example:
 	 * \code

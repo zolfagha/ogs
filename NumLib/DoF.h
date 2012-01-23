@@ -1,7 +1,7 @@
 
 #pragma once
 
-namespace DiscretizationLib
+namespace NumLib
 {
 
 class DoF

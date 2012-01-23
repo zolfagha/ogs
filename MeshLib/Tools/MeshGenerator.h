@@ -11,9 +11,9 @@ namespace MeshLib
 class MeshGenerator
 {
 public:
-    static std::auto_ptr<MeshLib::UnstructuredMesh<MathLib::Vector2D,2>> generateRegularMesh(const int dim, const double length, const size_t subdivision, const double origin_x, const double origin_y, const double origin_z) {
+    static std::auto_ptr<MeshLib::UnstructuredMesh2d> generateRegularMesh(const int dim, const double length, const size_t subdivision, const double origin_x, const double origin_y, const double origin_z) {
 
-        std::auto_ptr<MeshLib::UnstructuredMesh<MathLib::Vector2D,2>> msh(new MeshLib::UnstructuredMesh<MathLib::Vector2D,2>());
+        std::auto_ptr<MeshLib::UnstructuredMesh2d> msh(new MeshLib::UnstructuredMesh2d());
 
         size_t n_eles = static_cast<size_t>(pow(static_cast<double>(subdivision), dim));
         size_t n_nodes = static_cast<size_t>(pow(static_cast<double>(subdivision+1), dim));
@@ -24,7 +24,7 @@ public:
         size_t node_id(0);
         for (size_t i=0; i<n_nodes_per_axis; i++) {
             for (size_t j=0; j<n_nodes_per_axis; j++) {
-                msh->setNode(node_id++, MathLib::Vector2D(unit_length*j, unit_length*i));
+                msh->setNode(node_id++, GeoLib::Point(unit_length*j, unit_length*i, .0));
                 //for (size_t k=0; k<n_nodes_per_axis; k++) {
                 //    msh->setNode(node_id++, MathLib::Vector2D(unit_length*k, unit_length*j, unit_length*i));
                 //}

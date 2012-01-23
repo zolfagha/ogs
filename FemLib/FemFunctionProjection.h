@@ -7,10 +7,10 @@
 namespace FemLib
 {
 
-template<typename Tvalue, typename Tpos>
-void mapFunctions(FEMIntegrationPointFunction<Tvalue, Tpos> &ele, FEMNodalFunction<Tvalue, Tpos> &nod)
+template<typename Tvalue>
+void mapFunctions(TemplateFEMIntegrationPointFunction<Tvalue> &ele, TemplateFEMNodalFunction<Tvalue> &nod)
 {
-    IFemExtrapolation<Tvalue, Tpos> *method = FEMExtrapolationFactory<Tvalue, Tpos>::create(FEMExtrapolationMethod::Linear);
+    IFemExtrapolation<Tvalue> *method = FEMExtrapolationFactory<Tvalue>::create(FEMExtrapolationMethod::Linear);
     method->extrapolate(ele, nod);
 };
 

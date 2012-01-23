@@ -3,6 +3,7 @@
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MeshLib/Core/IMesh.h"
+#include "MeshLib/Tools/Mapping.h"
 
 namespace FemLib
 {
@@ -44,7 +45,6 @@ class FemInvariantMapping : public IFemMapping
 {
 public:
 };
-
 
 /**
  * Isoparametric mapping converts element shapes in physical coordinates (x,y,z) to that in natural coordinates (r,s,t).
@@ -127,8 +127,10 @@ private:
         double r = .0;
         MeshLib::IElement *e = getElement();
         double *shapefct = getShapeFunction();
-        for (size_t i=0; i<e->getNumberOfNodes(); i++)
-            r += shapefct[i] * e->getLocalX(i);
+        for (size_t i=0; i<e->getNumberOfNodes(); i++) {
+            const GeoLib::Point *pt = e->getMappedGeometry()->getNodePoint(i);
+            r += shapefct[i] * (*pt)[0];
+        }
         return r;
     }
 };

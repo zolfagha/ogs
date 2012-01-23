@@ -49,7 +49,7 @@ public:
     std::cout << "MSHRead:  ASCII file" << std::endl;
     std::string line_string ("");
 
-    UnstructuredMesh *msh = NULL;
+    TemplateUnstructuredMesh *msh = NULL;
 
     while (!if_file.eof())
     {
@@ -59,7 +59,7 @@ public:
         break;
 
       if (line_string.find("#FEM_MSH")!=std::string::npos) {
-        msh = new UnstructuredMesh();
+        msh = new TemplateUnstructuredMesh();
         vec_mesh.push_back(msh);
         continue;
       } 

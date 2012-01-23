@@ -10,6 +10,19 @@
 
 namespace GeoLib {
 
+struct GeoObjType
+{
+    enum type {
+        POINT,
+        POLYLINE,
+        POLYGON,
+        SURFACE,
+        VOLUME,
+        INVALID
+    };
+};
+    
+
 /**
  * \ingroup GEOLIB
  *
@@ -20,6 +33,8 @@ class GeoObject {
 public:
 	GeoObject() {};
 	virtual ~GeoObject() {};
+
+    virtual GeoObjType::type getGeoType() const = 0;
 };
 
 } // end namespace GEOLIB

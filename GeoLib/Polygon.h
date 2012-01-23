@@ -52,6 +52,8 @@ public:
 
 	virtual ~Polygon();
 
+    virtual GeoObjType::type getGeoType() const {return GeoObjType::POLYGON;};
+
 	/**
 	 *
 	 * @return

@@ -13,7 +13,7 @@ namespace FemLib
 class CauchyBC
 {
 public:
-    void set(FEMNodalFunction<double,double> *fem, int geo, int func);
+    void set(TemplateFEMNodalFunction<double,double> *fem, int geo, int func);
 };
 
 }

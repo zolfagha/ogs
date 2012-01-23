@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "MathLib/Vector.h"
 #include "MeshLib/Core/IMesh.h"
 #include "NumLib/IFunction.h"
 #include "FemElement.h"
@@ -18,11 +19,11 @@ struct PolynomialOrder
 };
 
 
-template<typename Tvalue, typename Tpos>
-class FEMNodalFunction : public NumLib::IFunction<Tvalue,Tpos>
+template<typename Tvalue>
+class TemplateFEMNodalFunction : public NumLib::IFunction<Tvalue>
 {
 public:
-    FEMNodalFunction(MeshLib::IMesh<Tpos>* msh, PolynomialOrder::type order) {
+    TemplateFEMNodalFunction(MeshLib::IMesh* msh, PolynomialOrder::type order) {
         _msh = msh;
         _order = order;
     }
@@ -32,11 +33,11 @@ public:
       return _msh->getDimension();
     }
 
-    const MeshLib::IMesh<Tpos>* getMesh() const {
+    const MeshLib::IMesh* getMesh() const {
         return _msh;
     }
 
-    Tvalue& getValue(Tpos &pt) const {
+    Tvalue& getValue(GeoLib::Point &pt) const {
         return _nodal_values[0];
     };
 
@@ -63,16 +64,20 @@ public:
 private:
     Tvalue* _nodal_values;
     //FEMInterpolation* _fe;
-    MeshLib::IMesh<Tpos>* _msh;
+    MeshLib::IMesh* _msh;
     PolynomialOrder::type _order;
 };
 
+typedef TemplateFEMNodalFunction<double> FemNodalFunctionScalar2d;
+typedef TemplateFEMNodalFunction<double> FEMNodalFunctionScalar3d;
+typedef TemplateFEMNodalFunction<MathLib::Vector2D> FemNodalFunctionVector2d;
+typedef TemplateFEMNodalFunction<MathLib::Vector3D> FEMNodalFunctionVector3d;
 
-template<typename Tvalue, typename Tpos>
-class FEMElementalFunction : public NumLib::IFunction<Tvalue,Tpos>
+template<typename Tvalue>
+class TemplateFEMElementalFunction : public NumLib::IFunction<Tvalue>
 {
 public:
-    Tvalue& getValue(Tpos &pt) const {
+    Tvalue& getValue(GeoLib::Point &pt) const {
         return _ele_values[0];
     };
     Tvalue& getValue(size_t id) const {
@@ -82,14 +87,14 @@ private:
     Tvalue* _ele_values;
 };
 
-template<typename Tvalue, typename Tpos>
-class FEMIntegrationPointFunction : public NumLib::IFunction<Tvalue,Tpos>
+template<typename Tvalue>
+class TemplateFEMIntegrationPointFunction : public NumLib::IFunction<Tvalue>
 {
 public:
-    FEMIntegrationPointFunction(MeshLib::IMesh<Tpos>* msh) {
+    TemplateFEMIntegrationPointFunction(MeshLib::IMesh* msh) {
         _msh = msh;
     };
-    Tvalue& getValue(Tpos &pt) const {
+    Tvalue& getValue(GeoLib::Point &pt) const {
         return _ele_values[0];
     };
     Tvalue& getValue(size_t id) const {
@@ -102,9 +107,11 @@ public:
 
 private:
     Tvalue* _ele_values;
-    MeshLib::IMesh<Tpos>* _msh;
+    MeshLib::IMesh* _msh;
 };
 
+typedef TemplateFEMIntegrationPointFunction<double> FEMIntegrationPointFunctionScalar2d;
+typedef TemplateFEMIntegrationPointFunction<MathLib::Vector2D> FEMIntegrationPointFunctionVector2d;
 
 }
 
