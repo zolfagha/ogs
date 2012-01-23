@@ -266,9 +266,9 @@ int main(int argc, char *argv[])
 
 #ifdef _OPENMP
 #ifdef LIS
-    MathLib::CRSMatrixOpenMP<double,int> eqsA(static_cast<unsigned>(crs->dimension), crs->row_ptr, crs->col_idx, crs->data, nthreads);
+    MathLib::CRSMatrixOpenMP<double,int> eqsA(static_cast<unsigned>(crs->dimension), crs->row_ptr, crs->col_idx, crs->data);
 #else
-    MathLib::CRSMatrixOpenMP<double,unsigned> eqsA(static_cast<unsigned>(crs->dimension), crs->row_ptr, crs->col_idx, crs->data, nthreads);
+    MathLib::CRSMatrixOpenMP<double,unsigned> eqsA(static_cast<unsigned>(crs->dimension), crs->row_ptr, crs->col_idx, crs->data);
 #endif
 #else
     MathLib::CRSMatrix<double, INDEX_TYPE> eqsA(crs->dimension, crs->row_ptr, crs->col_idx, crs->data);

@@ -41,6 +41,20 @@ IF (METIS_FOUND)
 		${METIS_LIBRARIES}	
 		${BLAS_LIBRARIES}
 	)
+
+	ADD_EXECUTABLE( FEMTest-OGS-6-CRS-OGS-6-CG-ND-Perm-Parallel
+		FEMTest-OGS-6-CRS-OGS-6-CG-ND-Perm-Parallel.cpp
+	        ${SOURCES}
+        	${HEADERS}
+	)
+	TARGET_LINK_LIBRARIES ( FEMTest-OGS-6-CRS-OGS-6-CG-ND-Perm-Parallel
+        	Base
+	        MathLib
+        	GeoLib
+		${METIS_LIBRARIES}	
+		${BLAS_LIBRARIES}
+	)
+
 ENDIF(METIS_FOUND)
 
 #IF (WIN32)

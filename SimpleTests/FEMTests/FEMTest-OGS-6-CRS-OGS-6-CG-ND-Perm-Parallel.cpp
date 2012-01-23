@@ -158,9 +158,12 @@ int main(int argc, char *argv[])
         sscanf(argv[3], "%d", &steps);
 
 #ifdef _OPENMP
-	omp_set_num_threads(1);
+    int nthreads = 1;
+    if (argc > 4)
+        sscanf(argv[4], "%d", &nthreads);
+    omp_set_num_threads (nthreads);
 #endif
-//    std::cout << "->Start OpenMP parallelization with " << omp_get_max_threads() << " threads" << std::endl;
+    std::cout << "->Start OpenMP parallelization with " << omp_get_max_threads() << " threads" << std::endl;
 
     // *** setup a problem
     // set mesh
@@ -337,7 +340,7 @@ int main(int argc, char *argv[])
 	run_timer_nd.stop();
 	cpu_timer_nd.stop();
 	if (verbose) {
-		std::cout << run_timer_nd.elapsed() << " s, cpu time: " << cpu_timer_nd.elapsed() << " s" << std::endl;
+		std::cout << run_timer_nd.elapsed() << " s, wtime: " << cpu_timer_nd.elapsed() << " s" << std::endl;
 	}
 	// applying the nested dissection reordering to matrix
 	RunTimeTimer run_timer_apl_nd;
@@ -351,12 +354,13 @@ int main(int argc, char *argv[])
 	run_timer_apl_nd.stop();
 	cpu_timer_apl_nd.stop();
 	if (verbose)
-		std::cout << run_timer_apl_nd.elapsed() << " s, cpu time: " << cpu_timer_apl_nd.elapsed() << " s" << std::endl;
+		std::cout << run_timer_apl_nd.elapsed() << " s, wtime: " << cpu_timer_apl_nd.elapsed() << " s" << std::endl;
 
 	// applying the nested dissection reordering to rhs
 	RunTimeTimer run_timer_apl_nd_rhs;
 	CPUTimeTimer cpu_timer_apl_nd_rhs;
 	run_timer_apl_nd_rhs.start();
+	cpu_timer_apl_nd_rhs.start();
 	if (verbose) {
 		std::cout << "\t[ND] applying nested dissection reordering to rhs ... " << std::flush;
 	}
@@ -367,7 +371,7 @@ int main(int argc, char *argv[])
 	run_timer_apl_nd_rhs.stop();
 	cpu_timer_apl_nd_rhs.stop();
 	if (verbose) {
-		std::cout << run_timer_apl_nd_rhs.elapsed() << " s, cpu time: " << cpu_timer_apl_nd_rhs.elapsed() << " s" << std::endl;
+		std::cout << run_timer_apl_nd_rhs.elapsed() << " s, wtime: " << cpu_timer_apl_nd_rhs.elapsed() << " s" << std::endl;
 	}
 
     // *** solve EQS
@@ -378,9 +382,9 @@ int main(int argc, char *argv[])
     cpu_timer2.start();
 //    eqsA.calcPrecond();
     std::cout << "-> solving system of " << eqsA.getNRows() << " linear equations (nnz = " << eqsA.getNNZ() << ") " << std::flush;
-    std::cout << " with sequential solver" << std::endl;
-    MathLib::CG(&eqsA, eqsRHS, eqsX, eps, steps);
-    std::cout << "MathLib::CG converged within " << steps << ", residuum is " << eps << std::endl;
+    std::cout << " with MathLib::CGParallel solver" << std::endl;
+    MathLib::CGParallel(&eqsA, eqsRHS, eqsX, eps, steps);
+    std::cout << "MathLib::CGParallel converged within " << steps << ", residuum is " << eps << std::endl;
 
     // applying the nested dissection reordering to the solution
 	if (verbose) {
