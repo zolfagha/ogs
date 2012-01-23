@@ -13,9 +13,6 @@
 
 #include <Eigen>
 
-//#include "LinAlg/Sparse/CRSMatrixOpenMP.h"
-//#include "LinAlg/Sparse/CRSMatrixDiagPrecond.h"
-//#include "LinAlg/Sparse/CRSMatrix.h"
 #include "LinAlg/Sparse/SparseTableCRS.h"
 
 #include "sparse.h"
@@ -30,7 +27,7 @@
 #include "MeshSparseTable.h"
 
 #include "LinAlg/Sparse/NestedDissectionPermutation/AdjMat.h"
-#include "LinAlg/Sparse/NestedDissectionPermutation/CRSMatrixReordered.h"
+#include "LinAlg/Sparse/NestedDissectionPermutation/CRSMatrixReorderedOpenMP.h"
 #include "LinAlg/Sparse/NestedDissectionPermutation/Cluster.h"
 #include "LinAlg/Sparse/CRSMatrix.h"
 
@@ -208,7 +205,7 @@ int main(int argc, char *argv[])
     const size_t dim_eqs = msh->getNumberOfNodes();
     MathLib::SparseTableCRS<INDEX_TYPE>* crs = FemLib::generateSparseTableCRS<INDEX_TYPE>(msh);
 
-    MathLib::CRSMatrixReordered eqsA(static_cast<unsigned>(crs->dimension), crs->row_ptr, crs->col_idx, crs->data);
+    MathLib::CRSMatrixReorderedOpenMP eqsA(static_cast<unsigned>(crs->dimension), crs->row_ptr, crs->col_idx, crs->data);
 
     double* eqsX(new double[dim_eqs]);
     double* eqsRHS(new double[dim_eqs]);
