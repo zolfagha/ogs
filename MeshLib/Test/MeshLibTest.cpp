@@ -4,7 +4,7 @@
 
 int main (int argc, char* argv[]) {
 
-    MeshLib::TemplateUnstructuredMesh<2> mesh;
+    MeshLib::UnstructuredMesh2d mesh;
 
     return 0;
 }

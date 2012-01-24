@@ -1,12 +1,13 @@
 
 #pragma once
 
-#include "FemLib/FemFunction.h"
-
 #include "MathLib/Function/Function.h"
 
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Tools/Tools.h"
+
+#include "FemLib/FemFunction.h"
+#include "IFemBC.h"
 
 namespace FemLib
 {
@@ -15,7 +16,7 @@ namespace FemLib
  * Neumann BC
  */
 template<typename Tval>
-class FemNeumannBC
+class FemNeumannBC : IFemBC
 {
 public:
     /// 

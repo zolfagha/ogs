@@ -11,8 +11,8 @@
 #include <vector>
 #include <map>
 
-#include "Polyline.h"
-#include "Point.h"
+#include "GeoLib/Core/Polyline.h"
+#include "GeoLib/Core/Point.h"
 #include "Color.h"
 #include "PropertyBounds.h"
 

@@ -8,7 +8,7 @@
 #ifndef AXISALIGNEDBOUNDINGBOX_H_
 #define AXISALIGNEDBOUNDINGBOX_H_
 
-#include "Point.h"
+#include "GeoLib/Core/Point.h"
 #include <vector>
 #include <limits>
 

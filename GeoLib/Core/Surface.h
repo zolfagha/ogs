@@ -11,9 +11,9 @@
 #include <vector>
 
 #include "GeoObject.h"
-#include "Point.h"
-#include "Polyline.h"
-#include "Triangle.h"
+#include "GeoLib/Core/Point.h"
+#include "GeoLib/Core/Polyline.h"
+#include "GeoLib/Shape/Triangle.h"
 #include "AxisAlignedBoundingBox.h"
 
 namespace GeoLib {

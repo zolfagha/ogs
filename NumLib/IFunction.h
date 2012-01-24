@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "GeoLib/Point.h"
+#include "GeoLib/Core/Point.h"
 
 namespace NumLib
 {

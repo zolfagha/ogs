@@ -8,7 +8,7 @@
 #ifndef RASTER_H_
 #define RASTER_H_
 
-#include "Surface.h"
+#include "GeoLib/Core/Surface.h"
 
 namespace GeoLib {
 

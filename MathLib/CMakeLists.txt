@@ -1,18 +1,14 @@
 #Source files grouped by a directory
 SET ( MathLib_Files
-	AnalyticalGeometry.h        
 	LinearInterpolation.h  
 	MathTools.h
 	Vector3.h
 	Vector.h
-	EarClippingTriangulation.h  
 	max.h
 	sparse.h
 	vector_io.h
-	AnalyticalGeometry.cpp        
 	LinearInterpolation.cpp  
 	MathTools.cpp
-	EarClippingTriangulation.cpp  
 )
 SOURCE_GROUP( MathLib FILES ${MathLib_Files})
 

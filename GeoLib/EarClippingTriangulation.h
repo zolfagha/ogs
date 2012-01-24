@@ -12,13 +12,13 @@
 #include <list>
 
 // GEOLIB
-#include "GeoLib/Polygon.h"
-#include "GeoLib/Triangle.h"
+#include "GeoLib/Core/Polygon.h"
+#include "GeoLib/Shape/Triangle.h"
 
 // MathLib
 #include "AnalyticalGeometry.h"
 
-namespace MathLib {
+namespace GeoLib {
 
 class EarClippingTriangulation {
 public:
@@ -51,7 +51,7 @@ private:
 	 */
 	std::list<GeoLib::Triangle> _triangles;
 
-	MathLib::Orientation _original_orient;
+	GeoLib::Orientation _original_orient;
 };
 
 } // end namespace MathLib

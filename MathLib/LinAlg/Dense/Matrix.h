@@ -78,6 +78,12 @@ public:
     */
    Matrix<T>* transpose() const; // HB & ZC
 
+   /**
+    * matrix transpose
+    * @param mat a matrix where transpose result is stored
+    */
+   void transpose(Matrix<T> &mat) const;
+
    Matrix<T>* getSubMatrix (size_t b_row, size_t b_col, size_t e_row, size_t e_col) const throw (std::range_error);
 
    /**
@@ -245,6 +251,15 @@ template<class T> Matrix<T>* Matrix<T>::transpose() const
 		}
 	}
 	return y;
+}
+
+template<class T> void Matrix<T>::transpose(Matrix<T> &mat) const
+{
+    for (size_t i = 0; i < nrows; i++) {
+        for (size_t j = 0; j < ncols; j++) {
+        	mat(j,i) = data[address(i, j)];
+		}
+    }
 }
 
 template<class T> Matrix<T>* Matrix<T>::getSubMatrix(

@@ -13,7 +13,7 @@
 #include <string>
 #include <iostream>
 
-namespace BASELIB {
+namespace Base {
 
 void printList (std::list<size_t> const& mylist, std::string const& title)
 {

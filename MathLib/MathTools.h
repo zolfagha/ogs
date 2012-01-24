@@ -44,9 +44,15 @@ double scpr(double const * const v, double const * const w, unsigned n);
 void crossProd (const double u[3], const double v[3], double r[3]);
 
 /**
+ * normalize the vector
+ */
+void normalizeVector(const double* u, size_t n, double* r);
+void normalizeVector(double* u, size_t n);
+
+/**
  * calcProjPntToLineAndDists computes the orthogonal projection
  * of a point p to the line described by the points a and b,
- * $g(\lambda) = a + \lambda (b - a)$,
+ * \f$g(\lambda) = a + \lambda (b - a)\f$,
  * the distance between p and the projected point
  * and the distances between the projected point and the end
  * points a, b of the line

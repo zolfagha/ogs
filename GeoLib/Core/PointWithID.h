@@ -8,7 +8,7 @@
 #ifndef POINTWITHID_H_
 #define POINTWITHID_H_
 
-#include "Point.h"
+#include "GeoLib/Core/Point.h"
 
 namespace GeoLib {
 /**

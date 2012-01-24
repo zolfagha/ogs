@@ -9,7 +9,7 @@
 #define VECTOR3_H
 
 // GEO
-#include "GeoLib/TemplatePoint.h"
+#include "GeoLib/Core/TemplatePoint.h"
 
 // MathLib
 #include "MathTools.h"

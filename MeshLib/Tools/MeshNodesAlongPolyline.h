@@ -9,7 +9,7 @@
 #define MESHNODESALONGPOLYLINE_H_
 
 // GEOLIB
-#include "GeoLib/Polyline.h"
+#include "GeoLib/Core/Polyline.h"
 
 // Mesh
 #include "MeshLib/Core/UnstructuredMesh.h"

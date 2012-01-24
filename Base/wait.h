@@ -9,7 +9,7 @@
 
 #include <ctime>
 
-namespace BASELIB {
+namespace Base {
 
 void wait(int seconds)
 {

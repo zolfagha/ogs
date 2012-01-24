@@ -8,7 +8,7 @@
 #ifndef COLOR_H_
 #define COLOR_H_
 
-#include "TemplatePoint.h"
+#include "GeoLib/Core/TemplatePoint.h"
 
 #include <fstream>
 #include <cstdlib>

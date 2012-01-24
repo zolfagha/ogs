@@ -32,12 +32,12 @@ size_t partition_(T* array, size_t beg, size_t end, size_t *perm)
 
 		if (i >= j)
 			break;
-		BASELIB::swap(array[i], array[j]);
-		BASELIB::swap(perm[i], perm[j]);
+		Base::swap(array[i], array[j]);
+		Base::swap(perm[i], perm[j]);
 	}
 
-	BASELIB::swap(array[beg], array[j]);
-	BASELIB::swap(perm[beg], perm[j]);
+	Base::swap(array[beg], array[j]);
+	Base::swap(perm[beg], perm[j]);
 	return j;
 }
 
@@ -79,12 +79,12 @@ private:
 
 			if (i >= j)
 				break;
-			BASELIB::swap(array[i], array[j]);
-			BASELIB::swap(perm[i], perm[j]);
+			Base::swap(array[i], array[j]);
+			Base::swap(perm[i], perm[j]);
 		}
 
-		BASELIB::swap(array[beg], array[j]);
-		BASELIB::swap(perm[beg], perm[j]);
+		Base::swap(array[beg], array[j]);
+		Base::swap(perm[beg], perm[j]);
 		return j;
 	}
 
@@ -127,12 +127,12 @@ private:
 
 			if (i >= j)
 				break;
-			BASELIB::swap(array[i], array[j]);
-			BASELIB::swap(perm[i], perm[j]);
+			Base::swap(array[i], array[j]);
+			Base::swap(perm[i], perm[j]);
 		}
 
-		BASELIB::swap(array[beg], array[j]);
-		BASELIB::swap(perm[beg], perm[j]);
+		Base::swap(array[beg], array[j]);
+		Base::swap(perm[beg], perm[j]);
 		return j;
 	}
 
@@ -159,12 +159,12 @@ private:
 
 			if (i >= j)
 				break;
-			BASELIB::swap(perm[i], perm[j]);
-			BASELIB::swap(array[i], array[j]);
+			Base::swap(perm[i], perm[j]);
+			Base::swap(array[i], array[j]);
 		}
 
-		BASELIB::swap(perm[beg], perm[j]);
-		BASELIB::swap(array[beg], array[j]);
+		Base::swap(perm[beg], perm[j]);
+		Base::swap(array[beg], array[j]);
 		return j;
 	}
 

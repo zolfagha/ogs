@@ -16,9 +16,9 @@
 #include "MathLib/LinAlg/Solvers/GaussAlgorithm.h"
 #include "MathLib/Function/Function.h"
 
-#include "GeoLib/Point.h"
-#include "GeoLib/Polyline.h"
-#include "GeoLib/GeoGenerator.h"
+#include "GeoLib/Core/Point.h"
+#include "GeoLib/Core/Polyline.h"
+#include "GeoLib/Shape/Rectangle.h"
 
 #include <vector>
 #include <memory>

@@ -1,7 +1,7 @@
 #ifndef SWAP_H_
 #define SWAP_H_
 
-namespace BASELIB {
+namespace Base {
 
 /**
  * swap the content of arg0 and arg1

@@ -5,6 +5,7 @@
 
 #include "INode.h"
 #include "IElement.h"
+#include "CoordinateSystem.h"
 
 namespace MeshLib
 {
@@ -15,13 +16,13 @@ public:
     virtual ~IMesh(){};
 
     virtual size_t getDimension() const = 0;
+    virtual const CoordinateSystem& getCoordinateSystem() const = 0;
 
     virtual size_t getNumberOfNodes() const = 0;
     virtual INode* getNode( size_t id ) const = 0;
 
     virtual size_t getNumberOfElements() const = 0;
     virtual IElement* getElemenet( size_t element_id ) const = 0;
-
 };
 
 }

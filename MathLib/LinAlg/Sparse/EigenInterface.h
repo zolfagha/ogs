@@ -14,10 +14,10 @@
 
 namespace MathLib
 {
-namespace EigenTools
+class EigenTools
 {
-
-MathLib::CRSSigned* buildCRSMatrixFromEigenMatrix(Eigen::DynamicSparseMatrix<double, Eigen::RowMajor> &A)
+public:
+static MathLib::CRSSigned* buildCRSMatrixFromEigenMatrix(Eigen::DynamicSparseMatrix<double, Eigen::RowMajor> &A)
 {
     const size_t dimension = A.rows();
 

@@ -2,7 +2,8 @@
 #pragma  once
 
 #include <vector>
-#include "GeoLib/Point.h"
+#include "GeoLib/Core/Point.h"
+#include "CoordinateSystem.h"
 
 namespace MeshLib
 {
@@ -21,7 +22,7 @@ struct ElementType
     };
 };
 
-class IElementMapping;
+class IElementCoordinatesMapping;
 
 /**
  * Interface of element classes
@@ -54,14 +55,15 @@ public:
         for (int i=0; i<this->getNumberOfNodes(); i++)
             e_node_id_list[i] = this->getNodeID(i);
     };
-    virtual const GeoLib::Point* getNodeLocalCoordinates( size_t i_nod ) const = 0;
+    virtual const GeoLib::Point* getNodeCoordinates( size_t i_nod ) const = 0;
 
     virtual size_t getNumberOfFaces() const = 0;
 
     virtual size_t getNumberOfEdges() const = 0;
     virtual IElement* getEdgeElement(size_t edge_id) = 0;
 
-    virtual IElementMapping* getMappedGeometry() = 0;
+    virtual void setMappedGeometry(IElementCoordinatesMapping* mapping) = 0;
+    virtual IElementCoordinatesMapping* getMappedGeometry() = 0;
 
 };
 

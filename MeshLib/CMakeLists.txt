@@ -8,6 +8,7 @@ SET ( MeshLib_Core_Files
 	Core/Node.h
 	Core/Element.h
 	Core/ElementFactory.h
+	Core/CoordinateSystem.h
 	)
 SOURCE_GROUP(MeshLib\\Core FILES ${MeshLib_Core_Files})
 

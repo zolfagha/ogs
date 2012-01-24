@@ -9,7 +9,7 @@
 #define POLYLINEVEC_H_
 
 #include "TemplateVec.h"
-#include "Polyline.h"
+#include "GeoLib/Core/Polyline.h"
 
 namespace GeoLib {
 

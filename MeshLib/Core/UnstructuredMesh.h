@@ -15,15 +15,16 @@
 namespace MeshLib
 {
 
-template<size_t N_DIM>
+template<size_t N_DIM, CoordinateSystem::CoordinateSystemType coord_type>
 class TemplateUnstructuredMesh : public IMesh
 {
 private:
     std::vector<Node*> _list_nodes;
     std::vector<IElement*> _list_elements;
+    CoordinateSystem _coord_system;
 
 public:
-    TemplateUnstructuredMesh()
+    TemplateUnstructuredMesh() : _coord_system(coord_type)
     {
     };
     virtual ~TemplateUnstructuredMesh(){
@@ -34,6 +35,10 @@ public:
     virtual size_t getDimension() const
     {
       return N_DIM;
+    };
+    virtual const CoordinateSystem& getCoordinateSystem() const
+    {
+        return _coord_system;        
     };
 
     virtual double getMinEdgeLength() const 
@@ -98,8 +103,8 @@ public:
     };
 };
 
-typedef TemplateUnstructuredMesh<1> UnstructuredMesh1d;
-typedef TemplateUnstructuredMesh<2> UnstructuredMesh2d;
-typedef TemplateUnstructuredMesh<3> UnstructuredMesh3d;
+typedef TemplateUnstructuredMesh<1, CoordinateSystem::X> UnstructuredMesh1d;
+typedef TemplateUnstructuredMesh<2, CoordinateSystem::XY> UnstructuredMesh2d;
+typedef TemplateUnstructuredMesh<3, CoordinateSystem::XYZ> UnstructuredMesh3d;
 
 }

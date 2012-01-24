@@ -4,6 +4,7 @@
 #include "Base/MemoryTools.h"
 #include "IElement.h"
 #include "Node.h"
+#include "CoordinateSystem.h"
 
 namespace MeshLib
 {
@@ -17,7 +18,7 @@ class TemplateUnstructuredElement : public IElement
 private:
     INode* _list_nodes[NUMBER_OF_NODES];
     size_t _list_node_id[NUMBER_OF_NODES];
-    IElementMapping *_geo_map;
+    IElementCoordinatesMapping *_geo_map;
     std::vector<IElement*> _list_edges;
 
     IElement* createEdgeElement(size_t edge_id);
@@ -71,14 +72,16 @@ public:
         return _list_nodes[local_node_id];
     }
 
-    virtual const GeoLib::Point* getNodeLocalCoordinates( size_t i_nod ) const 
+    virtual const GeoLib::Point* getNodeCoordinates( size_t i_nod ) const 
     {
         return _list_nodes[i_nod]->getData();
     };
 
-    virtual IElementMapping* getMappedGeometry() {
-        if (_geo_map==0)
-            _geo_map = new EleMapLocalCoordinates(this);
+    virtual void setMappedGeometry(IElementCoordinatesMapping* mapping) 
+    {
+        _geo_map = mapping;
+    }
+    virtual IElementCoordinatesMapping* getMappedGeometry() {
         return _geo_map;
     };
 };

@@ -9,15 +9,15 @@
 #define ANALYTICAL_GEOMETRY_H_
 
 // MathLib
-#include "Vector3.h"
+#include "MathLib/Vector3.h"
 // GEOLIB
-#include "GeoLib/Triangle.h"
+#include "GeoLib/Shape/Triangle.h"
 
 namespace GeoLib {
-	class Polyline;
+    class Polyline;
 }
 
-namespace MathLib {
+namespace GeoLib {
 
 enum Orientation {
 	CW = 1,

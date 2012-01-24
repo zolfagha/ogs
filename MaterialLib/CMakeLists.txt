@@ -1,6 +1,7 @@
 #Source files grouped by a directory
 SET ( MaterialLib_Files
 	PorousMedium.h
+	SolidMechanics.h
 )
 SOURCE_GROUP( MaterialLib FILES ${MaterialLib_Files} )
 

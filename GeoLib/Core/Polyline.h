@@ -10,10 +10,10 @@
 
 // GEOLIB
 #include "GeoObject.h"
-#include "Point.h"
+#include "GeoLib/Core/Point.h"
 
 // MathLib
-#include "MathTools.h"
+#include "GeoLib/MathTools.h"
 
 #include <vector>
 #include <cmath>

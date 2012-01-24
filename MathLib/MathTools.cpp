@@ -32,6 +32,21 @@ void crossProd(const double u[3], const double v[3], double r[3])
 	r[2] = u[0] * v[1] - u[1] * v[0];
 }
 
+void normalizeVector(const double* u, size_t n, double* r)
+{
+    double nrm(u[0] * u[0]);
+    for(size_t i = 1; i < n; i++)
+        nrm += u[i] * u[i];
+    double sqrt_nrm (sqrt(nrm));
+    for(size_t i = 0; i < n; i++)
+        r[i] = u[i] / sqrt_nrm;
+}
+
+void normalizeVector(double* u, size_t n)
+{
+    normalizeVector(u, n, u);
+}
+
 double calcProjPntToLineAndDists(const double p[3], const double a[3],
 		const double b[3], double &lambda, double &d0)
 {

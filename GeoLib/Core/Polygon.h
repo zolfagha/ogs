@@ -12,8 +12,8 @@
 #include <list>
 
 // GEOLIB
-#include "AxisAlignedBoundingBox.h"
-#include "Polyline.h"
+#include "GeoLib/AxisAlignedBoundingBox.h"
+#include "GeoLib/Core/Polyline.h"
 
 namespace GeoLib {
 

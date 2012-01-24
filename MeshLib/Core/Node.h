@@ -5,7 +5,7 @@
 #include <set>
 
 #include "MathLib/Vector.h"
-#include "GeoLib/Point.h"
+#include "GeoLib/Core/Point.h"
 
 #include "INode.h"
 

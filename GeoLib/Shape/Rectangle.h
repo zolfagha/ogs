@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include "Point.h"
-#include "Polyline.h"
+#include "GeoLib/Core/Point.h"
+#include "GeoLib/Core/Polyline.h"
 #include "Base/MemoryTools.h"
 
 namespace GeoLib

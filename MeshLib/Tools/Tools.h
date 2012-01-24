@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include "GeoLib/GeoObject.h"
-#include "GeoLib/Polyline.h"
+#include "GeoLib/Core/GeoObject.h"
+#include "GeoLib/Core/Polyline.h"
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Tools/MeshNodesAlongPolyline.h"
 

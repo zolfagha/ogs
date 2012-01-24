@@ -54,6 +54,7 @@ IF (WIN32)
 			-D_CRT_NONSTDC_NO_WARNINGS
 			-D_CRT_XNONSTDC_NO_WARNINGS
 			-D__restrict__=__restrict   # this fixes #5
+			-D_USE_MATH_DEFINES # use M_PI
 		)
 		# Sets warning level 3 and ignores some warnings
 		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /wd4290 /wd4267")

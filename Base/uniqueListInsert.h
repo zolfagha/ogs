@@ -10,7 +10,7 @@
 
 #include <list>
 
-namespace BASELIB {
+namespace Base {
 
 void uniqueListInsert (std::list<size_t>& list, size_t element)
 {

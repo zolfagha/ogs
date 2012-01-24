@@ -13,11 +13,11 @@
 #include <map>
 
 #include "PointVec.h"
-#include "Point.h"
+#include "GeoLib/Core/Point.h"
 #include "PolylineVec.h"
-#include "Polyline.h"
+#include "GeoLib/Core/Polyline.h"
 #include "SurfaceVec.h"
-#include "Surface.h"
+#include "GeoLib/Core/Surface.h"
 
 #include "Color.h"
 #include "Station.h"
