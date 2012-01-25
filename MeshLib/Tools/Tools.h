@@ -4,10 +4,12 @@
 #include "GeoLib/Core/GeoObject.h"
 #include "GeoLib/Core/Polyline.h"
 #include "MeshLib/Core/IMesh.h"
+#include "MeshLib/Core/ElementFactory.h"
 #include "MeshLib/Tools/MeshNodesAlongPolyline.h"
 
 #include <vector>
 #include <algorithm>
+#include <exception>
 
 namespace MeshLib
 {
@@ -51,19 +53,40 @@ void findConnectedElements(IMesh const* msh, const std::vector<INode*> &nodes, s
 };
 
 /// get a list of edge elements of given elements
-void createEdgeElements(IMesh const* msh, const std::vector<IElement*> &selected_ele, std::vector<IElement*> &edges)
+void createEdgeElements(IMesh * msh, const std::vector<INode*> &selected_nodes, const std::vector<IElement*> &selected_ele, std::vector<IElement*> &edges)
 {
+    typedef std::vector<IElement*> ElementList;
+
+    std::vector<size_t> vec_edge_nodes;
     for (size_t i=0; i<selected_ele.size(); i++) {
         IElement *e = selected_ele[i];
         for (size_t j=0; j<e->getNumberOfEdges(); j++) {
-            IElement *edge = e->getEdgeElement(j);
-            edges.push_back(edge);
+            e->getNodeIDsOfEdgeElement(j, vec_edge_nodes);
+            std::sort(vec_edge_nodes.begin(), vec_edge_nodes.end());
+
+            //check if already exists
+            IElement *e_edge = 0;
+            for (ElementList::iterator itr=edges.begin(); itr!=edges.end(); itr++) {
+                if ((*itr)->hasNodeIds(vec_edge_nodes)) {
+                    e_edge = *itr;
+                    break;
+                }
+            }
+            if (e_edge==0) {
+                //if new, create obj
+                IElement *edge = ElemenetFactory::createNewElement(e->getEdgeElementType(j)); 
+                e->getNodeIDsOfEdgeElement(j, vec_edge_nodes);
+                for (size_t k=0; k<vec_edge_nodes.size(); k++)
+                    edge->setNodeID(k, vec_edge_nodes[k]);
+                edges.push_back(edge);
+                msh->addEdgeElement(edge);
+            }
         }
     }
 };
 
 /// find edge elements on a given polyline
-void findEdgeElementsOnPolyline(IMesh const* msh, GeoLib::Polyline const* poly, std::vector<IElement*> *vec_edges_on_poly)
+void findEdgeElementsOnPolyline(IMesh * msh, GeoLib::Polyline const* poly, std::vector<IElement*> *vec_edges_on_poly)
 {
     // get a list of nodes on the polyline
     std::vector<INode*> nodes_on_poly;
@@ -73,7 +96,7 @@ void findEdgeElementsOnPolyline(IMesh const* msh, GeoLib::Polyline const* poly, 
     findConnectedElements(msh, nodes_on_poly, elements_near_poly);
     // get a list of edges made of the nodes
     std::vector<IElement*> selected_edges;
-    createEdgeElements(msh, elements_near_poly, selected_edges);
+    createEdgeElements(msh, nodes_on_poly, elements_near_poly, selected_edges);
     const size_t nr_edges = selected_edges.size();
     for (size_t i=0; i<nr_edges; i++) {
         IElement *edge_e = selected_edges[i];
@@ -91,7 +114,7 @@ void findEdgeElementsOnPolyline(IMesh const* msh, GeoLib::Polyline const* poly, 
 };
 
 /// find boundary elements located on given geometries
-void findBoundaryElementsOnGeometry(IMesh const* msh, GeoLib::GeoObject const* obj, std::vector<IElement*> *vec_eles)
+void findBoundaryElementsOnGeometry(IMesh * msh, GeoLib::GeoObject const* obj, std::vector<IElement*> *vec_eles)
 {
     switch (obj->getGeoType()) {
         case GeoLib::GeoObjType::POLYLINE:

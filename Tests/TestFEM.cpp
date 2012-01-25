@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "FemLib/FemElement.h"
+#include "FemLib/IFemElement.h"
 #include "FemLib/FemFunction.h"
 #include "FemLib/FemFunctionProjection.h"
 #include "FemLib/BC/FemDirichletBC.h"
@@ -35,7 +35,7 @@ TEST(FEM, testAll)
     Polyline* poly_left = rec.getLeft();
     Polyline* poly_right = rec.getRight();
     //mesh
-    std::auto_ptr<UnstructuredMesh2d> msh = MeshGenerator::generateRegularMesh(2, 2.0, 2, .0, .0, .0);
+    std::auto_ptr<UnstructuredMesh2d> msh = MeshGenerator::generateRegularQuadMesh(2.0, 2, .0, .0, .0);
     //mat
     const double K = 1.e-11; // TODO: should be a function
     //discretization
@@ -54,13 +54,12 @@ TEST(FEM, testAll)
     std::vector<double> globalRHS(n_dof, .0);
 
     //assembly
-    IFiniteElement *fe = head.getFiniteElement();
     MathLib::Matrix<double> localK;
     std::vector<size_t> e_node_id_list;
     for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
         MeshLib::IElement *e = msh->getElemenet(i_e);
-        fe->configure(e);
-        const size_t &n_dof = fe->getNumberOfDOFs();
+        IFiniteElement *fe = head.getFiniteElement(e);
+        const size_t &n_dof = fe->getNumberOfVariables();
         localK.resize(n_dof, n_dof);
         localK = .0;
         fe->computeIntTestShape(0, &localK);
@@ -83,11 +82,11 @@ TEST(FEM, testAll)
     //calculate vel (vel=f(h))
     for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
         MeshLib::IElement* e = msh->getElemenet(i_e);
-        fe->configure(e);
+        IFiniteElement *fe = head.getFiniteElement(e);
         std::vector<double> local_h;
         // for each integration points
         IFemIntegration *integral = fe->getIntegrationMethod();
-        IFemMapping *mapping = fe->getMapping();
+        IFemMapping *mapping = 0; //fe->getMapping();
         for (size_t ip=0; ip<integral->getNumberOfSamplingPoints(); ip++) {
             MathLib::Vector2D q;
             mapping->computeMappingFunctions(integral->getSamplingPoint(ip), FemMapComputation::DSHAPE);

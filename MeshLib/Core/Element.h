@@ -1,6 +1,8 @@
 #pragma  once
 
 #include <vector>
+#include <algorithm>
+
 #include "Base/MemoryTools.h"
 #include "IElement.h"
 #include "Node.h"
@@ -19,30 +21,37 @@ private:
     INode* _list_nodes[NUMBER_OF_NODES];
     size_t _list_node_id[NUMBER_OF_NODES];
     IElementCoordinatesMapping *_geo_map;
-    std::vector<IElement*> _list_edges;
+    std::vector<IElement*> _list_edges; // memory is assigned later when required
 
-    IElement* createEdgeElement(size_t edge_id);
 public:
     TemplateUnstructuredElement() {
         initialize();
     };
     TemplateUnstructuredElement(size_t element_id) {
         initialize();
-        this->setElementID(element_id);
+        this->setID(element_id);
     }
     virtual ~TemplateUnstructuredElement() 
     {
-        destroyStdVectorWithPointers(_list_edges);
     };
 
     virtual void initialize() {
         for (int i=0; i<NUMBER_OF_NODES; i++)
             _list_node_id[i] = 0;
-        for (int i=0; i<NUMER_OF_EDGES; i++)
-            _list_edges[i] = 0;
         _geo_map = 0;
-        if (NUMER_OF_EDGES>0)
-            _list_edges.resize(NUMER_OF_EDGES, 0);
+    }
+
+    virtual bool operator==(IElement& e) 
+    {
+        throw std::exception("Element::== is not implemented yet.");
+        return false;
+    }
+
+    virtual bool hasNodeIds(std::vector<size_t> &sorted_node_ids) const
+    {
+        std::vector<size_t> vec(_list_node_id, _list_node_id+NUMBER_OF_NODES);
+        std::sort (vec.begin(), vec.end());
+        return std::equal (vec.begin(), vec.end(), sorted_node_ids.begin());
     }
 
     virtual ElementType::type getElementType() const {return TYPE;};
@@ -50,24 +59,46 @@ public:
     virtual size_t getDimension() const {return DIMENSION;};
     virtual size_t getNumberOfFaces() const {return NUMBER_OF_FACES;};
     virtual size_t getNumberOfEdges() const {return NUMER_OF_EDGES;};
+
     virtual IElement* getEdgeElement(size_t edge_id) 
     {
-        if (_list_edges[edge_id]==0)
-            _list_edges[edge_id] = createEdgeElement(edge_id);
+        if (_list_edges.size()<NUMER_OF_EDGES)
+            return 0;
+
         return _list_edges[edge_id];
+    }
+
+    virtual void setEdgeElement(size_t edge_id, IElement* e) 
+    {
+        if (_list_edges.size()==0)
+            _list_edges.resize(NUMER_OF_EDGES, 0);
+        _list_edges[edge_id] = e;
+    }
+
+    void getNodeIDsOfEdgeElement(size_t edge_id, std::vector<size_t> &vec_node_ids) const
+    {
+        vec_node_ids.resize(0);
+    }
+
+    ElementType::type getEdgeElementType(size_t edge_id) const 
+    {
+        return ElementType::INVALID;
     }
 
     virtual void setNodeID(size_t local_node_id, size_t node_id) {
         assert (local_node_id < NUMBER_OF_NODES);
         _list_node_id[local_node_id] = node_id;
     }
+
     virtual size_t getNodeID(size_t local_node_id) const {
         assert (local_node_id < NUMBER_OF_NODES);
         return _list_node_id[local_node_id];
     };
+
     void setNode(size_t local_node_id, INode* nod) {
         _list_nodes[local_node_id] = nod;
     }
+
     INode* getNode(size_t local_node_id) const {
         return _list_nodes[local_node_id];
     }
@@ -96,28 +127,33 @@ typedef TemplateUnstructuredElement<ElementType::PRISM, 6, 3, 5, 9> Prism;
 typedef TemplateUnstructuredElement<ElementType::HEXAHEDRON, 8, 3, 6, 12> Hexahedron;
 
 template <> 
-IElement* Line::createEdgeElement(size_t edge_id)
+void Triangle::getNodeIDsOfEdgeElement(size_t edge_id, std::vector<size_t> &vec_node_ids) const 
 {
-    return 0;
+    vec_node_ids.resize(2);
+    vec_node_ids[0] = this->getNodeID(edge_id);
+    vec_node_ids[1] = this->getNodeID((edge_id+1)%3);
 }
 
 template <> 
-IElement* Triangle::createEdgeElement(size_t edge_id)
+void Quadrirateral::getNodeIDsOfEdgeElement(size_t edge_id, std::vector<size_t> &vec_node_ids) const 
 {
-    Line *e = new Line();
-    e->setNodeID(0, e->getNodeID(edge_id));
-    e->setNodeID(1, e->getNodeID((edge_id+1)%3));
-    return e;
+    vec_node_ids.resize(2);
+    vec_node_ids[0] = this->getNodeID(edge_id);
+    vec_node_ids[1] = this->getNodeID((edge_id+1)%4);
 }
 
 template <> 
-IElement* Quadrirateral::createEdgeElement(size_t edge_id)
+ElementType::type Triangle::getEdgeElementType(size_t edge_id) const
 {
-    Line *e = new Line();
-    e->setNodeID(0, e->getNodeID(edge_id));
-    e->setNodeID(1, e->getNodeID((edge_id+1)%4));
-    return e;
+    return ElementType::LINE;
 }
+
+template <> 
+ElementType::type Quadrirateral::getEdgeElementType(size_t edge_id) const
+{
+    return ElementType::LINE;
+}
+
 
 } // end namespace
 

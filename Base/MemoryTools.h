@@ -1,6 +1,8 @@
 
 #pragma  once
 
+#include <map>
+
 template <typename T>
 static void destroyStdVectorWithPointers(T &object) {
     if (object.size()>0) {
@@ -10,5 +12,15 @@ static void destroyStdVectorWithPointers(T &object) {
         object.clear();
     }
 };
+
+template <typename T>
+static void destroyStdMapWithPointers(T &object) {
+    if (object.size()>0) {
+        for (T::iterator itr=object.begin(); itr!=object.end(); itr++)
+            delete itr->second;
+        object.clear();
+    }
+};
+
 
 

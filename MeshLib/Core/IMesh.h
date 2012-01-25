@@ -23,6 +23,8 @@ public:
 
     virtual size_t getNumberOfElements() const = 0;
     virtual IElement* getElemenet( size_t element_id ) const = 0;
+
+    virtual size_t addEdgeElement(IElement*) = 0;
 };
 
 }

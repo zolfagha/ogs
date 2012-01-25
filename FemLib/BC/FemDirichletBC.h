@@ -33,7 +33,7 @@ public:
         // pickup nodes on geo
         MeshLib::findNodesOnGeometry(_var->getMesh(), _geo, &_vec_nodes);
         // set values
-        _vec_values.reserve(_vec_nodes.size());
+        _vec_values.resize(_vec_nodes.size());
         for (size_t i=0; i<_vec_nodes.size(); i++) {
             const GeoLib::Point* x = _vec_nodes[i]->getData();
             _vec_values[i] = _bc_func->eval(*x);

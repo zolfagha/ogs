@@ -1,22 +1,47 @@
 
 #pragma once
 
+#include "MathLib/LinAlg/Dense/Matrix.h"
+
 namespace FemLib
 {
 
 class IFemShapeFunction
 {
 public:
-    virtual void computeShapeFunction(double* pt, double* N) = 0;
-    virtual void computeGradShapeFunction(double* pt, double* dN) = 0;
-    virtual size_t getNumerOfNodes() = 0;
-    virtual double* getNodeCoordinates(size_t i) = 0;
+    virtual MathLib::Matrix<double>* computeShapeFunction(const double* pt) = 0;
+    virtual MathLib::Matrix<double>* computeGradShapeFunction(const double* pt) = 0;
+    //virtual double* getNodeCoordinates(size_t i) = 0;
 };
 
-class FemShapeLine2 : public IFemShapeFunction
+template <size_t N_DIM, size_t N_NODES>
+class TemplateShapeFunction : public IFemShapeFunction
 {
 public:
-    void computeShapeFunction(const double* pt, double* N)
+    TemplateShapeFunction() : _N(1,2), _dN(1,2) {};
+    MathLib::Matrix<double>* computeShapeFunction(const double* pt)
+    {
+        computeShapeFunction(pt, (double*)_N.getData());
+        return &_N;
+    }
+    MathLib::Matrix<double>* computeGradShapeFunction(const double* pt)
+    {
+        computeGradShapeFunction(pt, (double*)_dN.getData());
+        return &_dN;
+    }
+protected:
+    MathLib::Matrix<double> _N;
+    MathLib::Matrix<double> _dN;
+
+    virtual void computeShapeFunction(const double* pt, double* N) = 0;
+    virtual void computeGradShapeFunction(const double* pt, double* dN) = 0;
+};
+  
+
+class FemShapeLine2 : public TemplateShapeFunction<1, 2> 
+{
+public:
+    void computeShapeFunction(const double* pt, double *N)
     {
         N[0] = 1.0 - pt[0];
         N[1] = 1.0 + pt[0];
@@ -24,24 +49,24 @@ public:
             N[i] *= 0.5;
     };
 
-    void computeGradShapeFunction(const double* pt, double* dN)
+    void computeGradShapeFunction(const double* pt, double *dN)
     {
         dN[0] = -0.5;
         dN[1] = 0.5;
     };
 };
 
-class FemShapeLine3 : public IFemShapeFunction
+class FemShapeLine3 : public TemplateShapeFunction<1, 3> 
 {
 public:
-    void computeShapeFunction(const double* pt, double* N)
+    void computeShapeFunction(const double* pt, double *N)
     {
         N[0] = 0.5 * pt[0] * (pt[0] - 1.0);
         N[1] = 0.5 * pt[0] * (pt[0] + 1.0);
         N[2] = 1.0 - pt[0] * pt[0];
     };
 
-    void computeGradShapeFunction(const double* pt, double* dN)
+    void computeGradShapeFunction(const double* pt, double *dN)
     {
         dN[0] = pt[0] - 0.5;
         dN[1] = pt[0] + 0.5;
@@ -49,10 +74,10 @@ public:
     };
 };
 
-class FemShapeQuad4 : public IFemShapeFunction
+class FemShapeQuad4 : public TemplateShapeFunction<2, 4> 
 {
 public:
-    void computeShapeFunction(const double* pt, double* N)
+    void computeShapeFunction(const double* pt, double *N)
     {
         N[0] = (1.0 + pt[0]) * (1.0 + pt[1]);
         N[1] = (1.0 - pt[0]) * (1.0 + pt[1]);
@@ -62,7 +87,7 @@ public:
             N[i] *= 0.25;
     };
 
-    void computeGradShapeFunction(const double* u, double* dN4)
+    void computeGradShapeFunction(const double* u, double *dN4)
     {
         dN4[0] = +(1.0 + u[1]);
         dN4[1] = -(1.0 + u[1]);
@@ -77,10 +102,10 @@ public:
     };
 };
 
-class FemShapeQuad8 : public IFemShapeFunction
+class FemShapeQuad8 : public TemplateShapeFunction<2, 8> 
 {
 public:
-    void computeShapeFunction(const double* pt, double* N)
+    void computeShapeFunction(const double* pt, double *N)
     {
         N[0] = -0.25 * (1.0 - pt[0]) * (1.0 - pt[1]) * (( 1.0 + pt[0] + pt[1]));
         N[1] =  0.25 * (1.0 + pt[0]) * (1.0 - pt[1]) * ((-1.0 + pt[0] - pt[1]));
@@ -93,7 +118,7 @@ public:
         N[7] = 0.5 * (1.0 - pt[1] * pt[1]) * (1.0 - pt[0]);
     };
 
-    void computeGradShapeFunction(const double* pt, double* dN8)
+    void computeGradShapeFunction(const double* pt, double *dN8)
     {
         double r = pt[0];
         double s = pt[1];
@@ -120,10 +145,10 @@ public:
     };
 };
 
-class FemShapeQuad9 : public IFemShapeFunction
+class FemShapeQuad9 : public TemplateShapeFunction<2, 9> 
 {
 public:
-    void computeShapeFunction(const double* pt, double* N)
+    void computeShapeFunction(const double* pt, double *N)
     {
         N[8] = (1.0 - pt[0] * pt[0]) * ( 1.0 - pt[1] * pt[1]);
         N[7] = 0.5 * (1.0 - pt[1] * pt[1]) * (1.0 + pt[0]) - 0.5 * N[8];
@@ -136,7 +161,7 @@ public:
         N[0] = 0.25 * (1.0 + pt[0]) * (1.0 + pt[1]) - 0.5 * N[4] - 0.5 * N[7] - 0.25 * N[8];
     };
 
-    void computeGradShapeFunction(const double* u, double* dN9)
+    void computeGradShapeFunction(const double* u, double *dN9)
     {
         dN9[8] = -2.0 * u[0] * (1.0 - u[1] * u[1]);
         dN9[7] = +0.5 * (1.0 - u[1] * u[1]) - 0.5 * dN9[8];
@@ -160,28 +185,28 @@ public:
     };
 };
 
-class FemShapeHex8 : public IFemShapeFunction
+class FemShapeHex8 : public TemplateShapeFunction<3, 8> 
 {
     virtual void computeShapeFunction(double* pt, double* N) = 0;
     virtual void computeGradShapeFunction(double* pt, double* dN) = 0;
 };
 
-class FemShapeHex20 : public IFemShapeFunction
+class FemShapeHex20 : public TemplateShapeFunction<3, 20> 
 {
     virtual void computeShapeFunction(double* pt, double* N) = 0;
     virtual void computeGradShapeFunction(double* pt, double* dN) = 0;
 };
 
 
-class FemShapeTriangle3 : public IFemShapeFunction
+class FemShapeTriangle3 : public TemplateShapeFunction<2, 3> 
 {
-    virtual void computeShapeFunction(double* u, double* N)
+    void computeShapeFunction(const double* u, double *N)
     {
         N[0] = 1. - u[0] - u[1];
         N[1] = u[0];
         N[2] = u[1];
     };
-    virtual void computeGradShapeFunction(double* pt, double* dN3)
+    void computeGradShapeFunction(const double* pt, double *dN3)
     {
         //   d()/dL_1
         dN3[0] = -1.0;
@@ -194,9 +219,9 @@ class FemShapeTriangle3 : public IFemShapeFunction
     }
 };
 
-class FemShapeTriangle6 : public IFemShapeFunction
+class FemShapeTriangle6 : public TemplateShapeFunction<2, 6> 
 {
-    virtual void computeShapeFunction(double* u, double* N6)
+    void computeShapeFunction(const double* u, double *N6)
     {
         N6[0] = 2. * (1. - u[0] - u[1]) * (0.5 - u[0] - u[1]);
         N6[1] = u[0] * (2. * u[0] - 1.);
@@ -205,7 +230,7 @@ class FemShapeTriangle6 : public IFemShapeFunction
         N6[4] = 4. * u[0] * u[1];
         N6[5] = 4. * u[1] * (1. - u[0] - u[1]);
     };
-    virtual void computeGradShapeFunction(double* u, double* dN6)
+    void computeGradShapeFunction(const double* u, double *dN6)
     {
         dN6[0] = 4. * (u[0] + u[1]) - 3.;     // dN1/dL1
         dN6[6] = 4. * (u[0] + u[1]) - 3.;     // dN1/dL2
@@ -227,13 +252,13 @@ class FemShapeTriangle6 : public IFemShapeFunction
     }
 };
 
-class FemShapeTetra4 : public IFemShapeFunction
+class FemShapeTetra4 : public TemplateShapeFunction<3, 4> 
 {
     virtual void computeShapeFunction(double* pt, double* N) = 0;
     virtual void computeGradShapeFunction(double* pt, double* dN) = 0;
 };
 
-class FemShapeTetra10 : public IFemShapeFunction
+class FemShapeTetra10 : public TemplateShapeFunction<3, 10> 
 {
     virtual void computeShapeFunction(double* pt, double* N) = 0;
     virtual void computeGradShapeFunction(double* pt, double* dN) = 0;

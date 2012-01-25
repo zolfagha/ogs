@@ -36,8 +36,11 @@ public:
     IElement():_element_id(0), _group_id(0) {};
     virtual ~IElement() {};
 
-    size_t getElementID() const {return _element_id;};
-    void setElementID(size_t id) {_element_id = id;};
+    virtual bool operator==(IElement& e) = 0;
+    virtual bool hasNodeIds(std::vector<size_t> &node_ids) const = 0;
+
+    size_t getID() const {return _element_id;};
+    void setID(size_t id) {_element_id = id;};
 
     size_t getGroupID() const {return _group_id;};
     void setGroupID(size_t id) {_group_id = id;};
@@ -61,6 +64,9 @@ public:
 
     virtual size_t getNumberOfEdges() const = 0;
     virtual IElement* getEdgeElement(size_t edge_id) = 0;
+    virtual void setEdgeElement(size_t edge_id, IElement* e) = 0;
+    virtual void getNodeIDsOfEdgeElement(size_t edge_id, std::vector<size_t> &vec_node_ids) const = 0;
+    virtual ElementType::type getEdgeElementType(size_t edge_id) const = 0;
 
     virtual void setMappedGeometry(IElementCoordinatesMapping* mapping) = 0;
     virtual IElementCoordinatesMapping* getMappedGeometry() = 0;

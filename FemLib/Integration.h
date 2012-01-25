@@ -13,9 +13,10 @@ public:
 
     virtual size_t getNumberOfSamplingPoints() const = 0;
     virtual const double* getSamplingPoint(int igp) const = 0;
+    virtual double getWeight(int igp) const = 0;
 };
 
-class FemIntegrationGauss : IFemIntegration
+class FemIntegrationGauss : public IFemIntegration
 {
 public:
     FemIntegrationGauss() {};
@@ -25,7 +26,7 @@ public:
     size_t getNumberOfSamplingPoints() const;
     std::vector<int> getSamplingPoints() const;
     const double* getSamplingPoint(int igp) const;
-    double getWeight(int igp);
+    double getWeight(int igp) const;
 };
 
 }

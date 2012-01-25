@@ -2,7 +2,7 @@
 #pragma once
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
-#include "FemElement.h"
+#include "IFemElement.h"
 
 namespace FemLib
 {

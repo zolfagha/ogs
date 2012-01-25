@@ -30,7 +30,7 @@ public:
     /// setup BC. 
     void setup()
     {
-        const MeshLib::IMesh *msh = _var->getMesh();
+        MeshLib::IMesh *msh = (MeshLib::IMesh*)_var->getMesh();
         // pickup nodes on geo
         MeshLib::findNodesOnGeometry(msh, _geo, &_vec_nodes);
         // get discrete values at nodes
@@ -40,7 +40,7 @@ public:
             vec_nod_values[i] = _bc_func->eval(*x);
         }
         // distribute to nodes
-        _vec_values.reserve(_vec_nodes.size());
+        _vec_values.resize(_vec_nodes.size());
         if (_var->getDimension()==1) {
             // no need to integrate
             _vec_values.assign(_vec_values.begin(), _vec_values.end());
@@ -50,13 +50,12 @@ public:
             std::vector<MeshLib::IElement*> vec_ele;
             MeshLib::findBoundaryElementsOnGeometry(msh, _geo, &vec_ele);
             // for each edge elements found
-            IFiniteElement *fe_edge = _var->getFiniteElement();
             for (size_t i=0; i<vec_ele.size(); i++) {
-                const MeshLib::IElement *e = vec_ele[i];
-                fe_edge->configure(e);
+                MeshLib::IElement *e = vec_ele[i];
+                IFiniteElement *fe_edge = _var->getFiniteElement(e);
                 // compute integrals
-                std::vector<double> nodal_val(fe_edge->getNumberOfDOFs());
-                std::vector<double> result(fe_edge->getNumberOfDOFs());
+                std::vector<double> nodal_val(fe_edge->getNumberOfVariables());
+                std::vector<double> result(fe_edge->getNumberOfVariables());
                 fe_edge->computeIntTestShapeNodalVal(&nodal_val[0], &result[0]);
                 // add into nodal values
                 const size_t edge_nodes = 0;

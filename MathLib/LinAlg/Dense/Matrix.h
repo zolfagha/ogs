@@ -101,6 +101,21 @@ public:
     */
    void add(std::vector<size_t> &pos, const Matrix<T>& mat);
 
+   /**
+    * multiply values of this matrix A with the given matrix B and add results into a matrix C, i.e. C += A*B
+    * @param matB the matrix B
+    * @param matC the matrix C
+    */
+   void multiply(const Matrix<T> &matB, Matrix<T> &matC) const;
+
+   /**
+    * multiply values of this transposed matrix A with the given matrix B and add results into a matrix C, i.e. C += a*A^T*B
+    * @param matB the transposed matrix B
+    * @param matC the matrix C
+    * @param a the scalar factor. default = 1.0
+    */
+   void transposeAndMultiply(const Matrix<T> &matB, Matrix<T> &matC, double a=1.0) const;
+
    inline T & operator() (size_t row, size_t col) throw (std::range_error);
    inline T & operator() (size_t row, size_t col) const throw (std::range_error);
 
@@ -298,6 +313,29 @@ template<class T> void Matrix<T>::add(std::vector<size_t> &pos, const Matrix<T>&
     for (size_t i=0; i<pos.size(); i++) {
         for (size_t j=0; j<pos.size(); j++) {
 			data[address(pos[i], pos[j])] += mat(i,j);
+        }
+    }
+}
+
+template<class T> void Matrix<T>::multiply(const Matrix<T> &matB, Matrix<T> &matC) const
+{
+    for (size_t rowA=0; rowA<this->nrows; rowA++) {
+        for (size_t colB=0; colB<matB.getNCols(); colB++) {
+            for (size_t colArowB=0; colArowB<this->ncols; colArowB++) {
+                matC(rowA, colB) += this(rowA, colArowB) * matB(colArowB, colB);
+            }
+        }
+    }
+}
+
+template<class T> void Matrix<T>::transposeAndMultiply(const Matrix<T> &matB, Matrix<T> &matC, double a) const
+{
+    // C += A^T * B
+    for (size_t colA=0; colA<this->ncols; colA++) {
+        for (size_t colB=0; colB<matB.getNCols(); colB++) {
+            for (size_t colAcolB=0; colAcolB<this->nrows; colAcolB++) {
+                matC(colA, colB) += a * (*this)(colA, colAcolB) * matB(colAcolB, colB);
+            }
         }
     }
 }

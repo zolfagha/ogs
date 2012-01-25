@@ -21,6 +21,7 @@ class TemplateUnstructuredMesh : public IMesh
 private:
     std::vector<Node*> _list_nodes;
     std::vector<IElement*> _list_elements;
+    std::vector<IElement*> _list_edge_elements;
     CoordinateSystem _coord_system;
 
 public:
@@ -30,6 +31,7 @@ public:
     virtual ~TemplateUnstructuredMesh(){
         destroyStdVectorWithPointers(_list_nodes);
         destroyStdVectorWithPointers(_list_elements);
+        destroyStdVectorWithPointers(_list_edge_elements);
     };
 
     virtual size_t getDimension() const
@@ -80,10 +82,18 @@ public:
     };
 
     size_t addElement( IElement *e) {
-        e->setElementID(_list_elements.size());
+        e->setID(_list_elements.size());
         _list_elements.push_back(e);
-        return e->getElementID();
+        return e->getID();
     };
+
+    size_t addEdgeElement(IElement *e) 
+    {
+        e->setID(_list_edge_elements.size());
+        _list_edge_elements.push_back(e);
+        return e->getID();
+    }
+
 
     void construct() {
 
@@ -106,5 +116,25 @@ public:
 typedef TemplateUnstructuredMesh<1, CoordinateSystem::X> UnstructuredMesh1d;
 typedef TemplateUnstructuredMesh<2, CoordinateSystem::XY> UnstructuredMesh2d;
 typedef TemplateUnstructuredMesh<3, CoordinateSystem::XYZ> UnstructuredMesh3d;
+
+
+template<size_t N_DIM, CoordinateSystem::CoordinateSystemType coord_type>
+class TemplateMixedOrderUnstructuredMesh : public TemplateUnstructuredMesh<N_DIM, coord_type>
+{
+private:
+    size_t _order;
+public:
+    TemplateMixedOrderUnstructuredMesh() : _order(1) {};
+
+    void setOrder(size_t order)
+    {
+        _order = order;
+    };
+
+    size_t getOrder() const
+    {
+        return _order;
+    };
+};
 
 }

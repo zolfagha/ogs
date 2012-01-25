@@ -4,6 +4,7 @@
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Tools/Mapping.h"
+#include "FemLib/ShapeFunction.h"
 
 namespace FemLib
 {
@@ -25,7 +26,7 @@ class IFemMapping
 {
 public:
     /// initialize element
-    virtual void configure(const MeshLib::IElement* ele) = 0;
+    virtual void configure(MeshLib::IElement* ele) = 0;
     /// compute shape functions
     virtual void computeMappingFunctions(const double* natural_pt, FemMapComputation::type compType) = 0;
     /// return shape functions
@@ -36,6 +37,8 @@ public:
     virtual double* mapNatural2Physical(const double* natural_pt) = 0;
     /// map physical coordinates to natural coordinates
     virtual double* mapPhysical2Natural(const double* physical_pt) = 0;
+    
+    virtual double getDetJacobian() = 0;
 };
 
 /**
@@ -54,14 +57,13 @@ public:
 class FemIsoparametricMapping : public IFemMapping
 {
 public:
-    ///
-    virtual void configure(MeshLib::IElement* ele) 
+    FemIsoparametricMapping(IFemShapeFunction *shape)
     {
-        _ele = ele;
-    };
+        _shape = shape;
+    }
 
     /// 
-    virtual void computeMappingFunctions(double* natural_pt, FemMapComputation::type compType) 
+    virtual void computeMappingFunctions(const double* natural_pt, FemMapComputation::type compType) 
     {
         if (compType==FemMapComputation::SHAPE) {
             computeShapeFunction(natural_pt);
@@ -75,18 +77,20 @@ public:
 
     ///
     MeshLib::IElement* getElement() const {return _ele;};
-    double* mapNatural2Physical(double* natural_pt);
-    double* mapPhysical2Natural(double* physical_pt);
+    double* mapNatural2Physical(const double* natural_pt);
+    double* mapPhysical2Natural(const double* physical_pt);
 
     double* getShapeFunction();
+    const MathLib::Matrix<double>* getGradShapeFunction();
     void getJacobian();
     void getInvJacobian();
     double getDetJacobian();
 private:
-    void computeShapeFunction(double*);
-    void computeGradShapeFunction(double*);
-    void computeJacobian(double*);
+    void computeShapeFunction(const double*);
+    void computeGradShapeFunction(const double*);
+    void computeJacobian(const double*);
 
+    IFemShapeFunction *_shape;
     MeshLib::IElement* _ele;
     double _det_jac;
     double *_jac;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "FemElement.h"
+#include "IFemElement.h"
 
 namespace FemLib
 {

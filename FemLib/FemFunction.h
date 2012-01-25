@@ -4,7 +4,8 @@
 #include "MathLib/Vector.h"
 #include "MeshLib/Core/IMesh.h"
 #include "NumLib/IFunction.h"
-#include "FemElement.h"
+#include "IFemElement.h"
+#include "FemElementObjectContainer.h"
 
 namespace FemLib
 {
@@ -45,9 +46,13 @@ public:
         return _nodal_values[node_id];
     }
 
-    IFiniteElement* getFiniteElement() const
+    IFiniteElement* getFiniteElement(MeshLib::IElement *e)
     {
-        throw std::exception("The method or operation is not implemented.");
+        _feObjects.setPolynomialOrder(_order);
+        IFiniteElement* fe = _feObjects.getFeObject(e);
+        fe->configure(e);
+
+        return fe;
     }
 
     void setNodalValues( Tvalue* x ) 
@@ -66,6 +71,7 @@ private:
     //FEMInterpolation* _fe;
     MeshLib::IMesh* _msh;
     PolynomialOrder::type _order;
+    LagrangianFeObjectContainer _feObjects;
 };
 
 typedef TemplateFEMNodalFunction<double> FemNodalFunctionScalar2d;

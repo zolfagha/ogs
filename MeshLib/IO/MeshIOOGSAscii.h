@@ -104,7 +104,7 @@ public:
 
           ElementType::type ele_type = convertString2ElementType(name);
           IElement *newElem = ElemenetFactory::createNewElement(ele_type);
-          newElem->setElementID(idx);
+          newElem->setID(idx);
           newElem->setGroupID(group_id);
           for (size_t j=0; j < newElem->getNumberOfNodes(); j++) {
             if_file >> idummy;
