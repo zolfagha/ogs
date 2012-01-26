@@ -21,4 +21,11 @@ bool checkDistance(GeoLib::Point const &p0, GeoLib::Point const &p1, double squa
     return (sqrDist(&p0, &p1) < squaredDistance);
 }
 
+
+double triangleArea(GeoLib::Point const &p0, GeoLib::Point const &p1, GeoLib::Point const &p2)
+{
+    double A = 0.5*(p0[0]*(p1[1]-p2[1])+p1[0]*(p2[1]-p0[1])+p2[0]*(p0[1]-p1[1]));
+    return A;
+}
+
 }

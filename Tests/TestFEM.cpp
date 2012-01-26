@@ -86,10 +86,10 @@ TEST(FEM, testAll)
         std::vector<double> local_h;
         // for each integration points
         IFemIntegration *integral = fe->getIntegrationMethod();
-        IFemMapping *mapping = 0; //fe->getMapping();
+        IFemCoordinatesMapping *mapping = 0; //fe->getMapping();
         for (size_t ip=0; ip<integral->getNumberOfSamplingPoints(); ip++) {
             MathLib::Vector2D q;
-            mapping->computeMappingFunctions(integral->getSamplingPoint(ip), FemMapComputation::DSHAPE);
+            mapping->compute(integral->getSamplingPoint(ip), FemMapComputation::DSHAPE);
             const MathLib::Matrix<double> *dN = mapping->getGradShapeFunction();
             dN->axpy(-K, &local_h[0], .0, q.getRawRef()); //TODO  q = - K * dN * local_h;
             vel.setIntegrationPointValue(i_e, ip, q);

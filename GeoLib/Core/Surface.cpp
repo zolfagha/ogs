@@ -11,10 +11,8 @@
 #include "Surface.h"
 #include "AxisAlignedBoundingBox.h"
 #include "Polygon.h"
-
-// MathLib
-#include "MathLib/AnalyticalGeometry.h"
-#include "MathLib/EarClippingTriangulation.h"
+#include "GeoLib/AnalyticalGeometry.h"
+#include "GeoLib/EarClippingTriangulation.h"
 
 namespace GeoLib {
 
@@ -58,7 +56,7 @@ Surface* Surface::createSurface(const Polyline &ply)
 
 			std::list<GeoLib::Triangle> triangles;
 			std::cout << "triangulation of surface: ... " << std::flush;
-			MathLib::EarClippingTriangulation(*simple_polygon_it, triangles);
+			GeoLib::EarClippingTriangulation(*simple_polygon_it, triangles);
 			std::cout << "done - " << triangles.size () << " triangles " << std::endl;
 
 			// add Triangles to Surface

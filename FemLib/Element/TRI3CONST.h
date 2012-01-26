@@ -7,53 +7,40 @@
 namespace FemLib
 {
 
-class TRI3CONST : public IFiniteElement
+/**
+ * \brief TRI3CONST finite element class
+ *
+ * TRI3CONST is a finite element class for specific case of linear triangle elements with
+ * element constant parameters. Efficient integration can be expected due to use of analytical
+ * integration methods.
+ * 
+ * Remark:
+ * - Given coefficients are assumed to be constant over a element.
+ * - Axisymmetric model is not supported!
+ */    
+class TRI3CONST : public TemplateFeBase<FiniteElementType::TRI3CONST, 3>
 {
+private:
+    MeshLib::Triangle *_ele;
+    MeshLib::IMesh *_msh;
+    double a[3], b[3], c[3];
+    double A;
+
 public:
-    void assembleNN(MathLib::Matrix<double> &mat) {
-        MeshLib::Triangle *ele;
-        const size_t n_ele_nodes = 3;
-        double a[n_ele_nodes], b[n_ele_nodes], c[n_ele_nodes];
-        double nodes_x[n_ele_nodes], nodes_y[n_ele_nodes], nodes_z[n_ele_nodes];
-        // xyz
-        //for (size_t i=0; i<n_ele_nodes; i++) {
-        //    msh->getNodeCoordinates(ele->getNodeID(i), pt);
-        //    nodes_x[i] = pt[0];
-        //    nodes_y[i] = pt[1];
-        //    nodes_z[i] = pt[2];
-        //}
-        // area
-        const double A = 0.5*(nodes_x[0]*(nodes_y[1]-nodes_y[2])+nodes_x[1]*(nodes_y[2]-nodes_y[0])+nodes_x[2]*(nodes_y[0]-nodes_y[1]));
-        // set a,b,c
-        a[0] = 0.5/A*(nodes_x[1]*nodes_y[2]-nodes_x[2]*nodes_y[1]);
-        b[0] = 0.5/A*(nodes_y[1]-nodes_y[2]);
-        c[0] = 0.5/A*(nodes_x[2]-nodes_x[1]);
-        a[1] = 0.5/A*(nodes_x[2]*nodes_y[0]-nodes_x[0]*nodes_y[2]);
-        b[1] = 0.5/A*(nodes_y[2]-nodes_y[0]);
-        c[1] = 0.5/A*(nodes_x[0]-nodes_x[2]);
-        a[2] = 0.5/A*(nodes_x[0]*nodes_y[1]-nodes_x[1]*nodes_y[0]);
-        b[2] = 0.5/A*(nodes_y[0]-nodes_y[1]);
-        c[2] = 0.5/A*(nodes_x[1]-nodes_x[0]);
+    /// initialize object for given mesh elements
+    void configure( MeshLib::IMesh * msh, MeshLib::Triangle * e );
 
-        // assemble local EQS
-        // Int{w S ph/pt + div(w) K div(p)}dA = Int{w K div(p)}dL
-        mat(0,0) = b[0]*b[0] + c[0]*c[0];
-        mat(0,1) = b[0]*b[1] + c[0]*c[1];
-        mat(0,2) = b[0]*b[2] + c[0]*c[2];
-        mat(1,1) = b[1]*b[1] + c[1]*c[1];
-        mat(1,2) = b[1]*b[2] + c[1]*c[2];
-        mat(2,2) = b[2]*b[2] + c[2]*c[2];
-        //local_K *= A;
-        // symmetric
-        for (size_t i=0; i<n_ele_nodes; i++)
-            for (size_t j=0; j<i; j++)
-                mat(i,j) = mat(j,i);
+    /// make interpolation from nodal values
+    double interpolate(double *x, double *nodal_values);
 
-    };
+    /// compute an matrix M = Int{W^T F N} dV
+    void computeIntTestShape( Fscalar f, MathLib::Matrix<double> &mat);
 
-    void assembledNdN(MathLib::Matrix<double> &local_K) {
-    };
+    /// compute an matrix M = Int{W^T F dN} dV
+    void computeIntTestDShape( Fvector f, MathLib::Matrix<double> &mat);
+
+    /// compute an matrix M = Int{dW^T F dN} dV
+    void computeIntDTestDShape( Fscalar f, MathLib::Matrix<double> &mat);
 };
-
 
 }

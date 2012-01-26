@@ -9,8 +9,10 @@ namespace FemLib
 class IFemShapeFunction
 {
 public:
-    virtual MathLib::Matrix<double>* computeShapeFunction(const double* pt) = 0;
-    virtual MathLib::Matrix<double>* computeGradShapeFunction(const double* pt) = 0;
+    virtual void computeShapeFunction(const double* pt, double* N) = 0;
+    virtual void computeGradShapeFunction(const double* pt, double* dN) = 0;
+//    virtual MathLib::Matrix<double>* computeShapeFunction(const double* pt) = 0;
+//    virtual MathLib::Matrix<double>* computeGradShapeFunction(const double* pt) = 0;
     //virtual double* getNodeCoordinates(size_t i) = 0;
 };
 
@@ -18,7 +20,8 @@ template <size_t N_DIM, size_t N_NODES>
 class TemplateShapeFunction : public IFemShapeFunction
 {
 public:
-    TemplateShapeFunction() : _N(1,2), _dN(1,2) {};
+/*    TemplateShapeFunction() {};
+
     MathLib::Matrix<double>* computeShapeFunction(const double* pt)
     {
         computeShapeFunction(pt, (double*)_N.getData());
@@ -29,12 +32,14 @@ public:
         computeGradShapeFunction(pt, (double*)_dN.getData());
         return &_dN;
     }
-protected:
-    MathLib::Matrix<double> _N;
-    MathLib::Matrix<double> _dN;
+*/
 
     virtual void computeShapeFunction(const double* pt, double* N) = 0;
     virtual void computeGradShapeFunction(const double* pt, double* dN) = 0;
+protected:
+//    MathLib::Matrix<double> _N;
+    //MathLib::Matrix<double> _dN;
+
 };
   
 
@@ -265,5 +270,21 @@ class FemShapeTetra10 : public TemplateShapeFunction<3, 10>
 };
 
 
+//class FemShapeFunctionFactory
+//{
+//public:
+//    static IFemShapeFunction* createShapeFunction(MeshLib::ElementType::type e)
+//    {
+//        switch (e)
+//        {
+//        case MeshLib::ElementType::LINE:
+//            return new FemShapeLine2();
+//        case MeshLib::ElementType::TRIANGLE:
+//            return new FemShapeTriangle3();
+//        case MeshLib::ElementType::QUAD:
+//            return new FemShapeQuad4();
+//        }
+//    };
+//};
 
-};
+}

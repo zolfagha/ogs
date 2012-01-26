@@ -15,9 +15,10 @@
 #include "Polygon.h"
 
 // MathLib
-#include "MathLib/AnalyticalGeometry.h"
 #include "MathLib/MathTools.h"
 #include "MathLib/Vector3.h"
+
+#include "GeoLib/AnalyticalGeometry.h"
 
 // Base
 #include "Base/quicksort.h"
@@ -126,7 +127,7 @@ GeoLib::Point* Polygon::getIntersectionPointPolygonLine (GeoLib::Point const & a
 	if (_simple_polygon_list.empty ()) {
 		const size_t n_nodes (getNumberOfPoints()-1);
 		for (size_t k(0); k<n_nodes; k++) {
-			if (MathLib::lineSegmentIntersect (*(getPoint(k)), *(getPoint(k+1)), a, b, *s)) {
+			if (GeoLib::lineSegmentIntersect (*(getPoint(k)), *(getPoint(k+1)), a, b, *s)) {
 				return s;
 			}
 		}
@@ -136,7 +137,7 @@ GeoLib::Point* Polygon::getIntersectionPointPolygonLine (GeoLib::Point const & a
 			const Polygon* polygon (*it);
 			const size_t n_nodes_simple_polygon (polygon->getNumberOfPoints()-1);
 			for (size_t k(0); k<n_nodes_simple_polygon; k++) {
-				if (MathLib::lineSegmentIntersect (*(polygon->getPoint(k)), *(polygon->getPoint(k+1)), a, b, *s)) {
+				if (GeoLib::lineSegmentIntersect (*(polygon->getPoint(k)), *(polygon->getPoint(k+1)), a, b, *s)) {
 					return s;
 				}
 			}
@@ -215,13 +216,13 @@ void Polygon::ensureCWOrientation ()
 	// *** calculate supporting plane (plane normal and
 	MathLib::Vector plane_normal;
 	double d;
-	MathLib::getNewellPlane(tmp_polygon_pnts, plane_normal, d);
+	GeoLib::getNewellPlane(tmp_polygon_pnts, plane_normal, d);
 
 	// *** rotate if necessary
 	double tol (sqrt(std::numeric_limits<double>::min()));
 	if (fabs(plane_normal[0]) > tol || fabs(plane_normal[1]) > tol) {
 		// rotate copied points into x-y-plane
-		MathLib::rotatePointsToXY(plane_normal, tmp_polygon_pnts);
+		GeoLib::rotatePointsToXY(plane_normal, tmp_polygon_pnts);
 	}
 
 	for (size_t k(0); k<tmp_polygon_pnts.size(); k++) {
@@ -242,27 +243,27 @@ void Polygon::ensureCWOrientation ()
 		}
 	}
 	// *** determine orientation
-	MathLib::Orientation orient;
+	GeoLib::Orientation orient;
 	if (0 < min_x_max_y_idx && min_x_max_y_idx < n_pnts-2) {
-		orient = MathLib::getOrientation (
+		orient = GeoLib::getOrientation (
 			tmp_polygon_pnts[min_x_max_y_idx-1],
 			tmp_polygon_pnts[min_x_max_y_idx],
 			tmp_polygon_pnts[min_x_max_y_idx+1]);
 	} else {
 		if (0 == min_x_max_y_idx) {
-			orient = MathLib::getOrientation (
+			orient = GeoLib::getOrientation (
 					tmp_polygon_pnts[n_pnts-1],
 					tmp_polygon_pnts[0],
 					tmp_polygon_pnts[1]);
 		} else {
-			orient = MathLib::getOrientation (
+			orient = GeoLib::getOrientation (
 					tmp_polygon_pnts[n_pnts-2],
 					tmp_polygon_pnts[n_pnts-1],
 					tmp_polygon_pnts[0]);
 		}
 	}
 
-	if (orient == MathLib::CCW) {
+	if (orient == GeoLib::CCW) {
 		// switch orientation
 		size_t tmp_n_pnts (n_pnts);
 		tmp_n_pnts++; // include last point of polygon (which is identical to the first)
@@ -281,7 +282,7 @@ void Polygon::splitPolygonAtIntersection (std::list<Polygon*>::iterator polygon_
 	size_t idx0 (0), idx1 (0);
 	while (polygon_it != _simple_polygon_list.end()) {
 		GeoLib::Point *intersection_pnt (new GeoLib::Point);
-		bool is_simple (!MathLib::lineSegmentsIntersect (*polygon_it, idx0, idx1, *intersection_pnt));
+		bool is_simple (!GeoLib::lineSegmentsIntersect (*polygon_it, idx0, idx1, *intersection_pnt));
 		if (!is_simple) {
 			// adding intersection point to pnt_vec
 			size_t intersection_pnt_id (_ply_pnts.size());

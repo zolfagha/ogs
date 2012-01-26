@@ -5,12 +5,12 @@
 namespace FemLib
 {
 
-class QUAD4 : public FeIsoParametricElementBase<FiniteElementType::QUAD4, 4>
+class QUAD4 : public FeBaseNaturalCoordinates<FiniteElementType::QUAD4, 4>
 {
 private:
-    virtual IFemMapping* getMappingMethod() const 
+    virtual IFemCoordinatesMapping* getMappingMethod() const 
     {
-        return new FemIsoparametricMapping();
+        return new FemNaturalCoordinates();
     }
     virtual IFemShapeFunction* getBaseFunction() const 
     {

@@ -21,5 +21,5 @@ double sqrNrm2(const GeoLib::Point* const p0);
 /** squared dist between GEOLIB::Points p0 and p1 */
 double sqrDist(const GeoLib::Point* p0, const GeoLib::Point* p1);
 
-
+double triangleArea(GeoLib::Point const &p0, GeoLib::Point const &p1, GeoLib::Point const &p3);
 }

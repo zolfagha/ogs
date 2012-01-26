@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include "Base/MemoryTools.h"
+#include "GeoLib/MathTools.h"
 #include "IElement.h"
 #include "Node.h"
 #include "CoordinateSystem.h"
@@ -119,7 +120,15 @@ public:
 
 // elements
 typedef TemplateUnstructuredElement<ElementType::LINE, 2, 1, 2, 0> Line;
-typedef TemplateUnstructuredElement<ElementType::TRIANGLE, 3, 2, 3, 3> Triangle;
+typedef TemplateUnstructuredElement<ElementType::TRIANGLE, 3, 2, 3, 3> TemplateTriangle;
+class Triangle : public TemplateTriangle
+{
+public:
+    double getArea() const
+    {
+        return GeoLib::triangleArea(*getNodeCoordinates(0), *getNodeCoordinates(1), *getNodeCoordinates(2));
+    }
+};
 typedef TemplateUnstructuredElement<ElementType::QUAD, 4, 2, 4, 4> Quadrirateral;
 typedef TemplateUnstructuredElement<ElementType::TETRAHEDRON, 4, 3, 4, 6> Tetrahedron;
 typedef TemplateUnstructuredElement<ElementType::PYRAMID, 5, 3, 5, 8> Pyramid;
@@ -127,7 +136,7 @@ typedef TemplateUnstructuredElement<ElementType::PRISM, 6, 3, 5, 9> Prism;
 typedef TemplateUnstructuredElement<ElementType::HEXAHEDRON, 8, 3, 6, 12> Hexahedron;
 
 template <> 
-void Triangle::getNodeIDsOfEdgeElement(size_t edge_id, std::vector<size_t> &vec_node_ids) const 
+void TemplateTriangle::getNodeIDsOfEdgeElement(size_t edge_id, std::vector<size_t> &vec_node_ids) const 
 {
     vec_node_ids.resize(2);
     vec_node_ids[0] = this->getNodeID(edge_id);
@@ -143,7 +152,7 @@ void Quadrirateral::getNodeIDsOfEdgeElement(size_t edge_id, std::vector<size_t> 
 }
 
 template <> 
-ElementType::type Triangle::getEdgeElementType(size_t edge_id) const
+ElementType::type TemplateTriangle::getEdgeElementType(size_t edge_id) const
 {
     return ElementType::LINE;
 }

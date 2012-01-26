@@ -45,6 +45,18 @@ public:
     * @return
     */
    Matrix<T>& operator= (T a);
+   /**
+    * Matrix scalar multiplication
+    * @param a
+    * @return
+    */
+   void operator*= (T a);
+   /**
+    * Matrix scalar divide
+    * @param a
+    * @return
+    */
+   void operator/= (T a);
    
    /**
     * Matrix vector multiplication
@@ -174,6 +186,22 @@ template<class T> Matrix<T>& Matrix<T>::operator= (T a)
          data[address(i,j)] = a;
 
     return *this;
+}
+
+template<class T> void Matrix<T>::operator*= (T a)
+{
+    for (size_t i = 0; i < nrows; i++)
+        for (size_t j = 0; j < ncols; j++)
+            data[address(i,j)] *= a;
+
+}
+
+template<class T> void Matrix<T>::operator/= (T a)
+{
+    for (size_t i = 0; i < nrows; i++)
+        for (size_t j = 0; j < ncols; j++)
+            data[address(i,j)] /= a;
+
 }
 
 template<class T> void Matrix<T>::axpy ( T alpha, const T* x, T beta, T* y) const
