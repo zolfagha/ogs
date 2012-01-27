@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/Function/Function.h"
 
 #include "MeshLib/Core/IMesh.h"
@@ -56,7 +57,9 @@ public:
                 // compute integrals
                 std::vector<double> nodal_val(fe_edge->getNumberOfVariables());
                 std::vector<double> result(fe_edge->getNumberOfVariables());
-                fe_edge->computeIntTestShapeNodalVal(&nodal_val[0], &result[0]);
+                MathLib::Matrix<double> M(e->getNumberOfNodes(), e->getNumberOfNodes());
+                fe_edge->integrateWxN(0, M);
+                M.axpy(1.0, &nodal_val[0], 0.0, &result[0]);
                 // add into nodal values
                 const size_t edge_nodes = 0;
                 std::vector<size_t> localNodeId2Global;

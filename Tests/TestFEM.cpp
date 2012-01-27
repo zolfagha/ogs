@@ -5,8 +5,7 @@
 #include "FemLib/FemFunctionProjection.h"
 #include "FemLib/BC/FemDirichletBC.h"
 #include "FemLib/BC/FemNeumannBC.h"
-#include "FemLib/Interpolation.h"
-#include "FemLib/Mapping.h"
+#include "FemLib/FemCoorinatesMapping.h"
 
 #include "MeshLib/Core/UnstructuredMesh.h"
 #include "MeshLib/Tools/MeshGenerator.h"
@@ -62,7 +61,7 @@ TEST(FEM, testAll)
         const size_t &n_dof = fe->getNumberOfVariables();
         localK.resize(n_dof, n_dof);
         localK = .0;
-        fe->computeIntTestShape(0, &localK);
+        fe->integrateWxN(0, localK);
         e->getNodeIDList(e_node_id_list);
         globalA.add(e_node_id_list, localK); //TODO A(id_list) += K;
     }
@@ -85,12 +84,13 @@ TEST(FEM, testAll)
         IFiniteElement *fe = head.getFiniteElement(e);
         std::vector<double> local_h;
         // for each integration points
-        IFemIntegration *integral = fe->getIntegrationMethod();
-        IFemCoordinatesMapping *mapping = 0; //fe->getMapping();
+        IFemNumericalIntegration *integral = fe->getIntegrationMethod();
+        double x[2] = {};
         for (size_t ip=0; ip<integral->getNumberOfSamplingPoints(); ip++) {
             MathLib::Vector2D q;
-            mapping->compute(integral->getSamplingPoint(ip), FemMapComputation::DSHAPE);
-            const MathLib::Matrix<double> *dN = mapping->getGradShapeFunction();
+            integral->getSamplingPoint(ip, x);
+            fe->computeBasisFunctions(x);
+            const MathLib::Matrix<double> *dN = fe->getGradBasisFunction();
             dN->axpy(-K, &local_h[0], .0, q.getRawRef()); //TODO  q = - K * dN * local_h;
             vel.setIntegrationPointValue(i_e, ip, q);
         }

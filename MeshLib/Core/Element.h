@@ -8,6 +8,7 @@
 #include "IElement.h"
 #include "Node.h"
 #include "CoordinateSystem.h"
+#include "IMesh.h"
 
 namespace MeshLib
 {
@@ -16,30 +17,27 @@ namespace MeshLib
  * 
  */
 template <ElementType::type TYPE, size_t NUMBER_OF_NODES, size_t DIMENSION, size_t NUMBER_OF_FACES, size_t NUMER_OF_EDGES>
-class TemplateUnstructuredElement : public IElement
+class TemplateElement : public IElement
 {
 private:
-    INode* _list_nodes[NUMBER_OF_NODES];
     size_t _list_node_id[NUMBER_OF_NODES];
-    IElementCoordinatesMapping *_geo_map;
     std::vector<IElement*> _list_edges; // memory is assigned later when required
 
 public:
-    TemplateUnstructuredElement() {
+    TemplateElement() {
         initialize();
     };
-    TemplateUnstructuredElement(size_t element_id) {
+    TemplateElement(size_t element_id) {
         initialize();
         this->setID(element_id);
     }
-    virtual ~TemplateUnstructuredElement() 
+    virtual ~TemplateElement() 
     {
     };
 
-    virtual void initialize() {
+    void initialize() {
         for (int i=0; i<NUMBER_OF_NODES; i++)
             _list_node_id[i] = 0;
-        _geo_map = 0;
     }
 
     virtual bool operator==(IElement& e) 
@@ -55,13 +53,13 @@ public:
         return std::equal (vec.begin(), vec.end(), sorted_node_ids.begin());
     }
 
-    virtual ElementType::type getElementType() const {return TYPE;};
-    virtual size_t getNumberOfNodes() const {return NUMBER_OF_NODES;};
-    virtual size_t getDimension() const {return DIMENSION;};
-    virtual size_t getNumberOfFaces() const {return NUMBER_OF_FACES;};
-    virtual size_t getNumberOfEdges() const {return NUMER_OF_EDGES;};
+    ElementType::type getElementType() const {return TYPE;};
+    size_t getNumberOfNodes() const {return NUMBER_OF_NODES;};
+    size_t getDimension() const {return DIMENSION;};
+    size_t getNumberOfFaces() const {return NUMBER_OF_FACES;};
+    size_t getNumberOfEdges() const {return NUMER_OF_EDGES;};
 
-    virtual IElement* getEdgeElement(size_t edge_id) 
+    IElement* getEdgeElement(size_t edge_id) 
     {
         if (_list_edges.size()<NUMER_OF_EDGES)
             return 0;
@@ -69,21 +67,11 @@ public:
         return _list_edges[edge_id];
     }
 
-    virtual void setEdgeElement(size_t edge_id, IElement* e) 
+    void setEdgeElement(size_t edge_id, IElement* e) 
     {
         if (_list_edges.size()==0)
             _list_edges.resize(NUMER_OF_EDGES, 0);
         _list_edges[edge_id] = e;
-    }
-
-    void getNodeIDsOfEdgeElement(size_t edge_id, std::vector<size_t> &vec_node_ids) const
-    {
-        vec_node_ids.resize(0);
-    }
-
-    ElementType::type getEdgeElementType(size_t edge_id) const 
-    {
-        return ElementType::INVALID;
     }
 
     virtual void setNodeID(size_t local_node_id, size_t node_id) {
@@ -95,6 +83,62 @@ public:
         assert (local_node_id < NUMBER_OF_NODES);
         return _list_node_id[local_node_id];
     };
+};
+
+/**
+ * \brief Analytical element
+ */
+template <ElementType::type TYPE, size_t NUMBER_OF_NODES, size_t DIMENSION, size_t NUMBER_OF_FACES, size_t NUMER_OF_EDGES>
+class TemplateAnalyticalElement : public TemplateElement<TYPE, NUMBER_OF_NODES, DIMENSION, NUMBER_OF_FACES, NUMER_OF_EDGES>
+{
+private:
+    IMesh *_msh;
+public:
+    TemplateAnalyticalElement(IMesh *msh) 
+    {
+        _msh = msh;
+    }
+
+    const GeoLib::Point* getNodeCoordinates( size_t i_nod ) const 
+    {
+        return _msh->getNode(i_nod)->getData();
+    };
+};
+
+
+template <ElementType::type TYPE, size_t NUMBER_OF_NODES, size_t DIMENSION, size_t NUMBER_OF_FACES, size_t NUMER_OF_EDGES>
+class TemplateUnstructuredElement : public TemplateElement<TYPE, NUMBER_OF_NODES, DIMENSION, NUMBER_OF_FACES, NUMER_OF_EDGES>
+{
+private:
+    INode* _list_nodes[NUMBER_OF_NODES];
+    IElementCoordinatesMapping *_geo_map;
+
+public:
+    TemplateUnstructuredElement() {
+        initialize();
+    };
+    TemplateUnstructuredElement(size_t element_id) {
+        initialize();
+        this->setID(element_id);
+    }
+    virtual ~TemplateUnstructuredElement() 
+    {
+    };
+
+    void initialize() {
+        _geo_map = 0;
+    }
+
+    virtual void getNodeIDsOfEdgeElement(size_t edge_id, std::vector<size_t> &vec_node_ids) const
+    {
+        vec_node_ids.resize(0);
+    }
+
+    virtual ElementType::type getEdgeElementType(size_t edge_id) const 
+    {
+        return ElementType::INVALID;
+    }
+
 
     void setNode(size_t local_node_id, INode* nod) {
         _list_nodes[local_node_id] = nod;
@@ -113,6 +157,7 @@ public:
     {
         _geo_map = mapping;
     }
+
     virtual IElementCoordinatesMapping* getMappedGeometry() {
         return _geo_map;
     };

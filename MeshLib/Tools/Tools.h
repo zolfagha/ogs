@@ -76,8 +76,10 @@ void createEdgeElements(IMesh * msh, const std::vector<INode*> &selected_nodes, 
                 //if new, create obj
                 IElement *edge = ElemenetFactory::createNewElement(e->getEdgeElementType(j)); 
                 e->getNodeIDsOfEdgeElement(j, vec_edge_nodes);
-                for (size_t k=0; k<vec_edge_nodes.size(); k++)
+                for (size_t k=0; k<vec_edge_nodes.size(); k++) {
                     edge->setNodeID(k, vec_edge_nodes[k]);
+                    edge->setNode(k, msh->getNode(vec_edge_nodes[k]));
+                }
                 edges.push_back(edge);
                 msh->addEdgeElement(edge);
             }

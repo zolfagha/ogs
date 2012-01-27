@@ -97,19 +97,26 @@ public:
 
     void construct() {
 
-        //set node connectivity
-        const size_t n_ele = this->getNumberOfElements();
-        for (size_t i=0; i<n_ele; i++) {
-            const IElement* e = _list_elements[i];
-            for (size_t j=0; j<e->getNumberOfNodes(); j++) {
-                Node* nod_j = getNode(e->getNodeID(j));
-                for (size_t k=j+1; k<e->getNumberOfNodes(); k++) {
-                    Node* nod_k = getNode(e->getNodeID(k));
-                    nod_j->addConnectedNode(e->getNodeID(k));
-                    nod_k->addConnectedNode(e->getNodeID(j));
-                }
-            };
-        }
+        //// set 
+        //for (size_t i=0; i<getNumberOfElements(); i++) {
+        //    IElement *e = getElemenet(i);
+        //    for (size_t j=0; j<e->getNumberOfNodes; j++)
+        //        e->setNode(j, getNode(e->getNodeID(j)));
+        //}
+
+        ////set node connectivity
+        //const size_t n_ele = this->getNumberOfElements();
+        //for (size_t i=0; i<n_ele; i++) {
+        //    const IElement* e = _list_elements[i];
+        //    for (size_t j=0; j<e->getNumberOfNodes(); j++) {
+        //        Node* nod_j = getNode(e->getNodeID(j));
+        //        for (size_t k=j+1; k<e->getNumberOfNodes(); k++) {
+        //            Node* nod_k = getNode(e->getNodeID(k));
+        //            nod_j->addConnectedNode(e->getNodeID(k));
+        //            nod_k->addConnectedNode(e->getNodeID(j));
+        //        }
+        //    };
+        //}
     };
 };
 

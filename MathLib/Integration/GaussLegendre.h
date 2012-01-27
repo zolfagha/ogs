@@ -6,16 +6,20 @@
 namespace MathLib
 {
 
+/**
+ * \brief Gauss-Ledgendre quadrature method
+ *
+ */
 class GaussLegendre
 {
 public:
-    static double getPoint(long grd, long pkt) {
-        switch (grd)
+    static double getPoint(size_t n_sample_points, size_t point_id) {
+        switch (n_sample_points)
         {
         case 1:
             return 0.0;
         case 2:
-            switch (pkt)
+            switch (point_id)
             {
             case 0:
                 return 0.577350269189626;
@@ -24,7 +28,7 @@ public:
             }
             break;
         case 3:
-            switch (pkt)
+            switch (point_id)
             {
             case 0:
                 return 0.774596669241483;
@@ -35,7 +39,7 @@ public:
             }
             break;
         case 4:
-            switch (pkt)
+            switch (point_id)
             {
             case 0:
                 return 0.861136311594053;
@@ -51,14 +55,14 @@ public:
         return 0.0;
     }
 
-    static double getWeight(long grd, long pkt)
+    static double getWeight(size_t n_sample_points, size_t point_id)
     {
-        switch (grd)
+        switch (n_sample_points)
         {
         case 1:
             return 2.0;
         case 2:
-            switch (pkt)
+            switch (point_id)
             {
             case 0:
                 return 1.0;
@@ -67,7 +71,7 @@ public:
             }
             break;
         case 3:
-            switch (pkt)
+            switch (point_id)
             {
             case 0:
                 return 0.555555555555556;
@@ -78,7 +82,7 @@ public:
             }
             break;
         case 4:
-            switch (pkt)
+            switch (point_id)
             {
             case 0:
                 return 0.347854845137454;

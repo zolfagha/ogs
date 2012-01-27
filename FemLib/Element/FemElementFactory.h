@@ -19,14 +19,13 @@ public:
         switch (fe_type)
         {
             case FiniteElementType::LINE2:
-                break;
+                return new LINE2();
             case FiniteElementType::QUAD4:
                 return new QUAD4();
-                break;
             case FiniteElementType::TRI3CONST:
                 return new TRI3CONST();
-                break;
         }
+        assert(false);
         return 0;
     }
 };

@@ -15,6 +15,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <vector>
+#include <cassert>
 
 namespace MathLib {
 
@@ -127,6 +128,30 @@ public:
     * @param a the scalar factor. default = 1.0
     */
    void transposeAndMultiply(const Matrix<T> &matB, Matrix<T> &matC, double a=1.0) const;
+   /**
+    * C += a*A^T*v*B
+    * @param matB the transposed matrix B
+    * @param matC the matrix C
+    * @param a the scalar factor. default = 1.0
+    */
+   void transposeAndMultiply(const Matrix<T> &matB, T*row_vec, Matrix<T> &matC, double a=1.0) const;
+
+   /**
+    * return a determinant of the matrix
+    * @return determinant
+    */
+   T determinant() const;
+
+   /**
+    * return an inverse matrix
+    * @return inverse matrix
+    */
+   Matrix<T>* inverse() const;
+   /**
+    * return an inverse matrix
+    * @param inverse matrix
+    */
+   void inverse(Matrix<T>*) const;
 
    inline T & operator() (size_t row, size_t col) throw (std::range_error);
    inline T & operator() (size_t row, size_t col) const throw (std::range_error);
@@ -176,6 +201,8 @@ template<class T> void Matrix<T>::resize (size_t rows, size_t cols)
     if (rows!=nrows || cols!=ncols) {
         delete [] data;
         data = new T[nrows*ncols];
+        nrows = rows;
+        ncols = cols;
     }
 }
 
@@ -350,7 +377,7 @@ template<class T> void Matrix<T>::multiply(const Matrix<T> &matB, Matrix<T> &mat
     for (size_t rowA=0; rowA<this->nrows; rowA++) {
         for (size_t colB=0; colB<matB.getNCols(); colB++) {
             for (size_t colArowB=0; colArowB<this->ncols; colArowB++) {
-                matC(rowA, colB) += this(rowA, colArowB) * matB(colArowB, colB);
+                matC(rowA, colB) += (*this)(rowA, colArowB) * matB(colArowB, colB);
             }
         }
     }
@@ -368,6 +395,90 @@ template<class T> void Matrix<T>::transposeAndMultiply(const Matrix<T> &matB, Ma
     }
 }
 
+template<class T> void Matrix<T>::transposeAndMultiply(const Matrix<T> &matB, T*row_vec, Matrix<T> &matC, double a=1.0) const
+{
+    Matrix<T> m(1, matB.getNCols());
+    m = .0;
+    // M = v * B
+    for (size_t colB=0; colB<matB.getNCols(); colB++) {
+        for (size_t rowB=0; rowB<matB.getNRows(); rowB++) {
+            m(0, colB) += row_vec[rowB]*matB(rowB, colB);
+        }
+    }
+    // C += a* A^T * M
+    for (size_t colA=0; colA<this->ncols; colA++) {
+        for (size_t colB=0; colB<m.getNCols(); colB++) {
+            for (size_t colAcolB=0; colAcolB<this->nrows; colAcolB++) {
+                matC(colA, colB) += a * (*this)(colA, colAcolB) * m(colAcolB, colB);
+            }
+        }
+    }
+}
+
+template<class T> T Matrix<T>::determinant() const
+{
+    assert(nrows==ncols);
+    assert(nrows<4);
+
+    T det;
+    if (nrows==1) {
+        det = (*this)(0,0);
+    } else if (nrows==2) {
+        det = (*this)(0,0)*(*this)(1,1);
+        det -= (*this)(0,1)*(*this)(1,0);
+    } else if (nrows==3) {
+        det = (*this)(0,0)*((*this)(1,1)*(*this)(2,2)-(*this)(2,1)*(*this)(1,2));
+        det -= (*this)(1,0)*((*this)(0,1)*(*this)(2,2)-(*this)(2,1)*(*this)(0,2));
+        det += (*this)(2,0)*((*this)(0,1)*(*this)(1,2)-(*this)(1,1)*(*this)(0,2));
+    } else {
+        //TODO not implemented yet
+    }
+
+    return det;
+}
+
+template<class T> void Matrix<T>::inverse(Matrix<T> *y) const
+{
+    assert(nrows==ncols);
+    assert(nrows<4);
+
+    if (nrows==1) {
+        (*y)(0,0) = (*this)(0,0);
+    } else if (nrows==2) {
+        (*y)(0,0) = (*this)(1,1);
+        (*y)(0,1) = -(*this)(0,1);
+        (*y)(1,0) = -(*this)(1,0);
+        (*y)(1,1) = (*this)(0,0);
+    } else if (nrows==3) {
+        (*y)(0,0) = (*this)(1,1)*(*this)(2,2)-(*this)(2,1)*(*this)(1,2);
+        (*y)(0,1) = (*this)(0,2)*(*this)(2,1)-(*this)(0,1)*(*this)(2,2);
+        (*y)(0,2) =  (*this)(0,1)*(*this)(1,2)-(*this)(0,2)*(*this)(1,1);
+        //
+        (*y)(1,0) =  (*this)(1,2)*(*this)(2,0)-(*this)(2,2)*(*this)(1,0);
+        (*y)(1,1) =  (*this)(0,0)*(*this)(2,2)-(*this)(2,0)*(*this)(0,2);
+        (*y)(1,2) =  (*this)(0,2)*(*this)(1,0)-(*this)(1,2)*(*this)(0,0);
+        //
+        (*y)(2,0) =  (*this)(1,0)*(*this)(2,1)-(*this)(2,0)*(*this)(1,1);
+        (*y)(2,1) =  (*this)(0,1)*(*this)(2,0)-(*this)(2,1)*(*this)(0,0);
+        (*y)(2,2) =  (*this)(0,0)*(*this)(1,1)-(*this)(1,0)*(*this)(0,1);
+    } else {
+        //error
+    }
+
+    double detA = determinant();
+    (*y) /= detA;
+}
+
+template<class T> Matrix<T>* Matrix<T>::inverse() const
+{
+    assert(nrows==ncols);
+    assert(nrows<4);
+
+    Matrix<T>* y(new Matrix<T> (nrows, ncols));
+    inverse(y);
+
+    return y;
+}
 
 template<class T> T& Matrix<T>::operator() (size_t row, size_t col)
 	throw (std::range_error)

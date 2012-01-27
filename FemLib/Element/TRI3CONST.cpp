@@ -9,10 +9,10 @@
 namespace FemLib
 {
 
-void TRI3CONST::configure( MeshLib::IMesh * msh, MeshLib::Triangle * e )
+void TRI3CONST::configure( MeshLib::IMesh * msh, MeshLib::IElement * e )
 {
     _msh = msh;
-    _ele = e;
+    _ele = static_cast<MeshLib::Triangle*>(e);
     double nodes_x[3], nodes_y[3];
     // xyz
     for (size_t i=0; i<3; i++) {
@@ -34,16 +34,48 @@ void TRI3CONST::configure( MeshLib::IMesh * msh, MeshLib::Triangle * e )
     c[2] = 0.5/A*(nodes_x[1]-nodes_x[0]);
 }
 
+void TRI3CONST::computeBasisFunctions(const double *x)
+{
+    computeBasisFunction(x, (double*)_shape.getData());
+    computeGradBasisFunction(x, _dshape);
+}
+
+MathLib::Matrix<double>* TRI3CONST::getBasisFunction()
+{
+    return &_shape;
+}
+
+MathLib::Matrix<double>* TRI3CONST::getGradBasisFunction()
+{
+    return &_dshape;
+}
+
+void TRI3CONST::computeBasisFunction(const double *x,  double *shape)
+{
+    for (size_t i=0; i<3; i++)
+        shape[i] = a[i]+b[i]*x[0]+c[i]*x[1];
+}
+
+void TRI3CONST::computeGradBasisFunction(const double*,  MathLib::Matrix<double> &dshape)
+{
+    for (size_t i=0; i<3; i++) {
+        dshape(0,i) = b[i];
+        dshape(1,i) = c[i];
+    }
+}
+
 double TRI3CONST::interpolate(double *x, double *nodal_values)
 {
+    double shape[3] = {};
+    computeBasisFunction(x, shape);
     double v = 0;
     for (size_t i=0; i<3; i++)
-        v += (a[i]+b[i]*x[0]+c[i]*x[1])*nodal_values[i];
+        v += shape[i]*nodal_values[i];
     return v;
 }
 
 /// compute an matrix M = Int{W^T F N} dV
-void TRI3CONST::computeIntTestShape( Fscalar f, MathLib::Matrix<double> &mat)
+void TRI3CONST::integrateWxN( Fscalar f, MathLib::Matrix<double> &mat)
 {
     const double v = f(0);
     mat(0,0) = 1.0;
@@ -60,7 +92,7 @@ void TRI3CONST::computeIntTestShape( Fscalar f, MathLib::Matrix<double> &mat)
 }
 
 /// compute an matrix M = Int{W^T F dN} dV
-void TRI3CONST::computeIntTestDShape( Fvector f, MathLib::Matrix<double> &mat)
+void TRI3CONST::integrateWxDN( Fvector f, MathLib::Matrix<double> &mat)
 {
     double *v = f(0);
     for (int i=0; i<3; i++)
@@ -70,7 +102,7 @@ void TRI3CONST::computeIntTestDShape( Fvector f, MathLib::Matrix<double> &mat)
 }
 
 /// compute an matrix M = Int{dW^T F dN} dV
-void TRI3CONST::computeIntDTestDShape( Fscalar f, MathLib::Matrix<double> &mat)
+void TRI3CONST::integrateDWxDN( Fscalar f, MathLib::Matrix<double> &mat)
 {
     const double v = f(0);
     mat(0,0) = b[0]*b[0] + c[0]*c[0];

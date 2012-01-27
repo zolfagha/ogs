@@ -7,7 +7,6 @@
 #include "Integration.h"
 #include "FemCoorinatesMapping.h"
 #include "ShapeFunction.h"
-#include "TestFunction.h"
 
 namespace FemLib
 {
@@ -28,11 +27,12 @@ struct FiniteElementType
     };
 };
 
-typedef double (*Fscalar)(double *x);
-typedef double* (*Fvector)(double *x);
+typedef double (*Fscalar)(const double *x);
+typedef double* (*Fvector)(const double *x);
 
 /**
- * IFiniteElement class is an interface to all kinds of finite element classes. 
+ * \brief IFiniteElement class is an interface to all kinds of finite element classes. 
+ *
  * Roles of the class is
  * - assembly of typical local matrices, e.g. N^T N, dN^T dN
  * - interpolation, extrapolation
@@ -41,138 +41,172 @@ typedef double* (*Fvector)(double *x);
 class IFiniteElement
 {
 public:
-    IFiniteElement() : _ele(0) {};
-    virtual ~IFiniteElement() {};
-
     /// initialize object for given mesh elements
     virtual void configure( MeshLib::IMesh * msh, MeshLib::IElement * e ) = 0;
     /// return finite element type
     virtual const FiniteElementType::type getFeType() const = 0;
     /// return mesh element
-    MeshLib::IElement* getElement() const {return _ele;};
+    virtual MeshLib::IElement* getElement() const = 0;
     /// return the number of variables
     virtual size_t getNumberOfVariables() const = 0;
+
+    /// compute basis functions at the given point
+    virtual void computeBasisFunctions(const double *x) = 0;
+    /// get evaluated basis functions. 
+    virtual MathLib::Matrix<double>* getBasisFunction() = 0;
+    /// get evaluated gradient of basis functions. 
+    virtual MathLib::Matrix<double>* getGradBasisFunction() = 0;
 
     /// make interpolation from nodal values
     virtual double interpolate(double *pt, double *nodal_values) = 0;
     /// compute an matrix M = Int{W^T F N} dV
-    virtual void computeIntTestShape( Fscalar, MathLib::Matrix<double> &) = 0;
+    virtual void integrateWxN( Fscalar, MathLib::Matrix<double> &) = 0;
     /// compute an matrix M = Int{W^T F dN} dV
-    virtual void computeIntTestDShape( Fvector, MathLib::Matrix<double> &) = 0;
+    virtual void integrateWxDN( Fvector, MathLib::Matrix<double> &) = 0;
     /// compute an matrix M = Int{dW^T F dN} dV
-    virtual void computeIntDTestDShape( Fscalar, MathLib::Matrix<double> &) = 0;
+    virtual void integrateDWxDN( Fscalar, MathLib::Matrix<double> &) = 0;
 
-private:
-    MeshLib::IElement* _ele;
+    /// get the integration method
+    virtual IFemNumericalIntegration* getIntegrationMethod() const = 0;
 };
 
+/**
+ * \brief Base class for implementation of finite element classes
+ */
 template <FiniteElementType::type T_FETYPE, size_t N_VARIABLES>
 class TemplateFeBase : public IFiniteElement
 {
 public:
+    TemplateFeBase() : _ele(0) {};
+    virtual ~TemplateFeBase() {};
+
+    /// return mesh element
+    MeshLib::IElement* getElement() const {return _ele;};
     /// return the number of variables
     size_t getNumberOfVariables() const { return N_VARIABLES; };
     /// return finite element type
     const FiniteElementType::type getFeType() const { return T_FETYPE; };
+protected:
+    void setElement(MeshLib::IElement* e) {_ele = e;};
+private:
+    MeshLib::IElement* _ele;
 };
 
-// use of natural coordinates
 
-template <FiniteElementType::type T_FETYPE, size_t N_VARIABLES>
-class FeBaseNaturalCoordinates : public TemplateFeBase<T_FETYPE, N_VARIABLES>
+/**
+ * \brief Base for any isoparametric FE classes
+ */
+template <FiniteElementType::type T_FETYPE, size_t N_VARIABLES, class T_SHAPE, class T_INTEGRAL>
+class FeBaseIsoparametric : public TemplateFeBase<T_FETYPE, N_VARIABLES>
 {
 public:
-    FeBaseNaturalCoordinates() : _ele(0) 
+    FeBaseIsoparametric()
     {
-        _base = getBaseFunction();
-        _test = getTestFunction();
-        _integral = getIntegrationMethod();
-        _mapping = new FemNaturalCoordinates(_base);
+        _mapping = new FemNaturalCoordinates(new T_SHAPE());
+        _integration = new T_INTEGRAL();
     };
 
-    virtual ~FeBaseNaturalCoordinates() 
+    virtual ~FeBaseIsoparametric() 
     {
         delete _mapping;
-        delete _base;
-        delete _test;
-        delete _integral;
+        delete _integration;
     };
 
-    /// initialize object for given mesh elements
-    virtual void configure( const MeshLib::IElement * e )
-    {
+    virtual IFemNumericalIntegration* getIntegrationMethod() const {return _integration;};
 
+    /// initialize object for given mesh elements
+    virtual void configure( MeshLib::IMesh * msh, MeshLib::IElement * e )
+    {
+        setElement(e);
+        _mapping->initialize(e);
+    }
+
+    virtual void computeBasisFunctions(const double *x)
+    {
+        _mapping->compute(x);
+    }
+
+    virtual MathLib::Matrix<double>* getBasisFunction()
+    {
+        return _mapping->getProperties()->shape_r;
+    }
+
+    virtual MathLib::Matrix<double>* getGradBasisFunction()
+    {
+        return _mapping->getProperties()->dshape_dx;
     }
 
 
     /// make interpolation from nodal values
-    virtual double interpolate(double *pt, double *nodal_values)
+    virtual double interpolate(double *natural_pt, double *nodal_values)
     {
-        double v = 0;
-        MathLib::Matrix<double> *matN = _base->computeShapeFunction(pt);
-        double *N = (double*)matN->getData();
+        const CoordMappingProperties *prop = _mapping->compute(natural_pt);
+        double *N = (double*)prop->shape_r->getData();
+        double v = .0;
         for (size_t i=0; i<getNumberOfVariables(); i++)
             v+=N[i]*nodal_values[i];
         return v;
     }
 
-    /// extrapolate nodal values from integration point values
-    virtual void extrapolate(double *integral_values, double *nodal_values)
-    {
-        throw std::exception("not implemented yet.");
-    }
-
     /// compute an matrix M = Int{W^T F N} dV
-    virtual void computeIntTestShape( void (*func)(double*), MathLib::Matrix<double> *mat)
+    virtual void integrateWxN(Fscalar f, MathLib::Matrix<double> &mat)
     {
+        const size_t n_gp = _integration->getNumberOfSamplingPoints();
+        double x[3];
+        for (size_t i=0; i<n_gp; i++) {
+            _integration->getSamplingPoint(i, x);
+            const CoordMappingProperties *coord_prop = _mapping->compute(x);
+            MathLib::Matrix<double> *basis = coord_prop->shape_r;
+            MathLib::Matrix<double> *test = coord_prop->shape_r;
+            double fac = coord_prop->det_jacobian * _integration->getWeight(i);
+            double v = f(x);
+            fac *= v;
+            test->transposeAndMultiply(*basis, mat, fac);
+        }
     }
 
     /// compute an matrix M = Int{W^T F dN} dV
-    virtual void computeIntTestDShape( void (*func)(double*), MathLib::Matrix<double> *)
+    virtual void integrateWxDN(Fvector f, MathLib::Matrix<double> &mat)
     {
-
+        const size_t n_gp = _integration->getNumberOfSamplingPoints();
+        double x[3];
+        for (size_t i=0; i<n_gp; i++) {
+            _integration->getSamplingPoint(i, x);
+            const CoordMappingProperties *coord_prop = _mapping->compute(x);
+            MathLib::Matrix<double> *dbasis = coord_prop->dshape_dx;
+            MathLib::Matrix<double> *test = coord_prop->dshape_dx;
+            double fac = coord_prop->det_jacobian * _integration->getWeight(i);
+            double *v = f(x);
+            test->transposeAndMultiply(*dbasis, v, mat, fac);
+        }
     }
 
     /// compute an matrix M = Int{dW^T F dN} dV
-    virtual void computeIntDTestDShape( void (*func)(double*), MathLib::Matrix<double> *)
+    virtual void integrateDWxDN(Fscalar f, MathLib::Matrix<double> &mat)
     {
-
-    }
-
-    /// compute an vector V = Int{W^T*N}dV*U_i
-    virtual void computeIntTestShapeNodalVal(double *nod_val, double *result) 
-    {
-        MathLib::Matrix<double> M(this->getNumberOfVariables(), this->getNumberOfVariables());
-        //for each sampling point
-       size_t n_gp = _integral->getNumberOfSamplingPoints();
-       for (size_t i=0; i<n_gp; i++) {
-            const double *x = _integral->getSamplingPoint(i);
-            //TODO Mapping should provide N, dN, j because dr/dx is involved
-            MathLib::Matrix<double> *N = _base->computeShapeFunction(x);
-            MathLib::Matrix<double> *T = _test->computeTestFunction(*N);
-            _mapping->compute(x, FemMapComputation::ALL);
-            double fac = _mapping->getDetJacobian() * _integral->getWeight(i);
-            //M += W^T N * j *w
-            T->transposeAndMultiply(*N, M, fac);
-       }
-       //r = M * u
-       M.axpy(1.0, nod_val, 0.0, result);
+        const size_t n_gp = _integration->getNumberOfSamplingPoints();
+        double x[3];
+        for (size_t i=0; i<n_gp; i++) {
+            _integration->getSamplingPoint(i, x);
+            const CoordMappingProperties *coord_prop = _mapping->compute(x);
+            MathLib::Matrix<double> *dbasis = coord_prop->dshape_dx;
+            MathLib::Matrix<double> *dtest = coord_prop->dshape_dx;
+            double fac = coord_prop->det_jacobian * _integration->getWeight(i);
+            double v = f(x);
+            fac *= v;
+            dtest->transposeAndMultiply(*dbasis, mat, fac);
+        }
     }
 
 private:
-    MeshLib::IElement* _ele;
-    IFemCoordinatesMapping *_mapping;
-    IFemShapeFunction *_base;
-    IFemTestFunction *_test;
-    IFemIntegration *_integral;
+    FemNaturalCoordinates *_mapping;
+    IFemNumericalIntegration* _integration;
 
-    virtual IFemShapeFunction* getBaseFunction() const = 0;
-    virtual IFemIntegration* getIntegrationMethod() const = 0;
-
-    virtual IFemTestFunction* getTestFunction() const {
-        return new FemTestFunctionBubnov();
-    }
+//protected:
+//    virtual IFemShapeFunction* createShapeFunction() const = 0;
+//    virtual IFemIntegration* createIntegrationMethod() const = 0;
 };
+
 
 }
 

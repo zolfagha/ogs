@@ -50,7 +50,8 @@ public:
     {
         _feObjects.setPolynomialOrder(_order);
         IFiniteElement* fe = _feObjects.getFeObject(e);
-        fe->configure(e);
+        fe->configure(_msh, e);
+        fe->getIntegrationMethod()->initialize(e, 2);
 
         return fe;
     }

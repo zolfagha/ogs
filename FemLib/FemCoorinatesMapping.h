@@ -18,8 +18,10 @@ struct CoordMappingProperties
     //double r[3];
     /// shape function N(r)
     MathLib::Matrix<double> *shape_r;
-    /// gradient of shape functions, dN(r)/dx
+    /// gradient of shape functions, dN(r)/dr
     MathLib::Matrix<double> *dshape_dr;
+    /// gradient of shape functions, dN(r)/dx
+    MathLib::Matrix<double> *dshape_dx;
     /// Jacobian matrix, J=dx/dr
     MathLib::Matrix<double> *jacobian_dxdr;
     /// determinant of the Jacobian
@@ -31,6 +33,7 @@ struct CoordMappingProperties
     {
         shape_r = new MathLib::Matrix<double>(); 
         dshape_dr = new MathLib::Matrix<double>(); 
+        dshape_dx = new MathLib::Matrix<double>(); 
         jacobian_dxdr = new MathLib::Matrix<double>(); 
         inv_jacobian_drdx = new MathLib::Matrix<double>(); 
     }
@@ -39,6 +42,7 @@ struct CoordMappingProperties
     {
         delete shape_r;
         delete dshape_dr;
+        delete dshape_dx;
         delete jacobian_dxdr;
         delete inv_jacobian_drdx;
     }
@@ -55,9 +59,9 @@ public:
     /// compute shape functions
     virtual const CoordMappingProperties* compute(const double* natural_pt) = 0;
     /// map natural coordinates to physical coordinates
-    virtual double* mapToPhysicalCoordinates(const double* natural_pt) = 0;
+    virtual void mapToPhysicalCoordinates(const double* natural_pt, double*) = 0;
     /// map physical coordinates to natural coordinates
-    virtual double* mapFromPhysicalCoordinates(const double* physical_pt) = 0;
+    virtual void mapFromPhysicalCoordinates(const double* physical_pt, double*) = 0;
 
 };
 
@@ -74,10 +78,12 @@ private:
     CoordMappingProperties* _prop;
     IFemShapeFunction* _shape;
     MeshLib::IElement* _ele;
+    MathLib::Matrix<double> x;
 
 public:
-    FemNaturalCoordinates() 
+    FemNaturalCoordinates(IFemShapeFunction *shape) 
     {
+        _shape = shape;
         _prop = new CoordMappingProperties();
     }
     virtual ~FemNaturalCoordinates()
@@ -89,14 +95,20 @@ public:
     virtual void initialize(MeshLib::IElement* ele)
     {
         _ele = ele;
-        _shape = getShapeFunction();
         const size_t dim = _ele->getDimension();
         const size_t nnodes = _ele->getNumberOfNodes();
         _prop->shape_r->resize(1, nnodes);
         _prop->dshape_dr->resize(dim, nnodes);
+        _prop->dshape_dx->resize(dim, nnodes);
         _prop->jacobian_dxdr->resize(dim, dim);
         _prop->inv_jacobian_drdx->resize(dim, dim);
+        x.resize(dim, nnodes);
+        for (size_t i=0; i<nnodes; i++)
+            for (size_t j=0; j<dim; j++)
+                x(j,i) = _ele->getNodeCoordinates(i)->getData()[j]; //TODO should be via local coordinates
     }
+
+    virtual const CoordMappingProperties* getProperties() const {return _prop;};
 
     /// compute mapping properties at the given location in natural coordinates
     virtual const CoordMappingProperties* compute(const double* natural_pt) 
@@ -104,10 +116,6 @@ public:
         //prepare
         const size_t dim = _ele->getDimension();
         const size_t nnodes = _ele->getNumberOfNodes();
-        MathLib::Matrix<double> x(dim, nnodes);
-        for (size_t i=0; i<nnodes; i++)
-            for (size_t j=0; j<dim; j++)
-                x(j,i) = _ele->getNodeCoordinates(i)->getData()[j]; //TODO should be via local coordinates
 
         //shape, dshape
         MathLib::Matrix<double> *shape  = _prop->shape_r;
@@ -119,60 +127,83 @@ public:
         MathLib::Matrix<double> *jac = _prop->jacobian_dxdr;
         for (size_t i_r=0; i_r<dim; i_r++) {
             for (size_t j_x=0; j_x<dim; j_x++) {
-                for (size_t k=0; k<nnodes; j_x++) {
+                for (size_t k=0; k<nnodes; k++) {
                     (*jac)(i_r,j_x) += (*dshape_dr)(i_r, k) * x(j_x,k);
                 }
             }
         }
 
         //determinant of J
-        //TODO add a method to calculate a determinant
-        double det_j = 0;
-        if (dim==1) {
-            det_j = (*jac)(0,0);
-        } else if (dim==2) {
-            det_j = (*jac)(0,0)*(*jac)(1,1);
-            det_j -= (*jac)(0,1)*(*jac)(1,0);
-        } else if (dim==3) {
-            det_j = (*jac)(0,0)*((*jac)(1,1)*(*jac)(2,2)-(*jac)(2,1)*(*jac)(1,2));
-            det_j -= (*jac)(1,0)*((*jac)(0,1)*(*jac)(2,2)-(*jac)(2,1)*(*jac)(0,2));
-            det_j += (*jac)(2,0)*((*jac)(0,1)*(*jac)(1,2)-(*jac)(1,1)*(*jac)(0,2));
-        }
+        double det_j = jac->determinant();
         _prop->det_jacobian = det_j;
 
         //inverse of J
-        //TODO add a method to get inverse of the J
         MathLib::Matrix<double> *inv_jac = _prop->inv_jacobian_drdx;
-        if (dim==1) {
-            (*inv_jac)(0,0) = (*jac)(0,0);
-        } else if (dim==2) {
-            (*inv_jac)(0,0) = (*jac)(1,1);
-            (*inv_jac)(0,1) = -(*jac)(0,1);
-            (*inv_jac)(1,0) = -(*jac)(1,0);
-            (*inv_jac)(1,1) = (*jac)(0,0);
-        } else if (dim==3) {
-            (*inv_jac)(0,0) = (*jac)(1,1)*(*jac)(2,2)-(*jac)(2,1)*(*jac)(1,2);
-            (*inv_jac)(0,1) = (*jac)(0,2)*(*jac)(2,1)-(*jac)(0,1)*(*jac)(2,2);
-            (*inv_jac)(0,2) =  (*jac)(0,1)*(*jac)(1,2)-(*jac)(0,2)*(*jac)(1,1);
-            //
-            (*inv_jac)(1,0) =  (*jac)(1,2)*(*jac)(2,0)-(*jac)(2,2)*(*jac)(1,0);
-            (*inv_jac)(1,1) =  (*jac)(0,0)*(*jac)(2,2)-(*jac)(2,0)*(*jac)(0,2);
-            (*inv_jac)(1,2) =  (*jac)(0,2)*(*jac)(1,0)-(*jac)(1,2)*(*jac)(0,0);
-            //
-            (*inv_jac)(2,0) =  (*jac)(1,0)*(*jac)(2,1)-(*jac)(2,0)*(*jac)(1,1);
-            (*inv_jac)(2,1) =  (*jac)(0,1)*(*jac)(2,0)-(*jac)(2,1)*(*jac)(0,0);
-            (*inv_jac)(2,2) =  (*jac)(0,0)*(*jac)(1,1)-(*jac)(1,0)*(*jac)(0,1);
-        }
-        (*inv_jac) /= det_j;
+        jac->inverse(inv_jac);
+
+        //dshape/dx = invJ * dNdr
+        MathLib::Matrix<double> *dshape_dx = _prop->dshape_dx;
+        inv_jac->multiply(*dshape_dr, *dshape_dx);
+
 
         return _prop;
     };
 
-    double* mapToPhysicalCoordinates(const double* natural_pt);
-    double* mapFromPhysicalCoordinates(const double* physical_pt);
+    /// compute physical coordinates at the given natural coordinates
+    /// \f[
+    ///    \mathbf{x} = \mathbf{N(r)} * \mathbf{X}
+    /// \f]
+    ///
+    /// @param natural_pt
+    /// @return physical_pt
+    void mapToPhysicalCoordinates(const double* natural_pt, double* physical_pt)
+    {
+        const size_t dim = _ele->getDimension();
+        const size_t nnodes = _ele->getNumberOfNodes();
+        MathLib::Matrix<double> *shape  = _prop->shape_r;
+        _shape->computeShapeFunction(natural_pt, (double*)shape->getData());
 
-private:
-    virtual IFemShapeFunction* getShapeFunction() = 0;
+        for (size_t i=0; i<dim; i++) {
+            physical_pt[i] = .0;
+            for (size_t j=0; j<nnodes; j++)
+                physical_pt[i] += (*shape)(0,j) + x(i,j);
+        }
+    }
+
+    /// compute natural coordinates at the given natural coordinates.
+    /// Assuming \f$ r=0 \f$ at \f$ x = \bar{x}_{avg} \f$, natural coordinates can be calculated as
+    /// \f[
+    ///    \mathbf{r} = (\mathbf{J}^-1)^T * (\mathbf{x} - \bar{\mathbf{x}}_{avg})
+    /// \f]
+    ///
+    /// @param physical_pt
+    /// @return natural_pt
+    void mapFromPhysicalCoordinates(const double* physical_pt, double* natural_pt)
+    {
+        const size_t dim = _ele->getDimension();
+        const size_t nnodes = _ele->getNumberOfNodes();
+        MathLib::Matrix<double> *inv_jac = _prop->inv_jacobian_drdx;
+
+        // calculate dx which is relative coordinates from element center
+        std::vector<double> dx(dim, .0);
+        // x_avg = sum_i {x_i} / n
+        for (size_t i=0; i<dim; i++)
+            for (size_t j=0; j<nnodes; j++)
+                dx[i] += x(i,j);
+        for (size_t i=0; i<dim; i++)
+            dx[i] /= (double)nnodes;
+        // dx = pt - x_avg
+        for (size_t i=0; i<dim; i++)
+            dx[i] = physical_pt[i] -dx[i];
+
+        // r = invJ^T * dx
+        for (size_t i=0; i<dim; i++) {
+            natural_pt[i] = 0.0;
+            for (size_t j=0; j<dim; j++)
+                natural_pt[i] += (*inv_jac)(j * dim, i) * dx[j];
+        }
+
+    }
 };
 
 /**
@@ -186,7 +217,7 @@ public:
     FemAxisymmetric() : _r(.0) {};
     virtual ~FemAxisymmetric() {};
 
-    virtual void computeMappingFunctions(double* natural_pt, FemMapComputation::type compType) 
+    virtual void computeMappingFunctions(double* natural_pt) 
     {
         //FemIsoparametricMapping::computeMappingFunctions(natural_pt, compType);
         _r = this->computeRadius();

@@ -1,14 +1,12 @@
 
 #pragma once
 
-#include "IFemElement.h"
+#include "FemLib/IFemElement.h"
+#include "FemLib/Integration.h"
 
 namespace FemLib
 {
 
-class LINE2 : public IFiniteElement
-{
-
-};
+typedef FeBaseIsoparametric<FiniteElementType::LINE2, 2, FemShapeLine2, FemIntegrationGaussLine> LINE2;
 
 }

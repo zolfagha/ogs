@@ -2,7 +2,10 @@
 #pragma  once
 
 #include <vector>
+
 #include "GeoLib/Core/Point.h"
+
+#include "MeshLib/Core/INode.h"
 #include "CoordinateSystem.h"
 
 namespace MeshLib
@@ -52,10 +55,12 @@ public:
     virtual size_t getNumberOfNodes() const = 0;
     virtual void setNodeID(size_t local_node_id, size_t node_id) = 0;
     virtual size_t getNodeID(size_t local_node_id) const = 0;
+    virtual void setNode(size_t local_node_id, INode*) = 0;
+    virtual INode* getNode(size_t local_node_id) const = 0;
     void getNodeIDList( std::vector<size_t> &e_node_id_list ) const
     {
         e_node_id_list.resize(this->getNumberOfNodes());
-        for (int i=0; i<this->getNumberOfNodes(); i++)
+        for (size_t i=0; i<this->getNumberOfNodes(); i++)
             e_node_id_list[i] = this->getNodeID(i);
     };
     virtual const GeoLib::Point* getNodeCoordinates( size_t i_nod ) const = 0;

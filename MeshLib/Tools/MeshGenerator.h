@@ -69,6 +69,8 @@ public:
                 e->setNodeID(1, offset_y1+k+1);
                 e->setNodeID(2, offset_y2+k+1);
                 e->setNodeID(3, offset_y2+k);
+                for (size_t l=0; l<4; l++)
+                    e->setNode(l, msh->getNode(e->getNodeID(l)));
                 msh->addElement(e);
             }
         }

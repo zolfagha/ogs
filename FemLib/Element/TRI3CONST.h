@@ -25,22 +25,38 @@ private:
     MeshLib::IMesh *_msh;
     double a[3], b[3], c[3];
     double A;
+    FemIntegrationAnalytical _integration;
+    MathLib::Matrix<double> _shape, _dshape;
 
+    void computeBasisFunction(const double *x,  double *shape);
+    void computeGradBasisFunction(const double *x,  MathLib::Matrix<double> &mat);
 public:
+    TRI3CONST() : _shape(1,3), _dshape(2,3) {};
+
     /// initialize object for given mesh elements
-    void configure( MeshLib::IMesh * msh, MeshLib::Triangle * e );
+    void configure( MeshLib::IMesh * msh, MeshLib::IElement * e );
+
+    /// 
+    void computeBasisFunctions(const double *x);
+    MathLib::Matrix<double>* getBasisFunction();
+    MathLib::Matrix<double>* getGradBasisFunction();
+
 
     /// make interpolation from nodal values
     double interpolate(double *x, double *nodal_values);
 
     /// compute an matrix M = Int{W^T F N} dV
-    void computeIntTestShape( Fscalar f, MathLib::Matrix<double> &mat);
+    void integrateWxN( Fscalar f, MathLib::Matrix<double> &mat);
 
     /// compute an matrix M = Int{W^T F dN} dV
-    void computeIntTestDShape( Fvector f, MathLib::Matrix<double> &mat);
+    void integrateWxDN( Fvector f, MathLib::Matrix<double> &mat);
 
     /// compute an matrix M = Int{dW^T F dN} dV
-    void computeIntDTestDShape( Fscalar f, MathLib::Matrix<double> &mat);
+    void integrateDWxDN( Fscalar f, MathLib::Matrix<double> &mat);
+
+    /// get the integration method
+    IFemNumericalIntegration* getIntegrationMethod() const {return (IFemNumericalIntegration*)&_integration;};
+
 };
 
 }
