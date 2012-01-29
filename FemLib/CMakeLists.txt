@@ -10,9 +10,9 @@
 #
 FILE(GLOB FemLib_Files *.h *.cpp)
 SOURCE_GROUP( FemLib FILES ${FemLib_Files})
-FILE(GLOB FemLib_Element_Files Element/*.h *.cpp)
+FILE(GLOB FemLib_Element_Files Element/*.h Element/*.cpp)
 SOURCE_GROUP( FemLib\\Element FILES ${FemLib_Element_Files})
-FILE(GLOB FemLib_BC_Files BC/*.h *.cpp)
+FILE(GLOB FemLib_BC_Files BC/*.h BC/*.cpp)
 SOURCE_GROUP( FemLib\\BC FILES ${FemLib_BC_Files})
 
 ADD_LIBRARY(FemLib STATIC

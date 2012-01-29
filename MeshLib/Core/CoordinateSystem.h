@@ -3,8 +3,11 @@
 
 namespace MeshLib
 {
+
 /**
- * Coordinate systems
+ * \brief Coordinate systems
+ *
+ *
  */
 class CoordinateSystem
 {
@@ -21,16 +24,19 @@ public:
     CoordinateSystem(CoordinateSystemType coord) {
         _type = coord;
     }
-    CoordinateSystemType getType() const 
-    {
+
+    /// get this coordinate type
+    CoordinateSystemType getType() const {
         return _type;
     }
-    size_t getDimension() const
-    {
+
+    /// get dimension size
+    size_t getDimension() const {
         return _type / 10;
     }
-    bool hasZ() const
-    {
+
+    /// has z dimension
+    bool hasZ() const {
         return (_type % 10 == 2);
     }
 

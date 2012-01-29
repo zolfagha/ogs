@@ -10,6 +10,7 @@
 
 namespace MeshLib
 {
+
 /// List of available element types
 struct ElementType
 {
@@ -73,8 +74,8 @@ public:
     virtual void getNodeIDsOfEdgeElement(size_t edge_id, std::vector<size_t> &vec_node_ids) const = 0;
     virtual ElementType::type getEdgeElementType(size_t edge_id) const = 0;
 
-    virtual void setMappedGeometry(IElementCoordinatesMapping* mapping) = 0;
-    virtual IElementCoordinatesMapping* getMappedGeometry() = 0;
+    virtual void setMappedCoordinates(IElementCoordinatesMapping* mapping) = 0;
+    virtual IElementCoordinatesMapping* getMappedCoordinates() = 0;
 
 };
 

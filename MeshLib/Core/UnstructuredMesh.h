@@ -42,6 +42,11 @@ public:
     {
         return _coord_system;        
     };
+    /// set coordinate systems
+    virtual void setCoordinateSystem(CoordinateSystem coord) 
+    {
+        _coord_system = coord;
+    }
 
     virtual double getMinEdgeLength() const 
     {

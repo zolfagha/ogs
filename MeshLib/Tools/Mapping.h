@@ -13,7 +13,9 @@ namespace MeshLib
 {
 
 /**
- * Interface of methods mapping coordinates of elements.
+ * \brief Interface of methods mapping coordinates of elements.
+ *
+ *
  */
 class IElementCoordinatesMapping
 {
@@ -23,7 +25,7 @@ public:
 };
 
 /**
- * EleMapInvariant keep original coordinates.
+ * \brief EleMapInvariant keep original coordinates.
  */
 class EleMapInvariant : public IElementCoordinatesMapping
 {
@@ -32,29 +34,34 @@ public:
     {
         _e = e;
     };
+
     virtual GeoLib::Point* getNodePoint(size_t node_id) 
     {
         return (GeoLib::Point*)_e->getNodeCoordinates(node_id);
     }
+
 private:
     IElement *_e;
 };
 
 /**
- * EleMapLocalCoordinates returns local coordinates of elements.
+ * \brief Mapping local coordinates of elements.
  */
 class EleMapLocalCoordinates : public IElementCoordinatesMapping 
 {
 public:
+    ///
     EleMapLocalCoordinates(IElement* e, CoordinateSystem* coordinate_system) : _matR(0)
     {
         assert (e->getDimension() <= coordinate_system->getDimension());
+
         if (e->getDimension()==coordinate_system->getDimension()) {
             flip(e, coordinate_system);
         } else if (e->getDimension() < coordinate_system->getDimension()) {
             rotate(e, coordinate_system);
         }
     };
+
     virtual ~EleMapLocalCoordinates()
     {
         destroyStdVectorWithPointers(_point_vec);
@@ -65,10 +72,12 @@ public:
     virtual GeoLib::Point* getNodePoint(size_t node_id) {
         return _point_vec[node_id];
     }
+
 private:
     std::vector<GeoLib::Point*> _point_vec;
     MathLib::Matrix<double> *_matR;
 
+    ///
     void flip(IElement* e, CoordinateSystem* coordinate_system)
     {
         switch(coordinate_system->getType())
@@ -114,6 +123,7 @@ private:
         }
     }
 
+    ///
     void rotate(IElement* e, CoordinateSystem* coordinate_system)
     {
         _point_vec.resize(e->getNumberOfNodes());

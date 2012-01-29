@@ -111,7 +111,7 @@ class TemplateUnstructuredElement : public TemplateElement<TYPE, NUMBER_OF_NODES
 {
 private:
     INode* _list_nodes[NUMBER_OF_NODES];
-    IElementCoordinatesMapping *_geo_map;
+    IElementCoordinatesMapping *_coord_map;
 
 public:
     TemplateUnstructuredElement() {
@@ -126,7 +126,7 @@ public:
     };
 
     void initialize() {
-        _geo_map = 0;
+        _coord_map = 0;
     }
 
     virtual void getNodeIDsOfEdgeElement(size_t edge_id, std::vector<size_t> &vec_node_ids) const
@@ -153,13 +153,21 @@ public:
         return _list_nodes[i_nod]->getData();
     };
 
-    virtual void setMappedGeometry(IElementCoordinatesMapping* mapping) 
+    virtual void setMappedCoordinates(IElementCoordinatesMapping* mapping) 
     {
-        _geo_map = mapping;
+        _coord_map = mapping;
     }
 
-    virtual IElementCoordinatesMapping* getMappedGeometry() {
-        return _geo_map;
+    virtual IElementCoordinatesMapping* getMappedCoordinates(CoordinateSystem &coord) {
+        if (coord.getDimension()==this->getDimension()) {
+            return 0;
+        } else if (coord.getDimension() > this->getDimension()) {
+            if (_coord_map==0) {
+                _coord_map = new EleMapLocalCoordinates(this, &coord);
+            }
+            return _coord_map;
+        }
+        return 0;
     };
 };
 

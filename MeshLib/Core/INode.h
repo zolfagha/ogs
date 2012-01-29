@@ -5,6 +5,11 @@
 
 namespace MeshLib
 {
+/**
+ * \brief 
+ *
+ * 
+ */  
 class INode
 {
 public:
