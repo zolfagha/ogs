@@ -17,9 +17,9 @@ class IMesh
 {
 public:
     /// get coordinate systems
-    virtual const CoordinateSystem& getCoordinateSystem() const = 0;
+    virtual const CoordinateSystem* getCoordinateSystem() const = 0;
     /// set coordinate systems
-    virtual void setCoordinateSystem(CoordinateSystem coord) = 0;
+    virtual void setCoordinateSystem(CoordinateSystem &coord) = 0;
 
     /// get the number of elements
     virtual size_t getNumberOfElements() const = 0;

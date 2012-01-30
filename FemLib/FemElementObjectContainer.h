@@ -3,8 +3,8 @@
 
 #include <map>
 #include "Base/MemoryTools.h"
-#include "FemLib/IFemElement.h"
-#include "FemLib/Element/FemElementFactory.h"
+#include "FemLib/Core/IFemElement.h"
+#include "FemLib/Core/Element/FemElementFactory.h"
 
 namespace FemLib
 {

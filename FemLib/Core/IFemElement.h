@@ -1,9 +1,12 @@
 
 #pragma once
 
+#include "MathLib/LinAlg/Dense/Matrix.h"
+#include "MathLib/Function/Function.h"
+
 #include "MeshLib/Core/IElement.h"
 #include "MeshLib/Core/Element.h"
-#include "MathLib/LinAlg/Dense/Matrix.h"
+
 #include "Integration.h"
 #include "FemCoorinatesMapping.h"
 #include "ShapeFunction.h"
@@ -64,7 +67,7 @@ public:
     /// compute an matrix M = Int{W^T F dN} dV
     virtual void integrateWxDN( Fvector, MathLib::Matrix<double> &) = 0;
     /// compute an matrix M = Int{dW^T F dN} dV
-    virtual void integrateDWxDN( Fscalar, MathLib::Matrix<double> &) = 0;
+    virtual void integrateDWxDN( MathLib::IFunction<double, double*> *f, MathLib::Matrix<double> &) = 0;
 
     /// get the integration method
     virtual IFemNumericalIntegration* getIntegrationMethod() const = 0;
@@ -118,6 +121,15 @@ public:
     virtual void configure( MeshLib::IMesh * msh, MeshLib::IElement * e )
     {
         setElement(e);
+        if (e->getMappedCoordinates()==0) {
+            MeshLib::IElementCoordinatesMapping *ele_map = 0;
+            if (msh->getCoordinateSystem()->getDimension() == e->getDimension()) {
+                ele_map = new MeshLib::EleMapInvariant(e);
+            } else {
+                ele_map = new MeshLib::EleMapLocalCoordinates(e, msh->getCoordinateSystem());
+            }
+            e->setMappedCoordinates(ele_map);
+        }
         _mapping->initialize(e);
     }
 
@@ -159,8 +171,8 @@ public:
             MathLib::Matrix<double> *basis = coord_prop->shape_r;
             MathLib::Matrix<double> *test = coord_prop->shape_r;
             double fac = coord_prop->det_jacobian * _integration->getWeight(i);
-            double v = f(x);
-            fac *= v;
+            if (f!=0)
+                fac *= f(x);
             test->transposeAndMultiply(*basis, mat, fac);
         }
     }
@@ -176,13 +188,17 @@ public:
             MathLib::Matrix<double> *dbasis = coord_prop->dshape_dx;
             MathLib::Matrix<double> *test = coord_prop->dshape_dx;
             double fac = coord_prop->det_jacobian * _integration->getWeight(i);
-            double *v = f(x);
-            test->transposeAndMultiply(*dbasis, v, mat, fac);
+            if (f==0) {
+                test->transposeAndMultiply(*dbasis, mat, fac);
+            } else {
+                double *v = f(x);
+                test->transposeAndMultiply(*dbasis, v, mat, fac);
+            }
         }
     }
 
     /// compute an matrix M = Int{dW^T F dN} dV
-    virtual void integrateDWxDN(Fscalar f, MathLib::Matrix<double> &mat)
+    virtual void integrateDWxDN(MathLib::IFunction<double, double*> *f, MathLib::Matrix<double> &mat)
     {
         const size_t n_gp = _integration->getNumberOfSamplingPoints();
         double x[3];
@@ -192,8 +208,8 @@ public:
             MathLib::Matrix<double> *dbasis = coord_prop->dshape_dx;
             MathLib::Matrix<double> *dtest = coord_prop->dshape_dx;
             double fac = coord_prop->det_jacobian * _integration->getWeight(i);
-            double v = f(x);
-            fac *= v;
+            if (f!=0)
+                fac *= f->eval(x);
             dtest->transposeAndMultiply(*dbasis, mat, fac);
         }
     }

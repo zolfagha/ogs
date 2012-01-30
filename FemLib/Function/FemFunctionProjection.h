@@ -2,7 +2,7 @@
 #pragma once
 
 #include "FemFunction.h"
-#include "Extrapolation.h"
+#include "FemLib/Extrapolation.h"
 
 namespace FemLib
 {

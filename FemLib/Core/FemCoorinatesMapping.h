@@ -4,7 +4,7 @@
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Tools/Mapping.h"
-#include "FemLib/ShapeFunction.h"
+#include "FemLib/Core/ShapeFunction.h"
 
 namespace FemLib
 {
@@ -94,6 +94,8 @@ public:
     /// initialize element
     virtual void initialize(MeshLib::IElement* ele)
     {
+        assert(ele->getMappedCoordinates()!=0);
+
         _ele = ele;
         const size_t dim = _ele->getDimension();
         const size_t nnodes = _ele->getNumberOfNodes();
@@ -102,10 +104,16 @@ public:
         _prop->dshape_dx->resize(dim, nnodes);
         _prop->jacobian_dxdr->resize(dim, dim);
         _prop->inv_jacobian_drdx->resize(dim, dim);
+        (*_prop->shape_r) = .0;
+        (*_prop->dshape_dr) = .0;
+        (*_prop->dshape_dx) = .0;
+        (*_prop->jacobian_dxdr) = .0;
+        (*_prop->inv_jacobian_drdx) = .0;
         x.resize(dim, nnodes);
+        MeshLib::IElementCoordinatesMapping *ele_local_coord = _ele->getMappedCoordinates();
         for (size_t i=0; i<nnodes; i++)
             for (size_t j=0; j<dim; j++)
-                x(j,i) = _ele->getNodeCoordinates(i)->getData()[j]; //TODO should be via local coordinates
+                x(j,i) = ele_local_coord->getNodePoint(i)->getData()[j];
     }
 
     virtual const CoordMappingProperties* getProperties() const {return _prop;};
@@ -125,6 +133,7 @@ public:
 
         //jacobian: J=[dx/dr dy/dr // dx/ds dy/ds]
         MathLib::Matrix<double> *jac = _prop->jacobian_dxdr;
+        (*jac) = .0;
         for (size_t i_r=0; i_r<dim; i_r++) {
             for (size_t j_x=0; j_x<dim; j_x++) {
                 for (size_t k=0; k<nnodes; k++) {
@@ -143,6 +152,7 @@ public:
 
         //dshape/dx = invJ * dNdr
         MathLib::Matrix<double> *dshape_dx = _prop->dshape_dx;
+        (*dshape_dx) = .0;
         inv_jac->multiply(*dshape_dr, *dshape_dx);
 
 

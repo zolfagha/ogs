@@ -1,10 +1,10 @@
 
 #include "TRI3CONST.h"
 
-
 #include "MathLib/LinAlg/Dense/Matrix.h"
+#include "MathLib/Function/Function.h"
 #include "GeoLib/Core/Point.h"
-#include "IFemElement.h"
+#include "FemLib/Core/IFemElement.h"
 
 namespace FemLib
 {
@@ -102,9 +102,9 @@ void TRI3CONST::integrateWxDN( Fvector f, MathLib::Matrix<double> &mat)
 }
 
 /// compute an matrix M = Int{dW^T F dN} dV
-void TRI3CONST::integrateDWxDN( Fscalar f, MathLib::Matrix<double> &mat)
+void TRI3CONST::integrateDWxDN( MathLib::IFunction<double, double*> *f, MathLib::Matrix<double> &mat)
 {
-    const double v = f(0);
+    const double v = f->eval(0);
     mat(0,0) = b[0]*b[0] + c[0]*c[0];
     mat(0,1) = b[0]*b[1] + c[0]*c[1];
     mat(0,2) = b[0]*b[2] + c[0]*c[2];

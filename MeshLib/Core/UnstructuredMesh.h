@@ -38,12 +38,12 @@ public:
     {
       return N_DIM;
     };
-    virtual const CoordinateSystem& getCoordinateSystem() const
+    virtual const CoordinateSystem* getCoordinateSystem() const
     {
-        return _coord_system;        
+        return &_coord_system;        
     };
     /// set coordinate systems
-    virtual void setCoordinateSystem(CoordinateSystem coord) 
+    virtual void setCoordinateSystem(CoordinateSystem &coord) 
     {
         _coord_system = coord;
     }

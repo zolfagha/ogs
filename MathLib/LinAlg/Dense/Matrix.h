@@ -183,6 +183,12 @@ template<class T> Matrix<T>::Matrix (size_t rows, size_t cols)
       : nrows (rows), ncols (cols), data (new T[nrows*ncols])
 {}
 
+template<class T> Matrix<T>::Matrix (size_t rows, size_t cols, const T &val)
+    : nrows (rows), ncols (cols), data (new T[nrows*ncols])
+{
+    (*this) = val;
+}
+
 template<class T> Matrix<T>::Matrix (const Matrix& src) :
 	nrows (src.getNRows ()), ncols (src.getNCols ()), data (new T[nrows * ncols])
 {
@@ -200,7 +206,7 @@ template<class T> void Matrix<T>::resize (size_t rows, size_t cols)
 {
     if (rows!=nrows || cols!=ncols) {
         delete [] data;
-        data = new T[nrows*ncols];
+        data = new T[rows*cols];
         nrows = rows;
         ncols = cols;
     }
@@ -385,11 +391,16 @@ template<class T> void Matrix<T>::multiply(const Matrix<T> &matB, Matrix<T> &mat
 
 template<class T> void Matrix<T>::transposeAndMultiply(const Matrix<T> &matB, Matrix<T> &matC, double a) const
 {
+    assert(this->nrows==matB.getNRows());
+    assert(this->ncols==matB.getNCols());
+    assert(this->ncols==matC.getNCols());
+    assert(this->ncols==matC.getNRows());
+
     // C += A^T * B
     for (size_t colA=0; colA<this->ncols; colA++) {
         for (size_t colB=0; colB<matB.getNCols(); colB++) {
-            for (size_t colAcolB=0; colAcolB<this->nrows; colAcolB++) {
-                matC(colA, colB) += a * (*this)(colA, colAcolB) * matB(colAcolB, colB);
+            for (size_t rowArowB=0; rowArowB<this->nrows; rowArowB++) {
+                matC(colA, colB) += a * (*this)(rowArowB, colA) * matB(rowArowB, colB);
             }
         }
     }

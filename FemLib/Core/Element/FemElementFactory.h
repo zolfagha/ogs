@@ -3,10 +3,10 @@
 
 #include <map>
 
-#include "FemLib/IFemElement.h"
-#include "FemLib/Element/LINE2.h"
-#include "FemLib/Element/QUAD4.h"
-#include "FemLib/Element/TRI3CONST.h"
+#include "FemLib/Core/IFemElement.h"
+#include "FemLib/Core/Element/LINE2.h"
+#include "FemLib/Core/Element/QUAD4.h"
+#include "FemLib/Core/Element/TRI3CONST.h"
 
 namespace FemLib
 {

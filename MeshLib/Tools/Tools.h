@@ -53,7 +53,7 @@ void findConnectedElements(IMesh const* msh, const std::vector<INode*> &nodes, s
 };
 
 /// get a list of edge elements of given elements
-void createEdgeElements(IMesh * msh, const std::vector<INode*> &selected_nodes, const std::vector<IElement*> &selected_ele, std::vector<IElement*> &edges)
+void createEdgeElements(IMesh * msh, const std::vector<IElement*> &selected_ele, std::vector<IElement*> &edges)
 {
     typedef std::vector<IElement*> ElementList;
 
@@ -98,7 +98,7 @@ void findEdgeElementsOnPolyline(IMesh * msh, GeoLib::Polyline const* poly, std::
     findConnectedElements(msh, nodes_on_poly, elements_near_poly);
     // get a list of edges made of the nodes
     std::vector<IElement*> selected_edges;
-    createEdgeElements(msh, nodes_on_poly, elements_near_poly, selected_edges);
+    createEdgeElements(msh, elements_near_poly, selected_edges);
     const size_t nr_edges = selected_edges.size();
     for (size_t i=0; i<nr_edges; i++) {
         IElement *edge_e = selected_edges[i];
@@ -106,7 +106,7 @@ void findEdgeElementsOnPolyline(IMesh * msh, GeoLib::Polyline const* poly, std::
         size_t cnt_match = 0;
         for (size_t j=0; j<edge_e->getNumberOfNodes(); j++) {
             const INode* edge_nod = msh->getNode(edge_e->getNodeID(j));
-            if (std::find(nodes_on_poly.begin(), nodes_on_poly.end(), edge_nod) == nodes_on_poly.end())
+            if (std::find(nodes_on_poly.begin(), nodes_on_poly.end(), edge_nod) != nodes_on_poly.end())
                 cnt_match++;
         }
         // update the list

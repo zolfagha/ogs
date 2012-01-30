@@ -1,14 +1,18 @@
 
 #pragma once
 
+#include <map>
+#include <vector>
+
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/Function/Function.h"
 
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Tools/Tools.h"
 
-#include "FemLib/FemFunction.h"
+#include "FemLib/Function/FemFunction.h"
 #include "IFemBC.h"
+
 
 namespace FemLib
 {
@@ -34,37 +38,43 @@ public:
         MeshLib::IMesh *msh = (MeshLib::IMesh*)_var->getMesh();
         // pickup nodes on geo
         MeshLib::findNodesOnGeometry(msh, _geo, &_vec_nodes);
-        // get discrete values at nodes
-        std::vector<Tval> vec_nod_values(_vec_nodes.size());
-        for (size_t i=0; i<_vec_nodes.size(); i++) {
-            const GeoLib::Point* x = _vec_nodes[i]->getData();
-            vec_nod_values[i] = _bc_func->eval(*x);
-        }
-        // distribute to nodes
+        // distribute to RHS
         _vec_values.resize(_vec_nodes.size());
         if (_var->getDimension()==1) {
             // no need to integrate
-            _vec_values.assign(_vec_values.begin(), _vec_values.end());
+            // get discrete values at nodes
+            for (size_t i=0; i<_vec_nodes.size(); i++) {
+                const GeoLib::Point* x = _vec_nodes[i]->getData();
+                _vec_values[i] = _bc_func->eval(*x);
+            }
         } else {
-            // integrate over geo
             // find edge elements on the geo
-            std::vector<MeshLib::IElement*> vec_ele;
-            MeshLib::findBoundaryElementsOnGeometry(msh, _geo, &vec_ele);
+            std::vector<MeshLib::IElement*> vec_edge_eles;
+            MeshLib::findBoundaryElementsOnGeometry(msh, _geo, &vec_edge_eles);
             // for each edge elements found
-            for (size_t i=0; i<vec_ele.size(); i++) {
-                MeshLib::IElement *e = vec_ele[i];
-                IFiniteElement *fe_edge = _var->getFiniteElement(e);
+            std::map<size_t, Tval> map_nodeId2val;
+            for (size_t i=0; i<vec_edge_eles.size(); i++) {
+                MeshLib::IElement *e = vec_edge_eles[i];
+                const size_t edge_nnodes = e->getNumberOfNodes();
+                // set values at nodes
+                std::vector<double> nodal_val(edge_nnodes);
+                for (size_t i_nod=0; i_nod<edge_nnodes; i_nod++) {
+                    const GeoLib::Point* x = e->getNode(i_nod)->getData();
+                    nodal_val[i_nod] = _bc_func->eval(*x);
+                } 
                 // compute integrals
-                std::vector<double> nodal_val(fe_edge->getNumberOfVariables());
-                std::vector<double> result(fe_edge->getNumberOfVariables());
-                MathLib::Matrix<double> M(e->getNumberOfNodes(), e->getNumberOfNodes());
+                IFiniteElement *fe_edge = _var->getFiniteElement(e);
+                std::vector<double> result(edge_nnodes);
+                MathLib::Matrix<double> M(edge_nnodes, edge_nnodes);
+                M = .0;
                 fe_edge->integrateWxN(0, M);
                 M.axpy(1.0, &nodal_val[0], 0.0, &result[0]);
-                // add into nodal values
-                const size_t edge_nodes = 0;
-                std::vector<size_t> localNodeId2Global;
-                for (size_t k=0; k<edge_nodes; k++)
-                    _vec_values[localNodeId2Global[k]] += result[k];
+                // add into RHS values
+                for (size_t k=0; k<edge_nnodes; k++)
+                    map_nodeId2val[e->getNodeID(k)] += result[k];
+            }
+            for (size_t i=0; i<_vec_nodes.size(); i++) {
+                _vec_values[i] = map_nodeId2val[_vec_nodes[i]->getNodeID()];
             }
         }
     }
@@ -80,17 +90,17 @@ public:
 
     size_t getNumberOfConditions() const
     {
-        throw std::exception("The method or operation is not implemented.");
+        return _vec_nodes.size();
     }
 
     size_t getConditionDoF( size_t i ) const
     {
-        throw std::exception("The method or operation is not implemented.");
+        return _vec_nodes[i]->getNodeID();
     }
 
     double getConditionValue( size_t i ) const
     {
-        throw std::exception("The method or operation is not implemented.");
+        return _vec_values[i];
     }
 
 private:

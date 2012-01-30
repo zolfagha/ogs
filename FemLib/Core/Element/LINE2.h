@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include "FemLib/IFemElement.h"
-#include "FemLib/Integration.h"
+#include "FemLib/Core/IFemElement.h"
+#include "FemLib/Core/Integration.h"
 
 namespace FemLib
 {

@@ -4,8 +4,8 @@
 #include "MathLib/Vector.h"
 #include "MeshLib/Core/IMesh.h"
 #include "NumLib/IFunction.h"
-#include "IFemElement.h"
-#include "FemElementObjectContainer.h"
+#include "FemLib/Core/IFemElement.h"
+#include "FemLib/FemElementObjectContainer.h"
 
 namespace FemLib
 {
@@ -19,7 +19,9 @@ struct PolynomialOrder
     };
 };
 
-
+/**
+ * \brief Template class for FEM node-based functions
+ */
 template<typename Tvalue>
 class TemplateFEMNodalFunction : public NumLib::IFunction<Tvalue>
 {
@@ -27,11 +29,17 @@ public:
     TemplateFEMNodalFunction(MeshLib::IMesh* msh, PolynomialOrder::type order) {
         _msh = msh;
         _order = order;
+        size_t nnodes = msh->getNumberOfNodes();
+        _nodal_values = new Tvalue[nnodes];
+    }
+
+    virtual ~TemplateFEMNodalFunction() {
+        delete _nodal_values;
     }
 
     size_t getDimension() const
     {
-      return _msh->getDimension();
+      return _msh->getCoordinateSystem()->getDimension();
     }
 
     const MeshLib::IMesh* getMesh() const {
@@ -80,6 +88,10 @@ typedef TemplateFEMNodalFunction<double> FEMNodalFunctionScalar3d;
 typedef TemplateFEMNodalFunction<MathLib::Vector2D> FemNodalFunctionVector2d;
 typedef TemplateFEMNodalFunction<MathLib::Vector3D> FEMNodalFunctionVector3d;
 
+
+/**
+ * \brief Template class for FEM element-based functions
+ */
 template<typename Tvalue>
 class TemplateFEMElementalFunction : public NumLib::IFunction<Tvalue>
 {
@@ -94,27 +106,35 @@ private:
     Tvalue* _ele_values;
 };
 
+/**
+ * \brief Template class for FEM integration point-based functions
+ */
 template<typename Tvalue>
 class TemplateFEMIntegrationPointFunction : public NumLib::IFunction<Tvalue>
 {
 public:
     TemplateFEMIntegrationPointFunction(MeshLib::IMesh* msh) {
         _msh = msh;
+        _values.resize(msh->getNumberOfElements());
     };
+
     Tvalue& getValue(GeoLib::Point &pt) const {
-        return _ele_values[0];
+        throw std::exception("The method or operation is not implemented.");
     };
-    Tvalue& getValue(size_t id) const {
-        return _ele_values[id];
-    };
+
     void setIntegrationPointValue( size_t i_e, size_t ip, Tvalue &q ) 
     {
-        throw std::exception("The method or operation is not implemented.");
+        assert(ip<_values[i_e].size());
+        _values[i_e][ip] = q;
+    }
+
+    void setNumberOfIntegationPoints(size_t i_e, size_t n) {
+        _values[i_e].resize(n);
     }
 
 private:
-    Tvalue* _ele_values;
     MeshLib::IMesh* _msh;
+    std::vector<std::vector<Tvalue>> _values;
 };
 
 typedef TemplateFEMIntegrationPointFunction<double> FEMIntegrationPointFunctionScalar2d;

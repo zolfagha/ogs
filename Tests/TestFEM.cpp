@@ -1,14 +1,5 @@
+
 #include <gtest/gtest.h>
-
-#include "FemLib/IFemElement.h"
-#include "FemLib/FemFunction.h"
-#include "FemLib/FemFunctionProjection.h"
-#include "FemLib/BC/FemDirichletBC.h"
-#include "FemLib/BC/FemNeumannBC.h"
-#include "FemLib/FemCoorinatesMapping.h"
-
-#include "MeshLib/Core/UnstructuredMesh.h"
-#include "MeshLib/Tools/MeshGenerator.h"
 
 #include "MathLib/Vector.h"
 #include "MathLib/LinearInterpolation.h"
@@ -19,6 +10,18 @@
 #include "GeoLib/Core/Polyline.h"
 #include "GeoLib/Shape/Rectangle.h"
 
+#include "MeshLib/Core/UnstructuredMesh.h"
+#include "MeshLib/Tools/MeshGenerator.h"
+
+#include "FemLib/Core/IFemElement.h"
+#include "FemLib/Function/FemFunction.h"
+#include "FemLib/Function/FemFunctionProjection.h"
+#include "FemLib/BC/FemDirichletBC.h"
+#include "FemLib/BC/FemNeumannBC.h"
+#include "FemLib/Core/FemCoorinatesMapping.h"
+
+#include "ModelLib/GROUNDWATER_FLOW.h"
+
 #include <vector>
 #include <memory>
 
@@ -26,8 +29,26 @@ using namespace FemLib;
 using namespace GeoLib;
 using namespace MeshLib;
 
+void outputLinearEQS(MathLib::Matrix<double> &globalA, std::vector<double> &globalRHS)
+{
+    std::cout << "A=" << std::endl;
+    globalA.write(std::cout);
+    std::cout << "x=" << std::endl;
+    for (size_t i=0; i<globalRHS.size(); i++)
+        std::cout << globalRHS[i] << " ";
+    std::cout << std::endl;
+}
+
+TEST(MODEL, test1)
+{
+    ModelLib::GROUNDWATER_FLOW gw;
+}
+
 TEST(FEM, testAll) 
 {
+    typedef MathLib::Matrix<double> GlobalMatrixType;
+    typedef std::vector<double> GlobalVectorType;
+
     //#Define a problem
     //geometry
     Rectangle rec(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
@@ -41,7 +62,7 @@ TEST(FEM, testAll)
     FemNodalFunctionScalar2d head(msh.get(), PolynomialOrder::Linear);
     FEMIntegrationPointFunctionVector2d vel(msh.get());
     //bc
-    FemDirichletBC<double> bc1(&head, poly_right, &MathLib::FunctionConstant<double, GeoLib::Point>(.0)); //TODO should BC objects be created by fe functions?
+    FemDirichletBC<double> bc1(&head, poly_right, &MathLib::FunctionConstant<double, GeoLib::Point>(.0), &DiagonalizeMethod<GlobalMatrixType,GlobalVectorType,double>()); //TODO should BC objects be created by fe functions?
     FemNeumannBC<double> bc2(&head, poly_left, &MathLib::FunctionConstant<double, GeoLib::Point>(1.e-5));
 
     //#Solve
@@ -49,8 +70,8 @@ TEST(FEM, testAll)
     bc2.setup();
     // global EQS
     const size_t n_dof = msh->getNumberOfNodes();
-    MathLib::Matrix<double> globalA(n_dof, n_dof);
-    std::vector<double> globalRHS(n_dof, .0);
+    GlobalMatrixType globalA(n_dof, n_dof, .0);
+    GlobalVectorType globalRHS(n_dof, .0);
 
     //assembly
     MathLib::Matrix<double> localK;
@@ -61,18 +82,22 @@ TEST(FEM, testAll)
         const size_t &n_dof = fe->getNumberOfVariables();
         localK.resize(n_dof, n_dof);
         localK = .0;
-        fe->integrateWxN(0, localK);
+        fe->integrateDWxDN(&MathLib::FunctionConstant<double, double*>(K), localK);
         e->getNodeIDList(e_node_id_list);
         globalA.add(e_node_id_list, localK); //TODO A(id_list) += K;
     }
 
+    //outputLinearEQS(globalA, globalRHS);
+
     //apply BC
     bc2.apply(&globalRHS);
+    //outputLinearEQS(globalA, globalRHS);
     bc1.apply(&globalA, &globalRHS);
+    //outputLinearEQS(globalA, globalRHS);
 
     //solve
     MathLib::GaussAlgorithm solver(globalA);
-    std::vector<double> x(globalRHS);
+    GlobalVectorType x(globalRHS);
     solver.execute(&x[0]); // input x contains rhs but output x contains solution.
 
     //update head
@@ -82,12 +107,18 @@ TEST(FEM, testAll)
     for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
         MeshLib::IElement* e = msh->getElemenet(i_e);
         IFiniteElement *fe = head.getFiniteElement(e);
-        std::vector<double> local_h;
+        std::vector<double> local_h(e->getNumberOfNodes());
+        for (size_t j=0; j<e->getNumberOfNodes(); j++)
+            local_h[j] = head.getValue(e->getNodeID(j));
         // for each integration points
         IFemNumericalIntegration *integral = fe->getIntegrationMethod();
         double x[2] = {};
-        for (size_t ip=0; ip<integral->getNumberOfSamplingPoints(); ip++) {
+        const size_t n_gp = integral->getNumberOfSamplingPoints();
+        vel.setNumberOfIntegationPoints(i_e, n_gp);
+        for (size_t ip=0; ip<n_gp; ip++) {
             MathLib::Vector2D q;
+            q.getRawRef()[0] = .0;
+            q.getRawRef()[1] = .0;
             integral->getSamplingPoint(ip, x);
             fe->computeBasisFunctions(x);
             const MathLib::Matrix<double> *dN = fe->getGradBasisFunction();
@@ -96,64 +127,5 @@ TEST(FEM, testAll)
         }
     }
 
-    //for output
-    FemNodalFunctionVector2d nod_vel(msh.get(), PolynomialOrder::Linear);
-    mapFunctions(vel, nod_vel);
 };
-
-#if 0
-void calcMass(double *pt, MathLib::Matrix<double> *mat) {
-    //W^T N
-    FemLagrangeElement fem; //gauss, iso, Bubnov
-    double *shape = fem.computeShapeFunction(pt);
-    double *test = fem.computeTestFunction(pt);
-    int dof = 1;
-    for (int j=0; j<dof; j++)
-        for (int k=0; k<dof; k++)
-            (*mat)(j,k) = test[j]*shape[k];
-}
-
-void calcLap(double *pt, MathLib::Matrix<double> *mat) {
-    //dW^T dN
-    FemLagrangeElement fem; //gauss, iso, Bubnov
-    const MathLib::Matrix<double> *dshape = fem.computeGradShapeFunction(pt);
-    MathLib::Matrix<double> *dtest = fem.computeGradTestFunction(pt);
-    int dof = 1;
-    //mat = (*dtest->transpose()) * (*dshape);
-}
-
-// Method 2
-// - user only access FEM class
-// - FEM class hides mapping, integration, test function
-TEST(FEM, integral1)
-{
-    //input
-    MeshLib::UnstructuredMesh msh;
-    MeshLib::MeshGenerator::generateRegularMesh(2, 1.0, 1, .0, .0, .0, msh);
-    MeshLib::IElement *e = msh.getElemenet(0);
-
-    FemLagrangeElement fem; //gauss, iso, Bubnov
-    fem.configure(e);
-    size_t dof = e->getNumberOfNodes();
-    //output
-    MathLib::Matrix<double> M(dof, dof);
-    MathLib::Matrix<double> K(dof, dof);
-
-    //-----------------------------
-    fem.integrate(calcMass, &M);
-    fem.integrate(calcLap, &K);
-
-    // M = fem.integrateDomain(W^T * S * N)
-    // K = fem.integrateDomain(dW^T * K * N)
-    // {Q} = fem.integrateDomain(W^T * Q)
-    // {q} = fem.integrateBoundary(W^T * q)
-    //
-    // fdm.setEquation(M, K, Q+q); // M du/dt + K u = F
-    // fdm.discretize(dt, u_i, localA, localRHS); // A = (1/dt M+ theta K), b = (1/dt M+ (1-theta) K) u_i + F 
-    //
-    // globalA(dof_map) += localA
-    // localRHS(dof_map) += localRHS
-
-}
-#endif
 

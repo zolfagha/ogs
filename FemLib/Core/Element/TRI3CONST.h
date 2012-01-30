@@ -2,7 +2,7 @@
 #pragma once
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
-#include "IFemElement.h"
+#include "FemLib/Core/IFemElement.h"
 
 namespace FemLib
 {
@@ -52,7 +52,7 @@ public:
     void integrateWxDN( Fvector f, MathLib::Matrix<double> &mat);
 
     /// compute an matrix M = Int{dW^T F dN} dV
-    void integrateDWxDN( Fscalar f, MathLib::Matrix<double> &mat);
+    void integrateDWxDN( MathLib::IFunction<double, double*> *f, MathLib::Matrix<double> &mat);
 
     /// get the integration method
     IFemNumericalIntegration* getIntegrationMethod() const {return (IFemNumericalIntegration*)&_integration;};

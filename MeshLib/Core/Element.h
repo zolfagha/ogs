@@ -105,7 +105,9 @@ public:
     };
 };
 
-
+/**
+ * \brief Unstructured element
+ */
 template <ElementType::type TYPE, size_t NUMBER_OF_NODES, size_t DIMENSION, size_t NUMBER_OF_FACES, size_t NUMER_OF_EDGES>
 class TemplateUnstructuredElement : public TemplateElement<TYPE, NUMBER_OF_NODES, DIMENSION, NUMBER_OF_FACES, NUMER_OF_EDGES>
 {
@@ -158,16 +160,9 @@ public:
         _coord_map = mapping;
     }
 
-    virtual IElementCoordinatesMapping* getMappedCoordinates(CoordinateSystem &coord) {
-        if (coord.getDimension()==this->getDimension()) {
-            return 0;
-        } else if (coord.getDimension() > this->getDimension()) {
-            if (_coord_map==0) {
-                _coord_map = new EleMapLocalCoordinates(this, &coord);
-            }
-            return _coord_map;
-        }
-        return 0;
+    virtual IElementCoordinatesMapping* getMappedCoordinates() 
+    {
+        return _coord_map;
     };
 };
 

@@ -51,7 +51,7 @@ class EleMapLocalCoordinates : public IElementCoordinatesMapping
 {
 public:
     ///
-    EleMapLocalCoordinates(IElement* e, CoordinateSystem* coordinate_system) : _matR(0)
+    EleMapLocalCoordinates(IElement* e, const CoordinateSystem* coordinate_system) : _matR(0)
     {
         assert (e->getDimension() <= coordinate_system->getDimension());
 
@@ -78,7 +78,7 @@ private:
     MathLib::Matrix<double> *_matR;
 
     ///
-    void flip(IElement* e, CoordinateSystem* coordinate_system)
+    void flip(IElement* e, const CoordinateSystem* coordinate_system)
     {
         switch(coordinate_system->getType())
         {
@@ -124,7 +124,7 @@ private:
     }
 
     ///
-    void rotate(IElement* e, CoordinateSystem* coordinate_system)
+    void rotate(IElement* e, const CoordinateSystem* coordinate_system)
     {
         _point_vec.resize(e->getNumberOfNodes());
 
@@ -135,7 +135,7 @@ private:
         double dx[3];
         for(size_t i = 0; i < e->getNumberOfNodes(); i++)
         {
-            double const* const coords_node_i (e->getNodeCoordinates(0)->getData());
+            double const* const coords_node_i (e->getNodeCoordinates(i)->getData());
             dx[0] = (coords_node_i[0] - coords_node_0[0]);
             dx[1] = (coords_node_i[1] - coords_node_0[1]);
             dx[2] = (coords_node_i[2] - coords_node_0[2]);
@@ -146,7 +146,7 @@ private:
         }
     };
 
-    void getRotationMatrix(IElement* e, CoordinateSystem* coordinate_system)
+    void getRotationMatrix(IElement* e, const CoordinateSystem* coordinate_system)
     {
         double xx[3];
         double yy[3];
