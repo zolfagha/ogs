@@ -44,7 +44,7 @@ public:
             // no need to integrate
             // get discrete values at nodes
             for (size_t i=0; i<_vec_nodes.size(); i++) {
-                const GeoLib::Point* x = _vec_nodes[i]->getData();
+                const GeoLib::Point* x = msh->getNodeCoordinatesRef(_vec_nodes[i]);
                 _vec_values[i] = _bc_func->eval(*x);
             }
         } else {
@@ -59,7 +59,7 @@ public:
                 // set values at nodes
                 std::vector<double> nodal_val(edge_nnodes);
                 for (size_t i_nod=0; i_nod<edge_nnodes; i_nod++) {
-                    const GeoLib::Point* x = e->getNode(i_nod)->getData();
+                    const GeoLib::Point* x = msh->getNodeCoordinatesRef(e->getNodeID(i_nod));
                     nodal_val[i_nod] = _bc_func->eval(*x);
                 } 
                 // compute integrals
@@ -74,7 +74,7 @@ public:
                     map_nodeId2val[e->getNodeID(k)] += result[k];
             }
             for (size_t i=0; i<_vec_nodes.size(); i++) {
-                _vec_values[i] = map_nodeId2val[_vec_nodes[i]->getNodeID()];
+                _vec_values[i] = map_nodeId2val[_vec_nodes[i]];
             }
         }
     }
@@ -95,7 +95,7 @@ public:
 
     size_t getConditionDoF( size_t i ) const
     {
-        return _vec_nodes[i]->getNodeID();
+        return _vec_nodes[i];
     }
 
     double getConditionValue( size_t i ) const
@@ -108,7 +108,7 @@ private:
     TemplateFEMNodalFunction<Tval> *_var;
     GeoLib::GeoObject *_geo;
     MathLib::IFunction<Tval, GeoLib::Point> *_bc_func;
-    std::vector<MeshLib::INode*> _vec_nodes;
+    std::vector<size_t> _vec_nodes;
     std::vector<Tval> _vec_values;
 };
 

@@ -16,12 +16,12 @@ void TRI3CONST::configure( MeshLib::IMesh * msh, MeshLib::IElement * e )
     double nodes_x[3], nodes_y[3];
     // xyz
     for (size_t i=0; i<3; i++) {
-        const GeoLib::Point *pt = _msh->getNode(_ele->getNodeID(i))->getData();
+        const GeoLib::Point *pt = _msh->getNodeCoordinatesRef(_ele->getNodeID(i));
         nodes_x[i] = pt->getData()[0];
         nodes_y[i] = pt->getData()[1];
     }
     // area
-    A = _ele->getArea();
+    A = GeoLib::triangleArea(msh->getNodeCoordinates(_ele->getNodeID(0)),msh->getNodeCoordinates(_ele->getNodeID(1)),msh->getNodeCoordinates(_ele->getNodeID(2)));
     // set a,b,c
     a[0] = 0.5/A*(nodes_x[1]*nodes_y[2]-nodes_x[2]*nodes_y[1]);
     b[0] = 0.5/A*(nodes_y[1]-nodes_y[2]);
@@ -75,9 +75,9 @@ double TRI3CONST::interpolate(double *x, double *nodal_values)
 }
 
 /// compute an matrix M = Int{W^T F N} dV
-void TRI3CONST::integrateWxN( Fscalar f, MathLib::Matrix<double> &mat)
+void TRI3CONST::integrateWxN( MathLib::IFunction<double, double*>* f, MathLib::Matrix<double> &mat)
 {
-    const double v = f(0);
+    const double v = f->eval(0);
     mat(0,0) = 1.0;
     mat(0,1) = 0.5;
     mat(0,2) = 0.5;
@@ -92,9 +92,9 @@ void TRI3CONST::integrateWxN( Fscalar f, MathLib::Matrix<double> &mat)
 }
 
 /// compute an matrix M = Int{W^T F dN} dV
-void TRI3CONST::integrateWxDN( Fvector f, MathLib::Matrix<double> &mat)
+void TRI3CONST::integrateWxDN( MathLib::IFunction<double*, double*>* f, MathLib::Matrix<double> &mat)
 {
-    double *v = f(0);
+    double *v = f->eval(0);
     for (int i=0; i<3; i++)
         for (int j=0; j<3; j++)
             mat(i,j) = v[0]*b[j] + v[1]*c[j];

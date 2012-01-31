@@ -18,7 +18,7 @@
 
 // MathLib
 #include "SparseMatrixBase.h"
-#include "sparse.h"
+#include "MathLib/sparse.h"
 #include "amuxCRS.h"
 #include "../Preconditioner/generateDiagPrecond.h"
 

@@ -85,26 +85,26 @@ public:
     };
 };
 
-/**
- * \brief Analytical element
- */
-template <ElementType::type TYPE, size_t NUMBER_OF_NODES, size_t DIMENSION, size_t NUMBER_OF_FACES, size_t NUMER_OF_EDGES>
-class TemplateAnalyticalElement : public TemplateElement<TYPE, NUMBER_OF_NODES, DIMENSION, NUMBER_OF_FACES, NUMER_OF_EDGES>
-{
-private:
-    IMesh *_msh;
-public:
-    TemplateAnalyticalElement(IMesh *msh) 
-    {
-        _msh = msh;
-    }
-
-    const GeoLib::Point* getNodeCoordinates( size_t i_nod ) const 
-    {
-        return _msh->getNode(i_nod)->getData();
-    };
-};
-
+///**
+// * \brief Analytical element
+// */
+//template <ElementType::type TYPE, size_t NUMBER_OF_NODES, size_t DIMENSION, size_t NUMBER_OF_FACES, size_t NUMER_OF_EDGES>
+//class TemplateAnalyticalElement : public TemplateElement<TYPE, NUMBER_OF_NODES, DIMENSION, NUMBER_OF_FACES, NUMER_OF_EDGES>
+//{
+//private:
+//    IMesh *_msh;
+//public:
+//    TemplateAnalyticalElement(IMesh *msh) 
+//    {
+//        _msh = msh;
+//    }
+//
+//    const GeoLib::Point* getNodeCoordinates( size_t i_nod ) const 
+//    {
+//        return _msh->getNode(i_nod)->getData();
+//    };
+//};
+//
 /**
  * \brief Unstructured element
  */
@@ -112,7 +112,7 @@ template <ElementType::type TYPE, size_t NUMBER_OF_NODES, size_t DIMENSION, size
 class TemplateUnstructuredElement : public TemplateElement<TYPE, NUMBER_OF_NODES, DIMENSION, NUMBER_OF_FACES, NUMER_OF_EDGES>
 {
 private:
-    INode* _list_nodes[NUMBER_OF_NODES];
+    //INode* _list_nodes[NUMBER_OF_NODES];
     IElementCoordinatesMapping *_coord_map;
 
 public:
@@ -142,18 +142,18 @@ public:
     }
 
 
-    void setNode(size_t local_node_id, INode* nod) {
-        _list_nodes[local_node_id] = nod;
-    }
+    //void setNode(size_t local_node_id, INode* nod) {
+    //    _list_nodes[local_node_id] = nod;
+    //}
 
-    INode* getNode(size_t local_node_id) const {
-        return _list_nodes[local_node_id];
-    }
+    //INode* getNode(size_t local_node_id) const {
+    //    return _list_nodes[local_node_id];
+    //}
 
-    virtual const GeoLib::Point* getNodeCoordinates( size_t i_nod ) const 
-    {
-        return _list_nodes[i_nod]->getData();
-    };
+    //virtual const GeoLib::Point* getNodeCoordinates( size_t i_nod ) const 
+    //{
+    //    return _list_nodes[i_nod]->getData();
+    //};
 
     virtual void setMappedCoordinates(IElementCoordinatesMapping* mapping) 
     {
@@ -172,10 +172,10 @@ typedef TemplateUnstructuredElement<ElementType::TRIANGLE, 3, 2, 3, 3> TemplateT
 class Triangle : public TemplateTriangle
 {
 public:
-    double getArea() const
-    {
-        return GeoLib::triangleArea(*getNodeCoordinates(0), *getNodeCoordinates(1), *getNodeCoordinates(2));
-    }
+    //double getArea() const
+    //{
+    //    return GeoLib::triangleArea(*getNodeCoordinates(0), *getNodeCoordinates(1), *getNodeCoordinates(2));
+    //}
 };
 typedef TemplateUnstructuredElement<ElementType::QUAD, 4, 2, 4, 4> Quadrirateral;
 typedef TemplateUnstructuredElement<ElementType::TETRAHEDRON, 4, 3, 4, 6> Tetrahedron;

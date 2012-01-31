@@ -42,6 +42,7 @@ public:
 
     virtual bool operator==(IElement& e) = 0;
     virtual bool hasNodeIds(std::vector<size_t> &node_ids) const = 0;
+    virtual void initialize() = 0;
 
     size_t getID() const {return _element_id;};
     void setID(size_t id) {_element_id = id;};
@@ -56,15 +57,15 @@ public:
     virtual size_t getNumberOfNodes() const = 0;
     virtual void setNodeID(size_t local_node_id, size_t node_id) = 0;
     virtual size_t getNodeID(size_t local_node_id) const = 0;
-    virtual void setNode(size_t local_node_id, INode*) = 0;
-    virtual INode* getNode(size_t local_node_id) const = 0;
+    //virtual void setNode(size_t local_node_id, INode*) = 0;
+    //virtual INode* getNode(size_t local_node_id) const = 0;
     void getNodeIDList( std::vector<size_t> &e_node_id_list ) const
     {
         e_node_id_list.resize(this->getNumberOfNodes());
         for (size_t i=0; i<this->getNumberOfNodes(); i++)
             e_node_id_list[i] = this->getNodeID(i);
     };
-    virtual const GeoLib::Point* getNodeCoordinates( size_t i_nod ) const = 0;
+    //virtual const GeoLib::Point* getNodeCoordinates( size_t i_nod ) const = 0;
 
     virtual size_t getNumberOfFaces() const = 0;
 

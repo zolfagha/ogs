@@ -30,10 +30,18 @@ public:
     virtual size_t getNumberOfNodes() const = 0;
     /// get a node object
     virtual INode* getNode( size_t id ) const = 0;
+    /// get a point object
+    virtual const GeoLib::Point* getNodeCoordinatesRef(size_t id) const = 0;
+    virtual GeoLib::Point getNodeCoordinates(size_t id) const = 0;
+    /// get a list of points in the given element
+    virtual void getListOfNodeCoordinates(const std::vector<size_t> &vec_node_id, std::vector<GeoLib::Point> &vec_pt) const = 0;
 
 
     /// add a new element
-    virtual size_t addEdgeElement(IElement*) = 0;
+    virtual void addEdgeElement(IElement*) = 0;
+
+    /// get min edge length
+    virtual double getMinEdgeLength() const = 0;
 };
 
 }

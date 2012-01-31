@@ -22,6 +22,7 @@ private:
     std::set<size_t> _connected_nodes;
     GeoLib::Point _x;
 public:
+    Node() {};
     Node (size_t id, const GeoLib::Point &x) {
         this->_node_id = id;
         this->_x = x;

@@ -12,9 +12,5 @@ INCLUDE_DIRECTORIES(
 
 target_link_libraries (
 	ModelLib
-	Base
-        MathLib
-	GeoLib
-	MeshLib
-	FemLib
+	NumLib
 )

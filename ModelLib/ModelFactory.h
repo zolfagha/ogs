@@ -19,7 +19,7 @@ struct ModelType
 class ModelFactory
 {
 public:
-    static IDiscretizationModel* createModel(ModelType::type model_type) 
+    static IModel* createModel(ModelType::type model_type) 
     {
         switch (model_type) {
         case ModelType::GROUNDWATER_FLOW:

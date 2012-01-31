@@ -27,10 +27,10 @@ private:
     void diagonalize(Tmat *eqsA, Tvec *eqsRHS, size_t id, Tval x);
 
 public:
-    void apply( Tmat* globalA, Tvec* globalRHS, std::vector<MeshLib::INode*> vec_nodes, std::vector<Tval> vec_values)
+    void apply( Tmat* globalA, Tvec* globalRHS, std::vector<size_t> vec_nodes, std::vector<Tval> vec_values)
     {
         for (size_t i=0; i<vec_nodes.size(); i++)
-            diagonalize(globalA, globalRHS, vec_nodes[i]->getNodeID(), vec_values[i]);
+            diagonalize(globalA, globalRHS, vec_nodes[i], vec_values[i]);
     }
 };
 
@@ -89,18 +89,18 @@ public:
     }
     virtual ~FemDirichletBC()
     {
-        delete _method;
     }
 
     /// setup B.C.
     void setup()
     {
+        const MeshLib::IMesh *msh = _var->getMesh();
         // pickup nodes on geo
-        MeshLib::findNodesOnGeometry(_var->getMesh(), _geo, &_vec_nodes);
+        MeshLib::findNodesOnGeometry(msh, _geo, &_vec_nodes);
         // set values
         _vec_values.resize(_vec_nodes.size());
         for (size_t i=0; i<_vec_nodes.size(); i++) {
-            const GeoLib::Point* x = _vec_nodes[i]->getData();
+            const GeoLib::Point* x = msh->getNodeCoordinatesRef(_vec_nodes[i]);
             _vec_values[i] = _bc_func->eval(*x);
         }
     }
@@ -118,7 +118,7 @@ private:
     TemplateFEMNodalFunction<Tval> *_var;
     GeoLib::GeoObject *_geo;
     MathLib::IFunction<Tval, GeoLib::Point> *_bc_func;
-    std::vector<MeshLib::INode*> _vec_nodes;
+    std::vector<size_t> _vec_nodes;
     std::vector<Tval> _vec_values;
     // node id, var id, value
     IDirichletBCMethod *_method;

@@ -12,7 +12,7 @@
 #include "GeoLib/Core/Polyline.h"
 
 // Mesh
-#include "MeshLib/Core/UnstructuredMesh.h"
+#include "MeshLib/Core/IMesh.h"
 
 
 namespace MeshLib
@@ -26,7 +26,7 @@ namespace MeshLib
 class MeshNodesAlongPolyline
 {
 public:
-	MeshNodesAlongPolyline(GeoLib::Polyline const* const ply, UnstructuredMesh2d const* mesh);
+	MeshNodesAlongPolyline(GeoLib::Polyline const* const ply, IMesh const* mesh);
 	const std::vector<size_t>& getNodeIDs () const;
 	const GeoLib::Polyline* getPolyline () const;
 	size_t getNumberOfLinearNodes () const;
@@ -34,7 +34,7 @@ public:
 
 private:
 	const GeoLib::Polyline* _ply;
-	const UnstructuredMesh2d* _mesh;
+	const IMesh* _mesh;
 	size_t _linear_nodes;
 	std::vector<size_t> _msh_node_ids;
 	std::vector<double> _dist_of_proj_node_from_ply_start;

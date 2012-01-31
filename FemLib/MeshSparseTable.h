@@ -3,8 +3,8 @@
 
 #include <iostream>
 #include <set>
-#include "Mesh.h"
-#include "LinAlg/Sparse/SparseTableCRS.h"
+#include "MeshLib/Core/IMesh.h"
+#include "MathLib/LinAlg/Sparse/SparseTableCRS.h"
 
 using namespace std;
 

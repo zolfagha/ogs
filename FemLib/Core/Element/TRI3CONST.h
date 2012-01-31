@@ -46,10 +46,10 @@ public:
     double interpolate(double *x, double *nodal_values);
 
     /// compute an matrix M = Int{W^T F N} dV
-    void integrateWxN( Fscalar f, MathLib::Matrix<double> &mat);
+    void integrateWxN( MathLib::IFunction<double, double*>* f, MathLib::Matrix<double> &mat);
 
     /// compute an matrix M = Int{W^T F dN} dV
-    void integrateWxDN( Fvector f, MathLib::Matrix<double> &mat);
+    void integrateWxDN( MathLib::IFunction<double*, double*>* f, MathLib::Matrix<double> &mat);
 
     /// compute an matrix M = Int{dW^T F dN} dV
     void integrateDWxDN( MathLib::IFunction<double, double*> *f, MathLib::Matrix<double> &mat);

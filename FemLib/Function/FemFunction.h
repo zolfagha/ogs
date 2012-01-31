@@ -2,8 +2,10 @@
 #pragma once
 
 #include "MathLib/Vector.h"
+#include "MathLib/Function/Function.h"
 #include "MeshLib/Core/IMesh.h"
-#include "NumLib/IFunction.h"
+
+
 #include "FemLib/Core/IFemElement.h"
 #include "FemLib/FemElementObjectContainer.h"
 
@@ -23,7 +25,7 @@ struct PolynomialOrder
  * \brief Template class for FEM node-based functions
  */
 template<typename Tvalue>
-class TemplateFEMNodalFunction : public NumLib::IFunction<Tvalue>
+class TemplateFEMNodalFunction : public MathLib::IFunction<Tvalue, GeoLib::Point>
 {
 public:
     TemplateFEMNodalFunction(MeshLib::IMesh* msh, PolynomialOrder::type order) {
@@ -46,7 +48,7 @@ public:
         return _msh;
     }
 
-    Tvalue& getValue(GeoLib::Point &pt) const {
+    Tvalue eval(const GeoLib::Point &pt) {
         return _nodal_values[0];
     };
 
@@ -83,8 +85,7 @@ private:
     LagrangianFeObjectContainer _feObjects;
 };
 
-typedef TemplateFEMNodalFunction<double> FemNodalFunctionScalar2d;
-typedef TemplateFEMNodalFunction<double> FEMNodalFunctionScalar3d;
+typedef TemplateFEMNodalFunction<double> FemNodalFunctionScalar;
 typedef TemplateFEMNodalFunction<MathLib::Vector2D> FemNodalFunctionVector2d;
 typedef TemplateFEMNodalFunction<MathLib::Vector3D> FEMNodalFunctionVector3d;
 
@@ -93,10 +94,10 @@ typedef TemplateFEMNodalFunction<MathLib::Vector3D> FEMNodalFunctionVector3d;
  * \brief Template class for FEM element-based functions
  */
 template<typename Tvalue>
-class TemplateFEMElementalFunction : public NumLib::IFunction<Tvalue>
+class TemplateFEMElementalFunction : public MathLib::IFunction<Tvalue,GeoLib::Point>
 {
 public:
-    Tvalue& getValue(GeoLib::Point &pt) const {
+    Tvalue eval(const GeoLib::Point &pt) {
         return _ele_values[0];
     };
     Tvalue& getValue(size_t id) const {
@@ -110,7 +111,7 @@ private:
  * \brief Template class for FEM integration point-based functions
  */
 template<typename Tvalue>
-class TemplateFEMIntegrationPointFunction : public NumLib::IFunction<Tvalue>
+class TemplateFEMIntegrationPointFunction : public MathLib::IFunction<Tvalue,GeoLib::Point>
 {
 public:
     TemplateFEMIntegrationPointFunction(MeshLib::IMesh* msh) {
@@ -118,7 +119,7 @@ public:
         _values.resize(msh->getNumberOfElements());
     };
 
-    Tvalue& getValue(GeoLib::Point &pt) const {
+    Tvalue eval(const GeoLib::Point &pt) {
         throw std::exception("The method or operation is not implemented.");
     };
 

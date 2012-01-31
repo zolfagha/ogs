@@ -21,6 +21,6 @@ TARGET_LINK_LIBRARIES ( tests
 	MeshLib
 #	FdmLib
 	FemLib
-#	NumLib
+	NumLib
 )
 

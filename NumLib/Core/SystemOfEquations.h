@@ -3,9 +3,8 @@
 
 namespace NumLib
 {
-
-class DoF
+class SystemOfEquations
 {
-};
 
+};
 }

@@ -15,18 +15,15 @@ namespace MeshLib
 {
 
 /// seeks all nodes located on a given polyline and returns a list of the found node pointers.
-void findNodesOnPolyline(IMesh const* msh, GeoLib::Polyline const* poly, std::vector<INode*> *vec_nodes)
+void findNodesOnPolyline(IMesh const* msh, GeoLib::Polyline const* poly, std::vector<size_t> *vec_nodes)
 {
-    MeshNodesAlongPolyline obj(poly, (MeshLib::UnstructuredMesh2d*)msh);
+    MeshNodesAlongPolyline obj(poly, msh);
     std::vector<size_t> vec_node_id = obj.getNodeIDs();
-    vec_nodes->resize(vec_node_id.size());
-    for (size_t i=0; i<vec_node_id.size(); i++) {
-        (*vec_nodes)[i] = msh->getNode(vec_node_id[i]);
-    }
+    vec_nodes->assign(vec_node_id.begin(), vec_node_id.end());
 };
 
 ///
-void findNodesOnGeometry(IMesh const* msh, GeoLib::GeoObject const* obj, std::vector<INode*> *vec_nodes)
+void findNodesOnGeometry(IMesh const* msh, GeoLib::GeoObject const* obj, std::vector<size_t> *vec_nodes)
 {
     switch (obj->getGeoType()) {
         case GeoLib::GeoObjType::POLYLINE:
@@ -39,13 +36,13 @@ void findNodesOnGeometry(IMesh const* msh, GeoLib::GeoObject const* obj, std::ve
 };
 
 /// get a list of elements connected to one of give nodes
-void findConnectedElements(IMesh const* msh, const std::vector<INode*> &nodes, std::vector<IElement*> &connected_elements)
+void findConnectedElements(IMesh const* msh, const std::vector<size_t> &nodes, std::vector<size_t> &connected_elements)
 {
     for (size_t i=0; i<msh->getNumberOfElements(); i++) {
         IElement* e = msh->getElemenet(i);
         for (size_t j=0; j<e->getNumberOfNodes(); j++) {
-            if (std::find(nodes.begin(), nodes.end(), msh->getNode(e->getNodeID(j)))!=nodes.end()) {
-                connected_elements.push_back(e);
+            if (std::find(nodes.begin(), nodes.end(), e->getNodeID(j))!=nodes.end()) {
+                connected_elements.push_back(e->getID());
                 break;
             }
         }
@@ -53,13 +50,13 @@ void findConnectedElements(IMesh const* msh, const std::vector<INode*> &nodes, s
 };
 
 /// get a list of edge elements of given elements
-void createEdgeElements(IMesh * msh, const std::vector<IElement*> &selected_ele, std::vector<IElement*> &edges)
+void createEdgeElements(IMesh * msh, const std::vector<size_t> &selected_ele, std::vector<IElement*> &edges)
 {
     typedef std::vector<IElement*> ElementList;
 
     std::vector<size_t> vec_edge_nodes;
     for (size_t i=0; i<selected_ele.size(); i++) {
-        IElement *e = selected_ele[i];
+        IElement *e = msh->getElemenet(selected_ele[i]);
         for (size_t j=0; j<e->getNumberOfEdges(); j++) {
             e->getNodeIDsOfEdgeElement(j, vec_edge_nodes);
             std::sort(vec_edge_nodes.begin(), vec_edge_nodes.end());
@@ -78,7 +75,7 @@ void createEdgeElements(IMesh * msh, const std::vector<IElement*> &selected_ele,
                 e->getNodeIDsOfEdgeElement(j, vec_edge_nodes);
                 for (size_t k=0; k<vec_edge_nodes.size(); k++) {
                     edge->setNodeID(k, vec_edge_nodes[k]);
-                    edge->setNode(k, msh->getNode(vec_edge_nodes[k]));
+                    //edge->setNode(k, msh->getNode(vec_edge_nodes[k]));
                 }
                 edges.push_back(edge);
                 msh->addEdgeElement(edge);
@@ -91,10 +88,10 @@ void createEdgeElements(IMesh * msh, const std::vector<IElement*> &selected_ele,
 void findEdgeElementsOnPolyline(IMesh * msh, GeoLib::Polyline const* poly, std::vector<IElement*> *vec_edges_on_poly)
 {
     // get a list of nodes on the polyline
-    std::vector<INode*> nodes_on_poly;
+    std::vector<size_t> nodes_on_poly;
     findNodesOnPolyline(msh, poly, &nodes_on_poly);
     // get a list of elements having the nodes
-    std::vector<IElement*> elements_near_poly;
+    std::vector<size_t> elements_near_poly;
     findConnectedElements(msh, nodes_on_poly, elements_near_poly);
     // get a list of edges made of the nodes
     std::vector<IElement*> selected_edges;
@@ -105,9 +102,11 @@ void findEdgeElementsOnPolyline(IMesh * msh, GeoLib::Polyline const* poly, std::
         // check
         size_t cnt_match = 0;
         for (size_t j=0; j<edge_e->getNumberOfNodes(); j++) {
-            const INode* edge_nod = msh->getNode(edge_e->getNodeID(j));
-            if (std::find(nodes_on_poly.begin(), nodes_on_poly.end(), edge_nod) != nodes_on_poly.end())
+            //const INode* edge_nod = msh->getNode(edge_e->getNodeID(j));
+            if (std::find(nodes_on_poly.begin(), nodes_on_poly.end(), edge_e->getNodeID(j)) != nodes_on_poly.end())
                 cnt_match++;
+            else
+                break;
         }
         // update the list
         if (cnt_match==edge_e->getNumberOfNodes())

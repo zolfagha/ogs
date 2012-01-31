@@ -72,9 +72,20 @@ public:
         return new_node_id;
     };
 
-    virtual void getNodeCoordinates(size_t node_id, GeoLib::Point &pt) const {
-        INode* nod = _list_nodes[node_id];
-        pt = *nod->getData();
+    const GeoLib::Point*  getNodeCoordinatesRef(size_t id) const
+    {
+        return getNode(id)->getData();
+    }
+
+    GeoLib::Point getNodeCoordinates(size_t id) const
+    {
+        return *getNode(id)->getData();
+    }
+
+    virtual void getListOfNodeCoordinates(const std::vector<size_t> &vec_node_id, std::vector<GeoLib::Point> &vec_pt) const 
+    {
+        for (size_t i=0; i<vec_node_id.size(); i++)
+            vec_pt.push_back(*this->getNodeCoordinatesRef(vec_node_id[i]));
     }
 
     const std::vector<Node*>& getNodeVector() const { return _list_nodes;};
@@ -92,11 +103,10 @@ public:
         return e->getID();
     };
 
-    size_t addEdgeElement(IElement *e) 
+    void addEdgeElement(IElement *e) 
     {
         e->setID(_list_edge_elements.size());
         _list_edge_elements.push_back(e);
-        return e->getID();
     }
 
 

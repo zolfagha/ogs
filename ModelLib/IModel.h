@@ -9,12 +9,13 @@
 namespace ModelLib
 {
 
-class IDiscretizationModel
+class IModel
 {
 public:
-    //virtual void localAssembly(size_t i_ele, MathLib::Matrix<double> localA, double *localRHS) = 0;
-    //virtual void getKnownXi(std::vector<size_t> vec_dof_if, std::vector<double> vec_values) = 0;
-    //virtual void addRHS(std::vector<size_t> vec_dof_if, std::vector<double> vec_values) = 0;
+    //Time SuggestNext(Time t_n);
+    //bool IsAwake(Time t_n+1);
+    //bool TryNext(Time time);
+    //bool SolveTimeStep(Time t_n+1) = 0;
 };
 
 }
