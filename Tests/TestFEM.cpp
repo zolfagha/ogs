@@ -6,19 +6,14 @@
 #include "MathLib/LinAlg/Solvers/GaussAlgorithm.h"
 #include "MathLib/Function/Function.h"
 
-#include "GeoLib/Core/Point.h"
-#include "GeoLib/Core/Polyline.h"
 #include "GeoLib/Shape/Rectangle.h"
 
-#include "MeshLib/Core/UnstructuredMesh.h"
 #include "MeshLib/Tools/MeshGenerator.h"
 
-#include "FemLib/Core/IFemElement.h"
 #include "FemLib/Function/FemFunction.h"
 #include "FemLib/Function/FemFunctionProjection.h"
 #include "FemLib/BC/FemDirichletBC.h"
 #include "FemLib/BC/FemNeumannBC.h"
-#include "FemLib/Core/FemCoorinatesMapping.h"
 
 #include <vector>
 #include <memory>
@@ -40,28 +35,22 @@ void outputLinearEQS(MathLib::Matrix<double> &globalA, std::vector<double> &glob
     std::cout << std::endl;
 }
 
-TEST(FEM, testUnstructuredMesh)
+class GWProblem
 {
-    //#Define a problem
-    //geometry
-    Rectangle rec(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
-    Polyline* poly_left = rec.getLeft();
-    Polyline* poly_right = rec.getRight();
-    //mesh
-    //std::auto_ptr<UnstructuredMesh2d> msh = MeshGenerator::generateRegularQuadMesh(2.0, 2, .0, .0, .0);
-    std::auto_ptr<StructuredMesh<ElementType::QUAD>> msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
-    //mat
-    const double K = 1.e-11; // TODO: should be a function
-    //discretization
-    FemNodalFunctionScalar head(msh.get(), PolynomialOrder::Linear);
-    FEMIntegrationPointFunctionVector2d vel(msh.get());
-    //bc
-    FemDirichletBC<double> bc1(&head, poly_right, &MathLib::FunctionConstant<double, GeoLib::Point>(.0), &DiagonalizeMethod<GlobalMatrixType,GlobalVectorType,double>()); //TODO should BC objects be created by fe functions?
-    FemNeumannBC<double> bc2(&head, poly_left, &MathLib::FunctionConstant<double, GeoLib::Point>(1.e-5));
+public:
+    IMesh *msh;
+    MathLib::IFunction<double, double*> *K;
+    FemNodalFunctionScalar *head;
+    FEMIntegrationPointFunctionVector2d *vel;
+    FemDirichletBC<double> *bc1;
+    FemNeumannBC<double> *bc2;
+};
 
-    //#Solve
-    bc1.setup();
-    bc2.setup();
+void solveGW(GWProblem &gw)
+{
+    const MeshLib::IMesh *msh = gw.msh;
+    gw.bc1->setup();
+    gw.bc2->setup();
     // global EQS
     const size_t n_dof = msh->getNumberOfNodes();
     GlobalMatrixType globalA(n_dof, n_dof, .0);
@@ -72,11 +61,11 @@ TEST(FEM, testUnstructuredMesh)
     std::vector<size_t> e_node_id_list;
     for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
         MeshLib::IElement *e = msh->getElemenet(i_e);
-        IFiniteElement *fe = head.getFiniteElement(e);
+        IFiniteElement *fe = gw.head->getFiniteElement(e);
         const size_t &n_dof = fe->getNumberOfVariables();
         localK.resize(n_dof, n_dof);
         localK = .0;
-        fe->integrateDWxDN(&MathLib::FunctionConstant<double, double*>(K), localK);
+        fe->integrateDWxDN(gw.K, localK);
         e->getNodeIDList(e_node_id_list);
         globalA.add(e_node_id_list, localK); //TODO A(id_list) += K;
     }
@@ -84,9 +73,9 @@ TEST(FEM, testUnstructuredMesh)
     //outputLinearEQS(globalA, globalRHS);
 
     //apply BC
-    bc2.apply(&globalRHS);
+    gw.bc2->apply(&globalRHS);
     //outputLinearEQS(globalA, globalRHS);
-    bc1.apply(&globalA, &globalRHS);
+    gw.bc1->apply(&globalA, &globalRHS);
     //outputLinearEQS(globalA, globalRHS);
 
     //solve
@@ -95,20 +84,20 @@ TEST(FEM, testUnstructuredMesh)
     solver.execute(&x[0]); // input x contains rhs but output x contains solution.
 
     //update head
-    head.setNodalValues(&x[0]);
+    gw.head->setNodalValues(&x[0]);
 
     //calculate vel (vel=f(h))
     for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
         MeshLib::IElement* e = msh->getElemenet(i_e);
-        IFiniteElement *fe = head.getFiniteElement(e);
+        IFiniteElement *fe = gw.head->getFiniteElement(e);
         std::vector<double> local_h(e->getNumberOfNodes());
         for (size_t j=0; j<e->getNumberOfNodes(); j++)
-            local_h[j] = head.getValue(e->getNodeID(j));
+            local_h[j] = gw.head->getValue(e->getNodeID(j));
         // for each integration points
         IFemNumericalIntegration *integral = fe->getIntegrationMethod();
         double x[2] = {};
         const size_t n_gp = integral->getNumberOfSamplingPoints();
-        vel.setNumberOfIntegationPoints(i_e, n_gp);
+        gw.vel->setNumberOfIntegationPoints(i_e, n_gp);
         for (size_t ip=0; ip<n_gp; ip++) {
             MathLib::Vector2D q;
             q.getRawRef()[0] = .0;
@@ -116,10 +105,61 @@ TEST(FEM, testUnstructuredMesh)
             integral->getSamplingPoint(ip, x);
             fe->computeBasisFunctions(x);
             const MathLib::Matrix<double> *dN = fe->getGradBasisFunction();
-            dN->axpy(-K, &local_h[0], .0, q.getRawRef()); //TODO  q = - K * dN * local_h;
-            vel.setIntegrationPointValue(i_e, ip, q);
+            double k = gw.K->eval(x);
+            dN->axpy(-k, &local_h[0], .0, q.getRawRef()); //TODO  q = - K * dN * local_h;
+            gw.vel->setIntegrationPointValue(i_e, ip, q);
         }
     }
 }
+
+TEST(FEM, testUnstructuredMesh)
+{
+    //#Define a problem
+    GWProblem gw;
+    //#Define a problem
+    //geometry
+    Rectangle rec(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
+    Polyline* poly_left = rec.getLeft();
+    Polyline* poly_right = rec.getRight();
+    //mesh
+    gw.msh = MeshGenerator::generateRegularQuadMesh(2.0, 2, .0, .0, .0);
+    //discretization
+    gw.head = new FemNodalFunctionScalar(gw.msh, PolynomialOrder::Linear);
+    gw.vel = new FEMIntegrationPointFunctionVector2d(gw.msh);
+    //bc
+    gw.bc1 = new FemDirichletBC<double>(gw.head, poly_right, &MathLib::FunctionConstant<double, GeoLib::Point>(.0), &DiagonalizeMethod<GlobalMatrixType,GlobalVectorType,double>()); //TODO should BC objects be created by fe functions?
+    gw.bc2 = new FemNeumannBC<double>(gw.head, poly_left, &MathLib::FunctionConstant<double, GeoLib::Point>(1.e-5));
+
+    gw.K = new MathLib::FunctionConstant<double, double*>(1.e-11);
+
+    //#Solve
+    solveGW(gw);
+}
+
+TEST(FEM, testStructuredMesh)
+{
+    //#Define a problem
+    GWProblem gw;
+    //#Define a problem
+    //geometry
+    Rectangle rec(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
+    Polyline* poly_left = rec.getLeft();
+    Polyline* poly_right = rec.getRight();
+    //mesh
+    gw.msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
+    //discretization
+    gw.head = new FemNodalFunctionScalar(gw.msh, PolynomialOrder::Linear);
+    gw.vel = new FEMIntegrationPointFunctionVector2d(gw.msh);
+    //bc
+    gw.bc1 = new FemDirichletBC<double>(gw.head, poly_right, &MathLib::FunctionConstant<double, GeoLib::Point>(.0), &DiagonalizeMethod<GlobalMatrixType,GlobalVectorType,double>()); //TODO should BC objects be created by fe functions?
+    gw.bc2 = new FemNeumannBC<double>(gw.head, poly_left, &MathLib::FunctionConstant<double, GeoLib::Point>(1.e-5));
+
+    gw.K = new MathLib::FunctionConstant<double, double*>(1.e-11);
+
+    //#Solve
+    solveGW(gw);
+
+}
+
 
 

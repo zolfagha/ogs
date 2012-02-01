@@ -9,6 +9,9 @@ FILE(GLOB NumLib_Solution_Files Solution/*.h Solution/*.cpp)
 SOURCE_GROUP( NumLib\\Solution FILES ${NumLib_Solution_Files} )
 FILE(GLOB NumLib_Output_Files Output/*.h Output/*.cpp)
 SOURCE_GROUP( NumLib\\Output FILES ${NumLib_Output_Files} )
+FILE(GLOB NumLib_Discrete_Files Discrete/*.h Discrete/*.cpp)
+SOURCE_GROUP( NumLib\\Discrete FILES ${NumLib_Discrete_Files} )
+
 
 ADD_LIBRARY( NumLib STATIC 
 	${NumLib_Files} 
@@ -16,6 +19,7 @@ ADD_LIBRARY( NumLib STATIC
 	${NumLib_Coupling_Files} 
 	${NumLib_Solution_Files} 
 	${NumLib_Output_Files} 
+	${NumLib_Discrete_Files} 
 )
 
 INCLUDE_DIRECTORIES(

@@ -38,10 +38,10 @@ public:
         return msh;
     }
 
-    static std::auto_ptr<MeshLib::UnstructuredMesh2d> generateRegularQuadMesh(const double length, const size_t subdivision, const double origin_x, const double origin_y, const double origin_z) 
+    static MeshLib::UnstructuredMesh2d* generateRegularQuadMesh(const double length, const size_t subdivision, const double origin_x, const double origin_y, const double origin_z) 
     {
 
-        std::auto_ptr<MeshLib::UnstructuredMesh2d> msh(new MeshLib::UnstructuredMesh2d());
+        MeshLib::UnstructuredMesh2d* msh = new MeshLib::UnstructuredMesh2d();
 
         size_t n_eles = static_cast<size_t>(pow(static_cast<double>(subdivision), 2));
         size_t n_nodes = static_cast<size_t>(pow(static_cast<double>(subdivision+1), 2));
@@ -80,16 +80,14 @@ public:
 
     };
 
-    static std::auto_ptr<StructuredMesh<ElementType::QUAD>> generateStructuredRegularQuadMesh(const double length, const size_t subdivision, const double origin_x, const double origin_y, const double origin_z) 
+    static StructuredMesh<ElementType::QUAD>* generateStructuredRegularQuadMesh(const double length, const size_t subdivision, const double origin_x, const double origin_y, const double origin_z) 
     {
         CoordinateSystem coord(CoordinateSystem::XY);
         GeoLib::Point org(origin_x, origin_y, origin_z);
         GeoLib::Point pt_length(length, length, .0);
         GeoLib::Point pt_unit_len(length/subdivision, length/subdivision, .0);
 
-        std::auto_ptr<StructuredMesh<ElementType::QUAD>> msh(new StructuredMesh<ElementType::QUAD>(coord, org, pt_length.getData(), pt_unit_len.getData()));
-
-        return msh;
+        return new StructuredMesh<ElementType::QUAD>(coord, org, pt_length.getData(), pt_unit_len.getData());
 
     };
 
