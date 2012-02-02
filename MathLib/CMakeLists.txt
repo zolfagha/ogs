@@ -58,11 +58,6 @@ SET ( MathLib_LinAlg_Solvers_Files
 		LinAlg/Solvers/GaussAlgorithm.cpp
         LinAlg/Solvers/TriangularSolve.cpp
 )
-IF (USE_LIS)
-	SET ( MathLib_LinAlg_Solvers_Files ${MathLib_LinAlg_Solvers_Files}
-		LinAlg/Solvers/LisInterface.h
-)
-ENDIF (USE_LIS)
 SOURCE_GROUP( MathLib\\LinAlg\\Solvers FILES ${MathLib_LinAlg_Solvers_Files})
 
 SET ( MathLib_LinAlg_Preconditioner_Files
@@ -70,6 +65,20 @@ SET ( MathLib_LinAlg_Preconditioner_Files
 		LinAlg/Preconditioner/generateDiagPrecond.cpp
 )
 SOURCE_GROUP( MathLib\\LinAlg\\Preconditioner FILES ${MathLib_LinAlg_Preconditioner_Files})
+
+SET ( MathLib_LinAlg_LinearEquations_Files
+		LinAlg/LinearEquations/ILinearEquations.h
+		LinAlg/LinearEquations/LinearEquations.h
+		LinAlg/LinearEquations/PETScInterface.h
+		LinAlg/LinearEquations/PARDISOInterface.h
+)
+IF (USE_LIS)
+	SET ( MathLib_LinAlg_LinearEquations_Files ${MathLib_LinAlg_LinearEquations_Files}
+		LinAlg/LinearEquations/LisInterface.h
+		LinAlg/LinearEquations/LisInterface.cpp
+)
+ENDIF (USE_LIS)
+SOURCE_GROUP( MathLib\\LinAlg\\LinearEquations FILES ${MathLib_LinAlg_LinearEquations_Files})
 
 SET ( MathLib_Nonlinear_Files
         Nonlinear/Picard.h
@@ -104,6 +113,7 @@ ADD_LIBRARY( MathLib STATIC
 	${MathLib_LinAlg_Sparse_Files}
 	${MathLib_LinAlg_Solvers_Files}
 	${MathLib_LinAlg_Preconditioner_Files}
+	${MathLib_LinAlg_LinearEquations_Files}
 	${MathLib_Nonlinear_Files}
 	${MathLib_Integration_Files}
 	${MathLib_ODE_Files}

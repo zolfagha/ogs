@@ -15,7 +15,10 @@ void Clock::addTransientSystem(ITransientSystem *system)
 
 void Clock::moveForwardUntill(TimeStep time_end) 
 {
-    TimeStep time_current;
+    if (rootAsyncPartSolution.getNumberOfChildren()==0)
+        return;
+
+    TimeStep time_current = _time_begin;
     while (time_current<time_end) {
         TimeStep try_next = rootAsyncPartSolution.suggestNext(time_current);
         while (!rootAsyncPartSolution.solveNextStep(try_next)) {

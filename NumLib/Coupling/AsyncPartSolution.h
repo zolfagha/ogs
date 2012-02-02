@@ -18,6 +18,7 @@ public:
 	void setAlgorithm(PartitionedAlgorithm *algo);
 
     void addChildren(ITransientSystem* sys);
+    size_t getNumberOfChildren() const;
 	
 	TimeStep suggestNext(TimeStep time_current);
 	

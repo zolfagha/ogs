@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <limits>
 
 #include "Base/MemoryTools.h"
 #include "MathLib/Vector.h"
@@ -50,8 +51,8 @@ public:
 
     virtual double getMinEdgeLength() const 
     {
-        std::cout << "***Warning: getMinEdgeLength() just returns 0." << std::endl;
-        return .0;
+        std::cout << "***Warning: getMinEdgeLength() just returns numeric_limits<double>::epsilon()." << std::endl;
+        return std::numeric_limits<double>::epsilon();
     };
 
     virtual size_t getNumberOfNodes() const { return _list_nodes.size(); };

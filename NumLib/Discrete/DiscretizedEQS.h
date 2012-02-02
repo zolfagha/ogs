@@ -3,26 +3,26 @@
 
 #include <vector>
 
-#include "MathLib/LinAlg/Dense/Matrix.h"
-#include "MathLib/LinAlg/Sparse/CRSMatrix.h"
-
+#include "MathLib/LinAlg/LinearEquations/LinearEquations.h"
 
 namespace NumLib
 {
-typedef MathLib::CRSMatrix<double,size_t> SparseMatrix;
-typedef MathLib::Matrix<double> DenseMatrix;
-typedef std::vector<double> Vectir;
-typedef MathLib::Matrix<double> LocalEQS;
+//typedef MathLib::CRSMatrix<double,size_t> SparseMatrix;
+//typedef MathLib::Matrix<double> DenseMatrix;
+//typedef std::vector<double> Vectir;
+//typedef MathLib::Matrix<double> LocalEQS;
 
 /**
- * \brief Linear equations
+ * \brief Discrete equation
  */
+typedef MathLib::LinearEquations DiscretizedEQS;
+
+#if 0
 class DiscretizedEQS
 {
 private:
-    SparseMatrix* _A;
-    Vectir* _RHS;
-    Vectir* _X;
+    MathLib::LinearEquations *ls;
+
 public:
 
     SparseMatrix* getA() {return _A;};
@@ -59,5 +59,7 @@ public:
 
 
 };
+
+#endif
 
 }

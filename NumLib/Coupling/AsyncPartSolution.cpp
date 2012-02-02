@@ -14,9 +14,14 @@ void AsyncPartSolution::addChildren(ITransientSystem* sys)
 {
     listChildren.push_back(sys);
 }
-	
+
+size_t AsyncPartSolution::getNumberOfChildren() const
+{
+    return listChildren.size();
+}
+
 TimeStep AsyncPartSolution::suggestNext(TimeStep time_current) {
-    TimeStep t; 
+    TimeStep t = .0; 
     for (size_t i=0; i<listChildren.size(); i++) {
         ITransientSystem *solution = listChildren[i];
         t = std::min(t, solution->suggestNext(time_current));

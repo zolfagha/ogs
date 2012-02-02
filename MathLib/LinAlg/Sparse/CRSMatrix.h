@@ -59,6 +59,14 @@ public:
 		delete [] _data;
 	}
 
+    CRSMatrix<FP_TYPE,IDX_TYPE>& operator= (FP_TYPE a)
+    {
+        for (IDX_TYPE i=0; i<getNNZ(); i++)
+            _data[i] = a;
+
+        return *this;
+    }
+
 	virtual void amux(FP_TYPE d, FP_TYPE const * const __restrict__ x, FP_TYPE * __restrict__ y) const
 	{
 		amuxCRS<FP_TYPE, IDX_TYPE>(d, this->getNRows(), _row_ptr, _col_idx, _data, x, y);

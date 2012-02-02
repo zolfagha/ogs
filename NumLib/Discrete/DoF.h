@@ -80,7 +80,7 @@ public:
         DofMap *dof = new DofMap(discrete_points_size);
         _map_var2dof.push_back(dof);
         _map_msh2dof[mesh_id].push_back(dof);
-        return _map_var2dof.size();
+        return _map_var2dof.size()-1;
     }
 
     void construct(NumberingType num=BY_DOF)

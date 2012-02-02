@@ -3,7 +3,7 @@
 
 #include <string>
 #include "MathLib/LinAlg/Sparse/SparseTableCRS.h"
-#include "MathLib/LinAlg/Solvers/LinearSolver.h"
+#include "ILinearEquations.h"
 
 /*
 LIS matrix solver options
@@ -65,7 +65,7 @@ typedef struct {
     double ls_error_tolerance;
 } LIS_option;
 
-class LIS_Solver : public LinearSolver
+class LIS_Solver : public ILinearEquations
 {
 public:
     void initialize(int argc, char *argv[]);
