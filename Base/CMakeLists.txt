@@ -20,6 +20,7 @@ SET ( Base_Files
         CPUTimeTimer.cpp
 	RunTimeTimer.cpp
 	StringTools.cpp
+	Options.h
 	)
 SOURCE_GROUP( Base FILES ${Base_Files})
 

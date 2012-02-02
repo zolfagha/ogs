@@ -15,7 +15,7 @@ namespace NumLib
 /**
  * \brief Discrete equation
  */
-typedef MathLib::LinearEquations DiscretizedEQS;
+typedef MathLib::SparseLinearEquations DiscretizedEQS;
 
 #if 0
 class DiscretizedEQS

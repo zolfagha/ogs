@@ -83,18 +83,18 @@ MeshNodesAlongPolyline::MeshNodesAlongPolyline(GeoLib::Polyline const* const ply
 	// sort the (linear) nodes along the polyline according to their distances
 	Quicksort<double> (_dist_of_proj_node_from_ply_start, 0, _dist_of_proj_node_from_ply_start.size(), _msh_node_ids);
 
-#ifndef NDEBUG
-	std::cout << "*****" << std::endl;
-	std::cout << "distances of linear nodes along polyline " << *ply <<
-	"(min_edge_length = " << min_edge_length << "): " << std::endl;
-	for (size_t k(0); k < _dist_of_proj_node_from_ply_start.size(); k++)
-		std::cout << "\t" << _msh_node_ids[k] << " " <<
-		_dist_of_proj_node_from_ply_start[k] << std::endl;
-	//std::cout << "number of linear nodes along polyline " << ply << ": " <<
-	//_dist_of_proj_node_from_ply_start.size()
-	//          << ", number of higher order nodes: " << msh_node_higher_order_ids.size() <<
-	//std::endl;
-#endif
+//#ifndef NDEBUG
+//	std::cout << "*****" << std::endl;
+//	std::cout << "distances of linear nodes along polyline " << *ply <<
+//	"(min_edge_length = " << min_edge_length << "): " << std::endl;
+//	for (size_t k(0); k < _dist_of_proj_node_from_ply_start.size(); k++)
+//		std::cout << "\t" << _msh_node_ids[k] << " " <<
+//		_dist_of_proj_node_from_ply_start[k] << std::endl;
+//	//std::cout << "number of linear nodes along polyline " << ply << ": " <<
+//	//_dist_of_proj_node_from_ply_start.size()
+//	//          << ", number of higher order nodes: " << msh_node_higher_order_ids.size() <<
+//	//std::endl;
+//#endif
 	//// assign/append higher order nodes at the end of vector _msh_node_ids
 	//for (size_t k(0); k < msh_node_higher_order_ids.size(); k++)
 	//	_msh_node_ids.push_back (msh_node_higher_order_ids[k]);

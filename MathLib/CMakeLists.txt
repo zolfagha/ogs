@@ -71,6 +71,7 @@ SET ( MathLib_LinAlg_LinearEquations_Files
 		LinAlg/LinearEquations/LinearEquations.h
 		LinAlg/LinearEquations/PETScInterface.h
 		LinAlg/LinearEquations/PARDISOInterface.h
+		LinAlg/LinearEquations/LinearEquationsFactory.h
 )
 IF (USE_LIS)
 	SET ( MathLib_LinAlg_LinearEquations_Files ${MathLib_LinAlg_LinearEquations_Files}

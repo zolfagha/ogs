@@ -4,6 +4,7 @@
 #include <string>
 #include "MathLib/LinAlg/Sparse/SparseTableCRS.h"
 #include "ILinearEquations.h"
+#include "LinearEquations.h"
 
 /*
 LIS matrix solver options
@@ -65,12 +66,25 @@ typedef struct {
     double ls_error_tolerance;
 } LIS_option;
 
-class LIS_Solver : public ILinearEquations
+class LIS_Solver : public CRSLinearEquationsBase<signed>
 {
 public:
-    void initialize(int argc, char *argv[]);
-    void solve(CRSSigned *A, double *x, double *b, LIS_option &option);
-    void finialize();
+    void initialize();
+    void finalize();
+
+    void setOption(const Base::Options &option);
+    void setOption(const LIS_option &option)
+    {
+        _option = option;
+    }
+    LIS_option &getOption() 
+    {
+        return _option;
+    }
+
+    void solve();
+private:
+    LIS_option _option;
 };
 
 }

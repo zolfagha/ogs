@@ -8,13 +8,16 @@
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "MeshLib/Core/IMesh.h"
 
+
 #include "NumLib/Discrete/DiscretizedEQS.h"
 #include "NumLib/Discrete/DoF.h"
+#include "NumLib/Discrete/SparsityBuilder.h"
 
 #include "NumLib/Coupling/Clock.h"
 #include "NumLib/Coupling/TransientSystems.h"
 
 using namespace GeoLib;
+using namespace MathLib;
 using namespace MeshLib;
 using namespace NumLib;
 
@@ -35,18 +38,18 @@ TEST(Num, SingleDOF)
 
 TEST(Num, NumberingDofByDof)
 {
-        DofMapManager dofManagerB;
-        size_t dofIdB1 = dofManagerB.addDoF(10);
-        size_t dofIdB2 = dofManagerB.addDoF(10);
-        dofManagerB.construct();
-        const DofMap *dofMapB1 = dofManagerB.getDofMap(dofIdB1); 
-        const DofMap *dofMapB2 = dofManagerB.getDofMap(dofIdB2); 
-        ASSERT_EQ(dofManagerB.getNumberOfDof(), 2);
-        ASSERT_EQ(dofManagerB.getTotalNumberOfDiscretePoints(), 20);
-        ASSERT_EQ(dofMapB1->getEqsID(0), 0);
-        ASSERT_EQ(dofMapB1->getEqsID(9), 9);
-        ASSERT_EQ(dofMapB2->getEqsID(0), 10);
-        ASSERT_EQ(dofMapB2->getEqsID(9), 19);
+    DofMapManager dofManagerB;
+    size_t dofIdB1 = dofManagerB.addDoF(10);
+    size_t dofIdB2 = dofManagerB.addDoF(10);
+    dofManagerB.construct();
+    const DofMap *dofMapB1 = dofManagerB.getDofMap(dofIdB1); 
+    const DofMap *dofMapB2 = dofManagerB.getDofMap(dofIdB2); 
+    ASSERT_EQ(dofManagerB.getNumberOfDof(), 2);
+    ASSERT_EQ(dofManagerB.getTotalNumberOfDiscretePoints(), 20);
+    ASSERT_EQ(dofMapB1->getEqsID(0), 0);
+    ASSERT_EQ(dofMapB1->getEqsID(9), 9);
+    ASSERT_EQ(dofMapB2->getEqsID(0), 10);
+    ASSERT_EQ(dofMapB2->getEqsID(9), 19);
 };
 
 TEST(Num, NumberingDofByPoint)
@@ -69,13 +72,20 @@ TEST(Num, testDis1)
 {    
     //mesh
     IMesh* msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
+    MeshLib::TopologyNode2Nodes topo_node2nodes(msh);
     //define dof
     DofMapManager dofManager;
     size_t dofId = dofManager.addDoF(msh->getNumberOfNodes());
     dofManager.construct();
+    //sparse table
+    RowMajorSparsity sparse;
+    createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, sparse);
 
     // construct discrete eqs
-    DiscretizedEQS eqs;
+    SparseLinearEquations eqs;
+    eqs.create(sparse.size(), &sparse);
+    eqs.getOption().solver_type = SparseLinearEquations::CG;
+    eqs.getOption().precon_type = SparseLinearEquations::NONE;
 
     //
     const DofMap *dofMap = dofManager.getDofMap(dofId);
@@ -87,6 +97,8 @@ TEST(Num, testDis1)
         MathLib::Matrix<double> localK(local_dofmap.size(),local_dofmap.size());
         eqs.addA(local_dofmap, localK);
     }
+
+    eqs.solve();
 
 }
 

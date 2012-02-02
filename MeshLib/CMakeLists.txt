@@ -4,6 +4,7 @@ SET ( MeshLib_Core_Files
 	Core/INode.h
 	Core/IElement.h
 	Core/StructuredMesh.h
+	Core/StructuredMesh.cpp
 	Core/UnstructuredMesh.h
 	Core/Node.h
 	Core/Element.h
