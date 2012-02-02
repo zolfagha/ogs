@@ -2,7 +2,6 @@
 SET ( MathLib_Files
 	LinearInterpolation.h  
 	MathTools.h
-	Vector3.h
 	Vector.h
 	max.h
 	sparse.h

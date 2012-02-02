@@ -12,12 +12,12 @@
 #include "GeoLib/Core/TemplatePoint.h"
 
 // MathLib
-#include "MathTools.h"
+#include "MathLib/MathTools.h"
 
 #include <iostream>
 #include <cmath>
 
-namespace MathLib {
+namespace GeoLib {
 
 /**
  * The Vector class defines a three-dimensional vector, with appropriate
