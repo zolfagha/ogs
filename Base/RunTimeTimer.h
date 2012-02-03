@@ -11,6 +11,9 @@
 
 #include "TimeMeasurementBase.h"
 
+namespace Base
+{
+
 class RunTimeTimer : public TimeMeasurementBase
 {
 public:
@@ -27,5 +30,6 @@ private:
 	unsigned long _stop;
 #endif
 };
+}
 
 #endif

@@ -7,6 +7,9 @@
 
 #include "binarySearch.h"
 
+namespace Base
+{
+
 size_t searchElement (double const& val, size_t beg, size_t end, const std::vector<double>& array)
 {
 	if (beg >= end) return std::numeric_limits<size_t>::max();
@@ -19,4 +22,6 @@ size_t searchElement (double const& val, size_t beg, size_t end, const std::vect
 		return searchElement (val, beg, m, array);
 	}
 	return searchElement (val, m+1, end, array);
+}
+
 }

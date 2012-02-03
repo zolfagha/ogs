@@ -1,5 +1,8 @@
 #include "CPUTimeTimer.h"
 
+namespace Base
+{
+
 void CPUTimeTimer::start()
 {
 	_start = clock();
@@ -15,3 +18,4 @@ double CPUTimeTimer::elapsed()
 	return (_stop-_start)/(double)(CLOCKS_PER_SEC);
 }
 
+}

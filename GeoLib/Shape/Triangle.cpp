@@ -7,11 +7,12 @@
 
 #include "Triangle.h"
 
+#include "GeoLib/Vector3.h"
+
 // MathLib
 #include "MathLib/LinAlg/Solvers/GaussAlgorithm.h"
 #include "MathTools.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
-#include "MathLib/Vector3.h"
 
 namespace GeoLib {
 

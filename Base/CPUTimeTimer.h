@@ -5,6 +5,9 @@
 
 #include "TimeMeasurementBase.h"
 
+namespace Base
+{
+
 class CPUTimeTimer
 {
 public:
@@ -16,6 +19,8 @@ private:
 	clock_t _start;
 	clock_t _stop;
 };
+
+}
 
 #endif
 

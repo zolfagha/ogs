@@ -1,6 +1,9 @@
 #ifndef TIMEMEASUREMENT_H
 #define TIMEMEASUREMENT_H
 
+namespace Base
+{
+
 class TimeMeasurementBase 
 {
 public:
@@ -9,6 +12,8 @@ public:
 	virtual double elapsed () = 0;
 	virtual ~TimeMeasurementBase () {};
 };
+
+}
 
 #endif
 

@@ -9,6 +9,9 @@
 #include "StringTools.h"
 #include <string>
 
+namespace Base
+{
+
 /**
  * Converts three integers representing a date into a double.
  * Note: It is not really checked if the date actually makes sense.
@@ -39,4 +42,5 @@ double strDate2double(const std::string &s);
  */
 double xmlDate2double(const std::string &s);
 
+}
 #endif //DATETOOLS_H

@@ -74,7 +74,7 @@ void EarClippingTriangulation::copyPolygonPoints (const GeoLib::Polygon* polygon
 void EarClippingTriangulation::rotate ()
 {
 	// calculate supporting plane
-	MathLib::Vector plane_normal;
+	Vector plane_normal;
 	double d;
 	// compute the plane normal
 	getNewellPlane(_pnts, plane_normal, d);

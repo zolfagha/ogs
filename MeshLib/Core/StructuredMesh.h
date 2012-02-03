@@ -53,7 +53,7 @@ public:
     {
         delete _e;
         delete _nod;
-        destroyStdVectorWithPointers(_list_edge_elements);
+        Base::destroyStdVectorWithPointers(_list_edge_elements);
     }
 
     /// get coordinate systems

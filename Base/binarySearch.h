@@ -13,6 +13,9 @@
 #ifndef BINARYSEARCH_H_
 #define BINARYSEARCH_H_
 
+namespace Base
+{
+
 /**
  * Binary search in a sorted vector of elements to get the
  * id of an element according its key.
@@ -39,5 +42,7 @@ size_t searchElement (const T& key, size_t beg, size_t end, const std::vector<T>
 }
 
 size_t searchElement (double const& val, size_t beg, size_t end, const std::vector<double>& array);
+
+}
 
 #endif /* BINARYSEARCH_H_ */

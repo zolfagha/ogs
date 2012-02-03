@@ -6,6 +6,9 @@
 #ifndef FILEFINDER_H
 #define FILEFINDER_H
 
+namespace Base
+{
+
 /**
  * FileFinder stores a list of directories and will return the complete path
  * for a given filename if the corresponding file is found in any of these
@@ -51,4 +54,7 @@ private:
 
 
 };
+
+}
+
 #endif // FILEFINDER_H

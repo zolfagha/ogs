@@ -11,7 +11,12 @@ namespace MeshLib
 /**
  * \brief Interface to mesh classes
  *
- * 
+ * Mesh classes should have the following data,
+ * - Node
+ * - Vertex
+ * - Edge
+ * - Face
+ * - Element
  */
 class IMesh
 {

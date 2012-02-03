@@ -81,7 +81,7 @@ MeshNodesAlongPolyline::MeshNodesAlongPolyline(GeoLib::Polyline const* const ply
 	}
 
 	// sort the (linear) nodes along the polyline according to their distances
-	Quicksort<double> (_dist_of_proj_node_from_ply_start, 0, _dist_of_proj_node_from_ply_start.size(), _msh_node_ids);
+	Base::Quicksort<double> (_dist_of_proj_node_from_ply_start, 0, _dist_of_proj_node_from_ply_start.size(), _msh_node_ids);
 
 //#ifndef NDEBUG
 //	std::cout << "*****" << std::endl;

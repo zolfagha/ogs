@@ -306,7 +306,7 @@ bool GEOObjects::isUniquePointVecName(std::string &name)
 		count++;
 		// If the original name already exists we start to add numbers to name for
 		// as long as it takes to make the name unique.
-		if (count>1) cpName = cpName + "-" + number2str(count);
+		if (count>1) cpName = cpName + "-" + Base::number2str(count);
 
 		for (size_t i=0; i<_pnt_vecs.size(); i++)
 		{

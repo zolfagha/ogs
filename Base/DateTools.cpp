@@ -10,6 +10,9 @@
 #include <cmath>
 #include <cstdlib>
 
+namespace Base
+{
+
 double date2double(int y, int m, int d)
 {
 	if ( (y<1000 || y>9999) || (m<1 || m>12) || (d<1 || d>31) )
@@ -44,11 +47,11 @@ std::string date2string(double ddate)
 	int d = rest;
 	if (d<1 || d>31) std::cout << "Warning: date2String() -- day not in [1:31]" << std::endl;
 
-	std::string day = number2str(d);
+	std::string day = Base::number2str(d);
 	if (d<10) day = "0" + day;
-	std::string month = number2str(m);
+	std::string month = Base::number2str(m);
 	if (m<10) month = "0" + month;
-	std::string s =  number2str(y) + "-" + month + "-" + day;
+	std::string s =  Base::number2str(y) + "-" + month + "-" + day;
 	return s;
 }
 
@@ -74,4 +77,6 @@ double xmlDate2double(const std::string &s)
 		return date2double(y, m, d);
 	}
 	return 0;
+}
+
 }

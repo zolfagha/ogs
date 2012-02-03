@@ -84,7 +84,7 @@ public:
     void apply( T* globalRHS ) 
     {
         for (size_t i=0; i<this->getNumberOfConditions(); i++)
-            (*globalRHS)[this->getConditionDoF(i)] += this->getConditionValue(i);
+            globalRHS[this->getConditionDoF(i)] += this->getConditionValue(i);
     }
 
 

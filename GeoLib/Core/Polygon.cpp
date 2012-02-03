@@ -16,7 +16,7 @@
 
 // MathLib
 #include "MathLib/MathTools.h"
-#include "MathLib/Vector3.h"
+#include "GeoLib/Vector3.h"
 
 #include "GeoLib/AnalyticalGeometry.h"
 
@@ -214,7 +214,7 @@ void Polygon::ensureCWOrientation ()
 	}
 
 	// *** calculate supporting plane (plane normal and
-	MathLib::Vector plane_normal;
+	Vector plane_normal;
 	double d;
 	GeoLib::getNewellPlane(tmp_polygon_pnts, plane_normal, d);
 
@@ -335,7 +335,7 @@ void Polygon::splitPolygonAtPoint (std::list<GeoLib::Polygon*>::iterator polygon
 		perm[k] = k;
 	}
 
-	quicksort (id_vec, 0, n, perm);
+	Base::quicksort (id_vec, 0, n, perm);
 
 	for (size_t k(0); k<n-1; k++) {
 		if (id_vec[k] == id_vec[k+1]) {

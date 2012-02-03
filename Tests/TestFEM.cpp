@@ -3,8 +3,9 @@
 
 #include "MathLib/Vector.h"
 #include "MathLib/LinearInterpolation.h"
-#include "MathLib/LinAlg/Solvers/GaussAlgorithm.h"
+//#include "MathLib/LinAlg/Solvers/GaussAlgorithm.h"
 #include "MathLib/Function/Function.h"
+#include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
 
 #include "GeoLib/Shape/Rectangle.h"
 
@@ -53,8 +54,11 @@ void solveGW(GWProblem &gw)
     gw.bc2->setup();
     // global EQS
     const size_t n_dof = msh->getNumberOfNodes();
-    GlobalMatrixType globalA(n_dof, n_dof, .0);
-    GlobalVectorType globalRHS(n_dof, .0);
+    MathLib::DenseLinearEquations eqs;
+    eqs.create(n_dof);
+
+    MathLib::DenseLinearEquations::MatrixType* globalA = eqs.getA();
+    double* globalRHS = eqs.getRHS();
 
     //assembly
     MathLib::Matrix<double> localK;
@@ -67,24 +71,22 @@ void solveGW(GWProblem &gw)
         localK = .0;
         fe->integrateDWxDN(gw.K, localK);
         e->getNodeIDList(e_node_id_list);
-        globalA.add(e_node_id_list, localK); //TODO A(id_list) += K;
+        globalA->add(e_node_id_list, localK); //TODO A(id_list) += K;
     }
 
     //outputLinearEQS(globalA, globalRHS);
 
     //apply BC
-    gw.bc2->apply(&globalRHS);
+    gw.bc2->apply(globalRHS);
     //outputLinearEQS(globalA, globalRHS);
-    gw.bc1->apply(&globalA, &globalRHS);
+    gw.bc1->apply(eqs);
     //outputLinearEQS(globalA, globalRHS);
 
     //solve
-    MathLib::GaussAlgorithm solver(globalA);
-    GlobalVectorType x(globalRHS);
-    solver.execute(&x[0]); // input x contains rhs but output x contains solution.
+    eqs.solve();
 
     //update head
-    gw.head->setNodalValues(&x[0]);
+    gw.head->setNodalValues(eqs.getX());
 
     //calculate vel (vel=f(h))
     for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
@@ -127,7 +129,7 @@ TEST(FEM, testUnstructuredMesh)
     gw.head = new FemNodalFunctionScalar(gw.msh, PolynomialOrder::Linear);
     gw.vel = new FEMIntegrationPointFunctionVector2d(gw.msh);
     //bc
-    gw.bc1 = new FemDirichletBC<double>(gw.head, poly_right, &MathLib::FunctionConstant<double, GeoLib::Point>(.0), &DiagonalizeMethod<GlobalMatrixType,GlobalVectorType,double>()); //TODO should BC objects be created by fe functions?
+    gw.bc1 = new FemDirichletBC<double>(gw.head, poly_right, &MathLib::FunctionConstant<double, GeoLib::Point>(.0), &DiagonalizeMethod()); //TODO should BC objects be created by fe functions?
     gw.bc2 = new FemNeumannBC<double>(gw.head, poly_left, &MathLib::FunctionConstant<double, GeoLib::Point>(1.e-5));
 
     gw.K = new MathLib::FunctionConstant<double, double*>(1.e-11);
@@ -151,7 +153,7 @@ TEST(FEM, testStructuredMesh)
     gw.head = new FemNodalFunctionScalar(gw.msh, PolynomialOrder::Linear);
     gw.vel = new FEMIntegrationPointFunctionVector2d(gw.msh);
     //bc
-    gw.bc1 = new FemDirichletBC<double>(gw.head, poly_right, &MathLib::FunctionConstant<double, GeoLib::Point>(.0), &DiagonalizeMethod<GlobalMatrixType,GlobalVectorType,double>()); //TODO should BC objects be created by fe functions?
+    gw.bc1 = new FemDirichletBC<double>(gw.head, poly_right, &MathLib::FunctionConstant<double, GeoLib::Point>(.0), &DiagonalizeMethod()); //TODO should BC objects be created by fe functions?
     gw.bc2 = new FemNeumannBC<double>(gw.head, poly_left, &MathLib::FunctionConstant<double, GeoLib::Point>(1.e-5));
 
     gw.K = new MathLib::FunctionConstant<double, double*>(1.e-11);

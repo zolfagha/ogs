@@ -2,7 +2,8 @@
 #pragma once
 
 #include "ILinearEquations.h"
-#include "LinearEquations.h"
+#include "DenseLinearEquations.h"
+#include "SparseLinearEquations.h"
 #include "LisInterface.h"
 
 namespace MathLib

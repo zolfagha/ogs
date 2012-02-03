@@ -146,11 +146,11 @@ bool isPointInTriangle (const GeoLib::Point* p,
 }
 
 // NewellPlane from book Real-Time Collision detection p. 494
-void getNewellPlane(const std::vector<GeoLib::Point*>& pnts, MathLib::Vector &plane_normal,
+void getNewellPlane(const std::vector<GeoLib::Point*>& pnts, Vector &plane_normal,
 		double& d)
 {
 	d = 0;
-	MathLib::Vector centroid;
+	Vector centroid;
 	size_t n_pnts (pnts.size());
 	for (size_t i(n_pnts - 1), j(0); j < n_pnts; i = j, j++) {
 		plane_normal[0] += ((*(pnts[i]))[1] - (*(pnts[j]))[1])
@@ -168,7 +168,7 @@ void getNewellPlane(const std::vector<GeoLib::Point*>& pnts, MathLib::Vector &pl
 }
 
 
-void rotatePointsToXY(MathLib::Vector &plane_normal,
+void rotatePointsToXY(Vector &plane_normal,
 		std::vector<GeoLib::Point*> &pnts)
 {
 	double small_value (sqrt (std::numeric_limits<double>::min()));

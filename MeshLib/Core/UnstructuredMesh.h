@@ -30,9 +30,9 @@ public:
     {
     };
     virtual ~TemplateUnstructuredMesh(){
-        destroyStdVectorWithPointers(_list_nodes);
-        destroyStdVectorWithPointers(_list_elements);
-        destroyStdVectorWithPointers(_list_edge_elements);
+        Base::destroyStdVectorWithPointers(_list_nodes);
+        Base::destroyStdVectorWithPointers(_list_elements);
+        Base::destroyStdVectorWithPointers(_list_edge_elements);
     };
 
     virtual size_t getDimension() const

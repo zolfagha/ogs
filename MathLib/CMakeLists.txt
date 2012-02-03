@@ -67,7 +67,10 @@ SOURCE_GROUP( MathLib\\LinAlg\\Preconditioner FILES ${MathLib_LinAlg_Preconditio
 
 SET ( MathLib_LinAlg_LinearEquations_Files
 		LinAlg/LinearEquations/ILinearEquations.h
-		LinAlg/LinearEquations/LinearEquations.h
+		LinAlg/LinearEquations/DenseLinearEquations.h
+		LinAlg/LinearEquations/DenseLinearEquations.cpp
+		LinAlg/LinearEquations/SparseLinearEquations.h
+		LinAlg/LinearEquations/SparseLinearEquations.cpp
 		LinAlg/LinearEquations/PETScInterface.h
 		LinAlg/LinearEquations/PARDISOInterface.h
 		LinAlg/LinearEquations/LinearEquationsFactory.h

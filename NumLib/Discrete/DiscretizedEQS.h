@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "MathLib/LinAlg/LinearEquations/LinearEquations.h"
+#include "MathLib/LinAlg/LinearEquations/SparseLinearEquations.h"
 
 namespace NumLib
 {

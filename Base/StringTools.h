@@ -8,6 +8,8 @@
 #include <iostream>
 #include <ctype.h>
 
+namespace Base
+{
 
 /**
  *   Splits a string into a list of strings.
@@ -60,5 +62,7 @@ void trim(std::string &str, char ch=' ');
 #ifdef MSVC
 void correctScientificNotation(std::string filename, size_t precision = 0);
 #endif
+
+}
 
 #endif //STRINGTOOLS_H

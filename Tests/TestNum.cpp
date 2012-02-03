@@ -84,7 +84,7 @@ TEST(Num, testDis1)
     // construct discrete eqs
     SparseLinearEquations eqs;
     eqs.create(sparse.size(), &sparse);
-    eqs.getOption().solver_type = SparseLinearEquations::CG;
+    eqs.getOption().solver_type = SparseLinearEquations::SolverCG;
     eqs.getOption().precon_type = SparseLinearEquations::NONE;
 
     //

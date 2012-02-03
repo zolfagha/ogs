@@ -8,10 +8,12 @@
 #ifndef ANALYTICAL_GEOMETRY_H_
 #define ANALYTICAL_GEOMETRY_H_
 
-// MathLib
-#include "MathLib/Vector3.h"
 // GEOLIB
+#include "GeoLib/Vector3.h"
+#include "GeoLib/Core/Point.h"
 #include "GeoLib/Shape/Triangle.h"
+
+#include <vector>
 
 namespace GeoLib {
     class Polyline;
@@ -47,14 +49,14 @@ Orientation getOrientation (const GeoLib::Point* p0, const GeoLib::Point* p1, co
  * @param plane_normal the normal of the plane the polygon is located in
  * @param d parameter from the plane equation
  */
-void getNewellPlane (const std::vector<GeoLib::Point*>& pnts, MathLib::Vector &plane_normal, double& d);
+void getNewellPlane (const std::vector<GeoLib::Point*>& pnts, Vector &plane_normal, double& d);
 
 /**
  *
  * @param plane_normal
  * @param pnts
  */
-void rotatePointsToXY(MathLib::Vector &plane_normal, std::vector<GeoLib::Point*> &pnts);
+void rotatePointsToXY(Vector &plane_normal, std::vector<GeoLib::Point*> &pnts);
 
 bool isPointInTriangle (const GeoLib::Point* p,
 		const GeoLib::Point* a, const GeoLib::Point* b, const GeoLib::Point* c);

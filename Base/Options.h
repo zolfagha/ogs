@@ -103,7 +103,7 @@ public:
     template<typename T>
     T getOptionAsNum(const std::string &key) const
     {
-        return str2number<T>(getOption(key));
+        return Base::str2number<T>(getOption(key));
     }
 
     /// add new option
@@ -116,7 +116,7 @@ public:
     template<typename T>
     void addOptionAsNum(const std::string &key, T v)
     {
-        addOption(key, number2str<T>(v));
+        addOption(key, Base::number2str<T>(v));
     }
 };
 

@@ -70,7 +70,7 @@ public:
 
     virtual ~EleMapLocalCoordinates()
     {
-        destroyStdVectorWithPointers(_point_vec);
+        Base::destroyStdVectorWithPointers(_point_vec);
         if (_matR!=0)
             delete _matR;
     }

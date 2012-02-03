@@ -1,5 +1,8 @@
 #include "RunTimeTimer.h"
 
+namespace Base
+{
+
 void RunTimeTimer::start()
 {
 #ifndef _WIN32
@@ -25,4 +28,6 @@ double RunTimeTimer::elapsed()
 #else
 	return (_stop - _start) / 1000;
 #endif
+}
+
 }

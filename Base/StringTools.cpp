@@ -7,6 +7,9 @@
 
 #include "StringTools.h"
 
+namespace Base
+{
+
 std::list<std::string> splitString(const std::string &str, char delim)
 {
 	std::list<std::string> strList;
@@ -106,4 +109,4 @@ void correctScientificNotation(std::string filename, size_t precision)
 }
 #endif
 
-
+}

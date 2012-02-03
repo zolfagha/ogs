@@ -65,17 +65,17 @@ Station* Station::createStation(const std::string & line)
 {
 	std::list<std::string>::const_iterator it;
 	Station* station = new Station();
-	std::list<std::string> fields = splitString(line, '\t');
+	std::list<std::string> fields = Base::splitString(line, '\t');
 
 	if (fields.size() >= 3) {
 
 		it = fields.begin();
 		station->_name  = *it;
-		(*station)[0]     = strtod((replaceString(",", ".", *(++it))).c_str(), NULL);
-		(*station)[1]     = strtod((replaceString(",", ".", *(++it))).c_str(), NULL);
+		(*station)[0]     = strtod((Base::replaceString(",", ".", *(++it))).c_str(), NULL);
+		(*station)[1]     = strtod((Base::replaceString(",", ".", *(++it))).c_str(), NULL);
 		if (++it != fields.end())
 		{
-			(*station)[2] = strtod((replaceString(",", ".", *it)).c_str(), NULL);
+			(*station)[2] = strtod((Base::replaceString(",", ".", *it)).c_str(), NULL);
 		}
 	}
 	else
@@ -178,7 +178,7 @@ int StationBorehole::readStratigraphyFile(const std::string &path, std::vector<s
 
 	while ( getline(in, line) )
 	{
-		std::list<std::string> fields = splitString(line, '\t');
+		std::list<std::string> fields = Base::splitString(line, '\t');
 		data.push_back(fields);
 	}
 
@@ -232,7 +232,7 @@ int StationBorehole::addLayer(std::list<std::string> fields, StationBorehole* bo
 			fields.pop_front();
 
 			std::cerr << "StationBorehole::addLayer - assuming correct order" << std::endl;
-			double thickness(strtod(replaceString(",", ".", fields.front()).c_str(), 0));
+			double thickness(strtod(Base::replaceString(",", ".", fields.front()).c_str(), 0));
 			fields.pop_front();
 			borehole->addSoilLayer(thickness, fields.front());
 		}
@@ -267,7 +267,7 @@ int StationBorehole::addStratigraphies(const std::string &path, std::vector<Poin
 				fields.pop_front();
 				//the method just assumes that layers are read in correct order
 				fields.pop_front();
-				double thickness (strtod(replaceString(",", ".", fields.front()).c_str(), 0));
+				double thickness (strtod(Base::replaceString(",", ".", fields.front()).c_str(), 0));
 				fields.pop_front();
 				std::string soil_name (fields.front());
 				fields.pop_front();
@@ -291,24 +291,24 @@ int StationBorehole::addStratigraphies(const std::string &path, std::vector<Poin
 StationBorehole* StationBorehole::createStation(const std::string &line)
 {
 	StationBorehole* borehole = new StationBorehole();
-	std::list<std::string> fields = splitString(line, '\t');
+	std::list<std::string> fields = Base::splitString(line, '\t');
 
 	if (fields.size()      >= 5) {
 		borehole->_name     = fields.front();
 		fields.pop_front();
-		(*borehole)[0]      = strtod((replaceString(",", ".", fields.front())).c_str(), NULL);
+		(*borehole)[0]      = strtod((Base::replaceString(",", ".", fields.front())).c_str(), NULL);
 		fields.pop_front();
-		(*borehole)[1]      = strtod((replaceString(",", ".", fields.front())).c_str(), NULL);
+		(*borehole)[1]      = strtod((Base::replaceString(",", ".", fields.front())).c_str(), NULL);
 		fields.pop_front();
-		(*borehole)[2]      = strtod((replaceString(",", ".", fields.front())).c_str(), NULL);
+		(*borehole)[2]      = strtod((Base::replaceString(",", ".", fields.front())).c_str(), NULL);
 		fields.pop_front();
-		borehole->_depth	= strtod((replaceString(",", ".", fields.front())).c_str(), NULL);
+		borehole->_depth	= strtod((Base::replaceString(",", ".", fields.front())).c_str(), NULL);
 		fields.pop_front();
 		if (fields.empty())
 			borehole->_date = 0;
 		else
 		{
-			borehole->_date = strDate2double(fields.front());
+			borehole->_date = Base::strDate2double(fields.front());
 			fields.pop_front();
 		}
 	}
@@ -329,7 +329,7 @@ StationBorehole* StationBorehole::createStation(const std::string &name, double 
 	(*station)[1]   = y;
 	(*station)[2]   = z;
 	station->_depth = depth;
-	if (date.compare("0000-00-00")) station->_date  = xmlDate2double(date);
+	if (date.compare("0000-00-00")) station->_date  = Base::xmlDate2double(date);
 	return station;
 }
 

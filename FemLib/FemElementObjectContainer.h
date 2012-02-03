@@ -14,7 +14,7 @@ class FeObjectCachePerFeType
 public:
     virtual ~FeObjectCachePerFeType()
     {
-        destroyStdMapWithPointers(_mapFeObj);
+        Base::destroyStdMapWithPointers(_mapFeObj);
     }
 
     IFiniteElement* getFeObject(FiniteElementType::type fe_type)
@@ -49,7 +49,7 @@ public:
     }
     virtual ~FeObjectContainerPerElement()
     {
-        destroyStdVectorWithPointers(_vec_fem);
+        Base::destroyStdVectorWithPointers(_vec_fem);
     }
 
     void addFiniteElement(size_t i, FiniteElementType::type fe_type)

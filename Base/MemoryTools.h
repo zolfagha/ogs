@@ -3,6 +3,9 @@
 
 #include <map>
 
+namespace Base
+{
+
 template <typename T>
 static void destroyStdVectorWithPointers(T &object) {
     if (object.size()>0) {
@@ -22,5 +25,5 @@ static void destroyStdMapWithPointers(T &object) {
     }
 };
 
-
+}
 

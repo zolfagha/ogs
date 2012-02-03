@@ -10,10 +10,14 @@
 
 // STL
 #include <cstddef>
+#include <vector>
+
 
 // Base
 #include "swap.h"
 
+namespace Base
+{
 /**
  * version of partition_ that additional updates the permutation vector
  * */
@@ -53,9 +57,6 @@ void quicksort(T* array, size_t beg, size_t end, size_t* perm)
 		quicksort(array, p+1, end, perm);
 	}
 }
-
-// STL
-#include <vector>
 
 template <typename T>
 class Quicksort {
@@ -178,5 +179,5 @@ private:
 	}
 
 };
-
+}
 #endif /* QUICKSORT_H_ */

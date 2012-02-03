@@ -36,7 +36,7 @@ public:
     virtual double* getX() = 0;
 
     virtual void setKnownX(size_t row_id, double x) = 0;
-    virtual void setKnownX(std::vector<size_t> &vec_id, std::vector<double> &vec_x) = 0;
+    virtual void setKnownX(const std::vector<size_t> &vec_id, const std::vector<double> &vec_x) = 0;
     virtual void solve() = 0;
 };
 

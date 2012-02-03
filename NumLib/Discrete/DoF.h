@@ -72,7 +72,7 @@ public:
     DofMapManager() {};
     virtual ~DofMapManager()
     {
-        destroyStdVectorWithPointers(_map_var2dof);
+        Base::destroyStdVectorWithPointers(_map_var2dof);
     }
 
     size_t addDoF(size_t discrete_points_size, size_t mesh_id=0)

@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
 #include "MathLib/Function/Function.h"
 #include "GeoLib/Core/Point.h"
 
@@ -20,38 +21,14 @@ public:
 //    virtual void apply(int linearEqs, DirichletBC &bc) = 0;
 };
 
-template<typename Tmat, typename Tvec, typename Tval>
 class DiagonalizeMethod : public IDirichletBCMethod
 {
-private:
-    void diagonalize(Tmat *eqsA, Tvec *eqsRHS, size_t id, Tval x);
-
 public:
-    void apply( Tmat* globalA, Tvec* globalRHS, std::vector<size_t> vec_nodes, std::vector<Tval> vec_values)
+    void apply( MathLib::ILinearEquations& eqs, const std::vector<size_t> &vec_nodes, const std::vector<double> &vec_values)
     {
-        for (size_t i=0; i<vec_nodes.size(); i++)
-            diagonalize(globalA, globalRHS, vec_nodes[i], vec_values[i]);
+        eqs.setKnownX(vec_nodes, vec_values);
     }
 };
-
-template <> void DiagonalizeMethod<MathLib::Matrix<double>,std::vector<double>, double>::diagonalize(MathLib::Matrix<double> *eqsA, std::vector<double> *eqsRHS, size_t id, double x)
-{
-    const size_t n_cols = eqsA->getNCols();
-    //A(k, j) = 0.
-    for (size_t j=0; j<n_cols; j++)
-        (*eqsA)(id, j) = .0;
-    //b_i -= A(i,k)*val, i!=k
-    for (size_t j=0; j<n_cols; j++)
-        (*eqsRHS)[j] -= (*eqsA)(j, id)*x;
-    //b_k = val
-    (*eqsRHS)[id] = x;
-    //A(i, k) = 0., i!=k
-    for (size_t j=0; j<n_cols; j++)
-      (*eqsA)(j, id) = .0;
-    //A(k, k) = 1.0
-    (*eqsA)(id, id) = 1.0; //=x
-}
-
 
 class ResizeMethod : public IDirichletBCMethod
 {
@@ -106,11 +83,10 @@ public:
     }
 
     /// apply B.C.
-    template<typename Tmat, typename Tvec>
-    void apply( Tmat* globalA, Tvec* globalRHS ) 
+    void apply( MathLib::ILinearEquations& eqs ) 
     {
-        DiagonalizeMethod<Tmat, Tvec, Tval> method;
-        method.apply(globalA, globalRHS, _vec_nodes, _vec_values);
+        DiagonalizeMethod method;
+        method.apply(eqs, _vec_nodes, _vec_values);
     }
 
 
