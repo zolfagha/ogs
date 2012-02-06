@@ -59,8 +59,8 @@ public:
     IFiniteElement* getFiniteElement(MeshLib::IElement *e)
     {
         _feObjects.setPolynomialOrder(_order);
-        IFiniteElement* fe = _feObjects.getFeObject(e);
-        fe->configure(_msh, e);
+        IFiniteElement* fe = _feObjects.getFeObject(e, _msh);
+        fe->configure(e);
         fe->getIntegrationMethod()->initialize(e, 2);
 
         return fe;
@@ -119,6 +119,10 @@ public:
         _values.resize(msh->getNumberOfElements());
     };
 
+    const MeshLib::IMesh* getMesh() const {
+        return _msh;
+    }
+
     Tvalue eval(const GeoLib::Point &pt) {
         throw std::exception("The method or operation is not implemented.");
     };
@@ -131,6 +135,11 @@ public:
 
     void setNumberOfIntegationPoints(size_t i_e, size_t n) {
         _values[i_e].resize(n);
+    }
+
+    const std::vector<Tvalue>& getIntegrationPointValues(size_t i_e) const 
+    {
+        return _values[i_e];
     }
 
 private:

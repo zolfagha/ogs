@@ -4,7 +4,7 @@
 
 namespace FemLib
 {
-
+             
 /**
  * \brief Base for any isoparametric FE classes
  */
@@ -12,7 +12,7 @@ template <FiniteElementType::type T_FETYPE, size_t N_VARIABLES, class T_SHAPE, c
 class FeBaseIsoparametric : public TemplateFeBase<T_FETYPE, N_VARIABLES>
 {
 public:
-    FeBaseIsoparametric()
+    FeBaseIsoparametric(MeshLib::IMesh * msh) : TemplateFeBase<T_FETYPE, N_VARIABLES>(msh)
     {
         _mapping = new FemNaturalCoordinates(new T_SHAPE());
         _integration = new T_INTEGRAL();
@@ -27,9 +27,10 @@ public:
     virtual IFemNumericalIntegration* getIntegrationMethod() const {return _integration;};
 
     /// initialize object for given mesh elements
-    virtual void configure( MeshLib::IMesh * msh, MeshLib::IElement * e )
+    virtual void configure( MeshLib::IElement * e )
     {
         setElement(e);
+        const MeshLib::IMesh* msh = getMesh();
         if (e->getMappedCoordinates()==0) {
             MeshLib::IElementCoordinatesMapping *ele_map = 0;
             if (msh->getCoordinateSystem()->getDimension() == e->getDimension()) {
@@ -57,6 +58,10 @@ public:
         return _mapping->getProperties()->dshape_dx;
     }
 
+    virtual double getDetJ() const
+    {
+        return _mapping->getProperties()->det_jacobian;
+    }
 
     /// make interpolation from nodal values
     virtual double interpolate(double *natural_pt, double *nodal_values)
@@ -76,13 +81,11 @@ public:
         double x[3];
         for (size_t i=0; i<n_gp; i++) {
             _integration->getSamplingPoint(i, x);
-            const CoordMappingProperties *coord_prop = _mapping->compute(x);
-            MathLib::Matrix<double> *basis = coord_prop->shape_r;
-            MathLib::Matrix<double> *test = coord_prop->shape_r;
-            double fac = coord_prop->det_jacobian * _integration->getWeight(i);
+            _mapping->compute(x);
+            double fac = 1.0;
             if (f!=0)
                 fac *= f->eval(x);
-            test->transposeAndMultiply(*basis, mat, fac);
+            integrateWxN(i, fac, mat);
         }
     }
 
@@ -93,16 +96,11 @@ public:
         double x[3];
         for (size_t i=0; i<n_gp; i++) {
             _integration->getSamplingPoint(i, x);
-            const CoordMappingProperties *coord_prop = _mapping->compute(x);
-            MathLib::Matrix<double> *dbasis = coord_prop->dshape_dx;
-            MathLib::Matrix<double> *test = coord_prop->dshape_dx;
-            double fac = coord_prop->det_jacobian * _integration->getWeight(i);
-            if (f==0) {
-                test->transposeAndMultiply(*dbasis, mat, fac);
-            } else {
-                double *v = f->eval(x);
-                test->transposeAndMultiply(*dbasis, v, mat, fac);
-            }
+            _mapping->compute(x);
+            double *fac = 0;
+            if (f!=0)
+                fac = f->eval(x);
+            integrateWxDN(i, fac, mat);
         }
     }
 
@@ -114,15 +112,48 @@ public:
         for (size_t i=0; i<n_gp; i++) {
             _integration->getSamplingPoint(i, x);
             const CoordMappingProperties *coord_prop = _mapping->compute(x);
-            MathLib::Matrix<double> *dbasis = coord_prop->dshape_dx;
-            MathLib::Matrix<double> *dtest = coord_prop->dshape_dx;
-            double fac = coord_prop->det_jacobian * _integration->getWeight(i);
+            double fac = 1.0;
             if (f!=0)
                 fac *= f->eval(x);
-            dtest->transposeAndMultiply(*dbasis, mat, fac);
+            integrateDWxDN(i, fac, mat);
         }
     }
 
+    /// compute an matrix M = Int{W^T F N} dV
+    virtual void integrateWxN(size_t igp, double f, MathLib::Matrix<double> &mat)
+    {
+        double x[3];
+        _integration->getSamplingPoint(igp, x);
+        const CoordMappingProperties *coord_prop = _mapping->getProperties();
+        MathLib::Matrix<double> *basis = coord_prop->shape_r;
+        MathLib::Matrix<double> *test = coord_prop->shape_r;
+        double fac = f * coord_prop->det_jacobian * _integration->getWeight(igp);
+        test->transposeAndMultiply(*basis, mat, fac);
+    }
+
+    /// compute an matrix M = Int{W^T F dN} dV
+    virtual void integrateWxDN(size_t igp, double* f, MathLib::Matrix<double> &mat)
+    {
+        double x[3];
+        _integration->getSamplingPoint(igp, x);
+        const CoordMappingProperties *coord_prop = _mapping->getProperties();
+        MathLib::Matrix<double> *dbasis = coord_prop->dshape_dx;
+        MathLib::Matrix<double> *test = coord_prop->dshape_dx;
+        double fac = coord_prop->det_jacobian * _integration->getWeight(igp);
+        test->transposeAndMultiply(*dbasis, f, mat, fac);
+    }
+
+    /// compute an matrix M = Int{dW^T F dN} dV
+    virtual void integrateDWxDN(size_t igp, double f, MathLib::Matrix<double> &mat)
+    {
+        double x[3];
+        _integration->getSamplingPoint(igp, x);
+        const CoordMappingProperties *coord_prop = _mapping->getProperties();
+        MathLib::Matrix<double> *dbasis = coord_prop->dshape_dx;
+        MathLib::Matrix<double> *dtest = coord_prop->dshape_dx;
+        double fac = f*coord_prop->det_jacobian * _integration->getWeight(igp);
+        dtest->transposeAndMultiply(*dbasis, mat, fac);
+    }
 private:
     FemNaturalCoordinates *_mapping;
     IFemNumericalIntegration* _integration;

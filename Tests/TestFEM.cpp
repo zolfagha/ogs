@@ -15,6 +15,7 @@
 #include "FemLib/Function/FemFunctionProjection.h"
 #include "FemLib/BC/FemDirichletBC.h"
 #include "FemLib/BC/FemNeumannBC.h"
+#include "FemLib/Post/Extrapolation.h"
 
 #include <vector>
 #include <memory>
@@ -163,5 +164,33 @@ TEST(FEM, testStructuredMesh)
 
 }
 
+TEST(FEM, ExtrapolateAverage)
+{
+    //#Define a problem
+    GWProblem gw;
+    //#Define a problem
+    //geometry
+    Rectangle rec(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
+    Polyline* poly_left = rec.getLeft();
+    Polyline* poly_right = rec.getRight();
+    //mesh
+    gw.msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
+    //discretization
+    gw.head = new FemNodalFunctionScalar(gw.msh, PolynomialOrder::Linear);
+    gw.vel = new FEMIntegrationPointFunctionVector2d(gw.msh);
+    //bc
+    gw.bc1 = new FemDirichletBC<double>(gw.head, poly_right, &MathLib::FunctionConstant<double, GeoLib::Point>(.0), &DiagonalizeMethod()); //TODO should BC objects be created by fe functions?
+    gw.bc2 = new FemNeumannBC<double>(gw.head, poly_left, &MathLib::FunctionConstant<double, GeoLib::Point>(1.e-5));
 
+    gw.K = new MathLib::FunctionConstant<double, double*>(1.e-11);
+    solveGW(gw);
 
+    FemNodalFunctionVector2d nodal_vel(gw.msh, PolynomialOrder::Linear);
+    FEMExtrapolationAverage<MathLib::Vector2D> extrapo;
+    extrapo.extrapolate(*gw.vel, nodal_vel);
+}
+
+TEST(FEM, ExtrapolateLinear)
+{
+
+}

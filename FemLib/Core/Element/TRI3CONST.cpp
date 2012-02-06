@@ -9,9 +9,8 @@
 namespace FemLib
 {
 
-void TRI3CONST::configure( MeshLib::IMesh * msh, MeshLib::IElement * e )
+void TRI3CONST::configure( MeshLib::IElement * e )
 {
-    _msh = msh;
     _ele = static_cast<MeshLib::Triangle*>(e);
     double nodes_x[3], nodes_y[3];
     // xyz
@@ -21,7 +20,7 @@ void TRI3CONST::configure( MeshLib::IMesh * msh, MeshLib::IElement * e )
         nodes_y[i] = pt->getData()[1];
     }
     // area
-    A = GeoLib::triangleArea(msh->getNodeCoordinates(_ele->getNodeID(0)),msh->getNodeCoordinates(_ele->getNodeID(1)),msh->getNodeCoordinates(_ele->getNodeID(2)));
+    A = GeoLib::triangleArea(_msh->getNodeCoordinates(_ele->getNodeID(0)),_msh->getNodeCoordinates(_ele->getNodeID(1)),_msh->getNodeCoordinates(_ele->getNodeID(2)));
     // set a,b,c
     a[0] = 0.5/A*(nodes_x[1]*nodes_y[2]-nodes_x[2]*nodes_y[1]);
     b[0] = 0.5/A*(nodes_y[1]-nodes_y[2]);

@@ -15,11 +15,11 @@ namespace MeshLib
 class TopologyNode2Elements
 {
 public:
-    TopologyNode2Elements(IMesh *msh) {
-        _node2conn_eles.resize(msh->getNumberOfNodes());
-        const size_t nr_ele = msh->getNumberOfElements();
+    TopologyNode2Elements(const IMesh &msh) {
+        _node2conn_eles.resize(msh.getNumberOfNodes());
+        const size_t nr_ele = msh.getNumberOfElements();
         for (size_t i=0; i<nr_ele; i++) {
-            const IElement* e = msh->getElemenet(i);
+            const IElement* e = msh.getElemenet(i);
             for (size_t j=0; j<e->getNumberOfNodes(); j++) {
                 _node2conn_eles[e->getNodeID(j)].push_back(i);
             }

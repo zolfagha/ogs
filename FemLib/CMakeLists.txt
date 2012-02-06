@@ -18,6 +18,8 @@ FILE(GLOB FemLib_BC_Files BC/*.h BC/*.cpp)
 SOURCE_GROUP( FemLib\\BC FILES ${FemLib_BC_Files})
 FILE(GLOB FemLib_Function_Files Function/*.h Function/*.cpp)
 SOURCE_GROUP( FemLib\\Function FILES ${FemLib_Function_Files})
+FILE(GLOB FemLib_Post_Files Post/*.h Post/*.cpp)
+SOURCE_GROUP( FemLib\\Post FILES ${FemLib_Post_Files})
 
 
 ADD_LIBRARY(FemLib STATIC
@@ -26,6 +28,7 @@ ADD_LIBRARY(FemLib STATIC
 	${FemLib_Core_Element_Files}
 	${FemLib_BC_Files}
 	${FemLib_Function_Files}
+	${FemLib_Post_Files}
 )
 
 INCLUDE_DIRECTORIES(

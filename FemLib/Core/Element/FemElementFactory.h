@@ -13,22 +13,22 @@ namespace FemLib
 class FemElementFactory
 {
 public:
-    static IFiniteElement* create(FiniteElementType::type fe_type)
+    static IFiniteElement* create(FiniteElementType::type fe_type, MeshLib::IMesh *msh)
     {
         switch (fe_type)
         {
             case FiniteElementType::LINE2:
-                return new LINE2();
+                return new LINE2(msh);
             case FiniteElementType::LINE3:
-                return new LINE3();
+                return new LINE3(msh);
             case FiniteElementType::QUAD4:
-                return new QUAD4();
+                return new QUAD4(msh);
             case FiniteElementType::QUAD8:
-                return new QUAD8();
+                return new QUAD8(msh);
             case FiniteElementType::QUAD9:
-                return new QUAD9();
+                return new QUAD9(msh);
             case FiniteElementType::TRI3CONST:
-                return new TRI3CONST();
+                return new TRI3CONST(msh);
         }
         assert(false);
         return 0;

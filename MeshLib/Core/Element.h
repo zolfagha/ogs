@@ -27,10 +27,12 @@ public:
     TemplateElement() {
         initialize();
     };
+
     TemplateElement(size_t element_id) {
         initialize();
         this->setID(element_id);
-    }
+    };
+
     virtual ~TemplateElement() 
     {
     };
@@ -85,26 +87,6 @@ public:
     };
 };
 
-///**
-// * \brief Analytical element
-// */
-//template <ElementType::type TYPE, size_t NUMBER_OF_NODES, size_t DIMENSION, size_t NUMBER_OF_FACES, size_t NUMER_OF_EDGES>
-//class TemplateAnalyticalElement : public TemplateElement<TYPE, NUMBER_OF_NODES, DIMENSION, NUMBER_OF_FACES, NUMER_OF_EDGES>
-//{
-//private:
-//    IMesh *_msh;
-//public:
-//    TemplateAnalyticalElement(IMesh *msh) 
-//    {
-//        _msh = msh;
-//    }
-//
-//    const GeoLib::Point* getNodeCoordinates( size_t i_nod ) const 
-//    {
-//        return _msh->getNode(i_nod)->getData();
-//    };
-//};
-//
 /**
  * \brief Unstructured element
  */
@@ -210,6 +192,25 @@ ElementType::type Quadrirateral::getEdgeElementType(size_t edge_id) const
 {
     return ElementType::LINE;
 }
+
+///**
+// * \brief Analytical element
+// */
+//class AnalyticalQuadrirateral : public Quadrirateral
+//{
+//private:
+//    IMesh *_msh;
+//public:
+//    AnalyticalQuadrirateral(IMesh *msh) 
+//    {
+//        _msh = msh;
+//    }
+//
+//    const GeoLib::Point* getNodeCoordinates( size_t i_nod ) const 
+//    {
+//        return _msh->getNode(i_nod)->getData();
+//    };
+//};
 
 
 } // end namespace

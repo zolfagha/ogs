@@ -208,4 +208,21 @@ private:
     }
 };
 
+
+class FemGaussIntegrationFactory
+{
+public:
+    static FemIntegrationGaussBase* create(MeshLib::IElement *e) 
+    {
+        switch (e->getElementType()) {
+            case MeshLib::ElementType::QUAD:
+                return new FemIntegrationGaussQuad();
+            case MeshLib::ElementType::TRIANGLE:
+                return new FemIntegrationGaussQuad();
+            default:
+                return 0;
+        }
+    }
+};
+
 }

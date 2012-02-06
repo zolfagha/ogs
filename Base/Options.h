@@ -40,14 +40,15 @@ private:
     typedef std::map<std::string, IOptionNode*> Dictionary;
     Dictionary _dictionary;
     Options* _parent;
+    const std::string _dummy;
 
 public:
-    Options()
+    Options() : _dummy("")
     {
         _parent = 0;
     }
 
-    Options(Options* parent)
+    Options(Options* parent) : _dummy("")
     {
         _parent = parent;
     }
@@ -94,7 +95,7 @@ public:
     {
         Dictionary::const_iterator itr = _dictionary.find(key);
         if (itr==_dictionary.end() || !itr->second->isValue())
-            return "";
+            return _dummy;
         else 
             return static_cast<OptionLeaf*>(itr->second)->getValue();
     }

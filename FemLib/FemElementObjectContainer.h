@@ -17,11 +17,11 @@ public:
         Base::destroyStdMapWithPointers(_mapFeObj);
     }
 
-    IFiniteElement* getFeObject(FiniteElementType::type fe_type)
+    IFiniteElement* getFeObject(FiniteElementType::type fe_type, MeshLib::IMesh* msh)
     {
         IFiniteElement *fe = 0;
         if (_mapFeObj.count(fe_type)==0) {
-            fe = FemElementFactory::create(fe_type);
+            fe = FemElementFactory::create(fe_type, msh);
             _mapFeObj[fe_type] = fe;
         } else {
             fe = _mapFeObj[fe_type];
@@ -37,7 +37,7 @@ private:
 class IFeObjectContainer
 {
 public:
-    virtual IFiniteElement* getFeObject(MeshLib::IElement *e) = 0;
+    virtual IFiniteElement* getFeObject(MeshLib::IElement *e, MeshLib::IMesh *msh) = 0;
 };
 
 class FeObjectContainerPerElement : public IFeObjectContainer
@@ -52,12 +52,12 @@ public:
         Base::destroyStdVectorWithPointers(_vec_fem);
     }
 
-    void addFiniteElement(size_t i, FiniteElementType::type fe_type)
+    void addFiniteElement(size_t i, FiniteElementType::type fe_type, MeshLib::IMesh* msh)
     {
-        _vec_fem[i] = FemElementFactory::create(fe_type);
+        _vec_fem[i] = FemElementFactory::create(fe_type, msh);
     }
 
-    virtual IFiniteElement* getFeObject(MeshLib::IElement *e) 
+    virtual IFiniteElement* getFeObject(MeshLib::IElement *e, MeshLib::IMesh *msh) 
     {
         return _vec_fem[e->getID()];
     }
@@ -81,10 +81,10 @@ public:
         _order = order;
     }
 
-    virtual IFiniteElement* getFeObject(MeshLib::IElement *e)
+    virtual IFiniteElement* getFeObject(MeshLib::IElement *e, MeshLib::IMesh *msh)
     {
         FiniteElementType::type fe_type = getFeType(e->getElementType(), _order);
-        return FeObjectCachePerFeType::getFeObject(fe_type);
+        return FeObjectCachePerFeType::getFeObject(fe_type, msh);
     }
 private:
     size_t _order;

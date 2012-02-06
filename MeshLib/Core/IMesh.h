@@ -41,7 +41,6 @@ public:
     /// get a list of points in the given element
     virtual void getListOfNodeCoordinates(const std::vector<size_t> &vec_node_id, std::vector<GeoLib::Point> &vec_pt) const = 0;
 
-
     /// add a new element
     virtual void addEdgeElement(IElement*) = 0;
 
