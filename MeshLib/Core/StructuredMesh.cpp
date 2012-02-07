@@ -6,7 +6,7 @@ namespace MeshLib
 
 template<> void StructuredMesh<ElementType::QUAD>::construct()
 {
-    const size_t dim = this->_coord.getDimension();
+    const size_t dim = this->getDimension();
     for (size_t i=0; i<dim; i++)
         _number_of_elements_per_dimension[i] = static_cast<size_t>(_length[i] / _unit_length[i]);
 

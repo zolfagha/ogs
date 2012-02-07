@@ -41,7 +41,7 @@ public:
 
     size_t getDimension() const
     {
-      return _msh->getCoordinateSystem()->getDimension();
+      return _msh->getDimension();
     }
 
     const MeshLib::IMesh* getMesh() const {
@@ -56,10 +56,14 @@ public:
         return _nodal_values[node_id];
     }
 
+    Tvalue* getNodalValues() {
+        return _nodal_values;
+    }
+
     IFiniteElement* getFiniteElement(MeshLib::IElement *e)
     {
         _feObjects.setPolynomialOrder(_order);
-        IFiniteElement* fe = _feObjects.getFeObject(e, _msh);
+        IFiniteElement* fe = _feObjects.getFeObject(*e, _msh);
         fe->configure(e);
         fe->getIntegrationMethod()->initialize(e, 2);
 

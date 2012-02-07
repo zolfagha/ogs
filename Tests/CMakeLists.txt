@@ -6,6 +6,7 @@ INCLUDE_DIRECTORIES(
 	..
 )
 
+
 # Create the executable
 ADD_EXECUTABLE( tests
         ${Test_Files}

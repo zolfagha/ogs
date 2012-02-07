@@ -9,7 +9,7 @@
 #include "IMesh.h"
 #include "IElement.h"
 #include "ElementFactory.h"
-#include "CoordinateSystem.h"
+#include "MeshGeometricProperties.h"
 
 namespace MeshLib
 {
@@ -28,23 +28,31 @@ private:
     size_t  _number_of_nodes_per_dimension[3];
     IElement* _e;
     INode* _nod;
-    CoordinateSystem _coord;
-    size_t _ele_size;
+   size_t _ele_size;
     size_t _nod_size;
     std::vector<IElement*> _list_edge_elements;
+    MeshGeometricProperty _geo_prop;
+    bool _isAxisymmetric;
 
     void construct();
     void getNodeCoordinates(size_t id, GeoLib::Point* p) const;
 public:
 
     ///
-    StructuredMesh(CoordinateSystem &coord, GeoLib::Point &org_pt, const double* len, const double* unit_len) : _coord(coord), _origin(org_pt)
+    StructuredMesh(CoordinateSystemType::type coord, GeoLib::Point &org_pt, const double* len, const double* unit_len) : _origin(org_pt)
     {
-        const size_t dim = coord.getDimension();
+        _isAxisymmetric = false;
+        _geo_prop.setCoordinateSystem(coord);
+        const size_t dim = getDimension();
         for (size_t i=0; i<dim; i++)
             _length[i] = len[i];
         for (size_t i=0; i<dim; i++)
             _unit_length[i] = unit_len[i];
+
+        double d = _unit_length[0];
+        for (size_t i=1; i<getDimension(); i++)
+            d = std::min(d, _unit_length[i]);
+        _geo_prop.setMinEdgeLength(d);
 
         construct();
     }
@@ -56,10 +64,10 @@ public:
         Base::destroyStdVectorWithPointers(_list_edge_elements);
     }
 
-    /// get coordinate systems
-    const CoordinateSystem* getCoordinateSystem() const { return &_coord;};
-    /// set coordinate systems
-    void setCoordinateSystem(CoordinateSystem &coord) {_coord = coord;};
+    size_t getDimension() const 
+    {
+        return _geo_prop.getCoordinateSystem()->getDimension();
+    }
 
     /// get the number of elements
     size_t getNumberOfElements() const {
@@ -97,12 +105,18 @@ public:
         _list_edge_elements.push_back(e);
     }
 
-    double getMinEdgeLength() const
+    const MeshGeometricProperty* getGeometricProperty() const
     {
-        double d = _unit_length[0];
-        for (size_t i=1; i<_coord.getDimension(); i++)
-            d = std::min(d, _unit_length[i]);
-        return d;
+        return &_geo_prop;
+    }
+
+    void setAxisymmetric(bool flag)
+    {
+        _isAxisymmetric = flag;
+    }
+    bool isAxisymmetric() const
+    {
+        return _isAxisymmetric;
     }
 
 };

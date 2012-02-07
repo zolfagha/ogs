@@ -14,9 +14,9 @@ namespace MeshLib
 class MeshGenerator
 {
 public:
-    static std::auto_ptr<MeshLib::UnstructuredMesh1d> generateLineMesh(const double length, const size_t subdivision, const double origin_x, const double origin_y, const double origin_z) 
+    static std::auto_ptr<MeshLib::UnstructuredMesh> generateLineMesh(const double length, const size_t subdivision, const double origin_x, const double origin_y, const double origin_z) 
     {
-        std::auto_ptr<MeshLib::UnstructuredMesh1d> msh(new MeshLib::UnstructuredMesh1d());
+        std::auto_ptr<MeshLib::UnstructuredMesh> msh(new MeshLib::UnstructuredMesh(MeshLib::CoordinateSystemType::X));
 
         size_t n_eles = subdivision;
         size_t n_nodes = subdivision+1;
@@ -38,10 +38,10 @@ public:
         return msh;
     }
 
-    static MeshLib::UnstructuredMesh2d* generateRegularQuadMesh(const double length, const size_t subdivision, const double origin_x, const double origin_y, const double origin_z) 
+    static MeshLib::UnstructuredMesh* generateRegularQuadMesh(const double length, const size_t subdivision, const double origin_x, const double origin_y, const double origin_z) 
     {
 
-        MeshLib::UnstructuredMesh2d* msh = new MeshLib::UnstructuredMesh2d();
+        MeshLib::UnstructuredMesh* msh = new MeshLib::UnstructuredMesh(MeshLib::CoordinateSystemType::XY);
 
         size_t n_eles = static_cast<size_t>(pow(static_cast<double>(subdivision), 2));
         size_t n_nodes = static_cast<size_t>(pow(static_cast<double>(subdivision+1), 2));
@@ -82,12 +82,11 @@ public:
 
     static StructuredMesh<ElementType::QUAD>* generateStructuredRegularQuadMesh(const double length, const size_t subdivision, const double origin_x, const double origin_y, const double origin_z) 
     {
-        CoordinateSystem coord(CoordinateSystem::XY);
         GeoLib::Point org(origin_x, origin_y, origin_z);
         GeoLib::Point pt_length(length, length, .0);
         GeoLib::Point pt_unit_len(length/subdivision, length/subdivision, .0);
 
-        return new StructuredMesh<ElementType::QUAD>(coord, org, pt_length.getData(), pt_unit_len.getData());
+        return new StructuredMesh<ElementType::QUAD>(MeshLib::CoordinateSystemType::XY, org, pt_length.getData(), pt_unit_len.getData());
 
     };
 

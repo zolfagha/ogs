@@ -20,12 +20,12 @@ namespace FemLib
 /**
  * Neumann BC
  */
-template<typename Tval>
+template<typename Tval, typename Tflux>
 class FemNeumannBC : IFemBC
 {
 public:
     /// 
-    FemNeumannBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, MathLib::IFunction<Tval, GeoLib::Point> *func) 
+    FemNeumannBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, MathLib::IFunction<Tflux, GeoLib::Point> *func) 
     {
         _var = var;
         _geo = geo;
@@ -84,7 +84,7 @@ public:
     void apply( T* globalRHS ) 
     {
         for (size_t i=0; i<this->getNumberOfConditions(); i++)
-            globalRHS[this->getConditionDoF(i)] += this->getConditionValue(i);
+            globalRHS[this->getConditionDoF(i)] -= this->getConditionValue(i);
     }
 
 
@@ -107,7 +107,7 @@ private:
     // node id, var id, value
     TemplateFEMNodalFunction<Tval> *_var;
     GeoLib::GeoObject *_geo;
-    MathLib::IFunction<Tval, GeoLib::Point> *_bc_func;
+    MathLib::IFunction<Tflux, GeoLib::Point> *_bc_func;
     std::vector<size_t> _vec_nodes;
     std::vector<Tval> _vec_values;
 };

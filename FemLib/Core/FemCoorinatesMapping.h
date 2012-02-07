@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <iostream>
+
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Tools/Mapping.h"
@@ -145,16 +147,18 @@ public:
         //determinant of J
         double det_j = jac->determinant();
         _prop->det_jacobian = det_j;
+        if (det_j>.0) {
+            //inverse of J
+            MathLib::Matrix<double> *inv_jac = _prop->inv_jacobian_drdx;
+            jac->inverse(inv_jac);
 
-        //inverse of J
-        MathLib::Matrix<double> *inv_jac = _prop->inv_jacobian_drdx;
-        jac->inverse(inv_jac);
-
-        //dshape/dx = invJ * dNdr
-        MathLib::Matrix<double> *dshape_dx = _prop->dshape_dx;
-        (*dshape_dx) = .0;
-        inv_jac->multiply(*dshape_dr, *dshape_dx);
-
+            //dshape/dx = invJ * dNdr
+            MathLib::Matrix<double> *dshape_dx = _prop->dshape_dx;
+            (*dshape_dx) = .0;
+            inv_jac->multiply(*dshape_dr, *dshape_dx);
+        } else {
+            std::cout << "***error: det_j is not positive." << std::endl;
+        }
 
         return _prop;
     };
@@ -177,6 +181,26 @@ public:
             physical_pt[i] = .0;
             for (size_t j=0; j<nnodes; j++)
                 physical_pt[i] += (*shape)(0,j) + x(i,j);
+        }
+    }
+
+    /// compute physical coordinates at the given natural coordinates
+    /// \f[
+    ///    \mathbf{x} = \mathbf{N(r)} * \mathbf{X}
+    /// \f]
+    ///
+    /// @param natural_pt
+    /// @return physical_pt
+    void mapToPhysicalCoordinates(const CoordMappingProperties* prop, double* physical_pt)
+    {
+        const size_t dim = _ele->getDimension();
+        const size_t nnodes = _ele->getNumberOfNodes();
+        MathLib::Matrix<double> *shape  = prop->shape_r;
+
+        for (size_t i=0; i<dim; i++) {
+            physical_pt[i] = .0;
+            for (size_t j=0; j<nnodes; j++)
+                physical_pt[i] += (*shape)(0,j) * x(i,j);
         }
     }
 

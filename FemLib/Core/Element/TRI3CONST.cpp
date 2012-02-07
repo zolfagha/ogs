@@ -117,4 +117,15 @@ void TRI3CONST::integrateDWxDN( MathLib::IFunction<double, double*> *f, MathLib:
             mat(i,j) = mat(j,i);
 }
 
+void TRI3CONST::extrapolate(const std::vector<MathLib::Vector2D> &gp_values, std::vector<MathLib::Vector2D> &nodal_values)
+{
+    // gp_values are all same
+    MathLib::Vector2D v = gp_values[0];
+    for (size_t i=0; i<nodal_values.size(); i++) {
+        nodal_values[i] = v;
+    }
 }
+
+
+} // end namespace
+

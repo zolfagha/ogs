@@ -53,6 +53,8 @@ public:
 
     /// get the integration method
     virtual IFemNumericalIntegration* getIntegrationMethod() const = 0;
+
+    virtual void extrapolate(const std::vector<MathLib::Vector2D> &gp_values, std::vector<MathLib::Vector2D> &nodal_values) = 0;
 };
 
 /**

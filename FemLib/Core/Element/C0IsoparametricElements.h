@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FemLib/Core/IFemElement.h"
+#include "FemLib/Core/FemExtrapolation.h"
 
 namespace FemLib
 {
@@ -8,7 +9,7 @@ namespace FemLib
 /**
  * \brief Base for any isoparametric FE classes
  */
-template <FiniteElementType::type T_FETYPE, size_t N_VARIABLES, class T_SHAPE, class T_INTEGRAL>
+template <FiniteElementType::type T_FETYPE, size_t N_VARIABLES, class T_SHAPE, class T_INTEGRAL, class T_EXTRAPOLATE>
 class FeBaseIsoparametric : public TemplateFeBase<T_FETYPE, N_VARIABLES>
 {
 public:
@@ -33,10 +34,10 @@ public:
         const MeshLib::IMesh* msh = getMesh();
         if (e->getMappedCoordinates()==0) {
             MeshLib::IElementCoordinatesMapping *ele_map = 0;
-            if (msh->getCoordinateSystem()->getDimension() == e->getDimension()) {
+            if (msh->getDimension() == e->getDimension()) {
                 ele_map = new MeshLib::EleMapInvariant(msh, e);
             } else {
-                ele_map = new MeshLib::EleMapLocalCoordinates(msh, e, msh->getCoordinateSystem());
+                ele_map = new MeshLib::EleMapLocalCoordinates(msh, e, msh->getGeometricProperty()->getCoordinateSystem());
             }
             e->setMappedCoordinates(ele_map);
         }
@@ -78,13 +79,14 @@ public:
     virtual void integrateWxN(MathLib::IFunction<double, double*>* f, MathLib::Matrix<double> &mat)
     {
         const size_t n_gp = _integration->getNumberOfSamplingPoints();
-        double x[3];
+        double x[3], ox[3];
         for (size_t i=0; i<n_gp; i++) {
             _integration->getSamplingPoint(i, x);
             _mapping->compute(x);
+            _mapping->mapToPhysicalCoordinates(_mapping->getProperties(), ox);
             double fac = 1.0;
             if (f!=0)
-                fac *= f->eval(x);
+                fac *= f->eval(ox);
             integrateWxN(i, fac, mat);
         }
     }
@@ -93,13 +95,14 @@ public:
     virtual void integrateWxDN(MathLib::IFunction<double*, double*>* f, MathLib::Matrix<double> &mat)
     {
         const size_t n_gp = _integration->getNumberOfSamplingPoints();
-        double x[3];
+        double x[3], ox[3];
         for (size_t i=0; i<n_gp; i++) {
             _integration->getSamplingPoint(i, x);
             _mapping->compute(x);
+            _mapping->mapToPhysicalCoordinates(_mapping->getProperties(), ox);
             double *fac = 0;
             if (f!=0)
-                fac = f->eval(x);
+                fac = f->eval(ox);
             integrateWxDN(i, fac, mat);
         }
     }
@@ -108,13 +111,14 @@ public:
     virtual void integrateDWxDN(MathLib::IFunction<double, double*> *f, MathLib::Matrix<double> &mat)
     {
         const size_t n_gp = _integration->getNumberOfSamplingPoints();
-        double x[3];
+        double x[3], ox[3];
         for (size_t i=0; i<n_gp; i++) {
             _integration->getSamplingPoint(i, x);
             const CoordMappingProperties *coord_prop = _mapping->compute(x);
+            _mapping->mapToPhysicalCoordinates(coord_prop,  ox);
             double fac = 1.0;
             if (f!=0)
-                fac *= f->eval(x);
+                fac *= f->eval(ox);
             integrateDWxDN(i, fac, mat);
         }
     }
@@ -154,6 +158,13 @@ public:
         double fac = f*coord_prop->det_jacobian * _integration->getWeight(igp);
         dtest->transposeAndMultiply(*dbasis, mat, fac);
     }
+
+    void extrapolate(const std::vector<MathLib::Vector2D> &gp_values, std::vector<MathLib::Vector2D> &nodal_values)
+    {
+        T_EXTRAPOLATE extrapo;
+        extrapo.extrapolate(*this, gp_values, nodal_values);
+    }
+
 private:
     FemNaturalCoordinates *_mapping;
     IFemNumericalIntegration* _integration;
@@ -164,12 +175,12 @@ private:
 };
 
 
-typedef FeBaseIsoparametric<FiniteElementType::LINE2, 2, FemShapeLine2, FemIntegrationGaussLine> LINE2;
-typedef FeBaseIsoparametric<FiniteElementType::LINE3, 3, FemShapeLine3, FemIntegrationGaussLine> LINE3;
-typedef FeBaseIsoparametric<FiniteElementType::QUAD4, 4, FemShapeQuad4, FemIntegrationGaussQuad> QUAD4;
-typedef FeBaseIsoparametric<FiniteElementType::QUAD8, 8, FemShapeQuad8, FemIntegrationGaussQuad> QUAD8;
-typedef FeBaseIsoparametric<FiniteElementType::QUAD9, 9, FemShapeQuad9, FemIntegrationGaussQuad> QUAD9;
-typedef FeBaseIsoparametric<FiniteElementType::TRI3, 3, FemShapeTriangle3, FemIntegrationGaussTriangle> TRI3;
-typedef FeBaseIsoparametric<FiniteElementType::TRI6, 6, FemShapeTriangle6, FemIntegrationGaussTriangle> TRI6;
+typedef FeBaseIsoparametric<FiniteElementType::LINE2, 2, FemShapeLine2, FemIntegrationGaussLine, FeExtrapolationGaussLinear> LINE2;
+typedef FeBaseIsoparametric<FiniteElementType::LINE3, 3, FemShapeLine3, FemIntegrationGaussLine, FeExtrapolationGaussLinear> LINE3;
+typedef FeBaseIsoparametric<FiniteElementType::QUAD4, 4, FemShapeQuad4, FemIntegrationGaussQuad, FeExtrapolationGaussLinear> QUAD4;
+typedef FeBaseIsoparametric<FiniteElementType::QUAD8, 8, FemShapeQuad8, FemIntegrationGaussQuad, FeExtrapolationGaussLinear> QUAD8;
+typedef FeBaseIsoparametric<FiniteElementType::QUAD9, 9, FemShapeQuad9, FemIntegrationGaussQuad, FeExtrapolationGaussLinear> QUAD9;
+typedef FeBaseIsoparametric<FiniteElementType::TRI3, 3, FemShapeTriangle3, FemIntegrationGaussTriangle, FeExtrapolationGaussLinear> TRI3;
+typedef FeBaseIsoparametric<FiniteElementType::TRI6, 6, FemShapeTriangle6, FemIntegrationGaussTriangle, FeExtrapolationGaussLinear> TRI6;
 
 }

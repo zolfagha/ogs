@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 
-#include "Mesh.h"
+#include "MeshLib/Core/IMesh.h"
 
 namespace MeshLib
 {

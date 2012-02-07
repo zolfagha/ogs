@@ -9,6 +9,11 @@ class TemplateVector
 {
 public:
     TemplateVector() {};
+    TemplateVector(T v)
+    {
+        for (size_t i = 0; i < N; i++)
+            _data[i] = v;
+    }
     TemplateVector(T v[N])
     {
         for (size_t i=0; i<N; i++)
@@ -52,14 +57,79 @@ template<typename T>
 class TemplateVector<T,2>
 {
 public:
-    TemplateVector() {};
+    TemplateVector() 
+    {
+        for (size_t i=0; i<2; i++)
+            _data[i] = .0;
+    };
+    TemplateVector(T v)
+    {
+        for (size_t i=0; i<2; i++)
+            _data[i] = v;
+    }
     TemplateVector(T v1, T v2)
     {
         getRawRef()[0] = v1;
         getRawRef()[1] = v2;
     }
+    TemplateVector(const TemplateVector&v)
+    {
+        for (size_t i = 0; i < 2; i++)
+            _data[i] = v._data[i];
+    }
+
     const T* getRaw() const {return _data;};
     T* getRawRef() {return _data;};
+
+    const T& operator[] (size_t idx) const {
+        assert (idx <= 2);
+        return _data[idx];
+    }
+
+    TemplateVector<T,2>& operator= (T a)
+    {
+        for (size_t i = 0; i < 2; i++)
+            _data[i] = a;
+
+        return *this;
+    }
+    TemplateVector<T,2>& operator+= (T a)
+    {
+        for (size_t i = 0; i < 2; i++)
+            _data[i] += a;
+
+        return *this;
+    }
+    TemplateVector<T,2>& operator+= (const TemplateVector<T,2> &v)
+    {
+        for (size_t i = 0; i < 2; i++)
+            _data[i] += v._data[i];
+
+        return *this;
+    }
+    TemplateVector<T,2>& operator/= (T a)
+    {
+        for (size_t i = 0; i < 2; i++)
+            _data[i] /= a;
+
+        return *this;
+    }
+    TemplateVector<T,2> operator* (T a)
+    {
+        TemplateVector<T,2> v;
+        for (size_t i = 0; i < 2; i++)
+            v._data[i] = _data[i]*a;
+
+        return v;
+    }
+    TemplateVector<T,2> operator/ (T a)
+    {
+        TemplateVector<T,2> v;
+        for (size_t i = 0; i < 2; i++)
+            v._data[i] = _data[i]/a;
+
+        return v;
+    }
 private:
     T _data[2];
 };

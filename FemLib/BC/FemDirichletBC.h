@@ -57,7 +57,7 @@ class FemDirichletBC : IFemBC
 {
 public:
     ///
-    FemDirichletBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, MathLib::IFunction<Tval, GeoLib::Point> *bc_func, IDirichletBCMethod *method)
+    explicit FemDirichletBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, MathLib::IFunction<Tval, GeoLib::Point> *bc_func, IDirichletBCMethod *method)
     {
         _var = var;
         _geo = geo;

@@ -24,6 +24,7 @@ public:
         _A = new Matrix<double>(length, length);
         _b.resize(length);
         _x.resize(length);
+        reset();
     }
 
     void reset()
@@ -31,6 +32,11 @@ public:
         (*_A) = .0;
         _b.assign(_b.size(), .0);
         _x.assign(_x.size(), .0);
+    }
+
+    size_t getDimension() const
+    {
+        return _A->getNRows();
     }
 
     MatrixType* getA() 

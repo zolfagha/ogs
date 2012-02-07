@@ -51,28 +51,31 @@ private:
 
 /**
  * \brief Mapping local coordinates of elements.
+ *
+ * 
  */
 class EleMapLocalCoordinates : public IElementCoordinatesMapping 
 {
 public:
     ///
-    EleMapLocalCoordinates(const IMesh* msh, IElement* e, const CoordinateSystem* coordinate_system) : _matR(0)
+    EleMapLocalCoordinates(const IMesh* msh, IElement* e, const CoordinateSystem* coordinate_system) : _matR2original(0)
     {
         assert (e->getDimension() <= coordinate_system->getDimension());
         _msh = msh;
 
-        if (e->getDimension()==coordinate_system->getDimension()) {
-            flip(e, coordinate_system);
-        } else if (e->getDimension() < coordinate_system->getDimension()) {
-            rotate(e, coordinate_system);
-        }
+        //if (e->getDimension()==coordinate_system->getDimension()) {
+        //    flip(e, coordinate_system);
+        ////} else if (e->getDimension() < coordinate_system->getDimension()) {
+        ////    rotate(e, coordinate_system);
+        //}
+        rotate(e, coordinate_system);
     };
 
     virtual ~EleMapLocalCoordinates()
     {
         Base::destroyStdVectorWithPointers(_point_vec);
-        if (_matR!=0)
-            delete _matR;
+        if (_matR2original!=0)
+            delete _matR2original;
     }
 
     virtual GeoLib::Point* getNodePoint(size_t node_id) {
@@ -82,14 +85,15 @@ public:
 private:
     const IMesh* _msh;
     std::vector<GeoLib::Point*> _point_vec;
-    MathLib::Matrix<double> *_matR;
+    MathLib::Matrix<double> *_matR2original;
+    MathLib::Matrix<double> *_matR2local;
 
     ///
     void flip(IElement* e, const CoordinateSystem* coordinate_system)
     {
         switch(coordinate_system->getType())
         {
-        case CoordinateSystem::Y:
+        case CoordinateSystemType::Y:
             {
                 assert(e->getDimension()==1);
                 for(size_t i = 0; i < e->getNumberOfNodes(); i++)
@@ -99,7 +103,7 @@ private:
                 }
             }
             break;
-        case CoordinateSystem::Z:
+        case CoordinateSystemType::Z:
             {
                 assert(e->getDimension()==1);
                 for(size_t i = 0; i < e->getNumberOfNodes(); i++)
@@ -109,7 +113,7 @@ private:
                 }
             }
             break;
-        case CoordinateSystem::XZ:
+        case CoordinateSystemType::XZ:
             {
                 assert(e->getDimension()==2);
                 for(size_t i = 0; i < e->getNumberOfNodes(); i++)
@@ -140,8 +144,11 @@ private:
         std::vector<GeoLib::Point> vec_pt;
         _msh->getListOfNodeCoordinates(vec_node_id, vec_pt);
 
-        if (_matR==0)
-            getRotationMatrix(e, coordinate_system, vec_pt);
+        if (_matR2original==0) {
+            getRotationMatrixToOriginal(e, coordinate_system, vec_pt);
+            _matR2local = new MathLib::Matrix<double>(3,3);
+            _matR2original->transpose(*_matR2local);
+        }
 
         double const* const coords_node_0 (vec_pt[0].getData());
         double dx[3];
@@ -153,19 +160,21 @@ private:
             dx[2] = (coords_node_i[2] - coords_node_0[2]);
 
             GeoLib::Point *p = new GeoLib::Point();
-            _matR->axpy(1.0, dx, 0.0, (double*)p->getData());
+            _matR2local->axpy(1.0, dx, 0.0, (double*)p->getData());
             _point_vec[i] = p;
         }
     };
 
-    void getRotationMatrix(const IElement* e, const CoordinateSystem* coordinate_system, const std::vector<GeoLib::Point> &vec_pt)
+    // x=Rx' where x is original coordinates and x' is local coordinates
+    void getRotationMatrixToOriginal(const IElement* e, const CoordinateSystem* coordinate_system, const std::vector<GeoLib::Point> &vec_pt)
     {
         double xx[3];
         double yy[3];
         double zz[3];
-        _matR = new MathLib::Matrix<double>(3,3);
-        if (e->getDimension() == 1)
-        {
+        assert(_matR2original==0);
+        _matR2original = new MathLib::Matrix<double>(3,3);
+
+        if (e->getDimension() == 1) {
             // x"_vec
             double const* const pnt0(vec_pt[0].getData());
             double const* const pnt1(vec_pt[1].getData());
@@ -176,20 +185,20 @@ private:
             // an arbitrary vector
             for (size_t i = 0; i < 3; i++)
                 yy[i] = 0.0;
-            if (fabs(xx[0]) > 0.0 && fabs(xx[1]) + fabs(xx[2]) < DBL_MIN)
+
+            if (fabs(xx[0]) > 0.0 && fabs(xx[1]) + fabs(xx[2]) < DBL_MIN) {
                 yy[2] = 1.0;
-            else if (fabs(xx[1]) > 0.0 && fabs(xx[0]) + fabs(xx[2]) < DBL_MIN)
+            } else if (fabs(xx[1]) > 0.0 && fabs(xx[0]) + fabs(xx[2]) < DBL_MIN) {
                 yy[0] = 1.0;
-            else if (fabs(xx[2]) > 0.0 && fabs(xx[0]) + fabs(xx[1]) < DBL_MIN)
+            } else if (fabs(xx[2]) > 0.0 && fabs(xx[0]) + fabs(xx[1]) < DBL_MIN) {
                 yy[1] = 1.0;
-            else
-            {
-                for (size_t i = 0; i < 3; i++)
-                    if (fabs(xx[i]) > 0.0)
-                    {
+            } else {
+                for (size_t i = 0; i < 3; i++) {
+                    if (fabs(xx[i]) > 0.0) {
                         yy[i] = -xx[i];
                         break;
                     }
+                }
             }
             // z"_vec
             MathLib::crossProd(xx, yy, zz);
@@ -197,9 +206,8 @@ private:
             // y"_vec
             MathLib::crossProd(zz, xx, yy);
             MathLib::normalizeVector(yy, 3);
-        }
-        else if (e->getDimension()==2)
-        {
+
+        } else if (e->getDimension()==2) {
             // x"_vec
             //			xx[0] = nodes[1]->X() - nodes[0]->X();
             //			xx[1] = nodes[1]->Y() - nodes[0]->Y();
@@ -225,11 +233,11 @@ private:
             MathLib::crossProd(zz, xx, yy);
             MathLib::normalizeVector(yy, 3);
         }
-        for (size_t i = 0; i < 3; i++)
-        {
-            (*_matR)(i, 0) = xx[i];
-            (*_matR)(i, 1) = yy[i];
-            (*_matR)(i, 2) = zz[i];
+
+        for (size_t i=0; i<3; ++i) {
+            (*_matR2original)(i, 0) = xx[i];
+            (*_matR2original)(i, 1) = yy[i];
+            (*_matR2original)(i, 2) = zz[i];
         }
     }
 };

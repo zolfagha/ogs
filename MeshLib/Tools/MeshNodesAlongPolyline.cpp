@@ -16,7 +16,9 @@
 #include "MathLib/Vector.h"
 #include "MathLib/MathTools.h"
 // Mesh
+#include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Core/Node.h"
+#include "MeshLib/Core/MeshGeometricProperties.h"
 
 
 namespace MeshLib
@@ -26,7 +28,7 @@ MeshNodesAlongPolyline::MeshNodesAlongPolyline(GeoLib::Polyline const* const ply
 	_ply(ply), _mesh(mesh), _linear_nodes (0)
 {
 	//std::vector<Node*> const& mesh_nodes (mesh->getNodeVector());
-	double min_edge_length (mesh->getMinEdgeLength());
+	double min_edge_length (mesh->getGeometricProperty()->getMinEdgeLength());
 
     size_t n_linear_order_nodes (mesh->getNumberOfNodes ());
 	size_t n_nodes (mesh->getNumberOfNodes());

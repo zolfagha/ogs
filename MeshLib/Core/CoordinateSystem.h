@@ -4,6 +4,19 @@
 namespace MeshLib
 {
 
+struct CoordinateSystemType
+{
+    enum type {
+        X = 10,
+        Y = 11,
+        Z = 12,
+        XY = 21,
+        XZ = 22,
+        XYZ = 32,
+        INVALID = -1
+    };
+};
+
 /**
  * \brief Coordinate systems
  *
@@ -12,21 +25,21 @@ namespace MeshLib
 class CoordinateSystem
 {
 public:
-    enum CoordinateSystemType {
-        X = 10,
-        Y = 11,
-        Z = 12,
-        XY = 21,
-        XZ = 22,
-        XYZ = 32
-    };
 
-    CoordinateSystem(CoordinateSystemType coord) {
+    CoordinateSystem() {
+        _type = CoordinateSystemType::INVALID;
+    }
+
+    CoordinateSystem(CoordinateSystemType::type coord) {
+        _type = coord;
+    }
+
+    void setType(CoordinateSystemType::type coord) {
         _type = coord;
     }
 
     /// get this coordinate type
-    CoordinateSystemType getType() const {
+    CoordinateSystemType::type getType() const {
         return _type;
     }
 
@@ -41,6 +54,7 @@ public:
     }
 
 private:
-    CoordinateSystemType _type; 
+    CoordinateSystemType::type _type; 
 };
+
 }

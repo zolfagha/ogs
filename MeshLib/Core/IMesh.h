@@ -1,12 +1,17 @@
 
 #pragma once
 
-#include "INode.h"
-#include "IElement.h"
-#include "CoordinateSystem.h"
+#include <vector>
+
+#include "GeoLib/Core/Point.h"
+
 
 namespace MeshLib
 {
+class CoordinateSystem;
+class INode;
+class IElement;
+class MeshGeometricProperty;
 
 /**
  * \brief Interface to mesh classes
@@ -21,10 +26,11 @@ namespace MeshLib
 class IMesh
 {
 public:
-    /// get coordinate systems
-    virtual const CoordinateSystem* getCoordinateSystem() const = 0;
-    /// set coordinate systems
-    virtual void setCoordinateSystem(CoordinateSystem &coord) = 0;
+    ///// get coordinate systems
+    //virtual const CoordinateSystem* getCoordinateSystem() const = 0;
+    ///// set coordinate systems
+    //virtual void setCoordinateSystem(CoordinateSystem &coord) = 0;
+    size_t virtual getDimension() const = 0;
 
     /// get the number of elements
     virtual size_t getNumberOfElements() const = 0;
@@ -44,8 +50,12 @@ public:
     /// add a new element
     virtual void addEdgeElement(IElement*) = 0;
 
-    /// get min edge length
-    virtual double getMinEdgeLength() const = 0;
+    /// get mesh geometric property
+    virtual const MeshGeometricProperty* getGeometricProperty() const = 0;
+
+    /// return if this mesh is axisymmetric or not
+    virtual bool isAxisymmetric() const = 0;
+    virtual void setAxisymmetric(bool flag) = 0;
 };
 
 }

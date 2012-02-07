@@ -37,7 +37,7 @@ private:
 class IFeObjectContainer
 {
 public:
-    virtual IFiniteElement* getFeObject(MeshLib::IElement *e, MeshLib::IMesh *msh) = 0;
+    virtual IFiniteElement* getFeObject(const MeshLib::IElement &e, MeshLib::IMesh *msh) = 0;
 };
 
 class FeObjectContainerPerElement : public IFeObjectContainer
@@ -57,9 +57,9 @@ public:
         _vec_fem[i] = FemElementFactory::create(fe_type, msh);
     }
 
-    virtual IFiniteElement* getFeObject(MeshLib::IElement *e, MeshLib::IMesh *msh) 
+    virtual IFiniteElement* getFeObject(const MeshLib::IElement &e, MeshLib::IMesh *msh) 
     {
-        return _vec_fem[e->getID()];
+        return _vec_fem[e.getID()];
     }
 
 private:
@@ -81,9 +81,9 @@ public:
         _order = order;
     }
 
-    virtual IFiniteElement* getFeObject(MeshLib::IElement *e, MeshLib::IMesh *msh)
+    virtual IFiniteElement* getFeObject(const MeshLib::IElement &e, MeshLib::IMesh *msh)
     {
-        FiniteElementType::type fe_type = getFeType(e->getElementType(), _order);
+        FiniteElementType::type fe_type = getFeType(e.getElementType(), _order);
         return FeObjectCachePerFeType::getFeObject(fe_type, msh);
     }
 private:
