@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <map>
 #include <algorithm>
 
 #include "Base/MemoryTools.h"
@@ -17,41 +18,43 @@ namespace MeshLib
 /**
  * \brief a structured mesh class
  */
-template <ElementType::type T_ELEMENT_TYPE>
-class StructuredMesh : public IMesh
+template <ElementShape::type T_ELEMENT_TYPE>
+class StructuredMesh : public IMixedOrderMesh
 {
 private:
     GeoLib::Point _origin;
     double _length[3];
-    double  _unit_length[3];
+    double  _spacing[3];
     size_t  _number_of_elements_per_dimension[3];
     size_t  _number_of_nodes_per_dimension[3];
+    std::map<size_t, size_t> _map_order_nnodes;
     IElement* _e;
     INode* _nod;
-   size_t _ele_size;
-    size_t _nod_size;
+    size_t _n_ele;
     std::vector<IElement*> _list_edge_elements;
     MeshGeometricProperty _geo_prop;
     bool _isAxisymmetric;
+    size_t _order;
 
     void construct();
     void getNodeCoordinates(size_t id, GeoLib::Point* p) const;
 public:
 
     ///
-    StructuredMesh(CoordinateSystemType::type coord, GeoLib::Point &org_pt, const double* len, const double* unit_len) : _origin(org_pt)
+    StructuredMesh(CoordinateSystemType::type coord, GeoLib::Point &org_pt, const double* len, const double* spacing) : _origin(org_pt)
     {
+        _order = 1;
         _isAxisymmetric = false;
         _geo_prop.setCoordinateSystem(coord);
         const size_t dim = getDimension();
         for (size_t i=0; i<dim; i++)
             _length[i] = len[i];
         for (size_t i=0; i<dim; i++)
-            _unit_length[i] = unit_len[i];
+            _spacing[i] = spacing[i];
 
-        double d = _unit_length[0];
+        double d = _spacing[0];
         for (size_t i=1; i<getDimension(); i++)
-            d = std::min(d, _unit_length[i]);
+            d = std::min(d, _spacing[i]);
         _geo_prop.setMinEdgeLength(d);
 
         construct();
@@ -71,14 +74,19 @@ public:
 
     /// get the number of elements
     size_t getNumberOfElements() const {
-        return _ele_size;
+        return _n_ele;
+    }
+    /// get the number of elements of the given type
+    size_t getNumberOfElements(ElementShape::type ele_type) const {
+        if (ele_type==T_ELEMENT_TYPE) return _n_ele;
+        else return 0;
     }
     /// get an element
     IElement* getElemenet( size_t element_id ) const;
 
     /// get the number of nodes
     size_t getNumberOfNodes() const {
-        return _nod_size;
+        return getNumberOfNodes(_order);
     }
     /// get a node object
     INode* getNode( size_t id ) const;
@@ -105,6 +113,15 @@ public:
         _list_edge_elements.push_back(e);
     }
 
+    size_t getNumberOfEdges() const {
+        return _list_edge_elements.size();
+    }
+    IElement* getEdgeElement(size_t edge_id) {
+        if (edge_id<_list_edge_elements.size())
+            return _list_edge_elements[edge_id];
+        return 0;
+    }
+
     const MeshGeometricProperty* getGeometricProperty() const
     {
         return &_geo_prop;
@@ -119,11 +136,42 @@ public:
         return _isAxisymmetric;
     }
 
+    void setMaxiumOrder(size_t order)
+    {
+        assert(order<3);
+
+        size_t n_edges = _number_of_elements_per_dimension[0]*(_number_of_elements_per_dimension[1]+1) + _number_of_elements_per_dimension[1]*(_number_of_elements_per_dimension[0]+1);
+
+        if (order==2) {
+            _map_order_nnodes[2] = _map_order_nnodes[1] + n_edges + _n_ele;
+        }
+    }
+
+    size_t getMaxiumOrder() const
+    {
+        return _map_order_nnodes.size();
+    }
+    void setCurrentOrder(size_t order)
+    {
+        _order = order;
+    }
+    size_t getCurrentOrder() const
+    {
+        return _order;
+    }
+    size_t getNumberOfNodes(size_t order) const
+    {
+        if (order-1 < _map_order_nnodes.size()) {
+            std::map<size_t, size_t>::const_iterator itr = _map_order_nnodes.find(order);
+            return itr->second;
+        }
+        return 0;
+    }
 };
 
-template<> void StructuredMesh<ElementType::QUAD>::construct();
-template<> IElement* StructuredMesh<ElementType::QUAD>::getElemenet( size_t element_id ) const; 
-template<> INode* StructuredMesh<ElementType::QUAD>::getNode( size_t id ) const; 
-template<> void StructuredMesh<ElementType::QUAD>::getNodeCoordinates(size_t id,  GeoLib::Point* p) const;
+template<> void StructuredMesh<ElementShape::QUAD>::construct();
+template<> IElement* StructuredMesh<ElementShape::QUAD>::getElemenet( size_t element_id ) const; 
+template<> INode* StructuredMesh<ElementShape::QUAD>::getNode( size_t id ) const; 
+template<> void StructuredMesh<ElementShape::QUAD>::getNodeCoordinates(size_t id,  GeoLib::Point* p) const;
 
 }

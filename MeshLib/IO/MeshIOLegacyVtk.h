@@ -73,21 +73,21 @@ protected:
             IElement* ele = mesh.getElemenet(i);
 
             // Write number of points per cell
-            switch(ele->getElementType())
+            switch(ele->getShapeType())
             {
-            case ElementType::LINE:
+            case ElementShape::LINE:
                 vtk_file << "2"; break;
-            case ElementType::QUAD:
+            case ElementShape::QUAD:
                 vtk_file << "4"; break;
-            case ElementType::HEXAHEDRON:
+            case ElementShape::HEXAHEDRON:
                 vtk_file << "8"; break;
-            case ElementType::TRIANGLE:
+            case ElementShape::TRIANGLE:
                 vtk_file << "3"; break;
-            case ElementType::TETRAHEDRON:
+            case ElementShape::TETRAHEDRON:
                 vtk_file << "4"; break;
-            case ElementType::PRISM:
+            case ElementShape::PRISM:
                 vtk_file << "6"; break;
-            case ElementType::PYRAMID:
+            case ElementShape::PYRAMID:
                 vtk_file << "5"; break;
             default:
                 std::cerr << "COutput::WriteVTKElementData MshElemType not handled" << std::endl;
@@ -109,21 +109,21 @@ protected:
             IElement* ele = mesh.getElemenet(i);
 
             // Write vtk cell type number (see vtkCellType.h)
-            switch(ele->getElementType())
+            switch(ele->getShapeType())
             {
-            case ElementType::LINE:
+            case ElementShape::LINE:
                 vtk_file << "3" << std::endl; break;
-            case ElementType::QUAD:
+            case ElementShape::QUAD:
                 vtk_file << "9" << std::endl; break;
-            case ElementType::HEXAHEDRON:
+            case ElementShape::HEXAHEDRON:
                 vtk_file << "12" << std::endl; break;
-            case ElementType::TRIANGLE:
+            case ElementShape::TRIANGLE:
                 vtk_file << "5" << std::endl; break;
-            case ElementType::TETRAHEDRON:
+            case ElementShape::TETRAHEDRON:
                 vtk_file << "10" << std::endl; break;
-            case ElementType::PRISM: // VTK_WEDGE
+            case ElementShape::PRISM: // VTK_WEDGE
                 vtk_file << "13" << std::endl; break;
-            case ElementType::PYRAMID:
+            case ElementShape::PYRAMID:
                 vtk_file << "14" << std::endl; break;
             default:
                 std::cerr << "COutput::WriteVTKElementData MshElemType not handled" << std::endl;

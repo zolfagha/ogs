@@ -1,13 +1,15 @@
 
 #include "Topology.h"
 
+#include <algorithm>
+
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Core/IElement.h"
 
 namespace MeshLib
 {
 
-TopologyNode2Elements::TopologyNode2Elements(const IMesh &msh) 
+TopologySequentialNodes2Elements::TopologySequentialNodes2Elements(const IMesh &msh) 
 {
     _node2conn_eles.resize(msh.getNumberOfNodes());
     const size_t nr_ele = msh.getNumberOfElements();
@@ -15,6 +17,19 @@ TopologyNode2Elements::TopologyNode2Elements(const IMesh &msh)
         const IElement* e = msh.getElemenet(i);
         for (size_t j=0; j<e->getNumberOfNodes(); j++) {
             _node2conn_eles[e->getNodeID(j)].push_back(i);
+        }
+    }
+}
+
+TopologyRandomNodes2Elements2::TopologyRandomNodes2Elements2(const IMesh &msh, const std::vector<size_t> &nodes) 
+{
+    for (size_t i=0; i<msh.getNumberOfElements(); i++) {
+        IElement* e = msh.getElemenet(i);
+        for (size_t j=0; j<e->getNumberOfNodes(); j++) {
+            if (std::find(nodes.begin(), nodes.end(), e->getNodeID(j))!=nodes.end()) {
+                _map_node2conn_eles[e->getID()].push_back(i);
+                break;
+            }
         }
     }
 }

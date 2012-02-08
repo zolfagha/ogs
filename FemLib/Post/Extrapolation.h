@@ -27,7 +27,7 @@ public:
     void extrapolate(TemplateFEMIntegrationPointFunction<Tvalue> &ele_var, TemplateFEMNodalFunction<Tvalue> &nod_var)
     {
         const MeshLib::IMesh* msh = ele_var.getMesh();
-        MeshLib::TopologyNode2Elements node2eles(*msh);
+        MeshLib::TopologySequentialNodes2Elements node2eles(*msh);
         std::vector<Tvalue> vec_v(msh->getNumberOfNodes());
 
         for (size_t i=0; i<msh->getNumberOfElements(); i++) {

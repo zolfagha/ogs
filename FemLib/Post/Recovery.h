@@ -37,7 +37,7 @@ public:
         }
 
         std::vector<double> vec_du;
-        MeshLib::TopologyNode2Elements node2ele(msh);
+        MeshLib::TopologySequentialNodes2Elements node2ele(msh);
         for (size_t i=0; i<msh->getNumberOfNodes(); i++) {
             const std::vector<size_t> &eles = node2ele.getConnectedElements(i);
             for (size_t j=0; j<eles.size(); j++) {

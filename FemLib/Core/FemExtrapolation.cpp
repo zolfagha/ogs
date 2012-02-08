@@ -36,9 +36,9 @@ void FeExtrapolationGaussLinear::extrapolate(IFiniteElement &fe, const std::vect
     const size_t e_nnodes = e->getNumberOfNodes();
     // reorder gp values
     std::vector<Tvalue> reordered_gp_values(gp_values.size());
-    switch (e->getElementType()) {
-        case MeshLib::ElementType::QUAD:
-        case MeshLib::ElementType::HEXAHEDRON:
+    switch (e->getShapeType()) {
+        case MeshLib::ElementShape::QUAD:
+        case MeshLib::ElementShape::HEXAHEDRON:
             for (size_t j=0; j<gp_values.size(); j++) {
                 size_t nod_id = getLocalIndex(*e, *gauss, j);
                 reordered_gp_values[nod_id] = gp_values[j];
@@ -55,7 +55,7 @@ void FeExtrapolationGaussLinear::extrapolate(IFiniteElement &fe, const std::vect
     size_t i_s = 0;
     size_t i_e = e_nnodes;
     size_t ish = 0;
-    if (e->getElementType()==MeshLib::ElementType::TETRAHEDRON) {
+    if (e->getShapeType()==MeshLib::ElementShape::TETRAHEDRON) {
         i_s = 1;
         i_e = e_nnodes + 1;
         ish = 1;
@@ -77,7 +77,7 @@ void FeExtrapolationGaussLinear::extrapolate(IFiniteElement &fe, const std::vect
 double FeExtrapolationGaussLinear::calcXi_p(const MeshLib::IElement& e, FemIntegrationGaussBase& gauss)
 {
     double Xi_p = 0.0;
-    if (e.getElementType() == MeshLib::ElementType::QUAD || e.getElementType() == MeshLib::ElementType::HEXAHEDRON) {
+    if (e.getShapeType() == MeshLib::ElementShape::QUAD || e.getShapeType() == MeshLib::ElementShape::HEXAHEDRON) {
         double r = .0;
         const size_t nGauss = gauss.getSamplingLevel();
         for (size_t gp=0; gp<nGauss; gp++) {
@@ -102,8 +102,8 @@ int FeExtrapolationGaussLinear::getLocalIndex(const MeshLib::IElement& e, FemInt
     size_t gp_t = 0;
     const double MKleinsteZahl = std::numeric_limits<double>::epsilon();
 
-    switch (e.getElementType()) {
-    case MeshLib::ElementType::QUAD:
+    switch (e.getShapeType()) {
+    case MeshLib::ElementShape::QUAD:
         gp_r = igp/nGauss;
         gp_s = igp%nGauss;
         gp_t = 0;
@@ -128,7 +128,7 @@ int FeExtrapolationGaussLinear::getLocalIndex(const MeshLib::IElement& e, FemInt
         else if (fabs(r) < MKleinsteZahl && fabs(s) < MKleinsteZahl)
             LoIndex = 8;
         break;
-    case MeshLib::ElementType::HEXAHEDRON:
+    case MeshLib::ElementShape::HEXAHEDRON:
         gp_r = igp/(nGauss * nGauss);
         gp_s = igp%(nGauss * nGauss);
         gp_t = gp_s%nGauss;
@@ -198,10 +198,10 @@ void FeExtrapolationGaussLinear::getExtropoGaussPoints(const MeshLib::IElement &
 {
     int j = 0;
     //
-    switch (e.getElementType()) {
-    case MeshLib::ElementType::LINE:
+    switch (e.getShapeType()) {
+    case MeshLib::ElementShape::LINE:
         break;
-    case MeshLib::ElementType::TRIANGLE:
+    case MeshLib::ElementShape::TRIANGLE:
         switch (i) {
         case 0:
             unit[0] = -0.1666666666667;
@@ -217,7 +217,7 @@ void FeExtrapolationGaussLinear::getExtropoGaussPoints(const MeshLib::IElement &
             break;
         }
         break;
-    case MeshLib::ElementType::QUAD:
+    case MeshLib::ElementShape::QUAD:
         switch (i) {
         case 0:
             unit[0] = Xi_p;
@@ -237,7 +237,7 @@ void FeExtrapolationGaussLinear::getExtropoGaussPoints(const MeshLib::IElement &
             break;
         }
         break;
-    case MeshLib::ElementType::HEXAHEDRON:
+    case MeshLib::ElementShape::HEXAHEDRON:
         if (i < 4) {
             j = i;
             unit[2] = Xi_p;
@@ -264,7 +264,7 @@ void FeExtrapolationGaussLinear::getExtropoGaussPoints(const MeshLib::IElement &
             break;
         }
         break;
-    case MeshLib::ElementType::TETRAHEDRON:
+    case MeshLib::ElementShape::TETRAHEDRON:
         switch (i) {
         case 0:
             unit[0] = -0.166666666666667;

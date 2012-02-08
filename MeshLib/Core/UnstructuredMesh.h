@@ -1,16 +1,11 @@
 
 #pragma once
 
-#include <iostream>
 #include <vector>
-#include <limits>
-
-#include "Base/MemoryTools.h"
-#include "MathLib/Vector.h"
+#include <map>
 
 #include "IMesh.h"
 #include "IElement.h"
-#include "INode.h"
 #include "Node.h"
 #include "MeshGeometricProperties.h"
 
@@ -18,36 +13,36 @@
 namespace MeshLib
 {
 
+class INode;
+
 /**
  * \brief Unstructured mesh class
  *
  *
  */
-class UnstructuredMesh : public IMesh
+class UnstructuredMesh : public IMixedOrderMesh
 {
 private:
     std::vector<Node*> _list_nodes;
     std::vector<IElement*> _list_elements;
+    std::map<ElementShape::type, size_t> _n_eles_type;
     std::vector<IElement*> _list_edge_elements;
     MeshGeometricProperty _geo_prop;
     bool _isAxisymmetric;
+    size_t _order;
+    std::map<size_t, size_t> _map_order_nnodes;
 
 public:
-    UnstructuredMesh() 
+    UnstructuredMesh() : _order(1)
     {
     };
 
-    UnstructuredMesh(const CoordinateSystemType::type coord) 
+    UnstructuredMesh(const CoordinateSystemType::type coord)  : _order(1)
     {
         _geo_prop.setCoordinateSystem(coord);
     };
 
-    virtual ~UnstructuredMesh()
-    {
-        Base::destroyStdVectorWithPointers(_list_nodes);
-        Base::destroyStdVectorWithPointers(_list_elements);
-        Base::destroyStdVectorWithPointers(_list_edge_elements);
-    }
+    virtual ~UnstructuredMesh();
 
     //------------------------------------------------------------------------
     size_t getDimension() const
@@ -77,100 +72,6 @@ public:
 
 
     //------------------------------------------------------------------------
-    //
-    virtual size_t getNumberOfNodes() const 
-    { 
-        return _list_nodes.size(); 
-    };
-
-    virtual Node* getNode( size_t id ) const 
-    {
-        return _list_nodes.at(id);
-    };
-
-    size_t addNode( GeoLib::Point &x ) 
-    {
-        size_t new_node_id = _list_nodes.size();
-        this->_list_nodes.push_back(new Node(new_node_id, x));
-        return  new_node_id;
-    }
-
-    size_t setNode( size_t node_id, GeoLib::Point &x ) 
-    {
-        size_t new_node_id = node_id;
-        if (node_id<_list_nodes.size()) {
-            INode *node = this->_list_nodes.at(node_id);
-            node->setX(x);
-        } else {
-            new_node_id = this->_list_nodes.size();
-            this->_list_nodes.push_back(new Node(new_node_id, x));
-        }
-        return new_node_id;
-    };
-
-    const GeoLib::Point*  getNodeCoordinatesRef(size_t id) const
-    {
-        return getNode(id)->getData();
-    }
-
-    GeoLib::Point getNodeCoordinates(size_t id) const
-    {
-        return *getNode(id)->getData();
-    }
-
-    virtual void getListOfNodeCoordinates(const std::vector<size_t> &vec_node_id, std::vector<GeoLib::Point> &vec_pt) const 
-    {
-        for (size_t i=0; i<vec_node_id.size(); i++)
-            vec_pt.push_back(*this->getNodeCoordinatesRef(vec_node_id[i]));
-    }
-
-    const std::vector<Node*>& getNodeVector() const 
-    { 
-        return _list_nodes;
-    };
-
-    //------------------------------------------------------------------------
-    virtual size_t getNumberOfElements() const 
-    { 
-        return _list_elements.size(); 
-    };
-
-    virtual IElement* getElemenet( size_t element_id ) const 
-    {
-        assert(element_id<_list_elements.size());
-        return _list_elements.at(element_id);
-    };
-
-    size_t addElement( IElement *e) 
-    {
-        e->setID(_list_elements.size());
-        _list_elements.push_back(e);
-        return e->getID();
-    };
-
-    void addEdgeElement(IElement *e) 
-    {
-        e->setID(_list_edge_elements.size());
-        _list_edge_elements.push_back(e);
-    }
-};
-
-
-/**
- * \brief Mixed order mesh
- */
-class MixedOrderUnstructuredMesh : public UnstructuredMesh
-{
-private:
-    size_t _order;
-    size_t _max_order;
-    std::vector<size_t> _n_nodes;
-
-
-public:
-    MixedOrderUnstructuredMesh() : _order(1) {};
-
-
     void setCurrentOrder(size_t order)
     {
         _order = order;
@@ -183,28 +84,77 @@ public:
 
     size_t getMaxiumOrder() const
     {
-        return _max_order;
+        return _map_order_nnodes.size();
     }
 
-    /// get an element
-    virtual IElement* getElemenet( size_t element_id ) const = 0;
+    size_t getNumberOfNodes(size_t order) const
+    {
+        if (order-1 < _map_order_nnodes.size()) {
+            size_t sum = 0;
+            for (size_t i=0; i<order; ++i) {
+                std::map<size_t, size_t>::const_iterator itr = _map_order_nnodes.find(i+1);
+                sum += itr->second;
+            }
+            return sum;
+        }
+        return 0;
+    }
 
-    /// get the number of nodes
+    //------------------------------------------------------------------------
     size_t getNumberOfNodes() const
     {
         return getNumberOfNodes(_order);
     }
-    size_t getNumberOfNodes(size_t order) const
+
+    const std::vector<Node*>& getNodeVector() const 
+    { 
+        return _list_nodes;
+    };
+
+    Node* getNode( size_t id ) const 
     {
-        return _n_nodes[order];
+        return _list_nodes[id];
+    };
+
+    size_t addNode( GeoLib::Point &x, size_t order=1 ); 
+
+    size_t setNodeCoordinates( size_t node_id, GeoLib::Point &x );
+
+    const GeoLib::Point*  getNodeCoordinatesRef(size_t id) const
+    {
+        return getNode(id)->getData();
     }
 
-};
+    GeoLib::Point getNodeCoordinates(size_t id) const
+    {
+        return *getNode(id)->getData();
+    }
 
-class MixedOrderElement
-{
-public:
-    size_t getNumberOfNodes(size_t order);
+    void getListOfNodeCoordinates(const std::vector<size_t> &vec_node_id, std::vector<GeoLib::Point> &vec_pt) const;
+
+
+    //------------------------------------------------------------------------
+    size_t getNumberOfElements() const 
+    { 
+        return _list_elements.size(); 
+    };
+
+    size_t getNumberOfElements(ElementShape::type ele_type) const;
+
+    IElement* getElemenet( size_t element_id ) const 
+    {
+        assert(element_id<_list_elements.size());
+        IElement* e = _list_elements[element_id];
+        e->setCurrentOrder(_order);
+        return e;
+    };
+
+    size_t addElement( IElement *e);
+
+    //------------------------------------------------------------------------
+    void addEdgeElement(IElement *e);
+    size_t getNumberOfEdges() const;
+    IElement* getEdgeElement(size_t edge_id);
 };
 
 }

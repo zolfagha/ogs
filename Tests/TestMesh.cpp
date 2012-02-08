@@ -9,6 +9,7 @@
 #include "MeshLib/Tools/Mapping.h"
 #include "MeshLib/Topology/Topology.h"
 #include "MeshLib/Tools/MeshGenerator.h"
+#include "MeshLib/Tools/Tools.h"
 
 #include "TestUtil.h"
 
@@ -218,4 +219,207 @@ TEST(Mesh, MappingTriXY3)
     ASSERT_DOUBLE_ARRAY_EQ(GeoLib::Point(0,0,0), *p1);
     ASSERT_DOUBLE_ARRAY_EQ(GeoLib::Point(2,0,0), *p2);
     ASSERT_DOUBLE_ARRAY_EQ(GeoLib::Point(2,2,0), *p3);
+}
+
+TEST(Mesh, HigherOrderLine1)
+{
+    UnstructuredMesh* msh = createLineElement(GeoLib::Point(0,0,0), GeoLib::Point(1,0,0), CoordinateSystemType::X);
+    std::vector<IElement*> vec_edge;
+    createEdgeElements(msh);
+    ASSERT_EQ(1, msh->getNumberOfEdges());
+    generateHigherOrderUnstrucuredMesh(*msh, 2);
+
+    IElement* e = 0;
+    ASSERT_EQ(2, msh->getNumberOfNodes(1));
+    ASSERT_EQ(3, msh->getNumberOfNodes(2));
+    msh->setCurrentOrder(1);
+    e = msh->getElemenet(0);
+    ASSERT_EQ(2, msh->getNumberOfNodes(1));
+    ASSERT_EQ(2, e->getNumberOfNodes());
+    msh->setCurrentOrder(2);
+    e = msh->getElemenet(0);
+    ASSERT_EQ(3, msh->getNumberOfNodes(2));
+    ASSERT_EQ(3, e->getNumberOfNodes());
+
+    e->setCurrentOrder(1);
+    ASSERT_EQ(2, e->getNumberOfNodes());
+    e->setCurrentOrder(2);
+    ASSERT_EQ(3, e->getNumberOfNodes());
+
+    const GeoLib::Point* p = msh->getNodeCoordinatesRef(2);
+    ASSERT_DOUBLE_EQ(0.5, (*p)[0]);
+    ASSERT_DOUBLE_EQ(0., (*p)[1]);
+    ASSERT_DOUBLE_EQ(0., (*p)[2]);
+
+}
+
+TEST(Mesh, HigherOrderTriangle1)
+{
+    UnstructuredMesh* msh = createTriangleElement(GeoLib::Point(1,1,0), GeoLib::Point(3,1,0), GeoLib::Point(1,3,0), CoordinateSystemType::XY);
+    std::vector<IElement*> vec_edge;
+    createEdgeElements(msh);
+    ASSERT_EQ(3, msh->getNumberOfEdges());
+    generateHigherOrderUnstrucuredMesh(*msh, 2);
+
+    IElement* e = 0;
+    ASSERT_EQ(3, msh->getNumberOfNodes(1));
+    ASSERT_EQ(6, msh->getNumberOfNodes(2));
+    msh->setCurrentOrder(1);
+    e = msh->getElemenet(0);
+    ASSERT_EQ(3, msh->getNumberOfNodes(1));
+    ASSERT_EQ(3, e->getNumberOfNodes());
+    msh->setCurrentOrder(2);
+    e = msh->getElemenet(0);
+    ASSERT_EQ(6, msh->getNumberOfNodes(2));
+    ASSERT_EQ(6, e->getNumberOfNodes());
+
+    e->setCurrentOrder(1);
+    ASSERT_EQ(3, e->getNumberOfNodes());
+    e->setCurrentOrder(2);
+    ASSERT_EQ(6, e->getNumberOfNodes());
+
+    {
+        const GeoLib::Point* p = msh->getNodeCoordinatesRef(3);
+        ASSERT_DOUBLE_EQ(2., (*p)[0]);
+        ASSERT_DOUBLE_EQ(1., (*p)[1]);
+        ASSERT_DOUBLE_EQ(0., (*p)[2]);
+    }
+    {
+        const GeoLib::Point* p = msh->getNodeCoordinatesRef(4);
+        ASSERT_DOUBLE_EQ(2., (*p)[0]);
+        ASSERT_DOUBLE_EQ(2., (*p)[1]);
+        ASSERT_DOUBLE_EQ(0., (*p)[2]);
+    }
+    {
+        const GeoLib::Point* p = msh->getNodeCoordinatesRef(5);
+        ASSERT_DOUBLE_EQ(1., (*p)[0]);
+        ASSERT_DOUBLE_EQ(2., (*p)[1]);
+        ASSERT_DOUBLE_EQ(0., (*p)[2]);
+    }
+
+}
+
+TEST(Mesh, HigherOrderQuadUnstructure)
+{
+    MeshLib::UnstructuredMesh *msh = MeshGenerator::generateRegularQuadMesh(2.0, 2, .0, .0, .0);
+    std::vector<IElement*> vec_edge;
+    createEdgeElements(msh);
+    ASSERT_EQ(12, msh->getNumberOfEdges());
+    generateHigherOrderUnstrucuredMesh(*msh, 2);
+
+    IElement* e = 0;
+    ASSERT_EQ(9, msh->getNumberOfNodes(1));
+    ASSERT_EQ(25, msh->getNumberOfNodes(2));
+    msh->setCurrentOrder(1);
+    e = msh->getElemenet(0);
+    ASSERT_EQ(9, msh->getNumberOfNodes(1));
+    ASSERT_EQ(4, e->getNumberOfNodes());
+    msh->setCurrentOrder(2);
+    e = msh->getElemenet(0);
+    ASSERT_EQ(25, msh->getNumberOfNodes(2));
+    ASSERT_EQ(9, e->getNumberOfNodes());
+
+    e->setCurrentOrder(1);
+    ASSERT_EQ(4, e->getNumberOfNodes());
+    e->setCurrentOrder(2);
+    ASSERT_EQ(9, e->getNumberOfNodes());
+
+    {
+        const GeoLib::Point* p = msh->getNodeCoordinatesRef(9);
+        ASSERT_DOUBLE_EQ(0.5, (*p)[0]);
+        ASSERT_DOUBLE_EQ(0., (*p)[1]);
+        ASSERT_DOUBLE_EQ(0., (*p)[2]);
+    }
+    {
+        const GeoLib::Point* p = msh->getNodeCoordinatesRef(10);
+        ASSERT_DOUBLE_EQ(1.0, (*p)[0]);
+        ASSERT_DOUBLE_EQ(0.5, (*p)[1]);
+        ASSERT_DOUBLE_EQ(0., (*p)[2]);
+    }
+    {
+        const GeoLib::Point* p = msh->getNodeCoordinatesRef(11);
+        ASSERT_DOUBLE_EQ(0.5, (*p)[0]);
+        ASSERT_DOUBLE_EQ(1.0, (*p)[1]);
+        ASSERT_DOUBLE_EQ(0., (*p)[2]);
+    }
+    {
+        const GeoLib::Point* p = msh->getNodeCoordinatesRef(12);
+        ASSERT_DOUBLE_EQ(0., (*p)[0]);
+        ASSERT_DOUBLE_EQ(0.5, (*p)[1]);
+        ASSERT_DOUBLE_EQ(0., (*p)[2]);
+    }
+    {
+        const GeoLib::Point* p = msh->getNodeCoordinatesRef(13);
+        ASSERT_DOUBLE_EQ(1.5, (*p)[0]);
+        ASSERT_DOUBLE_EQ(0., (*p)[1]);
+        ASSERT_DOUBLE_EQ(0., (*p)[2]);
+    }
+    {
+        const GeoLib::Point* p = msh->getNodeCoordinatesRef(21);
+        ASSERT_DOUBLE_EQ(0.5, (*p)[0]);
+        ASSERT_DOUBLE_EQ(0.5, (*p)[1]);
+        ASSERT_DOUBLE_EQ(0., (*p)[2]);
+    }
+
+}
+
+TEST(Mesh, HigherOrderQuadStructure)
+{
+    MeshLib::StructuredMesh<ElementShape::QUAD> *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
+    msh->setMaxiumOrder(2);
+
+    IElement* e = 0;
+    ASSERT_EQ(9, msh->getNumberOfNodes(1));
+    ASSERT_EQ(25, msh->getNumberOfNodes(2));
+    msh->setCurrentOrder(1);
+    e = msh->getElemenet(0);
+    ASSERT_EQ(9, msh->getNumberOfNodes(1));
+    ASSERT_EQ(4, e->getNumberOfNodes());
+    msh->setCurrentOrder(2);
+    e = msh->getElemenet(0);
+    ASSERT_EQ(25, msh->getNumberOfNodes(2));
+    ASSERT_EQ(9, e->getNumberOfNodes());
+
+    e->setCurrentOrder(1);
+    ASSERT_EQ(4, e->getNumberOfNodes());
+    e->setCurrentOrder(2);
+    ASSERT_EQ(9, e->getNumberOfNodes());
+
+    {
+        const GeoLib::Point* p = msh->getNodeCoordinatesRef(9);
+        ASSERT_DOUBLE_EQ(0.5, (*p)[0]);
+        ASSERT_DOUBLE_EQ(0., (*p)[1]);
+        ASSERT_DOUBLE_EQ(0., (*p)[2]);
+    }
+    {
+        const GeoLib::Point* p = msh->getNodeCoordinatesRef(10);
+        ASSERT_DOUBLE_EQ(1.5, (*p)[0]);
+        ASSERT_DOUBLE_EQ(0., (*p)[1]);
+        ASSERT_DOUBLE_EQ(0., (*p)[2]);
+    }
+    {
+        const GeoLib::Point* p = msh->getNodeCoordinatesRef(11);
+        ASSERT_DOUBLE_EQ(0., (*p)[0]);
+        ASSERT_DOUBLE_EQ(0.5, (*p)[1]);
+        ASSERT_DOUBLE_EQ(0., (*p)[2]);
+    }
+    {
+        const GeoLib::Point* p = msh->getNodeCoordinatesRef(12);
+        ASSERT_DOUBLE_EQ(1., (*p)[0]);
+        ASSERT_DOUBLE_EQ(0.5, (*p)[1]);
+        ASSERT_DOUBLE_EQ(0., (*p)[2]);
+    }
+    {
+        const GeoLib::Point* p = msh->getNodeCoordinatesRef(13);
+        ASSERT_DOUBLE_EQ(2., (*p)[0]);
+        ASSERT_DOUBLE_EQ(0.5, (*p)[1]);
+        ASSERT_DOUBLE_EQ(0., (*p)[2]);
+    }
+    {
+        const GeoLib::Point* p = msh->getNodeCoordinatesRef(21);
+        ASSERT_DOUBLE_EQ(0.5, (*p)[0]);
+        ASSERT_DOUBLE_EQ(0.5, (*p)[1]);
+        ASSERT_DOUBLE_EQ(0., (*p)[2]);
+    }
+
 }

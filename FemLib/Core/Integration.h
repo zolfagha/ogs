@@ -214,10 +214,10 @@ class FemGaussIntegrationFactory
 public:
     static FemIntegrationGaussBase* create(MeshLib::IElement *e) 
     {
-        switch (e->getElementType()) {
-            case MeshLib::ElementType::QUAD:
+        switch (e->getShapeType()) {
+            case MeshLib::ElementShape::QUAD:
                 return new FemIntegrationGaussQuad();
-            case MeshLib::ElementType::TRIANGLE:
+            case MeshLib::ElementShape::TRIANGLE:
                 return new FemIntegrationGaussQuad();
             default:
                 return 0;

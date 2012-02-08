@@ -7,6 +7,7 @@
 #include "MeshLib/Core/Element.h"
 #include "MeshLib/Core/UnstructuredMesh.h"
 #include "MeshLib/Core/StructuredMesh.h"
+#include "MeshLib/Topology/Topology.h"
 
 namespace MeshLib
 {
@@ -27,7 +28,7 @@ public:
         size_t node_id(0);
         for (size_t i_z=0; i_z<n_nodes_per_axis; i_z++) {
             const double x = unit_length*i_z;
-            msh->setNode(node_id++, GeoLib::Point(x+origin_x, origin_y, origin_z));
+            msh->setNodeCoordinates(node_id++, GeoLib::Point(x+origin_x, origin_y, origin_z));
         }
 
         //elements
@@ -55,7 +56,7 @@ public:
             const double y = unit_length*j_y + origin_y;
             for (size_t k_x=0; k_x<n_nodes_per_axis; k_x++) {
                 const double x = unit_length*k_x + origin_x;
-                msh->setNode(node_id++, GeoLib::Point(x, y, z));
+                msh->setNodeCoordinates(node_id++, GeoLib::Point(x, y, z));
             }
         }
 
@@ -80,13 +81,13 @@ public:
 
     };
 
-    static StructuredMesh<ElementType::QUAD>* generateStructuredRegularQuadMesh(const double length, const size_t subdivision, const double origin_x, const double origin_y, const double origin_z) 
+    static StructuredMesh<ElementShape::QUAD>* generateStructuredRegularQuadMesh(const double length, const size_t subdivision, const double origin_x, const double origin_y, const double origin_z) 
     {
         GeoLib::Point org(origin_x, origin_y, origin_z);
         GeoLib::Point pt_length(length, length, .0);
         GeoLib::Point pt_unit_len(length/subdivision, length/subdivision, .0);
 
-        return new StructuredMesh<ElementType::QUAD>(MeshLib::CoordinateSystemType::XY, org, pt_length.getData(), pt_unit_len.getData());
+        return new StructuredMesh<ElementShape::QUAD>(MeshLib::CoordinateSystemType::XY, org, pt_length.getData(), pt_unit_len.getData());
 
     };
 

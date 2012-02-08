@@ -83,19 +83,19 @@ public:
 
     virtual IFiniteElement* getFeObject(const MeshLib::IElement &e, MeshLib::IMesh *msh)
     {
-        FiniteElementType::type fe_type = getFeType(e.getElementType(), _order);
+        FiniteElementType::type fe_type = getFeType(e.getShapeType(), _order);
         return FeObjectCachePerFeType::getFeObject(fe_type, msh);
     }
 private:
     size_t _order;
 
-    FiniteElementType::type getFeType(MeshLib::ElementType::type ele_type, size_t order)
+    FiniteElementType::type getFeType(MeshLib::ElementShape::type ele_type, size_t order)
     {
         switch (ele_type)
         {
-            case MeshLib::ElementType::LINE:
+            case MeshLib::ElementShape::LINE:
                 return (order==1) ? FiniteElementType::LINE2 : FiniteElementType::LINE3;
-            case MeshLib::ElementType::QUAD:
+            case MeshLib::ElementShape::QUAD:
                 return (order==1) ? FiniteElementType::QUAD4 : FiniteElementType::QUAD9;
         }
         return FiniteElementType::INVALID;

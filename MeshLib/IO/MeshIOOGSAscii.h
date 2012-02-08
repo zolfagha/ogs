@@ -12,28 +12,28 @@ namespace MeshLib
 class MeshIOOGS
 {
 protected:
-  static const std::string convertElementType2String(const ElementType::type t)
+  static const std::string convertElementType2String(const ElementShape::type t)
   {
-    if (t == ElementType::LINE)			return "line";
-    if (t == ElementType::QUAD)			return "quad";
-    if (t == ElementType::HEXAHEDRON)	return "hex";
-    if (t == ElementType::TRIANGLE)		return "tri";
-    if (t == ElementType::TETRAHEDRON)	return "tet";
-    if (t == ElementType::PRISM)		return "pris";
-    if (t == ElementType::PYRAMID)		return "pyra";
+    if (t == ElementShape::LINE)			return "line";
+    if (t == ElementShape::QUAD)			return "quad";
+    if (t == ElementShape::HEXAHEDRON)	return "hex";
+    if (t == ElementShape::TRIANGLE)		return "tri";
+    if (t == ElementShape::TETRAHEDRON)	return "tet";
+    if (t == ElementShape::PRISM)		return "pris";
+    if (t == ElementShape::PYRAMID)		return "pyra";
     return "none";
   };
 
-  static ElementType::type convertString2ElementType(const std::string &s)
+  static ElementShape::type convertString2ElementType(const std::string &s)
   {
-    if (s.compare("line") == 0) return ElementType::LINE;
-    if (s.compare("quad") == 0) return ElementType::QUAD;
-    if (s.compare("hex")  == 0) return ElementType::HEXAHEDRON;
-    if (s.compare("tri")  == 0) return ElementType::TRIANGLE;
-    if (s.compare("tet")  == 0) return ElementType::TETRAHEDRON;
-    if (s.compare("pris") == 0) return ElementType::PRISM;
-    if (s.compare("pyra") == 0) return ElementType::PYRAMID;
-    return ElementType::INVALID;
+    if (s.compare("line") == 0) return ElementShape::LINE;
+    if (s.compare("quad") == 0) return ElementShape::QUAD;
+    if (s.compare("hex")  == 0) return ElementShape::HEXAHEDRON;
+    if (s.compare("tri")  == 0) return ElementShape::TRIANGLE;
+    if (s.compare("tet")  == 0) return ElementShape::TETRAHEDRON;
+    if (s.compare("pris") == 0) return ElementShape::PRISM;
+    if (s.compare("pyra") == 0) return ElementShape::PYRAMID;
+    return ElementShape::INVALID;
   };
 
 public:
@@ -102,7 +102,7 @@ public:
             name = buffer;
           }
 
-          ElementType::type ele_type = convertString2ElementType(name);
+          ElementShape::type ele_type = convertString2ElementType(name);
           IElement *newElem = ElemenetFactory::createNewElement(ele_type);
           newElem->setID(idx);
           newElem->setGroupID(group_id);
