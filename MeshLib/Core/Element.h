@@ -190,7 +190,6 @@ private:
 typedef TemplateElement<LineTopology> Line;
 typedef TemplateElement<TriangleTopology> Triangle;
 typedef TemplateElement<Quad9Topology> Quadrirateral;
-
 typedef TemplateElement<TetraTopology> Tetrahedron;
 typedef TemplateElement<PyramidTopology> Pyramid;
 typedef TemplateElement<PrismTopology> Prism;
