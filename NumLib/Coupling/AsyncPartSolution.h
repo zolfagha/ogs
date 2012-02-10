@@ -1,22 +1,31 @@
 
 #pragma once
 
+#include <iostream>
 #include <vector>
+#include <algorithm>
 
+#include "CouplingSolution.h"
 #include "TransientSystems.h"
 #include "PartitionedAlgorithm.h"
 
 namespace NumLib
 {
+
+
+
+
+/**
+ * \brief 
+ */
 class AsyncPartSolution : public ITransientSystem
 {
 private:
-	PartitionedAlgorithm *algorithm;
-	std::vector<ITransientSystem*> listChildren;
+	IPartitionedAlgorithm *algorithm;
+	std::vector<ITransientSystem*> _listChildren;
+    std::vector<TimeStep> _list_synchronize_time;
 	
 public:
-	void setAlgorithm(PartitionedAlgorithm *algo);
-
     void addChildren(ITransientSystem* sys);
     size_t getNumberOfChildren() const;
 	
@@ -26,4 +35,5 @@ public:
 	
 	bool isAwake(TimeStep time);
 };
+
 }

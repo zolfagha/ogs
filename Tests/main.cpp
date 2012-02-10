@@ -11,6 +11,8 @@ TEST(AddTest, Test1)
 
 int main(int argc, char *argv[])
 {
+    argc = 2;
+    argv[1] = "--gtest_filter=Coupling.*";
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

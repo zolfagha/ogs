@@ -15,6 +15,10 @@
 
 #include "NumLib/Coupling/Clock.h"
 #include "NumLib/Coupling/TransientSystems.h"
+#include "NumLib/Coupling/AsyncPartSolution.h"
+#include "NumLib/Coupling/PartitionedAlgorithm.h"
+#include "NumLib/Coupling/CouplingSolution.h"
+#include "NumLib/Coupling/PartitionedProblem.h"
 
 using namespace GeoLib;
 using namespace MathLib;
@@ -99,10 +103,145 @@ TEST(Num, testDis1)
     }
 
     eqs.solve();
-
 }
 
-//TEST(Num, testTransient1)
+
+class BiotEQS : public IMonolithicProblem
+{
+public:
+    enum InputParameter
+    {
+        p = 0,
+        T = 1
+    };
+
+    enum OutputParameter
+    {
+        u = 0
+    };
+    size_t getNumberOfInputVarameters() const {return 2;};
+    size_t getNumberOfOutputParameters() const {return 1;};
+
+    BiotEQS() {
+        _vec_in_var.resize(getNumberOfInputVarameters());
+        _vec_out_var.resize(getNumberOfOutputParameters());
+    }
+
+    int solve()
+    {
+        // update u
+        return 0;
+    }
+};
+
+class LiquidEQS : public IMonolithicProblem
+{
+public:
+    enum InputParameters
+    {
+        u = 0,
+        T = 1
+    };
+    enum OutputParameters
+    {
+        p = 0,
+        v = 1
+    };
+    size_t getNumberOfInputVarameters() const {return 2;};
+    size_t getNumberOfOutputParameters() const {return 2;};
+    LiquidEQS() {
+        _vec_in_var.resize(getNumberOfInputVarameters());
+        _vec_out_var.resize(getNumberOfOutputParameters());
+    }
+    int solve()
+    {
+        // update u
+        return 0;
+    }
+
+};
+
+class HeatEQS : public IMonolithicProblem
+{
+public:
+    enum InputParameters
+    {
+        v = 0,
+        p = 1
+    };
+    enum OutputParameters
+    {
+        T = 0
+    };
+    size_t getNumberOfInputVarameters() const {return 2;};
+    size_t getNumberOfOutputParameters() const {return 1;};
+    HeatEQS() {
+        _vec_in_var.resize(getNumberOfInputVarameters());
+        _vec_out_var.resize(getNumberOfOutputParameters());
+    }
+    int solve()
+    {
+        // update u
+        return 0;
+    }
+};
+
+
+TEST(Coupling, SteadyCoupling1)
+{
+    BiotEQS biotEQS;
+    LiquidEQS liquid;
+    HeatEQS heat;
+
+    biotEQS.setInitial(BiotEQS::u, new MathLib::FunctionConstant<double,double>(.0));
+    liquid.setInitial(LiquidEQS::p, new MathLib::FunctionConstant<double,double>(1.0e+6));
+    liquid.setInitial(LiquidEQS::v, new MathLib::FunctionConstant<double,double>(.0));
+    heat.setInitial(HeatEQS::T, new MathLib::FunctionConstant<double,double>(25.0));
+
+    PartitionedProblem partPU(&BlockJacobiMethod());
+    partPU.add("u", &biotEQS, BiotEQS::u);
+    partPU.add("p", &liquid, LiquidEQS::p);
+    partPU.add("T");
+    partPU.connectInput("u", &liquid, LiquidEQS::u);
+    partPU.connectInput("p", &biotEQS, BiotEQS::p);
+    partPU.connectInput("T", &liquid, LiquidEQS::T);
+    partPU.connectInput("T", &biotEQS, BiotEQS::T);
+
+    PartitionedProblem partTV(&BlockJacobiMethod());
+    partTV.add("v", &partPU, partPU.getVariableID("v"));
+    partTV.add("p", &partPU, partPU.getVariableID("p"));
+    partTV.add("T", &heat, HeatEQS::T);
+    partTV.connectInput("v", &heat, HeatEQS::v);
+    partTV.connectInput("p", &heat, HeatEQS::p);
+    partTV.connectInput("T", &partPU, partPU.getVariableID("T"));
+
+
+
+    // v = P()
+    // T = Heat(v)
+
+    ASSERT_FALSE(partTV.check());
+}
+
+
+#if 0
+TEST(Coupling, SteadyCoupling2)
+{
+    SharedVariables vars;
+    PartitionedProblem partSol1(&BlockJacobiMethod());
+    PartitionedProblem partSol2(&BlockJacobiMethod());
+    MonolithicProblem mono1;
+    MonolithicProblem mono2;
+    MonolithicProblem mono3;
+    partSol1.addChildren(&mono1);
+    partSol1.addChildren(&partSol2);
+    partSol2.addChildren(&mono2);
+    partSol2.addChildren(&mono3);
+    partSol1.solve(&vars);
+}
+#endif
+
+//TEST(Coupling, TransientCoupling)
 //{
 //    std::vector<ITransientSystem*> vec_systems;
 //
@@ -116,4 +255,4 @@ TEST(Num, testDis1)
 //    // start clock
 //    clock.moveForwardUntill(t_end); 
 //}
-//
+
