@@ -223,6 +223,9 @@ public:
         if (x[0]<1.0) return 1e-11;
         else return 2e-11;
     };
+
+    MathLib::IFunction<Tval, Tpos>* clone() const {return 0;};
+
 };
 
 TEST(FEM, ExtrapolateAverage2)

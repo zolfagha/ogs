@@ -2,96 +2,197 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
 
-#include "CouplingSolution.h"
+#include "ICoupledProblem.h"
+
 
 namespace NumLib
 {
-typedef std::pair<ICouplingProblem*,size_t> PairSysVarId;
+typedef std::pair<ICoupledProblem*,size_t> PairSysVarId;
+typedef std::pair<size_t, size_t> PairInputVar;
 
+/**
+ * \brief Interface class for partitioned algorithm
+ */
 class IPartitionedAlgorithm
 {
 public:
-    virtual int solve(std::vector<ICouplingProblem*> &list_children, std::vector<std::pair<std::string, PairSysVarId>> &map_sharedVar2sysVar, SharedVariables* vars) = 0;
+    /// solve coupled problems
+    /// @param subproblems    a list of subproblems
+    /// @param vars           a container for shared variables
+    /// @param mapping        mapping data between subproblems and shared variables
+    virtual int solve(std::vector<ICoupledProblem*> &subproblems, NamedVariableContainer &vars, VariableMappingTable &mapping) = 0;
 };
 
-class IterativePartitionedMethod : public IPartitionedAlgorithm
+/**
+ * \brief Abstract class for iterative partitioned methods
+ */
+class AbstractIterativePartitionedMethod : public IPartitionedAlgorithm
 {
 public:
-    IterativePartitionedMethod() : _max_itr(200)
+    AbstractIterativePartitionedMethod() : _max_itr(100), _epsilon(1e-3)
     {
     }
 
-    size_t getIterationCounts() const {return _itr_count;};
-    void setMaximumIterationCounts(size_t n) {_max_itr = n;};
-    size_t getMaximumIterationCounts() const {return _max_itr;};
-
-protected:
-    void setIterationCounts(size_t n) {_itr_count = n;};
-
-private:
-    size_t _max_itr;
-    size_t _itr_count;
-};
-
-
-/**
- * \brief Block Jacobi method
- */
-class BlockJacobiMethod : public IterativePartitionedMethod
-{
-public:
-    int solve(std::vector<ICouplingProblem*> &list_children, std::vector<std::pair<std::string, PairSysVarId>> &map_sharedVar2sysVar, SharedVariables* vars)
+    AbstractIterativePartitionedMethod(double epsilon, size_t max_count) : _max_itr(max_count), _epsilon(epsilon)
     {
-        size_t max_itr = getMaximumIterationCounts();
+    }
 
-        for (size_t i_itr=0; i_itr<max_itr; i_itr++) {
-            // set previous state
-            for (size_t i=0; i<map_sharedVar2sysVar.size(); i++) {
-                const std::string &name = map_sharedVar2sysVar[i].first;
-                ICouplingProblem *solution = map_sharedVar2sysVar[i].second.first;
-                size_t internalId = map_sharedVar2sysVar[i].second.second;
-                vars->setVariable(name, const_cast<Variable*>(solution->get(internalId)));
-            }
-            // compute each
-            for (size_t i=0; i<list_children.size(); i++) {
-                ICouplingProblem *solution = list_children[i];
+    /// get max. iteration
+    size_t getMaximumIterationCounts() const {return _max_itr;};
+    /// get epsilon
+    double getEpsilon() const {return _epsilon;};
+    /// get iteration count
+    size_t getIterationCounts() const {return _itr_count;};
+
+    /// solve
+    int solve(std::vector<ICoupledProblem*> &subproblems, NamedVariableContainer &vars, VariableMappingTable &mapping)
+    {
+        const size_t n_subproblems = subproblems.size();
+
+        // initialize variables
+        const size_t n_para = vars.size();
+        for (size_t i=0; i<n_para; i++) {
+            PairSysVarId &sysvarid = mapping._map_paraId2subproblem[i];
+            ICoupledProblem *solution = sysvarid.first;
+            size_t internalId = sysvarid.second;
+            if (solution!=0)
+                vars.set(i, *const_cast<Variable*>(solution->getParameter(internalId)));
+        }
+
+        // obj to store previous state
+        NamedVariableContainer vars_prev;
+
+        // iteration start
+        const size_t max_itr = getMaximumIterationCounts();
+        bool is_converged = false;
+        size_t i_itr = 0;
+        double v_diff = .0;
+        do {
+            // copy current to prev
+            vars.clone(vars_prev);
+            // compute each solution
+            for (size_t i=0; i<n_subproblems; i++) {
+                ICoupledProblem *solution = subproblems[i];
+                std::vector<PairInputVar> &list_input_var = mapping._list_subproblem_input_source[i];
+                // set input
+                for (size_t j=0; j<list_input_var.size(); j++) {
+                    size_t local_var_id = list_input_var[j].first;
+                    size_t shared_var_id = list_input_var[j].second;
+                    solution->setParameter(local_var_id, vars.get(shared_var_id));
+                }
                 solution->solve();
+
+                //
+                doPostAfterSolve(*solution, vars, mapping);
             }
+            doPostAfterSolveAll(vars, mapping);
             // check convergence
-            if (isConverged(vars)) {
-                setIterationCounts(i_itr);
-                break;
-            }
+            is_converged = isConverged(vars_prev, vars, v_diff);
+            //std::cout << i_itr << ": diff=" << v_diff << std::endl;
+            ++i_itr;
+        } while (!is_converged && i_itr<max_itr);
+        std::cout << "iteration count=" << i_itr << ", error=" << v_diff << std::endl;
+
+        _itr_count = i_itr;
+        if (i_itr==max_itr) {
+            std::cout << "the iteration reached the maximum count " << max_itr << std::endl;
         }
 
         return 0;
     }
 
-    bool isConverged(SharedVariables* vars)
+protected:
+    /// check if solution is converged
+    bool isConverged(NamedVariableContainer& vars_prev, NamedVariableContainer& vars_current, double &v_diff)
     {
+        for (size_t i=0; i<vars_prev.size(); i++) {
+            double v_prev = vars_prev.get(i)->eval(.0);
+            double v_cur = vars_current.get(i)->eval(.0);
+            v_diff = fabs(v_cur - v_prev);
+            if (v_diff>getEpsilon()) {
+                return false;
+            }
+        }
         return true;
+    }
+
+
+    virtual void doPostAfterSolve( ICoupledProblem& solution, NamedVariableContainer& vars, VariableMappingTable &mapping )  {}
+
+    virtual void doPostAfterSolveAll( NamedVariableContainer &vars, VariableMappingTable &mapping ) {}
+
+
+
+private:
+    size_t _max_itr;
+    size_t _itr_count;
+    double _epsilon;
+};
+
+
+/**
+ * \brief Block Jacobi iterative partitioned method
+ */
+class BlockJacobiMethod : public AbstractIterativePartitionedMethod
+{
+public:
+    BlockJacobiMethod(double epsilon, size_t max_count) : AbstractIterativePartitionedMethod(epsilon, max_count)
+    {
+    }
+
+    virtual void doPostAfterSolveAll( NamedVariableContainer &vars, VariableMappingTable &mapping ) 
+    {
+        // set current state to shared variables
+        const size_t n_vars = vars.size();
+        for (size_t i=0; i<n_vars; i++) {
+            VariableMappingTable::PairSysVarId &v = mapping._map_paraId2subproblem[i];
+            const ICoupledProblem *solution = v.first;
+            if (solution!=0)
+                vars.set(i, *const_cast<Variable*>(solution->getParameter(v.second)));
+        }
+    }
+
+};
+
+
+/**
+ * \brief Block Gauss-Seidel iterative partitioned method
+ */
+class BlockGaussSeidelMethod : public AbstractIterativePartitionedMethod
+{
+public:
+    BlockGaussSeidelMethod(double epsilon, size_t max_count) : AbstractIterativePartitionedMethod(epsilon, max_count)
+    {
+    }
+
+    virtual void doPostAfterSolve( ICoupledProblem & solution, NamedVariableContainer& vars, VariableMappingTable &mapping ) 
+    {
+        // update shared variables
+        const size_t n_vars = vars.size();
+        for (size_t i=0; i<n_vars; i++) {
+            VariableMappingTable::PairSysVarId &v = mapping._map_paraId2subproblem[i];
+            const ICoupledProblem *work_solution = v.first;
+            if (work_solution==&solution) {
+                vars.set(i, *const_cast<Variable*>(solution.getParameter(v.second)));
+            }
+        }
     }
 };
 
 
-class BlockGaussSeidelMethod : public IterativePartitionedMethod
+class AbstractPartitionedStaggeredMethod : public IPartitionedAlgorithm
 {
 
 };
 
-
-class PartitionedStaggeredMethod : public IPartitionedAlgorithm
+class ParallelStaggeredMethod : public AbstractPartitionedStaggeredMethod
 {
 
 };
 
-class ParallelStaggeredMethod : public PartitionedStaggeredMethod
-{
-
-};
-
-class SerialStaggeredMethod : public PartitionedStaggeredMethod
+class SerialStaggeredMethod : public AbstractPartitionedStaggeredMethod
 {
 
 };

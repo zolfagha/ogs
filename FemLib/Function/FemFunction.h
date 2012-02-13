@@ -39,6 +39,8 @@ public:
         delete _nodal_values;
     }
 
+    MathLib::IFunction<Tvalue, GeoLib::Point>* clone() const {return 0;};
+
     size_t getDimension() const
     {
       return _msh->getDimension();
@@ -122,6 +124,8 @@ public:
         _msh = msh;
         _values.resize(msh->getNumberOfElements());
     };
+
+    MathLib::IFunction<Tvalue, GeoLib::Point>* clone() const {return 0;};
 
     const MeshLib::IMesh* getMesh() const {
         return _msh;

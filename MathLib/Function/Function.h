@@ -11,6 +11,7 @@ class IFunction
 {
 public:
     virtual Tval eval(const Tpos& x) = 0;
+    virtual IFunction<Tval,Tpos>* clone() const = 0;
 };
 
 template<typename Tval, typename Tpos>
@@ -27,6 +28,11 @@ public:
         return _v;
     };
 
+    virtual IFunction<Tval,Tpos>* clone() const
+    {
+        IFunction<Tval,Tpos>* obj = new FunctionConstant(_v);
+        return obj;
+    }
 private:
     Tval _v;
 };
@@ -41,6 +47,11 @@ public:
     {
         return _linear->getValue(x);
     };
+    virtual IFunction<double,double>* clone() const
+    {
+        FunctionLinear1D* obj = new FunctionLinear1D(_linear);
+        return obj;
+    }
 private:
     LinearInterpolation *_linear;
 };

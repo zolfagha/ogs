@@ -5,7 +5,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "CouplingSolution.h"
+#include "ICoupledProblem.h"
 #include "TransientSystems.h"
 #include "PartitionedAlgorithm.h"
 
