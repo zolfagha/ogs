@@ -3,26 +3,24 @@
 
 namespace NumLib
 {
-void Clock::setBeginning(TimeStep time) 
+
+void TimeSteppingController::setBeginning(TimeStep time) 
 {
     _time_begin = time;
 };
 
-void Clock::addTransientSystem(ITransientSystem *system) 
+void TimeSteppingController::addTransientSystem(ITransientCoupledProblem &system) 
 {
-    rootAsyncPartSolution.addChildren(system);
+    _root_subsystems = &system;
 };
 
-void Clock::moveForwardUntill(TimeStep time_end) 
+void TimeSteppingController::solve(TimeStep time_end) 
 {
-    if (rootAsyncPartSolution.getNumberOfChildren()==0)
-        return;
-
     TimeStep time_current = _time_begin;
     while (time_current<time_end) {
-        TimeStep try_next = rootAsyncPartSolution.suggestNext(time_current);
-        while (!rootAsyncPartSolution.solveNextStep(try_next)) {
-            try_next = rootAsyncPartSolution.suggestNext(time_current);
+        TimeStep try_next = _root_subsystems->suggestNext(time_current);
+        while (_root_subsystems->solve(try_next)!=0) {
+            try_next = _root_subsystems->suggestNext(time_current);
         }
         time_current = try_next;
     }

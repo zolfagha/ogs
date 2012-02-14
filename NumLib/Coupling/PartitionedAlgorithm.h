@@ -88,9 +88,13 @@ public:
                 doPostAfterSolve(*solution, vars, mapping);
             }
             doPostAfterSolveAll(vars, mapping);
-            // check convergence
-            is_converged = isConverged(vars_prev, vars, v_diff);
-            //std::cout << i_itr << ": diff=" << v_diff << std::endl;
+            if (n_subproblems>1) {
+                // check convergence
+                is_converged = isConverged(vars_prev, vars, v_diff);
+                //std::cout << i_itr << ": diff=" << v_diff << std::endl;
+            } else {
+                is_converged = true;
+            }
             ++i_itr;
         } while (!is_converged && i_itr<max_itr);
         std::cout << "iteration count=" << i_itr << ", error=" << v_diff << std::endl;
@@ -181,19 +185,51 @@ public:
     }
 };
 
-
-class AbstractPartitionedStaggeredMethod : public IPartitionedAlgorithm
+/**
+ * \brief 
+ */
+class ITransientPartitionedAlgorithm
 {
-
+public:
+    /// solve coupled problems
+    /// @param subproblems    a list of subproblems
+    /// @param vars           a container for shared variables
+    /// @param mapping        mapping data between subproblems and shared variables
+    virtual int solve(std::vector<ICoupledProblem*> &subproblems, NamedVariableContainer &vars_t_n, NamedVariableContainer &vars_t_n1, VariableMappingTable &mapping) = 0;
 };
 
-class ParallelStaggeredMethod : public AbstractPartitionedStaggeredMethod
+/**
+ * \brief 
+ */
+template <class T_PARTITIONED>
+class AbstractPartitionedStaggeredMethod : public ITransientPartitionedAlgorithm
 {
+public:
+    AbstractPartitionedStaggeredMethod() : _part_method() {};
+    AbstractPartitionedStaggeredMethod(double epsilon, size_t max_count) : _part_method(epsilon, max_count) {};
 
+    /// solve
+    int solve(std::vector<ICoupledProblem*> &subproblems, NamedVariableContainer &vars_t_n, NamedVariableContainer &vars_t_n1, VariableMappingTable &mapping)
+    {
+        // initialize variables at t_n1 from t_n
+        const size_t n_para = vars_t_n.size();
+        for (size_t i=0; i<n_para; i++) {
+            PairSysVarId &sysvarid = mapping._map_paraId2subproblem[i];
+            ICoupledProblem *solution = sysvarid.first;
+            size_t internalId = sysvarid.second;
+            if (solution!=0)
+                vars_t_n1.set(i, *vars_t_n.get(i));
+        }
+
+        _part_method.solve(subproblems, vars_t_n1, mapping);
+
+        return 0;
+    }
+private:
+    T_PARTITIONED _part_method;
 };
 
-class SerialStaggeredMethod : public AbstractPartitionedStaggeredMethod
-{
+typedef AbstractPartitionedStaggeredMethod<BlockJacobiMethod> ParallelStaggeredMethod;
+typedef AbstractPartitionedStaggeredMethod<BlockGaussSeidelMethod> SerialStaggeredMethod;
 
-};
 }

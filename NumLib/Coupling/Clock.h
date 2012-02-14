@@ -8,18 +8,22 @@
 namespace NumLib
 {
 
-class Clock
+/**
+ * \brief Time stepping controller
+ */    
+class TimeSteppingController
 {
-protected:
-	TimeStep _time_begin;
-	AsyncPartSolution rootAsyncPartSolution;
-
 public:
-	void setBeginning(TimeStep time);
+    /// set the starting time
+	void setBeginning(TimeStep time_begin);
+    /// add transient system
+	void addTransientSystem(ITransientCoupledProblem &sys);
+	/// solve systems until the given time
+	void solve(TimeStep time_end);
 
-	void addTransientSystem(ITransientSystem *system);
-	
-	void moveForwardUntill(TimeStep time_end);
+private:
+    TimeStep _time_begin;
+    ITransientCoupledProblem* _root_subsystems;
 };
 
 }

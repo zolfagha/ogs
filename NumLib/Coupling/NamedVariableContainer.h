@@ -27,10 +27,18 @@ public:
         Base::destroyStdVectorWithPointers(_list_var_data);
     }
 
+    /// reset data
+    void clear()
+    {
+        _list_var_names.clear();
+        Base::destroyStdVectorWithPointers(_list_var_data);
+    }
+
     /// make a copy of this object
     /// @param dest the destination object
     void clone(NamedVariableContainer &dest) const
     {
+        dest.clear();
         dest._list_var_names.assign(_list_var_names.begin(), _list_var_names.end());
         dest._list_var_data.resize(_list_var_data.size());
         for (size_t i=0; i<_list_var_data.size(); i++) {

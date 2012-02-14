@@ -15,7 +15,8 @@ namespace NumLib
 /**
  * \brief MonolithicSolution
  */
-class AbstractMonolithicProblem : public ICoupledProblem
+template<class T_SUPER>
+class AbstractMonolithicProblem : public T_SUPER
 {
 public:
     virtual ~AbstractMonolithicProblem()
@@ -45,8 +46,8 @@ protected:
     std::vector<Variable*> _vec_parameters;
 };
 
-template <size_t N_IN, size_t N_OUT>
-class TemplateMonolithicProblem : public AbstractMonolithicProblem
+template <class T_SUPER, size_t N_IN, size_t N_OUT>
+class TemplateMonolithicProblem : public AbstractMonolithicProblem<T_SUPER>
 {
 public:
     TemplateMonolithicProblem() {
@@ -55,6 +56,11 @@ public:
 
     size_t getNumberOfInputParameters() const {return N_IN;};
     size_t getNumberOfParameters() const {return N_IN+N_OUT;};
+};
+
+template <size_t N_IN, size_t N_OUT>
+class TemplateSteadyMonolithicProblem : public TemplateMonolithicProblem<ICoupledProblem, N_IN, N_OUT>
+{
 };
 
 
