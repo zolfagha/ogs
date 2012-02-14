@@ -26,7 +26,7 @@ void createRowMajorSparsityFromNodeConnectivity(const MeshLib::TopologyNode2Node
         std::set<size_t> &setConnection = row_major_entries[i];
         setConnection.insert(i);
         const std::set<size_t> connected_nodes = topo_node2nodes.getConnectedNodes(i);
-        for (std::set<size_t>::iterator it=connected_nodes.begin(); it!=connected_nodes.end(); it++) {
+        for (std::set<size_t>::const_iterator it=connected_nodes.begin(); it!=connected_nodes.end(); it++) {
             setConnection.insert(*it);
         }
     }

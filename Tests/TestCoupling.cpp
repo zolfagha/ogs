@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 #include <vector>
 
-#include "NumLib/Coupling/TimeSteppingController.h"
+#include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/Coupling/AsyncPartSolution.h"
 #include "NumLib/Coupling/PartitionedAlgorithm.h"
 #include "NumLib/Coupling/ICoupledProblem.h"
