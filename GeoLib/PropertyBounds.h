@@ -8,6 +8,9 @@
 
 #include <string>
 
+namespace GeoLib
+{
+
 class PropertyBounds
 {
 public:
@@ -25,5 +28,7 @@ private:
 	double _minVal;
 	double _maxVal;
 };
+
+}
 
 #endif //PROPERTYBOUNDS_H

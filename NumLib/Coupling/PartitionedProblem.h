@@ -5,7 +5,7 @@
 
 #include "ICoupledProblem.h"
 #include "NamedVariableContainer.h"
-
+#include "VariableMappingTable.h"
 
 namespace NumLib
 {

@@ -1,7 +1,8 @@
 
 #pragma once
 
-#include "NumLib/Core/TimeStep.h"
+#include "NumLib/TimeStepping/TimeStep.h"
+#include "NumLib/TimeStepping/ITransientProblem.h"
 #include "NamedVariableContainer.h"
 
 namespace NumLib
@@ -26,28 +27,38 @@ public:
 /**
  * \brief Interface class of transient coupling problems
  */
-class ITransientCoupledProblem : public ICoupledProblem
+class ITransientCoupledProblem : public ICoupledProblem, public ITransientProblem
 {
 public:
-    virtual TimeStep suggestNext(TimeStep time_current) = 0;
-    virtual bool isAwake(TimeStep time) = 0;
-    virtual int solveTimeStep(TimeStep time) = 0;
-
-    int solve(TimeStep time) {
-        _current_time = time;
+    int solve(const TimeStep &time) 
+    {
+        setCurrentTime(time);
         return solve();
     }
-
-
-
-    TimeStep getCurrentTime() const {return _current_time;};
-    void setCurrentTime(TimeStep t) {_current_time = t;};
 private:
     int solve()
     {
-        return solveTimeStep(_current_time);
+        return solveTimeStep(getCurrentTime());
     }
-    TimeStep _current_time;
+//public:
+//    virtual double suggestNext(const TimeStep &time_current) = 0;
+//    virtual bool isAwake(const TimeStep &time) = 0;
+//    virtual int solveTimeStep(const TimeStep &time) = 0;
+//
+//    int solve(const TimeStep &time) 
+//    {
+//        _current_time = time;
+//        return solve();
+//    }
+//
+//    const TimeStep& getCurrentTime() const {return _current_time;};
+//    void setCurrentTime(const TimeStep &t) {_current_time = t;};
+//private:
+//    int solve()
+//    {
+//        return solveTimeStep(_current_time);
+//    }
+//    TimeStep _current_time;
 };
 
 }

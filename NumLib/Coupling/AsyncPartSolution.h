@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "ICoupledProblem.h"
-#include "TransientSystems.h"
 #include "PartitionedAlgorithm.h"
 #include "MonolithicProblem.h"
 #include "PartitionedProblem.h"
@@ -16,14 +15,6 @@ template <size_t N_IN, size_t N_OUT>
 class TemplateTransientMonolithicProblem : public TemplateMonolithicProblem<ITransientCoupledProblem, N_IN, N_OUT>
 {
 
-};
-
-class TransientPartitionedProblem : public PartitionedProblem, public ITransientSystem
-{
-public:
-    TimeStep suggestNext(TimeStep time_current);
-    bool solveNextStep(TimeStep time);
-    bool isAwake(TimeStep time);
 };
 
 /**
@@ -88,13 +79,13 @@ public:
     //void addChildren(ITransientCoupledProblem& sys);
     //size_t getNumberOfChildren() const;
 	
-	TimeStep suggestNext(TimeStep time_current);
+	double suggestNext(const TimeStep &time_current);
 	
-	int solveTimeStep(TimeStep time);
+	int solveTimeStep(const TimeStep &time);
 	
-	bool isAwake(TimeStep time);
+	bool isAwake(const TimeStep &time);
 
-    void getActiveProblems(TimeStep time, std::vector<ICoupledProblem*> &list_active_problems);
+    void getActiveProblems(const TimeStep &time, std::vector<ICoupledProblem*> &list_active_problems);
 
 private:
     ITransientPartitionedAlgorithm *_algorithm;

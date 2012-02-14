@@ -10,6 +10,9 @@
 
 #include "CRSMatrix.h"
 
+namespace MathLib
+{
+
 template<class T> class CRSSymMatrix : public CRSMatrix<T>
 {
 public:
@@ -60,5 +63,8 @@ public:
 	}
 
 };
+
+}
+
 
 #endif /* CRSSYMMATRIX_H_ */

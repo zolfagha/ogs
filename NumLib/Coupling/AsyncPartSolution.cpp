@@ -18,8 +18,9 @@ namespace NumLib
 //    return _list_subproblems.size();
 //}
 
-TimeStep AsyncPartitionedProblem::suggestNext(TimeStep time_current) {
-    TimeStep t = std::numeric_limits<double>::max(); 
+double AsyncPartitionedProblem::suggestNext(const TimeStep &time_current) {
+    double t;
+    t = std::numeric_limits<double>::max(); 
     for (size_t i=0; i<_list_subproblems.size(); i++) {
         ITransientCoupledProblem *solution = _list_subproblems[i];
         t = std::min(t, solution->suggestNext(time_current));
@@ -27,7 +28,7 @@ TimeStep AsyncPartitionedProblem::suggestNext(TimeStep time_current) {
 	return t;
 }
 	
-void AsyncPartitionedProblem::getActiveProblems(TimeStep time, std::vector<ICoupledProblem*> &list_active_problems)
+void AsyncPartitionedProblem::getActiveProblems(const TimeStep &time, std::vector<ICoupledProblem*> &list_active_problems)
 {
     for (size_t i=0; i<_list_subproblems.size(); i++) {
         ITransientCoupledProblem *solution = _list_subproblems[i];
@@ -37,7 +38,7 @@ void AsyncPartitionedProblem::getActiveProblems(TimeStep time, std::vector<ICoup
     }
 }
 
-int AsyncPartitionedProblem::solveTimeStep(TimeStep time)  
+int AsyncPartitionedProblem::solveTimeStep(const TimeStep &time)  
 {
 
     std::cout << "->solve partitioned problems" << std::endl;
@@ -67,7 +68,7 @@ int AsyncPartitionedProblem::solveTimeStep(TimeStep time)
     return 0;
 };
 	
-bool AsyncPartitionedProblem::isAwake(TimeStep time) 
+bool AsyncPartitionedProblem::isAwake(const TimeStep &time) 
 {
     for (size_t i=0; i<_list_subproblems.size(); i++) {
         ITransientCoupledProblem *solution = _list_subproblems[i];

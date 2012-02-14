@@ -2,13 +2,14 @@
 #include <gtest/gtest.h>
 #include <vector>
 
-#include "NumLib/Coupling/Clock.h"
-#include "NumLib/Coupling/TransientSystems.h"
+#include "NumLib/Coupling/TimeSteppingController.h"
 #include "NumLib/Coupling/AsyncPartSolution.h"
 #include "NumLib/Coupling/PartitionedAlgorithm.h"
 #include "NumLib/Coupling/ICoupledProblem.h"
 #include "NumLib/Coupling/MonolithicProblem.h"
 #include "NumLib/Coupling/PartitionedProblem.h"
+#include "NumLib/Coupling/IterativePartitionedMethod.h"
+#include "NumLib/Coupling/TransientPartitionedMethod.h"
 
 using namespace MathLib;
 using namespace NumLib;
@@ -289,12 +290,13 @@ TEST(Coupling, SteadyCouplingSeidel)
 // A. a=t, b=2*t, c=3*t
 class TransientWeakCouplingEQS1 : public TemplateTransientMonolithicProblem<2,1>
 {
-    TimeStep _dt;
+    double _dt;
 public:
-    TransientWeakCouplingEQS1(TimeStep dt) : _dt(dt) {};
+    TransientWeakCouplingEQS1(double dt) : _dt(dt) {};
     enum Parameters { a=2, b = 0, c = 1 };
-    int solveTimeStep(TimeStep t) 
+    int solveTimeStep(const TimeStep &ts) 
     {
+        double t = ts.getTime();
         double vb = _vec_parameters[WeakCouplingEQS1::b]->eval(.0);
         double vc = _vec_parameters[WeakCouplingEQS1::c]->eval(.0);
         double va = 1./2.*(6.9*t - 2.*vb - 0.3*vc);
@@ -303,9 +305,10 @@ public:
         _vec_parameters[WeakCouplingEQS1::a] = new MathLib::FunctionConstant<double,double>(va);
         return 0;
     }
-    TimeStep suggestNext(TimeStep t) {return t+_dt;};
-    bool isAwake(TimeStep t) 
+    double suggestNext(const TimeStep &ts) {return ts.getTime()+_dt;};
+    bool isAwake(const TimeStep &ts) 
     {
+        double t = ts.getTime();
         double mod = t - static_cast<int>(t/_dt)*_dt;
         if (mod==.0) return true;
         return false;
@@ -314,12 +317,13 @@ public:
 
 class TransientWeakCouplingEQS2 :  public TemplateTransientMonolithicProblem<2,1>
 {
-    TimeStep _dt;
+    double _dt;
 public:
-    TransientWeakCouplingEQS2(TimeStep dt) : _dt(dt) {};
+    TransientWeakCouplingEQS2(double dt) : _dt(dt) {};
     enum Parameters { a = 0, b = 2, c = 1 };
-    int solveTimeStep(TimeStep t) 
+    int solveTimeStep(const TimeStep &ts) 
     {
+        double t = ts.getTime();
         double va = _vec_parameters[WeakCouplingEQS2::a]->eval(.0);
         double vc = _vec_parameters[WeakCouplingEQS2::c]->eval(.0);
         double vb = 1./5.*(13.6*t-3*va-0.2*vc);
@@ -328,9 +332,10 @@ public:
         _vec_parameters[WeakCouplingEQS2::b] = new MathLib::FunctionConstant<double,double>(vb);
         return 0;
     }
-    TimeStep suggestNext(TimeStep t) {return t+_dt;};
-    bool isAwake(TimeStep t) 
+    double suggestNext(const TimeStep &ts) {return (ts.getTime()+_dt);};
+    bool isAwake(const TimeStep &ts) 
     {
+        double t = ts.getTime();
         double mod = t - static_cast<int>(t/_dt)*_dt;
         if (mod==.0) return true;
         return false;
@@ -339,12 +344,13 @@ public:
 
 class TransientWeakCouplingEQS3 : public TemplateTransientMonolithicProblem<2,1>
 {
-    TimeStep _dt;
+    double _dt;
 public:
-    TransientWeakCouplingEQS3(TimeStep dt) : _dt(dt) {};
+    TransientWeakCouplingEQS3(double dt) : _dt(dt) {};
     enum Parameters { a = 0, b = 1, c = 2 };
-    int solveTimeStep(TimeStep t) 
+    int solveTimeStep(const TimeStep &ts) 
     {
+        double t = ts.getTime();
         double va = _vec_parameters[a]->eval(.0);
         double vb = _vec_parameters[b]->eval(.0);
         double vc = 1./3.*(10.1*t-0.5*va-0.3*vb);
@@ -353,9 +359,10 @@ public:
         _vec_parameters[c] = new MathLib::FunctionConstant<double,double>(vc);
         return 0;
     }
-    TimeStep suggestNext(TimeStep t) {return t+_dt;};
-    bool isAwake(TimeStep t) 
+    double suggestNext(const TimeStep &ts) {return (ts.getTime()+_dt);};
+    bool isAwake(const TimeStep &ts) 
     {
+        double t = ts.getTime();
         double mod = t - static_cast<int>(t/_dt)*_dt;
         if (mod==.0) return true;
         return false;
