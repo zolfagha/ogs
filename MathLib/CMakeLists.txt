@@ -71,7 +71,6 @@ SET ( MathLib_LinAlg_LinearEquations_Files
 		LinAlg/LinearEquations/DenseLinearEquations.cpp
 		LinAlg/LinearEquations/SparseLinearEquations.h
 		LinAlg/LinearEquations/SparseLinearEquations.cpp
-		LinAlg/LinearEquations/PETScInterface.h
 		LinAlg/LinearEquations/PARDISOInterface.h
 		LinAlg/LinearEquations/LinearEquationsFactory.h
 )
@@ -79,8 +78,14 @@ IF (USE_LIS)
 	SET ( MathLib_LinAlg_LinearEquations_Files ${MathLib_LinAlg_LinearEquations_Files}
 		LinAlg/LinearEquations/LisInterface.h
 		LinAlg/LinearEquations/LisInterface.cpp
-)
+	)
 ENDIF (USE_LIS)
+IF (USE_PETSC)
+	SET ( MathLib_LinAlg_LinearEquations_Files ${MathLib_LinAlg_LinearEquations_Files}
+		LinAlg/LinearEquations/PETScLinearSolver.h
+		LinAlg/LinearEquations/PETScLinearSolver.cpp
+	)
+ENDIF (USE_PETSC)
 SOURCE_GROUP( MathLib\\LinAlg\\LinearEquations FILES ${MathLib_LinAlg_LinearEquations_Files})
 
 SET ( MathLib_Nonlinear_Files

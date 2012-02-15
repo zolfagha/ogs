@@ -25,10 +25,10 @@ private:
     std::vector<std::vector<size_t> > _node2conn_eles;
 };
 
-class TopologyRandomNodes2Elements2
+class TopologyRandomNodes2Elements
 {
 public:
-    TopologyRandomNodes2Elements2(const IMesh &msh, const std::vector<size_t> &nodes);
+    TopologyRandomNodes2Elements(const IMesh &msh, const std::vector<size_t> &nodes);
 
     const std::vector<size_t>* getConnectedElements(size_t node_id) const {
         std::map<size_t, std::vector<size_t> >::const_iterator itr = _map_node2conn_eles.find(node_id);

@@ -21,7 +21,7 @@ TopologySequentialNodes2Elements::TopologySequentialNodes2Elements(const IMesh &
     }
 }
 
-TopologyRandomNodes2Elements2::TopologyRandomNodes2Elements2(const IMesh &msh, const std::vector<size_t> &nodes) 
+TopologyRandomNodes2Elements::TopologyRandomNodes2Elements(const IMesh &msh, const std::vector<size_t> &nodes) 
 {
     for (size_t i=0; i<msh.getNumberOfElements(); i++) {
         IElement* e = msh.getElemenet(i);

@@ -4,6 +4,7 @@
 
 #include <gtest/gtest.h>
 #include "GeoLib/Core/Point.h"
+#include "MathLib/Vector.h"
 
 inline void ASSERT_DOUBLE_ARRAY_EQ(const double* Expected, const double* Actual, size_t N, double epsilon=1.0e-8) {
     for (size_t i=0; i<N; i++) \

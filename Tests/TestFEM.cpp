@@ -39,6 +39,16 @@ void outputLinearEQS(MathLib::Matrix<double> &globalA, std::vector<double> &glob
     std::cout << std::endl;
 }
 
+void outputLinearEQS(MathLib::Matrix<double> &globalA, double* globalRHS)
+{
+    std::cout << "A=" << std::endl;
+    globalA.write(std::cout);
+    std::cout << "x=" << std::endl;
+    for (size_t i=0; i<globalA.getNRows(); i++)
+        std::cout << globalRHS[i] << " ";
+    std::cout << std::endl;
+}
+
 class GWFemTestProblem
 {
 public:
@@ -97,13 +107,13 @@ public:
             globalA->add(e_node_id_list, localK); //TODO A(id_list) += K;
         }
 
-        //outputLinearEQS(globalA, globalRHS);
+        outputLinearEQS(*globalA, globalRHS);
 
         //apply BC
         for (size_t i=0; i<gw.vec_bc2.size(); i++) gw.vec_bc2[i]->apply(globalRHS);
         //outputLinearEQS(globalA, globalRHS);
         for (size_t i=0; i<gw.vec_bc1.size(); i++) gw.vec_bc1[i]->apply(eqs);
-        //outputLinearEQS(globalA, globalRHS);
+        //outputLinearEQS(*globalA, globalRHS);
 
         //solve
         eqs.solve();
