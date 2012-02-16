@@ -16,7 +16,7 @@ public:
     virtual bool isAwake(const TimeStep &time) = 0;
     virtual int solveTimeStep(const TimeStep &time) = 0;
 
-    virtual int solve(const TimeStep &time) = 0;
+    //virtual int solve(const TimeStep &time) = 0;
 
     const TimeStep& getCurrentTime() const {return _current_time;};
     void setCurrentTime(const TimeStep &t) {_current_time = t;};

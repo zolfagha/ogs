@@ -23,8 +23,13 @@ void TimeSteppingController::solve(double time_end)
 
     while (time_current.getTime()<time_end) {
         double time_next = _root_subsystems->suggestNext(time_current);
+        if (!(time_next > time_current.getTime())) {
+            //error
+            std::cout << "error - the suggested next time step is invalid." << std::endl;
+            break;
+        }
         TimeStep t_n1(time_current, time_next);
-        bool isAccepted = (_root_subsystems->solve(t_n1)==0);
+        bool isAccepted = (_root_subsystems->solveTimeStep(t_n1)==0);
         if (isAccepted) {
             time_current.accept(time_next);
         }

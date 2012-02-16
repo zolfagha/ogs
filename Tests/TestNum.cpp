@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
+#include "MathLib/LinAlg/LinearEquations/SparseLinearEquations.h"
 
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "MeshLib/Core/IMesh.h"
@@ -12,6 +13,9 @@
 #include "NumLib/Discrete/DiscretizedEQS.h"
 #include "NumLib/Discrete/DoF.h"
 #include "NumLib/Discrete/SparsityBuilder.h"
+#include "NumLib/TimeStepping/TimeSteppingController.h"
+#include "NumLib/DomainDecomposition/DomainDecomposition.h"
+#include "NumLib/DomainDecomposition/ogs5/par_ddc_group.h"
 
 using namespace GeoLib;
 using namespace MathLib;
@@ -99,3 +103,72 @@ TEST(Num, testDis1)
 }
 
 
+
+class TestProblem : public ITransientProblem
+{
+    //NodeBasedDecomposedDomain* getDomain()
+    //{
+    //    NodeBasedDecomposedDomain *ddom;
+
+    //    bool isMeshStatic = true;
+    //    if (!isMeshStatic) {
+    //        MeshLib::IMesh *msh;
+    //        DomainDecompostionAlgorithm::decompose(*msh, 1, *ddom);
+    //    }
+    //    return ddom;
+    //};
+public:
+    int solveTimeStep(const TimeStep &time)
+    {
+        //NodeBasedDecomposedDomain *ddom = getDomain();
+        //ddom->assemble();
+        //ddom->solve();
+        //ddom->doPost();
+
+        return 0;        
+    }
+    void initialize()
+    {
+
+    }
+
+    double suggestNext(const TimeStep &time_current)
+    {
+        return .0;
+    }
+    bool isAwake(const TimeStep &time)
+    {
+        return true;
+    }
+
+};
+
+
+TEST(Num, test1)
+{
+    // define problems and solution strategy
+    TestProblem problem;
+
+    // pass it to discretization systems
+    TimeSteppingController timeStepping;
+    timeStepping.addTransientSystem(problem);
+
+    // start time stepping
+    timeStepping.setBeginning(.0);
+    timeStepping.solve(100.);
+    
+
+    MeshLib::IMixedOrderMesh* msh;
+    bool msh_order = false;
+
+    std::vector<ITransientProblem*> problems;
+    std::set<std::pair<bool,size_t>> eqs_properties;
+
+    CPARDomain *par;
+    CPARDomainGroup doms(*msh, eqs_properties);
+    doms.addDomain(par);
+    doms.setup();
+    doms.solveTimeStep(100.);
+
+
+}

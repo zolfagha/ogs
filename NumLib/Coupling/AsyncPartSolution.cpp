@@ -23,7 +23,9 @@ double AsyncPartitionedProblem::suggestNext(const TimeStep &time_current) {
     t = std::numeric_limits<double>::max(); 
     for (size_t i=0; i<_list_subproblems.size(); i++) {
         ITransientCoupledProblem *solution = _list_subproblems[i];
-        t = std::min(t, solution->suggestNext(time_current));
+        double suggest = solution->suggestNext(time_current);
+        if (suggest>.0)
+            t = std::min(t, suggest);
     }
 	return t;
 }

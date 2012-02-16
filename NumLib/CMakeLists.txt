@@ -13,6 +13,11 @@ FILE(GLOB NumLib_Output_Files Output/*.h Output/*.cpp)
 SOURCE_GROUP( NumLib\\Output FILES ${NumLib_Output_Files} )
 FILE(GLOB NumLib_Discrete_Files Discrete/*.h Discrete/*.cpp)
 SOURCE_GROUP( NumLib\\Discrete FILES ${NumLib_Discrete_Files} )
+FILE(GLOB NumLib_DomainDecomposition_Files DomainDecomposition/*.h DomainDecomposition/*.cpp)
+SOURCE_GROUP( NumLib\\DomainDecomposition FILES ${NumLib_DomainDecomposition_Files} )
+FILE(GLOB NumLib_DomainDecomposition_OGS5_Files DomainDecomposition/ogs5/*.h DomainDecomposition/ogs5/*.cpp)
+SOURCE_GROUP( NumLib\\DomainDecomposition\\OGS5 FILES ${NumLib_DomainDecomposition_OGS5_Files} )
+
 
 ADD_LIBRARY( NumLib STATIC 
 	${NumLib_Files} 
@@ -22,6 +27,8 @@ ADD_LIBRARY( NumLib STATIC
 	${NumLib_Solution_Files} 
 	${NumLib_Output_Files} 
 	${NumLib_Discrete_Files} 
+	${NumLib_DomainDecomposition_Files} 
+	${NumLib_DomainDecomposition_OGS5_Files} 
 )
 
 INCLUDE_DIRECTORIES(

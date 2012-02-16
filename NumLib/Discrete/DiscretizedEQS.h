@@ -3,63 +3,54 @@
 
 #include <vector>
 
-#include "MathLib/LinAlg/LinearEquations/SparseLinearEquations.h"
+#include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
 
 namespace NumLib
 {
-//typedef MathLib::CRSMatrix<double,size_t> SparseMatrix;
-//typedef MathLib::Matrix<double> DenseMatrix;
-//typedef std::vector<double> Vectir;
-//typedef MathLib::Matrix<double> LocalEQS;
-
-/**
- * \brief Discrete equation
- */
-typedef MathLib::SparseLinearEquations DiscretizedEQS;
 
 #if 0
-class DiscretizedEQS
+class ElementAssembly
 {
-private:
-    MathLib::LinearEquations *ls;
-
-public:
-
-    SparseMatrix* getA() {return _A;};
-    Vectir* getRHS() {return _RHS;}
-    Vectir* getX() {return _X;};
-
-    void create(size_t dimension)
-    {
-        throw std::exception("The method or operation is not implemented.");
-    }
-
-    void reset()
-    {
-        throw std::exception("The method or operation is not implemented.");
-    }
-
-    ///
-    double getA(size_t row_id, size_t col_id);
-    void setA(size_t row_id, size_t col_id, double v);
-    void addA(size_t row_id, size_t col_id, double v);
-
-    void add( std::vector<size_t> &dofmap, LocalEQS &localEQS ) 
-    {
-        throw std::exception("The method or operation is not implemented.");
-    }
-
-    void setKnownX(size_t eqs_id, double x0);
-
-    ///
-    void solve();
-
-
-
-
-
+    void get(int ele, int &A, int &b);
 };
 
+class SubDomain
+{
+    int list_ele;
+    int list_nod;
+};
+
+
+class IDomainDecomposedSystem
+{
+public:
+    virtual void addSubDomain(int list_ele) = 0;
+
+    virtual void setProblem() = 0;
+
+    virtual void solve() = 0;
+};
+
+class NodeBasedDomainDecomposedSystem : public IDomainDecomposedSystem
+{
+public:
+    void addSubDomain(int list_ele);
+
+    void setProblem();
+
+    void solve();
+};
+
+
+class ElementBasedDomainDecomposedSystem : public IDomainDecomposedSystem
+{
+public:
+    void addSubDomain(int list_ele);
+
+    void setProblem();
+
+    void solve();
+};
 #endif
 
 }

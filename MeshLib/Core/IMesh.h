@@ -68,7 +68,12 @@ public:
     virtual size_t getMaxiumOrder() const = 0;
     virtual void setCurrentOrder(size_t order) = 0;
     virtual size_t getCurrentOrder() const = 0;
+    virtual size_t getNumberOfNodes() const = 0; // i don't understand why this redefinition is needed
     virtual size_t getNumberOfNodes(size_t order) const = 0;
+    size_t getNumberOfTotalNodes() const
+    {
+        return getNumberOfNodes(getMaxiumOrder());
+    };
 };
 
 }
