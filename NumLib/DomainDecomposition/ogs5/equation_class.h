@@ -16,6 +16,9 @@
 
 namespace NumLib
 {
+namespace OGS5
+{
+
 class CNumerics;
 #ifdef USE_MPI
     class CPARDomain;
@@ -148,6 +151,6 @@ private:                                          // Dot not remove this!
 	void Message();
 };
 }
-
+}
 
 #endif

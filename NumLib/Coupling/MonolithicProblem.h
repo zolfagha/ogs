@@ -4,7 +4,7 @@
 #include <cassert>
 #include <vector>
 
-#include "base/MemoryTools.h"
+#include "Base/CodingTools.h"
 
 #include "ICoupledProblem.h"
 
@@ -21,7 +21,7 @@ class AbstractMonolithicProblem : public T_SUPER
 public:
     virtual ~AbstractMonolithicProblem()
     {
-        Base::destroyStdVectorWithPointers(_vec_parameters);
+        Base::releaseObjectsInStdVector(_vec_parameters);
     }
 
     void setParameter(size_t in_var, Variable* var)

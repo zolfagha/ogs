@@ -42,6 +42,8 @@ extern ios::pos_type GetNextSubKeyword(ifstream* file,string* line, bool* keywor
 
 namespace NumLib
 {
+namespace OGS5
+{
 
 /**************************************************************************
    FEMLib-Method:
@@ -441,4 +443,5 @@ void CNumerics::Write(fstream* num_file)
 
 #endif
 
+}
 }

@@ -10,6 +10,8 @@ using namespace std;
 
 namespace NumLib
 {
+namespace OGS5
+{
 
 /**************************************************************************
    FEMLib-Method:
@@ -456,5 +458,5 @@ void CPARDomainGroup::setup()
 	}
 
 
-
+}
 } //end

@@ -107,6 +107,8 @@ public:
 
     /// set max. order
     virtual void setMaximumOrder(size_t) = 0;
+    /// get max. order
+    virtual size_t getMaximumOrder() const = 0;
     /// set current order
     virtual void setCurrentOrder(size_t) = 0;
     /// get current order
@@ -117,6 +119,8 @@ public:
     virtual void getNodeIDList( size_t order, std::vector<size_t> &e_node_id_list ) const = 0;
     /// get a list of node id of the specified edge
     virtual void getNodeIDsOfEdgeElement(size_t order, size_t edge_id, std::vector<size_t> &vec_node_ids) const = 0;
+    /// get a list of node size with orders
+    virtual void getListOfNumberOfNodesForAllOrders(std::vector<size_t> &vec) const = 0;
 };
 
 }

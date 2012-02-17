@@ -6,7 +6,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "Base/MemoryTools.h"
+#include "Base/CodingTools.h"
 #include "MathLib/Function/Function.h"
 
 namespace NumLib
@@ -24,14 +24,14 @@ public:
     /// destructor
     virtual ~NamedVariableContainer()
     {
-        Base::destroyStdVectorWithPointers(_list_var_data);
+        Base::releaseObjectsInStdVector(_list_var_data);
     }
 
     /// reset data
     void clear()
     {
         _list_var_names.clear();
-        Base::destroyStdVectorWithPointers(_list_var_data);
+        Base::releaseObjectsInStdVector(_list_var_data);
     }
 
     /// make a copy of this object

@@ -72,6 +72,12 @@ public:
     */
    Matrix<T>* operator+ (const Matrix<T>& mat) const throw (std::range_error);
    /**
+    * Matrix matrix addition.
+    * @param mat
+    * @return
+    */
+   Matrix<T>& operator+= (const Matrix<T>& mat) throw (std::range_error);
+   /**
     * Matrix matrix subtraction
     * @param mat
     * @return
@@ -275,6 +281,21 @@ template<class T> Matrix<T>* Matrix<T>::operator+ (const Matrix<T>& mat) const t
 	}
 
 	return y;
+}
+
+template<class T> Matrix<T>& Matrix<T>::operator+= (const Matrix<T>& mat) throw (std::range_error)
+{
+    // make sure the two matrices have the same dimension.
+    if (nrows != mat.getNRows() || ncols != mat.getNCols())
+        throw std::range_error("Matrix::operator+, illegal matrix size!");
+
+    for (size_t i = 0; i < nrows; i++) {
+        for (size_t j = 0; j < ncols; j++) {
+            data[address(i, j)] += mat(i, j);
+        }
+    }
+
+    return *this;
 }
 
 // HS initial implementation

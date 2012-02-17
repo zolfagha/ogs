@@ -23,6 +23,9 @@
 
 namespace NumLib
 {
+namespace OGS5
+{
+
 class SparseTable;
 class Linear_EQS;
 
@@ -177,6 +180,6 @@ private:
 };
 
 }
-
+}
 
 #endif

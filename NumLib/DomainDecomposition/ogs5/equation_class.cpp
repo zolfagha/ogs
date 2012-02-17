@@ -24,12 +24,15 @@
 #include "matrix_class.h"
 #include "rf_num_new.h"
 
-std::vector<NumLib::Linear_EQS*> EQS_Vector;
 using namespace std;
 
 //
 namespace NumLib
 {
+namespace OGS5
+{
+
+
 /**************************************************************************
    Task: Linear equation::Constructor
    Programing:
@@ -2363,3 +2366,4 @@ int Linear_EQS::BiCG(double* xg, const long n)
 #endif
 //------------------------------------------------------------------------
 }                                                 // namespace
+}

@@ -2,7 +2,7 @@
 #pragma once
 
 #include <map>
-#include "Base/MemoryTools.h"
+#include "Base/CodingTools.h"
 #include "FemLib/Core/IFemElement.h"
 #include "FemLib/Core/Element/FemElementFactory.h"
 
@@ -14,7 +14,7 @@ class FeObjectCachePerFeType
 public:
     virtual ~FeObjectCachePerFeType()
     {
-        Base::destroyStdMapWithPointers(_mapFeObj);
+        Base::releaseObjectsInStdMap(_mapFeObj);
     }
 
     IFiniteElement* getFeObject(FiniteElementType::type fe_type, MeshLib::IMesh* msh)
@@ -49,7 +49,7 @@ public:
     }
     virtual ~FeObjectContainerPerElement()
     {
-        Base::destroyStdVectorWithPointers(_vec_fem);
+        Base::releaseObjectsInStdVector(_vec_fem);
     }
 
     void addFiniteElement(size_t i, FiniteElementType::type fe_type, MeshLib::IMesh* msh)

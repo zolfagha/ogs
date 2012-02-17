@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "Base/MemoryTools.h"
+#include "Base/CodingTools.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "GeoLib/Core/Point.h"
 
@@ -72,7 +72,7 @@ public:
 
     virtual ~EleMapLocalCoordinates()
     {
-        Base::destroyStdVectorWithPointers(_point_vec);
+        Base::releaseObjectsInStdVector(_point_vec);
         if (_matR2original!=0)
             delete _matR2original;
     }

@@ -9,8 +9,41 @@
  
 #include <string>
 
+#include "SparseLinearEquations.h"
 #include "petscmat.h"
 #include "petscksp.h"
+
+
+namespace MathLib
+{
+typedef struct {
+    int ls_method;
+    int ls_precond;
+    std::string ls_extra_arg;
+    long ls_max_iterations;
+    double ls_error_tolerance;
+} PETSc_option;
+
+class PETSc_Solver : public CRSLinearEquationsBase<signed>
+{
+public:
+    void initialize();
+    void finalize();
+
+    void setOption(const Base::Options &option);
+    void setOption(const PETSc_option &option)
+    {
+        _option = option;
+    }
+    PETSc_option &getOption() 
+    {
+        return _option;
+    }
+
+    void solve();
+private:
+    PETSc_option _option;
+};
 
 typedef Mat PETSc_Mat;
 typedef Vec PETSc_Vec;
@@ -75,7 +108,7 @@ class PETScLinearSolver
     void EQSV_Viewer(std::string file_name, PetscViewer viewer);
     void EQSV_Viewer(std::string file_name);
    
-  private:
+private:
     PETSc_Mat  A;
     PETSc_Vec b;
     PETSc_Vec x;
@@ -100,6 +133,8 @@ class PETScLinearSolver
     void MatrixCreate(PetscInt m, PetscInt n);
 
 };
+
+} //end
 
 
 #endif

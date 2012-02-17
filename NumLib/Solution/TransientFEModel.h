@@ -1,42 +1,69 @@
 
 #pragma once
 
-#include "NumLib/Core/TimeStep.h"
-#include "NumLib/Coupling/TransientSystems.h"
+#include <vector>
+
+#include "Base/CodingTools.h"
+#include "MeshLib/Core/IMesh.h"
+#include "FemLib/BC/FemDirichletBC.h"
+#include "FemLib/BC/FemNeumannBC.h"
+#include "NumLib/Coupling/ICoupledProblem.h"
+#include "NumLib/TimeStepping/ITransientProblem.h"
+#include "NumLib/TimeStepping/TimeStepping.h"
 
 namespace NumLib
 {
 
-class TransientFEModel: public ITransientSystem
+
+class TransientFemProblem: public ITransientProblem
 {
 private:
-	//Geo *GEO;
-	//Mesh *MSH;
-	//Mat *MAT;
-	//TimeDisc TIM;
-	//Fe FE;
-	//Ic IC;
-	//Bc BC;
-	//St ST;
-	//Num NUM;
-    TimeStepping *TIM;
+    MeshLib::IMesh* _msh;
+    std::vector<FemLib::FemDirichletBC<double>*> vec_bc1;
+    std::vector<FemLib::FemNeumannBC<double, double>*> vec_bc2;
+    FixedTimeStepping *TIM;
+    FemLib::FemNodalFunctionScalar* _u0;
+    FemLib::FemNodalFunctionScalar* _u_t0;
+    FemLib::FemNodalFunctionScalar* _u_t1;
 
 public:	
-	//void initialize(Input*) {
-	//	//GEO, MSH, TIM, IC, BC, ST, NUM
-	//}
-	
-	TimeStep suggestNext(TimeStep t_n) {
-		return TIM->next();
-	}
-	bool isAwake(TimeStep t_n1) {
-		return (TIM->next()==t_n1);
-	}
-	bool solveNextStep(TimeStep time) {
-		return solveTimeStep(time);
-	};
-	virtual void setupModel(int*) = 0;
-	virtual bool solveTimeStep(TimeStep t_n1) = 0;
+    TransientFemProblem(FemLib::FemNodalFunctionScalar& u0) 
+    {
+        _msh = (MeshLib::IMesh*) u0.getMesh();
+    };
+
+    virtual ~TransientFemProblem() 
+    {
+        Base::releaseObjectsInStdVector(vec_bc1);
+        Base::releaseObjectsInStdVector(vec_bc2);
+    };
+
+    void addDirichletBC(FemLib::FemDirichletBC<double>& bc1)
+    {
+        vec_bc1.push_back(&bc1);
+    }
+
+    void addNeumannBC(FemLib::FemNeumannBC<double, double>& bc2)
+    {
+        vec_bc2.push_back(&bc2);
+    }
+
+
+
+    double suggestNext(const TimeStep &time_current)
+    {
+        return TIM->next();
+    }
+
+    bool isAwake(const TimeStep &time)
+    {
+        return (TIM->next()==time.getTime());
+    }
+
+    int solveTimeStep(const TimeStep &time)
+    {
+    }
+
 };
 
 }

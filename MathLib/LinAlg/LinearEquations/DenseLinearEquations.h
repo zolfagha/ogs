@@ -19,13 +19,30 @@ public:
     typedef Matrix<double> MatrixType;
     typedef std::vector<double> VectorType;
 
+    DenseLinearEquationsBase() : _A(0) {};
+
+    virtual ~DenseLinearEquationsBase()
+    {
+        if (_A) delete _A;
+    }
+
     void create(size_t length, RowMajorSparsity *sparsity=0)
     {
-        _A = new Matrix<double>(length, length);
+        resize(length);
+    }
+
+    void resize(size_t length)
+    {
+        if (_A==0) {
+            _A = new Matrix<double>(length, length);
+        } else {
+            _A->resize(length, length);
+        }
         _b.resize(length);
         _x.resize(length);
         reset();
     }
+
 
     void reset()
     {

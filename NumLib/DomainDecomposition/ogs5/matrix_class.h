@@ -18,6 +18,9 @@
 
 namespace NumLib
 {
+namespace OGS5
+{
+
 
 class CPARDomain;
 
@@ -172,6 +175,7 @@ private:
 //const Vec& operator ^ (Vec& x,  Vec& y);
 
 // End of class Matrix
+}
 }
 
 //==========================================================================

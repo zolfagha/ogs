@@ -9,6 +9,9 @@
 
 #include "PETScLinearSolver.h"
 
+namespace MathLib
+{
+
 PETScLinearSolver:: ~PETScLinearSolver()
 {
   VecDestroy(&b);
@@ -375,3 +378,5 @@ void PETScLinearSolver::EQSV_Viewer(std::string file_name)
     VecView(b, viewer);
     VecView(x, viewer);   
 }
+
+} //end

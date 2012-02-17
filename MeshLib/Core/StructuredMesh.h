@@ -4,7 +4,7 @@
 #include <map>
 #include <algorithm>
 
-#include "Base/MemoryTools.h"
+#include "Base/CodingTools.h"
 #include "GeoLib/Core/Point.h"
 
 #include "IMesh.h"
@@ -64,7 +64,7 @@ public:
     {
         delete _e;
         delete _nod;
-        Base::destroyStdVectorWithPointers(_list_edge_elements);
+        Base::releaseObjectsInStdVector(_list_edge_elements);
     }
 
     size_t getDimension() const 

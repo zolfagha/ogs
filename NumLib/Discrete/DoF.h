@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <map>
-#include "Base/MemoryTools.h"
+#include "Base/CodingTools.h"
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Core/IElement.h"
 
@@ -19,16 +19,22 @@ class DofMap
 {
 private:
     std::vector<size_t> _map_node_id2eqs_id;
+    size_t _order;
 
 public:
-    DofMap(size_t discrete_points_size) : _map_node_id2eqs_id(discrete_points_size)
+    DofMap(size_t discrete_points_size, size_t order=1) : _map_node_id2eqs_id(discrete_points_size), _order(order)
     {
     }
 
     void getListOfEqsID( const std::vector<size_t>& vec_pt_id, std::vector<size_t>& vec_eqs_id ) const
     {
-        vec_eqs_id.resize(vec_pt_id.size());
-        for (size_t i=0; i<vec_pt_id.size(); i++) {
+        getListOfEqsID(vec_pt_id, vec_pt_id.size(), vec_eqs_id);
+    }
+
+    void getListOfEqsID( const std::vector<size_t>& vec_pt_id, size_t n, std::vector<size_t>& vec_eqs_id ) const
+    {
+        vec_eqs_id.resize(n);
+        for (size_t i=0; i<n; i++) {
             vec_eqs_id[i] = getEqsID(vec_pt_id[i]);
         }
     }
@@ -53,6 +59,8 @@ public:
     {
         return _map_node_id2eqs_id.size();
     }
+
+    size_t getOrder() const {return _order;};
 };
 
 class DofMapManager
@@ -72,12 +80,12 @@ public:
     DofMapManager() {};
     virtual ~DofMapManager()
     {
-        Base::destroyStdVectorWithPointers(_map_var2dof);
+        Base::releaseObjectsInStdVector(_map_var2dof);
     }
 
-    size_t addDoF(size_t discrete_points_size, size_t mesh_id=0)
+    size_t addDoF(size_t discrete_points_size, size_t order=1, size_t mesh_id=0)
     {
-        DofMap *dof = new DofMap(discrete_points_size);
+        DofMap *dof = new DofMap(discrete_points_size, order);
         _map_var2dof.push_back(dof);
         _map_msh2dof[mesh_id].push_back(dof);
         return _map_var2dof.size()-1;
@@ -126,6 +134,16 @@ public:
     size_t getTotalNumberOfDiscretePoints() const
     {
         return _total_pt;
+    }
+
+    void getListOfEqsID(const std::vector<size_t> &list_dofId, const std::vector<size_t> &ele_node_ids, const std::vector<size_t> &ele_node_size_order, std::vector<size_t> &local_dofmap) const
+    {
+        for (size_t j=0; j<list_dofId.size(); j++) {
+            std::vector<size_t> tmp_map;
+            const DofMap *dofMap = getDofMap(j);
+            dofMap->getListOfEqsID(ele_node_ids, ele_node_size_order[dofMap->getOrder()], tmp_map);
+            local_dofmap.insert(local_dofmap.end(), tmp_map.begin(), tmp_map.end());
+        }
     }
 };
 

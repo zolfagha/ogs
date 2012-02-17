@@ -20,6 +20,9 @@
 
 namespace NumLib
 {
+namespace OGS5
+{
+
 
 // Constructors
 Matrix::Matrix(size_t rows, size_t cols) :
@@ -1387,6 +1390,6 @@ void CSparseMatrix::DiagonalEntries(double* diag_e)
 
 ///////////////////////////////////////////////////////////
 }                                                 // Namespace
-
+}
 // End of class Matrix
 //==========================================================================

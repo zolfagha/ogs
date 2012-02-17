@@ -34,7 +34,7 @@ double time_ele_paral;
 #include <cmath>
 #include <iostream>
 
-#include "Base/MemoryTools.h"
+#include "Base/CodingTools.h"
 
 #include "par_ddc.h"
 #include "rf_num_new.h"
@@ -47,6 +47,9 @@ using namespace std;
 
 namespace NumLib
 {
+namespace OGS5
+{
+
 
 bool KeywordFound(const string &line)
 {
@@ -117,8 +120,8 @@ CPARDomain::~CPARDomain(void)
 	}
 
 	//
-    Base::destroyStdVectorWithPointers(_vec_sparse);
-    Base::destroyStdVectorWithPointers(_vec_eqs);
+    Base::releaseObjectsInStdVector(_vec_sparse);
+    Base::releaseObjectsInStdVector(_vec_eqs);
 
 #if defined(USE_MPI)                           // 13.12.2007 WW
 	//
@@ -1312,4 +1315,5 @@ void CPARDomain::InitialEQS(size_t problem_id)
 			   << eqsH->GetCPUtime() << endl;
 	}
 #endif                                            //// if defined(USE_MPI)
+}
 }

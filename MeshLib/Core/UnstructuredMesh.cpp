@@ -1,7 +1,7 @@
 
 #include "UnstructuredMesh.h"
 
-#include "Base/MemoryTools.h"
+#include "Base/CodingTools.h"
 
 
 namespace MeshLib
@@ -9,9 +9,9 @@ namespace MeshLib
 
 UnstructuredMesh::~UnstructuredMesh()
 {
-    Base::destroyStdVectorWithPointers(_list_nodes);
-    Base::destroyStdVectorWithPointers(_list_elements);
-    Base::destroyStdVectorWithPointers(_list_edge_elements);
+    Base::releaseObjectsInStdVector(_list_nodes);
+    Base::releaseObjectsInStdVector(_list_elements);
+    Base::releaseObjectsInStdVector(_list_edge_elements);
 }
 
 size_t UnstructuredMesh::addNode( GeoLib::Point &x, size_t order ) 

@@ -14,6 +14,8 @@
 
 namespace NumLib
 {
+namespace OGS5
+{
 
 class CNumerics
 {
@@ -89,6 +91,6 @@ public:
 };
 
 }
-
+}
 
 #endif

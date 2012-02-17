@@ -5,7 +5,7 @@
 
 #include "GeoLib/Core/Point.h"
 #include "GeoLib/Core/Polyline.h"
-#include "Base/MemoryTools.h"
+#include "Base/CodingTools.h"
 
 namespace GeoLib
 {
@@ -21,8 +21,8 @@ public:
         _pnt_vec.push_back(new Point(pt_lower_left[0], pt_upper_right[1], z));
     };
     virtual ~Rectangle() {
-        Base::destroyStdVectorWithPointers(_pnt_vec);
-        Base::destroyStdVectorWithPointers(_poly_vec);
+        Base::releaseObjectsInStdVector(_pnt_vec);
+        Base::releaseObjectsInStdVector(_poly_vec);
     }
 
     Polyline* getDomainPolyline() 

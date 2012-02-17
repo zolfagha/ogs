@@ -4,7 +4,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "Base/MemoryTools.h"
+#include "Base/CodingTools.h"
 #include "GeoLib/MathTools.h"
 
 #include "IElement.h"
@@ -43,6 +43,7 @@ public:
         _element_id = 0;
         _group_id = 0;
         _order = 1;
+        _max_order = _order;
         _coord_map = 0;
         _list_node_id.resize(getNumberOfNodes(_order), 0);
         std::fill(_list_node_id.begin(), _list_node_id.end(), 0);
@@ -72,8 +73,11 @@ public:
 
     void setMaximumOrder(size_t order)
     {
+        _max_order = order;
         _list_node_id.resize(getNumberOfNodes(order));
     }
+
+    size_t getMaximumOrder() const {return _max_order;};
 
     /// set current order
     void setCurrentOrder(size_t order) { _order = order; };
@@ -153,6 +157,13 @@ public:
         for (size_t i=0; i<nnodes; i++)
             e_node_id_list[i] = this->getNodeID(i);
     }
+    void getListOfNumberOfNodesForAllOrders(std::vector<size_t> &vec) const
+    {
+        vec.resize(getMaximumOrder());
+        for (size_t i=0; i<getMaximumOrder(); i++) {
+            vec[i] = this->getNumberOfNodes(i+1);
+        }
+    }
 
     void getNodeIDsOfEdgeElement(size_t edge_id, std::vector<size_t> &vec_node_ids) const 
     {
@@ -180,6 +191,7 @@ public:
 private:
     size_t _element_id;
     size_t _order;
+    size_t _max_order;
     size_t _group_id;
     std::vector<size_t> _list_node_id;
     std::vector<IElement*> _list_edges;
