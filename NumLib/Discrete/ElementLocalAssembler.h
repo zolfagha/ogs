@@ -11,46 +11,58 @@
 namespace NumLib
 {
 
+/**
+ * \brief Interface of all element local assembler classes
+ */
 class IElemenetLocalAssembler
 {
 public:
+    /// assemble a local linear equation for the given element
     virtual void assembly( MeshLib::IElement &e, MathLib::DenseLinearEquations &eqs) = 0;
 };
 
-class ITimeODEFemElementAssembler
+/**
+* \brief Abstract class of element assembler for time ODE formulations with FEM
+ */
+class AbstractTimeODEFemElementAssembler
 {
 public:
-    virtual void assembly(TimeStep &time, FemLib::IFiniteElement &fe, MathLib::DenseLinearEquations::MatrixType &M, MathLib::DenseLinearEquations::MatrixType &K,  MathLib::DenseLinearEquations::VectorType &F) = 0;
-};
+    AbstractTimeODEFemElementAssembler() : _fem_func(0) {};
+    //explicit AbstractTimeODEFemElementAssembler(FemLib::FemNodalFunctionScalar &func) : _fem_func(&func) {};
 
-template <class T_USER_ASSEMBLY>
-class TimeODEElementAssembler
-{
+    void setFemFunction(FemLib::FemNodalFunctionScalar& fe)
+    {
+        _fem_func = &fe;
+    }
+
+    void assembly(const TimeStep &time, MeshLib::IElement &e, MathLib::DenseLinearEquations::MatrixType &M, MathLib::DenseLinearEquations::MatrixType &K,  MathLib::DenseLinearEquations::VectorType &F)
+    {
+        FemLib::IFiniteElement* fe = _fem_func->getFiniteElement(&e);
+        assemblyFE(time, *fe, M, K, F);
+    }
+
 private:
     FemLib::FemNodalFunctionScalar* _fem_func;
 
-public:
-    TimeODEElementAssembler() {};
-
-    TimeODEElementAssembler(FemLib::FemNodalFunctionScalar &func) : _fem_func(&func) {};
-
-    void assembly(TimeStep &time, MeshLib::IElement &e, MathLib::DenseLinearEquations::MatrixType &M, MathLib::DenseLinearEquations::MatrixType &K,  MathLib::DenseLinearEquations::VectorType &F)
-    {
-        FemLib::IFiniteElement* fe = _fem_func->getFiniteElement(&e);
-        T_USER_ASSEMBLY.assembly(time, *fe, M, K, F);
-    }
-
+protected:
+    virtual void assemblyFE(const TimeStep &time, FemLib::IFiniteElement &fe, MathLib::DenseLinearEquations::MatrixType &M, MathLib::DenseLinearEquations::MatrixType &K,  MathLib::DenseLinearEquations::VectorType &F) = 0;
 };
 
+/**
+* \brief Euler scheme element assembler for time ODE formulations
+ */
 template <class T_USER_ASSEMBLY>
 class TimeEulerElementAssembler : public IElemenetLocalAssembler
 {
 private:
-    TimeODEElementAssembler<T_USER_ASSEMBLY> _time_ode;
-    TimeStep *_time_step;
+    T_USER_ASSEMBLY _time_ode;
+    const TimeStep *_time_step;
     double _theta;
 public:
-    TimeEulerElementAssembler(TimeStep &time, double theta, TimeODEElementAssembler<T_USER_ASSEMBLY> &a) : _time_step(&time), _theta(theta), _time_ode(a) {};
+    TimeEulerElementAssembler(const TimeStep &time, double theta, T_USER_ASSEMBLY &a) : _theta(theta), _time_ode(a)
+    {
+        _time_step = &time;
+    };
 
     virtual void assembly( MeshLib::IElement &e, MathLib::DenseLinearEquations &eqs)
     {

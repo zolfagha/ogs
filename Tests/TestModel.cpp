@@ -18,7 +18,7 @@ using namespace NumLib;
 TEST(Model, test1)
 {
     // define problems and solution strategy
-    ITransientProblem* problem;
+    ITransientSystem* problem;
 
     // pass it to discretization systems
     TimeSteppingController timeStepping;

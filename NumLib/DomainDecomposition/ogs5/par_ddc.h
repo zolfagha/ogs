@@ -18,7 +18,7 @@
 
 #include "MeshLib/Core/IMesh.h"
 
-#include "NumLib/TimeStepping/ITransientProblem.h"
+#include "NumLib/TimeStepping/ITransientSystem.h"
 
 
 namespace NumLib
@@ -42,7 +42,7 @@ public:
     void setID(int id) {ID = id;};
     MeshLib::IMixedOrderMesh* getMesh() const {return m_msh;};
     void setMesh(MeshLib::IMixedOrderMesh* msh, bool linear, bool quad) {m_msh = msh; use_linear=linear; use_quad=quad;};
-    void setProblems(std::vector<ITransientProblem*> &p) { _problems = p; }
+    void setProblems(std::vector<ITransientSystem*> &p) { _problems = p; }
 
 
     void CreateNodes();
@@ -119,7 +119,7 @@ private:
     friend class CPARDomainGroup;
     friend class SparseTable;
 
-    std::vector<ITransientProblem*> _problems;
+    std::vector<ITransientSystem*> _problems;
     std::vector<size_t> _problem2eqs;
     std::map<std::pair<size_t, size_t>, size_t> _set_eqs;
     std::vector<Linear_EQS*> _vec_eqs;

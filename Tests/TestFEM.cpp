@@ -49,7 +49,7 @@ void outputLinearEQS(MathLib::Matrix<double> &globalA, double* globalRHS)
     std::cout << std::endl;
 }
 
-class GWFemTestProblem
+class GWFemTestSystem
 {
 public:
     Rectangle *rec;
@@ -80,7 +80,7 @@ public:
         K = new MathLib::FunctionConstant<double, double*>(1.e-11);
     }
     
-    static void calculateHead(GWFemTestProblem &gw)
+    static void calculateHead(GWFemTestSystem &gw)
     {
         const MeshLib::IMesh *msh = gw.msh;
         for (size_t i=0; i<gw.vec_bc1.size(); i++) gw.vec_bc1[i]->setup();
@@ -122,7 +122,7 @@ public:
         gw.head->setNodalValues(eqs.getX());
     }
 
-    static void calculateVelocity(GWFemTestProblem &gw)
+    static void calculateVelocity(GWFemTestSystem &gw)
     {
         const MeshLib::IMesh *msh = gw.msh;
         //calculate vel (vel=f(h))
@@ -180,11 +180,11 @@ void getGWExpectedHead(std::vector<double> &expected)
 
 TEST(FEM, testUnstructuredMesh)
 {
-    GWFemTestProblem gw;
+    GWFemTestSystem gw;
     MeshLib::IMesh *msh = MeshGenerator::generateRegularQuadMesh(2.0, 2, .0, .0, .0);
     gw.define(msh);
     //#Solve
-    GWFemTestProblem::calculateHead(gw);
+    GWFemTestSystem::calculateHead(gw);
 
     double *h = gw.head->getNodalValues();
     std::vector<double> expected;
@@ -195,11 +195,11 @@ TEST(FEM, testUnstructuredMesh)
 
 TEST(FEM, testStructuredMesh)
 {
-    GWFemTestProblem gw;
+    GWFemTestSystem gw;
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     gw.define(msh);
     //#Solve
-    GWFemTestProblem::calculateHead(gw);
+    GWFemTestSystem::calculateHead(gw);
 
     double *h = gw.head->getNodalValues();
     std::vector<double> expected;
@@ -210,11 +210,11 @@ TEST(FEM, testStructuredMesh)
 
 TEST(FEM, ExtrapolateAverage1)
 {
-    GWFemTestProblem gw;
+    GWFemTestSystem gw;
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     gw.define(msh);
-    GWFemTestProblem::calculateHead(gw);
-    GWFemTestProblem::calculateVelocity(gw);
+    GWFemTestSystem::calculateHead(gw);
+    GWFemTestSystem::calculateVelocity(gw);
 
     FemNodalFunctionVector2d nodal_vel(gw.msh, PolynomialOrder::Linear);
     FemExtrapolationAverage<MathLib::Vector2D> extrapo;
@@ -240,7 +240,7 @@ public:
 
 TEST(FEM, ExtrapolateAverage2)
 {
-    GWFemTestProblem gw;
+    GWFemTestSystem gw;
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     gw.define(msh);
     delete gw.K;
@@ -249,8 +249,8 @@ TEST(FEM, ExtrapolateAverage2)
     delete gw.vec_bc2[0];
     gw.vec_bc2.clear();
 
-    GWFemTestProblem::calculateHead(gw);
-    GWFemTestProblem::calculateVelocity(gw);
+    GWFemTestSystem::calculateHead(gw);
+    GWFemTestSystem::calculateVelocity(gw);
 
     FemNodalFunctionVector2d nodal_vel(gw.msh, PolynomialOrder::Linear);
     FemExtrapolationAverage<MathLib::Vector2D> extrapo;

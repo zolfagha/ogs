@@ -11,7 +11,7 @@ void TimeSteppingController::setBeginning(double time)
     _time_begin = time;
 };
 
-void TimeSteppingController::addTransientSystem(ITransientProblem &system) 
+void TimeSteppingController::addTransientSystem(ITransientSystem &system) 
 {
     _root_subsystems = &system;
 };

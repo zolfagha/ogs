@@ -53,7 +53,7 @@ public:
  * DirichletBC class
  */
 template<typename Tval>
-class FemDirichletBC : IFemBC
+class FemDirichletBC : IFemBC, public MathLib::IFunction<Tval, GeoLib::Point>
 {
 public:
     ///
@@ -87,6 +87,17 @@ public:
     {
         DiagonalizeMethod method;
         method.apply(eqs, _vec_nodes, _vec_values);
+    }
+
+    Tval eval(const GeoLib::Point &x) 
+    {
+        return _bc_func->eval(x);
+    }
+
+    MathLib::IFunction<Tval,GeoLib::Point>* clone() const
+    {
+        FemDirichletBC<Tval> *f = new FemDirichletBC<Tval>(_var, _geo, _bc_func, _method);
+        return f;
     }
 
 

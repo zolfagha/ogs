@@ -6,7 +6,7 @@
 
 namespace NumLib
 {
-class ICoupledProblem;
+class ICoupledSystem;
 class NamedVariableContainer;
 class VariableMappingTable;
 
@@ -20,7 +20,7 @@ public:
     /// @param subproblems    a list of subproblems
     /// @param vars           a container for shared variables
     /// @param mapping        mapping data between subproblems and shared variables
-    virtual int solve(std::vector<ICoupledProblem*> &subproblems, NamedVariableContainer &vars, VariableMappingTable &mapping) = 0;
+    virtual int solve(std::vector<ICoupledSystem*> &subproblems, NamedVariableContainer &vars, VariableMappingTable &mapping) = 0;
 };
 
 /**
@@ -33,7 +33,7 @@ public:
     /// @param subproblems    a list of subproblems
     /// @param vars           a container for shared variables
     /// @param mapping        mapping data between subproblems and shared variables
-    virtual int solve(std::vector<ICoupledProblem*> &subproblems, NamedVariableContainer &vars_t_n, NamedVariableContainer &vars_t_n1, VariableMappingTable &mapping) = 0;
+    virtual int solve(std::vector<ICoupledSystem*> &subproblems, NamedVariableContainer &vars_t_n, NamedVariableContainer &vars_t_n1, VariableMappingTable &mapping) = 0;
 };
 
 

@@ -10,7 +10,7 @@ namespace ModelLib
 class GROUNDWATER_FLOW : public NumLib::TransientFemProblem
 {
 private:
-    NumLib::TimeEulerSpFEMLinearSolution _solution;
+    NumLib::TimeEulerSpaceFemLinearAlgorithm _solution;
 public:
     void initialiez();
     void setupModel(int*)

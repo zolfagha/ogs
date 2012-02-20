@@ -6,7 +6,7 @@
 
 #include "MeshLib/Core/IMesh.h"
 
-#include "NumLib/TimeStepping/ITransientProblem.h"
+#include "NumLib/TimeStepping/ITransientSystem.h"
 
 #include "par_ddc.h"
 #include "rf_num_new.h"
@@ -48,7 +48,7 @@ public:
 
     void solveTimeStep(TimeStep t_current)
     {
-        ITransientProblem *problem;
+        ITransientSystem *problem;
         bool msh_order = true;
         size_t n_var = 1;
         size_t problem_id;
@@ -67,7 +67,7 @@ private:
     CNumerics *num;
     bool use_linear;
     bool use_quad;
-    std::vector<ITransientProblem*> _problems;
+    std::vector<ITransientSystem*> _problems;
 
     void FindNodesOnInterface(bool quadr);
     void assembleGlobalMatrix() {};

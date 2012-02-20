@@ -477,7 +477,7 @@ void CPARDomain::CreateEQS()
     _problem2eqs.resize(_problems.size());
 
     for (size_t i=0; i<_problems.size(); i++) {
-        ITransientProblem* p = _problems[i];
+        ITransientSystem* p = _problems[i];
         size_t order = 1;
         size_t dof = 1;
         std::pair<size_t, size_t> eqs_type = make_pair(order, dof);

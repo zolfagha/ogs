@@ -7,7 +7,7 @@
 #include "Base/CodingTools.h"
 
 #include "ICoupledProblem.h"
-
+#include "NumLib/TimeStepping/ITransientSystem.h"
 
 namespace NumLib
 {
@@ -16,10 +16,10 @@ namespace NumLib
  * \brief MonolithicSolution
  */
 template<class T_SUPER>
-class AbstractMonolithicProblem : public T_SUPER
+class AbstractMonolithicSystem : public T_SUPER
 {
 public:
-    virtual ~AbstractMonolithicProblem()
+    virtual ~AbstractMonolithicSystem()
     {
         Base::releaseObjectsInStdVector(_vec_parameters);
     }
@@ -47,10 +47,10 @@ protected:
 };
 
 template <class T_SUPER, size_t N_IN, size_t N_OUT>
-class TemplateMonolithicProblem : public AbstractMonolithicProblem<T_SUPER>
+class TemplateMonolithicSystem : public AbstractMonolithicSystem<T_SUPER>
 {
 public:
-    TemplateMonolithicProblem() {
+    TemplateMonolithicSystem() {
         _vec_parameters.resize(getNumberOfParameters());
     }
 
@@ -59,8 +59,14 @@ public:
 };
 
 template <size_t N_IN, size_t N_OUT>
-class TemplateSteadyMonolithicProblem : public TemplateMonolithicProblem<ICoupledProblem, N_IN, N_OUT>
+class TemplateSteadyMonolithicSystem : public TemplateMonolithicSystem<ICoupledSystem, N_IN, N_OUT>
 {
+};
+
+template <size_t N_IN, size_t N_OUT>
+class TemplateTransientMonolithicSystem : public TemplateMonolithicSystem<ITransientCoupledSystem, N_IN, N_OUT>
+{
+
 };
 
 

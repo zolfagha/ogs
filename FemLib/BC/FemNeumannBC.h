@@ -21,7 +21,7 @@ namespace FemLib
  * Neumann BC
  */
 template<typename Tval, typename Tflux>
-class FemNeumannBC : IFemBC
+class FemNeumannBC : IFemBC, public MathLib::IFunction<Tflux, GeoLib::Point>
 {
 public:
     /// 
@@ -101,6 +101,17 @@ public:
     double getConditionValue( size_t i ) const
     {
         return _vec_values[i];
+    }
+
+    Tflux eval(const GeoLib::Point& x)
+    {
+        return _bc_func->eval(x);
+    }
+
+    MathLib::IFunction<Tflux, GeoLib::Point>* clone() const
+    {
+        FemNeumannBC<Tval, Tflux> *f = new FemNeumannBC<Tval, Tflux>(_var, _geo, _bc_func);
+        return f;
     }
 
 private:

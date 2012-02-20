@@ -2,7 +2,7 @@
 #pragma once
 
 #include "TimeStep.h"
-#include "ITransientProblem.h"
+#include "ITransientSystem.h"
 
 namespace NumLib
 {
@@ -17,13 +17,13 @@ public:
     /// set the starting time
 	void setBeginning(double time_begin);
     /// add transient system
-	void addTransientSystem(ITransientProblem &sys);
+	void addTransientSystem(ITransientSystem &sys);
 	/// solve systems until the given time
 	void solve(double time_end);
 
 private:
     double _time_begin;
-    ITransientProblem* _root_subsystems;
+    ITransientSystem* _root_subsystems;
 };
 
 }

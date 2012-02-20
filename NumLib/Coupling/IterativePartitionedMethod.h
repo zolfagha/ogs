@@ -27,13 +27,13 @@ public:
     /// get iteration count
     size_t getIterationCounts() const {return _itr_count;};
     /// solve
-    int solve(std::vector<ICoupledProblem*> &subproblems, NamedVariableContainer &vars, VariableMappingTable &mapping);
+    int solve(std::vector<ICoupledSystem*> &subproblems, NamedVariableContainer &vars, VariableMappingTable &mapping);
 
 protected:
     /// check if solution is converged
     bool isConverged(NamedVariableContainer& vars_prev, NamedVariableContainer& vars_current, double &v_diff);
 
-    virtual void doPostAfterSolve( ICoupledProblem& solution, NamedVariableContainer& vars, VariableMappingTable &mapping )  {}
+    virtual void doPostAfterSolve( ICoupledSystem& solution, NamedVariableContainer& vars, VariableMappingTable &mapping )  {}
 
     virtual void doPostAfterSolveAll( NamedVariableContainer &vars, VariableMappingTable &mapping ) {}
 
@@ -68,7 +68,7 @@ public:
     {
     }
 
-    void doPostAfterSolve( ICoupledProblem & solution, NamedVariableContainer& vars, VariableMappingTable &mapping );
+    void doPostAfterSolve( ICoupledSystem & solution, NamedVariableContainer& vars, VariableMappingTable &mapping );
 };
 
 }

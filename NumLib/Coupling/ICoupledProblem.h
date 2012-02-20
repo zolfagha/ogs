@@ -2,7 +2,7 @@
 #pragma once
 
 #include "NumLib/TimeStepping/TimeStep.h"
-#include "NumLib/TimeStepping/ITransientProblem.h"
+#include "NumLib/TimeStepping/ITransientSystem.h"
 #include "NamedVariableContainer.h"
 
 namespace NumLib
@@ -11,7 +11,7 @@ namespace NumLib
 /**
  * \brief Interface class of coupling problems
  */
-class ICoupledProblem
+class ICoupledSystem
 {
 public:
     virtual int solve() = 0;
@@ -27,7 +27,7 @@ public:
 /**
  * \brief Interface class of transient coupling problems
  */
-class ITransientCoupledProblem : public ICoupledProblem, public ITransientProblem
+class ITransientCoupledSystem : public ICoupledSystem, public ITransientSystem
 {
 public:
     int solve(const TimeStep &time) 

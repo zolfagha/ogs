@@ -11,19 +11,13 @@
 namespace NumLib
 {
 
-template <size_t N_IN, size_t N_OUT>
-class TemplateTransientMonolithicProblem : public TemplateMonolithicProblem<ITransientCoupledProblem, N_IN, N_OUT>
-{
-
-};
-
 /**
  * \brief Asynchronized partitioned problem
  */
-class AsyncPartitionedProblem : public ITransientCoupledProblem
+class AsyncPartitionedSystem : public ITransientCoupledSystem
 {
 public:
-    AsyncPartitionedProblem(ITransientPartitionedAlgorithm &algo) : _algorithm(&algo)
+    AsyncPartitionedSystem(ITransientPartitionedAlgorithm &algo) : _algorithm(&algo)
     {
     }
 
@@ -42,7 +36,7 @@ public:
     Variable* getParameter(size_t para_id) const { return _vars_t_n1.get(para_id); }
 
     /// find subproblem
-    int find(const ITransientCoupledProblem& sub) const;
+    int find(const ITransientCoupledSystem& sub) const;
 
     /// check consistency
     bool check() const;
@@ -56,7 +50,7 @@ public:
     /// @param sys problem
     /// @param internal_id parameter id in the sys
     /// @return parameter id
-    size_t addParameter(const std::string &name, ITransientCoupledProblem& sub_problem, size_t para_id_in_sub_problem);
+    size_t addParameter(const std::string &name, ITransientCoupledSystem& sub_problem, size_t para_id_in_sub_problem);
 
     /// set parameter 
     void setParameter(size_t para_id, Variable* var)
@@ -74,7 +68,7 @@ public:
     }
 
     /// connect system input and shared variable
-    void connectInput(const std::string &this_para_name, ITransientCoupledProblem &subproblem, size_t subproblem_para_id);
+    void connectInput(const std::string &this_para_name, ITransientCoupledSystem &subproblem, size_t subproblem_para_id);
 
     //void addChildren(ITransientCoupledProblem& sys);
     //size_t getNumberOfChildren() const;
@@ -85,11 +79,11 @@ public:
 	
 	bool isAwake(const TimeStep &time);
 
-    void getActiveProblems(const TimeStep &time, std::vector<ICoupledProblem*> &list_active_problems);
+    void getActiveProblems(const TimeStep &time, std::vector<ICoupledSystem*> &list_active_problems);
 
 private:
     ITransientPartitionedAlgorithm *_algorithm;
-    std::vector<ITransientCoupledProblem*> _list_subproblems;
+    std::vector<ITransientCoupledSystem*> _list_subproblems;
     std::vector<TimeStep> _list_synchronize_time;
 	
     //std::vector<ITransientCoupledProblem*> _list_subproblems;
@@ -98,7 +92,7 @@ private:
     NamedVariableContainer _vars_t_n1;
     VariableMappingTable _map;
 
-    size_t addSubProblem(ITransientCoupledProblem &sub_problem);
+    size_t addSubProblem(ITransientCoupledSystem &sub_problem);
 };
 
 }

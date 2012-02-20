@@ -24,7 +24,10 @@ public:
     // solve 
     virtual void solve() = 0;
     // get solution
-    virtual void getX() = 0;
+    virtual double* getX() = 0;
+    // 
+    virtual double* getRHS() = 0;
+    virtual MathLib::ILinearEquations* getLinearEquation() = 0;
 };
 
 /**
@@ -43,6 +46,11 @@ public:
         _eqs = &eqs;
     }
 
+    MathLib::ILinearEquations* getLinearEquation()
+    {
+        return _eqs;
+    }
+
     void construct(IDiscreteSystemAssembler& assemler)
     {
         DofMapManager *dofManager;
@@ -57,10 +65,16 @@ public:
         _eqs->solve();
     }
 
-    void getX()
+    double* getX()
     {
-
+        return _eqs->getX();
     }
+
+    double* getRHS()
+    {
+        return _eqs->getRHS();
+    }
+
 };
 
 

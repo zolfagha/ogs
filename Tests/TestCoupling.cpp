@@ -18,7 +18,7 @@ using namespace NumLib;
 // 3a + 5b + .2c = 13.6
 // .5a + .3b + 3c = 10.1
 // A. a=1, b=2, c=3
-class WeakCouplingEQS1 : public TemplateSteadyMonolithicProblem<2,1>
+class WeakCouplingEQS1 : public TemplateSteadyMonolithicSystem<2,1>
 {
 public:
     enum Parameters { a=2, b = 0, c = 1 };
@@ -34,7 +34,7 @@ public:
     }
 };
 
-class WeakCouplingEQS2 :  public TemplateSteadyMonolithicProblem<2,1>
+class WeakCouplingEQS2 :  public TemplateSteadyMonolithicSystem<2,1>
 {
 public:
     enum Parameters { a = 0, b = 2, c = 1 };
@@ -50,7 +50,7 @@ public:
     }
 };
 
-class WeakCouplingEQS3 : public TemplateSteadyMonolithicProblem<2,1>
+class WeakCouplingEQS3 : public TemplateSteadyMonolithicSystem<2,1>
 {
 public:
     enum Parameters { a = 0, b = 1, c = 2 };
@@ -288,7 +288,7 @@ TEST(Coupling, SteadyCouplingSeidel)
 // 3a + 5b + .2c = 13.6*t
 // .5a + .3b + 3c = 10.1*t
 // A. a=t, b=2*t, c=3*t
-class TransientWeakCouplingEQS1 : public TemplateTransientMonolithicProblem<2,1>
+class TransientWeakCouplingEQS1 : public TemplateTransientMonolithicSystem<2,1>
 {
     double _dt;
 public:
@@ -315,7 +315,7 @@ public:
     };
 };
 
-class TransientWeakCouplingEQS2 :  public TemplateTransientMonolithicProblem<2,1>
+class TransientWeakCouplingEQS2 :  public TemplateTransientMonolithicSystem<2,1>
 {
     double _dt;
 public:
@@ -342,7 +342,7 @@ public:
     };
 };
 
-class TransientWeakCouplingEQS3 : public TemplateTransientMonolithicProblem<2,1>
+class TransientWeakCouplingEQS3 : public TemplateTransientMonolithicSystem<2,1>
 {
     double _dt;
 public:
@@ -378,7 +378,7 @@ TEST(Coupling, TransientCouplingParallelStaggered1)
     eqs2.setParameter(TransientWeakCouplingEQS2::b, new MathLib::FunctionConstant<double,double>(.0));
     eqs3.setParameter(TransientWeakCouplingEQS3::c, new MathLib::FunctionConstant<double,double>(.0));
 
-    AsyncPartitionedProblem apart1(ParallelStaggeredMethod(1e-5, 100));
+    AsyncPartitionedSystem apart1(ParallelStaggeredMethod(1e-5, 100));
     apart1.addParameter("a", eqs1, TransientWeakCouplingEQS1::a);
     apart1.addParameter("b", eqs2, TransientWeakCouplingEQS2::b);
     apart1.addParameter("c");
@@ -387,7 +387,7 @@ TEST(Coupling, TransientCouplingParallelStaggered1)
     apart1.connectInput("a", eqs2, TransientWeakCouplingEQS2::a);
     apart1.connectInput("c", eqs2, TransientWeakCouplingEQS2::c);
 
-    AsyncPartitionedProblem part2(ParallelStaggeredMethod(1.e-5, 100));
+    AsyncPartitionedSystem part2(ParallelStaggeredMethod(1.e-5, 100));
     part2.addParameter("a", apart1, apart1.getParameterID("a"));
     part2.addParameter("b", apart1, apart1.getParameterID("b"));
     part2.addParameter("c", eqs3, TransientWeakCouplingEQS3::c);
@@ -420,7 +420,7 @@ TEST(Coupling, TransientCouplingParallelStaggered2)
     eqs2.setParameter(TransientWeakCouplingEQS2::b, new MathLib::FunctionConstant<double,double>(.0));
     eqs3.setParameter(TransientWeakCouplingEQS3::c, new MathLib::FunctionConstant<double,double>(.0));
 
-    AsyncPartitionedProblem apart1(ParallelStaggeredMethod(1e-5, 100));
+    AsyncPartitionedSystem apart1(ParallelStaggeredMethod(1e-5, 100));
     apart1.addParameter("a", eqs1, TransientWeakCouplingEQS1::a);
     apart1.addParameter("b", eqs2, TransientWeakCouplingEQS2::b);
     apart1.addParameter("c");
@@ -429,7 +429,7 @@ TEST(Coupling, TransientCouplingParallelStaggered2)
     apart1.connectInput("a", eqs2, TransientWeakCouplingEQS2::a);
     apart1.connectInput("c", eqs2, TransientWeakCouplingEQS2::c);
 
-    AsyncPartitionedProblem part2(ParallelStaggeredMethod(1.e-5, 100));
+    AsyncPartitionedSystem part2(ParallelStaggeredMethod(1.e-5, 100));
     part2.addParameter("a", apart1, apart1.getParameterID("a"));
     part2.addParameter("b", apart1, apart1.getParameterID("b"));
     part2.addParameter("c", eqs3, TransientWeakCouplingEQS3::c);
@@ -477,7 +477,7 @@ TEST(Coupling, TransientCouplingParallelStaggered3)
     eqs2.setParameter(TransientWeakCouplingEQS2::b, &MathLib::FunctionConstant<double,double>(.0));
     eqs3.setParameter(TransientWeakCouplingEQS3::c, &MathLib::FunctionConstant<double,double>(.0));
 
-    AsyncPartitionedProblem apart1(ParallelStaggeredMethod(1e-5, 1));
+    AsyncPartitionedSystem apart1(ParallelStaggeredMethod(1e-5, 1));
     apart1.addParameter("a", eqs1, TransientWeakCouplingEQS1::a);
     apart1.addParameter("b", eqs2, TransientWeakCouplingEQS2::b);
     apart1.addParameter("c");
@@ -486,7 +486,7 @@ TEST(Coupling, TransientCouplingParallelStaggered3)
     apart1.connectInput("a", eqs2, TransientWeakCouplingEQS2::a);
     apart1.connectInput("c", eqs2, TransientWeakCouplingEQS2::c);
 
-    AsyncPartitionedProblem part2(ParallelStaggeredMethod(1.e-5, 1));
+    AsyncPartitionedSystem part2(ParallelStaggeredMethod(1.e-5, 1));
     part2.addParameter("a", apart1, apart1.getParameterID("a"));
     part2.addParameter("b", apart1, apart1.getParameterID("b"));
     part2.addParameter("c", eqs3, TransientWeakCouplingEQS3::c);
@@ -546,7 +546,7 @@ TEST(Coupling, TransientCouplingSerialStaggered1)
     eqs2.setParameter(TransientWeakCouplingEQS2::b, new MathLib::FunctionConstant<double,double>(.0));
     eqs3.setParameter(TransientWeakCouplingEQS3::c, new MathLib::FunctionConstant<double,double>(.0));
 
-    AsyncPartitionedProblem apart1(SerialStaggeredMethod(1e-5, 100));
+    AsyncPartitionedSystem apart1(SerialStaggeredMethod(1e-5, 100));
     apart1.addParameter("a", eqs1, TransientWeakCouplingEQS1::a);
     apart1.addParameter("b", eqs2, TransientWeakCouplingEQS2::b);
     apart1.addParameter("c");
@@ -555,7 +555,7 @@ TEST(Coupling, TransientCouplingSerialStaggered1)
     apart1.connectInput("a", eqs2, TransientWeakCouplingEQS2::a);
     apart1.connectInput("c", eqs2, TransientWeakCouplingEQS2::c);
 
-    AsyncPartitionedProblem part2(SerialStaggeredMethod(1.e-5, 100));
+    AsyncPartitionedSystem part2(SerialStaggeredMethod(1.e-5, 100));
     part2.addParameter("a", apart1, apart1.getParameterID("a"));
     part2.addParameter("b", apart1, apart1.getParameterID("b"));
     part2.addParameter("c", eqs3, TransientWeakCouplingEQS3::c);
@@ -603,7 +603,7 @@ TEST(Coupling, TransientCouplingSerialStaggered2)
     eqs2.setParameter(TransientWeakCouplingEQS2::b, &MathLib::FunctionConstant<double,double>(.0));
     eqs3.setParameter(TransientWeakCouplingEQS3::c, &MathLib::FunctionConstant<double,double>(.0));
 
-    AsyncPartitionedProblem apart1(SerialStaggeredMethod(1e-5, 1));
+    AsyncPartitionedSystem apart1(SerialStaggeredMethod(1e-5, 1));
     apart1.addParameter("a", eqs1, TransientWeakCouplingEQS1::a);
     apart1.addParameter("b", eqs2, TransientWeakCouplingEQS2::b);
     apart1.addParameter("c");
@@ -612,7 +612,7 @@ TEST(Coupling, TransientCouplingSerialStaggered2)
     apart1.connectInput("a", eqs2, TransientWeakCouplingEQS2::a);
     apart1.connectInput("c", eqs2, TransientWeakCouplingEQS2::c);
 
-    AsyncPartitionedProblem part2(SerialStaggeredMethod(1.e-5, 1));
+    AsyncPartitionedSystem part2(SerialStaggeredMethod(1.e-5, 1));
     part2.addParameter("a", apart1, apart1.getParameterID("a"));
     part2.addParameter("b", apart1, apart1.getParameterID("b"));
     part2.addParameter("c", eqs3, TransientWeakCouplingEQS3::c);

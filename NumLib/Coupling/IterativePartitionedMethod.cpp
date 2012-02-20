@@ -12,7 +12,7 @@
 namespace NumLib
 {
 
-int AbstractIterativePartitionedMethod::solve(std::vector<ICoupledProblem*> &subproblems, NamedVariableContainer &vars, VariableMappingTable &mapping)
+int AbstractIterativePartitionedMethod::solve(std::vector<ICoupledSystem*> &subproblems, NamedVariableContainer &vars, VariableMappingTable &mapping)
 {
     const size_t n_subproblems = subproblems.size();
 
@@ -20,7 +20,7 @@ int AbstractIterativePartitionedMethod::solve(std::vector<ICoupledProblem*> &sub
     const size_t n_para = vars.size();
     for (size_t i=0; i<n_para; i++) {
         VariableMappingTable::PairSysVarId &sysvarid = mapping._map_paraId2subproblem[i];
-        ICoupledProblem *solution = sysvarid.first;
+        ICoupledSystem *solution = sysvarid.first;
         size_t internalId = sysvarid.second;
         if (solution!=0)
             vars.set(i, *const_cast<Variable*>(solution->getParameter(internalId)));
@@ -39,7 +39,7 @@ int AbstractIterativePartitionedMethod::solve(std::vector<ICoupledProblem*> &sub
         vars.clone(vars_prev);
         // compute each solution
         for (size_t i=0; i<n_subproblems; i++) {
-            ICoupledProblem *solution = subproblems[i];
+            ICoupledSystem *solution = subproblems[i];
             std::vector<VariableMappingTable::PairInputVar> &list_input_var = mapping._list_subproblem_input_source[i];
             // set input
             for (size_t j=0; j<list_input_var.size(); j++) {
@@ -92,19 +92,19 @@ void BlockJacobiMethod::doPostAfterSolveAll( NamedVariableContainer &vars, Varia
     const size_t n_vars = vars.size();
     for (size_t i=0; i<n_vars; i++) {
         VariableMappingTable::PairSysVarId &v = mapping._map_paraId2subproblem[i];
-        const ICoupledProblem *solution = v.first;
+        const ICoupledSystem *solution = v.first;
         if (solution!=0)
             vars.set(i, *const_cast<Variable*>(solution->getParameter(v.second)));
     }
 }
 
-void BlockGaussSeidelMethod::doPostAfterSolve( ICoupledProblem & solution, NamedVariableContainer& vars, VariableMappingTable &mapping ) 
+void BlockGaussSeidelMethod::doPostAfterSolve( ICoupledSystem & solution, NamedVariableContainer& vars, VariableMappingTable &mapping ) 
 {
     // update shared variables
     const size_t n_vars = vars.size();
     for (size_t i=0; i<n_vars; i++) {
         VariableMappingTable::PairSysVarId &v = mapping._map_paraId2subproblem[i];
-        const ICoupledProblem *work_solution = v.first;
+        const ICoupledSystem *work_solution = v.first;
         if (work_solution==&solution) {
             vars.set(i, *const_cast<Variable*>(solution.getParameter(v.second)));
         }
