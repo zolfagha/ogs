@@ -52,6 +52,10 @@ class AbstractMeshBasedDiscreteIVBVProblem : public IVBVProblem
 {
 public:
     AbstractMeshBasedDiscreteIVBVProblem(MeshLib::IMesh &msh) : _msh(&msh), _tim(0) {};
+    virtual ~AbstractMeshBasedDiscreteIVBVProblem()
+    {
+        Base::releaseObject(_tim);
+    }
     /// set a mesh
     void setMesh(MeshLib::IMesh &msh);
     /// get the mesh
@@ -59,7 +63,7 @@ public:
     /// set a time stepping function
     void setTimeSteppingFunction(ITimeStepFunction &f)
     {
-        _tim = &f;
+        _tim = f.clone();
     }
     /// get the time stepping function
     ITimeStepFunction* getTimeSteppingFunction() const {return _tim;};
@@ -77,10 +81,14 @@ class FemIVBVProblem : public AbstractMeshBasedDiscreteIVBVProblem
 public:
     FemIVBVProblem(MeshLib::IMesh &msh, T_ASSEMBLY &user_assembly) : AbstractMeshBasedDiscreteIVBVProblem(msh), _user_assembly(user_assembly)
     {
+        Base::zeroObject(_map_var, _map_ic);
     }
 
     virtual ~FemIVBVProblem()
     {
+        Base::releaseObject(_map_var, _map_ic);
+        Base::releaseObjectsInStdVector(_map_bc1);
+        Base::releaseObjectsInStdVector(_map_bc2);
     }
 
     /// get the number of variables
@@ -88,8 +96,9 @@ public:
 
     size_t createField(FemLib::PolynomialOrder::type order)
     {
-        if (_map_var==0)
-            _map_var = new FemLib::FemNodalFunctionScalar(getMesh(), order);
+        if (_map_var==0) {
+            _map_var = new FemLib::FemNodalFunctionScalar(*getMesh(), order);
+        }
         return 0;
     }
 
@@ -100,7 +109,7 @@ public:
 
     void setIC(int, MathLib::IFunction<double, GeoLib::Point>& ic)
     {
-        _map_ic = &ic;
+        _map_ic = ic.clone();
     }
 
     MathLib::IFunction<double, GeoLib::Point>* getIC(int) const 

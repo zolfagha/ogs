@@ -61,7 +61,7 @@ public:
     {
         _var = var;
         _geo = geo;
-        _bc_func = bc_func;
+        _bc_func = bc_func->clone();
         _method = method;
     }
     virtual ~FemDirichletBC()

@@ -20,35 +20,39 @@ class DiscreteSystem
 {
 public:
     /// @param msh a mesh to represent discrete systems by nodes or elements or edges
-    /// @param linear_eqs Linear equation objects used to solve linear equations. 
-    DiscreteSystem(MeshLib::IMesh& msh, MathLib::ILinearEquations& linear_eqs) 
-    {
-        _linear_sys = new MeshBasedDiscreteLinearEquation(msh, linear_eqs);
-    };
+    DiscreteSystem(MeshLib::IMesh& msh) : _msh(&msh) {};
 
     virtual ~DiscreteSystem()
     {
-        if (_linear_sys) delete _linear_sys;
+        Base::releaseObjectsInStdVector(_vec_linear_sys);
     }
 
-
-    IDiscreteLinearEquation* getLinearEquation()
+    /// create a new linear equation
+    template<class T_LINEAR_SOLVER>
+    size_t addLinearEquation(T_LINEAR_SOLVER &linear_solver)
     {
-        return _linear_sys;
+        _vec_linear_sys.push_back(new TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER>(*_msh, linear_solver));
+        return _vec_linear_sys.size()-1;
     }
 
-    void doEachElement(int func1, int func_reduce);
+    IDiscreteLinearEquation* getLinearEquation(size_t i)
+    {
+        return _vec_linear_sys[i];
+    }
 
-    void createField();
+    //void doEachElement(int func1, int func_reduce);
+
+    //void createField();
+
+    MeshLib::IMesh* getMesh() const { return _msh; };
 
 private:
     DISALLOW_COPY_AND_ASSIGN(DiscreteSystem);
 
-    MeshBasedDiscreteLinearEquation* _linear_sys;
+    MeshLib::IMesh* _msh;
+    std::vector<AbstractMeshBasedDiscreteLinearEquation*> _vec_linear_sys;
 
 };
-
-class MultipleMeshDiscreteSystem;
 
 
 }

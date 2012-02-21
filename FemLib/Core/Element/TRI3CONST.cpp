@@ -9,9 +9,9 @@
 namespace FemLib
 {
 
-void TRI3CONST::configure( MeshLib::IElement * e )
+void TRI3CONST::configure( MeshLib::IElement &e )
 {
-    _ele = static_cast<MeshLib::Triangle*>(e);
+    _ele = static_cast<MeshLib::Triangle*>(&e);
     double nodes_x[3], nodes_y[3];
     // xyz
     for (size_t i=0; i<3; i++) {

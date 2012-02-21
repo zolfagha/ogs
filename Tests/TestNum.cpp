@@ -16,6 +16,7 @@
 
 
 #include "NumLib/Discrete/DiscreteSystem.h"
+#include "NumLib/Discrete/ElementLocalAssembler.h"
 #include "NumLib/Discrete/DoF.h"
 #include "NumLib/Discrete/SparsityBuilder.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
@@ -158,6 +159,7 @@ TEST(Num, test1)
 
 TEST(Num, OGS5DDC)
 {
+#if 0
     MeshLib::IMixedOrderMesh* msh;
     bool msh_order = false;
 
@@ -169,16 +171,16 @@ TEST(Num, OGS5DDC)
     doms.addDomain(par);
     doms.setup();
     doms.solveTimeStep(100.);
+#endif
 }
 
 
-class GWAssembly: public AbstractTimeODEFemElementAssembler
+class GWAssembler: public AbstractTimeODEFemElementAssembler
 {
 private:
     MathLib::IFunction<double, double*>* _matK;
 public:
-    GWAssembly(MathLib::IFunction<double, double*> &mat) : _matK(&mat) {};
-    //explicit GWAssembly(FemLib::FemNodalFunctionScalar &fem, MathLib::IFunction<double, double*> &mat) : AbstractTimeODEFemElementAssembler(fem), _matK(&mat) {};
+    GWAssembler(MathLib::IFunction<double, double*> &mat) : _matK(&mat) {};
 
 protected:
     void assemblyFE(const TimeStep &time, FemLib::IFiniteElement &fe, MathLib::DenseLinearEquations::MatrixType &localM, MathLib::DenseLinearEquations::MatrixType &localK,  MathLib::DenseLinearEquations::VectorType &localF)
@@ -192,15 +194,17 @@ protected:
 
 class GWFemTestSystem : public ITransientSystem
 {
+    typedef FemIVBVProblem<GWAssembler> GWFemProblem;
+    typedef SingleStepLinearFEM<TimeEulerElementAssembler, MathLib::SparseLinearEquations, FemIVBVProblem<GWAssembler>> SolutionForHead;
 public:
-
     GWFemTestSystem()
     {
-        Base::zeroObject(rec, K, head, _discrete);
+        Base::zeroObject(_rec, _K, _head, _problem);
     }
+
     virtual ~GWFemTestSystem()
     {
-        Base::releaseObject(rec, K, head);
+        Base::releaseObject(_rec, _K, _head, _problem);
     }
 
     double suggestNext(const TimeStep &time_current)
@@ -215,53 +219,48 @@ public:
     int solveTimeStep(const TimeStep &time)
     {
         _solHead->solveTimeStep(time);
-        head = _solHead->getCurrentSolution(0);
+        _head = _solHead->getCurrentSolution(0);
         return 0;
     }
 
 
     //#Define a problem
-    void define()
+    void define(DiscreteSystem &dis)
     {
-        //geometry
-        rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
-        Polyline* poly_left = rec->getLeft();
-        Polyline* poly_right = rec->getRight();
-        //mesh
-        MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
-        //mat
-        K = new MathLib::FunctionConstant<double, double*>(1.e-11);
+        MeshLib::IMesh *msh = dis.getMesh();
+        size_t nnodes = msh->getNumberOfNodes();
         //equations
-        GWAssembly ele_eqs(*K) ;
+        _K = new MathLib::FunctionConstant<double, double*>(1.e-11);
+        GWAssembler ele_eqs(*_K) ;
         //IVBV problem
-        _problem = new FemIVBVProblem<GWAssembly>(*msh, ele_eqs);
+        _problem = new GWFemProblem(*dis.getMesh(), GWAssembler(ele_eqs));
+        //BC
         size_t headId = _problem->createField(PolynomialOrder::Linear);
+        _head = _problem->getField(headId);
+        _rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
+        Polyline* poly_left = _rec->getLeft();
+        Polyline* poly_right = _rec->getRight();
+        _problem->setIC(headId, *_head);
         _problem->addDirichletBC(headId, *poly_right, MathLib::FunctionConstant<double, GeoLib::Point>(.0));
         _problem->addNeumannBC(headId, *poly_left, MathLib::FunctionConstant<double, GeoLib::Point>(-1e-5));
-        _problem->setTimeSteppingFunction(TimeStepFunctionConstant(.0, 100.0, .0));
+        //transient
+        _problem->setTimeSteppingFunction(TimeStepFunctionConstant(.0, 100.0, 10.0));
         //solution algorithm
-        _solHead = new TimeEulerSpaceFemLinearAlgorithm<FemIVBVProblem<GWAssembly>, GWAssembly>(*_problem);
+        _solHead = new SolutionForHead(dis, *_problem);
+        _solHead->getTimeODEAssembler()->setTheta(1.0);
 
 
-        head = _problem->getField(headId);
         //vel = new FEMIntegrationPointFunctionVector2d(msh);
     }
 
-
-    void setDiscreteSystem(DiscreteSystem& dis)
-    {
-        _discrete = &dis;
-    }
-
-
 private:
-    FemIVBVProblem<GWAssembly>* _problem;
-    TimeEulerSpaceFemLinearAlgorithm<FemIVBVProblem<GWAssembly>, GWAssembly>* _solHead; 
-    Rectangle *rec;
+    GWFemProblem* _problem;
+    SolutionForHead* _solHead; 
+    Rectangle *_rec;
+    MathLib::IFunction<double, double*>* _K;
+    FemNodalFunctionScalar *_head;
 
-    MathLib::IFunction<double, double*> *K;
-    FemNodalFunctionScalar *head;
-    DiscreteSystem* _discrete;
+    DISALLOW_COPY_AND_ASSIGN(GWFemTestSystem);
 };
 
 
@@ -270,15 +269,13 @@ private:
 
 TEST(Num, Discrete1)
 {
-    {
+    // create a mesh
+    MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
+    // create a discrete system according to mesh
+    DiscreteSystem dis(*msh);
     // define problems
     GWFemTestSystem gwProblem;
-    gwProblem.define();
-    //// create discrete systems according to mesh
-    //MeshLib::IMesh *msh = gwProblem.getMesh();
-    //DiscreteSystem dis(*msh, *new MathLib::SparseLinearEquations());
-    //// 
-    //gwProblem.setDiscreteSystem(dis);
+    gwProblem.define(dis);
 
     // start time stepping
     TimeSteppingController timeStepping;
@@ -286,8 +283,7 @@ TEST(Num, Discrete1)
 
     timeStepping.setBeginning(.0);
     timeStepping.solve(100.);
-    }
 
-
+    Base::releaseObject(msh);
 }
 

@@ -7,9 +7,10 @@ namespace MeshLib
 {
 
 ///
-void EleMapLocalCoordinates::flip(IElement* e, const CoordinateSystem* coordinate_system)
+void EleMapLocalCoordinates::flip(IElement &ele, const CoordinateSystem &coordinate_system)
 {
-    switch(coordinate_system->getType())
+    IElement* e = &ele;
+    switch(coordinate_system.getType())
     {
     case CoordinateSystemType::Y:
         {
@@ -53,8 +54,9 @@ void EleMapLocalCoordinates::flip(IElement* e, const CoordinateSystem* coordinat
 }
 
 ///
-void EleMapLocalCoordinates::rotate(IElement* e, const CoordinateSystem* coordinate_system)
+void EleMapLocalCoordinates::rotate(IElement &ele, const CoordinateSystem &coordinate_system)
 {
+    IElement* e = &ele;
     _point_vec.resize(e->getNumberOfNodes());
 
     std::vector<size_t> vec_node_id;
@@ -63,7 +65,7 @@ void EleMapLocalCoordinates::rotate(IElement* e, const CoordinateSystem* coordin
     _msh->getListOfNodeCoordinates(vec_node_id, vec_pt);
 
     if (_matR2original==0) {
-        getRotationMatrixToOriginal(e, coordinate_system, vec_pt);
+        getRotationMatrixToOriginal(*e, coordinate_system, vec_pt);
         _matR2local = new MathLib::Matrix<double>(3,3);
         _matR2original->transpose(*_matR2local);
     }
@@ -84,8 +86,9 @@ void EleMapLocalCoordinates::rotate(IElement* e, const CoordinateSystem* coordin
 };
 
 // x=Rx' where x is original coordinates and x' is local coordinates
-void EleMapLocalCoordinates::getRotationMatrixToOriginal(const IElement* e, const CoordinateSystem* coordinate_system, const std::vector<GeoLib::Point> &vec_pt)
+void EleMapLocalCoordinates::getRotationMatrixToOriginal(const IElement &ele, const CoordinateSystem &coordinate_system, const std::vector<GeoLib::Point> &vec_pt)
 {
+    const IElement* e = &ele;
     double xx[3];
     double yy[3];
     double zz[3];

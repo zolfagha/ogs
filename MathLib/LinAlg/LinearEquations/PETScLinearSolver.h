@@ -1,9 +1,3 @@
-/*!
-   \brief Declaration of class PETScLinearSolver
-
-   11.2011. WW
-
-*/
 #ifndef PETSC_LSOLVER_INC
 #define PETSC_LSOLVER_INC
  

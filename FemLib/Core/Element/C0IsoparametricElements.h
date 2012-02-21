@@ -13,7 +13,7 @@ template <FiniteElementType::type T_FETYPE, size_t N_VARIABLES, class T_SHAPE, c
 class FeBaseIsoparametric : public TemplateFeBase<T_FETYPE, N_VARIABLES>
 {
 public:
-    FeBaseIsoparametric(MeshLib::IMesh * msh) : TemplateFeBase<T_FETYPE, N_VARIABLES>(msh)
+    FeBaseIsoparametric(MeshLib::IMesh &msh) : TemplateFeBase<T_FETYPE, N_VARIABLES>(msh)
     {
         _mapping = new FemNaturalCoordinates(new T_SHAPE());
         _integration = new T_INTEGRAL();
@@ -28,18 +28,18 @@ public:
     virtual IFemNumericalIntegration* getIntegrationMethod() const {return _integration;};
 
     /// initialize object for given mesh elements
-    virtual void configure( MeshLib::IElement * e )
+    virtual void configure( MeshLib::IElement &e )
     {
         setElement(e);
         const MeshLib::IMesh* msh = getMesh();
-        if (e->getMappedCoordinates()==0) {
+        if (e.getMappedCoordinates()==0) {
             MeshLib::IElementCoordinatesMapping *ele_map = 0;
-            if (msh->getDimension() == e->getDimension()) {
-                ele_map = new MeshLib::EleMapInvariant(msh, e);
+            if (msh->getDimension() == e.getDimension()) {
+                ele_map = new MeshLib::EleMapInvariant(*msh, e);
             } else {
-                ele_map = new MeshLib::EleMapLocalCoordinates(msh, e, msh->getGeometricProperty()->getCoordinateSystem());
+                ele_map = new MeshLib::EleMapLocalCoordinates(*msh, e, *msh->getGeometricProperty()->getCoordinateSystem());
             }
-            e->setMappedCoordinates(ele_map);
+            e.setMappedCoordinates(ele_map);
         }
         _mapping->initialize(e);
     }

@@ -57,7 +57,7 @@ class IFemCoordinatesMapping
 {
 public:
     /// initialize element
-    virtual void initialize(MeshLib::IElement* ele) = 0;
+    virtual void initialize(MeshLib::IElement &ele) = 0;
     /// compute shape functions
     virtual const CoordMappingProperties* compute(const double* natural_pt) = 0;
     /// map natural coordinates to physical coordinates
@@ -94,11 +94,11 @@ public:
     }
 
     /// initialize element
-    virtual void initialize(MeshLib::IElement* ele)
+    virtual void initialize(MeshLib::IElement &ele)
     {
-        assert(ele->getMappedCoordinates()!=0);
+        assert(ele.getMappedCoordinates()!=0);
 
-        _ele = ele;
+        _ele = &ele;
         const size_t dim = _ele->getDimension();
         const size_t nnodes = _ele->getNumberOfNodes();
         _prop->shape_r->resize(1, nnodes);

@@ -62,7 +62,7 @@ UnstructuredMesh * createTriangleElement(GeoLib::Point &pt1, GeoLib::Point &pt2,
 TEST(Mesh, MappingLineX1)
 {
     UnstructuredMesh* msh = createLineElement(GeoLib::Point(1,0,0), GeoLib::Point(3,0,0), CoordinateSystemType::X);
-    EleMapLocalCoordinates emap(msh, msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    EleMapLocalCoordinates emap(*msh, *msh->getElemenet(0), *msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -74,7 +74,7 @@ TEST(Mesh, MappingLineX1)
 TEST(Mesh, MappingLineX2)
 {
     UnstructuredMesh* msh = createLineElement(GeoLib::Point(3,0,0), GeoLib::Point(1,0,0), CoordinateSystemType::X);
-    EleMapLocalCoordinates emap(msh, msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    EleMapLocalCoordinates emap(*msh, *msh->getElemenet(0), *msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -86,7 +86,7 @@ TEST(Mesh, MappingLineX2)
 TEST(Mesh, MappingLineY1)
 {
     UnstructuredMesh* msh = createLineElement(GeoLib::Point(0,1,0), GeoLib::Point(0,3,0), CoordinateSystemType::Y);
-    EleMapLocalCoordinates emap(msh, msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    EleMapLocalCoordinates emap(*msh, *msh->getElemenet(0), *msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -98,7 +98,7 @@ TEST(Mesh, MappingLineY1)
 TEST(Mesh, MappingLineY2)
 {
     UnstructuredMesh* msh = createLineElement(GeoLib::Point(0,3,0), GeoLib::Point(0,1,0), CoordinateSystemType::Y);
-    EleMapLocalCoordinates emap(msh, msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    EleMapLocalCoordinates emap(*msh, *msh->getElemenet(0), *msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -110,7 +110,7 @@ TEST(Mesh, MappingLineY2)
 TEST(Mesh, MappingLineZ1)
 {
     UnstructuredMesh* msh = createLineElement(GeoLib::Point(0,0,1), GeoLib::Point(0,0,3), CoordinateSystemType::Z);
-    EleMapLocalCoordinates emap(msh, msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    EleMapLocalCoordinates emap(*msh, *msh->getElemenet(0), *msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -122,7 +122,7 @@ TEST(Mesh, MappingLineZ1)
 TEST(Mesh, MappingLineZ2)
 {
     UnstructuredMesh* msh = createLineElement(GeoLib::Point(0,0,3), GeoLib::Point(0,0,1), CoordinateSystemType::Z);
-    EleMapLocalCoordinates emap(msh, msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    EleMapLocalCoordinates emap(*msh, *msh->getElemenet(0), *msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -134,7 +134,7 @@ TEST(Mesh, MappingLineZ2)
 TEST(Mesh, MappingLineXY1)
 {
     UnstructuredMesh* msh = createLineElement(GeoLib::Point(0,3,0), GeoLib::Point(0,1,0), CoordinateSystemType::XY);
-    EleMapLocalCoordinates emap(msh, msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    EleMapLocalCoordinates emap(*msh, *msh->getElemenet(0), *msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -146,7 +146,7 @@ TEST(Mesh, MappingLineXY1)
 TEST(Mesh, MappingLineXY2)
 {
     UnstructuredMesh* msh = createLineElement(GeoLib::Point(1,1,0), GeoLib::Point(2,2,0), CoordinateSystemType::XY);
-    EleMapLocalCoordinates emap(msh, msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    EleMapLocalCoordinates emap(*msh, *msh->getElemenet(0), *msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -158,7 +158,7 @@ TEST(Mesh, MappingLineXY2)
 TEST(Mesh, MappingLineXZ1)
 {
     UnstructuredMesh* msh = createLineElement(GeoLib::Point(0,0,3), GeoLib::Point(0,0,1), CoordinateSystemType::XZ);
-    EleMapLocalCoordinates emap(msh, msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    EleMapLocalCoordinates emap(*msh, *msh->getElemenet(0), *msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -170,7 +170,7 @@ TEST(Mesh, MappingLineXZ1)
 TEST(Mesh, MappingLineXZ2)
 {
     UnstructuredMesh* msh = createLineElement(GeoLib::Point(1,0,1), GeoLib::Point(2,0,2), CoordinateSystemType::XZ);
-    EleMapLocalCoordinates emap(msh, msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    EleMapLocalCoordinates emap(*msh, *msh->getElemenet(0), *msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -182,7 +182,7 @@ TEST(Mesh, MappingLineXZ2)
 TEST(Mesh, MappingTriXY1)
 {
     UnstructuredMesh* msh = createTriangleElement(GeoLib::Point(1,1,0), GeoLib::Point(3,1,0), GeoLib::Point(1,3,0), CoordinateSystemType::XY);
-    EleMapLocalCoordinates emap(msh, msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    EleMapLocalCoordinates emap(*msh, *msh->getElemenet(0), *msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -196,7 +196,7 @@ TEST(Mesh, MappingTriXY1)
 TEST(Mesh, MappingTriXY2)
 {
     UnstructuredMesh* msh = createTriangleElement(GeoLib::Point(3,1,0), GeoLib::Point(1,3,0), GeoLib::Point(1,1,0), CoordinateSystemType::XY);
-    EleMapLocalCoordinates emap(msh, msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    EleMapLocalCoordinates emap(*msh, *msh->getElemenet(0), *msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -210,7 +210,7 @@ TEST(Mesh, MappingTriXY2)
 TEST(Mesh, MappingTriXY3)
 {
     UnstructuredMesh* msh = createTriangleElement(GeoLib::Point(1,3,0), GeoLib::Point(1,1,0), GeoLib::Point(3,1,0), CoordinateSystemType::XY);
-    EleMapLocalCoordinates emap(msh, msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    EleMapLocalCoordinates emap(*msh, *msh->getElemenet(0), *msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);

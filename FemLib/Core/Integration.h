@@ -16,7 +16,7 @@ namespace FemLib
 class IFemNumericalIntegration
 {
 public:
-    virtual void initialize(MeshLib::IElement* e, size_t n_sampl_level) = 0;
+    virtual void initialize(MeshLib::IElement &e, size_t n_sampl_level) = 0;
     virtual size_t getNumberOfSamplingPoints() const = 0;
     virtual void getSamplingPoint(size_t igp, double *) const = 0;
     virtual double getWeight(size_t igp) const = 0;
@@ -28,7 +28,7 @@ public:
 class FemIntegrationAnalytical : public IFemNumericalIntegration
 {
 public:
-    void initialize(MeshLib::IElement*, size_t) {};
+    void initialize(MeshLib::IElement&, size_t) {};
     size_t getNumberOfSamplingPoints() const {return 1;};
     void getSamplingPoint(size_t, double*) const {};
     double getWeight(size_t igp) const {return 1.0;};
@@ -48,7 +48,7 @@ public:
         _n_sampl_pt = 0;
     }
 
-    void initialize(MeshLib::IElement* e, size_t n_sampl_level)
+    void initialize(MeshLib::IElement &e, size_t n_sampl_level)
     {
         _n_sampl_level = n_sampl_level;
         _n_sampl_pt = getTotalNumberOfSamplingPoints(e, n_sampl_level);
@@ -61,7 +61,7 @@ private:
     size_t _n_sampl_level;
     size_t _n_sampl_pt;
 
-    virtual size_t getTotalNumberOfSamplingPoints(MeshLib::IElement* e, size_t n_sampl_level) const = 0;
+    virtual size_t getTotalNumberOfSamplingPoints(MeshLib::IElement &e, size_t n_sampl_level) const = 0;
     //size_t getTotalNumberOfSamplingPoints(MeshLib::IElement* e, size_t n_sampl_level) const
     //{
     //    switch (e->getElementType()) {
@@ -95,7 +95,7 @@ public:
     }
 
 private:
-    size_t getTotalNumberOfSamplingPoints(MeshLib::IElement* e, size_t n_sampl_level) const
+    size_t getTotalNumberOfSamplingPoints(MeshLib::IElement &e, size_t n_sampl_level) const
     {
         return n_sampl_level;
     }
@@ -122,7 +122,7 @@ public:
     }
 
 private:
-    size_t getTotalNumberOfSamplingPoints(MeshLib::IElement* e, size_t n_sampl_level) const
+    size_t getTotalNumberOfSamplingPoints(MeshLib::IElement &e, size_t n_sampl_level) const
     {
         return n_sampl_level*n_sampl_level;
     }
@@ -175,7 +175,7 @@ public:
     }
 
 private:
-    size_t getTotalNumberOfSamplingPoints(MeshLib::IElement* e, size_t n_sampl_level) const
+    size_t getTotalNumberOfSamplingPoints(MeshLib::IElement &e, size_t n_sampl_level) const
     {
         if (n_sampl_level==1) return 1;
         else if (n_sampl_level==2) return 3;

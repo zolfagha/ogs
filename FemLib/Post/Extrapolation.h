@@ -35,7 +35,7 @@ public:
             const std::vector<Tvalue> &gp_values = ele_var.getIntegrationPointValues(i);
             const size_t e_nnodes = e->getNumberOfNodes();
             std::vector<Tvalue> nodal_values(e_nnodes);
-            IFiniteElement *fe = nod_var.getFiniteElement(e);
+            IFiniteElement *fe = nod_var.getFiniteElement(*e);
             fe->extrapolate(gp_values, nodal_values);
 
             for (size_t j=0; j<e_nnodes; j++) {

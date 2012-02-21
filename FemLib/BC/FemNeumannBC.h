@@ -29,7 +29,7 @@ public:
     {
         _var = var;
         _geo = geo;
-        _bc_func = func;
+        _bc_func = func->clone();
     }
 
     /// setup BC. 
@@ -63,7 +63,7 @@ public:
                     nodal_val[i_nod] = _bc_func->eval(*x);
                 } 
                 // compute integrals
-                IFiniteElement *fe_edge = _var->getFiniteElement(e);
+                IFiniteElement *fe_edge = _var->getFiniteElement(*e);
                 std::vector<double> result(edge_nnodes);
                 MathLib::Matrix<double> M(edge_nnodes, edge_nnodes);
                 M = .0;

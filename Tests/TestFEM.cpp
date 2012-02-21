@@ -49,7 +49,7 @@ void outputLinearEQS(MathLib::Matrix<double> &globalA, double* globalRHS)
     std::cout << std::endl;
 }
 
-class GWFemTestSystem
+class GWFemTest
 {
 public:
     Rectangle *rec;
@@ -71,7 +71,7 @@ public:
         //mesh
         this->msh = msh;
         //discretization
-        head = new FemNodalFunctionScalar(msh, PolynomialOrder::Linear);
+        head = new FemNodalFunctionScalar(*msh, PolynomialOrder::Linear);
         vel = new FEMIntegrationPointFunctionVector2d(msh);
         //bc
         vec_bc1.push_back(new FemDirichletBC<double>(head, poly_right, new MathLib::FunctionConstant<double, GeoLib::Point>(.0), new DiagonalizeMethod())); //TODO should BC objects be created by fe functions?
@@ -80,7 +80,7 @@ public:
         K = new MathLib::FunctionConstant<double, double*>(1.e-11);
     }
     
-    static void calculateHead(GWFemTestSystem &gw)
+    static void calculateHead(GWFemTest &gw)
     {
         const MeshLib::IMesh *msh = gw.msh;
         for (size_t i=0; i<gw.vec_bc1.size(); i++) gw.vec_bc1[i]->setup();
@@ -98,7 +98,7 @@ public:
         std::vector<size_t> e_node_id_list;
         for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
             MeshLib::IElement *e = msh->getElemenet(i_e);
-            IFiniteElement *fe = gw.head->getFiniteElement(e);
+            IFiniteElement *fe = gw.head->getFiniteElement(*e);
             const size_t &n_dof = fe->getNumberOfVariables();
             localK.resize(n_dof, n_dof);
             localK = .0;
@@ -122,13 +122,13 @@ public:
         gw.head->setNodalValues(eqs.getX());
     }
 
-    static void calculateVelocity(GWFemTestSystem &gw)
+    static void calculateVelocity(GWFemTest &gw)
     {
         const MeshLib::IMesh *msh = gw.msh;
         //calculate vel (vel=f(h))
         for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
             MeshLib::IElement* e = msh->getElemenet(i_e);
-            IFiniteElement *fe = gw.head->getFiniteElement(e);
+            IFiniteElement *fe = gw.head->getFiniteElement(*e);
             std::vector<double> local_h(e->getNumberOfNodes());
             for (size_t j=0; j<e->getNumberOfNodes(); j++)
                 local_h[j] = gw.head->getValue(e->getNodeID(j));
@@ -180,11 +180,11 @@ void getGWExpectedHead(std::vector<double> &expected)
 
 TEST(FEM, testUnstructuredMesh)
 {
-    GWFemTestSystem gw;
+    GWFemTest gw;
     MeshLib::IMesh *msh = MeshGenerator::generateRegularQuadMesh(2.0, 2, .0, .0, .0);
     gw.define(msh);
     //#Solve
-    GWFemTestSystem::calculateHead(gw);
+    GWFemTest::calculateHead(gw);
 
     double *h = gw.head->getNodalValues();
     std::vector<double> expected;
@@ -195,11 +195,11 @@ TEST(FEM, testUnstructuredMesh)
 
 TEST(FEM, testStructuredMesh)
 {
-    GWFemTestSystem gw;
+    GWFemTest gw;
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     gw.define(msh);
     //#Solve
-    GWFemTestSystem::calculateHead(gw);
+    GWFemTest::calculateHead(gw);
 
     double *h = gw.head->getNodalValues();
     std::vector<double> expected;
@@ -210,13 +210,13 @@ TEST(FEM, testStructuredMesh)
 
 TEST(FEM, ExtrapolateAverage1)
 {
-    GWFemTestSystem gw;
+    GWFemTest gw;
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     gw.define(msh);
-    GWFemTestSystem::calculateHead(gw);
-    GWFemTestSystem::calculateVelocity(gw);
+    GWFemTest::calculateHead(gw);
+    GWFemTest::calculateVelocity(gw);
 
-    FemNodalFunctionVector2d nodal_vel(gw.msh, PolynomialOrder::Linear);
+    FemNodalFunctionVector2d nodal_vel(*gw.msh, PolynomialOrder::Linear);
     FemExtrapolationAverage<MathLib::Vector2D> extrapo;
     extrapo.extrapolate(*gw.vel, nodal_vel);
 
@@ -240,7 +240,7 @@ public:
 
 TEST(FEM, ExtrapolateAverage2)
 {
-    GWFemTestSystem gw;
+    GWFemTest gw;
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     gw.define(msh);
     delete gw.K;
@@ -249,10 +249,10 @@ TEST(FEM, ExtrapolateAverage2)
     delete gw.vec_bc2[0];
     gw.vec_bc2.clear();
 
-    GWFemTestSystem::calculateHead(gw);
-    GWFemTestSystem::calculateVelocity(gw);
+    GWFemTest::calculateHead(gw);
+    GWFemTest::calculateVelocity(gw);
 
-    FemNodalFunctionVector2d nodal_vel(gw.msh, PolynomialOrder::Linear);
+    FemNodalFunctionVector2d nodal_vel(*gw.msh, PolynomialOrder::Linear);
     FemExtrapolationAverage<MathLib::Vector2D> extrapo;
     extrapo.extrapolate(*gw.vel, nodal_vel);
 

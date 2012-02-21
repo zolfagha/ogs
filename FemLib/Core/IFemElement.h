@@ -27,7 +27,7 @@ class IFiniteElement
 {
 public:
     /// setup object for given mesh elements
-    virtual void configure(MeshLib::IElement * e ) = 0;
+    virtual void configure(MeshLib::IElement &e ) = 0;
     /// return finite element type
     virtual const FiniteElementType::type getFeType() const = 0;
     /// return this mesh element
@@ -64,10 +64,10 @@ template <FiniteElementType::type T_FETYPE, size_t N_VARIABLES>
 class TemplateFeBase : public IFiniteElement
 {
 public:
-    TemplateFeBase(MeshLib::IMesh *msh) : _msh(msh), _ele(0) {};
+    TemplateFeBase(MeshLib::IMesh &msh) : _msh(&msh), _ele(0) {};
     virtual ~TemplateFeBase() {};
 
-    void setMesh(MeshLib::IMesh * msh) {_msh = msh;};
+    void setMesh(MeshLib::IMesh &msh) {_msh = &msh;};
     const MeshLib::IMesh* getMesh() const {return _msh;};
     /// return mesh element
     MeshLib::IElement* getElement() const {return _ele;};
@@ -76,7 +76,7 @@ public:
     /// return finite element type
     const FiniteElementType::type getFeType() const { return T_FETYPE; };
 protected:
-    void setElement(MeshLib::IElement* e) {_ele = e;};
+    void setElement(MeshLib::IElement &e) {_ele = &e;};
 private:
     MeshLib::IMesh* _msh;
     MeshLib::IElement* _ele;

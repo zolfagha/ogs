@@ -43,6 +43,7 @@ public:
     virtual double getEnd() const = 0;
     virtual double next(double t_current) = 0;
     virtual void accept() = 0;
+    virtual ITimeStepFunction* clone() = 0;
 };
 
 class AbstractTimeStepFunction : public ITimeStepFunction
@@ -88,6 +89,11 @@ public:
     {
         _dt = convertTimeUnitToSec(t_unit, dt);
     };
+    ITimeStepFunction* clone()
+    {
+        TimeStepFunctionConstant *obj = new TimeStepFunctionConstant(getBeginning(), getEnd(), _dt);
+        return obj;
+    }
 
 protected:
     double suggestNext(double) 

@@ -31,10 +31,10 @@ private:
     void computeBasisFunction(const double *x,  double *shape);
     void computeGradBasisFunction(const double *x,  MathLib::Matrix<double> &mat);
 public:
-    TRI3CONST(MeshLib::IMesh *msh) : TemplateFeBase<FiniteElementType::TRI3CONST, 3>(msh), _shape(1,3), _dshape(2,3) {};
+    TRI3CONST(MeshLib::IMesh &msh) : TemplateFeBase<FiniteElementType::TRI3CONST, 3>(msh), _shape(1,3), _dshape(2,3) {};
 
     /// initialize object for given mesh elements
-    void configure( MeshLib::IElement * e );
+    void configure( MeshLib::IElement &e );
 
     /// 
     void computeBasisFunctions(const double *x);

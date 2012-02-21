@@ -1,6 +1,11 @@
 
 #pragma once
 
+#include <vector>
+#include <algorithm>
+
+#include "Base/CodingTools.h"
+
 #include "MathLib/Vector.h"
 #include "MathLib/Function/Function.h"
 #include "MeshLib/Core/IMesh.h"
@@ -12,6 +17,7 @@
 namespace FemLib
 {
 
+/// Polynomial order
 struct PolynomialOrder
 {
     enum type {
@@ -22,50 +28,85 @@ struct PolynomialOrder
 };
 
 /**
- * \brief Template class for FEM node-based functions
+ * \brief Template class for FEM node-based functions (assuming Lagrangian elements)
+ *
+ * @tparam Tvalue Nodal value type, e.g. double, vector
  */
 template<typename Tvalue>
 class TemplateFEMNodalFunction : public MathLib::IFunction<Tvalue, GeoLib::Point>
 {
 public:
-    TemplateFEMNodalFunction(MeshLib::IMesh* msh, PolynomialOrder::type order) {
-        _msh = msh;
-        _order = order;
-        size_t nnodes = msh->getNumberOfNodes();
-        _nodal_values = new Tvalue[nnodes];
-    }
-
-    virtual ~TemplateFEMNodalFunction() {
-        delete _nodal_values;
-    }
-
-    MathLib::IFunction<Tvalue, GeoLib::Point>* clone() const {return 0;};
-
-    size_t getDimension() const
+    /// @param msh Mesh
+    /// @param order Polynomial order
+    TemplateFEMNodalFunction(MeshLib::IMesh &msh, PolynomialOrder::type order, Tvalue v0) 
     {
-      return _msh->getDimension();
+        initialize(msh, order);
+        resetNodalValues(v0);
     }
 
-    const MeshLib::IMesh* getMesh() const {
-        return _msh;
+    /// @param msh Mesh
+    /// @param order Polynomial order
+    TemplateFEMNodalFunction(MeshLib::IMesh &msh, PolynomialOrder::type order) 
+    {
+        initialize(msh, order);
     }
 
-    Tvalue eval(const GeoLib::Point &pt) {
+    /// @param org source object for copying
+    TemplateFEMNodalFunction(const TemplateFEMNodalFunction<Tvalue> &org) 
+    {
+        assign(org);
+    }
+
+    ///
+    virtual ~TemplateFEMNodalFunction() 
+    {
+        //Base::releaseArrayObject(_nodal_values);
+        Base::releaseObject(_feObjects);
+    }
+
+    /// 
+    TemplateFEMNodalFunction &operator=(const TemplateFEMNodalFunction &org)
+    {
+        assign(org);
+        return *this;
+    }
+
+    /// make a clone of this object
+    /// @return MathLib::IFunction*
+    MathLib::IFunction<Tvalue, GeoLib::Point>* clone() const 
+    {
+        TemplateFEMNodalFunction<Tvalue> *obj = new TemplateFEMNodalFunction<Tvalue>(*this);
+        return obj;
+    };
+
+    size_t getDimension() const { return _msh->getDimension(); }
+
+    const MeshLib::IMesh* getMesh() const { return _msh; }
+
+
+    Tvalue eval(const GeoLib::Point &pt) 
+    {
+        throw std::exception("eval() is not implemented yet.");
         return _nodal_values[0];
     };
 
-    Tvalue& getValue(int node_id) const {
+    Tvalue& getValue(int node_id)
+    {
         return _nodal_values[node_id];
     }
 
-    Tvalue* getNodalValues() {
-        return _nodal_values;
+    Tvalue* getNodalValues() 
+    {
+        if (_nodal_values.size()>0)
+            return &_nodal_values[0];
+        else
+            return 0;
     }
 
-    IFiniteElement* getFiniteElement(MeshLib::IElement *e)
+    IFiniteElement* getFiniteElement(MeshLib::IElement &e)
     {
-        _feObjects.setPolynomialOrder(_order);
-        IFiniteElement* fe = _feObjects.getFeObject(*e, _msh);
+        _feObjects->setPolynomialOrder(_order);
+        IFiniteElement* fe = _feObjects->getFeObject(e, *_msh);
         fe->configure(e);
         fe->getIntegrationMethod()->initialize(e, 2);
 
@@ -74,8 +115,12 @@ public:
 
     void setNodalValues( Tvalue* x ) 
     {
-        for (size_t i=0; i<this->getNumberOfNodes(); i++)
-            _nodal_values[i] = x[i];
+        std::copy(x, x+getNumberOfNodes(), _nodal_values.begin());
+    }
+
+    void resetNodalValues (Tvalue &v)
+    {
+        std::fill(_nodal_values.begin(), _nodal_values.end(), v);
     }
 
     size_t getNumberOfNodes() const 
@@ -84,11 +129,27 @@ public:
     }
 
 private:
-    Tvalue* _nodal_values;
+    std::vector<Tvalue> _nodal_values;
     //FEMInterpolation* _fe;
     MeshLib::IMesh* _msh;
     PolynomialOrder::type _order;
-    LagrangianFeObjectContainer _feObjects;
+    LagrangianFeObjectContainer* _feObjects;
+
+    void initialize(MeshLib::IMesh &msh, PolynomialOrder::type order)
+    {
+        _msh = &msh;
+        _order = order;
+        size_t nnodes = msh.getNumberOfNodes();
+        _nodal_values.resize(nnodes);
+        _feObjects = new LagrangianFeObjectContainer();
+    }
+
+    void assign(const TemplateFEMNodalFunction<Tvalue> &org)
+    {
+        initialize(*org._msh, org._order);
+        std::copy(org._nodal_values.begin(), org._nodal_values.end(), _nodal_values.begin());
+    }
+
 };
 
 typedef TemplateFEMNodalFunction<double> FemNodalFunctionScalar;
@@ -153,6 +214,7 @@ public:
 private:
     MeshLib::IMesh* _msh;
     std::vector<std::vector<Tvalue>> _values;
+
 };
 
 typedef TemplateFEMIntegrationPointFunction<double> FEMIntegrationPointFunctionScalar2d;

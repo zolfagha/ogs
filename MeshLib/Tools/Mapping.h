@@ -32,10 +32,10 @@ public:
 class EleMapInvariant : public IElementCoordinatesMapping
 {
 public:
-    EleMapInvariant(const IMesh* msh, IElement* e) 
+    EleMapInvariant(const IMesh &msh, IElement &e) 
     {
-        _msh = msh;
-        _e = e;
+        _msh = &msh;
+        _e = &e;
     };
 
     GeoLib::Point* getNodePoint(size_t local_id) 
@@ -57,10 +57,10 @@ class EleMapLocalCoordinates : public IElementCoordinatesMapping
 {
 public:
     ///
-    EleMapLocalCoordinates(const IMesh* msh, IElement* e, const CoordinateSystem* coordinate_system) : _matR2original(0)
+    EleMapLocalCoordinates(const IMesh &msh, IElement &e, const CoordinateSystem &coordinate_system) : _matR2original(0)
     {
-        assert (e->getDimension() <= coordinate_system->getDimension());
-        _msh = msh;
+        assert (e.getDimension() <= coordinate_system.getDimension());
+        _msh = &msh;
 
         //if (e->getDimension()==coordinate_system->getDimension()) {
         //    flip(e, coordinate_system);
@@ -88,11 +88,11 @@ private:
     MathLib::Matrix<double> *_matR2local;
 
     ///
-    void flip(IElement* e, const CoordinateSystem* coordinate_system);
+    void flip(IElement &e, const CoordinateSystem &coordinate_system);
     ///
-    void rotate(IElement* e, const CoordinateSystem* coordinate_system);
+    void rotate(IElement &e, const CoordinateSystem &coordinate_system);
     // x=Rx' where x is original coordinates and x' is local coordinates
-    void getRotationMatrixToOriginal(const IElement* e, const CoordinateSystem* coordinate_system, const std::vector<GeoLib::Point> &vec_pt);
+    void getRotationMatrixToOriginal(const IElement &e, const CoordinateSystem &coordinate_system, const std::vector<GeoLib::Point> &vec_pt);
 };
 
 }

@@ -34,69 +34,115 @@ public:
  */
 class AbstractTimeSteppingAlgorithm : public ISolutionAlgorithm, public ITransientSystem
 {
-private:
-    ITimeStepFunction* _tim;
-
 public:
+    /// @param tim Time step function
     AbstractTimeSteppingAlgorithm(ITimeStepFunction &tim) : _tim(&tim) {};
 
+    /// get the time step function
+    /// @return Time step function
     ITimeStepFunction* getTimeStepFunction() const {return _tim;};
 
+    /// suggest the next time step
+    /// @param time_currrent current time step object
+    /// @return the next time
     double suggestNext(const TimeStep &time_current)
     {
         return _tim->next(time_current.getTime());
     }
 
+    /// return if the next time step is the same as the given time
+    /// @param time the time step object
+    /// @bool true if this process is active with the given time
     bool isAwake(const TimeStep &time)
     {
         return (time.getTime()==_tim->next(time.getTime()));
     }
 
+private:
+    ITimeStepFunction* _tim;
 };
+
+
+template<   template <class> class T_TIME_ODE_ASSEMBLER, 
+            class T_LINEAR_SOLVER, 
+            class T_FEM_PROBLEM_AND_ASSEMBLER >
+class SingleStepLinearFEM; // : public AbstractTimeSteppingAlgorithm
 
 /**
  * \brief Solution algorithm for linear transient problems using FEM with Euler time stepping method
+ *
+ * @tparam T_LINEAR_SOLVER     Linear equation solver class
+ * @tparam T_USER_FEM_PROBLEM  FEM problem class
+ * @tparam T_USER_ASSEMBLY     Local assembly class
  */
-template<class T_USER_FEM_PROBLEM, class T_USER_ASSEMBLY>
-class TimeEulerSpaceFemLinearAlgorithm : public AbstractTimeSteppingAlgorithm
+template<   template <class> class T_TIME_ODE_ASSEMBLER, 
+            class T_LINEAR_SOLVER, 
+            template <class> class T_USER_FEM_PROBLEM, 
+            class T_USER_ASSEMBLY >
+class SingleStepLinearFEM<T_TIME_ODE_ASSEMBLER, T_LINEAR_SOLVER, T_USER_FEM_PROBLEM<T_USER_ASSEMBLY>> : public AbstractTimeSteppingAlgorithm
 {
 public:
+    typedef T_TIME_ODE_ASSEMBLER<T_USER_ASSEMBLY> UserTimeOdeAssembler;
+    typedef T_USER_FEM_PROBLEM<T_USER_ASSEMBLY> UserFemProblem;
+
     ///
-    TimeEulerSpaceFemLinearAlgorithm(T_USER_FEM_PROBLEM &problem) : AbstractTimeSteppingAlgorithm(*problem.getTimeSteppingFunction()), _problem(&problem), _element_ode_assembler(problem.getElementAssemlby())
+    SingleStepLinearFEM(DiscreteSystem &dis, UserFemProblem &problem) 
+        : AbstractTimeSteppingAlgorithm(*problem.getTimeSteppingFunction()), 
+        _discrete_system(&dis), _problem(&problem), _element_ode_assembler(problem.getElementAssemlby())
     {
-        size_t n_var = problem.getNumberOfVariables();
-        _u_n1.resize(n_var, 0);
+        const size_t n_var = problem.getNumberOfVariables();
+        // initialize solution vectors
         _u_n.resize(n_var, 0);
+        _u_n1.resize(n_var, 0);
         for (size_t i=0; i<n_var; i++) {
-            _u_n[i] = (FemLib::FemNodalFunctionScalar*) problem.getIC(i);
+            _u_n1[i] = (FemLib::FemNodalFunctionScalar*) problem.getIC(i);
         }
+        // create linear equation
+        _eqs_id = _discrete_system->addLinearEquation(*new T_LINEAR_SOLVER);
+        IDiscreteLinearEquation *linear_eqs = _discrete_system->getLinearEquation(_eqs_id);
+        // define dof map
+        DofMapManager* dofManager = linear_eqs->getDofMapManger();
+        for (size_t i=0; i<n_var; i++) {
+            dofManager->addDoF(problem.getField(i)->getNumberOfNodes());
+        }
+        dofManager->construct();
     };
 
     /// solve 
     int solveTimeStep(const TimeStep &t_n1)
     {
+        const size_t n_var = _problem->getNumberOfVariables();
+        for (size_t i=0; i<n_var; i++) {
+            if (_u_n[i]!=0) delete _u_n[i];
+            _u_n[i] = _u_n1[i];
+        }
         return solve(t_n1, _u_n, _u_n1);
     }
 
+    /// get the current solution
     FemLib::FemNodalFunctionScalar* getCurrentSolution(int var_id)
     {
         return _u_n1[var_id];
+    }
+
+    /// get the time ode assembler
+    UserTimeOdeAssembler* getTimeODEAssembler()
+    {
+        return &_element_ode_assembler;
     }
 
 private:
     /// 
 	int solve(const TimeStep &t_n1, const std::vector<FemLib::FemNodalFunctionScalar*>& u_n, std::vector<FemLib::FemNodalFunctionScalar*>& u_n1) 
     {
-        FemIVBVProblem<T_USER_ASSEMBLY> *pro = _problem;
-        size_t n_var = pro->getNumberOfVariables();
+        UserFemProblem* pro = _problem;
+        const size_t n_var = pro->getNumberOfVariables();
         for (size_t i=0; i<n_var; i++) {
             u_n1[i] = new FemLib::FemNodalFunctionScalar(*u_n[i]);
         }
 		
 		// collect data
-		double delta_t = t_n1.getTimeStep();
-        double theta = 1.0;
-		
+		const double delta_t = t_n1.getTimeStepSize();
 
         for (size_t i=0; i<pro->getNumberOfDirichletBC(); i++) 
             pro->getFemDirichletBC(i)->setup();
@@ -105,8 +151,11 @@ private:
 
 		// assembly
         const MeshLib::IMesh *msh = u_n1[0]->getMesh();
-        IDiscreteLinearEquation* discreteEqs = _discrete_system->getLinearEquation();
-        discreteEqs->construct(ElementBasedAssembler(TimeEulerElementAssembler<T_USER_ASSEMBLY>(t_n1, theta, _element_ode_assembler)));
+        IDiscreteLinearEquation* discreteEqs = _discrete_system->getLinearEquation(_eqs_id);
+        std::vector<size_t> list_dof_id(n_var);
+        for (size_t i=0; i<n_var; i++)
+            list_dof_id[i] = i;
+        discreteEqs->construct(ElementBasedAssembler(t_n1, _element_ode_assembler));
 
         //apply BC1,2
         for (size_t i=0; i<pro->getNumberOfDirichletBC(); i++) 
@@ -128,10 +177,11 @@ private:
 	}
 
 private:
-    T_USER_FEM_PROBLEM* _problem;
-    T_USER_ASSEMBLY _element_ode_assembler;
+    UserFemProblem* _problem;
+    UserTimeOdeAssembler _element_ode_assembler;
 
     DiscreteSystem *_discrete_system;
+    size_t _eqs_id;
     std::vector<FemLib::FemNodalFunctionScalar*> _u_n;
     std::vector<FemLib::FemNodalFunctionScalar*> _u_n1;
 };

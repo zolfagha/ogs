@@ -136,13 +136,19 @@ public:
         return _total_pt;
     }
 
-    void getListOfEqsID(const std::vector<size_t> &list_dofId, const std::vector<size_t> &ele_node_ids, const std::vector<size_t> &ele_node_size_order, std::vector<size_t> &local_dofmap) const
+    void getListOfEqsID(const std::vector<size_t> &ele_node_ids, const std::vector<size_t> &ele_node_size_order, std::vector<size_t> &local_dofmap) const
     {
-        for (size_t j=0; j<list_dofId.size(); j++) {
-            std::vector<size_t> tmp_map;
-            const DofMap *dofMap = getDofMap(j);
-            dofMap->getListOfEqsID(ele_node_ids, ele_node_size_order[dofMap->getOrder()], tmp_map);
-            local_dofmap.insert(local_dofmap.end(), tmp_map.begin(), tmp_map.end());
+        const size_t n_dof = getNumberOfDof();
+        if (n_dof<2) {
+            const DofMap *dofMap = getDofMap(0);
+            dofMap->getListOfEqsID(ele_node_ids, ele_node_size_order[dofMap->getOrder()-1], local_dofmap);
+        } else {
+            for (size_t j=0; j<n_dof; j++) {
+                std::vector<size_t> tmp_map;
+                const DofMap *dofMap = getDofMap(j);
+                dofMap->getListOfEqsID(ele_node_ids, ele_node_size_order[dofMap->getOrder()-1], tmp_map);
+                local_dofmap.insert(local_dofmap.end(), tmp_map.begin(), tmp_map.end());
+            }
         }
     }
 };

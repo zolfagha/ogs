@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "Base/CodingTools.h"
+
 namespace NumLib
 {
 
@@ -24,7 +26,7 @@ public:
         return (_time_current < t._time_current);
     }
 
-    size_t getTimeStep() const {return _time_stepping_count;};
+    size_t getTimeStepCount() const {return _time_stepping_count;};
     double getTime() const {return _time_current;};
     double getTimeStepSize() const {return _dt;};
 
@@ -42,12 +44,13 @@ private:
     double _dt;
     size_t _time_stepping_count;
 
-    TimeStep(const TimeStep &prev) 
-    {
-        _time_current = prev._time_current;
-        _dt = prev._dt;
-        _time_stepping_count = prev._time_stepping_count;
-    };
+    DISALLOW_COPY_AND_ASSIGN(TimeStep);
+    //TimeStep(const TimeStep &prev) 
+    //{
+    //    _time_current = prev._time_current;
+    //    _dt = prev._dt;
+    //    _time_stepping_count = prev._time_stepping_count;
+    //};
 };
 
 }

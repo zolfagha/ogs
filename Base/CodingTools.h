@@ -32,6 +32,15 @@ static void releaseObjectsInStdMap(T &object)
 };
 
 template <typename T>
+void releaseArrayObject(T* &obj)
+{
+    if (obj) {
+        delete [] obj;
+        obj = 0;
+    }
+}
+
+template <typename T>
 void releaseObject(T* &obj)
 {
     if (obj) {

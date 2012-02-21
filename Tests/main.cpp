@@ -12,7 +12,7 @@ TEST(Dummy, Test1)
 int main(int argc, char *argv[])
 {
     argc = 2;
-    argv[1] = "--gtest_filter=MATH.*";
+    argv[1] = "--gtest_filter=Num.Discrete*";
     //argv[1] = "--gtest_filter=*";
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
