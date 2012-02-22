@@ -80,6 +80,14 @@ bool AsyncPartitionedSystem::isAwake(const TimeStep &time)
     return false;
 };
 
+void AsyncPartitionedSystem::accept(const TimeStep &time)
+{
+    for (size_t i=0; i<_list_subproblems.size(); i++) {
+        ITransientCoupledSystem *solution = _list_subproblems[i];
+        solution->accept(time);
+    }
+}
+
 int AsyncPartitionedSystem::find(const ITransientCoupledSystem& sub) const
 {
     std::vector<ITransientCoupledSystem*>::const_iterator itr = std::find(_list_subproblems.begin(), _list_subproblems.end(), &sub);

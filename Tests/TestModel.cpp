@@ -14,6 +14,7 @@
 
 using namespace NumLib;
 
+#if 0
 
 TEST(Model, test1)
 {
@@ -28,3 +29,5 @@ TEST(Model, test1)
     timeStepping.setBeginning(.0);
     timeStepping.solve(100.);
 }
+#endif
+

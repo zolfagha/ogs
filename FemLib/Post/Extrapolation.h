@@ -27,6 +27,7 @@ public:
     void extrapolate(TemplateFEMIntegrationPointFunction<Tvalue> &ele_var, TemplateFEMNodalFunction<Tvalue> &nod_var)
     {
         const MeshLib::IMesh* msh = ele_var.getMesh();
+        LagrangianFeObjectContainer* feObjects = nod_var.getFeObjectContainer();
         MeshLib::TopologySequentialNodes2Elements node2eles(*msh);
         std::vector<Tvalue> vec_v(msh->getNumberOfNodes());
 
@@ -35,7 +36,7 @@ public:
             const std::vector<Tvalue> &gp_values = ele_var.getIntegrationPointValues(i);
             const size_t e_nnodes = e->getNumberOfNodes();
             std::vector<Tvalue> nodal_values(e_nnodes);
-            IFiniteElement *fe = nod_var.getFiniteElement(*e);
+            IFiniteElement *fe = feObjects->getFeObject(*e);
             fe->extrapolate(gp_values, nodal_values);
 
             for (size_t j=0; j<e_nnodes; j++) {

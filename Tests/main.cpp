@@ -12,6 +12,8 @@ TEST(Dummy, Test1)
 int main(int argc, char *argv[])
 {
     argc = 2;
+    //argv[1] = "--gtest_filter=Math.SparseLinearEQS";
+    //argv[1] = "--gtest_filter=Num.Discrete*:FEM.*";
     argv[1] = "--gtest_filter=Num.Discrete*";
     //argv[1] = "--gtest_filter=*";
     ::testing::InitGoogleTest(&argc, argv);

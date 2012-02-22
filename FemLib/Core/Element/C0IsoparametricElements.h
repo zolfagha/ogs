@@ -42,6 +42,7 @@ public:
             e.setMappedCoordinates(ele_map);
         }
         _mapping->initialize(e);
+        _integration->initialize(e, 2);
     }
 
     virtual void computeBasisFunctions(const double *x)

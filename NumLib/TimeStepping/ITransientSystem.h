@@ -17,7 +17,7 @@ public:
     virtual int solveTimeStep(const TimeStep &time) = 0;
     const TimeStep& getCurrentTime() const {return *_current_time;};
     void setCurrentTime(const TimeStep &t) {_current_time = const_cast<TimeStep*>(&t);};
-
+    virtual void accept(const TimeStep &time) = 0;
 private:
     TimeStep* _current_time;
 };

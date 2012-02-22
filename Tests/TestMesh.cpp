@@ -20,7 +20,7 @@ using namespace MeshLib;
 TEST(Mesh, topoN2N)
 {
     IMesh* msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
-    TopologyNode2Nodes topo_node2nodes(msh);
+    TopologyNode2NodesConnectedByEdges topo_node2nodes(msh);
 
     ASSERT_EQ(topo_node2nodes.getNumberOfNodes(), msh->getNumberOfNodes());
     size_t expected_conn_nodes0[] = {1,3};

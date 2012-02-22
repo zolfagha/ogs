@@ -87,7 +87,10 @@ class TemplateMeshBasedDiscreteLinearEquation : public AbstractMeshBasedDiscrete
 {
 public:
     ///
-    TemplateMeshBasedDiscreteLinearEquation(MeshLib::IMesh &msh, T_LINEAR_SOLVER &linear_solver) : AbstractMeshBasedDiscreteLinearEquation(msh), _eqs(&linear_solver) {};
+    TemplateMeshBasedDiscreteLinearEquation(MeshLib::IMesh &msh, T_LINEAR_SOLVER &linear_solver) 
+        : AbstractMeshBasedDiscreteLinearEquation(msh), _eqs(&linear_solver) 
+    {
+    };
 
     /// get the linear solver 
     MathLib::ILinearEquations* getLinearEquation() const

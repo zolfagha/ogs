@@ -2,6 +2,8 @@
 #pragma once
 
 #include <vector>
+#include <algorithm>
+
 #include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/LinAlg/Sparse/CRSMatrix.h"
@@ -25,7 +27,7 @@ public:
         _x.resize(length);
     }
 
-    void reset()
+    virtual void reset()
     {
         (*_A) = .0;
         _b.assign(_b.size(), .0);
@@ -57,7 +59,7 @@ public:
         for (size_t i=0; i<vec_row_pos.size(); i++) {
             const size_t rowId = vec_row_pos[i];
             for (size_t j=0; j<vec_col_pos.size(); j++) {
-                const size_t colId = vec_row_pos[i];
+                const size_t colId = vec_col_pos[j];
                 _A->addValue(rowId, colId, fkt*sub_matrix(i,j));
             }
         }
@@ -96,17 +98,21 @@ public:
         return &_x[0];
     }
 
-    void setKnownX(size_t row_id, double x)
+    void setX(size_t i, double v)
     {
-
+        _x[i] = v;
     }
 
-    void setKnownX(const std::vector<size_t> &vec_id, const std::vector<double> &vec_x)
-    {
-        for (size_t i=0; i<vec_id.size(); ++i)
-            setKnownX(vec_id[i], vec_x[i]);
-    }
+    //void setKnownX(size_t row_id, double x)
+    //{
 
+    //}
+
+    //void setKnownX(const std::vector<size_t> &vec_id, const std::vector<double> &vec_x)
+    //{
+    //    for (size_t i=0; i<vec_id.size(); ++i)
+    //        setKnownX(vec_id[i], vec_x[i]);
+    //}
 
 private:
     CRSMatrix<double, IDX_TYPE> *_A;
@@ -168,9 +174,38 @@ public:
 
     void solve();
 
+    void setKnownX(size_t id, double x)
+    {
+        _vec_knownX_id.push_back(id);
+        _vec_knownX_x.push_back(x);
+    }
+
+    void setKnownX(const std::vector<size_t> &vec_id, const std::vector<double> &vec_x)
+    {
+        _vec_knownX_id.insert(_vec_knownX_id.end(), vec_id.begin(), vec_id.end());
+        _vec_knownX_x.insert(_vec_knownX_x.end(), vec_x.begin(), vec_x.end());
+    }
+
+    void reset()
+    {
+        CRSLinearEquationsBase<unsigned>::reset();
+        _vec_knownX_id.clear();
+        _vec_knownX_x.clear();
+        _map_solved_orgEqs.clear();
+        _tmp_b.assign(_tmp_b.size(), .0);
+        _tmp_x.assign(_tmp_x.size(), .0);
+    }
+
 private:
     SpLinearOptions _option;
+    std::vector<size_t> _vec_knownX_id;
+    std::vector<double> _vec_knownX_x;
+    std::vector<double> _tmp_b;
+    std::vector<double> _tmp_x;
+    std::map<size_t,size_t> _map_solved_orgEqs;
 
+    void setKnownXi_ReduceSizeOfEQS(const std::vector<size_t> &vec_id, const std::vector<double> &vec_x);
+    void solveEqs(CRSMatrix<double, unsigned> *A, double *rhs, double *x, SpLinearOptions &option);
 };
 
 }

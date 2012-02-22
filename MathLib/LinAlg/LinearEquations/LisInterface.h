@@ -83,6 +83,11 @@ public:
     }
 
     void solve();
+
+    void setKnownX(size_t id, double x) {};
+
+    void setKnownX(const std::vector<size_t> &vec_id, const std::vector<double> &vec_x) {};
+
 private:
     LIS_option _option;
 };

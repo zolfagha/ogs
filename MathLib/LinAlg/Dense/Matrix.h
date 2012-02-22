@@ -28,7 +28,7 @@ public:
    Matrix();
    Matrix (size_t rows, size_t cols);
    Matrix (size_t rows, size_t cols, const T& val);
-   Matrix (const Matrix &src);
+   Matrix (const Matrix<T> &src);
 
    ~Matrix ();
 
@@ -41,7 +41,14 @@ public:
    void axpy ( T alpha, const T* x, T beta, T* y) const;
 
    /**
-    * Add operation for all matrix entities
+    * Assignment operation for all matrix entities
+    * @param a
+    * @return
+    */
+   Matrix<T>& operator= (const Matrix<T> &src);
+
+   /**
+    * Set operation for all matrix entities
     * @param a
     * @return
     */
@@ -201,6 +208,15 @@ template<class T> Matrix<T>::Matrix (const Matrix& src) :
    for (size_t i = 0; i < nrows; i++)
       for (size_t j = 0; j < ncols; j++)
          data[address(i,j)] = src (i, j);
+}
+
+template<class T> Matrix<T>& Matrix<T>::operator= (const Matrix<T> &src)
+{
+    assert(nrows == src.getNRows() && ncols==src.getNCols());
+    for (size_t i = 0; i < nrows; i++)
+        for (size_t j = 0; j < ncols; j++)
+            data[address(i,j)] = src (i, j);
+    return *this;
 }
 
 template <class T> Matrix<T>::~Matrix ()

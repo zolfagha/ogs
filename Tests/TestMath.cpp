@@ -4,6 +4,7 @@
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/LinAlg/LinearEquations/LinearEquationsFactory.h"
 
+#include "MathLib/LinAlg/LinearEquations/SparseLinearEquations.h"
 #ifdef USE_PETSC
 #include "MathLib/LinAlg/LinearEquations/PETScLinearSolver.h"
 #endif
@@ -31,14 +32,68 @@ TEST(Math, Matrix_transposeAndMultiply)
     ASSERT_EQ(matC(1,1), 8.0);
 }
 
-TEST(Math, LinearEQS)
+TEST(Math, SparseLinearEQS)
 {
-    ILinearEquations *eqs = LinearEquationsFactory::create(LinearEquationsType::SparseEquations);
+    // set problem
+    const size_t dim_eqs = 9;
+    size_t int_dirichlet_bc_id[] = {2,5,8,0,3,6};
+    std::vector<size_t> list_dirichlet_bc_id(int_dirichlet_bc_id, int_dirichlet_bc_id+6);
+    std::vector<double> list_dirichlet_bc_value(6);
+    fill(list_dirichlet_bc_value.begin(), list_dirichlet_bc_value.begin()+3, .0);
+    fill(list_dirichlet_bc_value.begin()+3, list_dirichlet_bc_value.end(), 1.0);
 
+    double mat[] = {
+        6.66667e-012, -1.66667e-012, 0, -1.66667e-012, -3.33333e-012, 0, 0, 0, 0, 
+        -1.66667e-012, 1.33333e-011, -1.66667e-012, -3.33333e-012, -3.33333e-012, -3.33333e-012, 0, 0, 0, 
+        0, -1.66667e-012, 6.66667e-012, 0, -3.33333e-012, -1.66667e-012, 0, 0, 0, 
+        -1.66667e-012, -3.33333e-012, 0, 1.33333e-011, -3.33333e-012, 0, -1.66667e-012, -3.33333e-012, 0, 
+        -3.33333e-012, -3.33333e-012, -3.33333e-012, -3.33333e-012, 2.66667e-011, -3.33333e-012, -3.33333e-012, -3.33333e-012, -3.33333e-012, 
+        0, -3.33333e-012, -1.66667e-012, 0, -3.33333e-012, 1.33333e-011, 0, -3.33333e-012, -1.66667e-012, 
+        0, 0, 0, -1.66667e-012, -3.33333e-012, 0, 6.66667e-012, -1.66667e-012, 0, 
+        0, 0, 0, -3.33333e-012, -3.33333e-012, -3.33333e-012, -1.66667e-012, 1.33333e-011, -1.66667e-012, 
+        0, 0, 0, 0, -3.33333e-012, -1.66667e-012, 0, -1.66667e-012, 6.66667e-012
+    };
+
+    //
+    RowMajorSparsity sparse;
+    sparse.resize(dim_eqs);
+    for (size_t i=0; i<dim_eqs; i++) {
+        for (size_t j=0; j<dim_eqs; j++) {
+            if (mat[i*dim_eqs+j]!=.0)
+                sparse[i].insert(j);
+        }
+    }
+
+    // construct discrete eqs
+    SparseLinearEquations eqs;
+    eqs.create(sparse.size(), &sparse);
+    eqs.getOption().solver_type = SparseLinearEquations::SolverCG;
+    eqs.getOption().precon_type = SparseLinearEquations::NONE;
+
+    //
+    for (size_t i=0; i<dim_eqs; i++) {
+        for (size_t j=0; j<dim_eqs; j++) {
+            double v = mat[i*dim_eqs+j];
+            if (v!=.0)
+                eqs.addA(i, j, v);
+        }
+    }
+
+    eqs.setKnownX(list_dirichlet_bc_id, list_dirichlet_bc_value);
+
+    eqs.solve();
+
+    std::vector<double> exH(9);
+    for (size_t i=0; i<9; i++) {
+        if (i%3==0) exH[i] = 1.0;
+        if (i%3==1) exH[i] = 0.5;
+        if (i%3==2) exH[i] = 0.;
+    }
+    ASSERT_DOUBLE_ARRAY_EQ(&exH[0], eqs.getX(), dim_eqs, 1.e-5);
 }
 
 #ifdef USE_PETSC
-TEST(MATH, PETSC)
+TEST(Math, PETSC)
 {
     // set problem
     const size_t dim_eqs = 9;

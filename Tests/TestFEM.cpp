@@ -74,8 +74,8 @@ public:
         head = new FemNodalFunctionScalar(*msh, PolynomialOrder::Linear);
         vel = new FEMIntegrationPointFunctionVector2d(msh);
         //bc
-        vec_bc1.push_back(new FemDirichletBC<double>(head, poly_right, new MathLib::FunctionConstant<double, GeoLib::Point>(.0), new DiagonalizeMethod())); //TODO should BC objects be created by fe functions?
-        vec_bc2.push_back(new FemNeumannBC<double, double>(head, poly_left, new MathLib::FunctionConstant<double, GeoLib::Point>(-1e-5)));
+        vec_bc1.push_back(new FemDirichletBC<double>(head, poly_right, false, new MathLib::FunctionConstant<double, GeoLib::Point>(.0), new DiagonalizeMethod())); //TODO should BC objects be created by fe functions?
+        vec_bc2.push_back(new FemNeumannBC<double, double>(head, poly_left, false, new MathLib::FunctionConstant<double, GeoLib::Point>(-1e-5)));
 
         K = new MathLib::FunctionConstant<double, double*>(1.e-11);
     }
@@ -94,11 +94,12 @@ public:
         double* globalRHS = eqs.getRHS();
 
         //assembly
+        LagrangianFeObjectContainer* feObjects = gw.head->getFeObjectContainer();
         MathLib::Matrix<double> localK;
         std::vector<size_t> e_node_id_list;
         for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
             MeshLib::IElement *e = msh->getElemenet(i_e);
-            IFiniteElement *fe = gw.head->getFiniteElement(*e);
+            IFiniteElement *fe = feObjects->getFeObject(*e);
             const size_t &n_dof = fe->getNumberOfVariables();
             localK.resize(n_dof, n_dof);
             localK = .0;
@@ -125,10 +126,11 @@ public:
     static void calculateVelocity(GWFemTest &gw)
     {
         const MeshLib::IMesh *msh = gw.msh;
+        LagrangianFeObjectContainer* feObjects = gw.head->getFeObjectContainer();
         //calculate vel (vel=f(h))
         for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
             MeshLib::IElement* e = msh->getElemenet(i_e);
-            IFiniteElement *fe = gw.head->getFiniteElement(*e);
+            IFiniteElement *fe = feObjects->getFeObject(*e);
             std::vector<double> local_h(e->getNumberOfNodes());
             for (size_t j=0; j<e->getNumberOfNodes(); j++)
                 local_h[j] = gw.head->getValue(e->getNodeID(j));
@@ -245,7 +247,7 @@ TEST(FEM, ExtrapolateAverage2)
     gw.define(msh);
     delete gw.K;
     gw.K = new MyFunction<double, double*>();
-    gw.vec_bc1.push_back(new FemDirichletBC<double>(gw.head, gw.rec->getLeft(), new MathLib::FunctionConstant<double, GeoLib::Point>(2.e+6), new DiagonalizeMethod())); 
+    gw.vec_bc1.push_back(new FemDirichletBC<double>(gw.head, gw.rec->getLeft(), false, new MathLib::FunctionConstant<double, GeoLib::Point>(2.e+6), new DiagonalizeMethod())); 
     delete gw.vec_bc2[0];
     gw.vec_bc2.clear();
 

@@ -31,8 +31,8 @@ class ElementBasedAssembler : public IDiscreteLinearEquationAssembler
 {
 public:
     ///
-    ElementBasedAssembler(const TimeStep &time, ITransientElemenetLocalAssembler &a) 
-        : _element_assembler(&a), _timestep(&time)
+    ElementBasedAssembler(const TimeStep &time, std::vector<std::vector<double>*> &u0, ITransientElemenetLocalAssembler &a) 
+        : _element_assembler(&a), _timestep(&time), _u0(&u0)
     {
 
     }
@@ -50,15 +50,18 @@ public:
         std::vector<size_t> ele_node_ids, ele_node_size_order, local_dofmap;
         const size_t n_ele = msh.getNumberOfElements();
 
+        std::vector<double> local_u_n;
         for (size_t i=0; i<n_ele; i++) {
             MeshLib::IElement *e = msh.getElemenet(i);
             // get dof map
             e->getNodeIDList(e->getMaximumOrder(), ele_node_ids);
             e->getListOfNumberOfNodesForAllOrders(ele_node_size_order);
             dofManager.getListOfEqsID(ele_node_ids, ele_node_size_order, local_dofmap);
+            // get previous time step results
+            dofManager.getLocalVector(ele_node_ids, ele_node_size_order, *_u0, local_u_n);
             // local assembly
             localEQS.create(local_dofmap.size());
-            _element_assembler->assembly(time, *e, localEQS);
+            _element_assembler->assembly(time, *e, local_u_n, localEQS);
             // update global
             eqs.addA(local_dofmap, *localEQS.getA());
             eqs.addRHS(local_dofmap, localEQS.getRHS());
@@ -70,6 +73,7 @@ public:
 private:
     ITransientElemenetLocalAssembler* _element_assembler;
     const TimeStep* _timestep;
+    std::vector<std::vector<double>*>* _u0;
 };
 
 class NodeBasedAssembler  : public IDiscreteLinearEquationAssembler

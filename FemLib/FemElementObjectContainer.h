@@ -18,17 +18,18 @@ namespace FemLib
 class FeObjectCachePerFeType
 {
 public:
-    FeObjectCachePerFeType() {};
+    FeObjectCachePerFeType(MeshLib::IMesh &msh) : _msh(&msh) {};
+
     virtual ~FeObjectCachePerFeType()
     {
         Base::releaseObjectsInStdMap(_mapFeObj);
     }
 
-    IFiniteElement* getFeObject(FiniteElementType::type fe_type, MeshLib::IMesh &msh)
+    IFiniteElement* getFeObject(FiniteElementType::type fe_type)
     {
         IFiniteElement *fe = 0;
         if (_mapFeObj.count(fe_type)==0) {
-            fe = FemElementFactory::create(fe_type, msh);
+            fe = FemElementFactory::create(fe_type, *_msh);
             _mapFeObj[fe_type] = fe;
         } else {
             fe = _mapFeObj[fe_type];
@@ -36,8 +37,11 @@ public:
         return fe;
     }
 
+    MeshLib::IMesh* getMesh() const {return _msh;};
+
 private:
     std::map<FiniteElementType::type, IFiniteElement*> _mapFeObj;
+    MeshLib::IMesh *_msh;
 
     DISALLOW_COPY_AND_ASSIGN(FeObjectCachePerFeType);
 };
@@ -49,7 +53,7 @@ class IFeObjectContainer
 {
 public:
     /// get a finite element object for the given mesh element
-    virtual IFiniteElement* getFeObject(const MeshLib::IElement &e, MeshLib::IMesh &msh) = 0;
+    virtual IFiniteElement* getFeObject(const MeshLib::IElement &e) = 0;
 };
 
 /**
@@ -58,7 +62,7 @@ public:
 class FeObjectContainerPerElement : public IFeObjectContainer
 {
 public:
-    FeObjectContainerPerElement(size_t ele_size)
+    FeObjectContainerPerElement(MeshLib::IMesh &msh, size_t ele_size) : _msh(&msh)
     {
         _vec_fem.resize(ele_size);
     }
@@ -67,17 +71,18 @@ public:
         Base::releaseObjectsInStdVector(_vec_fem);
     }
 
-    void addFiniteElement(size_t i, FiniteElementType::type fe_type, MeshLib::IMesh &msh)
+    void addFiniteElement(size_t i, FiniteElementType::type fe_type)
     {
-        _vec_fem[i] = FemElementFactory::create(fe_type, msh);
+        _vec_fem[i] = FemElementFactory::create(fe_type, *_msh);
     }
 
-    virtual IFiniteElement* getFeObject(const MeshLib::IElement &e, MeshLib::IMesh &msh) 
+    virtual IFiniteElement* getFeObject(const MeshLib::IElement &e) 
     {
         return _vec_fem[e.getID()];
     }
 
 private:
+    MeshLib::IMesh* _msh;
     std::vector<IFiniteElement*> _vec_fem;
     DISALLOW_COPY_AND_ASSIGN(FeObjectContainerPerElement);
 };
@@ -89,7 +94,7 @@ private:
 class LagrangianFeObjectContainer : public FeObjectCachePerFeType, public IFeObjectContainer
 {
 public:
-    LagrangianFeObjectContainer() 
+    LagrangianFeObjectContainer(MeshLib::IMesh &msh) :  FeObjectCachePerFeType(msh)
     {
         _order = 1;
     }
@@ -99,10 +104,12 @@ public:
         _order = order;
     }
 
-    virtual IFiniteElement* getFeObject(const MeshLib::IElement &e, MeshLib::IMesh &msh)
+    virtual IFiniteElement* getFeObject(const MeshLib::IElement &e)
     {
         FiniteElementType::type fe_type = getFeType(e.getShapeType(), _order);
-        return FeObjectCachePerFeType::getFeObject(fe_type, msh);
+        IFiniteElement* fe = FeObjectCachePerFeType::getFeObject(fe_type);
+        fe->configure(*const_cast<MeshLib::IElement*>(&e));
+        return fe;
     }
 
 private:

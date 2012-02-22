@@ -239,6 +239,25 @@ public:
 		}
 	}
 
+#ifndef NDEBUG
+	void printMat() const
+	{
+		for (IDX_TYPE k(0); k<MatrixBase::_n_rows; k++) {
+			std::cout << k << ": " << std::flush;
+			const IDX_TYPE row_end(_row_ptr[k+1]);
+			for (IDX_TYPE j(_row_ptr[k]); j<row_end; j++) {
+				std::cout << _col_idx[j] << " " << std::flush;
+			}
+			std::cout << std::endl;
+		}
+        for (IDX_TYPE k(0); k<getNNZ(); k++) {
+            std::cout << _data[k] << " ";
+        }
+        std::cout << std::endl;
+	}
+#endif
+
+
 protected:
 	void removeRows (IDX_TYPE n_rows_cols, IDX_TYPE const*const rows)
 	{
@@ -369,20 +388,6 @@ protected:
 		delete[] col_idx_trans;
 		delete[] data_trans;
 	}
-
-#ifndef NDEBUG
-	void printMat() const
-	{
-		for (IDX_TYPE k(0); k<MatrixBase::_n_rows; k++) {
-			std::cout << k << ": " << std::flush;
-			const IDX_TYPE row_end(_row_ptr[k+1]);
-			for (IDX_TYPE j(_row_ptr[k]); j<row_end; j++) {
-				std::cout << _col_idx[j] << " " << std::flush;
-			}
-			std::cout << std::endl;
-		}
-	}
-#endif
 
 	IDX_TYPE *_row_ptr;
 	IDX_TYPE *_col_idx;

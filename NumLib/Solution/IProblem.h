@@ -32,13 +32,13 @@ public:
     /// get initial condition
     virtual MathLib::IFunction<double, GeoLib::Point>* getIC(int var_type) const = 0;
     /// add a Dirichlet boundary condition
-    virtual void addDirichletBC(int var_type,  GeoLib::GeoObject &geo, MathLib::IFunction<double, GeoLib::Point>& bc1) = 0;
+    virtual void addDirichletBC(int var_type,  GeoLib::GeoObject &geo, bool is_transient, MathLib::IFunction<double, GeoLib::Point>& bc1) = 0;
     /// get the number of Dirichlet BCs
     virtual size_t getNumberOfDirichletBC(int var_type) const = 0;
     /// get the Dirichlet BC
     virtual MathLib::IFunction<double, GeoLib::Point>* getDirichletBC(int var_type, int bc_id) const = 0;
     /// add a Neumann boundary condition
-    virtual void addNeumannBC(int var_type,  GeoLib::GeoObject &geo, MathLib::IFunction<double, GeoLib::Point>& bc2) = 0;
+    virtual void addNeumannBC(int var_type,  GeoLib::GeoObject &geo, bool is_transient, MathLib::IFunction<double, GeoLib::Point>& bc2) = 0;
     /// get the number of Neumann BCs
     virtual size_t getNumberOfNeumannBC(int var_type) const = 0;
     /// get the Neumann BC
@@ -117,9 +117,9 @@ public:
         return _map_ic;
     };
 
-    void addDirichletBC(int, GeoLib::GeoObject &geo, MathLib::IFunction<double, GeoLib::Point>& bc1)
+    void addDirichletBC(int, GeoLib::GeoObject &geo, bool is_transient, MathLib::IFunction<double, GeoLib::Point>& bc1)
     {
-        addDirichletBC(*new FemLib::FemDirichletBC<double>(_map_var, &geo, &bc1, &FemLib::DiagonalizeMethod()));
+        addDirichletBC(*new FemLib::FemDirichletBC<double>(_map_var, &geo, is_transient, &bc1, &FemLib::DiagonalizeMethod()));
     }
 
 
@@ -135,9 +135,9 @@ public:
         return _map_bc1[bc_id];
     };
 
-    void addNeumannBC(int, GeoLib::GeoObject &geo, MathLib::IFunction<double, GeoLib::Point>& bc2)
+    void addNeumannBC(int, GeoLib::GeoObject &geo, bool is_transient, MathLib::IFunction<double, GeoLib::Point>& bc2)
     {
-        addNeumannBC(*new FemLib::FemNeumannBC<double, double>(_map_var, &geo, &bc2));
+        addNeumannBC(*new FemLib::FemNeumannBC<double, double>(_map_var, &geo, is_transient, &bc2));
     }
 
     size_t getNumberOfNeumannBC(int n=0) const {return _map_bc2.size();};

@@ -34,7 +34,7 @@ TopologyRandomNodes2Elements::TopologyRandomNodes2Elements(const IMesh &msh, con
     }
 }
 
-TopologyNode2Nodes::TopologyNode2Nodes(IMesh *msh) 
+TopologyNode2NodesConnectedByEdges::TopologyNode2NodesConnectedByEdges(IMesh *msh) 
 {
     _node2conn_nodes.resize(msh->getNumberOfNodes());
     const size_t nr_ele = msh->getNumberOfElements();
@@ -51,6 +51,22 @@ TopologyNode2Nodes::TopologyNode2Nodes(IMesh *msh)
     }
 }
 
+TopologyNode2NodesConnectedByElements::TopologyNode2NodesConnectedByElements(IMesh *msh) 
+{
+    _node2conn_nodes.resize(msh->getNumberOfNodes());
+    const size_t nr_ele = msh->getNumberOfElements();
+    for (size_t i=0; i<nr_ele; i++) {
+        const IElement* e = msh->getElemenet(i);
+        const size_t e_nnodes = e->getNumberOfNodes();
+        for (size_t j=0; j<e_nnodes; j++) {
+            std::set<size_t> &set_conn_nodes = _node2conn_nodes[e->getNodeID(j)];
+            for (size_t k=0; k<e_nnodes; k++) {
+                if (j==k) continue;
+                set_conn_nodes.insert(e->getNodeID(k));
+            }
+        }
+    }
+}
 
 } // end namespace
 

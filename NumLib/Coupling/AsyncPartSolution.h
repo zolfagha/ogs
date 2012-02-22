@@ -79,6 +79,8 @@ public:
 	
 	bool isAwake(const TimeStep &time);
 
+    void accept(const TimeStep &time);
+
     void getActiveProblems(const TimeStep &time, std::vector<ICoupledSystem*> &list_active_problems);
 
 private:

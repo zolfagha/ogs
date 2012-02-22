@@ -15,8 +15,8 @@
 #include "NumLib/TimeStepping/ITransientSystem.h"
 #include "NumLib/Discrete/DoF.h"
 #include "NumLib/Discrete/DiscreteSystem.h"
+#include "NumLib/Discrete/SparsityBuilder.h"
 #include "NumLib/Solution/IProblem.h"
-
 
 namespace NumLib
 {
@@ -58,6 +58,12 @@ public:
         return (time.getTime()==_tim->next(time.getTime()));
     }
 
+    void accept(const TimeStep &time) 
+    {
+        _tim->accept();
+    };
+
+
 private:
     ITimeStepFunction* _tim;
 };
@@ -97,16 +103,37 @@ public:
         for (size_t i=0; i<n_var; i++) {
             _u_n1[i] = (FemLib::FemNodalFunctionScalar*) problem.getIC(i);
         }
-        // create linear equation
-        _eqs_id = _discrete_system->addLinearEquation(*new T_LINEAR_SOLVER);
+        // create linear solver
+        MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes(dis.getMesh());
+        RowMajorSparsity sparse;
+        if (n_var==1) {
+            SparsityBuilder::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, sparse);
+        } else {
+            //bug
+            SparsityBuilder::createRowMajorSparsityForMultipleDOFs(topo_node2nodes, n_var, sparse);
+        }
+        _linear_solver = new T_LINEAR_SOLVER();
+        _linear_solver->create(sparse.size(), &sparse);
+        // create linear equation systems
+        _eqs_id = _discrete_system->addLinearEquation(*_linear_solver);
         IDiscreteLinearEquation *linear_eqs = _discrete_system->getLinearEquation(_eqs_id);
-        // define dof map
+        // create dof map
         DofMapManager* dofManager = linear_eqs->getDofMapManger();
         for (size_t i=0; i<n_var; i++) {
             dofManager->addDoF(problem.getField(i)->getNumberOfNodes());
         }
         dofManager->construct();
     };
+
+    virtual ~SingleStepLinearFEM()
+    {
+        Base::releaseObject(_linear_solver);
+    }
+
+    T_LINEAR_SOLVER* getLinearEquationSolver()
+    {
+        return _linear_solver;
+    }
 
     /// solve 
     int solveTimeStep(const TimeStep &t_n1)
@@ -135,33 +162,32 @@ private:
     /// 
 	int solve(const TimeStep &t_n1, const std::vector<FemLib::FemNodalFunctionScalar*>& u_n, std::vector<FemLib::FemNodalFunctionScalar*>& u_n1) 
     {
+        // prepare data
         UserFemProblem* pro = _problem;
         const size_t n_var = pro->getNumberOfVariables();
         for (size_t i=0; i<n_var; i++) {
             u_n1[i] = new FemLib::FemNodalFunctionScalar(*u_n[i]);
         }
-		
-		// collect data
-		const double delta_t = t_n1.getTimeStepSize();
+        std::vector<std::vector<double>*> vec_un(n_var);
+        for (size_t i=0; i<n_var; i++) {
+            vec_un[i] = u_n[i]->getNodalValuesAsStdVec();
+        }
 
+        // setup BC
         for (size_t i=0; i<pro->getNumberOfDirichletBC(); i++) 
             pro->getFemDirichletBC(i)->setup();
         for (size_t i=0; i<pro->getNumberOfNeumannBC(); i++) 
             pro->getFemNeumannBC(i)->setup();
 
 		// assembly
-        const MeshLib::IMesh *msh = u_n1[0]->getMesh();
         IDiscreteLinearEquation* discreteEqs = _discrete_system->getLinearEquation(_eqs_id);
-        std::vector<size_t> list_dof_id(n_var);
-        for (size_t i=0; i<n_var; i++)
-            list_dof_id[i] = i;
-        discreteEqs->construct(ElementBasedAssembler(t_n1, _element_ode_assembler));
+        discreteEqs->construct(ElementBasedAssembler(t_n1, vec_un, _element_ode_assembler));
 
         //apply BC1,2
-        for (size_t i=0; i<pro->getNumberOfDirichletBC(); i++) 
-            pro->getFemDirichletBC(i)->apply(*discreteEqs->getLinearEquation());
         for (size_t i=0; i<pro->getNumberOfNeumannBC(); i++) 
             pro->getFemNeumannBC(i)->apply(discreteEqs->getRHS());
+        for (size_t i=0; i<pro->getNumberOfDirichletBC(); i++) 
+            pro->getFemDirichletBC(i)->apply(*discreteEqs->getLinearEquation());
 		
 		// solve
 		discreteEqs->solve();
@@ -179,6 +205,7 @@ private:
 private:
     UserFemProblem* _problem;
     UserTimeOdeAssembler _element_ode_assembler;
+    T_LINEAR_SOLVER* _linear_solver;
 
     DiscreteSystem *_discrete_system;
     size_t _eqs_id;

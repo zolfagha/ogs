@@ -63,6 +63,9 @@ public:
     size_t getOrder() const {return _order;};
 };
 
+/**
+ * \brief Dof map manger
+ */
 class DofMapManager
 {
 private:
@@ -148,6 +151,32 @@ public:
                 const DofMap *dofMap = getDofMap(j);
                 dofMap->getListOfEqsID(ele_node_ids, ele_node_size_order[dofMap->getOrder()-1], tmp_map);
                 local_dofmap.insert(local_dofmap.end(), tmp_map.begin(), tmp_map.end());
+            }
+        }
+    }
+
+    size_t getTotalNumberOfDOFs(const std::vector<size_t> &list_vec_entry_id, const std::vector<size_t> &list_vec_size_for_order) const
+    {
+        size_t s = 0;
+        const size_t n_dof = getNumberOfDof();
+        for (size_t i=0; i<n_dof; i++) {
+            const DofMap *dofMap = getDofMap(i);
+            s += list_vec_size_for_order[dofMap->getOrder()-1];
+        }
+        return s;
+    }
+
+    /// create a subset of vector u corresponding to the given vector index
+    void getLocalVector(const std::vector<size_t> &list_vec_entry_id, const std::vector<size_t> &list_vec_size_for_order, const std::vector<std::vector<double>*> &list_multiple_u, std::vector<double> &local_u) const
+    {
+        local_u.clear();
+        const size_t n_dof = getNumberOfDof();
+        for (size_t i=0; i<n_dof; i++) {
+            const DofMap *dofMap = getDofMap(i);
+            const size_t vec_size = list_vec_size_for_order[dofMap->getOrder()-1];
+            const std::vector<double> &dof_u = *list_multiple_u[i];
+            for (size_t j=0; j<vec_size; j++) {
+                local_u.push_back(dof_u[list_vec_entry_id[j]]);
             }
         }
     }

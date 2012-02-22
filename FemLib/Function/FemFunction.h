@@ -60,7 +60,6 @@ public:
     ///
     virtual ~TemplateFEMNodalFunction() 
     {
-        //Base::releaseArrayObject(_nodal_values);
         Base::releaseObject(_feObjects);
     }
 
@@ -79,22 +78,28 @@ public:
         return obj;
     };
 
+    /// get the spatial dimension
     size_t getDimension() const { return _msh->getDimension(); }
-
+    /// get the mesh
     const MeshLib::IMesh* getMesh() const { return _msh; }
+    /// get the number of nodes
+    size_t getNumberOfNodes() const { return _msh->getNumberOfNodes(); }
 
 
+    /// evaluate this function at the given point
     Tvalue eval(const GeoLib::Point &pt) 
     {
         throw std::exception("eval() is not implemented yet.");
         return _nodal_values[0];
     };
 
+    /// get nodal value
     Tvalue& getValue(int node_id)
     {
         return _nodal_values[node_id];
     }
 
+    /// get an array of nodal values
     Tvalue* getNodalValues() 
     {
         if (_nodal_values.size()>0)
@@ -103,47 +108,57 @@ public:
             return 0;
     }
 
-    IFiniteElement* getFiniteElement(MeshLib::IElement &e)
+    std::vector<Tvalue>* getNodalValuesAsStdVec() 
     {
-        _feObjects->setPolynomialOrder(_order);
-        IFiniteElement* fe = _feObjects->getFeObject(e, *_msh);
-        fe->configure(e);
-        fe->getIntegrationMethod()->initialize(e, 2);
-
-        return fe;
+        return &_nodal_values;
     }
 
+    /// set nodal values
     void setNodalValues( Tvalue* x ) 
     {
         std::copy(x, x+getNumberOfNodes(), _nodal_values.begin());
     }
 
+    /// reset nodal values with the given value
     void resetNodalValues (Tvalue &v)
     {
         std::fill(_nodal_values.begin(), _nodal_values.end(), v);
     }
 
-    size_t getNumberOfNodes() const 
+    LagrangianFeObjectContainer* getFeObjectContainer()
     {
-        return _msh->getNumberOfNodes();
+        return _feObjects;
     }
+
+    ///// get finite element object
+    //IFiniteElement* getFiniteElement(MeshLib::IElement &e)
+    //{
+    //    _feObjects->setPolynomialOrder(_order);
+    //    IFiniteElement* fe = _feObjects->getFeObject(e);
+    //    fe->configure(e);
+    //    fe->getIntegrationMethod()->initialize(e, 2);
+
+    //    return fe;
+    //}
+
 
 private:
     std::vector<Tvalue> _nodal_values;
-    //FEMInterpolation* _fe;
     MeshLib::IMesh* _msh;
     PolynomialOrder::type _order;
     LagrangianFeObjectContainer* _feObjects;
 
+    /// initialize 
     void initialize(MeshLib::IMesh &msh, PolynomialOrder::type order)
     {
         _msh = &msh;
         _order = order;
         size_t nnodes = msh.getNumberOfNodes();
         _nodal_values.resize(nnodes);
-        _feObjects = new LagrangianFeObjectContainer();
+        _feObjects = new LagrangianFeObjectContainer(msh);
     }
 
+    /// assigne this object from the given object
     void assign(const TemplateFEMNodalFunction<Tvalue> &org)
     {
         initialize(*org._msh, org._order);

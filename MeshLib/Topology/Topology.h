@@ -41,13 +41,20 @@ private:
     std::map<size_t, std::vector<size_t> > _map_node2conn_eles;
 };
 
+class ITopologyNode2Nodes
+{
+public:
+    virtual const std::set<size_t>& getConnectedNodes(size_t node_id) const = 0;
+    virtual size_t getNumberOfNodes() const = 0;
+};
+
 /**
  * \brief Mesh topological data: node <-> connected nodes
  */
-class TopologyNode2Nodes
+class TopologyNode2NodesConnectedByEdges : public ITopologyNode2Nodes
 {
 public:
-    TopologyNode2Nodes(IMesh *msh);
+    TopologyNode2NodesConnectedByEdges(IMesh *msh);
 
     const std::set<size_t>& getConnectedNodes(size_t node_id) const 
     {
@@ -63,6 +70,24 @@ private:
     std::vector<std::set<size_t>> _node2conn_nodes;
 };
 
+class TopologyNode2NodesConnectedByElements : public ITopologyNode2Nodes
+{
+public:
+    TopologyNode2NodesConnectedByElements(IMesh *msh);
+
+    const std::set<size_t>& getConnectedNodes(size_t node_id) const 
+    {
+        return _node2conn_nodes[node_id];
+    }
+
+    size_t getNumberOfNodes() const 
+    {
+        return _node2conn_nodes.size();
+    }
+
+private:
+    std::vector<std::set<size_t>> _node2conn_nodes;
+};
 
 
 }

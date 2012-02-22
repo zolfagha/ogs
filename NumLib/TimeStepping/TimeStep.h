@@ -14,6 +14,7 @@ class TimeStep
 public:
     TimeStep() : _time_current(.0), _dt(.0), _time_stepping_count(0) {};
     TimeStep(double t) : _time_current(t), _dt(.0), _time_stepping_count(0) {};
+    TimeStep(double t, double dt) : _time_current(t), _dt(dt), _time_stepping_count(0) {};
     TimeStep(const TimeStep &prev, double t) 
     {
         _time_current = t;

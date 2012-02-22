@@ -57,13 +57,16 @@ class FemDirichletBC : IFemBC, public MathLib::IFunction<Tval, GeoLib::Point>
 {
 public:
     ///
-    explicit FemDirichletBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, MathLib::IFunction<Tval, GeoLib::Point> *bc_func, IDirichletBCMethod *method)
+    explicit FemDirichletBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, MathLib::IFunction<Tval, GeoLib::Point> *bc_func, IDirichletBCMethod *method)
     {
         _var = var;
         _geo = geo;
         _bc_func = bc_func->clone();
         _method = method;
+        _is_transient = is_transient;
+        _do_setup = true;
     }
+
     virtual ~FemDirichletBC()
     {
     }
@@ -71,6 +74,9 @@ public:
     /// setup B.C.
     void setup()
     {
+        if (!_do_setup) return;
+        if (!_is_transient) _do_setup = false;
+
         const MeshLib::IMesh *msh = _var->getMesh();
         // pickup nodes on geo
         MeshLib::findNodesOnGeometry(msh, _geo, &_vec_nodes);
@@ -80,6 +86,8 @@ public:
             const GeoLib::Point* x = msh->getNodeCoordinatesRef(_vec_nodes[i]);
             _vec_values[i] = _bc_func->eval(*x);
         }
+        if (!_is_transient)
+            _do_setup = false;
     }
 
     /// apply B.C.
@@ -96,7 +104,7 @@ public:
 
     MathLib::IFunction<Tval,GeoLib::Point>* clone() const
     {
-        FemDirichletBC<Tval> *f = new FemDirichletBC<Tval>(_var, _geo, _bc_func, _method);
+        FemDirichletBC<Tval> *f = new FemDirichletBC<Tval>(_var, _geo, _is_transient, _bc_func, _method);
         return f;
     }
 
@@ -109,6 +117,8 @@ private:
     std::vector<Tval> _vec_values;
     // node id, var id, value
     IDirichletBCMethod *_method;
+    bool _is_transient;
+    bool _do_setup;
 };
 
 

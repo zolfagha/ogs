@@ -313,6 +313,7 @@ public:
         if (mod==.0) return true;
         return false;
     };
+    void accept(const TimeStep &time) {};
 };
 
 class TransientWeakCouplingEQS2 :  public TemplateTransientMonolithicSystem<2,1>
@@ -340,6 +341,7 @@ public:
         if (mod==.0) return true;
         return false;
     };
+    void accept(const TimeStep &time) {};
 };
 
 class TransientWeakCouplingEQS3 : public TemplateTransientMonolithicSystem<2,1>
@@ -367,6 +369,7 @@ public:
         if (mod==.0) return true;
         return false;
     };
+    void accept(const TimeStep &time) {};
 };
 
 TEST(Coupling, TransientCouplingParallelStaggered1)

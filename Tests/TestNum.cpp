@@ -29,6 +29,8 @@
 
 #include "NumLib/Output/Output.h"
 
+#include "TestUtil.h"
+
 using namespace GeoLib;
 using namespace MathLib;
 using namespace MeshLib;
@@ -86,14 +88,14 @@ TEST(Num, testDis1)
 {    
     //mesh
     IMesh* msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
-    MeshLib::TopologyNode2Nodes topo_node2nodes(msh);
+    MeshLib::TopologyNode2NodesConnectedByEdges topo_node2nodes(msh);
     //define dof
     DofMapManager dofManager;
     size_t dofId = dofManager.addDoF(msh->getNumberOfNodes());
     dofManager.construct();
     //sparse table
     RowMajorSparsity sparse;
-    createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, sparse);
+    SparsityBuilder::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, sparse);
 
     // construct discrete eqs
     SparseLinearEquations eqs;
@@ -140,6 +142,7 @@ public:
         return true;
     }
 
+    void accept(const TimeStep &time) {};
 };
 
 
@@ -179,16 +182,20 @@ class GWAssembler: public AbstractTimeODEFemElementAssembler
 {
 private:
     MathLib::IFunction<double, double*>* _matK;
+    LagrangianFeObjectContainer* _feObjects;
 public:
-    GWAssembler(MathLib::IFunction<double, double*> &mat) : _matK(&mat) {};
-
-protected:
-    void assemblyFE(const TimeStep &time, FemLib::IFiniteElement &fe, MathLib::DenseLinearEquations::MatrixType &localM, MathLib::DenseLinearEquations::MatrixType &localK,  MathLib::DenseLinearEquations::VectorType &localF)
+    GWAssembler(LagrangianFeObjectContainer &feObjects, MathLib::IFunction<double, double*> &mat) : _feObjects(&feObjects), _matK(&mat) 
     {
-        localM = .0;
-        localF.resize(localF.size(), .0);
-        fe.integrateDWxDN(_matK, localK);
-        localK *= -1;
+    };
+
+//protected:
+    void assembly(const TimeStep &time, MeshLib::IElement &e, MathLib::DenseLinearEquations::MatrixType &localM, MathLib::DenseLinearEquations::MatrixType &localK,  MathLib::DenseLinearEquations::VectorType &localF)
+    {
+        IFiniteElement* fe = _feObjects->getFeObject(e);
+
+        //localM = .0;
+        //localF.resize(localF.size(), .0);
+        fe->integrateDWxDN(_matK, localK);
     }
 };
 
@@ -199,12 +206,12 @@ class GWFemTestSystem : public ITransientSystem
 public:
     GWFemTestSystem()
     {
-        Base::zeroObject(_rec, _K, _head, _problem);
+        Base::zeroObject(_rec, _head, _problem);
     }
 
     virtual ~GWFemTestSystem()
     {
-        Base::releaseObject(_rec, _K, _head, _problem);
+        Base::releaseObject(_rec, _head, _problem);
     }
 
     double suggestNext(const TimeStep &time_current)
@@ -223,15 +230,19 @@ public:
         return 0;
     }
 
+    void accept(const TimeStep &time) 
+    {
+        _solHead->accept(time);
+    };
 
     //#Define a problem
-    void define(DiscreteSystem &dis)
+    void define(DiscreteSystem &dis, MathLib::IFunction<double, double*> &K)
     {
         MeshLib::IMesh *msh = dis.getMesh();
         size_t nnodes = msh->getNumberOfNodes();
+        _feObjects = new LagrangianFeObjectContainer(*msh);
         //equations
-        _K = new MathLib::FunctionConstant<double, double*>(1.e-11);
-        GWAssembler ele_eqs(*_K) ;
+        GWAssembler ele_eqs(*_feObjects, K) ;
         //IVBV problem
         _problem = new GWFemProblem(*dis.getMesh(), GWAssembler(ele_eqs));
         //BC
@@ -241,24 +252,32 @@ public:
         Polyline* poly_left = _rec->getLeft();
         Polyline* poly_right = _rec->getRight();
         _problem->setIC(headId, *_head);
-        _problem->addDirichletBC(headId, *poly_right, MathLib::FunctionConstant<double, GeoLib::Point>(.0));
-        _problem->addNeumannBC(headId, *poly_left, MathLib::FunctionConstant<double, GeoLib::Point>(-1e-5));
+        _problem->addDirichletBC(headId, *poly_right, false, MathLib::FunctionConstant<double, GeoLib::Point>(.0));
+        _problem->addNeumannBC(headId, *poly_left, false, MathLib::FunctionConstant<double, GeoLib::Point>(-1e-5));
         //transient
         _problem->setTimeSteppingFunction(TimeStepFunctionConstant(.0, 100.0, 10.0));
         //solution algorithm
         _solHead = new SolutionForHead(dis, *_problem);
         _solHead->getTimeODEAssembler()->setTheta(1.0);
+        MathLib::SparseLinearEquations* linear_solver = _solHead->getLinearEquationSolver();
+        linear_solver->getOption().solver_type = SparseLinearEquations::SolverCG;
+        linear_solver->getOption().precon_type = SparseLinearEquations::NONE;
 
 
         //vel = new FEMIntegrationPointFunctionVector2d(msh);
+    }
+
+    FemNodalFunctionScalar* getCurrentHead()
+    {
+        return _head;
     }
 
 private:
     GWFemProblem* _problem;
     SolutionForHead* _solHead; 
     Rectangle *_rec;
-    MathLib::IFunction<double, double*>* _K;
     FemNodalFunctionScalar *_head;
+    LagrangianFeObjectContainer* _feObjects;
 
     DISALLOW_COPY_AND_ASSIGN(GWFemTestSystem);
 };
@@ -269,20 +288,35 @@ private:
 
 TEST(Num, Discrete1)
 {
-    // create a mesh
+    // create a discrete system
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
-    // create a discrete system according to mesh
     DiscreteSystem dis(*msh);
+    // mat
+    MathLib::FunctionConstant<double, double*> K(1.e-11);
+    // BC
     // define problems
     GWFemTestSystem gwProblem;
-    gwProblem.define(dis);
+    gwProblem.define(dis, K);
 
-    // start time stepping
-    TimeSteppingController timeStepping;
-    timeStepping.addTransientSystem(gwProblem);
+    gwProblem.solveTimeStep(TimeStep(1.0, 1.0));
 
-    timeStepping.setBeginning(.0);
-    timeStepping.solve(100.);
+    std::vector<double> expected(9);
+    for (size_t i=0; i<9; i++) {
+        if (i%3==0) expected[i] = 2.e+6;
+        if (i%3==1) expected[i] = 1.e+6;
+        if (i%3==2) expected[i] = 0.e+6;
+    }
+
+    FemNodalFunctionScalar* h = gwProblem.getCurrentHead();
+
+    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], h->getNodalValues(), h->getNumberOfNodes());
+
+    //// start time stepping
+    //TimeSteppingController timeStepping;
+    //timeStepping.addTransientSystem(gwProblem);
+
+    //timeStepping.setBeginning(.0);
+    //timeStepping.solve(100.);
 
     Base::releaseObject(msh);
 }

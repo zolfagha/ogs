@@ -25,17 +25,23 @@ class FemNeumannBC : IFemBC, public MathLib::IFunction<Tflux, GeoLib::Point>
 {
 public:
     /// 
-    FemNeumannBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, MathLib::IFunction<Tflux, GeoLib::Point> *func) 
+    FemNeumannBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, MathLib::IFunction<Tflux, GeoLib::Point> *func) 
     {
         _var = var;
         _geo = geo;
         _bc_func = func->clone();
+        _is_transient = is_transient;
+        _do_setup = true;
     }
 
     /// setup BC. 
     void setup()
     {
+        if (!_do_setup) return;
+        if (!_is_transient) _do_setup = false;
+
         MeshLib::IMesh *msh = (MeshLib::IMesh*)_var->getMesh();
+        LagrangianFeObjectContainer* feObjects = _var->getFeObjectContainer();
         // pickup nodes on geo
         MeshLib::findNodesOnGeometry(msh, _geo, &_vec_nodes);
         // distribute to RHS
@@ -63,7 +69,9 @@ public:
                     nodal_val[i_nod] = _bc_func->eval(*x);
                 } 
                 // compute integrals
-                IFiniteElement *fe_edge = _var->getFiniteElement(*e);
+                IFiniteElement *fe_edge = feObjects->getFeObject(*e);
+                fe_edge->getIntegrationMethod()->initialize(*e, 2);
+                //IFiniteElement *fe_edge = _var->getFiniteElement(*e);
                 std::vector<double> result(edge_nnodes);
                 MathLib::Matrix<double> M(edge_nnodes, edge_nnodes);
                 M = .0;
@@ -110,7 +118,7 @@ public:
 
     MathLib::IFunction<Tflux, GeoLib::Point>* clone() const
     {
-        FemNeumannBC<Tval, Tflux> *f = new FemNeumannBC<Tval, Tflux>(_var, _geo, _bc_func);
+        FemNeumannBC<Tval, Tflux> *f = new FemNeumannBC<Tval, Tflux>(_var, _geo, _is_transient, _bc_func);
         return f;
     }
 
@@ -121,6 +129,9 @@ private:
     MathLib::IFunction<Tflux, GeoLib::Point> *_bc_func;
     std::vector<size_t> _vec_nodes;
     std::vector<Tval> _vec_values;
+    bool _is_transient;
+    bool _do_setup;
+
 };
 
 

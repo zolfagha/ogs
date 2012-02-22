@@ -31,6 +31,7 @@ void TimeSteppingController::solve(double time_end)
         TimeStep t_n1(time_current, time_next);
         bool isAccepted = (_root_subsystems->solveTimeStep(t_n1)==0);
         if (isAccepted) {
+            _root_subsystems->accept(time_next);
             time_current.accept(time_next);
         }
     }
