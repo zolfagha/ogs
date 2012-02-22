@@ -286,7 +286,7 @@ private:
 
 
 
-TEST(Num, Discrete1)
+TEST(Num, DiscreteSingleStep1)
 {
     // create a discrete system
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
@@ -311,13 +311,39 @@ TEST(Num, Discrete1)
 
     ASSERT_DOUBLE_ARRAY_EQ(&expected[0], h->getNodalValues(), h->getNumberOfNodes());
 
-    //// start time stepping
-    //TimeSteppingController timeStepping;
-    //timeStepping.addTransientSystem(gwProblem);
-
-    //timeStepping.setBeginning(.0);
-    //timeStepping.solve(100.);
-
     Base::releaseObject(msh);
 }
 
+TEST(Num, DiscreteTimeStep1)
+{
+    // create a discrete system
+    MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
+    DiscreteSystem dis(*msh);
+    // mat
+    MathLib::FunctionConstant<double, double*> K(1.e-11);
+    // BC
+    // define problems
+    GWFemTestSystem gwProblem;
+    gwProblem.define(dis, K);
+
+    // start time stepping
+    TimeSteppingController timeStepping;
+    timeStepping.addTransientSystem(gwProblem);
+    timeStepping.setBeginning(.0);
+    timeStepping.solve(100.);
+
+
+    std::vector<double> expected(9);
+    for (size_t i=0; i<9; i++) {
+        if (i%3==0) expected[i] = 2.e+6;
+        if (i%3==1) expected[i] = 1.e+6;
+        if (i%3==2) expected[i] = 0.e+6;
+    }
+
+    FemNodalFunctionScalar* h = gwProblem.getCurrentHead();
+
+    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], h->getNodalValues(), h->getNumberOfNodes());
+
+
+    Base::releaseObject(msh);
+}

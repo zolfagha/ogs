@@ -15,6 +15,7 @@
 
 // Base
 #include "Base/swap.h"
+#include "Base/CodingTools.h"
 
 // MathLib
 #include "SparseMatrixBase.h"
@@ -41,6 +42,52 @@ public:
 			std::cout << "cannot open " << fname << std::endl;
 		}
 	}
+
+    //CRSMatrix(const CRSMatrix &src) :
+    //SparseMatrixBase<FP_TYPE, IDX_TYPE>(src.getNRows(),src.getNCols())
+    //{
+    //    _row_ptr = new IDX_TYPE[src.getNRows()];
+    //    for (IDX_TYPE i=0; i<src.getNRows(); i++)
+    //        _row_ptr[i] = src._row_ptr[i];
+    //    _col_idx = new IDX_TYPE[src.getNNZ()];
+    //    for (IDX_TYPE i=0; i<src.getNNZ(); i++)
+    //        _col_idx[i] = src._col_idx[i];
+    //    _data = new FP_TYPE[src.getNNZ()];
+    //    for (IDX_TYPE i=0; i<src.getNNZ(); i++)
+    //        _data[i] = src._data[i];
+    //}
+
+    //CRSMatrix& operator=(const CRSMatrix &src)
+    //{
+    //    _n_rows = src._n_rows;
+    //    _n_cols = src._n_cols;
+    //    _row_ptr = new IDX_TYPE[src.getNRows()];
+    //    for (IDX_TYPE i=0; i<src.getNRows(); i++)
+    //        _row_ptr[i] = src._row_ptr[i];
+    //    _col_idx = new IDX_TYPE[src.getNNZ()];
+    //    for (IDX_TYPE i=0; i<src.getNNZ(); i++)
+    //        _col_idx[i] = src._col_idx[i];
+    //    _data = new FP_TYPE[src.getNNZ()];
+    //    for (IDX_TYPE i=0; i<src.getNNZ(); i++)
+    //        _data[i] = src._data[i];
+    //}
+        
+    CRSMatrix* clone()
+    {
+        CRSMatrix<FP_TYPE, IDX_TYPE> *obj = new CRSMatrix<FP_TYPE, IDX_TYPE>(_n_rows);
+        const IDX_TYPE n_nz = getNNZ();
+        obj->_row_ptr = new IDX_TYPE[_n_rows];
+        obj->_col_idx = new IDX_TYPE[n_nz];
+        obj->_data = new FP_TYPE[n_nz];
+        for (IDX_TYPE i=0; i<_n_rows; i++)
+            obj->_row_ptr[i] = _row_ptr[i];
+        for (IDX_TYPE i=0; i<n_nz; i++)
+            obj->_col_idx[i] = _col_idx[i];
+        for (IDX_TYPE i=0; i<n_nz; i++)
+            obj->_data[i] = _data[i];
+
+        return obj;
+    }
 
 	CRSMatrix(IDX_TYPE n, IDX_TYPE *iA, IDX_TYPE *jA, FP_TYPE* A) :
 		SparseMatrixBase<FP_TYPE, IDX_TYPE>(n,n),
@@ -392,6 +439,8 @@ protected:
 	IDX_TYPE *_row_ptr;
 	IDX_TYPE *_col_idx;
 	FP_TYPE* _data;
+private:
+    DISALLOW_COPY_AND_ASSIGN(CRSMatrix);
 };
 
 } // end namespace MathLib

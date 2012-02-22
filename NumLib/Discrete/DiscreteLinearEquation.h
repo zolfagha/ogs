@@ -65,6 +65,7 @@ public:
     /// @param assembler Discrete system assembler
     void construct(IDiscreteLinearEquationAssembler& assemler)
     {
+        getLinearEquation()->reset();
         assemler.assembly(*_msh, *_dofManager, *getLinearEquation());
         // apply fixed boundary conditions?
     }

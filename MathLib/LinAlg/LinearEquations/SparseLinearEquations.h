@@ -2,7 +2,10 @@
 #pragma once
 
 #include <vector>
+#include <map>
 #include <algorithm>
+
+#include "Base/CodingTools.h"
 
 #include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
@@ -18,6 +21,13 @@ template<typename IDX_TYPE>
 class CRSLinearEquationsBase : public ILinearEquations
 {
 public:
+    CRSLinearEquationsBase() : _A(0) {};
+
+    virtual ~CRSLinearEquationsBase()
+    {
+        Base::releaseObject(_A);
+    }
+
     void create(size_t length, RowMajorSparsity *sparsity)
     {
         SparseTableCRS<IDX_TYPE> *crs = convertRowMajorSparsityToCRS<IDX_TYPE>(*sparsity);
@@ -103,21 +113,12 @@ public:
         _x[i] = v;
     }
 
-    //void setKnownX(size_t row_id, double x)
-    //{
-
-    //}
-
-    //void setKnownX(const std::vector<size_t> &vec_id, const std::vector<double> &vec_x)
-    //{
-    //    for (size_t i=0; i<vec_id.size(); ++i)
-    //        setKnownX(vec_id[i], vec_x[i]);
-    //}
-
 private:
     CRSMatrix<double, IDX_TYPE> *_A;
     std::vector<double> _b;
     std::vector<double> _x;
+
+    DISALLOW_COPY_AND_ASSIGN(CRSLinearEquationsBase);
 };
 
 /**
@@ -156,6 +157,12 @@ public:
         };
     };
 
+    SparseLinearEquations() {};
+
+    virtual ~SparseLinearEquations()
+    {
+    }
+
     void initialize() {};
     void finalize() {};
 
@@ -191,20 +198,16 @@ public:
         CRSLinearEquationsBase<unsigned>::reset();
         _vec_knownX_id.clear();
         _vec_knownX_x.clear();
-        _map_solved_orgEqs.clear();
-        _tmp_b.assign(_tmp_b.size(), .0);
-        _tmp_x.assign(_tmp_x.size(), .0);
     }
 
 private:
     SpLinearOptions _option;
     std::vector<size_t> _vec_knownX_id;
     std::vector<double> _vec_knownX_x;
-    std::vector<double> _tmp_b;
-    std::vector<double> _tmp_x;
-    std::map<size_t,size_t> _map_solved_orgEqs;
 
-    void setKnownXi_ReduceSizeOfEQS(const std::vector<size_t> &vec_id, const std::vector<double> &vec_x);
+    DISALLOW_COPY_AND_ASSIGN(SparseLinearEquations);
+
+    void setKnownXi_ReduceSizeOfEQS(CRSMatrix<double, unsigned> *A, double *org_eqsRHS, double *org_eqsX, const std::vector<size_t> &vec_id, const std::vector<double> &vec_x, std::vector<double> &out_b, std::vector<double> &out_x, std::map<size_t,size_t> &map_solved_orgEqs);
     void solveEqs(CRSMatrix<double, unsigned> *A, double *rhs, double *x, SpLinearOptions &option);
 };
 
