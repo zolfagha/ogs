@@ -7,8 +7,6 @@ FILE(GLOB NumLib_TimeStepping_Files TimeStepping/*.h TimeStepping/*.cpp)
 SOURCE_GROUP( NumLib\\TimeStepping FILES ${NumLib_TimeStepping_Files} )
 FILE(GLOB NumLib_Coupling_Files Coupling/*.h Coupling/*.cpp)
 SOURCE_GROUP( NumLib\\Coupling FILES ${NumLib_Coupling_Files} )
-FILE(GLOB NumLib_Solution_Files Solution/*.h Solution/*.cpp)
-SOURCE_GROUP( NumLib\\Solution FILES ${NumLib_Solution_Files} )
 FILE(GLOB NumLib_Output_Files Output/*.h Output/*.cpp)
 SOURCE_GROUP( NumLib\\Output FILES ${NumLib_Output_Files} )
 FILE(GLOB NumLib_Discrete_Files Discrete/*.h Discrete/*.cpp)
@@ -24,7 +22,6 @@ ADD_LIBRARY( NumLib STATIC
 	${NumLib_Core_Files} 
 	${NumLib_TimeStepping_Files} 
 	${NumLib_Coupling_Files} 
-	${NumLib_Solution_Files} 
 	${NumLib_Output_Files} 
 	${NumLib_Discrete_Files} 
 	${NumLib_DomainDecomposition_Files} 

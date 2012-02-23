@@ -108,7 +108,7 @@ public:
             globalA->add(e_node_id_list, localK); //TODO A(id_list) += K;
         }
 
-        outputLinearEQS(*globalA, globalRHS);
+        //outputLinearEQS(*globalA, globalRHS);
 
         //apply BC
         for (size_t i=0; i<gw.vec_bc2.size(); i++) gw.vec_bc2[i]->apply(globalRHS);

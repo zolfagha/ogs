@@ -37,6 +37,11 @@ public:
         _x.resize(length);
     }
 
+    size_t getDimension() const
+    {
+        return _x.size();
+    }
+
     virtual void reset()
     {
         (*_A) = .0;

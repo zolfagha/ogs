@@ -102,6 +102,8 @@ public:
         return &_b[0];
     }
 
+    VectorType* getRHSAsStdVec() {return &_b;};
+
     void setRHS(size_t rowId, double v)
     {
         _b[rowId] = v;
@@ -119,6 +121,9 @@ public:
     {
         return &_x[0];
     }
+
+    VectorType* getXAsStdVec() {return &_x;};
+
 
     void setKnownX(size_t row_id, double x)
     {

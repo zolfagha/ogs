@@ -19,7 +19,7 @@ public:
     /// add transient system
 	void addTransientSystem(ITransientSystem &sys);
 	/// solve systems until the given time
-	void solve(double time_end);
+	size_t solve(double time_end);
 
 private:
     double _time_begin;

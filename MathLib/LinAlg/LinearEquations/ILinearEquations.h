@@ -21,6 +21,7 @@ public:
     virtual void create(size_t length, RowMajorSparsity *sparsity=0) = 0;
     virtual void setOption(const Base::Options &option) = 0;
     virtual void reset() = 0;
+    virtual size_t getDimension() const = 0;
 
     virtual double getA(size_t rowId, size_t colId) = 0;
     virtual void setA(size_t rowId, size_t colId, double v) = 0;

@@ -6,7 +6,6 @@
 #include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
 
 #include "MeshLib/Core/IMesh.h"
-#include "FemLib/Function/FemFunction.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 
 
@@ -33,28 +32,10 @@ public:
 /**
 * \brief Abstract class of element assembler for time ODE formulations with FEM
  */
-class AbstractTimeODEFemElementAssembler
+class ITimeODEElementAssembler
 {
 public:
-    AbstractTimeODEFemElementAssembler() /* : _fem_func(0) */ {};
-
-    //void setFemFunction(FemLib::FemNodalFunctionScalar& fe)
-    //{
-    //    _fem_func = &fe;
-    //}
-
-    //void assembly(const TimeStep &time, MeshLib::IElement &e, MathLib::DenseLinearEquations::MatrixType &M, MathLib::DenseLinearEquations::MatrixType &K,  MathLib::DenseLinearEquations::VectorType &F)
-    //{
-    //    assert(&_fem_func!=0);
-    //    FemLib::IFiniteElement* fe = _fem_func->getFiniteElement(e);
-    //    assemblyFE(time, *fe, M, K, F);
-    //}
-
-private:
-    //FemLib::FemNodalFunctionScalar* _fem_func;
-
-protected:
-    //virtual void assemblyFE(const TimeStep &time, FemLib::IFiniteElement &fe, MathLib::DenseLinearEquations::MatrixType &M, MathLib::DenseLinearEquations::MatrixType &K,  MathLib::DenseLinearEquations::VectorType &F) = 0;
+    virtual void assembly(const TimeStep &time, MeshLib::IElement &e, MathLib::DenseLinearEquations::MatrixType &M, MathLib::DenseLinearEquations::MatrixType &K,  MathLib::DenseLinearEquations::VectorType &F)  = 0;
 };
 
 /**

@@ -27,7 +27,7 @@ public:
         return (_time_current < t._time_current);
     }
 
-    size_t getTimeStepCount() const {return _time_stepping_count;};
+    size_t getTimeStepID() const {return _time_stepping_count;};
     double getTime() const {return _time_current;};
     double getTimeStepSize() const {return _dt;};
 
@@ -39,6 +39,13 @@ public:
         _dt = .0;
         _time_stepping_count++;
     };
+
+    void assign(const TimeStep& src)
+    {
+        _time_current = src._time_current;
+        _dt = src._dt;
+        _time_stepping_count = src._time_stepping_count;
+    }
 
 private:
     double _time_current;

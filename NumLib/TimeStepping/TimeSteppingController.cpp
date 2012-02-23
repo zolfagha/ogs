@@ -16,10 +16,10 @@ void TimeSteppingController::addTransientSystem(ITransientSystem &system)
     _root_subsystems = &system;
 };
 
-void TimeSteppingController::solve(double time_end) 
+size_t TimeSteppingController::solve(double time_end) 
 {
     TimeStep time_current(_time_begin);
-    std::cout << "\n\n***Start time steps\n";
+    std::cout << "\n\n***Start time steps with t0=" << _time_begin << "s\n";
 
     while (time_current.getTime()<time_end) {
         double time_next = _root_subsystems->suggestNext(time_current);
@@ -29,12 +29,15 @@ void TimeSteppingController::solve(double time_end)
             break;
         }
         TimeStep t_n1(time_current, time_next);
+        std::cout << "Time step " << t_n1.getTimeStepID() << ": t=" << time_next <<  "s, dt=" << t_n1.getTimeStepSize() << "s " << std::endl;
         bool isAccepted = (_root_subsystems->solveTimeStep(t_n1)==0);
         if (isAccepted) {
             _root_subsystems->accept(time_next);
             time_current.accept(time_next);
         }
     }
+
+    return time_current.getTimeStepID();
 }
 
 }

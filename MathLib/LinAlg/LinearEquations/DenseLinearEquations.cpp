@@ -17,10 +17,10 @@ void DenseLinearEquations::setOption(const Base::Options &option)
 void DenseLinearEquations::solve()
 {
     MathLib::GaussAlgorithm solver(*this->getA());
-    double *b = this->getRHS();
-    double *x = this->getX();
-    std::copy(b, b+this->getDimension(), x);
-    solver.execute(x);
+    DenseLinearEquationsBase::VectorType *b = this->getRHSAsStdVec();
+    DenseLinearEquationsBase::VectorType *x = this->getXAsStdVec();
+    std::copy(b->begin(), b->end(), x->begin());
+    solver.execute(&(*x)[0]);
 }
 
 

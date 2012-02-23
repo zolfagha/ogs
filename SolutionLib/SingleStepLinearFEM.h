@@ -1,78 +1,31 @@
 
 #pragma once
 
+#include "ISolution.h"
+
 #include <vector>
 
+#include "Base/CodingTools.h"
 #include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
-
 #include "MeshLib/Core/IMesh.h"
 
 #include "FemLib/Function/FemFunction.h"
 #include "FemLib/BC/FemDirichletBC.h"
 #include "FemLib/BC/FemNeumannBC.h"
 
-#include "NumLib/TimeStepping/TimeSteppingController.h"
-#include "NumLib/TimeStepping/ITransientSystem.h"
 #include "NumLib/Discrete/DoF.h"
 #include "NumLib/Discrete/DiscreteSystem.h"
 #include "NumLib/Discrete/SparsityBuilder.h"
-#include "NumLib/Solution/IProblem.h"
 
-namespace NumLib
+
+namespace SolutionLib
 {
-
-/**
- * \brief Interface to all solution algorithm classes
- */
-class ISolutionAlgorithm
-{
-public:
-};
-
-/**
- * \brief Abstract class for time-stepping method
- */
-class AbstractTimeSteppingAlgorithm : public ISolutionAlgorithm, public ITransientSystem
-{
-public:
-    /// @param tim Time step function
-    AbstractTimeSteppingAlgorithm(ITimeStepFunction &tim) : _tim(&tim) {};
-
-    /// get the time step function
-    /// @return Time step function
-    ITimeStepFunction* getTimeStepFunction() const {return _tim;};
-
-    /// suggest the next time step
-    /// @param time_currrent current time step object
-    /// @return the next time
-    double suggestNext(const TimeStep &time_current)
-    {
-        return _tim->next(time_current.getTime());
-    }
-
-    /// return if the next time step is the same as the given time
-    /// @param time the time step object
-    /// @bool true if this process is active with the given time
-    bool isAwake(const TimeStep &time)
-    {
-        return (time.getTime()==_tim->next(time.getTime()));
-    }
-
-    void accept(const TimeStep &time) 
-    {
-        _tim->accept();
-    };
-
-
-private:
-    ITimeStepFunction* _tim;
-};
-
 
 template<   template <class> class T_TIME_ODE_ASSEMBLER, 
             class T_LINEAR_SOLVER, 
             class T_FEM_PROBLEM_AND_ASSEMBLER >
-class SingleStepLinearFEM; // : public AbstractTimeSteppingAlgorithm
+class SingleStepLinearFEM;
+
 
 /**
  * \brief Solution algorithm for linear transient problems using FEM with Euler time stepping method
@@ -92,7 +45,7 @@ public:
     typedef T_USER_FEM_PROBLEM<T_USER_ASSEMBLY> UserFemProblem;
 
     ///
-    SingleStepLinearFEM(DiscreteSystem &dis, UserFemProblem &problem) 
+    SingleStepLinearFEM(NumLib::DiscreteSystem &dis, UserFemProblem &problem) 
         : AbstractTimeSteppingAlgorithm(*problem.getTimeSteppingFunction()), 
         _discrete_system(&dis), _problem(&problem), _element_ode_assembler(problem.getElementAssemlby())
     {
@@ -101,7 +54,7 @@ public:
         _u_n.resize(n_var, 0);
         _u_n1.resize(n_var, 0);
         for (size_t i=0; i<n_var; i++) {
-            _u_n1[i] = (FemLib::FemNodalFunctionScalar*) problem.getIC(i);
+            _u_n1[i] = (FemLib::FemNodalFunctionScalar*) problem.getIC(i)->clone();
         }
         // create linear solver
         MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes(dis.getMesh());
@@ -136,14 +89,18 @@ public:
     }
 
     /// solve 
-    int solveTimeStep(const TimeStep &t_n1)
+    int solveTimeStep(const NumLib::TimeStep &t_n1)
     {
+        double dt = t_n1.getTime() - AbstractTimeSteppingAlgorithm::getTimeStepFunction()->getPrevious();
+        NumLib::TimeStep this_t_n1;
+        this_t_n1.assign(t_n1);
+        this_t_n1.setTimeStepSize(dt);
         const size_t n_var = _problem->getNumberOfVariables();
         for (size_t i=0; i<n_var; i++) {
             if (_u_n[i]!=0) delete _u_n[i];
             _u_n[i] = _u_n1[i];
         }
-        return solve(t_n1, _u_n, _u_n1);
+        return solve(this_t_n1, _u_n, _u_n1);
     }
 
     /// get the current solution
@@ -160,7 +117,7 @@ public:
 
 private:
     /// 
-	int solve(const TimeStep &t_n1, const std::vector<FemLib::FemNodalFunctionScalar*>& u_n, std::vector<FemLib::FemNodalFunctionScalar*>& u_n1) 
+	int solve(const NumLib::TimeStep &t_n1, const std::vector<FemLib::FemNodalFunctionScalar*>& u_n, std::vector<FemLib::FemNodalFunctionScalar*>& u_n1) 
     {
         // prepare data
         UserFemProblem* pro = _problem;
@@ -180,8 +137,8 @@ private:
             pro->getFemNeumannBC(i)->setup();
 
 		// assembly
-        IDiscreteLinearEquation* discreteEqs = _discrete_system->getLinearEquation(_eqs_id);
-        discreteEqs->construct(ElementBasedAssembler(t_n1, vec_un, _element_ode_assembler));
+        NumLib::IDiscreteLinearEquation* discreteEqs = _discrete_system->getLinearEquation(_eqs_id);
+        discreteEqs->construct(NumLib::ElementBasedAssembler(t_n1, vec_un, _element_ode_assembler));
 
         //apply BC1,2
         for (size_t i=0; i<pro->getNumberOfNeumannBC(); i++) 
@@ -207,10 +164,11 @@ private:
     UserTimeOdeAssembler _element_ode_assembler;
     T_LINEAR_SOLVER* _linear_solver;
 
-    DiscreteSystem *_discrete_system;
+    NumLib::DiscreteSystem *_discrete_system;
     size_t _eqs_id;
     std::vector<FemLib::FemNodalFunctionScalar*> _u_n;
     std::vector<FemLib::FemNodalFunctionScalar*> _u_n1;
 };
+
 
 }
