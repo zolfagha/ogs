@@ -47,7 +47,7 @@ public:
     ///
     SingleStepLinearFEM(NumLib::DiscreteSystem &dis, UserFemProblem &problem) 
         : AbstractTimeSteppingAlgorithm(*problem.getTimeSteppingFunction()), 
-        _discrete_system(&dis), _problem(&problem), _element_ode_assembler(problem.getElementAssemlby())
+        _discrete_system(&dis), _problem(&problem), _element_ode_assembler(problem.getElementAssemlby()), _linear_eqs(0)
     {
         const size_t n_var = problem.getNumberOfVariables();
         // initialize solution vectors
@@ -68,10 +68,9 @@ public:
         _linear_solver = new T_LINEAR_SOLVER();
         _linear_solver->create(sparse.size(), &sparse);
         // create linear equation systems
-        _eqs_id = _discrete_system->addLinearEquation(*_linear_solver);
-        IDiscreteLinearEquation *linear_eqs = _discrete_system->getLinearEquation(_eqs_id);
+        _linear_eqs = _discrete_system->createLinearEquation<T_LINEAR_SOLVER, NumLib::SparsityBuilderFromNodeConnectivity>(*_linear_solver);
         // create dof map
-        DofMapManager* dofManager = linear_eqs->getDofMapManger();
+        DofMapManager* dofManager = _linear_eqs->getDofMapManger();
         for (size_t i=0; i<n_var; i++) {
             dofManager->addDoF(problem.getField(i)->getNumberOfNodes());
         }
@@ -137,18 +136,17 @@ private:
             pro->getFemNeumannBC(i)->setup();
 
 		// assembly
-        NumLib::IDiscreteLinearEquation* discreteEqs = _discrete_system->getLinearEquation(_eqs_id);
-        discreteEqs->construct(NumLib::ElementBasedAssembler(t_n1, vec_un, _element_ode_assembler));
+        _linear_eqs->construct(NumLib::ElementBasedTransientAssembler(t_n1, vec_un, _element_ode_assembler));
 
         //apply BC1,2
         for (size_t i=0; i<pro->getNumberOfNeumannBC(); i++) 
-            pro->getFemNeumannBC(i)->apply(discreteEqs->getRHS());
+            pro->getFemNeumannBC(i)->apply(_linear_eqs->getRHS());
         for (size_t i=0; i<pro->getNumberOfDirichletBC(); i++) 
-            pro->getFemDirichletBC(i)->apply(*discreteEqs->getLinearEquation());
+            pro->getFemDirichletBC(i)->apply(*_linear_eqs->getLinearEquation());
 		
 		// solve
-		discreteEqs->solve();
-        double *x = discreteEqs->getX();
+		_linear_eqs->solve();
+        double *x = _linear_eqs->getX();
 
         for (size_t i=0; i<n_var; i++) {
             u_n1[i]->setNodalValues(x); //TODO use DOF
@@ -163,9 +161,8 @@ private:
     UserFemProblem* _problem;
     UserTimeOdeAssembler _element_ode_assembler;
     T_LINEAR_SOLVER* _linear_solver;
-
     NumLib::DiscreteSystem *_discrete_system;
-    size_t _eqs_id;
+    NumLib::IDiscreteLinearEquation* _linear_eqs;
     std::vector<FemLib::FemNodalFunctionScalar*> _u_n;
     std::vector<FemLib::FemNodalFunctionScalar*> _u_n1;
 };

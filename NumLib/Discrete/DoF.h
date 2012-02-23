@@ -80,7 +80,7 @@ public:
         BY_POINT
     };
 
-    DofMapManager() {};
+    DofMapManager() : _total_pt(0) {};
     virtual ~DofMapManager()
     {
         Base::releaseObjectsInStdVector(_map_var2dof);

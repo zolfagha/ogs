@@ -66,6 +66,24 @@ public:
     }
 };
 
+class SparsityBuilderDummy
+{
+public:
+    SparsityBuilderDummy(MeshLib::IMesh&, DofMapManager&, MathLib::RowMajorSparsity&) {};
+};
 
+class SparsityBuilderFromNodeConnectivity
+{
+public:
+    SparsityBuilderFromNodeConnectivity(MeshLib::IMesh &msh, DofMapManager &dofManager, MathLib::RowMajorSparsity &sparse)
+    {
+        MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes(&msh);
+        if (dofManager.getNumberOfDof()==1) {
+            SparsityBuilder::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, sparse);
+        } else {
+            SparsityBuilder::createRowMajorSparsityForMultipleDOFs(topo_node2nodes, dofManager.getNumberOfDof(), sparse);
+        }
+    }
+};
 
 }

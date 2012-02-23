@@ -8,6 +8,7 @@
 #include "MathLib/Function/Function.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/LinAlg/LinearEquations/SparseLinearEquations.h"
+#include "MathLib/LinAlg/LinearEquations/LisInterface.h"
 
 #include "GeoLib/Shape/Rectangle.h"
 
@@ -16,6 +17,8 @@
 
 
 #include "NumLib/Discrete/DiscreteSystem.h"
+#include "NumLib/Discrete/DiscreteLinearEquation.h"
+#include "NumLib/Discrete/DiscreteLinearEquationAssembler.h"
 #include "NumLib/Discrete/ElementLocalAssembler.h"
 #include "NumLib/Discrete/DoF.h"
 #include "NumLib/Discrete/SparsityBuilder.h"
@@ -129,4 +132,228 @@ TEST(Num, OGS5DDC)
 #endif
 }
 
+struct NumExample1
+{
+    std::vector<size_t> list_dirichlet_bc_id;
+    std::vector<double> list_dirichlet_bc_value;
+    static const size_t dim_eqs = 9;
+    std::vector<double> exH;
+
+    NumExample1()
+    {
+        size_t int_dirichlet_bc_id[] = {2,5,8,0,3,6};
+        list_dirichlet_bc_id.assign(int_dirichlet_bc_id, int_dirichlet_bc_id+6);
+        list_dirichlet_bc_value.resize(6);
+        fill(list_dirichlet_bc_value.begin(), list_dirichlet_bc_value.begin()+3, .0);
+        fill(list_dirichlet_bc_value.begin()+3, list_dirichlet_bc_value.end(), 1.0);
+        exH.resize(9);
+        for (size_t i=0; i<9; i++) {
+            if (i%3==0) exH[i] = 1.0;
+            if (i%3==1) exH[i] = 0.5;
+            if (i%3==2) exH[i] = 0.;
+        }
+    }
+
+    class TestElementAssembler : public IElemenetLocalAssembler
+    {
+        Matrix<double> _m;
+    public:
+        TestElementAssembler()
+        {
+            _m.resize(4,4);
+            _m(0,0) = 4.0; _m(0,1) = -1.0; _m(0,2) = -2.0; _m(0,3) = -1.0; 
+            _m(1,1) = 4.0; _m(1,2) = -1.0; _m(1,3) = -2.0;
+            _m(2,2) = 4.0; _m(2,3) = -1.0;
+            _m(3,3) = 4.0;
+            for (size_t i=0; i<4; i++)
+                for (size_t j=0; j<i; j++) _m(i,j) = _m(j,i);
+            _m *= 1.e-11/6.0;
+        }
+        void assembly(MeshLib::IElement &e, MathLib::DenseLinearEquations &eqs)
+        {
+            (*eqs.getA()) = _m;
+        }
+    };
+};
+
+TEST(Discrete, Lis1)
+{
+    NumExample1 ex1;
+    NumExample1::TestElementAssembler ele_assembler;
+    CRSLisSolver lis;
+    lis.getOption().ls_method = LIS_option::CG;
+    lis.getOption().ls_precond = LIS_option::NONE;
+    MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
+
+    // define discrete system
+    DiscreteSystem dis(*msh);
+    {
+        // create a linear problem
+        IDiscreteLinearEquation *linear_eq = dis.createLinearEquation<CRSLisSolver, NumLib::SparsityBuilderFromNodeConnectivity>(lis);
+        // DoF?
+        DofMapManager *dofManager = linear_eq->getDofMapManger();
+        dofManager->addDoF(msh->getNumberOfNodes());
+        dofManager->construct(DofMapManager::BY_DOF);
+        // solve the equation
+        linear_eq->construct(NumLib::ElementBasedAssembler(ele_assembler));
+        linear_eq->getLinearEquation()->setKnownX(ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
+        linear_eq->solve();
+
+        ASSERT_DOUBLE_ARRAY_EQ(&ex1.exH[0], linear_eq->getX(), 9, 1.e-5);
+    }
+
+}
+
+class SubDomain
+{
+public:
+    std::vector<size_t> list_e;
+    std::vector<size_t> list_n;
+    MeshLib::IMesh *msh;
+    size_t getDimension() {return list_n.size();};
+};
+
+class INodalDecomposedLinearEquation : public IDiscreteLinearEquation
+{
+
+};
+
+
+template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
+class TemplateNodalDecomposedLinearEquation : public INodalDecomposedLinearEquation
+{
+public:
+    /// construct 
+    void construct(IDiscreteLinearEquationAssembler& assemler)
+    {
+        DofMapManager* dofManager = getDofMapManger();
+        assert(dofManager->getNumberOfDof()>0);
+
+        if (_do_create_eqs) {
+            _do_create_eqs = false;
+            MathLib::RowMajorSparsity sparse;
+            T_SPARSITY_BUILDER sp_builder(*getMesh(), *dofManager, sparse);
+            getLinearEquation()->create(dofManager->getTotalNumberOfDiscretePoints(), &sparse);
+        } else {
+            getLinearEquation()->reset();
+        }
+        assemler.assembly(*getMesh(), *dofManager, *getLinearEquation());
+    }
+
+    /// solve
+    void solve()
+    {
+        _eqs->solve();
+    }
+
+
+    /// get the solution vector
+    double* getX()
+    {
+        return _eqs->getX();
+    }
+
+    /// get the RHS vector
+    double* getRHS()
+    {
+        return _eqs->getRHS();
+    }
+    /// get a linear equation object
+    MathLib::ILinearEquations* getLinearEquation() const
+    {
+        return _eqs;
+    }
+    /// get a Dof map manager
+    DofMapManager* getDofMapManger() const
+    {
+        return _dofManager;
+    }
+private:
+    T_LINEAR_SOLVER* _eqs;
+    DofMapManager* _dofManager;
+
+};
+
+class DecomposedDiscreteSystem
+{
+public:
+    DecomposedDiscreteSystem(SubDomain &subdomain) {};
+    /// create a new linear equation
+    template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
+    IDiscreteLinearEquation* createLinearEquation(T_LINEAR_SOLVER &linear_solver)
+    {
+        _vec_linear_sys.push_back(new TemplateNodalDecomposedLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_subdomain, linear_solver));
+        return _vec_linear_sys.back();
+    }
+
+    IDiscreteLinearEquation* getLinearEquation(size_t i)
+    {
+        return _vec_linear_sys[i];
+    }
+private:
+    DISALLOW_COPY_AND_ASSIGN(DecomposedDiscreteSystem);
+
+    SubDomain* _subdomain;
+    std::vector<INodalDecomposedLinearEquation*> _vec_linear_sys;
+};
+
+TEST(Discrete, Lis2)
+{
+    NumExample1 ex1;
+    NumExample1::TestElementAssembler ele_assembler;
+    CRSLisSolver lis;
+    lis.getOption().ls_method = LIS_option::CG;
+    lis.getOption().ls_precond = LIS_option::NONE;
+    MeshLib::IMesh *msh = MeshGenerator::generateRegularQuadMesh(2.0, 2, .0, .0, .0);
+
+    SubDomain dom1;
+    int dom1_nodes[] = {0, 1, 2, 3, 4};
+    int dom1_eles[] = {0, 1, 2, 3};
+    dom1.list_n.assign(dom1_nodes, dom1_nodes+5);
+    dom1.list_e.assign(dom1_eles, dom1_eles+4);
+    //dom1.msh = msh.getSubMesh(0, 1);
+
+    SubDomain dom2;
+    int dom2_nodes[] = {5, 6, 7, 8};
+    int dom2_eles[] = {0, 1, 2, 3};
+    dom2.list_n.assign(dom2_nodes, dom2_nodes+4);
+    dom2.list_e.assign(dom2_eles, dom2_eles+4);
+    //dom2 = msh.getSubMesh(2, 3);
+
+
+    {
+        // define discrete system
+        DecomposedDiscreteSystem dis(dom1);
+        // create a linear problem
+        IDiscreteLinearEquation *linear_eq = dis.createLinearEquation<CRSLisSolver, NumLib::SparsityBuilderFromNodeConnectivity>(lis);
+        // DoF?
+        DofMapManager *dofManager = linear_eq->getDofMapManger();
+        dofManager->addDoF(msh->getNumberOfNodes());
+        dofManager->construct(DofMapManager::BY_DOF);
+        // solve the equation
+        linear_eq->construct(NumLib::ElementBasedAssembler(ele_assembler));
+        linear_eq->getLinearEquation()->setKnownX(ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
+        linear_eq->solve();
+
+        ASSERT_DOUBLE_ARRAY_EQ(&ex1.exH[0], linear_eq->getX(), 9, 1.e-5);
+    }
+
+    {
+        // define discrete system
+        DiscreteSystem dis(*dom2.msh);
+        // create a linear problem
+        IDiscreteLinearEquation *linear_eq = dis.createLinearEquation<CRSLisSolver, NumLib::SparsityBuilderFromNodeConnectivity>(lis);
+        // DoF?
+        DofMapManager *dofManager = linear_eq->getDofMapManger();
+        dofManager->addDoF(msh->getNumberOfNodes());
+        dofManager->construct(DofMapManager::BY_DOF);
+        // solve the equation
+        linear_eq->construct(NumLib::ElementBasedAssembler(ele_assembler));
+        linear_eq->getLinearEquation()->setKnownX(ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
+        linear_eq->solve();
+
+        ASSERT_DOUBLE_ARRAY_EQ(&ex1.exH[0], linear_eq->getX(), 9, 1.e-5);
+    }
+
+}
 

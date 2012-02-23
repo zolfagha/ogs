@@ -2,6 +2,9 @@
 #pragma once
 
 #include <string>
+
+#include "lis.h"
+
 #include "MathLib/LinAlg/Sparse/SparseTableCRS.h"
 #include "ILinearEquations.h"
 #include "SparseLinearEquations.h"
@@ -57,16 +60,42 @@ additive Schwarz -adds true -adds_iter [1] Number of iterations
 
 namespace MathLib
 {
-	
-typedef struct {
+
+struct LIS_option
+{
     int ls_method;
     int ls_precond;
     std::string ls_extra_arg;
     long ls_max_iterations;
     double ls_error_tolerance;
-} LIS_option;
+    enum SolverType
+    {
+        CG = 1,
+        BiCG = 2,
+        CGS = 3,
+        BiCGSTAB = 4,
+        BiCGSTABl = 5,
+        GPBiCG = 6,
+        TFQMR = 7,
+        Orthomin = 8,
+        GMRES = 9
+    };
+    enum PreconType
+    {
+        NONE = 0,
+        Jacobi = 1,
+        ILU = 2
+    };
+    LIS_option()
+    {
+        ls_method = CG;
+        ls_precond = NONE;
+        ls_max_iterations = 500;
+        ls_error_tolerance = 1.e-6;
+    }
+};
 
-class LIS_Solver : public CRSLinearEquationsBase<signed>
+class CRSLisSolver : public CRSLinearEquationsBase<signed>
 {
 public:
     void initialize();
@@ -82,14 +111,72 @@ public:
         return _option;
     }
 
-    void solve();
-
-    void setKnownX(size_t id, double x) {};
-
-    void setKnownX(const std::vector<size_t> &vec_id, const std::vector<double> &vec_x) {};
+protected:
+    void solveEqs(CRSMatrix<double, signed> *A, double *rhs, double *x);
 
 private:
     LIS_option _option;
 };
+
+#if 0
+class LisSolver : public ILinearEquations
+{
+public:
+    LisSolver() 
+    {
+        _global_dim = 0;
+        _local_dim = 0;
+    }
+    virtual ~LisSolver();
+
+    void initialize();
+    void finalize();
+
+    void setOption(const LIS_option &option)
+    {
+        _option = option;
+    }
+    LIS_option &getOption() 
+    {
+        return _option;
+    }
+
+    void create(size_t length, RowMajorSparsity *sparsity=0);
+    void setOption(const Base::Options &option);
+    void reset();
+
+    size_t getDimension() const { return _global_dim; }
+    size_t getLocalDimension() const { return _local_dim; }
+
+
+    double getA(size_t rowId, size_t colId);
+    void setA(size_t rowId, size_t colId, double v);
+    void addA(size_t rowId, size_t colId, double v);
+    void addA(std::vector<size_t> &vec_row_pos, std::vector<size_t> &vec_col_pos, MathLib::Matrix<double> &sub_matrix, double fkt=1.0);
+    void addA(std::vector<size_t> &vec_pos, MathLib::Matrix<double> &sub_matrix, double fkt=1.0);
+
+    double getRHS(size_t rowId);
+    double* getRHS();
+    void setRHS(size_t rowId, double v);
+    void addRHS(std::vector<size_t> &vec_pos, double *sub_vector, double fkt=1.0);
+    void addRHS(size_t rowId, double v);
+
+    double* getX();
+
+    void setKnownX(size_t row_id, double x);
+    void setKnownX(const std::vector<size_t> &vec_id, const std::vector<double> &vec_x);
+    void solve();
+private:
+    LIS_option _option;
+    LIS_MATRIX _A;
+    LIS_VECTOR _b;
+    LIS_VECTOR _x;
+    int _local_dim;
+    int _global_dim;
+    std::vector<double> _tmp_b;
+    std::vector<double> _tmp_x;
+
+};
+#endif
 
 }

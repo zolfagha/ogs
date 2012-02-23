@@ -28,11 +28,12 @@ public:
     }
 
     /// create a new linear equation
-    template<class T_LINEAR_SOLVER>
-    size_t addLinearEquation(T_LINEAR_SOLVER &linear_solver)
+    template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
+    IDiscreteLinearEquation* createLinearEquation(T_LINEAR_SOLVER &linear_solver)
     {
-        _vec_linear_sys.push_back(new TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER>(*_msh, linear_solver));
-        return _vec_linear_sys.size()-1;
+        _vec_linear_sys.push_back(new TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_msh, linear_solver));
+        //return _vec_linear_sys.size()-1;
+        return _vec_linear_sys.back();
     }
 
     IDiscreteLinearEquation* getLinearEquation(size_t i)

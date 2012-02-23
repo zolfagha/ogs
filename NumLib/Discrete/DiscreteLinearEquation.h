@@ -4,12 +4,12 @@
 #include <vector>
 
 #include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
+#include "MathLib/LinAlg/Sparse/SparseTableCRS.h"
 
 #include "MeshLib/Core/IMesh.h"
 
 #include "NumLib/Discrete/DoF.h"
 #include "NumLib/Discrete/DiscreteLinearEquationAssembler.h"
-
 
 namespace NumLib
 {
@@ -20,9 +20,9 @@ namespace NumLib
 class IDiscreteLinearEquation
 {
 public:
-    /// construct discrete linear equations
+    /// construct 
     virtual void construct(IDiscreteLinearEquationAssembler& assemler) = 0;
-    /// solve 
+    /// solve
     virtual void solve() = 0;
     /// get solution
     virtual double* getX() = 0;
@@ -62,14 +62,6 @@ public:
         return _dofManager;
     }
 
-    /// @param assembler Discrete system assembler
-    void construct(IDiscreteLinearEquationAssembler& assemler)
-    {
-        getLinearEquation()->reset();
-        assemler.assembly(*_msh, *_dofManager, *getLinearEquation());
-        // apply fixed boundary conditions?
-    }
-
 private:
     MeshLib::IMesh* _msh;
     DofMapManager* _dofManager;
@@ -83,13 +75,13 @@ private:
  *
  * @tparam T_LINEAR_SOLVER Linear solver class
  */
-template<class T_LINEAR_SOLVER>
+template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
 class TemplateMeshBasedDiscreteLinearEquation : public AbstractMeshBasedDiscreteLinearEquation
 {
 public:
     ///
     TemplateMeshBasedDiscreteLinearEquation(MeshLib::IMesh &msh, T_LINEAR_SOLVER &linear_solver) 
-        : AbstractMeshBasedDiscreteLinearEquation(msh), _eqs(&linear_solver) 
+        : AbstractMeshBasedDiscreteLinearEquation(msh), _eqs(&linear_solver), _do_create_eqs(true)
     {
     };
 
@@ -99,11 +91,29 @@ public:
         return _eqs;
     }
 
-    /// solve the linear equation
+    /// construct the linear equation
+    void construct(IDiscreteLinearEquationAssembler& assemler)
+    {
+        DofMapManager* dofManager = getDofMapManger();
+        assert(dofManager->getNumberOfDof()>0);
+
+        if (_do_create_eqs) {
+            _do_create_eqs = false;
+            MathLib::RowMajorSparsity sparse;
+            T_SPARSITY_BUILDER sp_builder(*getMesh(), *dofManager, sparse);
+            getLinearEquation()->create(dofManager->getTotalNumberOfDiscretePoints(), &sparse);
+        } else {
+            getLinearEquation()->reset();
+        }
+        assemler.assembly(*getMesh(), *dofManager, *getLinearEquation());
+    }
+
+    /// solve
     void solve()
     {
         _eqs->solve();
     }
+
 
     /// get the solution vector
     double* getX()
@@ -118,6 +128,7 @@ public:
     }
 private:
     T_LINEAR_SOLVER* _eqs;
+    bool _do_create_eqs;
 
     DISALLOW_COPY_AND_ASSIGN(TemplateMeshBasedDiscreteLinearEquation);
 };

@@ -31,7 +31,7 @@ public:
         case LinearEquationsType::SparseEquations:
             return new SparseLinearEquations();
         case LinearEquationsType::LIS:
-            return new LIS_Solver();
+            return new CRSLisSolver();
         }
         assert(false);
         return 0;
