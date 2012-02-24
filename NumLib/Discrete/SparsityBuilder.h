@@ -34,6 +34,24 @@ public:
         }
     }
 
+    static void createRowMajorSparsityFromNodeConnectivity(const MeshLib::ITopologyNode2Nodes &topo_node2nodes, const DofMap &dof, MathLib::RowMajorSparsity &row_major_entries)
+    {
+        const size_t n_nodes = topo_node2nodes.getNumberOfNodes();
+        row_major_entries.resize(dof.getNumberOfActiveDoFs());
+
+        size_t i_rows = 0;
+        for (size_t i=0; i<n_nodes; i++) {
+            if (!dof.isActiveDoF(i)) continue;
+            // search connected nodes
+            std::set<size_t> &setConnection = row_major_entries[i_rows++];
+            setConnection.insert(dof.getEqsID(i));
+            const std::set<size_t> connected_nodes = topo_node2nodes.getConnectedNodes(i);
+            for (std::set<size_t>::const_iterator it=connected_nodes.begin(); it!=connected_nodes.end(); it++) {
+                if (dof.isActiveDoF(*it)) setConnection.insert(dof.getEqsID(*it));
+            }
+        }
+    }
+
     /**
      * create row-major sparsity for multiple DOFs with a single mesh
      */
@@ -80,6 +98,20 @@ public:
         MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes(&msh);
         if (dofManager.getNumberOfDof()==1) {
             SparsityBuilder::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, sparse);
+        } else {
+            SparsityBuilder::createRowMajorSparsityForMultipleDOFs(topo_node2nodes, dofManager.getNumberOfDof(), sparse);
+        }
+    }
+};
+
+class SparsityBuilderFromNodeConnectivityWithInactiveDoFs
+{
+public:
+    SparsityBuilderFromNodeConnectivityWithInactiveDoFs(MeshLib::IMesh &msh, DofMapManager &dofManager, MathLib::RowMajorSparsity &sparse)
+    {
+        MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes(&msh);
+        if (dofManager.getNumberOfDof()==1) {
+            SparsityBuilder::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, *dofManager.getDofMap(0), sparse);
         } else {
             SparsityBuilder::createRowMajorSparsityForMultipleDOFs(topo_node2nodes, dofManager.getNumberOfDof(), sparse);
         }

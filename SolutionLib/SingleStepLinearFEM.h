@@ -57,24 +57,14 @@ public:
             _u_n1[i] = (FemLib::FemNodalFunctionScalar*) problem.getIC(i)->clone();
         }
         // create linear solver
-        MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes(dis.getMesh());
-        RowMajorSparsity sparse;
-        if (n_var==1) {
-            SparsityBuilder::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, sparse);
-        } else {
-            //bug
-            SparsityBuilder::createRowMajorSparsityForMultipleDOFs(topo_node2nodes, n_var, sparse);
-        }
         _linear_solver = new T_LINEAR_SOLVER();
-        _linear_solver->create(sparse.size(), &sparse);
-        // create linear equation systems
-        _linear_eqs = _discrete_system->createLinearEquation<T_LINEAR_SOLVER, NumLib::SparsityBuilderFromNodeConnectivity>(*_linear_solver);
         // create dof map
-        DofMapManager* dofManager = _linear_eqs->getDofMapManger();
         for (size_t i=0; i<n_var; i++) {
-            dofManager->addDoF(problem.getField(i)->getNumberOfNodes());
+            _dofManager.addDoF(problem.getField(i)->getNumberOfNodes());
         }
-        dofManager->construct();
+        _dofManager.construct();
+        // create linear equation systems
+        _linear_eqs = _discrete_system->createLinearEquation<T_LINEAR_SOLVER, NumLib::SparsityBuilderFromNodeConnectivity>(*_linear_solver, _dofManager);
     };
 
     virtual ~SingleStepLinearFEM()
@@ -130,8 +120,12 @@ private:
         }
 
         // setup BC
-        for (size_t i=0; i<pro->getNumberOfDirichletBC(); i++) 
-            pro->getFemDirichletBC(i)->setup();
+        for (size_t i=0; i<pro->getNumberOfDirichletBC(); i++) {
+            FemLib::FemDirichletBC<double> *bc1 = pro->getFemDirichletBC(i);
+            bc1->setup();
+            size_t varid = 0; //?
+            _linear_eqs->setPrescribedDoF(varid, bc1->getListOfBCNodes(), bc1->getListOfBCValues());
+        }
         for (size_t i=0; i<pro->getNumberOfNeumannBC(); i++) 
             pro->getFemNeumannBC(i)->setup();
 
@@ -139,14 +133,15 @@ private:
         _linear_eqs->construct(NumLib::ElementBasedTransientAssembler(t_n1, vec_un, _element_ode_assembler));
 
         //apply BC1,2
-        for (size_t i=0; i<pro->getNumberOfNeumannBC(); i++) 
-            pro->getFemNeumannBC(i)->apply(_linear_eqs->getRHS());
-        for (size_t i=0; i<pro->getNumberOfDirichletBC(); i++) 
-            pro->getFemDirichletBC(i)->apply(*_linear_eqs->getLinearEquation());
+        for (size_t i=0; i<pro->getNumberOfNeumannBC(); i++) {
+            FemLib::FemNeumannBC<double, double> *bc2 = pro->getFemNeumannBC(i);
+            size_t varid = 0; //?
+            _linear_eqs->addRHS(varid, bc2->getListOfBCNodes(), bc2->getListOfBCValues(), -1.0);
+        }
 		
 		// solve
 		_linear_eqs->solve();
-        double *x = _linear_eqs->getX();
+        double *x = _linear_eqs->getLocalX();
 
         for (size_t i=0; i<n_var; i++) {
             u_n1[i]->setNodalValues(x); //TODO use DOF
@@ -160,6 +155,7 @@ private:
 private:
     UserFemProblem* _problem;
     UserTimeOdeAssembler _element_ode_assembler;
+    NumLib::DofMapManager _dofManager;
     T_LINEAR_SOLVER* _linear_solver;
     NumLib::DiscreteSystem *_discrete_system;
     NumLib::IDiscreteLinearEquation* _linear_eqs;

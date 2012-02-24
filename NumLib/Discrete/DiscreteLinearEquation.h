@@ -25,14 +25,18 @@ public:
     /// solve
     virtual void solve() = 0;
     /// get solution
-    virtual double* getX() = 0;
-    /// get RHS 
-    virtual double* getRHS() = 0;
-    /// get a linear equation object
-    virtual MathLib::ILinearEquations* getLinearEquation() const = 0;
+    virtual void getGlobalX(std::vector<double> &x) = 0;
+    virtual double* getLocalX() = 0;
+    ///// get RHS 
+    //virtual double* getRHS() = 0;
+    ///// get a linear equation object
+    //virtual MathLib::ILinearEquations* getLinearEquation() const = 0;
     /// get a Dof map manager
     virtual DofMapManager* getDofMapManger() const = 0;
-
+    /// set prescribed dof
+    virtual void setPrescribedDoF(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> list_prescribed_values) = 0;
+    /// set additional RHS values
+    virtual void addRHS(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> list_rhs_values, double fkt) = 0;
 };
 
 /**
@@ -42,14 +46,13 @@ class AbstractMeshBasedDiscreteLinearEquation : public IDiscreteLinearEquation
 {
 public:
     ///
-    AbstractMeshBasedDiscreteLinearEquation(MeshLib::IMesh &msh) : _msh(&msh)
+    AbstractMeshBasedDiscreteLinearEquation(MeshLib::IMesh &msh, DofMapManager &dofManager) : _msh(&msh), _dofManager(&dofManager)
     {
-        _dofManager = new DofMapManager();
     }
 
     virtual ~AbstractMeshBasedDiscreteLinearEquation()
     {
-        Base::releaseObject(_dofManager);
+        //Base::releaseObject(_dofManager);
     }
 
     MeshLib::IMesh* getMesh() const
@@ -61,6 +64,7 @@ public:
     {
         return _dofManager;
     }
+
 
 private:
     MeshLib::IMesh* _msh;
@@ -80,15 +84,33 @@ class TemplateMeshBasedDiscreteLinearEquation : public AbstractMeshBasedDiscrete
 {
 public:
     ///
-    TemplateMeshBasedDiscreteLinearEquation(MeshLib::IMesh &msh, T_LINEAR_SOLVER &linear_solver) 
-        : AbstractMeshBasedDiscreteLinearEquation(msh), _eqs(&linear_solver), _do_create_eqs(true)
+    TemplateMeshBasedDiscreteLinearEquation(MeshLib::IMesh &msh, T_LINEAR_SOLVER &linear_solver, DofMapManager &dofManager) 
+        : AbstractMeshBasedDiscreteLinearEquation(msh, dofManager), _eqs(&linear_solver), _do_create_eqs(true)
     {
     };
 
-    /// get the linear solver 
-    MathLib::ILinearEquations* getLinearEquation() const
+    ///// get the linear solver 
+    //MathLib::ILinearEquations* getLinearEquation() const
+    //{
+    //    return _eqs;
+    //}
+
+    /// set prescribed dof
+    void setPrescribedDoF(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> list_prescribed_values)
     {
-        return _eqs;
+        //assert(_list_prescribed_dof_id.size()==0);
+        _list_prescribed_dof_id.clear();
+        _list_prescribed_values.clear();
+
+        const DofMap* dofMap = getDofMapManger()->getDofMap(dofId);
+        const size_t n = list_discrete_pt_id.size();
+        for (size_t i=0; i<n; i++) {
+            size_t pt_id = list_discrete_pt_id[i];
+            if (dofMap->isActiveDoF(pt_id)) {
+                _list_prescribed_dof_id.push_back(dofMap->getEqsID(pt_id));
+                _list_prescribed_values.push_back(list_prescribed_values[i]);
+            }
+        }
     }
 
     /// construct the linear equation
@@ -101,12 +123,29 @@ public:
             _do_create_eqs = false;
             MathLib::RowMajorSparsity sparse;
             T_SPARSITY_BUILDER sp_builder(*getMesh(), *dofManager, sparse);
-            getLinearEquation()->create(dofManager->getTotalNumberOfDiscretePoints(), &sparse);
+            _eqs->create(dofManager->getTotalNumberOfActiveDoFs(), &sparse);
         } else {
-            getLinearEquation()->reset();
+            _eqs->reset();
         }
-        assemler.assembly(*getMesh(), *dofManager, *getLinearEquation());
+        assemler.assembly(*getMesh(), *dofManager, *_eqs);
+
+        //apply 1st bc
+        _eqs->setKnownX(_list_prescribed_dof_id, _list_prescribed_values);
     }
+
+    /// set additional RHS values
+    void addRHS(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> list_rhs_values, double fkt=1.0)
+    {
+        const DofMap* dofMap = getDofMapManger()->getDofMap(dofId);
+        const size_t n = list_discrete_pt_id.size();
+        for (size_t i=0; i<n; i++) {
+            size_t pt_id = list_discrete_pt_id[i];
+            if (dofMap->isActiveDoF(pt_id)) {
+                _eqs->addRHS(dofMap->getEqsID(pt_id), list_rhs_values[i]*fkt);
+            }
+        }
+    }
+
 
     /// solve
     void solve()
@@ -116,19 +155,29 @@ public:
 
 
     /// get the solution vector
-    double* getX()
+    double* getLocalX()
     {
         return _eqs->getX();
     }
 
-    /// get the RHS vector
-    double* getRHS()
+    void getGlobalX(std::vector<double> &x)
     {
-        return _eqs->getRHS();
+        x.resize(_eqs->getDimension());
+        double *tmp_x = _eqs->getX();
+        for (size_t i=0; i<x.size(); i++)
+            x[i] = tmp_x[i];
     }
+
+    ///// get the RHS vector
+    //double* getRHS()
+    //{
+    //    return _eqs->getRHS();
+    //}
 private:
     T_LINEAR_SOLVER* _eqs;
     bool _do_create_eqs;
+    std::vector<size_t> _list_prescribed_dof_id;
+    std::vector<double> _list_prescribed_values;
 
     DISALLOW_COPY_AND_ASSIGN(TemplateMeshBasedDiscreteLinearEquation);
 };

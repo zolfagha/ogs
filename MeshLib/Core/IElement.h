@@ -80,7 +80,7 @@ public:
     /// return the number of nodes under current order
     virtual size_t getNumberOfNodes() const = 0;
     /// set node id
-    virtual void setNodeID(size_t local_node_id, size_t node_id) = 0;
+    virtual void setNodeID(const size_t &local_node_id, const size_t &node_id) = 0;
     /// return node id
     virtual size_t getNodeID(size_t local_node_id) const = 0;
     /// get a list of node ids

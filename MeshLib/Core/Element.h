@@ -133,7 +133,7 @@ public:
         _list_edges[edge_id] = e;
     }
 
-    void setNodeID(size_t local_node_id, size_t node_id) 
+    void setNodeID(const size_t &local_node_id, const size_t &node_id) 
     {
         //assert (local_node_id < NUMBER_OF_NODES);
         _list_node_id[local_node_id] = node_id;

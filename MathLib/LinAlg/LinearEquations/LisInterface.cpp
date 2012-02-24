@@ -22,6 +22,12 @@ void CRSLisSolver::finalize()
     lis_finalize();
 }
 
+CRSLisSolver::~CRSLisSolver()
+{
+    lis_vector_destroy(bb);
+    lis_vector_destroy(xx);
+}
+
 void CRSLisSolver::setOption(const Base::Options &option)
 {
     throw std::exception("LisSolver::setOption() is not implemented.");
@@ -35,9 +41,8 @@ void CRSLisSolver::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)
     std::cout << "*** LIS solver computation" << std::endl;
 
     // Creating a matrix.
-    LIS_MATRIX AA;
-    LIS_VECTOR bb,xx;
     LIS_SOLVER solver;
+    LIS_MATRIX AA;
 #ifndef USE_MPI
     int ierr = lis_matrix_create(0, &AA);
     ierr = lis_matrix_set_type(AA, LIS_MATRIX_CRS);
@@ -64,14 +69,12 @@ void CRSLisSolver::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)
     // Assemble the vector, b, x
     ierr = lis_vector_duplicate(AA, &bb);
     ierr = lis_vector_duplicate(AA, &xx);
-    ierr = lis_vector_scatter(x, xx);
-    ierr = lis_vector_scatter(b, bb);
-    //#pragma omp parallel for
-    //for (long i=0; i < dimension; ++i)
-    //{
-    //    ierr = lis_vector_set_value(LIS_INS_VALUE, i, x[i], xx);
-    //    ierr = lis_vector_set_value(LIS_INS_VALUE, i, b[i], bb);
-    //}
+    #pragma omp parallel for
+    for (long i=0; i < dimension; ++i)
+    {
+        ierr = lis_vector_set_value(LIS_INS_VALUE, i, x[i], xx);
+        ierr = lis_vector_set_value(LIS_INS_VALUE, i, b[i], bb);
+    }
 
     // Create solver
     ierr = lis_solver_create(&solver);
@@ -91,21 +94,25 @@ void CRSLisSolver::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)
     //	lis_vector_print(bb);
 
     // Update the solution (answer) into the x vector
-    ierr = lis_vector_gather(xx, x);
-
-    //#pragma omp parallel for
-    //for(long i=0; i<dimension; ++i)
-    //{
-    //    lis_vector_get_value(xx,i,&(x[i]));
-    //}
+    #pragma omp parallel for
+    for(long i=0; i<dimension; ++i)
+    {
+        lis_vector_get_value(xx,i,&(x[i]));
+    }
 
     // Clear memory
-    //lis_matrix_destroy(AA);
-    lis_vector_destroy(bb);
-    lis_vector_destroy(xx);
+    //lis_matrix_destroy(AA); // CRSMatrix will free this memory
     lis_solver_destroy(solver);
     std::cout << "------------------------------------------------------------------" << std::endl;
 }
+
+void CRSLisSolver::gatherX(std::vector<double> &x)
+{
+    int local_n, global_n;
+    lis_vector_get_size(xx, &local_n, &global_n);
+    x.resize(global_n);
+    lis_vector_gather(xx, &x[0]);
+};
 
 #if 0
 void LisSolver::initialize()

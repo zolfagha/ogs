@@ -31,17 +31,7 @@ public:
         resize(length);
     }
 
-    void resize(size_t length)
-    {
-        if (_A==0) {
-            _A = new Matrix<double>(length, length);
-        } else {
-            _A->resize(length, length);
-        }
-        _b.resize(length);
-        _x.resize(length);
-        reset();
-    }
+    void resize(size_t length);
 
 
     void reset()
@@ -76,22 +66,6 @@ public:
         (*_A)(rowId, colId) += v;
     }
 
-    void addA(std::vector<size_t> &vec_row_pos, std::vector<size_t> &vec_col_pos, MathLib::Matrix<double> &sub_matrix, double fkt=1.0)
-    {
-        for (size_t i=0; i<vec_row_pos.size(); i++) {
-            const size_t rowId = vec_row_pos[i];
-            for (size_t j=0; j<vec_col_pos.size(); j++) {
-                const size_t colId = vec_row_pos[i];
-                (*_A)(rowId, colId) += fkt*sub_matrix(i,j);
-            }
-        }
-    }
-
-    void addA(std::vector<size_t> &vec_pos, MathLib::Matrix<double> &sub_matrix, double fkt=1.0)
-    {
-        addA(vec_pos, vec_pos, sub_matrix, fkt);
-    }
-
     double getRHS(size_t rowId)
     {
         return _b[rowId];
@@ -109,12 +83,9 @@ public:
         _b[rowId] = v;
     }
 
-    void addRHS(std::vector<size_t> &vec_row_pos, double *sub_vector, double fkt=1.0)
+    void addRHS(size_t rowId, double v)
     {
-        for (size_t i=0; i<vec_row_pos.size(); i++) {
-            const size_t rowId = vec_row_pos[i];
-            _b[rowId] += sub_vector[i];
-        }
+        _b[rowId] += v;
     }
 
     double* getX()
@@ -125,28 +96,17 @@ public:
     VectorType* getXAsStdVec() {return &_x;};
 
 
-    void setKnownX(size_t row_id, double x)
-    {
-        const size_t n_cols = _A->getNCols();
-        //A(k, j) = 0.
-        for (size_t j=0; j<n_cols; j++)
-            (*_A)(row_id, j) = .0;
-        //b_i -= A(i,k)*val, i!=k
-        for (size_t j=0; j<n_cols; j++)
-            _b[j] -= (*_A)(j, row_id)*x;
-        //b_k = val
-        _b[row_id] = x;
-        //A(i, k) = 0., i!=k
-        for (size_t j=0; j<n_cols; j++)
-            (*_A)(j, row_id) = .0;
-        //A(k, k) = 1.0
-        (*_A)(row_id, row_id) = 1.0; //=x
-    }
+    void setKnownX(size_t row_id, double x);
 
     void setKnownX(const std::vector<size_t> &vec_id, const std::vector<double> &vec_x)
     {
         for (size_t i=0; i<vec_id.size(); ++i)
             setKnownX(vec_id[i], vec_x[i]);
+    }
+
+    void printout(std::ostream &os=std::cout) const
+    {
+
     }
 
 private:

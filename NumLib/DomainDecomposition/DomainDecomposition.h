@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include "Base/BidirectionalMap.h"
+
 #include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
 #include "MeshLib/Core/IMesh.h"
 
@@ -10,10 +12,19 @@
 namespace NumLib
 {
 
+/**
+ * \brief Node-based decomposed sub domain
+ */
 class NodeBasedSubDomain
 {
 private:
     MathLib::ILinearEquations *_linear_eqs;
+
+    MeshLib::IMesh *_local_msh;
+    Base::BidirectionalMap<size_t, size_t> _map_global2localNodeId;
+    std::set<size_t> _ghost_nodes;
+    std::vector<size_t> _list_dirichlet_bc_id;
+    std::vector<double> _list_dirichlet_bc_value;
 public:
     void setupEqs()
     {
@@ -63,12 +74,6 @@ public:
     }
 
 
-};
-
-class DomainDecompostionAlgorithm
-{
-public:
-    static void decompose(MeshLib::IMesh &msh, size_t n, NodeBasedDecomposedDomain &ddc);
 };
 
 class ElementBasedSubDomain

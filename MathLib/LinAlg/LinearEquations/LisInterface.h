@@ -100,6 +100,7 @@ class CRSLisSolver : public CRSLinearEquationsBase<signed>
 public:
     void initialize();
     void finalize();
+    virtual ~CRSLisSolver();
 
     void setOption(const Base::Options &option);
     void setOption(const LIS_option &option)
@@ -111,11 +112,14 @@ public:
         return _option;
     }
 
+    void gatherX(std::vector<double> &x);
+
 protected:
     void solveEqs(CRSMatrix<double, signed> *A, double *rhs, double *x);
 
 private:
     LIS_option _option;
+    LIS_VECTOR bb,xx;
 };
 
 #if 0

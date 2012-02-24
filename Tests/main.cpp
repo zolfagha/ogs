@@ -11,11 +11,13 @@ TEST(Dummy, Test1)
 
 int main(int argc, char *argv[])
 {
+#if 0
     argc = 2;
     //argv[1] = "--gtest_filter=Math.*";
     //argv[1] = "--gtest_filter=Num.Discrete*:FEM.*";
-    //argv[1] = "--gtest_filter=Num.Discrete*";
+    argv[1] = "--gtest_filter=Discrete.*";
     //argv[1] = "--gtest_filter=*";
+#endif
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

@@ -122,6 +122,9 @@ public:
         return f;
     }
 
+    std::vector<size_t>& getListOfBCNodes() {return _vec_nodes;};
+    std::vector<Tval>& getListOfBCValues() {return _vec_values;};
+
 private:
     // node id, var id, value
     TemplateFEMNodalFunction<Tval> *_var;

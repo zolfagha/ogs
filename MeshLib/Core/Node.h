@@ -29,7 +29,7 @@ public:
     };
 
     size_t getNodeID() const { return _node_id;};
-    void setNodeID(size_t id) { _node_id = id;};
+    void setNodeID(const size_t &id) { _node_id = id;};
     virtual const GeoLib::Point* getData() const 
     {
         return &_x;
