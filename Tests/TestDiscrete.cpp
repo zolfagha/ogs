@@ -17,34 +17,32 @@
 #include "MeshLib/Core/IMesh.h"
 
 
-#include "NumLib/Discrete/DiscreteSystem.h"
-#include "NumLib/Discrete/DiscreteLinearEquation.h"
-#include "NumLib/Discrete/DiscreteLinearEquationAssembler.h"
-#include "NumLib/Discrete/ElementLocalAssembler.h"
-#include "NumLib/Discrete/DoF.h"
-#include "NumLib/Discrete/SparsityBuilder.h"
-#include "NumLib/TimeStepping/TimeSteppingController.h"
-#include "NumLib/TimeStepping/TimeStepFunction.h"
-#include "NumLib/DomainDecomposition/DomainDecomposition.h"
-#include "NumLib/DomainDecomposition/ogs5/par_ddc_group.h"
-
-#include "NumLib/Output/Output.h"
+#include "DiscreteLib/DiscreteSystem.h"
+#include "DiscreteLib/DiscreteVector.h"
+#include "DiscreteLib/DiscreteLinearEquation.h"
+#include "DiscreteLib/ElementLocalAssembler.h"
+#include "DiscreteLib/DoF.h"
+#include "DiscreteLib/SparsityBuilder.h"
 
 #include "TestUtil.h"
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 using namespace GeoLib;
 using namespace MathLib;
 using namespace MeshLib;
-using namespace NumLib;
+using namespace DiscreteLib;
 
-struct NumExample1
+struct DiscreteExample1
 {
     std::vector<size_t> list_dirichlet_bc_id;
     std::vector<double> list_dirichlet_bc_value;
     static const size_t dim_eqs = 9;
     std::vector<double> exH;
 
-    NumExample1()
+    DiscreteExample1()
     {
         size_t int_dirichlet_bc_id[] = {2,5,8,0,3,6};
         list_dirichlet_bc_id.assign(int_dirichlet_bc_id, int_dirichlet_bc_id+6);
@@ -93,10 +91,101 @@ struct NumExample1
     };
 };
 
+TEST(Discrete, VecSingle1)
+{
+    MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
+    DiscreteSystem dis(*msh);
+    DiscreteVector<double> *v = dis.createVector<double>(msh->getNumberOfNodes());
+
+    double expected[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+    std::copy(expected, expected+9, v->begin());
+    
+    ASSERT_EQ(9, v->size());
+    ASSERT_DOUBLE_ARRAY_EQ(expected, *v, 9);
+}
+
+TEST(Discrete, VecDecomposed1)
+{
+    MeshLib::IMesh* org_msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
+    const size_t n_dom = 2;
+    std::vector<NodeDecomposedDiscreteSystem*> vec_dis(n_dom);
+    DecomposedMasterVector<double> global_v(10);
+    global_v.decompose(n_dom);
+
+    omp_set_num_threads(n_dom);
+
+    #pragma omp parallel shared(global_v, org_msh, vec_dis, std::cout) default(none)
+    {
+        int iam = omp_get_thread_num();
+        //std::cout << "threads " << iam << std::endl;
+
+        DecomposedLocalVector<double>* local_v = global_v.createLocal(iam, iam*5, (iam+1)*5);
+        for (size_t i=local_v->getRangeBegin(); i<local_v->getRangeEnd(); i++)
+            local_v->global(i) = iam*10 + i;
+    }
+
+    double expected[] = {0, 1, 2, 3, 4, 15, 16, 17, 18, 19};
+    ASSERT_DOUBLE_ARRAY_EQ(expected, global_v, 10);
+}
+
+TEST(Discrete, VecDecomposed2)
+{
+#if 0
+    MeshLib::IMesh* org_msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
+    const size_t n_dom = 2;
+    std::vector<NodeDecomposedDiscreteSystem*> vec_dis(n_dom);
+    DecomposedDiscreteVector<double> global_v(10);
+    global_v.decompose(n_dom);
+
+    omp_set_num_threads(n_dom);
+
+#pragma omp parallel shared(global_v, org_msh, vec_dis, std::cout) default(none)
+    {
+        int iam = omp_get_thread_num();
+        std::cout << "threads " << iam << std::endl;
+
+        DecomposedDiscreteVectorLeaf<double>* local_v = global_v.createLocal(iam, iam*5, (iam+1)*5);
+        for (size_t i=local_v->getRangeBegin(); i<local_v->getRangeEnd(); i++)
+            (*local_v)[i] = iam*10 + i;
+        Base::BidirectionalMap<size_t, size_t> msh_node_id_mapping;
+        std::set<size_t> ghost_nodes;
+        MeshLib::IMesh* local_msh;
+        if (iam==0) {
+            int dom1_eles[] = {0, 1, 2, 3};
+            int dom1_ghost_nodes[] = {5, 6, 7, 8};
+            std::vector<size_t> dom1_e(dom1_eles, dom1_eles+4);
+            MeshGenerator::generateSubMesh(*org_msh, dom1_e, local_msh, msh_node_id_mapping);
+            for (size_t i=0; i<4; i++) {
+                ghost_nodes.insert(msh_node_id_mapping.mapAtoB(dom1_ghost_nodes[i]));
+            }
+        } else {
+            int dom2_eles[] = {1, 2, 3};
+            int dom2_ghost_nodes[] = {0, 1, 2, 3, 4};
+            std::vector<size_t> dom2_e(dom2_eles, dom2_eles+3);
+            MeshGenerator::generateSubMesh(*org_msh, dom2_e, local_msh, msh_node_id_mapping);
+            for (size_t i=0; i<5; i++) {
+                ghost_nodes.insert(msh_node_id_mapping.mapAtoB(dom2_ghost_nodes[i]));
+            }
+        }
+
+        NodeDecomposedDiscreteSystem* dis = new NodeDecomposedDiscreteSystem(*local_msh, msh_node_id_mapping, ghost_nodes);
+        vec_dis[iam] = dis;
+        DecomposedDiscreteVector<double> *v = dis->createVector<double>(local_msh->getNumberOfNodes());
+        for (size_t i=v->getRangeBegin(); i<v->getRangeEnd(); i++)
+            (*v)[i] = iam*10 + i;
+    }
+
+    for (size_t i=0; i<global_v.size(); i++) {
+        std::cout << global_v[i] << " ";
+    }
+    std::cout << std::endl;
+#endif
+}
+
 TEST(Discrete, Lis1)
 {
-    NumExample1 ex1;
-    NumExample1::TestElementAssembler ele_assembler;
+    DiscreteExample1 ex1;
+    DiscreteExample1::TestElementAssembler ele_assembler;
     CRSLisSolver lis;
     lis.getOption().ls_method = LIS_option::CG;
     lis.getOption().ls_precond = LIS_option::NONE;
@@ -110,10 +199,10 @@ TEST(Discrete, Lis1)
         dofManager.addDoF(msh->getNumberOfNodes());
         dofManager.construct(DofMapManager::BY_DOF);
         // create a linear problem
-        IDiscreteLinearEquation *linear_eq = dis.createLinearEquation<CRSLisSolver, NumLib::SparsityBuilderFromNodeConnectivity>(lis, dofManager);
+        IDiscreteLinearEquation *linear_eq = dis.createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivity>(lis, dofManager);
         // solve the equation
         linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
-        linear_eq->construct(NumLib::ElementBasedAssembler(ele_assembler));
+        linear_eq->construct(ElementBasedAssembler(ele_assembler));
         //linear_eq->getLinearEquation()->printout();
         linear_eq->solve();
 
@@ -122,16 +211,16 @@ TEST(Discrete, Lis1)
 
 }
 
-struct NodeDDC
-{
-    Base::BidirectionalMap<size_t, size_t> map_global2localNodeId;
-    std::set<size_t> ghost_nodes;
-};
 
 TEST(Discrete, Lis2)
 {
-    NumExample1 ex1;
-    NumExample1::TestElementAssembler ele_assembler;
+    struct NodeDDC
+    {
+        Base::BidirectionalMap<size_t, size_t> map_global2localNodeId;
+        std::set<size_t> ghost_nodes;
+    };
+    DiscreteExample1 ex1;
+    DiscreteExample1::TestElementAssembler ele_assembler;
     MeshLib::IMesh *org_msh = MeshGenerator::generateRegularQuadMesh(2.0, 2, .0, .0, .0);
 
     {
@@ -162,9 +251,9 @@ TEST(Discrete, Lis2)
         size_t dofId = dofManager.addDoF(local_msh->getNumberOfNodes(), dom1.ghost_nodes);
         dofManager.construct(DofMapManager::BY_POINT);
         // create a linear problem
-        IDiscreteLinearEquation *linear_eq = dis.createLinearEquation<CRSLisSolver, NumLib::SparsityBuilderFromNodeConnectivityWithInactiveDoFs>(lis, dofManager);
+        IDiscreteLinearEquation *linear_eq = dis.createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivityWithInactiveDoFs>(lis, dofManager);
         linear_eq->setPrescribedDoF(dofId, list_dirichlet_bc_id, list_dirichlet_bc_value);
-        linear_eq->construct(NumLib::ElementBasedAssembler(ele_assembler));
+        linear_eq->construct(ElementBasedAssembler(ele_assembler));
         //linear_eq->getLinearEquation()->printout();
         
         //solve
@@ -179,10 +268,10 @@ TEST(Discrete, Lis2)
         NodeDDC dom2;
         {
             int dom2_eles[] = {1, 2, 3};
-            int dom2_ghost_nodes[] = {1, 2, 3, 4};
+            int dom2_ghost_nodes[] = {0, 1, 2, 3, 4};
             std::vector<size_t> dom2_e(dom2_eles, dom2_eles+3);
             MeshGenerator::generateSubMesh(*org_msh, dom2_e, local_msh, dom2.map_global2localNodeId);
-            for (size_t i=0; i<4; i++) {
+            for (size_t i=0; i<5; i++) {
                 dom2.ghost_nodes.insert(dom2.map_global2localNodeId.mapAtoB(dom2_ghost_nodes[i]));
             }
         }
@@ -200,9 +289,9 @@ TEST(Discrete, Lis2)
         size_t dofId = dofManager.addDoF(local_msh->getNumberOfNodes(), dom2.ghost_nodes);
         dofManager.construct(DofMapManager::BY_POINT);
         // create a linear problem
-        IDiscreteLinearEquation *linear_eq = dis.createLinearEquation<CRSLisSolver, NumLib::SparsityBuilderFromNodeConnectivityWithInactiveDoFs>(lis, dofManager);
+        IDiscreteLinearEquation *linear_eq = dis.createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivityWithInactiveDoFs>(lis, dofManager);
         linear_eq->setPrescribedDoF(dofId, list_dirichlet_bc_id, list_dirichlet_bc_value);
-        linear_eq->construct(NumLib::ElementBasedAssembler(ele_assembler));
+        linear_eq->construct(ElementBasedAssembler(ele_assembler));
         //linear_eq->printout();
         // solve the equation
         //linear_eq->solve();
@@ -211,3 +300,90 @@ TEST(Discrete, Lis2)
     }
 }
 
+TEST(Discrete, DoF_single)
+{
+    DofMapManager dofManagerA;
+    size_t dofId1 = dofManagerA.addDoF(10);
+    dofManagerA.construct();
+    const DofMap *dofMap1 = dofManagerA.getDofMap(dofId1); 
+
+    ASSERT_EQ(dofManagerA.getNumberOfDof(), 1);
+    ASSERT_EQ(dofManagerA.getTotalNumberOfDiscretePoints(), 10);
+    ASSERT_TRUE(dofMap1!=0);
+    ASSERT_EQ(dofMap1->getNumberOfDiscretePoints(), 10);
+    ASSERT_EQ(dofMap1->getEqsID(0), 0);
+    ASSERT_EQ(dofMap1->getEqsID(9), 9);
+};
+
+TEST(Discrete, DoF_numberingByDof)
+{
+    DofMapManager dofManagerB;
+    size_t dofIdB1 = dofManagerB.addDoF(10);
+    size_t dofIdB2 = dofManagerB.addDoF(10);
+    dofManagerB.construct();
+    const DofMap *dofMapB1 = dofManagerB.getDofMap(dofIdB1); 
+    const DofMap *dofMapB2 = dofManagerB.getDofMap(dofIdB2); 
+    ASSERT_EQ(dofManagerB.getNumberOfDof(), 2);
+    ASSERT_EQ(dofManagerB.getTotalNumberOfDiscretePoints(), 20);
+    ASSERT_EQ(dofMapB1->getEqsID(0), 0);
+    ASSERT_EQ(dofMapB1->getEqsID(9), 9);
+    ASSERT_EQ(dofMapB2->getEqsID(0), 10);
+    ASSERT_EQ(dofMapB2->getEqsID(9), 19);
+};
+
+TEST(Discrete, DoF_numberingByPoint)
+{
+    DofMapManager dofManagerB;
+    size_t dofIdB1 = dofManagerB.addDoF(10);
+    size_t dofIdB2 = dofManagerB.addDoF(10);
+    dofManagerB.construct(DofMapManager::BY_POINT);
+    const DofMap *dofMapB1 = dofManagerB.getDofMap(dofIdB1); 
+    const DofMap *dofMapB2 = dofManagerB.getDofMap(dofIdB2); 
+    ASSERT_EQ(dofManagerB.getNumberOfDof(), 2);
+    ASSERT_EQ(dofManagerB.getTotalNumberOfDiscretePoints(), 20);
+    ASSERT_EQ(dofMapB1->getEqsID(0), 0);
+    ASSERT_EQ(dofMapB1->getEqsID(9), 18);
+    ASSERT_EQ(dofMapB2->getEqsID(0), 1);
+    ASSERT_EQ(dofMapB2->getEqsID(9), 19);
+}
+
+TEST(Discrete, DoF_ghost_nodes)
+{
+    {
+        DofMapManager *dofManager = new DofMapManager();
+        int ghost_nodes[] = {5, 6, 7, 8};
+        std::set<size_t> vec_ghost_nodes(ghost_nodes, ghost_nodes+4);
+        dofManager->addDoF(9, vec_ghost_nodes);
+        dofManager->construct(DofMapManager::BY_POINT);
+        const DofMap *dofMap = dofManager->getDofMap(0);
+
+        ASSERT_EQ(1, dofManager->getNumberOfDof());
+        ASSERT_EQ(9, dofManager->getTotalNumberOfDiscretePoints());
+        ASSERT_EQ(5, dofManager->getTotalNumberOfActiveDoFs());
+        ASSERT_TRUE(dofMap!=0);
+        ASSERT_EQ(9, dofMap->getNumberOfDiscretePoints());
+        ASSERT_EQ(5, dofMap->getNumberOfActiveDoFs());
+        ASSERT_EQ(0, dofMap->getEqsID(0));
+        ASSERT_EQ(-1, dofMap->getEqsID(8));
+
+        delete dofManager;
+    }
+    {
+        DofMapManager *dofManager = new DofMapManager();
+        int ghost_nodes[] = {0, 1, 2, 3, 4};
+        std::set<size_t> vec_ghost_nodes(ghost_nodes, ghost_nodes+4);
+        dofManager->addDoF(8, vec_ghost_nodes);
+        dofManager->construct(DofMapManager::BY_POINT);
+
+        ASSERT_EQ(1, dofManager->getNumberOfDof());
+        ASSERT_EQ(8, dofManager->getTotalNumberOfDiscretePoints());
+        ASSERT_EQ(4, dofManager->getTotalNumberOfActiveDoFs());
+        const DofMap *dofMap = dofManager->getDofMap(0);
+        ASSERT_TRUE(dofMap!=0);
+        ASSERT_EQ(8, dofMap->getNumberOfDiscretePoints());
+        ASSERT_EQ(4, dofMap->getNumberOfActiveDoFs());
+        ASSERT_EQ(-1, dofMap->getEqsID(0));
+        ASSERT_EQ(3, dofMap->getEqsID(7));
+        delete dofManager;
+    }
+}

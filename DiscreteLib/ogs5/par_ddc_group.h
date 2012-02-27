@@ -6,14 +6,10 @@
 
 #include "MeshLib/Core/IMesh.h"
 
-#include "NumLib/TimeStepping/ITransientSystem.h"
-
 #include "par_ddc.h"
 #include "rf_num_new.h"
 #include "equation_class.h"
 
-namespace NumLib
-{
 namespace OGS5
 {
 
@@ -46,16 +42,6 @@ public:
     void setup();
 
 
-    void solveTimeStep(TimeStep t_current)
-    {
-        ITransientSystem *problem;
-        bool msh_order = true;
-        size_t n_var = 1;
-        size_t problem_id;
-
-        solveEQS(problem_id);
-    }
-
 
 
 private:
@@ -67,7 +53,7 @@ private:
     CNumerics *num;
     bool use_linear;
     bool use_quad;
-    std::vector<ITransientSystem*> _problems;
+    //std::vector<ITransientSystem*> _problems;
 
     void FindNodesOnInterface(bool quadr);
     void assembleGlobalMatrix() {};
@@ -81,6 +67,7 @@ private:
         long global_eqs_dim = 1;
 
         //construct eqs
+#if 0
         for (size_t i=0; i<dom_vector.size(); i++) {
             CPARDomain *dom = dom_vector[i];
             dom->InitialEQS(problem_id);
@@ -92,7 +79,7 @@ private:
 #ifndef USE_MPI
         assembleGlobalMatrix();
 #endif
-
+#endif
         // solve
 #ifdef USE_MPI
         for (size_t i=0; i<dom_vector.size(); i++) {
@@ -110,5 +97,4 @@ private:
     }
 };
 
-}
 }

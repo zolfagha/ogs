@@ -11,6 +11,9 @@
 
 namespace MathLib {
 
+#pragma warning(push)
+#pragma warning(disable: 4018)
+
 /**
  * Class CRSMatrixDiagPrecond represents a matrix in compressed row storage
  * format associated with a diagonal preconditioner.
@@ -88,6 +91,7 @@ private:
 	double *_inv_diag;
 };
 
+#pragma warning(pop)
 }
 
 #endif

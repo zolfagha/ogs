@@ -21,7 +21,8 @@ template<class T_ASSEMBLY>
 class FemIVBVProblem : public AbstractMeshBasedDiscreteIVBVProblem
 {
 public:
-    FemIVBVProblem(MeshLib::IMesh &msh, T_ASSEMBLY &user_assembly) : AbstractMeshBasedDiscreteIVBVProblem(msh), _user_assembly(user_assembly)
+    FemIVBVProblem(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh, T_ASSEMBLY &user_assembly) 
+        : AbstractMeshBasedDiscreteIVBVProblem(msh), _user_assembly(user_assembly), _discrete_system(&dis)
     {
         Base::zeroObject(_map_var, _map_ic);
     }
@@ -39,7 +40,7 @@ public:
     size_t createField(FemLib::PolynomialOrder::type order)
     {
         if (_map_var==0) {
-            _map_var = new FemLib::FemNodalFunctionScalar(*getMesh(), order);
+            _map_var = new FemLib::FemNodalFunctionScalar(*_discrete_system, *getMesh(), order);
         }
         return 0;
     }
@@ -101,6 +102,7 @@ public:
 
 private:
     T_ASSEMBLY _user_assembly;
+    DiscreteLib::DiscreteSystem* _discrete_system;
     FemLib::FemNodalFunctionScalar* _map_var;
     MathLib::IFunction<double, GeoLib::Point>* _map_ic;
     std::vector<FemLib::FemDirichletBC<double>*> _map_bc1;

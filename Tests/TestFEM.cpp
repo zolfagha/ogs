@@ -11,6 +11,8 @@
 
 #include "MeshLib/Tools/MeshGenerator.h"
 
+#include "DiscreteLib/DiscreteSystem.h"
+
 #include "FemLib/Function/FemFunction.h"
 #include "FemLib/Function/FemFunctionProjection.h"
 #include "FemLib/BC/FemDirichletBC.h"
@@ -25,6 +27,7 @@
 using namespace FemLib;
 using namespace GeoLib;
 using namespace MeshLib;
+using namespace DiscreteLib;
 
 typedef MathLib::Matrix<double> GlobalMatrixType;
 typedef std::vector<double> GlobalVectorType;
@@ -53,6 +56,7 @@ class GWFemTest
 {
 public:
     Rectangle *rec;
+    DiscreteSystem *dis;
     IMesh *msh;
     MathLib::IFunction<double, double*> *K;
     FemNodalFunctionScalar *head;
@@ -70,9 +74,10 @@ public:
         Polyline* poly_right = rec->getRight();
         //mesh
         this->msh = msh;
+        dis = new DiscreteSystem(*msh);
         //discretization
-        head = new FemNodalFunctionScalar(*msh, PolynomialOrder::Linear);
-        vel = new FEMIntegrationPointFunctionVector2d(msh);
+        head = new FemNodalFunctionScalar(*dis, *msh, PolynomialOrder::Linear);
+        vel = new FEMIntegrationPointFunctionVector2d(*dis, *msh);
         //bc
         vec_bc1.push_back(new FemDirichletBC<double>(head, poly_right, false, new MathLib::FunctionConstant<double, GeoLib::Point>(.0), new DiagonalizeMethod())); //TODO should BC objects be created by fe functions?
         vec_bc2.push_back(new FemNeumannBC<double, double>(head, poly_left, false, new MathLib::FunctionConstant<double, GeoLib::Point>(-1e-5)));
@@ -218,7 +223,7 @@ TEST(FEM, ExtrapolateAverage1)
     GWFemTest::calculateHead(gw);
     GWFemTest::calculateVelocity(gw);
 
-    FemNodalFunctionVector2d nodal_vel(*gw.msh, PolynomialOrder::Linear);
+    FemNodalFunctionVector2d nodal_vel(*gw.dis, *gw.msh, PolynomialOrder::Linear);
     FemExtrapolationAverage<MathLib::Vector2D> extrapo;
     extrapo.extrapolate(*gw.vel, nodal_vel);
 
@@ -254,7 +259,7 @@ TEST(FEM, ExtrapolateAverage2)
     GWFemTest::calculateHead(gw);
     GWFemTest::calculateVelocity(gw);
 
-    FemNodalFunctionVector2d nodal_vel(*gw.msh, PolynomialOrder::Linear);
+    FemNodalFunctionVector2d nodal_vel(*gw.dis, *gw.msh, PolynomialOrder::Linear);
     FemExtrapolationAverage<MathLib::Vector2D> extrapo;
     extrapo.extrapolate(*gw.vel, nodal_vel);
 

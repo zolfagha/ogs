@@ -18,11 +18,7 @@
 
 #include "MeshLib/Core/IMesh.h"
 
-#include "NumLib/TimeStepping/ITransientSystem.h"
 
-
-namespace NumLib
-{
 namespace OGS5
 {
 
@@ -42,7 +38,7 @@ public:
     void setID(int id) {ID = id;};
     MeshLib::IMixedOrderMesh* getMesh() const {return m_msh;};
     void setMesh(MeshLib::IMixedOrderMesh* msh, bool linear, bool quad) {m_msh = msh; use_linear=linear; use_quad=quad;};
-    void setProblems(std::vector<ITransientSystem*> &p) { _problems = p; }
+    //void setProblems(std::vector<ITransientSystem*> &p) { _problems = p; }
 
 
     void CreateNodes();
@@ -52,16 +48,6 @@ public:
     void CreateEQS();                     //WW
 	void InitialEQS(size_t problem_id);   //WW
 	void CalcElementMatrices();
-
-    void assembly(size_t problem_id)
-    {
-        Linear_EQS *eqs = _vec_eqs[_problem2eqs[problem_id]];
-        for (size_t i=0; i<elements.size(); i++) {
-            MeshLib::IElement* e = m_msh->getElemenet(i);
-            // local assembly
-            // add to eqs
-        }
-    }
 
     long GetDOMNode(long);
 	//
@@ -119,8 +105,6 @@ private:
     friend class CPARDomainGroup;
     friend class SparseTable;
 
-    std::vector<ITransientSystem*> _problems;
-    std::vector<size_t> _problem2eqs;
     std::map<std::pair<size_t, size_t>, size_t> _set_eqs;
     std::vector<Linear_EQS*> _vec_eqs;
     std::vector<SparseTable*> _vec_sparse;
@@ -179,7 +163,6 @@ private:
     bool use_quad;
 };
 
-}
 }
 
 #endif

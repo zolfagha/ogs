@@ -12,8 +12,6 @@
 #include <string>
 #include <vector>
 
-namespace NumLib
-{
 namespace OGS5
 {
 
@@ -90,7 +88,6 @@ public:
 	//void Write(std::fstream*);
 };
 
-}
 }
 
 #endif

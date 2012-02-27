@@ -30,6 +30,7 @@ using namespace MeshLib;
 using namespace FemLib;
 using namespace NumLib;
 using namespace SolutionLib;
+using namespace DiscreteLib;
 
 class GWAssembler: public NumLib::ITimeODEElementAssembler
 {
@@ -97,7 +98,7 @@ public:
         //equations
         GWAssembler ele_eqs(*_feObjects, K) ;
         //IVBV problem
-        _problem = new GWFemProblem(*dis.getMesh(), GWAssembler(ele_eqs));
+        _problem = new GWFemProblem(dis, *dis.getMesh(), GWAssembler(ele_eqs));
         //BC
         size_t headId = _problem->createField(PolynomialOrder::Linear);
         _head = _problem->getField(headId);

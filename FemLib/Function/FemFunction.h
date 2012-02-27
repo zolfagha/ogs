@@ -10,6 +10,8 @@
 #include "MathLib/Function/Function.h"
 #include "MeshLib/Core/IMesh.h"
 
+#include "DiscreteLib/DiscreteSystem.h"
+#include "DiscreteLib/DiscreteVector.h"
 
 #include "FemLib/Core/IFemElement.h"
 #include "FemLib/FemElementObjectContainer.h"
@@ -38,17 +40,17 @@ class TemplateFEMNodalFunction : public MathLib::IFunction<Tvalue, GeoLib::Point
 public:
     /// @param msh Mesh
     /// @param order Polynomial order
-    TemplateFEMNodalFunction(MeshLib::IMesh &msh, PolynomialOrder::type order, Tvalue v0) 
+    TemplateFEMNodalFunction(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh, PolynomialOrder::type order, Tvalue v0) 
     {
-        initialize(msh, order);
+        initialize(dis, msh, order);
         resetNodalValues(v0);
     }
 
     /// @param msh Mesh
     /// @param order Polynomial order
-    TemplateFEMNodalFunction(MeshLib::IMesh &msh, PolynomialOrder::type order) 
+    TemplateFEMNodalFunction(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh, PolynomialOrder::type order) 
     {
-        initialize(msh, order);
+        initialize(dis, msh, order);
     }
 
     /// @param org source object for copying
@@ -90,39 +92,39 @@ public:
     Tvalue eval(const GeoLib::Point &pt) 
     {
         throw std::exception("eval() is not implemented yet.");
-        return _nodal_values[0];
+        return (*_nodal_values)[0];
     };
 
     /// get nodal value
     Tvalue& getValue(int node_id)
     {
-        return _nodal_values[node_id];
+        return (*_nodal_values)[node_id];
     }
 
     /// get an array of nodal values
     Tvalue* getNodalValues() 
     {
-        if (_nodal_values.size()>0)
-            return &_nodal_values[0];
+        if (_nodal_values->size()>0)
+            return &(*_nodal_values)[0];
         else
             return 0;
     }
 
-    std::vector<Tvalue>* getNodalValuesAsStdVec() 
+    DiscreteLib::DiscreteVector<double>* getNodalValuesAsStdVec() 
     {
-        return &_nodal_values;
+        return _nodal_values;
     }
 
     /// set nodal values
     void setNodalValues( Tvalue* x ) 
     {
-        std::copy(x, x+getNumberOfNodes(), _nodal_values.begin());
+        std::copy(x, x+getNumberOfNodes(), _nodal_values->begin());
     }
 
     /// reset nodal values with the given value
     void resetNodalValues (Tvalue &v)
     {
-        std::fill(_nodal_values.begin(), _nodal_values.end(), v);
+        std::fill(_nodal_values->begin(), _nodal_values->end(), v);
     }
 
     LagrangianFeObjectContainer* getFeObjectContainer()
@@ -143,26 +145,28 @@ public:
 
 
 private:
-    std::vector<Tvalue> _nodal_values;
+    DiscreteLib::DiscreteSystem* _discrete_system;
+    DiscreteLib::DiscreteVector<Tvalue>* _nodal_values;
     MeshLib::IMesh* _msh;
     PolynomialOrder::type _order;
     LagrangianFeObjectContainer* _feObjects;
 
     /// initialize 
-    void initialize(MeshLib::IMesh &msh, PolynomialOrder::type order)
+    void initialize(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh, PolynomialOrder::type order)
     {
+        _discrete_system = &dis;
         _msh = &msh;
         _order = order;
         size_t nnodes = msh.getNumberOfNodes();
-        _nodal_values.resize(nnodes);
+        _nodal_values = dis.createVector<Tvalue>(nnodes);
         _feObjects = new LagrangianFeObjectContainer(msh);
     }
 
     /// assigne this object from the given object
     void assign(const TemplateFEMNodalFunction<Tvalue> &org)
     {
-        initialize(*org._msh, org._order);
-        std::copy(org._nodal_values.begin(), org._nodal_values.end(), _nodal_values.begin());
+        initialize(*org._discrete_system, *org._msh, org._order);
+        std::copy(org._nodal_values->begin(), org._nodal_values->end(), _nodal_values->begin());
     }
 
 };
@@ -196,39 +200,60 @@ template<typename Tvalue>
 class TemplateFEMIntegrationPointFunction : public MathLib::IFunction<Tvalue,GeoLib::Point>
 {
 public:
-    TemplateFEMIntegrationPointFunction(MeshLib::IMesh* msh) {
-        _msh = msh;
-        _values.resize(msh->getNumberOfElements());
+    TemplateFEMIntegrationPointFunction(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh) 
+    {
+        initialize(dis, msh, msh.getNumberOfElements());
     };
 
-    MathLib::IFunction<Tvalue, GeoLib::Point>* clone() const {return 0;};
+    TemplateFEMIntegrationPointFunction(const TemplateFEMIntegrationPointFunction &src) 
+    {
+        initialize(*src._discrete_system, *src._msh, src._values->size());
+    };
 
-    const MeshLib::IMesh* getMesh() const {
+    MathLib::IFunction<Tvalue, GeoLib::Point>* clone() const 
+    {
+        TemplateFEMIntegrationPointFunction<Tvalue> *obj = new TemplateFEMIntegrationPointFunction<Tvalue>(*this);
+        return obj;
+    };
+
+    const MeshLib::IMesh* getMesh() const 
+    {
         return _msh;
     }
 
-    Tvalue eval(const GeoLib::Point &pt) {
+    Tvalue eval(const GeoLib::Point &pt) 
+    {
         throw std::exception("The method or operation is not implemented.");
     };
 
     void setIntegrationPointValue( size_t i_e, size_t ip, Tvalue &q ) 
     {
         assert(ip<_values[i_e].size());
-        _values[i_e][ip] = q;
+        (*_values)[i_e][ip] = q;
     }
 
-    void setNumberOfIntegationPoints(size_t i_e, size_t n) {
-        _values[i_e].resize(n);
+    void setNumberOfIntegationPoints(size_t i_e, size_t n) 
+    {
+        (*_values)[i_e].resize(n);
     }
 
     const std::vector<Tvalue>& getIntegrationPointValues(size_t i_e) const 
     {
-        return _values[i_e];
+        return (*_values)[i_e];
     }
 
 private:
     MeshLib::IMesh* _msh;
-    std::vector<std::vector<Tvalue>> _values;
+    DiscreteLib::DiscreteVector<std::vector<Tvalue>>* _values;
+    DiscreteLib::DiscreteSystem* _discrete_system;
+
+    void initialize(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh, size_t n)
+    {
+        _msh = &msh;
+        _discrete_system = &dis;
+        _values = _discrete_system->createVector<std::vector<Tvalue>>(n);
+    }
+
 
 };
 

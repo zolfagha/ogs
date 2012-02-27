@@ -18,8 +18,6 @@
 //
 #include "par_ddc.h"
 
-namespace NumLib
-{
 namespace OGS5
 {
 
@@ -1390,6 +1388,5 @@ void CSparseMatrix::DiagonalEntries(double* diag_e)
 
 ///////////////////////////////////////////////////////////
 }                                                 // Namespace
-}
 // End of class Matrix
 //==========================================================================

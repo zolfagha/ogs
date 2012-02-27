@@ -10,7 +10,7 @@
 namespace MathLib {
 
 #ifdef _OPENMP
-double scpr(double const * const v, double const * const w, unsigned n)
+double scpr(double const * const v, double const * const w, OPENMP_LOOP_TYPE n)
 {
 	long double res (v[0]*w[0]);
 	OPENMP_LOOP_TYPE k;

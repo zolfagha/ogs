@@ -25,6 +25,9 @@
 
 namespace MathLib {
 
+#pragma warning(push)
+#pragma warning(disable: 4018)
+
 template<typename FP_TYPE, typename IDX_TYPE>
 class CRSMatrix: public SparseMatrixBase<FP_TYPE, IDX_TYPE>
 {
@@ -442,6 +445,8 @@ protected:
 private:
     DISALLOW_COPY_AND_ASSIGN(CRSMatrix);
 };
+
+#pragma warning(pop)
 
 } // end namespace MathLib
 

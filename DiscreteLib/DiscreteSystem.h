@@ -8,11 +8,11 @@
 
 #include "MeshLib/Core/IMesh.h"
 
-#include "NumLib/Discrete/DiscreteVector.h"
-#include "NumLib/Discrete/DiscreteLinearEquation.h"
+#include "DiscreteVector.h"
+#include "DiscreteLinearEquation.h"
 
 
-namespace NumLib
+namespace DiscreteLib
 {
 
 /**
@@ -47,10 +47,11 @@ public:
     //}
 
     template<typename T>
-    void createVector(const size_t &n, DiscreteVector<T>* &v) 
+    DiscreteVector<T>* createVector(const size_t &n) 
     {
-        v = new DiscreteVector<T>();
+        DiscreteVector<T>* v = new DiscreteVector<T>(n);
         _vec_vectors.push_back(v);
+        return v;
     };
 
 private:
@@ -85,11 +86,19 @@ public:
     size_t getGlobalNumberOfNodes() const {return _n_global_nodes; };
 
     template<typename T>
-    void createVector(const size_t &n, DiscreteVector<T>* &v) 
+    DecomposedMasterVector<T>* createVector(const size_t &n) 
     {
-        v = new DecomposedDiscreteVector<T>();
+        DecomposedMasterVector<T>* v = new DecomposedMasterVector<T>(0, n);
         _vec_vectors.push_back(v);
+        return v;
     };
+
+    template<typename T>
+    DecomposedMasterVector<T>* getVector(const size_t &i) 
+    {
+        return (DecomposedMasterVector<T>*)_vec_vectors[n];
+    };
+
 
 private:
     DISALLOW_COPY_AND_ASSIGN(NodeDecomposedDiscreteSystem);
@@ -100,6 +109,7 @@ private:
 
     // 
     size_t _n_global_nodes;
+
 };
 
 

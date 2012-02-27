@@ -7,9 +7,9 @@
 
 #include "MeshLib/Topology/Topology.h"
 
-#include "NumLib/Discrete/DoF.h"
+#include "DoF.h"
 
-namespace NumLib
+namespace DiscreteLib
 {
 
 class SparsityBuilder

@@ -3,15 +3,17 @@
 
 #include <vector>
 
+#include "Base/CodingTools.h"
+
 #include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
 #include "MathLib/LinAlg/Sparse/SparseTableCRS.h"
 
 #include "MeshLib/Core/IMesh.h"
 
-#include "NumLib/Discrete/DoF.h"
-#include "NumLib/Discrete/DiscreteLinearEquationAssembler.h"
+#include "DoF.h"
+#include "DiscreteLinearEquationAssembler.h"
 
-namespace NumLib
+namespace DiscreteLib
 {
 
 /** 

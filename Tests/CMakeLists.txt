@@ -16,6 +16,7 @@ TARGET_LINK_LIBRARIES ( tests
 	MathLib
 	GeoLib
 	MeshLib
+	DiscreteLib
 #	FdmLib
 	FemLib
 	NumLib

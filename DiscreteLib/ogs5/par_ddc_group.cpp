@@ -8,8 +8,6 @@
 
 using namespace std;
 
-namespace NumLib
-{
 namespace OGS5
 {
 
@@ -140,7 +138,7 @@ void CPARDomainGroup::setup()
     {
         m_dom = dom_vector[i];
         m_dom->setMesh(this->m_msh, use_linear, use_quad);
-        m_dom->setProblems(_problems);
+//        m_dom->setProblems(_problems);
     }
 
 	//----------------------------------------------------------------------
@@ -458,5 +456,4 @@ void CPARDomainGroup::setup()
 	}
 
 
-}
 } //end

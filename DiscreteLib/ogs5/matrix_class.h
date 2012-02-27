@@ -9,15 +9,9 @@
 #ifndef matrix_class_INC
 #define matrix_class_INC
 
-//#include <cstdlib>
-//#include <fstream>
 #include <iostream>
-//#include <map>
-//#include <vector>
 
 
-namespace NumLib
-{
 namespace OGS5
 {
 
@@ -175,7 +169,6 @@ private:
 //const Vec& operator ^ (Vec& x,  Vec& y);
 
 // End of class Matrix
-}
 }
 
 //==========================================================================

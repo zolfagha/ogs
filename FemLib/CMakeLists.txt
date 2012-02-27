@@ -48,7 +48,8 @@ ENDIF (PARALLEL_USE_MPI)
 target_link_libraries (
 	FemLib
 	Base
-        MathLib
+	MathLib
 	GeoLib
 	MeshLib
+	DiscreteLib
 )

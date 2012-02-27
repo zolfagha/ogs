@@ -45,8 +45,6 @@ double time_ele_paral;
 using namespace std;
 
 
-namespace NumLib
-{
 namespace OGS5
 {
 
@@ -473,7 +471,7 @@ void CPARDomain::CreateEQS()
     if (use_quad) {
         _vec_sparse.push_back(new SparseTable(*this, true));
     }
-
+#if 0
     _problem2eqs.resize(_problems.size());
 
     for (size_t i=0; i<_problems.size(); i++) {
@@ -491,6 +489,7 @@ void CPARDomain::CreateEQS()
         }
         _problem2eqs[i] = eqs_id;
     }
+#endif
  }
 
 /**************************************************************************
@@ -501,9 +500,11 @@ void CPARDomain::CreateEQS()
 **************************************************************************/
 void CPARDomain::InitialEQS(size_t problem_id)
 {
+#if 0
 	Linear_EQS* this_eqs = _vec_eqs[_problem2eqs[problem_id]];
 	
 	this_eqs->Initialize();
+#endif
 }
 
 //
@@ -1315,5 +1316,4 @@ void CPARDomain::InitialEQS(size_t problem_id)
 			   << eqsH->GetCPUtime() << endl;
 	}
 #endif                                            //// if defined(USE_MPI)
-}
 }

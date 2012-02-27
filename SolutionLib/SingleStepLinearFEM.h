@@ -13,10 +13,11 @@
 #include "FemLib/BC/FemDirichletBC.h"
 #include "FemLib/BC/FemNeumannBC.h"
 
-#include "NumLib/Discrete/DoF.h"
-#include "NumLib/Discrete/DiscreteSystem.h"
-#include "NumLib/Discrete/SparsityBuilder.h"
+#include "DiscreteLib/DoF.h"
+#include "DiscreteLib/DiscreteSystem.h"
+#include "DiscreteLib/SparsityBuilder.h"
 
+#include "NumLib/Discrete/DiscreteLinearEquationAssembler.h"
 
 namespace SolutionLib
 {
@@ -45,7 +46,7 @@ public:
     typedef T_USER_FEM_PROBLEM<T_USER_ASSEMBLY> UserFemProblem;
 
     ///
-    SingleStepLinearFEM(NumLib::DiscreteSystem &dis, UserFemProblem &problem) 
+    SingleStepLinearFEM(DiscreteLib::DiscreteSystem &dis, UserFemProblem &problem) 
         : AbstractTimeSteppingAlgorithm(*problem.getTimeSteppingFunction()), 
         _discrete_system(&dis), _problem(&problem), _element_ode_assembler(problem.getElementAssemlby()), _linear_eqs(0)
     {
@@ -64,7 +65,7 @@ public:
         }
         _dofManager.construct();
         // create linear equation systems
-        _linear_eqs = _discrete_system->createLinearEquation<T_LINEAR_SOLVER, NumLib::SparsityBuilderFromNodeConnectivity>(*_linear_solver, _dofManager);
+        _linear_eqs = _discrete_system->createLinearEquation<T_LINEAR_SOLVER, DiscreteLib::SparsityBuilderFromNodeConnectivity>(*_linear_solver, _dofManager);
     };
 
     virtual ~SingleStepLinearFEM()
@@ -114,7 +115,7 @@ private:
         for (size_t i=0; i<n_var; i++) {
             u_n1[i] = new FemLib::FemNodalFunctionScalar(*u_n[i]);
         }
-        std::vector<std::vector<double>*> vec_un(n_var);
+        std::vector<DiscreteLib::DiscreteVector<double>*> vec_un(n_var);
         for (size_t i=0; i<n_var; i++) {
             vec_un[i] = u_n[i]->getNodalValuesAsStdVec();
         }
@@ -155,10 +156,10 @@ private:
 private:
     UserFemProblem* _problem;
     UserTimeOdeAssembler _element_ode_assembler;
-    NumLib::DofMapManager _dofManager;
+    DiscreteLib::DofMapManager _dofManager;
     T_LINEAR_SOLVER* _linear_solver;
-    NumLib::DiscreteSystem *_discrete_system;
-    NumLib::IDiscreteLinearEquation* _linear_eqs;
+    DiscreteLib::DiscreteSystem *_discrete_system;
+    DiscreteLib::IDiscreteLinearEquation* _linear_eqs;
     std::vector<FemLib::FemNodalFunctionScalar*> _u_n;
     std::vector<FemLib::FemNodalFunctionScalar*> _u_n1;
 };

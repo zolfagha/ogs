@@ -5,6 +5,10 @@
 #include <cstdlib>
 #include <cmath>
 
+#pragma warning(push)
+#pragma warning(disable: 4244)
+
+
 #define SIGN(a) ((a) >= 0 ? 1.0 : -1.0)
 #define SQR(a) ((a)*(a))                             // Quadrat von a
 inline double abs2(double a) {
@@ -1691,5 +1695,7 @@ namespace lapack
       stpsv_(JOB_STR+5, JOB_STR+1, JOB_STR, &n, A, B+i*ldB, &N_ONE);
   }
 }
+
+#pragma warning(pop)
 
 #endif

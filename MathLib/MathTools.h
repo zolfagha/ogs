@@ -34,7 +34,7 @@ double scpr(const T* v0, const T* v1, size_t n)
 }
 
 #ifdef _OPENMP
-double scpr(double const * const v, double const * const w, unsigned n);
+double scpr(double const * const v, double const * const w, OPENMP_LOOP_TYPE n);
 #endif
 
 /**

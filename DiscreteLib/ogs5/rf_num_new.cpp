@@ -21,6 +21,8 @@
 //#undef SEEK_CUR
 #endif
 
+#include "rf_num_new.h"
+
 //#include "makros.h"
 // C++ STL
 #include <cfloat>
@@ -36,12 +38,9 @@ using namespace std;
 extern ios::pos_type GetNextSubKeyword(ifstream* file,string* line, bool* keyword);
 // GeoSys-GeoLib
 // GeoSys-FEMLib
-#include "rf_num_new.h"
 //#include "StringTools.h"
 //#include "mathlib.h"
 
-namespace NumLib
-{
 namespace OGS5
 {
 
@@ -443,5 +442,4 @@ void CNumerics::Write(fstream* num_file)
 
 #endif
 
-}
 }

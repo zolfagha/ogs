@@ -27,8 +27,6 @@
 using namespace std;
 
 //
-namespace NumLib
-{
 namespace OGS5
 {
 
@@ -2366,4 +2364,3 @@ int Linear_EQS::BiCG(double* xg, const long n)
 #endif
 //------------------------------------------------------------------------
 }                                                 // namespace
-}

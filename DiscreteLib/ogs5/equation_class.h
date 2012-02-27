@@ -14,8 +14,6 @@
 #include "matrix_class.h"
 
 
-namespace NumLib
-{
 namespace OGS5
 {
 
@@ -150,7 +148,6 @@ private:                                          // Dot not remove this!
 	//
 	void Message();
 };
-}
 }
 
 #endif
