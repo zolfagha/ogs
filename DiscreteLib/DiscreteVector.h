@@ -130,15 +130,15 @@ private:
  * \brief Vector container for distributed memory
  */
 template<typename T>
-class DecomposedMasterVector : public IDiscreteVector
+class OMPDecomposedMasterVector : public IDiscreteVector
 {
 public:
-    DecomposedMasterVector(size_t n_global)
+    OMPDecomposedMasterVector(size_t n_global)
     {
         _global_n = n_global;
     };
 
-    virtual ~DecomposedMasterVector() {};
+    virtual ~OMPDecomposedMasterVector() {};
 
     void decompose(size_t n)
     {

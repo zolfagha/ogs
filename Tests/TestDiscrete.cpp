@@ -23,6 +23,7 @@
 #include "DiscreteLib/ElementLocalAssembler.h"
 #include "DiscreteLib/DoF.h"
 #include "DiscreteLib/SparsityBuilder.h"
+#include "DiscreteLib/ogs5/par_ddc_group.h"
 
 #include "TestUtil.h"
 
@@ -104,29 +105,6 @@ TEST(Discrete, VecSingle1)
     ASSERT_DOUBLE_ARRAY_EQ(expected, *v, 9);
 }
 
-TEST(Discrete, VecDecomposed1)
-{
-    MeshLib::IMesh* org_msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
-    const size_t n_dom = 2;
-    std::vector<NodeDecomposedDiscreteSystem*> vec_dis(n_dom);
-    DecomposedMasterVector<double> global_v(10);
-    global_v.decompose(n_dom);
-
-    omp_set_num_threads(n_dom);
-
-    #pragma omp parallel shared(global_v, org_msh, vec_dis, std::cout) default(none)
-    {
-        int iam = omp_get_thread_num();
-        //std::cout << "threads " << iam << std::endl;
-
-        DecomposedLocalVector<double>* local_v = global_v.createLocal(iam, iam*5, (iam+1)*5);
-        for (size_t i=local_v->getRangeBegin(); i<local_v->getRangeEnd(); i++)
-            local_v->global(i) = iam*10 + i;
-    }
-
-    double expected[] = {0, 1, 2, 3, 4, 15, 16, 17, 18, 19};
-    ASSERT_DOUBLE_ARRAY_EQ(expected, global_v, 10);
-}
 
 TEST(Discrete, VecDecomposed2)
 {
@@ -211,95 +189,112 @@ TEST(Discrete, Lis1)
 
 }
 
-
-TEST(Discrete, Lis2)
+TEST(Discrete, OGS51)
 {
+    MeshLib::IMixedOrderMesh* msh;
+    std::set<std::pair<bool, size_t>> set_property;
+    OGS5::CPARDomainGroup dg(*msh, set_property);
+}
+
+//# OpenMP ###################################################################################################
+TEST(Discrete, OMP_vec1)
+{
+    MeshLib::IMesh* org_msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
+    const size_t n_dom = 2;
+    OMPDecomposedMasterVector<double> global_v(10);
+    global_v.decompose(n_dom);
+
+    omp_set_num_threads(n_dom);
+
+    #pragma omp parallel shared(global_v, org_msh, std::cout) default(none)
+    {
+        int iam = omp_get_thread_num();
+        //std::cout << "threads " << iam << std::endl;
+
+        DecomposedLocalVector<double>* local_v = global_v.createLocal(iam, iam*5, (iam+1)*5);
+        for (size_t i=local_v->getRangeBegin(); i<local_v->getRangeEnd(); i++)
+            local_v->global(i) = iam*10 + i;
+    }
+
+    double expected[] = {0, 1, 2, 3, 4, 15, 16, 17, 18, 19};
+    ASSERT_DOUBLE_ARRAY_EQ(expected, global_v, 10);
+}
+
+
+TEST(Discrete, OMP_eqs1)
+{
+    DiscreteExample1 ex1;
     struct NodeDDC
     {
         Base::BidirectionalMap<size_t, size_t> map_global2localNodeId;
         std::set<size_t> ghost_nodes;
     };
-    DiscreteExample1 ex1;
-    DiscreteExample1::TestElementAssembler ele_assembler;
     MeshLib::IMesh *org_msh = MeshGenerator::generateRegularQuadMesh(2.0, 2, .0, .0, .0);
+    const size_t n_dom = 2;
+    OMPMasterNodeDecomposedDiscreteSystem global_dis(*org_msh, n_dom);
 
+    omp_set_num_threads(n_dom);
+
+    // define decomposed discrete system
+    #pragma omp parallel shared(ex1, global_dis, org_msh, std::cout) default(none)
     {
-        // define a local problem with ddc
+        int iam = omp_get_thread_num();
+        //std::cout << "threads " << iam << std::endl;
+
         MeshLib::IMesh* local_msh = 0;
-        NodeDDC dom1;
-        {
+        NodeDDC dom;
+        if (iam==0) {
+            // define a local problem with ddc
             int dom1_eles[] = {0, 1, 2, 3};
             int dom1_ghost_nodes[] = {5, 6, 7, 8};
             std::vector<size_t> dom1_e(dom1_eles, dom1_eles+4);
 
-            MeshGenerator::generateSubMesh(*org_msh, dom1_e, local_msh, dom1.map_global2localNodeId);
+            MeshGenerator::generateSubMesh(*org_msh, dom1_e, local_msh, dom.map_global2localNodeId);
             for (size_t i=0; i<4; i++) {
-                dom1.ghost_nodes.insert(dom1.map_global2localNodeId.mapAtoB(dom1_ghost_nodes[i]));
+                dom.ghost_nodes.insert(dom.map_global2localNodeId.mapAtoB(dom1_ghost_nodes[i]));
             }
-        }
-        std::vector<size_t> list_dirichlet_bc_id;
-        std::vector<double> list_dirichlet_bc_value;
-        ex1.setLocalDirichletBC(dom1.map_global2localNodeId, list_dirichlet_bc_id, list_dirichlet_bc_value);
-        CRSLisSolver lis;
-        lis.getOption().ls_method = LIS_option::CG;
-        lis.getOption().ls_precond = LIS_option::NONE;
-
-        // define discrete system
-        NodeDecomposedDiscreteSystem dis(*local_msh, dom1.map_global2localNodeId, dom1.ghost_nodes);
-        // create dof map
-        DofMapManager dofManager;
-        size_t dofId = dofManager.addDoF(local_msh->getNumberOfNodes(), dom1.ghost_nodes);
-        dofManager.construct(DofMapManager::BY_POINT);
-        // create a linear problem
-        IDiscreteLinearEquation *linear_eq = dis.createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivityWithInactiveDoFs>(lis, dofManager);
-        linear_eq->setPrescribedDoF(dofId, list_dirichlet_bc_id, list_dirichlet_bc_value);
-        linear_eq->construct(ElementBasedAssembler(ele_assembler));
-        //linear_eq->getLinearEquation()->printout();
-        
-        //solve
-        //linear_eq->solve();
-
-        //ASSERT_DOUBLE_ARRAY_EQ(&ex1.exH[0], linear_eq->getX(), 9, 1.e-5);
-    }
-
-    {
-        // define a local problem with ddc
-        MeshLib::IMesh* local_msh = 0;
-        NodeDDC dom2;
-        {
+        } else {
             int dom2_eles[] = {1, 2, 3};
             int dom2_ghost_nodes[] = {0, 1, 2, 3, 4};
             std::vector<size_t> dom2_e(dom2_eles, dom2_eles+3);
-            MeshGenerator::generateSubMesh(*org_msh, dom2_e, local_msh, dom2.map_global2localNodeId);
+            MeshGenerator::generateSubMesh(*org_msh, dom2_e, local_msh, dom.map_global2localNodeId);
             for (size_t i=0; i<5; i++) {
-                dom2.ghost_nodes.insert(dom2.map_global2localNodeId.mapAtoB(dom2_ghost_nodes[i]));
+                dom.ghost_nodes.insert(dom.map_global2localNodeId.mapAtoB(dom2_ghost_nodes[i]));
             }
         }
         std::vector<size_t> list_dirichlet_bc_id;
         std::vector<double> list_dirichlet_bc_value;
-        ex1.setLocalDirichletBC(dom2.map_global2localNodeId, list_dirichlet_bc_id, list_dirichlet_bc_value);
+        ex1.setLocalDirichletBC(dom.map_global2localNodeId, list_dirichlet_bc_id, list_dirichlet_bc_value);
+
+        // discrete system
+        OMPLocalNodeDecomposedDiscreteSystem *local_dis = global_dis.createLocal(*local_msh, dom.map_global2localNodeId, dom.ghost_nodes);
+
+        //// create dof map
+        //DofMapManager dofManager;
+        //size_t dofId = dofManager.addDoF(local_msh->getNumberOfNodes(), dom.ghost_nodes);
+        //dofManager.construct(DofMapManager::BY_POINT);
+
+        // create a linear problem
         CRSLisSolver lis;
         lis.getOption().ls_method = LIS_option::CG;
         lis.getOption().ls_precond = LIS_option::NONE;
-
-        // define discrete system
-        NodeDecomposedDiscreteSystem dis(*local_msh, dom2.map_global2localNodeId, dom2.ghost_nodes);
-        // create a dof map
         DofMapManager dofManager;
-        size_t dofId = dofManager.addDoF(local_msh->getNumberOfNodes(), dom2.ghost_nodes);
+        size_t dofId = dofManager.addDoF(org_msh->getNumberOfNodes());
         dofManager.construct(DofMapManager::BY_POINT);
-        // create a linear problem
-        IDiscreteLinearEquation *linear_eq = dis.createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivityWithInactiveDoFs>(lis, dofManager);
+        IDiscreteLinearEquation *linear_eq = local_dis->createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivityWithInactiveDoFs>(lis, dofManager);
         linear_eq->setPrescribedDoF(dofId, list_dirichlet_bc_id, list_dirichlet_bc_value);
-        linear_eq->construct(ElementBasedAssembler(ele_assembler));
-        //linear_eq->printout();
-        // solve the equation
-        //linear_eq->solve();
-
-        //ASSERT_DOUBLE_ARRAY_EQ(&ex1.exH[0], linear_eq->getX(), 9, 1.e-5);    
+        // construct and solve
+        DiscreteExample1::TestElementAssembler ele_assembler;
+        linear_eq->construct(ElementBasedAssembler(ele_assembler));    
     }
+
+
+     IDiscreteLinearEquation *global_eq;
+     global_eq->solve();
 }
 
+
+//# DoF ###################################################################################################
 TEST(Discrete, DoF_single)
 {
     DofMapManager dofManagerA;

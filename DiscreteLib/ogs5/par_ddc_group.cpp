@@ -11,56 +11,6 @@ using namespace std;
 namespace OGS5
 {
 
-/**************************************************************************
-   FEMLib-Method:
-   Task:
-   Programing:
-   07/2004 OK Implementation
-   07/2004 OK Version 1 untill 3.9.17OK6
-   07/2004 OK Version 2 from   3.9.17OK7
-   10/2005 OK cout
-**************************************************************************/
-void CPARDomainGroup::DOMRead(string file_base_name)
-{
-	//----------------------------------------------------------------------
-	std::cout << "DOMRead: ";
-	//----------------------------------------------------------------------
-	CPARDomain* m_dom = NULL;
-	char line[MAX_ZEILE];
-	string sub_line;
-	string line_string;
-	string ddc_file_name;
-	ios::pos_type position;
-	//----------------------------------------------------------------------
-	// File handling
-	ddc_file_name = file_base_name + DDC_FILE_EXTENSION;
-	ifstream ddc_file (ddc_file_name.data(),ios::in);
-	if(!ddc_file.good())
-	{
-		cout << "no DDC file" << endl;
-		return;
-	}
-	ddc_file.seekg(0L,ios::beg);
-	//----------------------------------------------------------------------
-	// Keyword loop
-	while (!ddc_file.eof())
-	{
-		ddc_file.getline(line,MAX_ZEILE);
-		line_string = line;
-		//----------------------------------------------------------------------
-		// keyword found
-		if(line_string.find("#DOMAIN") != string::npos)
-		{
-			m_dom = new CPARDomain();
-			position = m_dom->Read(&ddc_file);
-			dom_vector.push_back(m_dom);
-			ddc_file.seekg(position,ios::beg);
-		}                         // keyword found
-	}                                     // eof
-	//----------------------------------------------------------------------
-	cout << dom_vector.size() << " domains" << endl;
-	//----------------------------------------------------------------------
-}
 
 /**************************************************************************
    FEMLib-Method:
@@ -175,7 +125,7 @@ void CPARDomainGroup::setup()
 	// Find nodes of all neighbors of each node. // WW
 	// Local topology. WW
 	cout << "  Find nodes on borders" << endl;
-	FindNodesOnInterface(use_quad);
+	findNodesOnInterface(use_quad);
 	cout << "  Find the connected nodes for each node" << endl;
 #ifndef USE_MPI                                //WW
 	for(i = 0; i < no_domains; i++)
@@ -207,206 +157,168 @@ void CPARDomainGroup::setup()
 		//----------------------------------------------------------------------
 }
 
-/**************************************************************************
-   FEMLib-Method:
-   Task:
-   Programing:
-   07/2006 WW Implementation
-   last modification:
-**************************************************************************/
-	void CPARDomainGroup::FindNodesOnInterface(bool quadr)
-	{
-		// int k;
-		long i, nnodes_gl, g_index, nnodes_l;
-		size_t j;
-		long l_buff = 0, l_buff1 = 0;
-
-		long* elem_nodes = NULL;
-		//
-        MeshLib::IElement* m_ele = 0;
-		//
-		CPARDomain* m_dom = NULL;
-		vector<long> boundary_nodes;
-		vector<long> boundary_nodes_HQ;
-		vector<long> inner_nodes_HQ;
-		vector<long> inner_nodes;
-		vector<long> long_buffer;
-		vector<long> bc_buffer;
-		vector<long> dom_bc_buffer;
-		vector<long> dom_bc_bufferHQ;
-		//
-		nnodes_gl = m_msh->getNumberOfNodes(); //TODO total nodes
-		nnodes_l = m_msh->getNumberOfNodes();	//
-		bc_buffer.resize(nnodes_gl);
-		//
-#if defined(USE_MPI)                           //13.12.2007
-		long overlapped_entry_size = 0;
+void CPARDomainGroup::findNodesOnInterface(bool quadr)
+{
+	const size_t nnodes_gl = m_msh->getNumberOfTotalNodes(); 
+	const size_t nnodes_l = m_msh->getNumberOfNodes();	//
+	
+#if defined(USE_MPI)
+	long overlapped_entry_size = 0;
 #endif
-		for(i = 0; i < nnodes_gl; i++)
-		{
-			if(node_connected_doms[i] > 1.0)
-			{
-				// Mapp BC entry-->global node array
-				bc_buffer[i] = (long)long_buffer.size();
-				long_buffer.push_back(i);
+    // Map BC entry-->global node array
+    vector<long> list_bndNodeId;
+    vector<long> map_glNode2bndNodeId(nnodes_gl);
+	for (size_t i=0; i<nnodes_gl; i++) {
+		if (node_connected_doms[i] > 1) {
+			map_glNode2bndNodeId[i] = (long)list_bndNodeId.size();
+			list_bndNodeId.push_back(i);
 #ifdef USE_MPI
-				if(m_msh->nod_vector[i]->GetIndex() < m_msh->GetNodesNumber(false))
-					overlapped_entry_size = (long)long_buffer.size();
+			if (m_msh->nod_vector[i]->GetIndex() < m_msh->GetNodesNumber(false))
+				overlapped_entry_size = (long)list_bndNodeId.size();
 #endif
-			}
-			else
-				bc_buffer[i] = -1;
-		}
-		//
-#if defined(USE_MPI)                           // 13.12.2007
-		// Total border nodes
-		m_dom = dom_vector[myrank];
-		m_dom->t_border_nodes_size = overlapped_entry_size;
-		m_dom->t_border_nodes_sizeH = (long)long_buffer.size();
-		m_dom->t_border_nodes = new long[m_dom->t_border_nodes_sizeH];
-		for(i = 0; i < m_dom->t_border_nodes_sizeH; i++)
-			m_dom->t_border_nodes [i] = long_buffer[i];
+		} else {
+			map_glNode2bndNodeId[i] = -1;
+        }
+	}
+	
+#if defined(USE_MPI)
+	// Total border nodes
+	m_dom = dom_vector[myrank];
+	m_dom->t_border_nodes_size = overlapped_entry_size;
+	m_dom->t_border_nodes_sizeH = (long)list_bndNodeId.size();
+	m_dom->t_border_nodes = new long[m_dom->t_border_nodes_sizeH];
+	for(long i = 0; i < m_dom->t_border_nodes_sizeH; i++)
+		m_dom->t_border_nodes [i] = list_bndNodeId[i];
 #endif
 
-		// Sort
+	// Sort
 #ifndef USE_MPI
-		for(int k = 0; k < (int)dom_vector.size(); k++)
-		{
-			int myrank = k;
+	for (size_t k=0; k<dom_vector.size(); k++) {
+		int myrank = (int) k;
 #endif
-		m_dom = dom_vector[myrank];
-		//
-		boundary_nodes.clear();
-		inner_nodes.clear();
-		boundary_nodes_HQ.clear();
-		inner_nodes_HQ.clear();
-		long_buffer.clear();
-		long_buffer.resize((long)m_dom->nodes.size());
-		dom_bc_buffer.clear();
-		dom_bc_bufferHQ.clear();
+        CPARDomain* m_dom = dom_vector[myrank];
+        setupDomain(m_dom, map_glNode2bndNodeId, quadr);
+#ifndef USE_MPI
+    }
+#endif
+}
 
-		for(i = 0; i < (long)m_dom->nodes.size(); i++)
-		{
-			g_index = m_dom->nodes[i];
-			if(node_connected_doms[ g_index] > 1.0)
-			{
-				if(g_index >= nnodes_l)
-				{
-					boundary_nodes_HQ.push_back(i);
-					dom_bc_bufferHQ.push_back(bc_buffer[g_index]);
-					long_buffer[i] = -(long)boundary_nodes_HQ.size() -
-					                 nnodes_gl;
-				}
-				else
-				{
-					boundary_nodes.push_back(i);
-					dom_bc_buffer.push_back(bc_buffer[g_index]);
-					long_buffer[i] = -(long)boundary_nodes.size();
-				}
-			}
-			else
-			{
-				if(g_index >= nnodes_l)
-				{
-					long_buffer[i] = (long)inner_nodes_HQ.size() + nnodes_gl;
-					inner_nodes_HQ.push_back(i);
-				}
-				else
-				{
-					long_buffer[i] = (long)inner_nodes.size();
-					inner_nodes.push_back(i);
-				}
-			}
-		}
-		//
-		m_dom->num_inner_nodes = (long)inner_nodes.size();
-		m_dom->num_inner_nodesHQ = (long)inner_nodes_HQ.size();
-		m_dom->num_boundary_nodes = (long)boundary_nodes.size();
-		m_dom->num_boundary_nodesHQ = (long)boundary_nodes_HQ.size();
-		// Sort for high order nodes
+void CPARDomainGroup::setupDomain( CPARDomain* m_dom, const vector<long>& map_glNode2bndNodeId, bool quadr ) 
+{
+    //
+    const size_t nnodes_gl = m_msh->getNumberOfTotalNodes(); 
+    const size_t nnodes_l = m_msh->getNumberOfNodes();
 
-		m_dom->nodes_inner.clear();
-		m_dom->nodes_halo.clear();
-		for(i = 0; i < m_dom->num_inner_nodes; i++)
-			m_dom->nodes_inner.push_back(m_dom->nodes[inner_nodes[i]]);
-		for(i = 0; i < (long)inner_nodes_HQ.size(); i++)
-			m_dom->nodes_inner.push_back(m_dom->nodes[inner_nodes_HQ[i]]);
-		//
-		for(i = 0; i < m_dom->num_boundary_nodes; i++)
-			m_dom->nodes_halo.push_back(m_dom->nodes[boundary_nodes[i]]);
-		for(i = 0; i < (long)boundary_nodes_HQ.size(); i++)
-			m_dom->nodes_halo.push_back(m_dom->nodes[boundary_nodes_HQ[i]]);
-		//
-		m_dom->nodes.clear();
-		m_dom->nodes.resize(m_dom->nnodesHQ_dom);
-		// First interior nodes, then interface nodes
-		j = 0;
-		for(i = 0; i < m_dom->num_inner_nodes; i++)
-			m_dom->nodes[i] = m_dom->nodes_inner[i];
-		//       m_dom->nodes_inner[i] = i;
-		j += m_dom->num_inner_nodes;
-		for(i = 0; i < m_dom->num_boundary_nodes; i++)
-			m_dom->nodes[i + j] = m_dom->nodes_halo[i];
-		//      m_dom->nodes_halo[i] = i+j;
-		j += m_dom->num_boundary_nodes;
-		for(i = 0; i < (long)inner_nodes_HQ.size(); i++)
-			m_dom->nodes[i + j] = m_dom->nodes_inner[i + m_dom->num_inner_nodes];
-		//     m_dom->nodes_inner[i+m_dom->num_inner_nodes] = i+j;
-		j += (long)inner_nodes_HQ.size();
-		for(i = 0; i < (long)boundary_nodes_HQ.size(); i++)
-			m_dom->nodes[i + j] = m_dom->nodes_halo[i + m_dom->num_boundary_nodes];
-		//      m_dom->nodes_halo[i+m_dom->num_boundary_nodes] = i+j;
+    // find inner nodes, boundary nodes
+    vector<size_t> list_local_boundary_nodes;
+    vector<size_t> list_local_boundary_nodes_HQ;
+    vector<long> list_local_inner_nodes_HQ;
+    vector<long> list_local_inner_nodes;
+    vector<long> map_localBndNode2globalBndNode;
+    vector<long> map_localBndNode2globalBndNode_HQ;
+    vector<long> map_localNode2sortedNode(m_dom->nodes.size());
 
-		for(i = 0; i < (long)m_dom->nodes.size(); i++)
-		{
-			l_buff = long_buffer[i];
-			if(l_buff < 0) //interface nodes
-			{
-				if(-l_buff - nnodes_gl > 0) //HQ nodes
-					l_buff1 = m_dom->nnodes_dom + (long)inner_nodes_HQ.size() -
-					          l_buff - nnodes_gl - 1;
-				else
-					l_buff1 = (long)inner_nodes.size() - l_buff - 1;
-				//             l_buff1 = m_dom->num_inner_nodesHQ-l_buff-1;
-			}
-			else
-			{
-				if(l_buff - nnodes_gl >= 0) //HQ nodes
-					l_buff1 = m_dom->nnodes_dom + l_buff - nnodes_gl;
-				else
-					l_buff1 = l_buff;
-			}
-			long_buffer[i] = l_buff1;
-		}
-		//
+    for (size_t i=0; i<m_dom->nodes.size(); i++) {
+        const long g_index = m_dom->nodes[i];
+        if (node_connected_doms[g_index] > 1) {
+            // boundary
+            if (g_index >= (long)nnodes_l) {
+                list_local_boundary_nodes_HQ.push_back(i);
+                map_localBndNode2globalBndNode_HQ.push_back(map_glNode2bndNodeId[g_index]);
+                map_localNode2sortedNode[i] = -(long)list_local_boundary_nodes_HQ.size() - nnodes_gl;
+            } else {
+                list_local_boundary_nodes.push_back(i);
+                map_localBndNode2globalBndNode.push_back(map_glNode2bndNodeId[g_index]);
+                map_localNode2sortedNode[i] = -(long)list_local_boundary_nodes.size();
+            }
+        } else {
+            // internal
+            if (g_index >= (long)nnodes_l) {
+                map_localNode2sortedNode[i] = (long)list_local_inner_nodes_HQ.size() + nnodes_gl;
+                list_local_inner_nodes_HQ.push_back(i);
+            } else {
+                map_localNode2sortedNode[i] = (long)list_local_inner_nodes.size();
+                list_local_inner_nodes.push_back(i);
+            }
+        }
+    }
+    // set inner nodes
+    m_dom->num_inner_nodes = (long)list_local_inner_nodes.size();
+    m_dom->num_inner_nodesHQ = (long)list_local_inner_nodes_HQ.size();
+    m_dom->nodes_inner.clear();
+    for(long i=0; i<m_dom->num_inner_nodes; i++)
+        m_dom->nodes_inner.push_back(m_dom->nodes[list_local_inner_nodes[i]]);
+    for(long i=0; i<(long)list_local_inner_nodes_HQ.size(); i++)
+        m_dom->nodes_inner.push_back(m_dom->nodes[list_local_inner_nodes_HQ[i]]);
+    // set boundary nodes
+    m_dom->num_boundary_nodes = (long)list_local_boundary_nodes.size();
+    m_dom->num_boundary_nodesHQ = (long)list_local_boundary_nodes_HQ.size();
+    m_dom->nodes_halo.clear();
+    for(long i = 0; i < m_dom->num_boundary_nodes; i++)
+        m_dom->nodes_halo.push_back(m_dom->nodes[list_local_boundary_nodes[i]]);
+    for(long i = 0; i < (long)list_local_boundary_nodes_HQ.size(); i++)
+        m_dom->nodes_halo.push_back(m_dom->nodes[list_local_boundary_nodes_HQ[i]]);
+
+    // set all nodes in the domain
+    m_dom->nodes.clear();
+    m_dom->nodes.resize(m_dom->nnodesHQ_dom);
+    // First interior nodes, then interface nodes
+    long j = 0;
+    for (long i = 0; i < m_dom->num_inner_nodes; i++)
+        m_dom->nodes[i] = m_dom->nodes_inner[i];
+    j += m_dom->num_inner_nodes;
+    for(long i = 0; i < m_dom->num_boundary_nodes; i++)
+        m_dom->nodes[i + j] = m_dom->nodes_halo[i];
+    j += m_dom->num_boundary_nodes;
+    for(long i = 0; i < (long)list_local_inner_nodes_HQ.size(); i++)
+        m_dom->nodes[i + j] = m_dom->nodes_inner[i + m_dom->num_inner_nodes];
+    j += (long)list_local_inner_nodes_HQ.size();
+    for(long i = 0; i < (long)list_local_boundary_nodes_HQ.size(); i++)
+        m_dom->nodes[i + j] = m_dom->nodes_halo[i + m_dom->num_boundary_nodes];
+
+
+    // create a list of sorted node id
+    for (size_t i=0; i<m_dom->nodes.size(); i++) {
+        const long signed_local_bnd_node_id = map_localNode2sortedNode[i];
+        long corrected_local_node_id = 0;
+        if (signed_local_bnd_node_id < 0) { 
+            //interface nodes
+            if (- signed_local_bnd_node_id - nnodes_gl > 0) //HQ nodes
+                corrected_local_node_id = m_dom->nnodes_dom + (long)list_local_inner_nodes_HQ.size() - signed_local_bnd_node_id - nnodes_gl - 1;
+            else
+                corrected_local_node_id = (long)list_local_inner_nodes.size() - signed_local_bnd_node_id - 1;
+        } else {
+            // internal
+            if (signed_local_bnd_node_id - nnodes_gl >= 0) //HQ nodes
+                corrected_local_node_id = m_dom->nnodes_dom + (signed_local_bnd_node_id - nnodes_gl);
+            else
+                corrected_local_node_id = signed_local_bnd_node_id;
+        }
+        map_localNode2sortedNode[i] = corrected_local_node_id;
+    }
+
+    //
 #ifdef USE_MPI                              //WW
-		m_dom->FillBorderNodeConnectDom(node_connected_doms);
+    m_dom->FillBorderNodeConnectDom(node_connected_doms);
 #endif
-		//
-		m_dom->nodes_inner.clear();
-		m_dom->nodes_halo.clear();
-		// Mapping the local index to global BC array, overlapped_entry.
-		//
-		for(i = 0; i < m_dom->num_boundary_nodes; i++)
-			m_dom->nodes_halo.push_back(dom_bc_buffer[i]);
-		for(i = 0; i < (long)boundary_nodes_HQ.size(); i++)
-			m_dom->nodes_halo.push_back(dom_bc_bufferHQ[i]);
-		//----------------------------------------------------------------------
-		for(i = 0; i < (long)m_dom->elements.size(); i++)
-		{
-			m_ele = m_msh->getElemenet(m_dom->elements[i]);
-			elem_nodes = m_dom->element_nodes_dom[i];
-			for(j = 0; j < m_ele->getNumberOfNodes(quadr); j++)
-			{
-				l_buff = elem_nodes[j];
-				elem_nodes[j] = long_buffer[l_buff];
-			}
-		}
-
-#ifndef USE_MPI
-	}
-#endif
-	}
+    //
+    m_dom->nodes_inner.clear(); //not needed any more?
+    m_dom->nodes_halo.clear();
+    // Mapping the local index to global BC array, overlapped_entry.
+    for(long i=0; i<m_dom->num_boundary_nodes; i++)
+        m_dom->nodes_halo.push_back(map_localBndNode2globalBndNode[i]);
+    for(size_t i=0; i<list_local_boundary_nodes_HQ.size(); i++)
+        m_dom->nodes_halo.push_back(map_localBndNode2globalBndNode_HQ[i]);
+    //----------------------------------------------------------------------
+    for (size_t i = 0; i<m_dom->elements.size(); i++) {
+        MeshLib::IElement* m_ele = m_msh->getElemenet(m_dom->elements[i]);
+        long* elem_nodes = m_dom->element_nodes_dom[i];
+        for (size_t j = 0; j < m_ele->getNumberOfNodes(quadr); j++) {
+            long unsorted_id = elem_nodes[j];
+            elem_nodes[j] = map_localNode2sortedNode[unsorted_id];
+        }
+    }
+}
 
 /**************************************************************************
    DDCLib-Function
@@ -457,3 +369,5 @@ void CPARDomainGroup::setup()
 
 
 } //end
+
+

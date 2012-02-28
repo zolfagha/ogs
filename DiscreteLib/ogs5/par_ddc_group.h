@@ -13,6 +13,9 @@
 namespace OGS5
 {
 
+/**
+ * \brief a class managing decomposed sub-domains
+ */
 class CPARDomainGroup
 {
 
@@ -31,8 +34,6 @@ public:
     {
         //delete _dom_vector
     }
-
-    void DOMRead(std::string);
 
     void addDomain(CPARDomain* dom) 
     {
@@ -55,12 +56,14 @@ private:
     bool use_quad;
     //std::vector<ITransientSystem*> _problems;
 
-    void FindNodesOnInterface(bool quadr);
+    /// Find nodes of all neighbors of each node
+    void findNodesOnInterface(bool quadr);
     void assembleGlobalMatrix() {};
     void CountDoms2Nodes(bool quad);
     //extern void CountDoms2Nodes(CRFProcess* m_pcs);   //WW
     void SetBoundaryConditionSubDomain() {};
 
+    void setupDomain( CPARDomain* m_dom, const std::vector<long>& bc_buffer, bool quadr ) ;
 
     void solveEQS(size_t problem_id)
     {
