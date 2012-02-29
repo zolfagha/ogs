@@ -1661,37 +1661,6 @@ int Linear_EQS::GMRES()
 //-----------------------------------------------------------------
 //#endif // USE_MPI
 #endif                                         //GMRES
-#ifdef JFNK_H2M
-/*! \brief Initialize the Jacobi preconditioner fot JFNK
-
-   WW  02.2011.
- */
-void Linear_EQS::Init_Precond_Jacobi_JFNK()
-{
-	for(long i = 0; i < size_global; i++)
-		prec_M[i] = 0.;
-}
-
-/*************************************************************************
-   GeoSys-Function:
-   Task: Parallel preconditioner, inverse
-   Programming:
-   02/2011 WW
- **************************************************************************/
-void Linear_EQS::Precond_Jacobi(const double* vec_s, double* vec_r)
-{
-	double val;
-
-	for(long i = 0; i < size_A; i++)
-	{
-		val = prec_M[i];
-		//  <DBL_EPSILON
-		if(fabs(val) < DBL_MIN)
-			val = 1.0;
-		vec_r[i] = vec_s[i] / val;
-	}
-}
-#endif
 
 #endif                                         // If not defined USE_MPI
 #if defined(USE_MPI)

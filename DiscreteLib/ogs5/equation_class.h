@@ -12,15 +12,13 @@
 #include <vector>
 
 #include "matrix_class.h"
-
+#include "DenseMatrix.h"
 
 namespace OGS5
 {
 
 class CNumerics;
-#ifdef USE_MPI
-    class CPARDomain;
-#endif
+class CPARDomain;
 
 
 
@@ -32,54 +30,23 @@ public:
 	Linear_EQS(const long size);
 #endif
 	~Linear_EQS();
-	// Configure numerics
+
 	void ConfigNumerics( CNumerics* m_num, const long n = 0);
-	// Preconditioner;
-	void Precond(double* vec_s, double* vec_r);
-	void TransPrecond(double* vec_s, double* vec_r);
-	//#if defined(USE_MPI)
-	void Precond_Jacobi(const double* vec_s, double* vec_r);
-	//#endif
-	//
-#ifdef JFNK_H2M
-	/// GMRES. 01.09.2010. WW
-	void setPCS(::CRFProcess* the_pcs) {a_pcs = the_pcs; }
-	void Init_Precond_Jacobi_JFNK();
-#endif
-	void ComputePreconditioner();
-	void ComputePreconditioner_Jacobi();
-	void ComputePreconditioner_ILU() {       }
-	//
-	// Solver
+
+    //
+    void Initialize();
+    void Clean();
+
 #if defined(USE_MPI)
 	int Solver(double* xg, const long n);
-	int CG(double* xg, const long n);
-	int BiCG(double* xg, const long n);   //02.2010. WW
-	int BiCGStab(double* xg, const long n);
-	int CGS(double* xg, const long n);
 	double GetCPUtime() const { return cpu_time;  }
 #else
 	int Solver();
-	int CG();
-	int BiCG();                           //02.2010. WW
-	int BiCGStab();
-	int Gauss() {return -1; }
-	int QMRCGStab() {return -1; }
-	int CGNR() {return -1; }
-	int CGS();
-	int Richardson() {return -1; }
-	int JOR() {return -1; }
-	int SOR() {return -1; }
-	int AMG1R5() {return -1; }
-	int UMF() {return -1; }
-	int GMRES();
 #endif
-	//
-	void Initialize();
-	void Clean();
+
 	//
 	// Access to the members
-	void SetDOF(const int dof_n)          // For different processes with different DOF of OPDE. _new. 02/2010. WW
+	void SetDOF(const int dof_n)
 	{
 		A->SetDOF(dof_n);
 	}
@@ -99,6 +66,7 @@ public:
 	void WriteRHS(std::ostream &os = std::cout);
 	void WriteX(std::ostream &os = std::cout);
 	void Write_BIN(std::ostream &os);
+
 private:                                          // Dot not remove this!
 	CSparseMatrix* A;
 	double* b;
@@ -111,7 +79,6 @@ private:                                          // Dot not remove this!
 	double* border_buffer0;
 	double* border_buffer1;
 	double cpu_time;
-	friend class ::CPARDomain;
 	//
 	double dot (const double* xx,  const double* yy, const long n);
 	inline void MatrixMulitVec(double* xx,  double* yy);
@@ -134,10 +101,6 @@ private:                                          // Dot not remove this!
 	double dot (const double* xx,  const double* yy);
 	inline double Norm(const double* xx)  { return sqrt(dot(xx, xx)); }
 	inline bool CheckNormRHS(const double normb_new);
-#ifdef JFNK_H2M
-	/// 30.06.2010. WW
-	CRFProcess* a_pcs;
-#endif
 	/// GMRES. 30.06.2010. WW
 	/// GMRES H matrix
 	mutable Matrix H;
@@ -147,6 +110,37 @@ private:                                          // Dot not remove this!
 	void Set_Plane_Rotation(double &dx, double &dy, double &cs, double &sn);
 	//
 	void Message();
+
+    // Preconditioner;
+    void Precond(double* vec_s, double* vec_r);
+    void TransPrecond(double* vec_s, double* vec_r);
+    //#if defined(USE_MPI)
+    void Precond_Jacobi(const double* vec_s, double* vec_r);
+    //#endif
+#if defined(USE_MPI)
+    int CG(double* xg, const long n);
+    int BiCG(double* xg, const long n);   //02.2010. WW
+    int BiCGStab(double* xg, const long n);
+    int CGS(double* xg, const long n);
+#else
+    int CG();
+    int BiCG();                           //02.2010. WW
+    int BiCGStab();
+    int Gauss() {return -1; }
+    int QMRCGStab() {return -1; }
+    int CGNR() {return -1; }
+    int CGS();
+    int Richardson() {return -1; }
+    int JOR() {return -1; }
+    int SOR() {return -1; }
+    int AMG1R5() {return -1; }
+    int UMF() {return -1; }
+    int GMRES();
+#endif
+    //
+    void ComputePreconditioner();
+    void ComputePreconditioner_Jacobi();
+    void ComputePreconditioner_ILU() {       }
 };
 }
 

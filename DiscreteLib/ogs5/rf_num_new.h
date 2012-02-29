@@ -76,9 +76,6 @@ public:
 	//
 	// Dynamics
 	bool CheckDynamic();
-	double GetDynamicDamping_beta1 () const {return DynamicDamping[0]; }
-	double GetDynamicDamping_beta2 () const {return DynamicDamping[1]; }
-	double GetDynamicDamping_bbeta () const {return DynamicDamping[2]; }
 	//
 	/// For GMRES. WW
 	long Get_m() const {return m_cols; }

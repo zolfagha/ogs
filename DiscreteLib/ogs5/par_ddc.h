@@ -1,10 +1,4 @@
-/**************************************************************************
-   PARLib - Object: PAR
-   Task: class implementation
-   Programing:
-   07/2004 OK Implementation
-   last modified:
-**************************************************************************/
+
 #ifndef par_dd_INC
 #define par_dd_INC
 
@@ -25,42 +19,88 @@ namespace OGS5
 class SparseTable;
 class Linear_EQS;
 
+/**
+ * \brief Sub-domain
+ */
 class CPARDomain
 {
 public:
-    CPARDomain(void);
+    CPARDomain(size_t id, MeshLib::IMixedOrderMesh &msh, bool linear, bool quad);
     ~CPARDomain(void);
 
-    std::ios::pos_type Read(std::ifstream*);
-    void WriteTecplot(std::string);       //OK
+    /// get domain id
+    size_t getID() const {return _dom_id;};
+    /// get mesh
+    MeshLib::IMixedOrderMesh* getMesh() const {return _msh;};
 
-    int getID() const {return ID;};
-    void setID(int id) {ID = id;};
-    MeshLib::IMixedOrderMesh* getMesh() const {return m_msh;};
-    void setMesh(MeshLib::IMixedOrderMesh* msh, bool linear, bool quad) {m_msh = msh; use_linear=linear; use_quad=quad;};
-    //void setProblems(std::vector<ITransientSystem*> &p) { _problems = p; }
+    /// get the number of this domain nodes
+    long getNumberOfDomainNodes(bool quad) const { return quad ? _nnodesHQ_dom : _nnodes_dom; }
+    /// get the total number of this domain nodes
+    size_t getTotalNumberOfDomainNodes() const {return _list_dom_global_nodes.size();};
+    /// resize the number domain nodes
+    void resizeDomainNodes(size_t n) {_list_dom_global_nodes.resize(n);};
+    /// get local node id
+    long getLocalNodeID(size_t global_id) const;
+    /// get global node id
+    long getGlobalNodeID(size_t local_id) const {return _list_dom_global_nodes[local_id];};
+    /// set global node id
+    void setGlobalNodeID(size_t local_id, long global_id) {_list_dom_global_nodes[local_id] = global_id;};
+
+    /// get the number of inner nodes
+    long getNumberOfInnerNodes(bool quad) const {return quad ? _num_inner_nodesHQ : _num_inner_nodes;};
+    /// set the number of inner nodes
+    void setNumberOfInnerNodes(bool quad, long n) { if (quad) _num_inner_nodesHQ = n; else _num_inner_nodes = n;};
+    /// reset a list of inner nodes
+    void resetInnerNodes() { _list_inner_nodes_global.clear(); }
+    /// add inner node
+    void addInnerNode(long global_id) {_list_inner_nodes_global.push_back(global_id);};
+    /// get inner node
+    long getInnerNode(size_t i) const {return _list_inner_nodes_global[i];};
+
+    /// get the number of boundary nodes
+    long getNumberOfBoundaryNodes(bool quad) const {return quad ? num_boundary_nodesHQ : num_boundary_nodes;};
+    /// set the number of boundary nodes
+    void setNumberOfBoundaryNodes(bool quad, long n) { if (quad) num_boundary_nodesHQ = n; else num_boundary_nodes = n;};
+    /// reset a list of boundary nodes
+    void resetBoundaryNodes() { _list_boundary_nodes_global.clear(); }
+    /// add boundary node
+    void addBoundaryNode(long global_id) {_list_boundary_nodes_global.push_back(global_id);};
+    /// get boundary node
+    long getBoundaryNode(size_t i) const {return _list_boundary_nodes_global[i];};
+
+    /// get the number of domain elements
+    size_t getNumberOfElements() const {return _list_dom_elements.size(); };
+    /// get element id
+    long getElementId(size_t i) const {return _list_dom_elements[i];};
+
+    /// get the number of connected nodes 
+    long getNumberOfNodesConnectedToNode(size_t i) const
+    {
+        return _node2conneted_nodes[i].size();
+    }
+    /// set the number of connected nodes
+    void setNumberOfNodesConnectedToNode(size_t i, long v)
+    {
+        _node2conneted_nodes[i].resize(v);
+    }
+    long get_node_conneted_nodes(size_t i, size_t j) const
+    {
+        return _node2conneted_nodes[i][j];
+    }
+    void set_node_conneted_nodes(size_t i, size_t j, long v)
+    {
+        _node2conneted_nodes[i][j] = v;
+    }
+
+    long* get_element_nodes_dom(size_t i) const {return element_nodes_dom[i];};
+
+    void NodeConnectedNodes();
 
 
-    void CreateNodes();
-	void CreateElements();
-	void NodeConnectedNodes();            //WW
-
-    void CreateEQS();                     //WW
-	void InitialEQS(size_t problem_id);   //WW
+    void CreateEQS();
+	void InitialEQS(size_t problem_id);
 	void CalcElementMatrices();
 
-    long GetDOMNode(long);
-	//
-	long GetDomainNodes() const           //WW
-	{
-		if(quadratic) return nnodesHQ_dom;
-		else return nnodes_dom;
-	}
-	long GetDomainNodes(bool quad) const  //WW
-	{
-		if(quad) return nnodesHQ_dom;
-		else return nnodes_dom;
-	}
 #if defined(USE_MPI)                           //WW
 	// long MaxDim() const {return max_dimen;}   //WW
 	void ReleaseMemory();
@@ -102,19 +142,19 @@ public:
 #endif
 
 private:
-    friend class CPARDomainGroup;
-    friend class SparseTable;
+    void CreateNodes();
+    void CreateElements();
 
     std::map<std::pair<size_t, size_t>, size_t> _set_eqs;
     std::vector<Linear_EQS*> _vec_eqs;
     std::vector<SparseTable*> _vec_sparse;
 
     std::vector<long*> element_nodes_dom; // Local DOM element nodes. WW
-    long nnodes_dom;
-    long nnodesHQ_dom;
+    long _nnodes_dom;
+    long _nnodesHQ_dom;
     //#ifdef USE_MPI //WW
-    long num_inner_nodes;
-    long num_inner_nodesHQ;
+    long _num_inner_nodes;
+    long _num_inner_nodesHQ;
     long num_boundary_nodes;
     long num_boundary_nodesHQ;
     //#endif
@@ -148,19 +188,16 @@ private:
 #endif
     //
     // Equation
-    int ID;
-    std::vector<long> elements;
-    std::vector<long> nodes_inner;
-    std::vector<long> nodes_halo;
-    std::vector<long> nodes;
-    MeshLib::IMixedOrderMesh* m_msh;
-    bool selected;                        //OK
-    bool quadratic;                       //WW
-    std::vector<long*> node_conneted_nodes; //WW
-    std::vector<int> num_nodes2_node;     //WW
-    int m_color[3];                       //OK
-    bool use_linear;
-    bool use_quad;
+    int _dom_id;
+    std::vector<long> _list_dom_elements;
+    std::vector<long> _list_inner_nodes_global;
+    std::vector<long> _list_boundary_nodes_global;
+    std::vector<long> _list_dom_global_nodes;
+    MeshLib::IMixedOrderMesh* _msh;
+    bool _quadratic;
+    std::vector<std::vector<long>> _node2conneted_nodes;
+    bool _use_linear;
+    bool _use_quad;
 };
 
 }
