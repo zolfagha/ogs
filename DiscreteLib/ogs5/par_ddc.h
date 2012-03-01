@@ -101,6 +101,14 @@ public:
 	void InitialEQS(size_t problem_id);
 	void CalcElementMatrices();
 
+    Linear_EQS* getEQS(bool quad)
+    {
+        if (_vec_eqs.size()==0) return 0;
+        if (!quad) return _vec_eqs[0];
+        if (_use_linear) return _vec_eqs[1];
+        else return _vec_eqs[0];
+    }
+
 #if defined(USE_MPI)                           //WW
 	// long MaxDim() const {return max_dimen;}   //WW
 	void ReleaseMemory();

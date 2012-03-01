@@ -42,6 +42,8 @@ public:
 
     void setup();
 
+    void DDCAssembleGlobalMatrix();
+    void SetBoundaryConditionSubDomain();
 
 
 
@@ -59,7 +61,6 @@ private:
     void findNodesOnInterface(bool quadr);
     void assembleGlobalMatrix() {};
     void countDoms2Nodes(bool quad);
-    void SetBoundaryConditionSubDomain() {};
 
     void setupDomain( CPARDomain* m_dom, const std::vector<long>& bc_buffer, bool quadr ) ;
 

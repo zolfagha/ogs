@@ -276,6 +276,176 @@ void CPARDomainGroup::setupDomain( CPARDomain* m_dom, const vector<long>& map_gl
     }
 }
 
+void CPARDomainGroup::DDCAssembleGlobalMatrix()
+{
+    //input?
+    const bool isQuadratic = true;
+    const bool isMixedOrder = true;
+    const int dof = 1;
+    int dofId_H = 3;
+
+    //
+    const size_t no_domains = _dom_vector.size();
+#ifndef USE_MPI
+    for (size_t k = 0; k < no_domains; k++) {
+        CPARDomain* m_dom = _dom_vector[k];
+#else
+    m_dom = dom_vector[myrank];
+#endif
+    // eqs
+    CSparseMatrix* A = eqs_new->getA();
+    double* rhs = eqs_new->getRHS();
+
+    Linear_EQS* domEqs = m_dom->getEQS(isQuadratic);
+    CSparseMatrix* dom_A = domEqs->getA();
+    double* rhs_dom = domEqs->getRHS();
+
+    size_t no_dom_nodes = m_dom->getNumberOfDomainNodes(isQuadratic);
+
+
+    std::vector<long> Shift(dof); //TODO
+
+    for (size_t i = 0; i < no_dom_nodes; i++) {
+        //------------------------------------------
+        // Use the feature of sparse matrix of FEM
+        const long ig = m_dom->getGlobalNodeID(i);
+        const long ncol = m_dom->getNumberOfNodesConnectedToNode(i);
+        for(long j0 = 0; j0 < ncol; j0++) {
+            long j = m_dom->get_node_conneted_nodes(i, j0);
+            if (j >= no_dom_nodes)
+                continue;
+            const long jg = m_dom->getGlobalNodeID(j);
+            // DOF loop ---------------------------
+            for (int ii = 0; ii < dof; ii++) {
+                for(int jj = 0; jj < dof; jj++) {
+                    // get domain system matrix
+                    double a_ij = (*dom_A)(i + no_dom_nodes * ii, j + no_dom_nodes * jj);
+                    (*A)(ig + Shift[ii],jg + Shift[jj]) += a_ij;
+                }
+            }
+            // DOF loop ---------------------------WW
+        }
+        // set global RHS vector
+        for (int ii = 0; ii < dof; ii++) 
+            rhs[ig + Shift[ii]] += rhs_dom[i + no_dom_nodes * ii];
+    }
+
+    // Mono HM------------------------------------WW
+    if (isMixedOrder) {
+        size_t no_dom_nodes_linear = m_dom->getNumberOfDomainNodes(false);
+        size_t no_dom_nodesHQ = m_dom->getNumberOfDomainNodes(true);
+        //add non-diagonal part
+        for(size_t i = 0; i < no_dom_nodes_linear; i++)
+        {
+            const long ig = m_dom->getGlobalNodeID(i);
+            const size_t ncol = m_dom->getNumberOfNodesConnectedToNode(i);
+            for (size_t j0 = 0; j0 < ncol; j0++)
+            {
+                const long j = m_dom->get_node_conneted_nodes(i, j0);
+                const long jg = m_dom->getGlobalNodeID(j);
+                for(int ii = 0; ii < dof; ii++)
+                {
+                    // dom to global. WW
+                    double a_ij = (*dom_A)(i + no_dom_nodesHQ * dof,j + no_dom_nodesHQ * ii);
+                    double a_ji = (*dom_A)(j + no_dom_nodesHQ * ii, i + no_dom_nodesHQ * dof);
+                    (*A)(ig + Shift[ii], jg + Shift[dofId_H]) += a_ij;
+                    (*A)(jg + Shift[dofId_H], ig + Shift[ii]) += a_ji;
+                }
+            }
+        }
+        //add diagonal part for H
+        for(size_t i = 0; i < no_dom_nodes_linear; i++)
+        {
+            long ig = m_dom->getGlobalNodeID(i);
+            size_t ncol = m_dom->getNumberOfNodesConnectedToNode(i);
+            for (size_t j0 = 0; j0 < ncol; j0++)
+            {
+                long j = m_dom->get_node_conneted_nodes(i, j0);
+                long jg = m_dom->getGlobalNodeID(j);
+                if(jg >= no_dom_nodes)
+                    continue;
+                // get domain system matrix
+                // dom to global. WW
+                double a_ij = (*dom_A)(i + no_dom_nodesHQ * dof,j + no_dom_nodesHQ * dof);
+                (*A)(ig + Shift[dofId_H],jg + Shift[dofId_H]) += a_ij;
+            }
+            //
+            rhs[ig + Shift[dofId_H]] += rhs_dom[i + no_dom_nodesHQ * dof];
+        }
+        // Mono HM------------------------------------WW
+    }
+
+#ifndef USE_MPI
+    }
+#endif
+}
+
+void CPARDomainGroup::SetBoundaryConditionSubDomain()
+{
+    struct CBoundaryConditionNode 
+    {
+        long geo_node_number;
+    };
+    struct CNodeValue 
+    {
+        long geo_node_number;
+        double node_value;
+    };
+    CBoundaryConditionNode* m_bc_nv = NULL;
+    CNodeValue* m_st_nv = NULL;
+    std::vector<CBoundaryConditionNode*> bc_node_value;
+    std::vector<CNodeValue*> st_node_value;
+
+    std::vector<long> bc_node_value_in_dom;
+    std::vector<long> bc_local_index_in_dom;
+    std::vector<long> rank_bc_node_value_in_dom;
+    std::vector<long> st_node_value_in_dom;
+    std::vector<long> st_local_index_in_dom;
+    std::vector<long> rank_st_node_value_in_dom;
+
+	int k;
+	long i,j;
+	CPARDomain* m_dom = NULL;
+	//
+	for(k = 0; k < (int)_dom_vector.size(); k++)
+	{
+		m_dom = _dom_vector[k];
+		// BC
+		for(i = 0; i < (long)bc_node_value.size(); i++)
+		{
+			m_bc_nv = bc_node_value[i];
+			for(j = 0; j < (long)m_dom->getTotalNumberOfDomainNodes(); j++)
+				if(m_bc_nv->geo_node_number == m_dom->getGlobalNodeID(j))
+				{
+					bc_node_value_in_dom.push_back(i);
+					bc_local_index_in_dom.push_back(j);
+					break;
+				}
+		}
+		rank_bc_node_value_in_dom.push_back((long)bc_node_value_in_dom.size());
+		// ST
+		for(i = 0; i < (long)st_node_value.size(); i++)
+		{
+			m_st_nv = st_node_value[i];
+            for(j = 0; j < (long)m_dom->getTotalNumberOfDomainNodes(); j++)
+				if(m_st_nv->geo_node_number == m_dom->getGlobalNodeID(j))
+				{
+					st_node_value_in_dom.push_back(i);
+					st_local_index_in_dom.push_back(j);
+					break;
+				}
+		}
+		rank_st_node_value_in_dom.push_back((long)st_node_value_in_dom.size());
+	}
+	long Size = (long)st_node_value.size();
+	long l_index;
+	for(i = 0; i < Size; i++)
+	{
+		l_index = st_node_value[i]->geo_node_number;
+		st_node_value[i]->node_value /= (double)_node_connected_doms[l_index];
+	}
+}
+
 } //end
 
 

@@ -54,6 +54,7 @@ public:
 	double X(const long i) const {return x[i]; }
     double* getX() {return x;};
 	double RHS(const long i) const {return b[i]; }
+    double* getRHS() {return b;};
 	double NormX();
 	double NormRHS() { return bNorm; }
 #if defined(USE_MPI)
@@ -66,6 +67,8 @@ public:
 	void WriteRHS(std::ostream &os = std::cout);
 	void WriteX(std::ostream &os = std::cout);
 	void Write_BIN(std::ostream &os);
+
+    CSparseMatrix* getA() {return A;};
 
 private:                                          // Dot not remove this!
 	CSparseMatrix* A;
