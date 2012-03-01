@@ -32,6 +32,8 @@ using namespace NumLib;
 using namespace SolutionLib;
 using namespace DiscreteLib;
 
+#ifdef USE_BLAS_LAPACK
+
 class GWAssembler: public NumLib::ITimeODEElementAssembler
 {
 private:
@@ -202,3 +204,4 @@ TEST(Solution, Fem2)
     Base::releaseObject(msh);
 }
 
+#endif

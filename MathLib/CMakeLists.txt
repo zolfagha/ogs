@@ -47,16 +47,21 @@ SET ( MathLib_LinAlg_Solvers_Files
         LinAlg/Solvers/TriangularSolve.h
         LinAlg/Solvers/IterativeLinearSolver.h
         LinAlg/Solvers/solver.h
-        LinAlg/Solvers/BiCGStab.h
-        LinAlg/Solvers/CG.h
         LinAlg/Solvers/GMRes.h
-        LinAlg/Solvers/BiCGStab.cpp
-        LinAlg/Solvers/CG.cpp
         LinAlg/Solvers/CGParallel.cpp
         LinAlg/Solvers/GMRes.cpp
-		LinAlg/Solvers/GaussAlgorithm.cpp
+	LinAlg/Solvers/GaussAlgorithm.cpp
         LinAlg/Solvers/TriangularSolve.cpp
 )
+IF (USE_BLAS_LAPACK)
+SET ( MathLib_LinAlg_Solvers_Files ${MathLib_LinAlg_Solvers_Files}
+        LinAlg/Solvers/BiCGStab.h
+        LinAlg/Solvers/BiCGStab.cpp
+        LinAlg/Solvers/CG.h
+        LinAlg/Solvers/CG.cpp
+)
+ENDIF (USE_BLAS_LAPACK)
+
 SOURCE_GROUP( MathLib\\LinAlg\\Solvers FILES ${MathLib_LinAlg_Solvers_Files})
 
 SET ( MathLib_LinAlg_Preconditioner_Files
@@ -69,11 +74,17 @@ SET ( MathLib_LinAlg_LinearEquations_Files
 		LinAlg/LinearEquations/ILinearEquations.h
 		LinAlg/LinearEquations/DenseLinearEquations.h
 		LinAlg/LinearEquations/DenseLinearEquations.cpp
-		LinAlg/LinearEquations/SparseLinearEquations.h
-		LinAlg/LinearEquations/SparseLinearEquations.cpp
+		LinAlg/LinearEquations/SparseLinearEquationBase.h
+		LinAlg/LinearEquations/SparseLinearEquationBase.cpp
 		LinAlg/LinearEquations/PARDISOInterface.h
 		LinAlg/LinearEquations/LinearEquationsFactory.h
 )
+IF (USE_BLAS_LAPACK)
+	SET ( MathLib_LinAlg_LinearEquations_Files ${MathLib_LinAlg_LinearEquations_Files}
+		LinAlg/LinearEquations/SparseLinearEquations.h
+		LinAlg/LinearEquations/SparseLinearEquations.cpp
+	)
+ENDIF (USE_BLAS_LAPACK)
 IF (USE_LIS)
 	SET ( MathLib_LinAlg_LinearEquations_Files ${MathLib_LinAlg_LinearEquations_Files}
 		LinAlg/LinearEquations/LisInterface.h

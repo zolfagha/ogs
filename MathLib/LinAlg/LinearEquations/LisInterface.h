@@ -7,7 +7,7 @@
 
 #include "MathLib/LinAlg/Sparse/SparseTableCRS.h"
 #include "ILinearEquations.h"
-#include "SparseLinearEquations.h"
+#include "SparseLinearEquationBase.h"
 
 /*
 LIS matrix solver options

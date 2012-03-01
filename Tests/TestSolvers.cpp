@@ -83,6 +83,7 @@ TEST(Math, LinearSolverDirect)
     ASSERT_DOUBLE_ARRAY_EQ(&ex1.exH[0], eqs.getX(), ex1.dim_eqs, 1.e-5);
 }
 
+#ifdef USE_BLAS_LAPACK
 TEST(Math, LinearSolverSparse)
 {
     // set problem
@@ -108,6 +109,7 @@ TEST(Math, LinearSolverSparse)
 
     ASSERT_DOUBLE_ARRAY_EQ(&ex1.exH[0], eqs.getX(), ex1.dim_eqs, 1.e-5);
 }
+#endif
 
 #ifdef USE_LIS
 TEST(Math, LinearSolverLis1)
