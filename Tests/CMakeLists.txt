@@ -6,6 +6,10 @@ INCLUDE_DIRECTORIES(
 	..
 )
 
+IF (USE_MPI)
+	INCLUDE_DIRECTORIES(${MPI_INCLUDE_PATH})
+ENDIF (USE_MPI)
+
 # Create the executable
 ADD_EXECUTABLE( tests
         ${Test_Files}

@@ -43,6 +43,7 @@ Linear_EQS::Linear_EQS(const SparseTable &sparse_table,
                        const long dof, bool messg) : message(messg), a_pcs(NULL)
 #endif
 {
+    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 	long i;
 	/// If JFNK method.  //03.08.2010. WW
 #ifdef JFNK_H2M
@@ -88,16 +89,6 @@ Linear_EQS::Linear_EQS(const SparseTable &sparse_table,
 	bNorm = 1.0;
 	error = 1.0e10;
 
-	//NW moved below to rf.cpp. Initialization and finalization of LIS solver
-	//must be called only once but they were called several times with multiple meshes
-#ifdef LIS
-	////	A->Write();
-	//
-	int argc = 0;
-	char** argv = NULL;
-	// Initialization of the lis solver.
-	lis_initialize(&argc, &argv);
-#endif
 }
 #if defined(USE_MPI)
 /**************************************************************************
@@ -107,6 +98,7 @@ Linear_EQS::Linear_EQS(const SparseTable &sparse_table,
 **************************************************************************/
 Linear_EQS::Linear_EQS(const long size)
 {
+    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 	long i;
 	A = NULL;
 	b = NULL;
@@ -118,6 +110,7 @@ Linear_EQS::Linear_EQS(const long size)
 	iter = 0;
 	bNorm = 1.0;
 	error = 1.0e10;
+
 }
 #endif
 /**************************************************************************

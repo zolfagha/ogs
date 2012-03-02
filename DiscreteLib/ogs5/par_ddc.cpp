@@ -123,19 +123,11 @@ void CPARDomain::ReleaseMemory()
 		delete [] element_nodes_dom[i];
 		element_nodes_dom[i] = NULL;
 	}
-	for(long i = 0; i < (long)_node2conneted_nodes.size(); i++)
-	{
-		delete [] _node2conneted_nodes[i];
-		_node2conneted_nodes[i] = NULL;
-	}
-	if(eqs)
-		delete eqs;
-	if(eqsH)
-		delete eqsH;
-	if(sparse_graph)
-		delete sparse_graph;
-	if(sparse_graph_H)
-		delete sparse_graph_H;
+    for (size_t i=0; i<_vec_eqs.size(); i++)
+        delete _vec_eqs[i];
+    for (size_t i=0; i<_vec_sparse.size(); i++)
+        delete _vec_sparse[i];
+
 	if(t_border_nodes)
 		delete [] t_border_nodes;
 	t_border_nodes = NULL;
@@ -483,9 +475,9 @@ void CPARDomain::InitialEQS(size_t problem_id)
 			b_end[1] = b_start[1] + num_boundary_nodesHQ;
 			n_shift[1] =  n_shift[0] + _num_inner_nodesHQ;
 			//
-			dof = eqsH->DOF();
-			eqsH->SetDomain(this);
-			eqsH->ConfigNumerics(m_num, n);
+			dof = getEQS(_quadratic)->DOF();
+			getEQS(_quadratic)->SetDomain(this);
+			getEQS(_quadratic)->ConfigNumerics(m_num, n);
 			inner_size += _num_inner_nodesHQ;
 			border_size += num_boundary_nodesHQ;
 		}
@@ -494,9 +486,9 @@ void CPARDomain::InitialEQS(size_t problem_id)
 			n_loc = _nnodes_dom;
 			nq = 1;
 			n_bc = t_border_nodes_size;
-			dof = eqs->DOF();
-			eqs->SetDomain(this);
-			eqs->ConfigNumerics(m_num, n);
+			dof = getEQS(_quadratic)->DOF();
+			getEQS(_quadratic)->SetDomain(this);
+			getEQS(_quadratic)->ConfigNumerics(m_num, n);
 		}
 		//  Concatenate index
 		inner_size *= dof;
@@ -839,14 +831,10 @@ void CPARDomain::InitialEQS(size_t problem_id)
 		int ii, k;
 		long counter = 0;
 		double* x_i, * x_g;
-		Linear_EQS* eq = NULL;
-		if(_quadratic)
-			eq = eqsH;
-		else
-			eq = eqs;
+		Linear_EQS* eq = getEQS(_quadratic);
 		//
-		x_i = eq->f_buffer[0];
-		x_g = eq->f_buffer[(long)eq->f_buffer.size() - 1];
+		x_i = eq->F_buffer(0);
+		x_g = eq->F_buffer(eq->F_buffer().size() - 1);
 		//
 		long n_global = (long)n / dof;
 		//
@@ -974,12 +962,12 @@ void CPARDomain::InitialEQS(size_t problem_id)
 ********************************************************************/
 	void CPARDomain::PrintEQS_CPUtime(ostream &os)
 	{
-		if(eqs)
+		if(!_quadratic)
 			os << "CPU time elapsed in linear solver for linear elements: "
-			   << eqs->GetCPUtime() << endl;
-		if(eqsH)
+			   << getEQS(_quadratic)->GetCPUtime() << endl;
+		if(_quadratic)
 			os << "CPU time elapsed in linear solver for quadratic elements: "
-			   << eqsH->GetCPUtime() << endl;
+			   << getEQS(_quadratic)->GetCPUtime() << endl;
 	}
 #endif                                            //// if defined(USE_MPI)
 }

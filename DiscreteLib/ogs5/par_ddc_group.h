@@ -4,6 +4,10 @@
 #include <string>
 #include <set>
 
+#ifdef USE_MPI
+#include "mpi.h"
+#endif
+
 #include "MeshLib/Core/IMesh.h"
 
 #include "par_ddc.h"
@@ -23,6 +27,7 @@ public:
     CPARDomainGroup(MeshLib::IMixedOrderMesh &msh, std::set<std::pair<bool, size_t>> &set_property) : _set_property(set_property)
     {
         _msh = &msh;
+        MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
         for (std::set<std::pair<bool, size_t>>::iterator itr=set_property.begin(); itr!=set_property.end(); ++itr) {
             if (!itr->first) use_linear = true;
@@ -48,6 +53,7 @@ public:
 
 
 private:
+    int myrank;
     std::set<std::pair<bool, size_t>> _set_property;
     std::vector<CPARDomain*> _dom_vector;
     std::vector<int> _node_connected_doms;
@@ -86,7 +92,7 @@ private:
 #ifdef USE_MPI
         for (size_t i=0; i<_dom_vector.size(); i++) {
             CPARDomain *dom = _dom_vector[i];
-            dom->eqs->Solver(eqs_new->getX(), global_eqs_dim);
+            dom->getEQS(false)->Solver(eqs_new->getX(), global_eqs_dim);
         }
 #else
         eqs_new->Solver();

@@ -70,6 +70,10 @@ public:
 
     CSparseMatrix* getA() {return A;};
 
+    std::vector<double*>& F_buffer() { return f_buffer; }
+    double* F_buffer(size_t i) { return f_buffer[i]; }
+    void F_buffer(std::vector<double*> val) { f_buffer = val; }
+
 private:                                          // Dot not remove this!
 	CSparseMatrix* A;
 	double* b;
@@ -92,7 +96,7 @@ private:                                          // Dot not remove this!
 	std::string precond_name;
 	// Buffer
 	std::vector<double*> f_buffer;
-	// Controls
+    // Controls
 	int precond_type;
 	int solver_type;
 	bool message;
@@ -144,6 +148,8 @@ private:                                          // Dot not remove this!
     void ComputePreconditioner();
     void ComputePreconditioner_Jacobi();
     void ComputePreconditioner_ILU() {       }
+
+    int myrank;
 };
 }
 

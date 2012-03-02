@@ -24,6 +24,9 @@ TARGET_LINK_LIBRARIES ( testsMPI
 
 
 # Link external libraries
+IF (USE_MPI)
+	INCLUDE_DIRECTORIES(${MPI_INCLUDE_PATH})
+ENDIF (USE_MPI)
 
 IF (WIN32)
         TARGET_LINK_LIBRARIES( testsMPI Winmm.lib )

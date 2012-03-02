@@ -12,12 +12,12 @@
 
 #include "MeshLib/Core/IMesh.h"
 
-
 namespace OGS5
 {
 
 class SparseTable;
 class Linear_EQS;
+class CNumerics;
 
 /**
  * \brief Sub-domain
@@ -147,6 +147,13 @@ public:
 #endif
 	//
 	//
+    long T_border_nodes_size() const { return t_border_nodes_size; }
+    void T_border_nodes_size(long val) { t_border_nodes_size = val; }
+    long T_border_nodes_sizeH() const { return t_border_nodes_sizeH; }
+    void T_border_nodes_sizeH(long val) { t_border_nodes_sizeH = val; }
+    long* T_border_nodes() const { return t_border_nodes; }
+    void T_border_nodes(long* val) { t_border_nodes = val; }
+    void T_border_nodes(long i, long val) { t_border_nodes[i] = val; }
 #endif
 
 private:

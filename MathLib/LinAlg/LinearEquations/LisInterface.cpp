@@ -63,6 +63,7 @@ void CRSLisSolver::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)
     sprintf(solver_options, "-i %d -p %d %s", _option.ls_method, _option.ls_precond, _option.ls_extra_arg.c_str()); 
     sprintf(tol_option, "-tol %e -maxiter %d -omp_num_threads %d -initx_zeros 0", _option.ls_error_tolerance, _option.ls_max_iterations, nthreads);
 
+    int ierr;
     ierr = lis_matrix_set_crs(A->getNNZ(), (int*)A->getRowPtrArray(), (int*)A->getColIdxArray(), (double*)A->getEntryArray(), AA);
     ierr = lis_matrix_assemble(AA);
 
@@ -114,11 +115,9 @@ void CRSLisSolver::gatherX(std::vector<double> &x)
     lis_vector_gather(xx, &x[0]);
 };
 
-#if 0
-void LisSolver::initialize()
+#if 1
+void LisSolver::initialize(int argc, char* argv[])
 {
-    int argc=0;
-    char **argv;
     lis_initialize(&argc, &argv);
 }
 
@@ -134,28 +133,46 @@ LisSolver::~LisSolver()
     lis_vector_destroy(_x);
 }
 
-void LisSolver::create(size_t length, RowMajorSparsity *sparsity)
+void LisSolver::createDynamic(size_t local_n, size_t global_n)
 {
-    int n = static_cast<int>(length);
-    int is = 0;
-    int ie = n;
-#ifndef USE_MPI
-    lis_matrix_create(0, &_A);
-    lis_matrix_set_size(_A,0,n);
-    lis_vector_create(0, &_b);
-    lis_vector_create(0, &_x);
-    lis_vector_set_size(_b, 0, n);
-    lis_vector_set_size(_x, 0, n);
-#else
-    lis_matrix_create(MPI_COMM_WORLD, &_A);
-    lis_matrix_set_size(_A,0,n);
+    _dynamic = true;
+    int err = 0;
+    lis_matrix_create(LIS_COMM_WORLD, &_A);
+    lis_matrix_set_size(_A,local_n,global_n);
     lis_matrix_get_size(_A, &_local_dim, &_global_dim);
-    lis_vector_create(MPI_COMM_WORLD, &_b);
-    lis_vector_create(MPI_COMM_WORLD, &_x);
-    lis_vector_get_range(_b, &is, &ie);
-#endif
+    err = lis_matrix_get_range(_A,&_is,&_ie); CHKERR(err);
+    err = lis_vector_duplicate(_A,&_b); CHKERR(err);
+    err = lis_vector_duplicate(_b,&_x); CHKERR(err);
 
     reset();
+}
+
+SparseTableCRS<int>* LisSolver::createCRS(size_t local_n, size_t global_n)
+{
+    int err = 0;
+    lis_matrix_create(LIS_COMM_WORLD, &_A);
+    lis_matrix_set_size(_A,local_n,global_n);
+    lis_matrix_get_size(_A, &_local_dim, &_global_dim);
+    _crs.nonzero = 3*_local_dim;
+    err = lis_matrix_malloc_crs(_local_dim,_crs.nonzero,&_crs.row_ptr,&_crs.col_idx,&_crs.data); CHKERR(err);
+    err = lis_matrix_get_range(_A,&_is,&_ie); CHKERR(err);
+    err = lis_vector_duplicate(_A,&_b); CHKERR(err);
+    err = lis_vector_duplicate(_b,&_x); CHKERR(err);
+
+    reset();
+
+    return &_crs;
+}
+
+void LisSolver::assembleMatrix()
+{
+    int err;
+    if (_dynamic) {
+        err = lis_matrix_set_type(_A, LIS_MATRIX_CRS);
+    } else {
+        err = lis_matrix_set_crs(_crs.row_ptr[_ie-_is],_crs.row_ptr,_crs.col_idx,_crs.data,_A); CHKERR(err);
+    }
+    err = lis_matrix_assemble(_A); CHKERR(err);
 }
 
 void LisSolver::setOption(const Base::Options &option)
@@ -247,6 +264,42 @@ void LisSolver::setKnownX(const std::vector<size_t> &vec_id, const std::vector<d
 
 void LisSolver::solve()
 {
+    int err;
+
+    // solve
+    LIS_SOLVER solver;
+    err = lis_solver_create(&solver); CHKERR(err);
+    lis_solver_set_option("-print mem",solver);
+    lis_solver_set_optionC(solver);
+
+    err = lis_solve(_A,_b,_x,solver); CHKERR(err);
+
+    int	iter,iter_double,iter_quad;
+    double			times,itimes,ptimes,p_c_times,p_i_times;
+    LIS_REAL		resid;
+    int				nsol;
+    char			solvername[128];
+    lis_solver_get_itersex(solver,&iter,&iter_double,&iter_quad);
+    lis_solver_get_timeex(solver,&times,&itimes,&ptimes,&p_c_times,&p_i_times);
+    lis_solver_get_residualnorm(solver,&resid);
+    lis_solver_get_solver(solver,&nsol);
+    lis_get_solvername(nsol,solvername);
+    
+    int myrank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+
+    if( myrank==0 )
+    {
+        printf("%s: iter     = %d iter_double = %d iter_quad = %d\n",solvername,iter, iter_double, iter_quad);
+        printf("%s: times    = %e\n",solvername,times);
+        printf("%s: p_times  = %e (p_c = %e p_i = %e )\n",solvername, ptimes, p_c_times,p_i_times);
+        printf("%s: i_times  = %e\n",solvername, itimes);
+        printf("%s: Residual = %e\n\n",solvername,resid);
+    }
+
+    lis_solver_destroy(solver);
+
+#if 0
     int iter = 0;
     double resid = 0.0;
 
@@ -288,6 +341,7 @@ void LisSolver::solve()
     printf("\t residuals: %e\n", resid);
 
     lis_solver_destroy(solver);
+#endif
 }
 #endif
 

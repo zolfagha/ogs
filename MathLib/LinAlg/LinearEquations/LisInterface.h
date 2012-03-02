@@ -122,19 +122,20 @@ private:
     LIS_VECTOR bb,xx;
 };
 
-#if 0
-class LisSolver : public ILinearEquations
+#if 1
+class LisSolver // : public ILinearEquations
 {
 public:
     LisSolver() 
     {
         _global_dim = 0;
         _local_dim = 0;
+        _dynamic = false;
     }
     virtual ~LisSolver();
 
-    void initialize();
-    void finalize();
+    static void initialize(int argc, char* argv[]);
+    static void finalize();
 
     void setOption(const LIS_option &option)
     {
@@ -145,7 +146,8 @@ public:
         return _option;
     }
 
-    void create(size_t length, RowMajorSparsity *sparsity=0);
+    void createDynamic(size_t local_n, size_t global_n);
+    SparseTableCRS<int>* createCRS(size_t local_n, size_t global_n);
     void setOption(const Base::Options &option);
     void reset();
 
@@ -170,6 +172,34 @@ public:
     void setKnownX(size_t row_id, double x);
     void setKnownX(const std::vector<size_t> &vec_id, const std::vector<double> &vec_x);
     void solve();
+
+    void getRange(int &is, int &ie) const {is = _is; ie = _ie;};
+    SparseTableCRS<int>* getCRS() {return &_crs;} ;
+    void assembleMatrix();
+
+    size_t createVector()
+    {
+        LIS_VECTOR u;
+        int err = lis_vector_duplicate(_A,&u); CHKERR(err);
+        _vec_u.push_back(u);
+        return _vec_u.size()-1;
+    }
+    void destroyVector(size_t i)
+    {
+        LIS_VECTOR &u = _vec_u[i];
+        lis_vector_destroy(u);
+        _vec_u.erase(_vec_u.begin()+i);
+    }
+    void setVectorAll(size_t i, double v)
+    {
+        LIS_VECTOR &u = _vec_u[i];
+        lis_vector_set_all(1.0, u);
+    }
+    void matvecToRHS(size_t i)
+    {
+        LIS_VECTOR &u = _vec_u[i];
+        lis_matvec(_A,u,_b);
+    }
 private:
     LIS_option _option;
     LIS_MATRIX _A;
@@ -179,7 +209,11 @@ private:
     int _global_dim;
     std::vector<double> _tmp_b;
     std::vector<double> _tmp_x;
-
+    int _is;
+    int _ie;
+    SparseTableCRS<int> _crs;
+    std::vector<LIS_VECTOR> _vec_u;
+    bool _dynamic;
 };
 #endif
 

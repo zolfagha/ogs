@@ -128,7 +128,7 @@ void CPARDomainGroup::findNodesOnInterface(bool quadr)
 			map_glNode2bndNodeId[i] = (long)list_bndNodeId.size();
 			list_bndNodeId.push_back(i);
 #ifdef USE_MPI
-			if (_msh->nod_vector[i]->GetIndex() < _msh->GetNodesNumber(false))
+			if (i < _msh->getNumberOfNodes(0))
 				overlapped_entry_size = (long)list_bndNodeId.size();
 #endif
 		} else {
@@ -138,20 +138,20 @@ void CPARDomainGroup::findNodesOnInterface(bool quadr)
 	
 #if defined(USE_MPI)
 	// Total border nodes
-	m_dom = _dom_vector[myrank];
-	m_dom->t_border_nodes_size = overlapped_entry_size;
-	m_dom->t_border_nodes_sizeH = (long)list_bndNodeId.size();
-	m_dom->t_border_nodes = new long[m_dom->t_border_nodes_sizeH];
-	for(long i = 0; i < m_dom->t_border_nodes_sizeH; i++)
-		m_dom->t_border_nodes [i] = list_bndNodeId[i];
+	CPARDomain*m_dom = _dom_vector[myrank];
+	m_dom->T_border_nodes_size(overlapped_entry_size);
+	m_dom->T_border_nodes_sizeH((long)list_bndNodeId.size());
+	m_dom->T_border_nodes(new long[list_bndNodeId.size()]);
+	for(size_t i = 0; i < list_bndNodeId.size(); i++)
+		m_dom->T_border_nodes(i, list_bndNodeId[i]);
 #endif
 
 	// Sort
 #ifndef USE_MPI
 	for (size_t k=0; k<_dom_vector.size(); k++) {
 		int myrank = (int) k;
-#endif
         CPARDomain* m_dom = _dom_vector[myrank];
+#endif
         setupDomain(m_dom, map_glNode2bndNodeId, quadr);
 #ifndef USE_MPI
     }
@@ -290,7 +290,7 @@ void CPARDomainGroup::DDCAssembleGlobalMatrix()
     for (size_t k = 0; k < no_domains; k++) {
         CPARDomain* m_dom = _dom_vector[k];
 #else
-    m_dom = dom_vector[myrank];
+    CPARDomain* m_dom = _dom_vector[myrank];
 #endif
     // eqs
     CSparseMatrix* A = eqs_new->getA();
