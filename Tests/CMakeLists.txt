@@ -6,10 +6,6 @@ INCLUDE_DIRECTORIES(
 	..
 )
 
-IF (USE_MPI)
-	INCLUDE_DIRECTORIES(${MPI_INCLUDE_PATH})
-ENDIF (USE_MPI)
-
 # Create the executable
 ADD_EXECUTABLE( tests
         ${Test_Files}
@@ -29,6 +25,11 @@ TARGET_LINK_LIBRARIES ( tests
 
 # Link external libraries
 TARGET_LINK_LIBRARIES( tests ${GTEST_BOTH_LIBRARIES} )
+
+IF (USE_MPI)
+	INCLUDE_DIRECTORIES(${MPI_INCLUDE_PATH})
+        TARGET_LINK_LIBRARIES( tests ${MPI_C_LIBRARIES} )
+ENDIF (USE_MPI)
 
 IF (WIN32)
         TARGET_LINK_LIBRARIES( tests Winmm.lib )

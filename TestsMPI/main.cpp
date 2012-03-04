@@ -4,10 +4,10 @@
 #include "mpi.h"
 #include "lis.h"
 
-#include "MathLib/LinAlg/LinearEquations/LisInterface.h"
+#include "DiscreteLib/LisDiscreteSystem.h"
 #include "DiscreteLib/ogs5/par_ddc_group.h"
 
-using namespace MathLib;
+using namespace DiscreteLib;
 
 int nprocs = 0;
 int my_rank = 0;
