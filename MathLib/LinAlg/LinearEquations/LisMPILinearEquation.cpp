@@ -1,31 +1,17 @@
 
-#include "LisDiscreteSystem.h"
+#include "LisMPILinearEquation.h"
 
-#ifdef USE_MPI
-#include "mpi.h"
-#endif
-
-namespace DiscreteLib
+namespace MathLib
 {
 
-void LisSolver::initialize(int argc, char* argv[])
-{
-    lis_initialize(&argc, &argv);
-}
-
-void LisSolver::finalize()
-{
-    lis_finalize();
-}
-
-LisSolver::~LisSolver()
+LisMPILinearEquation::~LisMPILinearEquation()
 {
     lis_matrix_destroy(_A);
     lis_vector_destroy(_b);
     lis_vector_destroy(_x);
 }
 
-void LisSolver::createDynamic(size_t local_n, size_t global_n)
+void LisMPILinearEquation::createDynamic(size_t local_n, size_t global_n)
 {
     _dynamic = true;
     int err = 0;
@@ -39,23 +25,7 @@ void LisSolver::createDynamic(size_t local_n, size_t global_n)
     reset();
 }
 
-MathLib::SparseTableCRS<int>* LisSolver::createCRS(size_t local_n, size_t global_n)
-{
-    int err = 0;
-    lis_matrix_create(LIS_COMM_WORLD, &_A);
-    lis_matrix_set_size(_A,local_n,global_n);
-    lis_matrix_get_size(_A, &_local_dim, &_global_dim);
-    _crs.nonzero = 3*_local_dim;
-    err = lis_matrix_malloc_crs(_local_dim,_crs.nonzero,&_crs.row_ptr,&_crs.col_idx,&_crs.data); CHKERR(err);
-    err = lis_matrix_get_range(_A,&_is,&_ie); CHKERR(err);
-    err = lis_vector_duplicate(_A,&_b); CHKERR(err);
-    err = lis_vector_duplicate(_b,&_x); CHKERR(err);
-
-    reset();
-
-    return &_crs;
-}
-void LisSolver::assembleMatrix()
+void LisMPILinearEquation::assembleMatrix()
 {
     int err;
     if (_dynamic) {
@@ -66,33 +36,33 @@ void LisSolver::assembleMatrix()
     err = lis_matrix_assemble(_A); CHKERR(err);
 }
 
-void LisSolver::setOption(const Base::Options &option)
+void LisMPILinearEquation::setOption(const Base::Options &option)
 {
-    throw std::exception("LisSolver::setOption() is not implemented.");
+    throw std::exception("LisMPILinearEquation::setOption() is not implemented.");
 }
 
-void LisSolver::reset()
+void LisMPILinearEquation::reset()
 {
     lis_vector_set_all(0., _b);
     lis_vector_set_all(0., _x);
 }
 
-double LisSolver::getA(size_t rowId, size_t colId)
+double LisMPILinearEquation::getA(size_t rowId, size_t colId)
 {
     throw std::exception("not implemented.");
 }
 
-void LisSolver::setA(size_t rowId, size_t colId, double v)
+void LisMPILinearEquation::setA(size_t rowId, size_t colId, double v)
 {
     lis_matrix_set_value(LIS_INS_VALUE, rowId, colId, v, _A);
 }
 
-void LisSolver::addA(size_t rowId, size_t colId, double v)
+void LisMPILinearEquation::addA(size_t rowId, size_t colId, double v)
 {
     lis_matrix_set_value(LIS_ADD_VALUE, rowId, colId, v, _A);
 }
 
-void LisSolver::addA(std::vector<size_t> &vec_row_pos, std::vector<size_t> &vec_col_pos, MathLib::Matrix<double> &sub_matrix, double fkt)
+void LisMPILinearEquation::addA(std::vector<size_t> &vec_row_pos, std::vector<size_t> &vec_col_pos, MathLib::Matrix<double> &sub_matrix, double fkt)
 {
     for (size_t i=0; i<vec_row_pos.size(); i++) {
         const size_t rowId = vec_row_pos[i];
@@ -103,34 +73,34 @@ void LisSolver::addA(std::vector<size_t> &vec_row_pos, std::vector<size_t> &vec_
     }
 }
 
-void LisSolver::addA(std::vector<size_t> &vec_pos, MathLib::Matrix<double> &sub_matrix, double fkt)
+void LisMPILinearEquation::addA(std::vector<size_t> &vec_pos, MathLib::Matrix<double> &sub_matrix, double fkt)
 {
     addA(vec_pos, vec_pos, sub_matrix, fkt);
 }
 
-double LisSolver::getRHS(size_t rowId)
+double LisMPILinearEquation::getRHS(size_t rowId)
 {
     double v;
     lis_vector_get_value(_b, rowId, &v);
     return v;
 }
 
-double* LisSolver::getRHS()
+double* LisMPILinearEquation::getRHS()
 {
     return &_tmp_b[0];
 }
 
-void LisSolver::setRHS(size_t rowId, double v)
+void LisMPILinearEquation::setRHS(size_t rowId, double v)
 {
     lis_vector_set_value(LIS_INS_VALUE, rowId, v, _b);
 }
 
-void LisSolver::addRHS(size_t rowId, double v)
+void LisMPILinearEquation::addRHS(size_t rowId, double v)
 {
     lis_vector_set_value(LIS_ADD_VALUE, rowId, v, _b);
 }
 
-void LisSolver::addRHS(std::vector<size_t> &vec_pos, double *sub_vector, double fkt)
+void LisMPILinearEquation::addRHS(std::vector<size_t> &vec_pos, double *sub_vector, double fkt)
 {
     for (size_t i=0; i<vec_pos.size(); i++) {
         const size_t rowId = vec_pos[i];
@@ -138,22 +108,22 @@ void LisSolver::addRHS(std::vector<size_t> &vec_pos, double *sub_vector, double 
     }
 }
 
-double* LisSolver::getX()
+double* LisMPILinearEquation::getX()
 {
     return &_tmp_x[0];
 }
 
-void LisSolver::setKnownX(size_t row_id, double x)
+void LisMPILinearEquation::setKnownX(size_t row_id, double x)
 {
 
 }
 
-void LisSolver::setKnownX(const std::vector<size_t> &vec_id, const std::vector<double> &vec_x)
+void LisMPILinearEquation::setKnownX(const std::vector<size_t> &vec_id, const std::vector<double> &vec_x)
 {
 
 }
 
-void LisSolver::solve()
+void LisMPILinearEquation::solve()
 {
     int err;
 
@@ -234,7 +204,5 @@ void LisSolver::solve()
     lis_solver_destroy(solver);
 #endif
 }
-
-
 
 } //end

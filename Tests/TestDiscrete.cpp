@@ -18,6 +18,7 @@
 
 
 #include "DiscreteLib/DiscreteSystem.h"
+#include "DiscreteLib/OMPDiscreteSystem.h"
 #include "DiscreteLib/DiscreteVector.h"
 #include "DiscreteLib/DiscreteLinearEquation.h"
 #include "DiscreteLib/ElementLocalAssembler.h"
@@ -201,8 +202,7 @@ TEST(Discrete, OMP_vec1)
 {
     MeshLib::IMesh* org_msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     const size_t n_dom = 2;
-    OMPDecomposedMasterVector<double> global_v(10);
-    global_v.decompose(n_dom);
+    OMPGlobalDiscreteVector<double> global_v(10, n_dom);
 
     omp_set_num_threads(n_dom);
 
@@ -211,7 +211,7 @@ TEST(Discrete, OMP_vec1)
         int iam = omp_get_thread_num();
         //std::cout << "threads " << iam << std::endl;
 
-        DecomposedLocalVector<double>* local_v = global_v.createLocal(iam, iam*5, (iam+1)*5);
+        OMPLocalDiscreteVector<double>* local_v = global_v.createLocal(iam, iam*5, (iam+1)*5);
         for (size_t i=local_v->getRangeBegin(); i<local_v->getRangeEnd(); i++)
             local_v->global(i) = iam*10 + i;
     }

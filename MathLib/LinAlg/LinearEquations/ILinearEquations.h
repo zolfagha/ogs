@@ -16,8 +16,8 @@ namespace MathLib
 class ILinearEquations
 {
 public:
-    virtual void initialize() = 0;
-    virtual void finalize() = 0;
+    //virtual void initialize() = 0;
+    //virtual void finalize() = 0;
 
     virtual void create(size_t length, RowMajorSparsity *sparsity=0) = 0;
     virtual void setOption(const Base::Options &option) = 0;

@@ -1,74 +1,22 @@
 
 #pragma once
 
-#include <vector>
-#include <algorithm>
+#include "ILinearEquations.h"
+#include "LisInterface.h"
 
-#include "mpi.h"
-
-#include "MathLib/LinAlg/LinearEquations/LisMPILinearEquation.h"
-
-#include "DiscreteSystem.h"
-#include "LisMPIDiscreteVector.h"
-#include "LisMPILinearSystem.h"
-
-
-namespace DiscreteLib
+namespace MathLib
 {
 
-/**
- * \brief Discrete system based on LIS and MPI
- */
-class LisMPIDiscreteSystem : public IDiscreteSystem
+class LisMPILinearEquation : public MathLib::ILinearEquations
 {
 public:
-    LisMPIDiscreteSystem(MeshLib::IMesh &local_msh) : _local_msh(&local_msh)
-    {
-    };
-
-    virtual ~LisMPIDiscreteSystem()
-    {
-        Base::releaseObjectsInStdVector(_list_vector);
-        Base::releaseObjectsInStdVector(_vec_linear_sys);
-    }
-
-    LisMPIDiscreteVector* createVector(MPI_Comm comm, int local_n, int global_n)
-    {
-        LisMPIDiscreteVector* v = new LisMPIDiscreteVector(comm, local_n, global_n);
-        _list_vector.push_back(v);
-        return v;
-    }
-
-    template<class T_SPARSITY_BUILDER>
-    IDiscreteLinearEquation* createLinearEquation(MathLib::LisMPILinearEquation &linear_solver, DofMapManager &dofManager)
-    {
-        _vec_linear_sys.push_back(new MathLib::LisMPILinearEquation<T_SPARSITY_BUILDER>(*_msh, linear_solver, dofManager));
-        //return _vec_linear_sys.size()-1;
-        return _vec_linear_sys.back();
-    };
-
-
-private:
-    MeshLib::IMesh *_local_msh;
-    std::vector<LisMPIDiscreteVector*> _list_vector;
-    std::vector<AbstractMeshBasedDiscreteLinearEquation*> _vec_linear_sys;
-
-    DISALLOW_COPY_AND_ASSIGN (LisMPIDiscreteSystem);
-};
-
-class LisSolver // : public ILinearEquations
-{
-public:
-    LisSolver() 
+    LisMPILinearEquation() 
     {
         _global_dim = 0;
         _local_dim = 0;
         _dynamic = false;
     }
-    virtual ~LisSolver();
-
-    static void initialize(int argc, char* argv[]);
-    static void finalize();
+    virtual ~LisMPILinearEquation();
 
     void setOption(const MathLib::LIS_option &option)
     {
@@ -79,8 +27,13 @@ public:
         return _option;
     }
 
+    void create( size_t local_n, MathLib::RowMajorSparsity* sparse )
+    {
+
+    }
+
     void createDynamic(size_t local_n, size_t global_n);
-    MathLib::SparseTableCRS<int>* createCRS(size_t local_n, size_t global_n);
+
     void setOption(const Base::Options &option);
     void reset();
 
@@ -133,6 +86,11 @@ public:
         LIS_VECTOR &u = _vec_u[i];
         lis_matvec(_A,u,_b);
     }
+    void printout(std::ostream &os=std::cout) const
+    {
+
+    }
+
 private:
     MathLib::LIS_option _option;
     LIS_MATRIX _A;
