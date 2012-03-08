@@ -18,3 +18,4 @@ target_link_libraries (
 	Base
         MathLib
 )
+SET_TARGET_PROPERTIES(Base PROPERTIES LINKER_LANGUAGE CXX)

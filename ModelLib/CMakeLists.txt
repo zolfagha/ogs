@@ -14,3 +14,4 @@ target_link_libraries (
 	ModelLib
 	NumLib
 )
+SET_TARGET_PROPERTIES(Base PROPERTIES LINKER_LANGUAGE CXX)

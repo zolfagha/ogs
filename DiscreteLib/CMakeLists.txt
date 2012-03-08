@@ -29,3 +29,5 @@ target_link_libraries (
         MathLib
         MeshLib
 )
+
+SET_TARGET_PROPERTIES(Base PROPERTIES LINKER_LANGUAGE CXX)
