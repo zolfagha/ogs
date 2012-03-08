@@ -19,27 +19,28 @@ size_t DofMap::setEqsIDSequnetual(size_t eqs_id_begin)
 
 size_t DofMapManager::addDoF(size_t discrete_points_size, size_t order, size_t mesh_id)
 {
-    _total_pt += discrete_points_size;
-    DofMap *dof = new DofMap(discrete_points_size, order);
-    _map_var2dof.push_back(dof);
-    _map_msh2dof[mesh_id].push_back(dof);
-    return _map_var2dof.size()-1;
+    return addDoF(discrete_points_size, 0, order, mesh_id);
 }
 
-size_t DofMapManager::addDoF(size_t discrete_points_size, std::set<size_t> &list_inactive_node_id, size_t order, size_t mesh_id)
+size_t DofMapManager::addDoF(size_t discrete_points_size, std::set<size_t>* list_inactive_node_id, size_t order, size_t mesh_id)
+{
+    return addDoF(discrete_points_size, 0, list_inactive_node_id, order, mesh_id);
+}
+
+size_t DofMapManager::addDoF(size_t discrete_points_size, std::set<size_t>* ghost_nodes, std::set<size_t>* list_inactive_node_id, size_t order, size_t mesh_id)
 {
     _total_pt += discrete_points_size;
-    DofMap *dof = new DofMap(discrete_points_size, list_inactive_node_id, order);
+    DofMap *dof = new DofMap(discrete_points_size, ghost_nodes, list_inactive_node_id, order);
     _map_var2dof.push_back(dof);
     _map_msh2dof[mesh_id].push_back(dof);
     return _map_var2dof.size()-1;
 }
 
-void DofMapManager::construct(NumberingType num)
+void DofMapManager::construct(NumberingType num, size_t offset)
 {
     if (num==BY_DOF) {
         //order by dof
-        size_t eqs_id = 0;
+        size_t eqs_id = offset;
         for (size_t i=0; i<_map_var2dof.size(); i++) {
             DofMap *dof = _map_var2dof[i];
             eqs_id = dof->setEqsIDSequnetual(eqs_id);
@@ -47,7 +48,7 @@ void DofMapManager::construct(NumberingType num)
         _total_dofs = eqs_id;
     } else {
         //order by discrete points
-        size_t eqs_id = 0;
+        size_t eqs_id = offset;
         for (std::map<size_t, std::vector<DofMap*> >::iterator itr=_map_msh2dof.begin(); itr!=_map_msh2dof.end(); itr++) {
             std::vector<DofMap*> *vec = &itr->second;
             size_t pt_size = vec->at(0)->getNumberOfDiscretePoints();

@@ -104,6 +104,22 @@ public:
     }
 };
 
+class SparsityBuilderFromNodeConnectivityWithGhostDoFs
+{
+public:
+    SparsityBuilderFromNodeConnectivityWithGhostDoFs(MeshLib::IMesh &msh, DofMapManager &dofManager, MathLib::RowMajorSparsity &sparse)
+    {
+        MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes(&msh);
+        if (dofManager.getNumberOfDof()==1) {
+            SparsityBuilder::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, sparse);
+        } else {
+            SparsityBuilder::createRowMajorSparsityForMultipleDOFs(topo_node2nodes, dofManager.getNumberOfDof(), sparse);
+        }
+        size_t n_rows = dofManager.getTotalNumberOfActiveDoFsWithoutGhost();
+        sparse.erase(sparse.begin()+n_rows, sparse.end());
+    }
+};
+
 class SparsityBuilderFromNodeConnectivityWithInactiveDoFs
 {
 public:

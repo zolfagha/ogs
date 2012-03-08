@@ -61,6 +61,8 @@ void testLISSystem(int argc, char *argv[])
     Base::BidirectionalMap<size_t, size_t> msh_node_id_mapping;
     std::set<size_t> ghost_nodes;
     MeshLib::IMesh* local_msh;
+    std::vector<size_t> list_local_bc_id;
+    std::vector<double> list_local_bc_value;
     if (my_rank==0) {
         int dom1_eles[] = {0, 1, 2, 3};
         int dom1_ghost_nodes[] = {5, 6, 7, 8};
@@ -78,18 +80,21 @@ void testLISSystem(int argc, char *argv[])
             ghost_nodes.insert(msh_node_id_mapping.mapAtoB(dom2_ghost_nodes[i]));
         }
     }
+    ex1.setLocalDirichletBC(msh_node_id_mapping, list_local_bc_id, list_local_bc_value);
     MathLib::LisMPILinearEquation lis;
     lis.getOption().ls_method = LIS_option::CG;
     lis.getOption().ls_precond = LIS_option::NONE;
 
 
     // create linear system
-    DofMapManager dof;
-    LisMPILinearSystem<SparsityBuilderFromNodeConnectivity> linear_eq(*local_msh, lis, dof);
-    linear_eq.setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
-    linear_eq.construct(ElementBasedAssembler(ele_assembler));
-    //linear_eq->getLinearEquation()->printout();
-    linear_eq.solve();
+    MPIDofMapManager dofManager(MPI_COMM_WORLD, msh_node_id_mapping);
+    int dofId = dofManager.addDoF(local_msh->getNumberOfNodes(), &ghost_nodes, 0, 1, 0);
+    dofManager.construct();
+    //LisMPILinearSystem<SparsityBuilderFromNodeConnectivityWithGhostDoFs> linear_eq(*local_msh, lis, dofManager);
+    //linear_eq.setPrescribedDoF(dofId, list_local_bc_id, list_local_bc_value);
+    //linear_eq.construct(ElementBasedAssembler(ele_assembler));
+    ////linear_eq->getLinearEquation()->printout();
+    //linear_eq.solve();
 }
 
 void testLISVector(int argc, char *argv[])

@@ -27,6 +27,10 @@ INCLUDE_DIRECTORIES(
 	..
 )
 
+IF (USE_MPI)
+	INCLUDE_DIRECTORIES(${MPI_INCLUDE_PATH})
+ENDIF (USE_MPI)
+
 target_link_libraries (
 	NumLib
 	Base
