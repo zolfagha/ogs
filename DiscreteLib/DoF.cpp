@@ -52,9 +52,22 @@ void DofMapManager::construct(NumberingType num, size_t offset)
         for (std::map<size_t, std::vector<DofMap*> >::iterator itr=_map_msh2dof.begin(); itr!=_map_msh2dof.end(); itr++) {
             std::vector<DofMap*> *vec = &itr->second;
             size_t pt_size = vec->at(0)->getNumberOfDiscretePoints();
+            // first, real nodes
             for (size_t i=0; i<pt_size; i++) {
                 for (size_t j=0; j<vec->size(); j++) {
                     DofMap *dof = vec->at(j);
+                    if (dof->isGhostDoF(i)) continue;
+                    if (dof->isActiveDoF(i))
+                        dof->setEqsID(i, eqs_id++);
+                    else
+                        dof->setEqsID(i, -1);
+                }
+            }
+            // next ghost nodes
+            for (size_t i=0; i<pt_size; i++) {
+                for (size_t j=0; j<vec->size(); j++) {
+                    DofMap *dof = vec->at(j);
+                    if (!dof->isGhostDoF(i)) continue;
                     if (dof->isActiveDoF(i))
                         dof->setEqsID(i, eqs_id++);
                     else

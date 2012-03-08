@@ -90,6 +90,16 @@ void testLISSystem(int argc, char *argv[])
     MPIDofMapManager dofManager(MPI_COMM_WORLD, msh_node_id_mapping);
     int dofId = dofManager.addDoF(local_msh->getNumberOfNodes(), &ghost_nodes, 0, 1, 0);
     dofManager.construct();
+
+    DofMap* dofMap = dofManager.getDofMap(dofId);
+    std::cout << my_rank << ": n_pt=" << dofMap->getNumberOfDiscretePoints() << std::endl;
+    std::cout << my_rank << ": n_ghost_pt=" << dofMap->getNumberOfGhostPoints() << std::endl;
+    std::cout << my_rank << ": n_active_dofs=" << dofMap->getNumberOfActiveDoFs() << std::endl;
+    std::cout << my_rank << ": n_active_dofs_without=" << dofMap->getNumberOfActiveDoFsWithoutGhost() << std::endl;
+    for (size_t i=0; i<dofMap->getNumberOfDiscretePoints(); i++) {
+        std::cout << my_rank << ": eqs_id[" << i << "] = " << dofMap->getEqsID(i) << (dofMap->isGhostDoF(i)?"*":"")<< std::endl;
+    }
+
     //LisMPILinearSystem<SparsityBuilderFromNodeConnectivityWithGhostDoFs> linear_eq(*local_msh, lis, dofManager);
     //linear_eq.setPrescribedDoF(dofId, list_local_bc_id, list_local_bc_value);
     //linear_eq.construct(ElementBasedAssembler(ele_assembler));
@@ -194,7 +204,8 @@ int testLIS(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
     initialize(argc, argv);
-    testLISVector(argc, argv);
+    testLISSystem(argc, argv);
+    //testLISVector(argc, argv);
     //testLIS(argc, argv);
     finalize();
 #if 0

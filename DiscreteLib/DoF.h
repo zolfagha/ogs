@@ -59,7 +59,7 @@ public:
 
     bool isGhostDoF(size_t discrete_pt_id) const 
     {
-        return (_list_ghost_node_id.count(discrete_pt_id) == 0);
+        return (_list_ghost_node_id.count(discrete_pt_id) > 0);
     }
 
     long getEqsID(size_t discrete_pt_id) const
@@ -96,6 +96,11 @@ public:
             if (isActiveDoF(i) && !isGhostDoF(i) ) count++;
         }
         return count;
+    }
+
+    void getListOfGhostNodeID(std::vector<size_t> &list_ghost)
+    {
+        list_ghost.assign(_list_ghost_node_id.begin(), _list_ghost_node_id.end());
     }
 
     size_t getOrder() const {return _order;};
@@ -168,6 +173,14 @@ public:
         return count;
     }
 
+    size_t getTotalNumberOfGhostPoints() const
+    {
+        size_t count = 0;
+        for (size_t i=0; i<_map_var2dof.size(); i++) {
+            count += _map_var2dof[i]->getNumberOfGhostPoints();
+        }
+        return count;
+    }
 
     void getListOfEqsID(const std::vector<size_t> &ele_node_ids, const std::vector<size_t> &ele_node_size_order, std::vector<long> &local_dofmap) const;
 
@@ -207,16 +220,39 @@ public:
     void construct()
     {
         size_t dof_end_prev_rank = 0;
-        //receive
+        //receive from the previous 
         MPI_Status status;
         if (_my_rank>0)
             MPI_Recv(&dof_end_prev_rank, 1, MPI_INT, _my_rank-1, MPI_ANY_TAG, _my_comm, &status);
         //set
         DofMapManager::construct(BY_POINT, dof_end_prev_rank);
-        size_t dof_end_current = getTotalNumberOfActiveDoFs();
-        //send
+        size_t dof_end_current = dof_end_prev_rank + getTotalNumberOfActiveDoFsWithoutGhost();
+        //send to the next
         if (_my_rank<_nprocs-1)
-            MPI_Send(&dof_end_current, 1, MPI_INT, _my_rank+1, MPI_ANY_TAG, _my_comm);
+            MPI_Send(&dof_end_current, 1, MPI_INT, _my_rank+1, 0, _my_comm);
+        //get total dof
+        size_t n_total_dof = dof_end_current;
+        if (_nprocs>1) {
+            // get total dof from the last process
+            MPI_Bcast(&n_total_dof, 1, MPI_INT, _nprocs-1, _my_comm);
+            // get start dof id of each process
+            std::vector<size_t> proc_dof_start(_nprocs);
+            size_t my_dof_begin = dof_end_prev_rank;
+            MPI_Allgather(&my_dof_begin, 1, MPI_INT, &proc_dof_start[0], 1, MPI_INT, _my_comm);
+            //get ghost node id
+            if (DofMapManager::getTotalNumberOfGhostPoints()>0) {
+                for (size_t i=0; i<DofMapManager::getNumberOfDof(); i++) {
+                    DofMap* dofMap = DofMapManager::getDofMap(i);
+                    std::vector<size_t> list_ghost;
+                    dofMap->getListOfGhostNodeID(list_ghost);
+                    for (size_t j=0; j<list_ghost.size(); j++) {
+                        size_t ghost_global_id = _map_global_local.mapBtoA(list_ghost[j]);
+                        size_t rank_having_real = 0;
+
+                    }
+                }
+            }
+        }
     }
 
 private:
