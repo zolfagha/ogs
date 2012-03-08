@@ -1,6 +1,7 @@
 
 #include "Mapping.h"
 
+#include <limits>
 #include "MathLib/MathTools.h"
 
 namespace MeshLib
@@ -107,6 +108,7 @@ void EleMapLocalCoordinates::getRotationMatrixToOriginal(const IElement &ele, co
         for (size_t i = 0; i < 3; i++)
             yy[i] = 0.0;
 
+	const double DBL_MIN = std::numeric_limits<double>::epsilon();
         if (fabs(xx[0]) > 0.0 && fabs(xx[1]) + fabs(xx[2]) < DBL_MIN) {
             yy[2] = 1.0;
         } else if (fabs(xx[1]) > 0.0 && fabs(xx[0]) + fabs(xx[2]) < DBL_MIN) {

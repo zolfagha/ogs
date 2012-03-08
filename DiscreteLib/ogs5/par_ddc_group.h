@@ -24,12 +24,12 @@ class CPARDomainGroup
 {
 
 public:
-    CPARDomainGroup(MeshLib::IMixedOrderMesh &msh, std::set<std::pair<bool, size_t>> &set_property) : _set_property(set_property)
+    CPARDomainGroup(MeshLib::IMixedOrderMesh &msh, std::set<std::pair<bool, size_t> > &set_property) : _set_property(set_property)
     {
         _msh = &msh;
         MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
-        for (std::set<std::pair<bool, size_t>>::iterator itr=set_property.begin(); itr!=set_property.end(); ++itr) {
+        for (std::set<std::pair<bool, size_t> >::iterator itr=set_property.begin(); itr!=set_property.end(); ++itr) {
             if (!itr->first) use_linear = true;
             if (itr->first) use_quad = true;
         }
@@ -54,7 +54,7 @@ public:
 
 private:
     int myrank;
-    std::set<std::pair<bool, size_t>> _set_property;
+    std::set<std::pair<bool, size_t> > _set_property;
     std::vector<CPARDomain*> _dom_vector;
     std::vector<int> _node_connected_doms;
     MeshLib::IMixedOrderMesh* _msh;

@@ -13,6 +13,7 @@
 #include <string>
 #include <sstream>
 #include <limits>
+#include <cmath>
 
 #include "GeoObject.h"
 
@@ -48,7 +49,8 @@ public:
     virtual GeoObjType::type getGeoType() const {return GeoObjType::POINT;};
 
     /** check if the given object equals to this. */
-    bool operator== (const TemplatePoint<T> &p) const {
+    bool operator== (const TemplatePoint<T> &p) const
+    {
         for (size_t i=0; i<3; i++)
             if (_x[i]!=p._x[i]) return false;
         return true;
@@ -138,12 +140,14 @@ std::istream& operator>> (std::istream &is, TemplatePoint<T> &p)
 	return is;
 }
 
+#if 0
 template <>
 bool TemplatePoint<double>::operator== (const TemplatePoint<double> &p) const {
     for (size_t i=0; i<3; i++)
         if (fabs(_x[i]-p._x[i])>std::numeric_limits<double>::epsilon()) return false;
     return true;
 }
+#endif
 
 } // end namespace GEO
 

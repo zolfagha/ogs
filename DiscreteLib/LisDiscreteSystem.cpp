@@ -68,7 +68,7 @@ void LisSolver::assembleMatrix()
 
 void LisSolver::setOption(const Base::Options &option)
 {
-    throw std::exception("LisSolver::setOption() is not implemented.");
+    throw "LisSolver::setOption() is not implemented.";
 }
 
 void LisSolver::reset()
@@ -79,7 +79,7 @@ void LisSolver::reset()
 
 double LisSolver::getA(size_t rowId, size_t colId)
 {
-    throw std::exception("not implemented.");
+    throw "not implemented.";
 }
 
 void LisSolver::setA(size_t rowId, size_t colId, double v)

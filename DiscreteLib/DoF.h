@@ -4,6 +4,9 @@
 #include <vector>
 #include <map>
 #include <set>
+#ifdef USE_MPI
+#include "mpi.h"
+#endif
 
 #include "Base/BidirectionalMap.h"
 #include "Base/CodingTools.h"
@@ -182,11 +185,10 @@ private:
     size_t _total_pt;
     size_t _total_dofs;
 
-    DISALLOW_COPY_AND_ASSIGN(class DofMapManager);
+    DISALLOW_COPY_AND_ASSIGN(DofMapManager);
 };
 
 #ifdef USE_MPI
-#include "mpi.h"
 
 class MPIDofMapManager : public DofMapManager
 {

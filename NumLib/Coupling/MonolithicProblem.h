@@ -51,7 +51,7 @@ class TemplateMonolithicSystem : public AbstractMonolithicSystem<T_SUPER>
 {
 public:
     TemplateMonolithicSystem() {
-        _vec_parameters.resize(getNumberOfParameters());
+	    AbstractMonolithicSystem<T_SUPER>::_vec_parameters.resize(getNumberOfParameters());
     }
 
     size_t getNumberOfInputParameters() const {return N_IN;};

@@ -4,7 +4,7 @@
 #include "MeshGenerator.h"
 
 #include <memory>
-
+#include "GeoLib/Core/Point.h"
 #include "MeshLib/Topology/Topology.h"
 
 namespace MeshLib
@@ -23,7 +23,9 @@ std::auto_ptr<MeshLib::UnstructuredMesh> MeshGenerator::generateLineMesh(const d
     size_t node_id(0);
     for (size_t i_z=0; i_z<n_nodes_per_axis; i_z++) {
         const double x = unit_length*i_z;
-        msh->setNodeCoordinates(node_id++, GeoLib::Point(x+origin_x, origin_y, origin_z));
+        GeoLib::Point p(x+origin_x, origin_y, origin_z);
+        msh->setNodeCoordinates(node_id++, p);
+        //msh->setNodeCoordinates(node_id++, GeoLib::Point(x+origin_x, origin_y, origin_z));
     }
 
     //elements
@@ -51,7 +53,9 @@ MeshLib::UnstructuredMesh* MeshGenerator::generateRegularQuadMesh(const double l
         const double y = unit_length*j_y + origin_y;
         for (size_t k_x=0; k_x<n_nodes_per_axis; k_x++) {
             const double x = unit_length*k_x + origin_x;
-            msh->setNodeCoordinates(node_id++, GeoLib::Point(x, y, z));
+            GeoLib::Point p(x, y, z);
+            msh->setNodeCoordinates(node_id++, p);
+            //msh->setNodeCoordinates(node_id++, GeoLib::Point(x, y, z));
         }
     }
 
@@ -98,7 +102,9 @@ void MeshGenerator::generateSubMesh(const MeshLib::IMesh &src, const std::vector
     }
 
     for (std::set<size_t>::iterator itr=list_nodes_subset.begin(); itr!=list_nodes_subset.end(); ++itr) {
-        size_t new_node_id = new_msh->addNode(src.getNodeCoordinates(*itr));
+        GeoLib::Point p(src.getNodeCoordinates(*itr));
+        size_t new_node_id = new_msh->addNode(p);
+        //size_t new_node_id = new_msh->addNode(src.getNodeCoordinates(*itr));
         map_global2local.insert(*itr, new_node_id);
     }
 

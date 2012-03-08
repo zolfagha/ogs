@@ -42,7 +42,7 @@ public:
     template<class T_SPARSITY_BUILDER>
     IDiscreteLinearEquation* createLinearEquation(MathLib::LisMPILinearEquation &linear_solver, DofMapManager &dofManager)
     {
-        _vec_linear_sys.push_back(new MathLib::LisMPILinearEquation<T_SPARSITY_BUILDER>(*_msh, linear_solver, dofManager));
+        _vec_linear_sys.push_back(new LisMPILinearSystem<T_SPARSITY_BUILDER>(*_local_msh, linear_solver, dofManager));
         //return _vec_linear_sys.size()-1;
         return _vec_linear_sys.back();
     };

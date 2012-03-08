@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <cassert>
+
 namespace MathLib
 {
 
@@ -17,7 +19,7 @@ public:
     TemplateVector(T v[N])
     {
         for (size_t i=0; i<N; i++)
-            _data[u] = v[i];
+            _data[i] = v[i];
     }
     //TemplateVector(T &v1, T &v2);
     //TemplateVector(T &v1, T &v2, T&v3);

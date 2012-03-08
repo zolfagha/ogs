@@ -33,14 +33,14 @@ public:
 
     const T2& mapAtoB(const T1 &v) const 
     {
-        MapA::const_iterator itr = _map1.find(v);
+        typename MapA::const_iterator itr = _map1.find(v);
         //if (itr!=_map1.end()) 
         return itr->second;
     };
 
     const T1& mapBtoA(const T2 &v) const 
     {
-        MapB::const_iterator itr = _map2.find(v);
+        typename MapB::const_iterator itr = _map2.find(v);
         //if (itr!=_map2.end()) 
         return itr->second;
     };

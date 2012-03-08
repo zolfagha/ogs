@@ -30,7 +30,7 @@ CRSLisSolver::~CRSLisSolver()
 
 void CRSLisSolver::setOption(const Base::Options &option)
 {
-    throw std::exception("LisSolver::setOption() is not implemented.");
+    throw "LisSolver::setOption() is not implemented.";
 }
 
 void CRSLisSolver::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)

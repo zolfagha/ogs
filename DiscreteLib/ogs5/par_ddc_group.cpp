@@ -380,8 +380,7 @@ void CPARDomainGroup::DDCAssembleGlobalMatrix()
 #endif
 }
 
-void CPARDomainGroup::SetBoundaryConditionSubDomain()
-{
+
     struct CBoundaryConditionNode 
     {
         long geo_node_number;
@@ -391,6 +390,20 @@ void CPARDomainGroup::SetBoundaryConditionSubDomain()
         long geo_node_number;
         double node_value;
     };
+
+void CPARDomainGroup::SetBoundaryConditionSubDomain()
+{
+#if 0
+    struct CBoundaryConditionNode 
+    {
+        long geo_node_number;
+    };
+    struct CNodeValue 
+    {
+        long geo_node_number;
+        double node_value;
+    };
+#endif
     CBoundaryConditionNode* m_bc_nv = NULL;
     CNodeValue* m_st_nv = NULL;
     std::vector<CBoundaryConditionNode*> bc_node_value;

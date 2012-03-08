@@ -443,7 +443,7 @@ template<class T> void Matrix<T>::transposeAndMultiply(const Matrix<T> &matB, Ma
     }
 }
 
-template<class T> void Matrix<T>::transposeAndMultiply(const Matrix<T> &matB, T*row_vec, Matrix<T> &matC, double a=1.0) const
+template<class T> void Matrix<T>::transposeAndMultiply(const Matrix<T> &matB, T*row_vec, Matrix<T> &matC, double a) const
 {
     Matrix<T> m(1, matB.getNCols());
     m = .0;

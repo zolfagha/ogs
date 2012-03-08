@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include <cmath>
 
 #include "ICoupledProblem.h"
 #include "NamedVariableContainer.h"

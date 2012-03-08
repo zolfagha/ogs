@@ -210,7 +210,7 @@ private:
     std::vector<long> _list_dom_global_nodes;
     MeshLib::IMixedOrderMesh* _msh;
     bool _quadratic;
-    std::vector<std::vector<long>> _node2conneted_nodes;
+    std::vector<std::vector<long> > _node2conneted_nodes;
     bool _use_linear;
     bool _use_quad;
 };

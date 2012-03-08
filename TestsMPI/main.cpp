@@ -11,7 +11,7 @@
 #include "DiscreteLib/ogs5/par_ddc_group.h"
 #include "DiscreteLib/SparsityBuilder.h"
 
-#include "tests/TestExamples.h"
+#include "Tests/TestExamples.h"
 
 using namespace DiscreteLib;
 using namespace MathLib;

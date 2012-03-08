@@ -67,7 +67,7 @@ public:
     }
 
 private:
-    std::vector<std::set<size_t>> _node2conn_nodes;
+    std::vector<std::set<size_t> > _node2conn_nodes;
 };
 
 class TopologyNode2NodesConnectedByElements : public ITopologyNode2Nodes
@@ -86,7 +86,7 @@ public:
     }
 
 private:
-    std::vector<std::set<size_t>> _node2conn_nodes;
+    std::vector<std::set<size_t> > _node2conn_nodes;
 };
 
 

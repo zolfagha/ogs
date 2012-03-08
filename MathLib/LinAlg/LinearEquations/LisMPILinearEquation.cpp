@@ -38,7 +38,7 @@ void LisMPILinearEquation::assembleMatrix()
 
 void LisMPILinearEquation::setOption(const Base::Options &option)
 {
-    throw std::exception("LisMPILinearEquation::setOption() is not implemented.");
+    throw "LisMPILinearEquation::setOption() is not implemented.";
 }
 
 void LisMPILinearEquation::reset()
@@ -49,7 +49,7 @@ void LisMPILinearEquation::reset()
 
 double LisMPILinearEquation::getA(size_t rowId, size_t colId)
 {
-    throw std::exception("not implemented.");
+    throw "not implemented.";
 }
 
 void LisMPILinearEquation::setA(size_t rowId, size_t colId, double v)

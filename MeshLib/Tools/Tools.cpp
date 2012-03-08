@@ -27,7 +27,7 @@ void findNodesOnGeometry(IMesh const* msh, GeoLib::GeoObject const* obj, std::ve
             findNodesOnPolyline(msh, static_cast<GeoLib::Polyline const*>(obj), vec_nodes);
             break;
         default:
-            throw std::exception("This geo type is not supported in MeshLib::findNodesOnGeometry()");
+            throw "This geo type is not supported in MeshLib::findNodesOnGeometry()";
             break;
     }
 };
@@ -84,7 +84,7 @@ void findBoundaryElementsOnGeometry(IMesh * msh, GeoLib::GeoObject const* obj, s
             findEdgeElementsOnPolyline(msh, static_cast<GeoLib::Polyline const*>(obj), vec_eles);
             break;
         default:
-            throw std::exception("This geo type is not supported in MeshLib::findNodesOnGeometry()");
+            throw "This geo type is not supported in MeshLib::findNodesOnGeometry()";
             break;
     }
 };
@@ -178,7 +178,9 @@ void generateHigherOrderUnstrucuredMesh(UnstructuredMesh &msh, size_t order)
         e->setMaximumOrder(order);
         if (order==2) {
             // add midpoint
-            size_t nod_id = msh.addNode(GeoLib::Point(.5 * (pnt0[0] + pnt1[0]), 0.5 * (pnt0[1] + pnt1[1]), 0.5 * (pnt0[2] + pnt1[2])), 2);
+            GeoLib::Point p(.5 * (pnt0[0] + pnt1[0]), 0.5 * (pnt0[1] + pnt1[1]), 0.5 * (pnt0[2] + pnt1[2]));
+            size_t nod_id = msh.addNode(p, 2);
+            //size_t nod_id = msh.addNode(GeoLib::Point(.5 * (pnt0[0] + pnt1[0]), 0.5 * (pnt0[1] + pnt1[1]), 0.5 * (pnt0[2] + pnt1[2])), 2);
             e->setNodeID(2, nod_id);
         } else {
             //
@@ -216,7 +218,9 @@ void generateHigherOrderUnstrucuredMesh(UnstructuredMesh &msh, size_t order)
             x0 /= (double) e_nnodes1;
             y0 /= (double) e_nnodes1;
             z0 /= (double) e_nnodes1;
-            size_t nodid = msh.addNode(GeoLib::Point(x0,y0,z0),2);
+            GeoLib::Point p(x0,y0,z0);
+            size_t nodid = msh.addNode(p,2);
+            //size_t nodid = msh.addNode(GeoLib::Point(x0,y0,z0),2);
             e->setNodeID(8, nodid);
         }
     }

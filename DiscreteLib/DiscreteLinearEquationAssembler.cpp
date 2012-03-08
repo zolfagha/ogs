@@ -1,6 +1,8 @@
 
 #include "DiscreteLinearEquationAssembler.h"
 
+#include <vector>
+
 #include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
 #include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
 

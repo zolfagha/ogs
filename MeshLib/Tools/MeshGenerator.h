@@ -2,6 +2,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 #include "Base/BidirectionalMap.h"
 
 #include "MeshLib/Core/Element.h"
