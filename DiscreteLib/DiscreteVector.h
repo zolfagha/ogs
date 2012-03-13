@@ -10,23 +10,41 @@ namespace DiscreteLib
 /**
  * \brief Interface of Vector containers in discrete systems
  */
-class IDiscreteVector 
+class IDiscreteVectorBase
+{
+public:
+    virtual ~IDiscreteVectorBase() {};
+};
+
+template<typename T>
+class IDiscreteVector : public IDiscreteVectorBase
 {
 public:
     virtual ~IDiscreteVector() {};
-    virtual size_t size() const = 0;
-    //virtual double dot(IDiscreteVector &vec) = 0;
-    //virtual double norm1() = 0;
-    //virtual double norm2() = 0;
-    //virtual double norm_max() = 0;
 
+    //virtual void resize(size_t n) = 0;
+    virtual size_t size() const = 0;
+    virtual double dot(const IDiscreteVector<T> &vec) {return .0;};
+    virtual double norm1() {return .0;};
+    virtual double norm2() {return .0;};
+    virtual double norm_max() {return .0;};
+
+    virtual T& operator[] (size_t idx) = 0;
+    virtual const T& operator[] (size_t idx) const = 0;
+
+    //virtual typename std::vector<T>::iterator begin() = 0;
+    //virtual typename std::vector<T>::iterator end() = 0;
+    virtual size_t getRangeBegin() const = 0;
+    virtual size_t getRangeEnd() const = 0;
 };
+
+
 
 /**
  * \brief Vector container for single memory
  */
 template<typename T>
-class DiscreteVector : public IDiscreteVector
+class DiscreteVector : public IDiscreteVector<T>
 {
 public:
     DiscreteVector() {};
@@ -35,7 +53,7 @@ public:
 
     virtual void resize(size_t n) {return _data.resize(n);};
     virtual size_t size() const {return _data.size();};
-    virtual double dot(const DiscreteVector &vec) {return .0;};
+    virtual double dot(const IDiscreteVector<T> &vec) {return .0;};
     virtual double norm1() {return .0;};
     virtual double norm2() {return .0;};
     virtual double norm_max() {return .0;};
@@ -56,6 +74,14 @@ public:
     typename std::vector<T>::iterator end() 
     {
         return _data.end();
+    }
+    virtual size_t getRangeBegin() const
+    {
+        return 0;
+    }
+    virtual size_t getRangeEnd() const
+    {
+        return _data.size();
     }
 
 protected:

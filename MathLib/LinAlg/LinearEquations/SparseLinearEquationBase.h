@@ -27,6 +27,7 @@ public:
     }
 
     void create(size_t length, RowMajorSparsity *sparsity);
+    bool isCreated() const { return _A!=0; };
 
     size_t getDimension() const
     {

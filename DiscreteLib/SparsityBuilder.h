@@ -134,4 +134,13 @@ public:
     }
 };
 
+class SparsityBuilderFromLocalSparsity
+{
+public:
+    SparsityBuilderFromLocalSparsity(std::vector<MathLib::RowMajorSparsity*> &list_local_sparse, DofMapManager &dofManager, MathLib::RowMajorSparsity &sparse)
+    {
+
+    }
+};
+
 }

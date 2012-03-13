@@ -106,7 +106,7 @@ private:
  * This vector container utilizes shared memory systems and makes local vectors keep actual memory
  */
 template<typename T>
-class OMPGlobalDiscreteVector : public IDiscreteVector
+class OMPGlobalDiscreteVector : public IDiscreteVectorBase
 {
 public:
     /// @param n_global the size of vector

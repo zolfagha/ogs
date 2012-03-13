@@ -22,6 +22,8 @@ namespace DiscreteLib
 class IDiscreteLinearEquation
 {
 public:
+    /// 
+    virtual void initialize() = 0;
     /// construct 
     virtual void construct(IDiscreteLinearEquationAssembler& assemler) = 0;
     /// solve
@@ -29,6 +31,8 @@ public:
     /// get solution
     virtual void getGlobalX(std::vector<double> &x) = 0;
     virtual double* getLocalX() = 0;
+    DiscreteVector<double>* getX() {return 0;};
+//    virtual DiscreteVector<double>* getX() = 0;
     ///// get RHS 
     //virtual double* getRHS() = 0;
     ///// get a linear equation object
@@ -48,13 +52,14 @@ class AbstractMeshBasedDiscreteLinearEquation : public IDiscreteLinearEquation
 {
 public:
     ///
-    AbstractMeshBasedDiscreteLinearEquation(MeshLib::IMesh &msh, DofMapManager &dofManager) : _msh(&msh), _dofManager(&dofManager)
+    AbstractMeshBasedDiscreteLinearEquation(MeshLib::IMesh &msh, DofMapManager &dofManager) : _msh(&msh), _dofManager(&dofManager), _sparsity(0)
     {
     }
 
     virtual ~AbstractMeshBasedDiscreteLinearEquation()
     {
         //Base::releaseObject(_dofManager);
+        Base::releaseObject(_sparsity);
     }
 
     MeshLib::IMesh* getMesh() const
@@ -67,10 +72,21 @@ public:
         return _dofManager;
     }
 
+    MathLib::RowMajorSparsity* getSparsity() const
+    {
+        return _sparsity;
+    }
+
+protected:
+    void setSparsity(MathLib::RowMajorSparsity* sp)
+    {
+        _sparsity = sp;;
+    }
 
 private:
     MeshLib::IMesh* _msh;
     DofMapManager* _dofManager;
+    MathLib::RowMajorSparsity* _sparsity;
 
     DISALLOW_COPY_AND_ASSIGN(AbstractMeshBasedDiscreteLinearEquation);
 };
@@ -115,20 +131,28 @@ public:
         }
     }
 
+    void initialize()
+    {
+        DofMapManager* dofManager = getDofMapManger();
+        assert(dofManager->getNumberOfDof()>0);
+
+        if (_do_create_eqs && !_eqs->isCreated()) {
+            _do_create_eqs = false;
+            MathLib::RowMajorSparsity* sparse = new MathLib::RowMajorSparsity();
+            T_SPARSITY_BUILDER sp_builder(*getMesh(), *dofManager, *sparse);
+            AbstractMeshBasedDiscreteLinearEquation::setSparsity(sparse);
+            _eqs->create(dofManager->getTotalNumberOfActiveDoFs(), sparse);
+        } else {
+            _eqs->reset();
+        }
+    }
+
     /// construct the linear equation
     void construct(IDiscreteLinearEquationAssembler& assemler)
     {
         DofMapManager* dofManager = getDofMapManger();
         assert(dofManager->getNumberOfDof()>0);
 
-        if (_do_create_eqs) {
-            _do_create_eqs = false;
-            MathLib::RowMajorSparsity sparse;
-            T_SPARSITY_BUILDER sp_builder(*getMesh(), *dofManager, sparse);
-            _eqs->create(dofManager->getTotalNumberOfActiveDoFs(), &sparse);
-        } else {
-            _eqs->reset();
-        }
         assemler.assembly(*getMesh(), *dofManager, *_eqs);
 
         //apply 1st bc

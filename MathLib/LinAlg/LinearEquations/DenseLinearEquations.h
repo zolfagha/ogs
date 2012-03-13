@@ -31,6 +31,9 @@ public:
         resize(length);
     }
 
+    bool isCreated() const { return _A!=0; };
+
+
     void resize(size_t length);
 
 

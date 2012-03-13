@@ -69,7 +69,7 @@ private:
 
 protected:
     // vector
-    std::vector<IDiscreteVector*> _vec_vectors;
+    std::vector<IDiscreteVectorBase*> _vec_vectors;
 };
 
 } //end

@@ -15,6 +15,7 @@ public:
         _global_dim = 0;
         _local_dim = 0;
         _dynamic = false;
+        _created = false;
     }
     virtual ~LisMPILinearEquation();
 
@@ -29,8 +30,10 @@ public:
 
     void create( size_t local_n, MathLib::RowMajorSparsity* sparse )
     {
-
+        _created = true;
     }
+
+    bool isCreated() const { return _created; };
 
     void createDynamic(size_t local_n, size_t global_n);
 
@@ -105,5 +108,6 @@ private:
     MathLib::SparseTableCRS<int> _crs;
     std::vector<LIS_VECTOR> _vec_u;
     bool _dynamic;
+    bool _created;
 };
 } //end
