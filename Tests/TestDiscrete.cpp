@@ -24,7 +24,9 @@
 #include "DiscreteLib/ElementLocalAssembler.h"
 #include "DiscreteLib/DoF.h"
 #include "DiscreteLib/SparsityBuilder.h"
+#ifdef USE_MPI
 #include "DiscreteLib/ogs5/par_ddc_group.h"
+#endif
 #include "DiscreteLib/SerialNodeDecompositionDiscreteSystem.h"
 
 #include "TestUtil.h"
@@ -39,37 +41,98 @@ using namespace MathLib;
 using namespace MeshLib;
 using namespace DiscreteLib;
 
-TEST(Discrete, DDC1)
+DDCGlobal* setupNDDC1()
 {
-    // subdomain1
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
-    DDCGlobaLocalMappingOffset mapping(0, msh->getNumberOfNodes(), 0);
-    DDCSubDomain* dom1 = new DDCSubDomain(*msh, mapping);
+    DDCGlobaLocalMappingOffset* mapping = new DDCGlobaLocalMappingOffset(0, msh->getNumberOfNodes(), 0);
+    DDCSubDomain* dom1 = new DDCSubDomain(*msh, *mapping);
     // global
-    DDCGlobal ddc(DecompositionType::Node);
-    ddc.addSubDomain(dom1);
+    DDCGlobal *ddc = new DDCGlobal(DecompositionType::Node);
+    ddc->addSubDomain(dom1);
+    return ddc;
+}
+
+DDCGlobal* setupNDDC2()
+{
+    MeshLib::IMesh *org_msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
+    DDCGlobal *ddc = new DDCGlobal(DecompositionType::Node);
+    {
+        MeshLib::IMesh* local_msh;
+        int dom1_eles[] = {0, 1, 2, 3};
+        int dom1_ghost_nodes[] = {5, 6, 7, 8};
+        std::set<size_t> list_ghost(dom1_ghost_nodes, dom1_ghost_nodes + 4);
+        std::vector<size_t> dom1_e(dom1_eles, dom1_eles+4);
+        Base::BidirectionalMap<size_t, size_t> msh_node_id_mapping;
+        MeshGenerator::generateSubMesh(*org_msh, dom1_e, local_msh, msh_node_id_mapping);
+        DDCGlobaLocalMappingOffset* mapping = new DDCGlobaLocalMappingOffset(0, local_msh->getNumberOfNodes(), 0);
+        DDCSubDomain* dom = new DDCSubDomain(*local_msh, *mapping, &list_ghost);
+        ddc->addSubDomain(dom);
+    }
+    size_t offset = ddc->getSubDomain(0)->getLoalMesh()->getNumberOfNodes() - ddc->getSubDomain(0)->getNumberOfGhosts();
+    {
+        MeshLib::IMesh* local_msh;
+        int dom1_eles[] = {1, 2, 3};
+        int dom1_ghost_nodes[] = {0, 1, 2, 3, 4};
+        std::set<size_t> list_ghost(dom1_ghost_nodes, dom1_ghost_nodes + 5);
+        std::vector<size_t> dom1_e(dom1_eles, dom1_eles+3);
+        Base::BidirectionalMap<size_t, size_t> msh_node_id_mapping;
+        MeshGenerator::generateSubMesh(*org_msh, dom1_e, local_msh, msh_node_id_mapping);
+        DDCGlobaLocalMappingOffset* mapping = new DDCGlobaLocalMappingOffset(0, local_msh->getNumberOfNodes(), offset);
+        DDCSubDomain* dom = new DDCSubDomain(*local_msh, *mapping, &list_ghost);
+        ddc->addSubDomain(dom);
+    }
+    return ddc;
+}
+
+TEST(Discrete, NDDCSSVec1)
+{
+    DDCGlobal* ddc = setupNDDC1();
 
     // discrete system
-    SerialNodeDecompositionDiscreteSystem dis(ddc);
-    
+    NodeDDCSerialSharedDiscreteSystem dis(*ddc);
+
     // vector
-    IDiscreteVector<double>* v = dis.createVector<double>(msh->getNumberOfNodes());
+    IDiscreteVector<double>* v = dis.createVector<double>(9);
     for (size_t i=0; i<v->size(); ++i)
         (*v)[i] = i;
     ASSERT_EQ(9, v->size());
     double expected[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
     ASSERT_DOUBLE_ARRAY_EQ(expected, *v, 9);
+}
 
-    // linear equation
+TEST(Discrete, NDDCSSVec2)
+{
+    DDCGlobal* ddc = setupNDDC2();
+    // discrete system
+    NodeDDCSerialSharedDiscreteSystem dis(*ddc);
+
+    // vector
+    IDiscreteVector<double>* v = dis.createVector<double>(9);
+    for (size_t i=0; i<v->size(); ++i)
+        (*v)[i] = i;
+    ASSERT_EQ(9, v->size());
+    double expected[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+    ASSERT_DOUBLE_ARRAY_EQ(expected, *v, 9);
+}
+
+TEST(Discrete, NDDCSSEqs2)
+{
     DiscreteExample1 ex1;
     DiscreteExample1::TestElementAssembler ele_assembler;
     CRSLisSolver lis;
     lis.getOption().ls_method = LIS_option::CG;
     lis.getOption().ls_precond = LIS_option::NONE;
+    DDCGlobal* ddc = setupNDDC2();
+
+    // discrete system
+    NodeDDCSerialSharedDiscreteSystem dis(*ddc);
+    // dof
     DofMapManager dofManager;
-    dofManager.addDoF(msh->getNumberOfNodes());
+    dofManager.addDoF(ddc->getTotalNumberOfDecomposedObjects());
     dofManager.construct(DofMapManager::BY_DOF);
+    // eqs
     IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivity>(lis, dofManager);
+    linear_eq->initialize();
     linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
     linear_eq->construct(ElementBasedAssembler(ele_assembler));
     //linear_eq->getLinearEquation()->printout();
@@ -174,12 +237,14 @@ TEST(Discrete, Lis1)
     }
 }
 
+#ifdef USE_MPI
 TEST(Discrete, OGS51)
 {
     MeshLib::IMixedOrderMesh* msh;
     std::set<std::pair<bool, size_t>> set_property;
     OGS5::CPARDomainGroup dg(*msh, set_property);
 }
+#endif
 
 //# OpenMP ###################################################################################################
 TEST(Discrete, OMP_vec1)

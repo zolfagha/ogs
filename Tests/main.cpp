@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     argc = 2;
     //argv[1] = "--gtest_filter=Math.*";
     //argv[1] = "--gtest_filter=Num.Discrete*:FEM.*";
-    argv[1] = "--gtest_filter=Discrete.Vec*";
+    argv[1] = "--gtest_filter=Discrete.NDDCSS*";
     //argv[1] = "--gtest_filter=*";
 #endif
     ::testing::InitGoogleTest(&argc, argv);

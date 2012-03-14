@@ -55,6 +55,13 @@ IF (NOT USE_LIS)
 		LinAlg/LinearEquations/LisInterface.cpp
 	)
 ENDIF ()
+IF(NOT (USE_MPI AND USE_LIS))
+	LIST(REMOVE_ITEM MathLib_LinAlg_LinearEquations_Files 
+		LinAlg/LinearEquations/LisMPILinearEquation.h
+		LinAlg/LinearEquations/LisMPILinearEquation.cpp
+	)
+ENDIF()
+
 IF (NOT USE_PETSC)
 	LIST(REMOVE_ITEM MathLib_LinAlg_LinearEquations_Files 
 		LinAlg/LinearEquations/PETScLinearSolver.h
@@ -78,7 +85,7 @@ FILE(GLOB MathLib_ODE_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
 	ODE/*.cpp)
 SOURCE_GROUP( MathLib\\ODE FILES ${MathLib_ODE_Files})
 #Function/
-FILE(GLOB MathLib_ODE_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
+FILE(GLOB MathLib_Function_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
 	Function/*.h 
 	Function/*.cpp)
 SOURCE_GROUP( MathLib\\Function FILES ${MathLib_Function_Files})

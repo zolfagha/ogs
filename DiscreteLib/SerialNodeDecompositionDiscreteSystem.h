@@ -5,34 +5,49 @@
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteSystem.h"
 #include "DomainDecomposition.h"
+#include "MeshBasedDiscreteLinearEquation.h"
+#include "DDCDiscreteVector.h"
 
 namespace DiscreteLib
 {
 
+void createLocalDofManager(const DofMapManager &global, DDCGlobal &ddc_global, DDCSubDomain &dom, DofMapManager &local)
+{
+    MeshLib::IMesh* local_msh = dom.getLoalMesh();
 
+    for (size_t i=0; i<global.getNumberOfDof(); i++) {
+        const DofMap* dofmap = global.getDofMap(i);
+        local.addDoF(local_msh->getNumberOfNodes(), dom.getGhostList(), 0, dofmap->getOrder(), 0);
+    }
+    size_t offset = dom.getGlobalLocalIdMap()->local2global(0)*global.getNumberOfDof();
+    local.construct(DofMapManager::BY_POINT, offset);
+}
 
 
 template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
-class SerialDDCLinearEquation : public IDiscreteLinearEquation
+class DDCSerialSharedLinearEquation : public IDiscreteLinearEquation
 {
 public:
-    SerialDDCLinearEquation(DDCGlobal &ddc_global, T_LINEAR_SOLVER &linear_solver, DofMapManager &dofManager)
+    DDCSerialSharedLinearEquation(DDCGlobal &ddc_global, T_LINEAR_SOLVER &global_linear_solver, DofMapManager &global_dofManager)
     {
         _ddc_global = &ddc_global;
         for (size_t i=0; i<ddc_global.getNumberOfSubDomains(); i++) {
             DDCSubDomain* dom = ddc_global.getSubDomain(i);
-            _list_local_eq.push_back(new TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*dom->getLoalMesh(), linear_solver, dofManager));
+            DofMapManager *local_dofManager = new DofMapManager();
+            createLocalDofManager(global_dofManager,  ddc_global, *dom, *local_dofManager);
+            _list_local_eq.push_back(new TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*dom->getLoalMesh(), global_linear_solver, *local_dofManager));
         }
         _do_create_eqs = true;
-        _global_eqs = &linear_solver;
-        _global_dofManager = &dofManager;
+        _global_eqs = &global_linear_solver;
+        _global_dofManager = &global_dofManager;
     };
 
-    virtual ~SerialDDCLinearEquation() 
+    virtual ~DDCSerialSharedLinearEquation() 
     {
         Base::releaseObjectsInStdVector(_list_local_eq);
     };
 
+    /// initialize EQS
     void initialize()
     {
         DofMapManager* dofManager = getDofMapManger();
@@ -40,14 +55,28 @@ public:
             _do_create_eqs = false;
             //create global linear equation
             MathLib::RowMajorSparsity global_sparse;
-            std::vector<MathLib::RowMajorSparsity*> list_local_sparse(_list_local_eq.size());
-            for (size_t i=0; i<_list_local_eq.size(); i++) {
-                list_local_sparse[i] = _list_local_eq[i]->getSparsity();
-            }
-            SparsityBuilderFromLocalSparsity sp_builder(list_local_sparse, *dofManager, global_sparse);
+            SparsityBuilderFromDDC<T_SPARSITY_BUILDER> sp_builder(*_ddc_global, *dofManager, global_sparse);
             _global_eqs->create(dofManager->getTotalNumberOfActiveDoFs(), &global_sparse);
         } else {
             _global_eqs->reset();
+        }
+    }
+
+    /// set prescribed dof
+    void setPrescribedDoF(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> list_prescribed_values)
+    {
+        //assert(_list_prescribed_dof_id.size()==0);
+        _list_prescribed_dof_id.clear();
+        _list_prescribed_values.clear();
+
+        const DofMap* dofMap = getDofMapManger()->getDofMap(dofId);
+        const size_t n = list_discrete_pt_id.size();
+        for (size_t i=0; i<n; i++) {
+            size_t pt_id = list_discrete_pt_id[i];
+            if (dofMap->isActiveDoF(pt_id)) {
+                _list_prescribed_dof_id.push_back(dofMap->getEqsID(pt_id));
+                _list_prescribed_values.push_back(list_prescribed_values[i]);
+            }
         }
     }
 
@@ -94,23 +123,6 @@ public:
     {
         return _global_dofManager;
     }
-    /// set prescribed dof
-    void setPrescribedDoF(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> list_prescribed_values)
-    {
-        //assert(_list_prescribed_dof_id.size()==0);
-        _list_prescribed_dof_id.clear();
-        _list_prescribed_values.clear();
-
-        const DofMap* dofMap = getDofMapManger()->getDofMap(dofId);
-        const size_t n = list_discrete_pt_id.size();
-        for (size_t i=0; i<n; i++) {
-            size_t pt_id = list_discrete_pt_id[i];
-            if (dofMap->isActiveDoF(pt_id)) {
-                _list_prescribed_dof_id.push_back(dofMap->getEqsID(pt_id));
-                _list_prescribed_values.push_back(list_prescribed_values[i]);
-            }
-        }
-    }
     /// set additional RHS values
     void addRHS(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> list_rhs_values, double fkt)
     {
@@ -133,21 +145,21 @@ private:
     std::vector<size_t> _list_prescribed_dof_id;
     std::vector<double> _list_prescribed_values;
 
-    DISALLOW_COPY_AND_ASSIGN(SerialDDCLinearEquation);
+    DISALLOW_COPY_AND_ASSIGN(DDCSerialSharedLinearEquation);
 };
 
 
 /**
  * 
  */
-class SerialNodeDecompositionDiscreteSystem : public IDiscreteSystem
+class NodeDDCSerialSharedDiscreteSystem : public IDiscreteSystem
 {
 public:
-    SerialNodeDecompositionDiscreteSystem(DDCGlobal &ddc_global) : _ddc_global(&ddc_global)
+    NodeDDCSerialSharedDiscreteSystem(DDCGlobal &ddc_global) : _ddc_global(&ddc_global)
     {
 
     }
-    virtual ~SerialNodeDecompositionDiscreteSystem()
+    virtual ~NodeDDCSerialSharedDiscreteSystem()
     {
 
     }
@@ -156,7 +168,7 @@ public:
     template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
     IDiscreteLinearEquation* createLinearEquation(T_LINEAR_SOLVER &linear_solver, DofMapManager &dofManager)
     {
-        _vec_linear_sys.push_back(new SerialDDCLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_ddc_global, linear_solver, dofManager));
+        _vec_linear_sys.push_back(new DDCSerialSharedLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_ddc_global, linear_solver, dofManager));
         //return _vec_linear_sys.size()-1;
         return _vec_linear_sys.back();
     }
@@ -169,12 +181,18 @@ public:
     template<typename T>
     IDiscreteVector<T>* createVector(const size_t &n) 
     {
-        DDCDiscreteVector<T>* v = new DDCDiscreteVector<T>(n, _ddc_global->getNumberOfSubDomains());
+        std::vector<size_t> list_range_begin;
+        for (size_t i=0; i<_ddc_global->getNumberOfSubDomains(); i++) {
+            size_t cnt = (size_t)((double)n / (double)_ddc_global->getNumberOfSubDomains() * (double)i);
+            list_range_begin.push_back(cnt);
+        }
+
+        DDCDiscreteVector<T>* v = new DDCDiscreteVector<T>(n, list_range_begin);
         _vec_vectors.push_back(v);
         return v;
     };
 private:
-    DISALLOW_COPY_AND_ASSIGN(SerialNodeDecompositionDiscreteSystem);
+    DISALLOW_COPY_AND_ASSIGN(NodeDDCSerialSharedDiscreteSystem);
 
 private:
     DDCGlobal* _ddc_global;

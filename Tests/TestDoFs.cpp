@@ -24,7 +24,6 @@
 #include "DiscreteLib/ElementLocalAssembler.h"
 #include "DiscreteLib/DoF.h"
 #include "DiscreteLib/SparsityBuilder.h"
-#include "DiscreteLib/ogs5/par_ddc_group.h"
 
 #include "TestUtil.h"
 #include "TestExamples.h"
@@ -37,6 +36,9 @@ using namespace GeoLib;
 using namespace MathLib;
 using namespace MeshLib;
 using namespace DiscreteLib;
+
+
+
 
 //# DoF ###################################################################################################
 TEST(Discrete, DoF_single)

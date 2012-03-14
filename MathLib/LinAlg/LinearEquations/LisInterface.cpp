@@ -40,11 +40,12 @@ void CRSLisSolver::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)
     std::cout << "------------------------------------------------------------------" << std::endl;
     std::cout << "*** LIS solver computation" << std::endl;
 
+    int ierr;
     // Creating a matrix.
     LIS_SOLVER solver;
     LIS_MATRIX AA;
 #ifndef USE_MPI
-    int ierr = lis_matrix_create(0, &AA);
+    ierr = lis_matrix_create(0, &AA);
     ierr = lis_matrix_set_type(AA, LIS_MATRIX_CRS);
     ierr = lis_matrix_set_size(AA, 0, dimension);
 #else
@@ -63,7 +64,6 @@ void CRSLisSolver::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)
     sprintf(solver_options, "-i %d -p %d %s", _option.ls_method, _option.ls_precond, _option.ls_extra_arg.c_str()); 
     sprintf(tol_option, "-tol %e -maxiter %d -omp_num_threads %d -initx_zeros 0", _option.ls_error_tolerance, _option.ls_max_iterations, nthreads);
 
-    int ierr;
     ierr = lis_matrix_set_crs(A->getNNZ(), (int*)A->getRowPtrArray(), (int*)A->getColIdxArray(), (double*)A->getEntryArray(), AA);
     ierr = lis_matrix_assemble(AA);
 

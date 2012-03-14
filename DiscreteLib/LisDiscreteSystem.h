@@ -9,6 +9,7 @@
 #include "MathLib/LinAlg/LinearEquations/LisMPILinearEquation.h"
 
 #include "DiscreteSystem.h"
+#include "MeshBasedDiscreteLinearEquation.h"
 #include "LisMPIDiscreteVector.h"
 #include "LisMPILinearSystem.h"
 

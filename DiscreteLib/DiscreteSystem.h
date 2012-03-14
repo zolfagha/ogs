@@ -10,12 +10,16 @@
 
 #include "DiscreteVector.h"
 #include "DiscreteLinearEquation.h"
+#include "DiscreteDataContainer.h"
+#include "MeshBasedDiscreteLinearEquation.h"
 
 namespace DiscreteLib
 {
 
 class IDiscreteSystem
 {
+public:
+    virtual ~IDiscreteSystem() {};
 };
 
 /**
@@ -29,8 +33,8 @@ public:
 
     virtual ~DiscreteSystem()
     {
-        Base::releaseObjectsInStdVector(_vec_linear_sys);
-        Base::releaseObjectsInStdVector(_vec_vectors);
+        //Base::releaseObjectsInStdVector(_vec_linear_sys);
+        //Base::releaseObjectsInStdVector(_vec_vectors);
     }
 
     /// get this mesh
@@ -40,9 +44,9 @@ public:
     template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
     IDiscreteLinearEquation* createLinearEquation(T_LINEAR_SOLVER &linear_solver, DofMapManager &dofManager)
     {
-        _vec_linear_sys.push_back(new TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_msh, linear_solver, dofManager));
-        //return _vec_linear_sys.size()-1;
-        return _vec_linear_sys.back();
+        TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER> *eq = new TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_msh, linear_solver, dofManager);
+        _data.addLinearEquation(eq);
+        return eq;
     }
 
     //IDiscreteLinearEquation* getLinearEquation(size_t i)
@@ -54,7 +58,7 @@ public:
     DiscreteVector<T>* createVector(const size_t &n) 
     {
         DiscreteVector<T>* v = new DiscreteVector<T>(n);
-        _vec_vectors.push_back(v);
+        _data.addVector(v);
         return v;
     };
 
@@ -64,12 +68,13 @@ private:
     // discretization
     MeshLib::IMesh* _msh;
 
-    // linear equations
-    std::vector<AbstractMeshBasedDiscreteLinearEquation*> _vec_linear_sys;
+    //// linear equations
+    //std::vector<AbstractMeshBasedDiscreteLinearEquation*> _vec_linear_sys;
 
 protected:
-    // vector
-    std::vector<IDiscreteVectorBase*> _vec_vectors;
+    DiscreteDataContainer _data;
+    //// vector
+    //std::vector<IDiscreteVectorBase*> _vec_vectors;
 };
 
 } //end

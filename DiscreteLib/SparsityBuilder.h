@@ -7,6 +7,7 @@
 
 #include "MeshLib/Topology/Topology.h"
 
+#include "DomainDecomposition.h"
 #include "DoF.h"
 
 namespace DiscreteLib
@@ -140,6 +141,37 @@ public:
     SparsityBuilderFromLocalSparsity(std::vector<MathLib::RowMajorSparsity*> &list_local_sparse, DofMapManager &dofManager, MathLib::RowMajorSparsity &sparse)
     {
 
+    }
+};
+
+template <class T_SPARSITY_BUILDER>
+class SparsityBuilderFromDDC
+{
+public:
+    SparsityBuilderFromDDC(DDCGlobal &ddc_global, DofMapManager &dofManager, MathLib::RowMajorSparsity &sparse)
+    {
+        std::vector<MathLib::RowMajorSparsity> local_sparse(ddc_global.getNumberOfSubDomains());
+        for (size_t i=0; i<ddc_global.getNumberOfSubDomains(); i++) {
+            DDCSubDomain* dom = ddc_global.getSubDomain(i);
+            T_SPARSITY_BUILDER builder(*dom->getLoalMesh(), dofManager, local_sparse[i]);
+        }
+
+        size_t n_dofs = dofManager.getTotalNumberOfActiveDoFs();
+        sparse.resize(n_dofs);
+
+        size_t i_row = 0;
+        for (size_t i=0; i<local_sparse.size(); i++) {
+            size_t offset = 0;
+            MathLib::RowMajorSparsity &local_sp = local_sparse[i];
+            for (size_t j=0; j<local_sp.size(); j++) {
+                std::set<size_t> &setConnection = sparse[i_row++];
+                std::set<size_t> &local_conn = local_sp[j];
+                for (std::set<size_t>::iterator itr = local_conn.begin(); itr!=local_conn.end(); ++itr) {
+                    setConnection.insert(offset + *itr);
+                }
+            }
+            offset += local_sp.size();
+        }
     }
 };
 

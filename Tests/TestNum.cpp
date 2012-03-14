@@ -23,7 +23,9 @@
 #include "DiscreteLib/ElementLocalAssembler.h"
 #include "DiscreteLib/DoF.h"
 #include "DiscreteLib/SparsityBuilder.h"
+#ifdef USE_MPI
 #include "DiscreteLib/ogs5/par_ddc_group.h"
+#endif
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TimeStepping/TimeStepFunction.h"
 

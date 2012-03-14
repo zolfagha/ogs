@@ -1,13 +1,18 @@
 #Source files grouped by a directory
 FILE(GLOB DiscreteLib_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.h *.cpp)
 IF(NOT (USE_LIS AND USE_MPI))
-	LIST(REMOVE_ITEM DiscreteLib_Files LisMPIDiscreteVector.h LisMPIDiscreteVector.cpp)
+	LIST(REMOVE_ITEM DiscreteLib_Files 
+		LisMPIDiscreteVector.h 
+		LisMPIDiscreteVector.cpp
+		LisMPILinearSystem.h 
+		)
 ENDIF()
 SOURCE_GROUP( DiscreteLib FILES ${DiscreteLib_Files} )
 
-FILE(GLOB DiscreteLib_OGS5_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ogs5/*.h ogs5/*.cpp)
-SOURCE_GROUP( DiscreteLib\\OGS5 FILES ${DiscreteLib_OGS5_Files} )
-
+IF(USE_MPI)
+	FILE(GLOB DiscreteLib_OGS5_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ogs5/*.h ogs5/*.cpp)
+	SOURCE_GROUP( DiscreteLib\\OGS5 FILES ${DiscreteLib_OGS5_Files} )
+ENDIF()
 
 ADD_LIBRARY( DiscreteLib STATIC 
 	${DiscreteLib_Files} 

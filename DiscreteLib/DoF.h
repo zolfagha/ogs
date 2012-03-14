@@ -139,30 +139,11 @@ public:
 
     virtual void construct(NumberingType num=BY_DOF, size_t offset=0);
 
-    size_t getNumberOfDof() const
-    {
-        return _map_var2dof.size();
-    }
-
-    const DofMap* getDofMap(size_t var_id) const
-    {
-        return _map_var2dof.at(var_id);
-    }
-
-    DofMap* getDofMap(size_t var_id)
-    {
-        return _map_var2dof.at(var_id);
-    }
-
-    size_t getTotalNumberOfDiscretePoints() const
-    {
-        return _total_pt;
-    }
-
-    size_t getTotalNumberOfActiveDoFs() const
-    {
-        return _total_dofs;
-    }
+    size_t getNumberOfDof() const { return _map_var2dof.size(); }
+    const DofMap* getDofMap(size_t var_id) const { return _map_var2dof.at(var_id); }
+    DofMap* getDofMap(size_t var_id) { return _map_var2dof.at(var_id); }
+    size_t getTotalNumberOfDiscretePoints() const { return _total_pt; }
+    size_t getTotalNumberOfActiveDoFs() const { return _total_dofs; }
 
     size_t getTotalNumberOfActiveDoFsWithoutGhost() const
     {
@@ -200,6 +181,72 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(DofMapManager);
 };
+
+
+class IDofTable
+{
+public:
+    virtual size_t getNumberOfDofTypes() const = 0;
+    virtual size_t getTotalNumberOfDoFs() const = 0;
+    virtual size_t getEquationIndex(size_t dof_type, size_t pt_id) = 0;
+};
+
+class DoFMapping
+{
+public:
+    void doit(std::vector<size_t> &list_pt_id, std::vector<size_t> &list_dof_type);
+};
+
+struct DoF
+{
+    size_t dof_type;
+    size_t pt_id;
+    size_t eq_id;
+};
+
+class ExpensiveDofTable : public IDofTable
+{
+public:
+    size_t addDof(DoF* dof)
+    {
+        _list_dof.push_back(dof);
+        _tbl_type_pt[dof->dof_type][dof->pt_id] = dof;
+    }
+    size_t getNumberOfDofTypes() const
+    {
+        return _tbl_type_pt.size();
+    }
+    size_t getTotalNumberOfDoFs() const
+    {
+        return _list_dof.size();
+    }
+    size_t getEquationIndex(size_t dof_type, size_t pt_id)
+    {
+        return _tbl_type_pt[dof_type][pt_id]->eq_id;
+    }
+
+private:
+    std::vector<DoF*> _list_dof;
+    std::map<size_t, std::map<size_t, DoF*> > _tbl_type_pt;
+};
+
+class DofTable2 : public IDofTable
+{
+public:
+    size_t getNumberOfDofTypes() const
+    {
+    }
+    size_t getTotalNumberOfDoFs() const
+    {
+    }
+    size_t getEquationIndex(size_t dof_type, size_t pt_id)
+    {
+    }
+
+private:
+};
+
+
 
 #ifdef USE_MPI
 
