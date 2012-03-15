@@ -61,7 +61,7 @@ public:
         _linear_solver = new T_LINEAR_SOLVER();
         // create dof map
         for (size_t i=0; i<n_var; i++) {
-            _dofManager.addDoF(problem.getField(i)->getNumberOfNodes());
+            _dofManager.addVariableDoFs(dis.getMesh()->getID(), 0, problem.getField(i)->getNumberOfNodes());
         }
         _dofManager.construct();
         // create linear equation systems
@@ -156,7 +156,7 @@ private:
 private:
     UserFemProblem* _problem;
     UserTimeOdeAssembler _element_ode_assembler;
-    DiscreteLib::DofMapManager _dofManager;
+    DiscreteLib::DofEquationIdTable _dofManager;
     T_LINEAR_SOLVER* _linear_solver;
     DiscreteLib::DiscreteSystem *_discrete_system;
     DiscreteLib::IDiscreteLinearEquation* _linear_eqs;

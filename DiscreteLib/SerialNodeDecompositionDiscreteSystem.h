@@ -11,16 +11,16 @@
 namespace DiscreteLib
 {
 
-void createLocalDofManager(const DofMapManager &global, DDCGlobal &ddc_global, DDCSubDomain &dom, DofMapManager &local)
+void createLocalDofManager(const DofEquationIdTable &global, DDCGlobal &ddc_global, DDCSubDomain &dom, DofEquationIdTable &local)
 {
     MeshLib::IMesh* local_msh = dom.getLoalMesh();
 
-    for (size_t i=0; i<global.getNumberOfDof(); i++) {
-        const DofMap* dofmap = global.getDofMap(i);
-        local.addDoF(local_msh->getNumberOfNodes(), dom.getGhostList(), 0, dofmap->getOrder(), 0);
+    for (size_t i=0; i<global.getNumberOfVariables(); i++) {
+        //const DofMap* dofmap = global.getVariableDoF(i);
+        //local.addVariableDoF(local_msh->getNumberOfNodes(), dom.getGhostList(), 0, dofmap->getOrder(), 0);
     }
-    size_t offset = dom.getGlobalLocalIdMap()->local2global(0)*global.getNumberOfDof();
-    local.construct(DofMapManager::BY_POINT, offset);
+    size_t offset = dom.getGlobalLocalIdMap()->local2global(0)*global.getNumberOfVariables();
+    local.construct(DofNumberingType::BY_POINT, offset);
 }
 
 
@@ -28,12 +28,12 @@ template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
 class DDCSerialSharedLinearEquation : public IDiscreteLinearEquation
 {
 public:
-    DDCSerialSharedLinearEquation(DDCGlobal &ddc_global, T_LINEAR_SOLVER &global_linear_solver, DofMapManager &global_dofManager)
+    DDCSerialSharedLinearEquation(DDCGlobal &ddc_global, T_LINEAR_SOLVER &global_linear_solver, DofEquationIdTable &global_dofManager)
     {
         _ddc_global = &ddc_global;
         for (size_t i=0; i<ddc_global.getNumberOfSubDomains(); i++) {
             DDCSubDomain* dom = ddc_global.getSubDomain(i);
-            DofMapManager *local_dofManager = new DofMapManager();
+            DofEquationIdTable *local_dofManager = new DofEquationIdTable();
             createLocalDofManager(global_dofManager,  ddc_global, *dom, *local_dofManager);
             _list_local_eq.push_back(new TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*dom->getLoalMesh(), global_linear_solver, *local_dofManager));
         }
@@ -50,7 +50,7 @@ public:
     /// initialize EQS
     void initialize()
     {
-        DofMapManager* dofManager = getDofMapManger();
+        DofEquationIdTable* dofManager = getDofMapManger();
         if (_do_create_eqs) {
             _do_create_eqs = false;
             //create global linear equation
@@ -69,12 +69,11 @@ public:
         _list_prescribed_dof_id.clear();
         _list_prescribed_values.clear();
 
-        const DofMap* dofMap = getDofMapManger()->getDofMap(dofId);
         const size_t n = list_discrete_pt_id.size();
         for (size_t i=0; i<n; i++) {
             size_t pt_id = list_discrete_pt_id[i];
-            if (dofMap->isActiveDoF(pt_id)) {
-                _list_prescribed_dof_id.push_back(dofMap->getEqsID(pt_id));
+            if (_global_dofManager->isActiveDoF(dofId, 0, pt_id)) {
+                _list_prescribed_dof_id.push_back(_global_dofManager->mapEqsID(dofId, 0, pt_id));
                 _list_prescribed_values.push_back(list_prescribed_values[i]);
             }
         }
@@ -83,7 +82,7 @@ public:
     /// construct 
     void construct(IDiscreteLinearEquationAssembler& assemler) 
     {
-        DofMapManager* dofManager = getDofMapManger();
+        DofEquationIdTable* dofManager = getDofMapManger();
 
         // local eqs
         for (size_t i=0; i<_list_local_eq.size(); i++)
@@ -119,19 +118,18 @@ public:
         return 0;
     };
     /// get a Dof map manager
-    DofMapManager* getDofMapManger() const
+    DofEquationIdTable* getDofMapManger() const
     {
         return _global_dofManager;
     }
     /// set additional RHS values
     void addRHS(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> list_rhs_values, double fkt)
     {
-        const DofMap* dofMap = getDofMapManger()->getDofMap(dofId);
         const size_t n = list_discrete_pt_id.size();
         for (size_t i=0; i<n; i++) {
             size_t pt_id = list_discrete_pt_id[i];
-            if (dofMap->isActiveDoF(pt_id)) {
-                _global_eqs->addRHS(dofMap->getEqsID(pt_id), list_rhs_values[i]*fkt);
+            if (_global_dofManager->isActiveDoF(dofId, 0, pt_id)) {
+                _global_eqs->addRHS(_global_dofManager->mapEqsID(dofId, 0, pt_id), list_rhs_values[i]*fkt);
             }
         }
     }
@@ -141,7 +139,7 @@ private:
     std::vector<AbstractMeshBasedDiscreteLinearEquation*> _list_local_eq;
     T_LINEAR_SOLVER* _global_eqs;
     bool _do_create_eqs;
-    DofMapManager* _global_dofManager;
+    DofEquationIdTable* _global_dofManager;
     std::vector<size_t> _list_prescribed_dof_id;
     std::vector<double> _list_prescribed_values;
 
@@ -166,7 +164,7 @@ public:
 
     /// create a new linear equation
     template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
-    IDiscreteLinearEquation* createLinearEquation(T_LINEAR_SOLVER &linear_solver, DofMapManager &dofManager)
+    IDiscreteLinearEquation* createLinearEquation(T_LINEAR_SOLVER &linear_solver, DofEquationIdTable &dofManager)
     {
         _vec_linear_sys.push_back(new DDCSerialSharedLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_ddc_global, linear_solver, dofManager));
         //return _vec_linear_sys.size()-1;

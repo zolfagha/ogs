@@ -21,7 +21,7 @@ class AbstractMeshBasedDiscreteLinearEquation : public IDiscreteLinearEquation
 {
 public:
     ///
-    AbstractMeshBasedDiscreteLinearEquation(MeshLib::IMesh &msh, DofMapManager &dofManager) : _msh(&msh), _dofManager(&dofManager), _sparsity(0)
+    AbstractMeshBasedDiscreteLinearEquation(MeshLib::IMesh &msh, DofEquationIdTable &dofManager) : _msh(&msh), _dofManager(&dofManager), _sparsity(0)
     {
     }
 
@@ -36,7 +36,7 @@ public:
         return _msh;
     }
 
-    DofMapManager* getDofMapManger() const 
+    DofEquationIdTable* getDofMapManger() const 
     {
         return _dofManager;
     }
@@ -54,7 +54,7 @@ protected:
 
 private:
     MeshLib::IMesh* _msh;
-    DofMapManager* _dofManager;
+    DofEquationIdTable* _dofManager;
     MathLib::RowMajorSparsity* _sparsity;
 
     DISALLOW_COPY_AND_ASSIGN(AbstractMeshBasedDiscreteLinearEquation);
@@ -71,7 +71,7 @@ class TemplateMeshBasedDiscreteLinearEquation : public AbstractMeshBasedDiscrete
 {
 public:
     ///
-    TemplateMeshBasedDiscreteLinearEquation(MeshLib::IMesh &msh, T_LINEAR_SOLVER &linear_solver, DofMapManager &dofManager) 
+    TemplateMeshBasedDiscreteLinearEquation(MeshLib::IMesh &msh, T_LINEAR_SOLVER &linear_solver, DofEquationIdTable &dofManager) 
         : AbstractMeshBasedDiscreteLinearEquation(msh, dofManager), _eqs(&linear_solver), _do_create_eqs(true)
     {
     };
@@ -83,18 +83,19 @@ public:
     //}
 
     /// set prescribed dof
-    void setPrescribedDoF(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> list_prescribed_values)
+    void setPrescribedDoF(size_t varId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> list_prescribed_values)
     {
         //assert(_list_prescribed_dof_id.size()==0);
         _list_prescribed_dof_id.clear();
         _list_prescribed_values.clear();
 
-        const DofMap* dofMap = getDofMapManger()->getDofMap(dofId);
         const size_t n = list_discrete_pt_id.size();
+        const DofEquationIdTable* dofmap = getDofMapManger(); 
+        const size_t msh_id = getMesh()->getID();
         for (size_t i=0; i<n; i++) {
             size_t pt_id = list_discrete_pt_id[i];
-            if (dofMap->isActiveDoF(pt_id)) {
-                _list_prescribed_dof_id.push_back(dofMap->getEqsID(pt_id));
+            if (dofmap->isActiveDoF(varId, msh_id, pt_id)) {
+                _list_prescribed_dof_id.push_back(dofmap->mapEqsID(varId, msh_id, pt_id));
                 _list_prescribed_values.push_back(list_prescribed_values[i]);
             }
         }
@@ -102,8 +103,8 @@ public:
 
     void initialize()
     {
-        DofMapManager* dofManager = getDofMapManger();
-        assert(dofManager->getNumberOfDof()>0);
+        DofEquationIdTable* dofManager = getDofMapManger();
+        assert(dofManager->getNumberOfVariables()>0);
 
         if (_do_create_eqs && !_eqs->isCreated()) {
             _do_create_eqs = false;
@@ -119,8 +120,8 @@ public:
     /// construct the linear equation
     void construct(IDiscreteLinearEquationAssembler& assemler)
     {
-        DofMapManager* dofManager = getDofMapManger();
-        assert(dofManager->getNumberOfDof()>0);
+        DofEquationIdTable* dofManager = getDofMapManger();
+        assert(dofManager->getNumberOfVariables()>0);
 
         assemler.assembly(*getMesh(), *dofManager, *_eqs);
 
@@ -131,12 +132,13 @@ public:
     /// set additional RHS values
     void addRHS(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> list_rhs_values, double fkt=1.0)
     {
-        const DofMap* dofMap = getDofMapManger()->getDofMap(dofId);
         const size_t n = list_discrete_pt_id.size();
+        const DofEquationIdTable* dofmap = getDofMapManger(); 
+        const size_t msh_id = getMesh()->getID();
         for (size_t i=0; i<n; i++) {
             size_t pt_id = list_discrete_pt_id[i];
-            if (dofMap->isActiveDoF(pt_id)) {
-                _eqs->addRHS(dofMap->getEqsID(pt_id), list_rhs_values[i]*fkt);
+            if (dofmap->isActiveDoF(dofId, msh_id, pt_id)) {
+                _eqs->addRHS(dofmap->mapEqsID(dofId, msh_id, pt_id), list_rhs_values[i]*fkt);
             }
         }
     }

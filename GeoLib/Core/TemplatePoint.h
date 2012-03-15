@@ -140,7 +140,15 @@ std::istream& operator>> (std::istream &is, TemplatePoint<T> &p)
 	return is;
 }
 
-#if 0
+//template <class T>
+//bool TemplatePoint<T>::operator== (const TemplatePoint<T> &p) const
+//{
+//    for (size_t i=0; i<3; i++)
+//        if (_x[i]!=p._x[i]) return false;
+//    return true;
+//}
+
+#if 1
 template <>
 bool TemplatePoint<double>::operator== (const TemplatePoint<double> &p) const {
     for (size_t i=0; i<3; i++)

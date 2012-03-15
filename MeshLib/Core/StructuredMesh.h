@@ -22,6 +22,7 @@ template <ElementShape::type T_ELEMENT_TYPE>
 class StructuredMesh : public IMixedOrderMesh
 {
 private:
+    size_t _msh_id;
     GeoLib::Point _origin;
     double _length[3];
     double  _spacing[3];
@@ -41,7 +42,7 @@ private:
 public:
 
     ///
-    StructuredMesh(CoordinateSystemType::type coord, GeoLib::Point &org_pt, const double* len, const double* spacing) : _origin(org_pt)
+    StructuredMesh(CoordinateSystemType::type coord, GeoLib::Point &org_pt, const double* len, const double* spacing) : _origin(org_pt), _msh_id(0)
     {
         _order = 1;
         _isAxisymmetric = false;
@@ -66,6 +67,9 @@ public:
         delete _nod;
         Base::releaseObjectsInStdVector(_list_edge_elements);
     }
+
+    void setID(size_t id) {_msh_id = id;};
+    virtual size_t getID() const {return _msh_id;};
 
     size_t getDimension() const 
     {

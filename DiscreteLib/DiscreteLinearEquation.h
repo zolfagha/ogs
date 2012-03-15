@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "DoF.h"
+#include "DofMapManager.h"
 #include "DiscreteLinearEquationAssembler.h"
 
 namespace DiscreteLib
@@ -31,7 +31,7 @@ public:
     ///// get a linear equation object
     //virtual MathLib::ILinearEquations* getLinearEquation() const = 0;
     /// get a Dof map manager
-    virtual DofMapManager* getDofMapManger() const = 0;
+    virtual DofEquationIdTable* getDofMapManger() const = 0;
     /// set prescribed dof
     virtual void setPrescribedDoF(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> list_prescribed_values) = 0;
     /// set additional RHS values

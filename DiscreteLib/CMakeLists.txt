@@ -5,6 +5,8 @@ IF(NOT (USE_LIS AND USE_MPI))
 		LisMPIDiscreteVector.h 
 		LisMPIDiscreteVector.cpp
 		LisMPILinearSystem.h 
+		LisDiscreteSystem.h
+		LisDiscreteSystem.cpp
 		)
 ENDIF()
 SOURCE_GROUP( DiscreteLib FILES ${DiscreteLib_Files} )

@@ -2,7 +2,7 @@
 #pragma once
 
 #include "ElementLocalAssembler.h"
-#include "DoF.h"
+#include "DofMapManager.h"
 
 namespace MeshLib 
 {
@@ -24,7 +24,7 @@ class IDiscreteLinearEquationAssembler
 {
 public:
     /// assembly
-    virtual void assembly( MeshLib::IMesh &msh, DofMapManager &dofManager, MathLib::ILinearEquations &eqs) = 0;
+    virtual void assembly( MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs) = 0;
 };
 
 /**
@@ -42,7 +42,7 @@ public:
     /// @param dofManager Dof map manager
     /// @param list_dofId List of Dof IDs used in this problem
     /// @param eqs Linear equation solver
-    void assembly(MeshLib::IMesh &msh, DofMapManager &dofManager, MathLib::ILinearEquations &eqs);
+    void assembly(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs);
 
 private:
     IElemenetLocalAssembler* _e_assembler;

@@ -36,7 +36,7 @@ public:
     /// @param dofManager Dof map manager
     /// @param list_dofId List of Dof IDs used in this problem
     /// @param eqs Linear equation solver
-    void assembly(MeshLib::IMesh &msh, DiscreteLib::DofMapManager &dofManager, MathLib::ILinearEquations &eqs);
+    void assembly(MeshLib::IMesh &msh, DiscreteLib::DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs);
 
 private:
     ITransientElemenetLocalAssembler* _transient_e_assembler;

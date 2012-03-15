@@ -25,11 +25,13 @@ class MeshGeometricProperty;
 class IMesh
 {
 public:
+    virtual void setID(size_t id) = 0;
+    virtual size_t getID() const = 0;
     ///// get coordinate systems
     //virtual const CoordinateSystem* getCoordinateSystem() const = 0;
     ///// set coordinate systems
     //virtual void setCoordinateSystem(CoordinateSystem &coord) = 0;
-    size_t virtual getDimension() const = 0;
+    virtual size_t getDimension() const = 0;
     /// get mesh geometric property
     virtual const MeshGeometricProperty* getGeometricProperty() const = 0;
     /// return if this mesh is axisymmetric or not

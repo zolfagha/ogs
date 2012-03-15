@@ -13,7 +13,7 @@
 namespace DiscreteLib
 {
 
-void ElementBasedAssembler::assembly(MeshLib::IMesh &msh, DofMapManager &dofManager, MathLib::ILinearEquations &eqs)
+void ElementBasedAssembler::assembly(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs)
 {
     MathLib::DenseLinearEquations localEQS;
     std::vector<size_t> ele_node_ids, ele_node_size_order;
@@ -26,7 +26,8 @@ void ElementBasedAssembler::assembly(MeshLib::IMesh &msh, DofMapManager &dofMana
         // get dof map
         e->getNodeIDList(e->getMaximumOrder(), ele_node_ids);
         e->getListOfNumberOfNodesForAllOrders(ele_node_size_order);
-        dofManager.getListOfEqsID(ele_node_ids, ele_node_size_order, local_dofmap);
+        dofManager.mapEqsID(msh.getID(), ele_node_ids, local_dofmap); //TODO order
+        //dofManager.mapEqsID(ele_node_ids, ele_node_size_order, local_dofmap);
         // local assembly
         localEQS.create(local_dofmap.size());
         _e_assembler->assembly(*e, localEQS);

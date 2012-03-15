@@ -56,7 +56,10 @@ class OMPLocalDiscreteVector : public DiscreteVector<T>
     /// get the ghost element id (global) in this vector
     size_t getGhostElementId(size_t i) const {return _ghost_id[i];};
     /// check if the give id can be a ghost element in this vector. This function doesn't check if actually this vector contain the element.
-    bool isGhost(size_t global_idx) const {return (global_idx<_i_end);};
+    bool isGhost(size_t global_idx) const 
+    {
+        return std::find(_ghost_id.begin(), _ghost_id.end(), global_idx) != _ghost_id.end();
+    };
 
     /// check if this vector contain an element with the given global id
     bool has(size_t global_idx) const

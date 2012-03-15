@@ -8,7 +8,7 @@
 #include "MeshLib/Topology/Topology.h"
 
 #include "DomainDecomposition.h"
-#include "DoF.h"
+#include "DofMapManager.h"
 
 namespace DiscreteLib
 {
@@ -88,19 +88,19 @@ public:
 class SparsityBuilderDummy
 {
 public:
-    SparsityBuilderDummy(MeshLib::IMesh&, DofMapManager&, MathLib::RowMajorSparsity&) {};
+    SparsityBuilderDummy(MeshLib::IMesh&, DofEquationIdTable&, MathLib::RowMajorSparsity&) {};
 };
 
 class SparsityBuilderFromNodeConnectivity
 {
 public:
-    SparsityBuilderFromNodeConnectivity(MeshLib::IMesh &msh, DofMapManager &dofManager, MathLib::RowMajorSparsity &sparse)
+    SparsityBuilderFromNodeConnectivity(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
     {
         MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes(&msh);
-        if (dofManager.getNumberOfDof()==1) {
+        if (dofManager.getNumberOfVariables()==1) {
             SparsityBuilder::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, sparse);
         } else {
-            SparsityBuilder::createRowMajorSparsityForMultipleDOFs(topo_node2nodes, dofManager.getNumberOfDof(), sparse);
+            SparsityBuilder::createRowMajorSparsityForMultipleDOFs(topo_node2nodes, dofManager.getNumberOfVariables(), sparse);
         }
     }
 };
@@ -108,37 +108,37 @@ public:
 class SparsityBuilderFromNodeConnectivityWithGhostDoFs
 {
 public:
-    SparsityBuilderFromNodeConnectivityWithGhostDoFs(MeshLib::IMesh &msh, DofMapManager &dofManager, MathLib::RowMajorSparsity &sparse)
+    SparsityBuilderFromNodeConnectivityWithGhostDoFs(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
     {
         MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes(&msh);
-        if (dofManager.getNumberOfDof()==1) {
+        if (dofManager.getNumberOfVariables()==1) {
             SparsityBuilder::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, sparse);
         } else {
-            SparsityBuilder::createRowMajorSparsityForMultipleDOFs(topo_node2nodes, dofManager.getNumberOfDof(), sparse);
+            SparsityBuilder::createRowMajorSparsityForMultipleDOFs(topo_node2nodes, dofManager.getNumberOfVariables(), sparse);
         }
         size_t n_rows = dofManager.getTotalNumberOfActiveDoFsWithoutGhost();
         sparse.erase(sparse.begin()+n_rows, sparse.end());
     }
 };
 
-class SparsityBuilderFromNodeConnectivityWithInactiveDoFs
-{
-public:
-    SparsityBuilderFromNodeConnectivityWithInactiveDoFs(MeshLib::IMesh &msh, DofMapManager &dofManager, MathLib::RowMajorSparsity &sparse)
-    {
-        MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes(&msh);
-        if (dofManager.getNumberOfDof()==1) {
-            SparsityBuilder::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, *dofManager.getDofMap(0), sparse);
-        } else {
-            SparsityBuilder::createRowMajorSparsityForMultipleDOFs(topo_node2nodes, dofManager.getNumberOfDof(), sparse);
-        }
-    }
-};
+//class SparsityBuilderFromNodeConnectivityWithInactiveDoFs
+//{
+//public:
+//    SparsityBuilderFromNodeConnectivityWithInactiveDoFs(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
+//    {
+//        MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes(&msh);
+//        if (dofManager.getNumberOfVariables()==1) {
+//            SparsityBuilder::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, *dofManager.getVariableDoF(0), sparse);
+//        } else {
+//            SparsityBuilder::createRowMajorSparsityForMultipleDOFs(topo_node2nodes, dofManager.getNumberOfVariables(), sparse);
+//        }
+//    }
+//};
 
 class SparsityBuilderFromLocalSparsity
 {
 public:
-    SparsityBuilderFromLocalSparsity(std::vector<MathLib::RowMajorSparsity*> &list_local_sparse, DofMapManager &dofManager, MathLib::RowMajorSparsity &sparse)
+    SparsityBuilderFromLocalSparsity(std::vector<MathLib::RowMajorSparsity*> &list_local_sparse, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
     {
 
     }
@@ -148,7 +148,7 @@ template <class T_SPARSITY_BUILDER>
 class SparsityBuilderFromDDC
 {
 public:
-    SparsityBuilderFromDDC(DDCGlobal &ddc_global, DofMapManager &dofManager, MathLib::RowMajorSparsity &sparse)
+    SparsityBuilderFromDDC(DDCGlobal &ddc_global, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
     {
         std::vector<MathLib::RowMajorSparsity> local_sparse(ddc_global.getNumberOfSubDomains());
         for (size_t i=0; i<ddc_global.getNumberOfSubDomains(); i++) {

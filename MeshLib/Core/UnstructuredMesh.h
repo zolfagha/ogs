@@ -23,6 +23,7 @@ class INode;
 class UnstructuredMesh : public IMixedOrderMesh
 {
 private:
+    size_t _msh_id;
     std::vector<Node*> _list_nodes;
     std::vector<IElement*> _list_elements;
     std::map<ElementShape::type, size_t> _n_eles_type;
@@ -33,11 +34,11 @@ private:
     std::map<size_t, size_t> _map_order_nnodes;
 
 public:
-    UnstructuredMesh() : _order(1)
+    UnstructuredMesh() : _order(1), _msh_id(0)
     {
     };
 
-    UnstructuredMesh(const CoordinateSystemType::type coord)  : _order(1)
+    UnstructuredMesh(const CoordinateSystemType::type coord)  : _order(1), _msh_id(0)
     {
         _geo_prop.setCoordinateSystem(coord);
     };
@@ -45,6 +46,9 @@ public:
     virtual ~UnstructuredMesh();
 
     //------------------------------------------------------------------------
+    void setID(size_t id) {_msh_id = id;};
+    virtual size_t getID() const {return _msh_id;};
+
     size_t getDimension() const
     {
         return _geo_prop.getCoordinateSystem()->getDimension();

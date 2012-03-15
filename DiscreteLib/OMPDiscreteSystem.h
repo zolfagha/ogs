@@ -78,7 +78,7 @@ public:
 
     /// create a new linear equation
     template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
-    IDiscreteLinearEquation* createLinearEquation(T_LINEAR_SOLVER &linear_solver, DofMapManager &dofManager)
+    IDiscreteLinearEquation* createLinearEquation(T_LINEAR_SOLVER &linear_solver, DofEquationIdTable &dofManager)
     {
         _vec_linear_sys.push_back(new TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_msh, linear_solver, dofManager));
         //return _vec_linear_sys.size()-1;
