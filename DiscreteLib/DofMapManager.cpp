@@ -1,6 +1,6 @@
 
 #include "DofMapManager.h"
-
+#include <limits>
 
 namespace DiscreteLib
 {

@@ -18,7 +18,7 @@ class OMPLocalDiscreteVector : public DiscreteVector<T>
      /// @param n_global    size of the global vector 
      /// @param i_begin     global index starting this local vector
      /// @param i_end       global index ending this local vector + 1 
-    OMPLocalDiscreteVector(size_t local_id, size_t n_global, size_t i_begin, size_t i_end) : DiscreteVector(i_end - i_begin) 
+    OMPLocalDiscreteVector(size_t local_id, size_t n_global, size_t i_begin, size_t i_end) : DiscreteVector<T>(i_end - i_begin) 
     {
         _local_id = local_id;
         _global_n = n_global;
@@ -32,7 +32,7 @@ class OMPLocalDiscreteVector : public DiscreteVector<T>
     /// @param i_begin     global index starting this local vector
     /// @param i_end       global index ending this local vector + 1 
     /// @param ghost_id    a list of ghost id
-    OMPLocalDiscreteVector(size_t local_id, size_t n_global, size_t i_begin, size_t i_end, std::vector<size_t> &ghost_id) : DiscreteVector(i_end - i_begin + ghost_id.size()), _ghost_id(ghost_id)
+    OMPLocalDiscreteVector(size_t local_id, size_t n_global, size_t i_begin, size_t i_end, std::vector<size_t> &ghost_id) : DiscreteVector<T>(i_end - i_begin + ghost_id.size()), _ghost_id(ghost_id)
     {
         _local_id = local_id;
         _global_n = n_global;
@@ -72,14 +72,14 @@ class OMPLocalDiscreteVector : public DiscreteVector<T>
     }
 
     /// access with local index
-    T& operator[] (size_t i_local) { return _data[i_local]; }
+    T& operator[] (size_t i_local) { return DiscreteVector<T>::_data[i_local]; }
     /// access with local index
-    const T& operator[] (size_t i_local) const { return _data[i_local]; }
+    const T& operator[] (size_t i_local) const { return DiscreteVector<T>::_data[i_local]; }
 
     /// access with global index
-    T& global (size_t i) { return _data[access(i)]; }
+    T& global (size_t i) { return DiscreteVector<T>::_data[access(i)]; }
     /// access with global index
-   const T& global (size_t i) const { return _data[access(i)]; }
+   const T& global (size_t i) const { return DiscreteVector<T>::_data[access(i)]; }
 
 
 private:

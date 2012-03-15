@@ -9,7 +9,9 @@
 #include "MathLib/Function/Function.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/LinAlg/LinearEquations/SparseLinearEquations.h"
+#ifdef USE_LIS
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
+#endif
 
 #include "GeoLib/Shape/Rectangle.h"
 
