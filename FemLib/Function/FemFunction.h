@@ -228,7 +228,7 @@ public:
 
     void setIntegrationPointValue( size_t i_e, size_t ip, Tvalue &q ) 
     {
-        assert(ip<_values[i_e].size());
+        assert(ip<(*_values)[i_e].size());
         (*_values)[i_e][ip] = q;
     }
 
