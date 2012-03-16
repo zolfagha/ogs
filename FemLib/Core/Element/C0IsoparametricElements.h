@@ -30,8 +30,8 @@ public:
     /// initialize object for given mesh elements
     virtual void configure( MeshLib::IElement &e )
     {
-        setElement(e);
-        const MeshLib::IMesh* msh = getMesh();
+    	TemplateFeBase<T_FETYPE, N_VARIABLES>::setElement(e);
+        const MeshLib::IMesh* msh = TemplateFeBase<T_FETYPE, N_VARIABLES>::getMesh();
         if (e.getMappedCoordinates()==0) {
             MeshLib::IElementCoordinatesMapping *ele_map = 0;
             if (msh->getDimension() == e.getDimension()) {
@@ -71,7 +71,7 @@ public:
         const CoordMappingProperties *prop = _mapping->compute(natural_pt);
         double *N = (double*)prop->shape_r->getData();
         double v = .0;
-        for (size_t i=0; i<getNumberOfVariables(); i++)
+        for (size_t i=0; i<TemplateFeBase<T_FETYPE, N_VARIABLES>::getNumberOfVariables(); i++)
             v+=N[i]*nodal_values[i];
         return v;
     }

@@ -234,7 +234,8 @@ TEST(Discrete, Lis1)
         // solve the equation
         linear_eq->initialize();
         linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
-        linear_eq->construct(ElementBasedAssembler(ele_assembler));
+        ElementBasedAssembler eqs_assembler(ele_assembler);
+        linear_eq->construct(eqs_assembler);
         //linear_eq->getLinearEquation()->printout();
         linear_eq->solve();
 

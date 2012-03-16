@@ -31,7 +31,7 @@ TEST(Mesh, topoN2N)
     ASSERT_EQ(std::set<size_t>(expected_conn_nodes4, expected_conn_nodes4+4), topo_node2nodes.getConnectedNodes(4));
 }
 
-UnstructuredMesh * createLineElement(GeoLib::Point &pt1, GeoLib::Point &pt2, CoordinateSystemType::type coord_type)
+UnstructuredMesh * createLineElement(GeoLib::Point pt1, GeoLib::Point pt2, CoordinateSystemType::type coord_type)
 {
     UnstructuredMesh *msh = new UnstructuredMesh(coord_type);
     msh->addNode(pt1);
@@ -44,7 +44,7 @@ UnstructuredMesh * createLineElement(GeoLib::Point &pt1, GeoLib::Point &pt2, Coo
     return msh;
 }
 
-UnstructuredMesh * createTriangleElement(GeoLib::Point &pt1, GeoLib::Point &pt2, GeoLib::Point &pt3, CoordinateSystemType::type coord_type)
+UnstructuredMesh * createTriangleElement(GeoLib::Point pt1, GeoLib::Point pt2, GeoLib::Point pt3, CoordinateSystemType::type coord_type)
 {
     UnstructuredMesh *msh = new UnstructuredMesh(coord_type);
     msh->addNode(pt1);

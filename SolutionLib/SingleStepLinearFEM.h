@@ -39,7 +39,7 @@ template<   template <class> class T_TIME_ODE_ASSEMBLER,
             class T_LINEAR_SOLVER, 
             template <class> class T_USER_FEM_PROBLEM, 
             class T_USER_ASSEMBLY >
-class SingleStepLinearFEM<T_TIME_ODE_ASSEMBLER, T_LINEAR_SOLVER, T_USER_FEM_PROBLEM<T_USER_ASSEMBLY>> : public AbstractTimeSteppingAlgorithm
+class SingleStepLinearFEM<T_TIME_ODE_ASSEMBLER, T_LINEAR_SOLVER, T_USER_FEM_PROBLEM<T_USER_ASSEMBLY> > : public AbstractTimeSteppingAlgorithm
 {
 public:
     typedef T_TIME_ODE_ASSEMBLER<T_USER_ASSEMBLY> UserTimeOdeAssembler;

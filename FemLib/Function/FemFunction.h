@@ -91,7 +91,7 @@ public:
     /// evaluate this function at the given point
     Tvalue eval(const GeoLib::Point &pt) 
     {
-        throw std::exception("eval() is not implemented yet.");
+        throw "eval() is not implemented yet.";
         return (*_nodal_values)[0];
     };
 
@@ -223,7 +223,7 @@ public:
 
     Tvalue eval(const GeoLib::Point &pt) 
     {
-        throw std::exception("The method or operation is not implemented.");
+        throw "The method or operation is not implemented.";
     };
 
     void setIntegrationPointValue( size_t i_e, size_t ip, Tvalue &q ) 
@@ -244,14 +244,14 @@ public:
 
 private:
     MeshLib::IMesh* _msh;
-    DiscreteLib::DiscreteVector<std::vector<Tvalue>>* _values;
+    DiscreteLib::DiscreteVector<std::vector<Tvalue> >* _values;
     DiscreteLib::DiscreteSystem* _discrete_system;
 
     void initialize(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh, size_t n)
     {
         _msh = &msh;
         _discrete_system = &dis;
-        _values = _discrete_system->createVector<std::vector<Tvalue>>(n);
+        _values = _discrete_system->createVector<std::vector<Tvalue> >(n);
     }
 
 

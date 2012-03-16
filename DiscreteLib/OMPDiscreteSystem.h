@@ -33,7 +33,7 @@ public:
     template<typename T>
     OMPGlobalDiscreteVector<T>* getVector(const size_t &i) 
     {
-        return (OMPGlobalDiscreteVector<T>*)_vec_vectors[n];
+    	return (OMPGlobalDiscreteVector<T>*)DiscreteSystem::_data.getLinearEquation(i);
     };
 
 
@@ -91,14 +91,14 @@ public:
     OMPGlobalDiscreteVector<T>* createVector(const size_t &n) 
     {
         OMPGlobalDiscreteVector<T>* v = new OMPGlobalDiscreteVector<T>(0, n);
-	DiscreteSystem::_data.addVector(v);
+        DiscreteSystem::_data.addVector(v);
         return v;
     };
 
     template<typename T>
     OMPGlobalDiscreteVector<T>* getVector(const size_t &i) 
     {
-        return (OMPGlobalDiscreteVector<T>*)_vec_vectors[n];
+        return (OMPGlobalDiscreteVector<T>*)DiscreteSystem::_data.getVector(i);
     };
 
 

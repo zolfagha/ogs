@@ -22,7 +22,7 @@ inline void ASSERT_DOUBLE_ARRAY_EQ(const MathLib::Vector2D &Expected, const Math
             ASSERT_NEAR(Expected[j], Actual[i][j], epsilon); 
 }
 
-inline void ASSERT_DOUBLE_ARRAY_EQ(GeoLib::Point& Expected, GeoLib::Point& Actual, double epsilon=1.0e-8) {
+inline void ASSERT_DOUBLE_ARRAY_EQ(GeoLib::Point Expected, GeoLib::Point Actual, double epsilon=1.0e-8) {
     for (size_t i=0; i<3; i++) \
         ASSERT_NEAR(Expected[i], Actual[i], epsilon); 
 }

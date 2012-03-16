@@ -147,9 +147,9 @@ public:
             std::vector<double> xi(e->getNumberOfNodes());
             std::vector<double> yi(e->getNumberOfNodes());
             for (size_t i=0; i<e->getNumberOfNodes(); i++) {
-                GeoLib::Point &pt = msh->getNodeCoordinates(e->getNodeID(i));
-                xi[i] = pt[0];
-                yi[i] = pt[1];
+                const GeoLib::Point* pt = msh->getNodeCoordinatesRef(e->getNodeID(i));
+                xi[i] = (*pt)[0];
+                yi[i] = (*pt)[1];
             }
             for (size_t ip=0; ip<n_gp; ip++) {
                 MathLib::Vector2D q;
