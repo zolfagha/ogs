@@ -148,7 +148,7 @@ std::istream& operator>> (std::istream &is, TemplatePoint<T> &p)
 //    return true;
 //}
 
-#ifdef MSVC
+#ifdef _MSC_VER
 template <>
 bool TemplatePoint<double>::operator== (const TemplatePoint<double> &p) const {
     for (size_t i=0; i<3; i++)
