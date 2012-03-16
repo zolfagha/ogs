@@ -15,6 +15,7 @@
 namespace DiscreteLib
 {
 
+#if 0
 /**
  * \brief Mapping of DoFs for one variable
  *
@@ -112,6 +113,6 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(DofMap);
 };
-
+#endif
 
 }

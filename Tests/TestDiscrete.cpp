@@ -74,12 +74,16 @@ DDCGlobal* setupNDDC2()
     {
         MeshLib::IMesh* local_msh;
         int dom1_eles[] = {1, 2, 3};
-        int dom1_ghost_nodes[] = {0, 1, 2, 3, 4};
-        std::set<size_t> list_ghost(dom1_ghost_nodes, dom1_ghost_nodes + 5);
+        int dom1_ghost_nodes[] = {1, 2, 3, 4}; 
+        size_t n_ghost = 4;
         std::vector<size_t> dom1_e(dom1_eles, dom1_eles+3);
-        Base::BidirectionalMap<size_t, size_t> msh_node_id_mapping;
-        MeshGenerator::generateSubMesh(*org_msh, dom1_e, local_msh, msh_node_id_mapping);
-        DDCGlobaLocalMappingOffset* mapping = new DDCGlobaLocalMappingOffset(0, local_msh->getNumberOfNodes(), offset);
+        Base::BidirectionalMap<size_t, size_t>* msh_node_id_mapping = new Base::BidirectionalMap<size_t, size_t>();
+        MeshGenerator::generateSubMesh(*org_msh, dom1_e, local_msh, *msh_node_id_mapping);
+        std::set<size_t> list_ghost;
+        for (size_t i=0; i<n_ghost; i++) {
+            list_ghost.insert(msh_node_id_mapping->mapAtoB(dom1_ghost_nodes[i]));
+        }
+        DDCGlobaLocalMappingAll* mapping = new DDCGlobaLocalMappingAll(*msh_node_id_mapping);
         DDCSubDomain* dom = new DDCSubDomain(*local_msh, *mapping, &list_ghost);
         ddc->addSubDomain(dom);
     }
@@ -94,7 +98,7 @@ TEST(Discrete, NDDCSSVec1)
     NodeDDCSerialSharedDiscreteSystem dis(*ddc);
 
     // vector
-    IDiscreteVector<double>* v = dis.createVector<double>(9);
+    IDiscreteVector<double>* v = dis.createVector<double>(ddc->getTotalNumberOfDecomposedObjects());
     for (size_t i=0; i<v->size(); ++i)
         (*v)[i] = i;
     ASSERT_EQ(9, v->size());
@@ -109,7 +113,7 @@ TEST(Discrete, NDDCSSVec2)
     NodeDDCSerialSharedDiscreteSystem dis(*ddc);
 
     // vector
-    IDiscreteVector<double>* v = dis.createVector<double>(9);
+    IDiscreteVector<double>* v = dis.createVector<double>(ddc->getTotalNumberOfDecomposedObjects());
     for (size_t i=0; i<v->size(); ++i)
         (*v)[i] = i;
     ASSERT_EQ(9, v->size());
@@ -117,7 +121,7 @@ TEST(Discrete, NDDCSSVec2)
     ASSERT_DOUBLE_ARRAY_EQ(expected, *v, 9);
 }
 
-#if 0 
+#if 1
 TEST(Discrete, NDDCSSEqs2)
 {
     DiscreteExample1 ex1;

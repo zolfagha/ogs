@@ -83,7 +83,7 @@ public:
     //}
 
     /// set prescribed dof
-    void setPrescribedDoF(size_t varId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> list_prescribed_values)
+    void setPrescribedDoF(size_t varId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> &list_prescribed_values)
     {
         //assert(_list_prescribed_dof_id.size()==0);
         _list_prescribed_dof_id.clear();
@@ -130,7 +130,7 @@ public:
     }
 
     /// set additional RHS values
-    void addRHS(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> list_rhs_values, double fkt=1.0)
+    void addRHS(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> &list_rhs_values, double fkt=1.0)
     {
         const size_t n = list_discrete_pt_id.size();
         const DofEquationIdTable* dofmap = getDofMapManger(); 

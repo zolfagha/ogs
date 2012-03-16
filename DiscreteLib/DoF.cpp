@@ -4,7 +4,7 @@
 
 namespace DiscreteLib
 {
-
+#if 0
 size_t DofMap::setEqsIDSequnetual(size_t eqs_id_begin)
 {
     size_t eqs_id = eqs_id_begin;
@@ -16,7 +16,7 @@ size_t DofMap::setEqsIDSequnetual(size_t eqs_id_begin)
     }
     return eqs_id;
 }
-
+#endif
 
 
 } //end

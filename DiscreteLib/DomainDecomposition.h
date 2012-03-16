@@ -133,7 +133,7 @@ private:
 class DDCGlobal
 {
 public:
-    DDCGlobal(DecompositionType::type ddc_type) : _ddc_type(ddc_type) 
+    DDCGlobal(DecompositionType::type ddc_type) : _ddc_type(ddc_type), _id(0)
     {
         _n_discrete_pt = 0;
     };
@@ -141,6 +141,9 @@ public:
     {
         Base::releaseObjectsInStdVector(_list_dom);
     }
+
+    size_t getID() const {return _id;};
+    void setID(size_t i) {_id = i;};
 
     DecompositionType::type getDecompositionType() const {return _ddc_type;};
 
@@ -153,6 +156,7 @@ public:
         } else {
             _n_discrete_pt += sub->getLoalMesh()->getNumberOfElements();
         }
+        _n_discrete_pt -= sub->getNumberOfGhosts();
         return sub->getDomainID();
     }
 
@@ -177,6 +181,7 @@ private:
     std::vector<size_t> _list_dom_start_obj;
     std::vector<DDCSubDomain*> _list_dom;
     size_t _n_discrete_pt;
+    size_t _id;
 };
 
 } //end

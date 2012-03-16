@@ -33,9 +33,9 @@ public:
     /// get a Dof map manager
     virtual DofEquationIdTable* getDofMapManger() const = 0;
     /// set prescribed dof
-    virtual void setPrescribedDoF(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> list_prescribed_values) = 0;
+    virtual void setPrescribedDoF(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> &list_prescribed_values) = 0;
     /// set additional RHS values
-    virtual void addRHS(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> list_rhs_values, double fkt) = 0;
+    virtual void addRHS(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> &list_rhs_values, double fkt) = 0;
 };
 
 

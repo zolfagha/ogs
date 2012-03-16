@@ -35,23 +35,23 @@ public:
         }
     }
 
-    static void createRowMajorSparsityFromNodeConnectivity(const MeshLib::ITopologyNode2Nodes &topo_node2nodes, const DofMap &dof, MathLib::RowMajorSparsity &row_major_entries)
-    {
-        const size_t n_nodes = topo_node2nodes.getNumberOfNodes();
-        row_major_entries.resize(dof.getNumberOfActiveDoFs());
+    //static void createRowMajorSparsityFromNodeConnectivity(const MeshLib::ITopologyNode2Nodes &topo_node2nodes, const DofMap &dof, MathLib::RowMajorSparsity &row_major_entries)
+    //{
+    //    const size_t n_nodes = topo_node2nodes.getNumberOfNodes();
+    //    row_major_entries.resize(dof.getNumberOfActiveDoFs());
 
-        size_t i_rows = 0;
-        for (size_t i=0; i<n_nodes; i++) {
-            if (!dof.isActiveDoF(i)) continue;
-            // search connected nodes
-            std::set<size_t> &setConnection = row_major_entries[i_rows++];
-            setConnection.insert(dof.getEqsID(i));
-            const std::set<size_t> connected_nodes = topo_node2nodes.getConnectedNodes(i);
-            for (std::set<size_t>::const_iterator it=connected_nodes.begin(); it!=connected_nodes.end(); it++) {
-                if (dof.isActiveDoF(*it)) setConnection.insert(dof.getEqsID(*it));
-            }
-        }
-    }
+    //    size_t i_rows = 0;
+    //    for (size_t i=0; i<n_nodes; i++) {
+    //        if (!dof.isActiveDoF(i)) continue;
+    //        // search connected nodes
+    //        std::set<size_t> &setConnection = row_major_entries[i_rows++];
+    //        setConnection.insert(dof.getEqsID(i));
+    //        const std::set<size_t> connected_nodes = topo_node2nodes.getConnectedNodes(i);
+    //        for (std::set<size_t>::const_iterator it=connected_nodes.begin(); it!=connected_nodes.end(); it++) {
+    //            if (dof.isActiveDoF(*it)) setConnection.insert(dof.getEqsID(*it));
+    //        }
+    //    }
+    //}
 
     /**
      * create row-major sparsity for multiple DOFs with a single mesh
@@ -150,28 +150,43 @@ class SparsityBuilderFromDDC
 public:
     SparsityBuilderFromDDC(DDCGlobal &ddc_global, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
     {
+        const size_t n_dom = ddc_global.getNumberOfSubDomains();
+        const size_t n_dofs = dofManager.getTotalNumberOfActiveDoFs();
+        sparse.resize(n_dofs);
+
         std::vector<MathLib::RowMajorSparsity> local_sparse(ddc_global.getNumberOfSubDomains());
-        for (size_t i=0; i<ddc_global.getNumberOfSubDomains(); i++) {
+        for (size_t i=0; i<n_dom; i++) {
             DDCSubDomain* dom = ddc_global.getSubDomain(i);
             T_SPARSITY_BUILDER builder(*dom->getLoalMesh(), dofManager, local_sparse[i]);
         }
 
-        size_t n_dofs = dofManager.getTotalNumberOfActiveDoFs();
-        sparse.resize(n_dofs);
-
-        size_t i_row = 0;
-        for (size_t i=0; i<local_sparse.size(); i++) {
-            size_t offset = 0;
+        for (size_t i=0; i<n_dom; i++) {
+            DDCSubDomain* dom = ddc_global.getSubDomain(i);
+            IDDCGlobaLocalMapping* mapping = dom->getGlobalLocalIdMap();
             MathLib::RowMajorSparsity &local_sp = local_sparse[i];
             for (size_t j=0; j<local_sp.size(); j++) {
-                std::set<size_t> &setConnection = sparse[i_row++];
-                std::set<size_t> &local_conn = local_sp[j];
-                for (std::set<size_t>::iterator itr = local_conn.begin(); itr!=local_conn.end(); ++itr) {
-                    setConnection.insert(offset + *itr);
+                const std::set<size_t> &local_row = local_sp[j];
+                const size_t i_gloal = mapping->local2global(j);
+                std::set<size_t> &global_row = sparse[i_gloal];
+                for (std::set<size_t>::iterator itr=local_row.begin(); itr!=local_row.end(); ++itr) {
+                    global_row.insert(mapping->local2global(*itr));
                 }
             }
-            offset += local_sp.size();
         }
+
+        //size_t i_row = 0;
+        //for (size_t i=0; i<local_sparse.size(); i++) {
+        //    size_t offset = 0;
+        //    MathLib::RowMajorSparsity &local_sp = local_sparse[i];
+        //    for (size_t j=0; j<local_sp.size(); j++) {
+        //        std::set<size_t> &setConnection = sparse[i_row++];
+        //        std::set<size_t> &local_conn = local_sp[j];
+        //        for (std::set<size_t>::iterator itr = local_conn.begin(); itr!=local_conn.end(); ++itr) {
+        //            setConnection.insert(offset + *itr);
+        //        }
+        //    }
+        //    offset += local_sp.size();
+        //}
     }
 };
 

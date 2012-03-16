@@ -11,16 +11,15 @@
 namespace DiscreteLib
 {
 
-void createLocalDofManager(const DofEquationIdTable &global, DDCGlobal &ddc_global, DDCSubDomain &dom, DofEquationIdTable &local)
+void createLocalDofManager(const DofEquationIdTable &global, DDCGlobal &ddc_global, DDCSubDomain &dom, DofEquationIdTable &local_dof)
 {
-    MeshLib::IMesh* local_msh = dom.getLoalMesh();
+    //MeshLib::IMesh* local_msh = dom.getLoalMesh();
 
-    for (size_t i=0; i<global.getNumberOfVariables(); i++) {
-        //const DofMap* dofmap = global.getVariableDoF(i);
-        //local.addVariableDoF(local_msh->getNumberOfNodes(), dom.getGhostList(), 0, dofmap->getOrder(), 0);
-    }
-    size_t offset = dom.getGlobalLocalIdMap()->local2global(0)*global.getNumberOfVariables();
-    local.construct(DofNumberingType::BY_POINT, offset);
+    //for (size_t i=0; i<global.getNumberOfVariables(); i++) {
+    //    local_dof.addVariableDoFs(local_msh->getID(), )
+    //}
+    //size_t offset = dom.getGlobalLocalIdMap()->local2global(0)*global.getNumberOfVariables();
+    //local_dof.construct(DofNumberingType::BY_POINT, offset);
 }
 
 
@@ -34,7 +33,7 @@ public:
         for (size_t i=0; i<ddc_global.getNumberOfSubDomains(); i++) {
             DDCSubDomain* dom = ddc_global.getSubDomain(i);
             DofEquationIdTable *local_dofManager = new DofEquationIdTable();
-            createLocalDofManager(global_dofManager,  ddc_global, *dom, *local_dofManager);
+            //createLocalDofManager(global_dofManager,  ddc_global, *dom, *local_dofManager);
             _list_local_eq.push_back(new TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*dom->getLoalMesh(), global_linear_solver, *local_dofManager));
         }
         _do_create_eqs = true;
@@ -50,20 +49,42 @@ public:
     /// initialize EQS
     void initialize()
     {
-        DofEquationIdTable* dofManager = getDofMapManger();
+        DofEquationIdTable* global_dofManager = getDofMapManger();
         if (_do_create_eqs) {
             _do_create_eqs = false;
             //create global linear equation
             MathLib::RowMajorSparsity global_sparse;
-            SparsityBuilderFromDDC<T_SPARSITY_BUILDER> sp_builder(*_ddc_global, *dofManager, global_sparse);
-            _global_eqs->create(dofManager->getTotalNumberOfActiveDoFs(), &global_sparse);
+            SparsityBuilderFromDDC<T_SPARSITY_BUILDER> sp_builder(*_ddc_global, *global_dofManager, global_sparse);
+            _global_eqs->create(global_dofManager->getTotalNumberOfActiveDoFs(), &global_sparse);
+            //local dof
+            size_t mesh_id = _ddc_global->getID();
+            for (size_t i=0; i<_list_local_eq.size(); i++) {
+                DDCSubDomain* dom = _ddc_global->getSubDomain(i);
+                MeshLib::IMesh* local_msh = dom->getLoalMesh();
+                DofEquationIdTable *local_dofManager = _list_local_eq[i]->getDofMapManger();
+                // for each var
+                for (size_t j=0; j<global_dofManager->getNumberOfVariables(); j++) {
+                    local_dofManager->addVariableDoFs(mesh_id, 0, local_msh->getNumberOfNodes());
+                    IMappedAddress* local_pt2dof = local_dofManager->getPointEquationIdTable(j, mesh_id);
+                    for (size_t k=0; k<local_msh->getNumberOfNodes(); k++) {
+                        size_t dof_id = global_dofManager->mapEqsID(mesh_id, j, dom->getGlobalLocalIdMap()->local2global(k));
+                        local_pt2dof->set(k, dof_id);
+                    }
+                }
+                // ghost
+                if (dom->getGhostList()!=0) {
+                    std::set<size_t>* dom_ghosts = dom->getGhostList();
+                    std::vector<size_t> vec_ghosts(dom_ghosts->begin(), dom_ghosts->end());
+                    local_dofManager->setGhostPoints(mesh_id, vec_ghosts);
+                }
+            }
         } else {
             _global_eqs->reset();
         }
     }
 
     /// set prescribed dof
-    void setPrescribedDoF(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> list_prescribed_values)
+    void setPrescribedDoF(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> &list_prescribed_values)
     {
         //assert(_list_prescribed_dof_id.size()==0);
         _list_prescribed_dof_id.clear();
@@ -85,13 +106,14 @@ public:
         DofEquationIdTable* dofManager = getDofMapManger();
 
         // local eqs
-        for (size_t i=0; i<_list_local_eq.size(); i++)
-            _list_local_eq[i]->construct(assemler);
-
-        // global eqs
         for (size_t i=0; i<_list_local_eq.size(); i++) {
-            
+            _list_local_eq[i]->construct(assemler);
+            //_global_eqs->printout();
         }
+
+        //apply 1st bc
+        _global_eqs->setKnownX(_list_prescribed_dof_id, _list_prescribed_values);
+        //_global_eqs->printout();
     }
 
     /// solve
@@ -123,7 +145,7 @@ public:
         return _global_dofManager;
     }
     /// set additional RHS values
-    void addRHS(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> list_rhs_values, double fkt)
+    void addRHS(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> &list_rhs_values, double fkt)
     {
         const size_t n = list_discrete_pt_id.size();
         for (size_t i=0; i<n; i++) {

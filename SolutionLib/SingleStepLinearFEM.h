@@ -131,6 +131,7 @@ private:
             pro->getFemNeumannBC(i)->setup();
 
 		// assembly
+        _linear_eqs->initialize();
         _linear_eqs->construct(NumLib::ElementBasedTransientAssembler(t_n1, vec_un, _element_ode_assembler));
 
         //apply BC1,2

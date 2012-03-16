@@ -10,9 +10,18 @@ namespace NumLib
 {
 
 /// create a subset of vector u corresponding to the given vector index
-void getLocalVector(const std::vector<size_t> &list_vec_entry_id, const std::vector<size_t> &list_vec_size_for_order, const std::vector<DiscreteLib::DiscreteVector<double>*> &list_multiple_u, std::vector<double> &local_u)
+void getLocalVector(DiscreteLib::DofEquationIdTable &dofManager, const std::vector<size_t> &list_vec_entry_id, const std::vector<size_t> &list_vec_size_for_order, const std::vector<DiscreteLib::DiscreteVector<double>*> &list_multiple_u, std::vector<double> &local_u)
 {
     local_u.clear();
+    const size_t n_var = dofManager.getNumberOfVariables();
+    for (size_t i=0; i<n_var; i++) {
+        size_t var_order = 1; //TODO
+        const size_t n_dof = list_vec_size_for_order[var_order-1];
+        const DiscreteLib::DiscreteVector<double> &var_u = *list_multiple_u[i];
+        for (size_t j=0; j<n_dof; j++) {
+            local_u.push_back(var_u[list_vec_entry_id[j]]);
+        }
+    }
     //const size_t n_dof = getNumberOfVariables();
     //for (size_t i=0; i<n_dof; i++) {
     //    const DofMap *dofMap = getVariableDoF(i);
@@ -42,7 +51,7 @@ void ElementBasedTransientAssembler::assembly(MeshLib::IMesh &msh, DiscreteLib::
         dofManager.mapEqsID(msh.getID(), ele_node_ids, local_dofmap);
         //dofManager.mapEqsID(ele_node_ids, ele_node_size_order, local_dofmap);
         // get previous time step results
-        getLocalVector(ele_node_ids, ele_node_size_order, *_u0, local_u_n);
+        getLocalVector(dofManager, ele_node_ids, ele_node_size_order, *_u0, local_u_n);
         // local assembly
         localEQS.create(local_dofmap.size());
         _transient_e_assembler->assembly(time, *e, local_u_n, localEQS);

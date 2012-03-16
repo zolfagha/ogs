@@ -28,7 +28,7 @@ void DofEquationIdTable::construct(DofNumberingType::type num, size_t offset)
                 size_t mesh_id = itr->first;
                 std::vector<size_t> &list_var = itr->second;
                 for (size_t i=0; i<list_var.size(); i++) {
-                    IMappedAddress* pt2eq = getVariableDoF(list_var[i], mesh_id);
+                    IMappedAddress* pt2eq = getPointEquationIdTable(list_var[i], mesh_id);
                     eqs_id = offset + i;
                     eqs_id = pt2eq->setAll(eqs_id, list_var.size());
                 }
@@ -43,7 +43,7 @@ void DofEquationIdTable::construct(DofNumberingType::type num, size_t offset)
                 size_t i_min = std::numeric_limits<size_t>::max();
                 size_t i_max = 0;
                 for (size_t i=0; i<list_var.size(); i++) {
-                    IMappedAddress* pt2eq = getVariableDoF(list_var[i], mesh_id);
+                    IMappedAddress* pt2eq = getPointEquationIdTable(list_var[i], mesh_id);
                     size_t tmp_min, tmp_max;
                     pt2eq->key_range(tmp_min, tmp_max);
                     i_min = std::min(i_min, tmp_min);
@@ -53,7 +53,7 @@ void DofEquationIdTable::construct(DofNumberingType::type num, size_t offset)
                 for (size_t i=i_min; i<i_max+1; i++) {
                     if (isGhostPoint(mesh_id, i)) continue; //skip ghost
                     for (size_t j=0; j<list_var.size(); j++) {
-                        IMappedAddress* pt2eq = getVariableDoF(list_var[j], mesh_id);
+                        IMappedAddress* pt2eq = getPointEquationIdTable(list_var[j], mesh_id);
                         if (pt2eq->has(i) && pt2eq->isActive(i)) {
                             pt2eq->set(i, eqs_id++);
                         }
@@ -64,7 +64,7 @@ void DofEquationIdTable::construct(DofNumberingType::type num, size_t offset)
                 for (size_t i=i_min; i<i_max+1; i++) {
                     if (!isGhostPoint(mesh_id, i)) continue; //skip real
                     for (size_t j=0; j<list_var.size(); j++) {
-                        IMappedAddress* pt2eq = getVariableDoF(list_var[j], mesh_id);
+                        IMappedAddress* pt2eq = getPointEquationIdTable(list_var[j], mesh_id);
                         if (pt2eq->has(i) && pt2eq->isActive(i)) {
                             pt2eq->set(i, eqs_id++);
                         }

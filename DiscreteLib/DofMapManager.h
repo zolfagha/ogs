@@ -99,7 +99,7 @@ public:
     /// deactivate DoFs
     void deactivateDoFs(size_t var_id, size_t mesh_id, size_t pt_id)
     {
-        getVariableDoF(var_id, mesh_id)->activate(pt_id, false);
+        getPointEquationIdTable(var_id, mesh_id)->activate(pt_id, false);
     }
 
     /// set ghost points for overlapped regions appeared with domain-decomposition methods
@@ -152,7 +152,7 @@ public:
     /// is this DoF active?
     bool isActiveDoF(size_t var_id, size_t mesh_id, size_t pt_id) const
     {
-        return getVariableDoF(var_id, mesh_id)->isActive(pt_id);
+        return getPointEquationIdTable(var_id, mesh_id)->isActive(pt_id);
     }
     /// get the total number of active DoFs
     size_t getTotalNumberOfActiveDoFs() const { return _total_dofs; }
@@ -166,13 +166,13 @@ public:
     /// map dof to equation id
     long mapEqsID(size_t var_id, size_t mesh_id, size_t pt_id) const
     {
-        const IMappedAddress* add = getVariableDoF(var_id, mesh_id);
+        const IMappedAddress* add = getPointEquationIdTable(var_id, mesh_id);
         return add->address(pt_id);
     }
     void mapEqsID(size_t var_id, size_t mesh_id, const std::vector<size_t> &pt_id, std::vector<long> &eqs_id) const
     {
         eqs_id.resize(pt_id.size());
-        const IMappedAddress* add = getVariableDoF(var_id, mesh_id);
+        const IMappedAddress* add = getPointEquationIdTable(var_id, mesh_id);
         for (size_t i=0; i<pt_id.size(); i++)
             eqs_id[i] = add->address(pt_id[i]);
     }
@@ -184,17 +184,29 @@ public:
         eqs_id.resize(list_var.size()*pt_id.size());
         for (size_t i=0; i<list_var.size(); i++) {
             size_t var_id = list_var[i];
-            const IMappedAddress* add = getVariableDoF(var_id, mesh_id);
+            const IMappedAddress* add = getPointEquationIdTable(var_id, mesh_id);
             for (size_t i=0; i<pt_id.size(); i++)
                 eqs_id[i] = add->address(pt_id[i]);
         }
     }
+    void mapEqsID(size_t mesh_id, const std::vector<size_t> &pt_id, std::vector<long> &eqs_id, std::vector<long> &eqs_id_without_ghost) const
+    {
+        if (_map_msh2var.count(mesh_id)==0) return;
 
-protected:
-    void setTotalDoFs(size_t n) {_total_dofs = n;};
-    //std::map<size_t, std::vector<DofMap*> >& getMapMsh2Dof() {return _map_msh2dof;}
-    /// get the DoF mapping for the given variable
-    const IMappedAddress* getVariableDoF(size_t var_id, size_t mesh_id) const 
+        const std::vector<size_t> &list_var = _map_msh2var.find(mesh_id)->second;
+        eqs_id.resize(list_var.size()*pt_id.size());
+        eqs_id_without_ghost.resize(list_var.size()*pt_id.size());
+        for (size_t i=0; i<list_var.size(); i++) {
+            size_t var_id = list_var[i];
+            const IMappedAddress* add = getPointEquationIdTable(var_id, mesh_id);
+            for (size_t i=0; i<pt_id.size(); i++) {
+                eqs_id[i] = add->address(pt_id[i]);
+                eqs_id_without_ghost[i] = isGhostPoint(mesh_id, pt_id[i]) ? -1 : eqs_id[i];
+            }
+        }
+    }
+
+    const IMappedAddress* getPointEquationIdTable(size_t var_id, size_t mesh_id) const 
     {
         std::map<size_t, IMappedAddress*>::const_iterator itr = _map_var2dof[var_id].find(mesh_id);
         if (itr!=_map_var2dof[var_id].end()) {
@@ -203,7 +215,12 @@ protected:
             return 0;
         }
     }
-    IMappedAddress* getVariableDoF(size_t var_id, size_t mesh_id) { return _map_var2dof[var_id][mesh_id]; }
+    IMappedAddress* getPointEquationIdTable(size_t var_id, size_t mesh_id) { return _map_var2dof[var_id][mesh_id]; }
+
+protected:
+    void setTotalDoFs(size_t n) {_total_dofs = n;};
+    //std::map<size_t, std::vector<DofMap*> >& getMapMsh2Dof() {return _map_msh2dof;}
+    /// get the DoF mapping for the given variable
 
 private:
     DISALLOW_COPY_AND_ASSIGN(DofEquationIdTable);
@@ -265,7 +282,7 @@ public:
             //get ghost node id
             if (DofEquationIdTable::getTotalNumberOfGhostPoints()>0) {
                 for (size_t i=0; i<DofEquationIdTable::getNumberOfVariables(); i++) {
-                    DofMap* dofMap = DofEquationIdTable::getVariableDoF(i);
+                    DofMap* dofMap = DofEquationIdTable::getPointEquationIdTable(i);
                     std::vector<size_t> list_ghost;
                     dofMap->getListOfGhostNodeID(list_ghost);
                     for (size_t j=0; j<list_ghost.size(); j++) {
