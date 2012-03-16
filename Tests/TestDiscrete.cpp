@@ -29,7 +29,8 @@
 #ifdef USE_MPI
 #include "DiscreteLib/ogs5/par_ddc_group.h"
 #endif
-#include "DiscreteLib/SerialNodeDecompositionDiscreteSystem.h"
+#include "DiscreteLib/NodeDDCSerialSharedDiscreteSystem.h"
+#include "DiscreteLib/NodeDDCSerialDistributedDiscreteSystem.h"
 
 #include "TestUtil.h"
 #include "TestExamples.h"
@@ -121,7 +122,6 @@ TEST(Discrete, NDDCSSVec2)
     ASSERT_DOUBLE_ARRAY_EQ(expected, *v, 9);
 }
 
-#if 1
 TEST(Discrete, NDDCSSEqs2)
 {
     DiscreteExample1 ex1;
@@ -147,7 +147,32 @@ TEST(Discrete, NDDCSSEqs2)
 
     ASSERT_DOUBLE_ARRAY_EQ(&ex1.exH[0], linear_eq->getLocalX(), 9, 1.e-5);
 }
-#endif
+
+TEST(Discrete, NDDCSDEqs2)
+{
+    DiscreteExample1 ex1;
+    DiscreteExample1::TestElementAssembler ele_assembler;
+    CRSLisSolver lis;
+    lis.getOption().ls_method = LIS_option::CG;
+    lis.getOption().ls_precond = LIS_option::NONE;
+    DDCGlobal* ddc = setupNDDC2();
+
+    // discrete system
+    NodeDDCSerialDistributedDiscreteSystem dis(*ddc);
+    // dof
+    DofEquationIdTable dofManager;
+    size_t varId = dofManager.addVariableDoFs(0, 0, ddc->getTotalNumberOfDecomposedObjects());
+    dofManager.construct(DofNumberingType::BY_DOF);
+    // eqs
+    IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivity>(lis, dofManager);
+    linear_eq->initialize();
+    linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
+    linear_eq->construct(ElementBasedAssembler(ele_assembler));
+    //linear_eq->getLinearEquation()->printout();
+    linear_eq->solve();
+
+    ASSERT_DOUBLE_ARRAY_EQ(&ex1.exH[0], linear_eq->getLocalX(), 9, 1.e-5);
+}
 
 TEST(Discrete, VecSingle1)
 {

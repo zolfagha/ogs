@@ -11,37 +11,24 @@
 namespace DiscreteLib
 {
 
-void createLocalDofManager(const DofEquationIdTable &global, DDCGlobal &ddc_global, DDCSubDomain &dom, DofEquationIdTable &local_dof)
-{
-    //MeshLib::IMesh* local_msh = dom.getLoalMesh();
-
-    //for (size_t i=0; i<global.getNumberOfVariables(); i++) {
-    //    local_dof.addVariableDoFs(local_msh->getID(), )
-    //}
-    //size_t offset = dom.getGlobalLocalIdMap()->local2global(0)*global.getNumberOfVariables();
-    //local_dof.construct(DofNumberingType::BY_POINT, offset);
-}
-
-
 template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
-class DDCSerialSharedLinearEquation : public IDiscreteLinearEquation
+class NodeDDCSerialSharedLinearEquation : public IDiscreteLinearEquation
 {
 public:
-    DDCSerialSharedLinearEquation(DDCGlobal &ddc_global, T_LINEAR_SOLVER &global_linear_solver, DofEquationIdTable &global_dofManager)
+    NodeDDCSerialSharedLinearEquation(DDCGlobal &ddc_global, T_LINEAR_SOLVER &shared_linear_solver, DofEquationIdTable &global_dofManager)
     {
         _ddc_global = &ddc_global;
         for (size_t i=0; i<ddc_global.getNumberOfSubDomains(); i++) {
             DDCSubDomain* dom = ddc_global.getSubDomain(i);
             DofEquationIdTable *local_dofManager = new DofEquationIdTable();
-            //createLocalDofManager(global_dofManager,  ddc_global, *dom, *local_dofManager);
-            _list_local_eq.push_back(new TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*dom->getLoalMesh(), global_linear_solver, *local_dofManager));
+            _list_local_eq.push_back(new TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*dom->getLoalMesh(), shared_linear_solver, *local_dofManager));
         }
         _do_create_eqs = true;
-        _global_eqs = &global_linear_solver;
+        _sheared_eqs = &shared_linear_solver;
         _global_dofManager = &global_dofManager;
     };
 
-    virtual ~DDCSerialSharedLinearEquation() 
+    virtual ~NodeDDCSerialSharedLinearEquation() 
     {
         Base::releaseObjectsInStdVector(_list_local_eq);
     };
@@ -55,7 +42,7 @@ public:
             //create global linear equation
             MathLib::RowMajorSparsity global_sparse;
             SparsityBuilderFromDDC<T_SPARSITY_BUILDER> sp_builder(*_ddc_global, *global_dofManager, global_sparse);
-            _global_eqs->create(global_dofManager->getTotalNumberOfActiveDoFs(), &global_sparse);
+            _sheared_eqs->create(global_dofManager->getTotalNumberOfActiveDoFs(), &global_sparse);
             //local dof
             size_t mesh_id = _ddc_global->getID();
             for (size_t i=0; i<_list_local_eq.size(); i++) {
@@ -79,7 +66,7 @@ public:
                 }
             }
         } else {
-            _global_eqs->reset();
+            _sheared_eqs->reset();
         }
     }
 
@@ -112,26 +99,26 @@ public:
         }
 
         //apply 1st bc
-        _global_eqs->setKnownX(_list_prescribed_dof_id, _list_prescribed_values);
+        _sheared_eqs->setKnownX(_list_prescribed_dof_id, _list_prescribed_values);
         //_global_eqs->printout();
     }
 
     /// solve
     void solve()
     {
-        _global_eqs->solve();
+        _sheared_eqs->solve();
     }
 
     /// get solution
     double* getLocalX()
     {
-        return _global_eqs->getX();
+        return _sheared_eqs->getX();
     }
 
     void getGlobalX(std::vector<double> &x)
     {
-        x.resize(_global_eqs->getDimension());
-        double *tmp_x = _global_eqs->getX();
+        x.resize(_sheared_eqs->getDimension());
+        double *tmp_x = _sheared_eqs->getX();
         for (size_t i=0; i<x.size(); i++)
             x[i] = tmp_x[i];
     }
@@ -151,7 +138,7 @@ public:
         for (size_t i=0; i<n; i++) {
             size_t pt_id = list_discrete_pt_id[i];
             if (_global_dofManager->isActiveDoF(dofId, 0, pt_id)) {
-                _global_eqs->addRHS(_global_dofManager->mapEqsID(dofId, 0, pt_id), list_rhs_values[i]*fkt);
+                _sheared_eqs->addRHS(_global_dofManager->mapEqsID(dofId, 0, pt_id), list_rhs_values[i]*fkt);
             }
         }
     }
@@ -159,13 +146,13 @@ public:
 private:
     DDCGlobal* _ddc_global;
     std::vector<AbstractMeshBasedDiscreteLinearEquation*> _list_local_eq;
-    T_LINEAR_SOLVER* _global_eqs;
+    T_LINEAR_SOLVER* _sheared_eqs;
     bool _do_create_eqs;
     DofEquationIdTable* _global_dofManager;
     std::vector<size_t> _list_prescribed_dof_id;
     std::vector<double> _list_prescribed_values;
 
-    DISALLOW_COPY_AND_ASSIGN(DDCSerialSharedLinearEquation);
+    DISALLOW_COPY_AND_ASSIGN(NodeDDCSerialSharedLinearEquation);
 };
 
 
@@ -188,7 +175,7 @@ public:
     template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
     IDiscreteLinearEquation* createLinearEquation(T_LINEAR_SOLVER &linear_solver, DofEquationIdTable &dofManager)
     {
-        _vec_linear_sys.push_back(new DDCSerialSharedLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_ddc_global, linear_solver, dofManager));
+        _vec_linear_sys.push_back(new NodeDDCSerialSharedLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_ddc_global, linear_solver, dofManager));
         //return _vec_linear_sys.size()-1;
         return _vec_linear_sys.back();
     }

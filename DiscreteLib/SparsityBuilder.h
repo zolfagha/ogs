@@ -35,6 +35,62 @@ public:
         }
     }
 
+    static void createRowMajorSparsityFromNodeConnectivity(const MeshLib::ITopologyNode2Nodes &topo_node2nodes, size_t mesh_id, DofEquationIdTable &local_dofTable, MathLib::RowMajorSparsity &row_major_entries)
+    {
+        row_major_entries.resize(local_dofTable.getTotalNumberOfActiveDoFs());
+
+        const size_t n_nodes = topo_node2nodes.getNumberOfNodes();
+        for (size_t i=0; i<n_nodes; i++) {
+            const std::set<size_t> connected_nodes = topo_node2nodes.getConnectedNodes(i);
+            for (size_t j=0; j<local_dofTable.getNumberOfVariables(); j++) {
+                // for each DoF(var,pt)
+                long row_id = local_dofTable.mapEqsID(j, mesh_id, i);
+                std::set<size_t> &setConnection = row_major_entries[i];
+                // add all DoFs defined in this point
+                for (size_t l=0; l<local_dofTable.getNumberOfVariables(); l++) {
+                    long col_id = local_dofTable.mapEqsID(l, mesh_id, i);
+                    setConnection.insert(col_id);
+                }
+                // add DoFs defined in connected nodes
+                for (std::set<size_t>::const_iterator it=connected_nodes.begin(); it!=connected_nodes.end(); it++) {
+                    for (size_t l=0; l<local_dofTable.getNumberOfVariables(); l++) {
+                        long col_id = local_dofTable.mapEqsID(l, mesh_id, *it);
+                        setConnection.insert(col_id);
+                    }
+                }
+            }
+        }
+    }
+
+    static void createRowMajorSparsityFromNodeConnectivity(const MeshLib::ITopologyNode2Nodes &local_topo_node2nodes, IDDCGlobaLocalMapping &pt_mapping, size_t mesh_id, DofEquationIdTable &global_dofTable, MathLib::RowMajorSparsity &row_major_entries)
+    {
+        row_major_entries.resize(global_dofTable.getTotalNumberOfActiveDoFs());
+
+        const size_t n_nodes = local_topo_node2nodes.getNumberOfNodes();
+        for (size_t i=0; i<n_nodes; i++) {
+            const std::set<size_t> connected_nodes = local_topo_node2nodes.getConnectedNodes(i);
+            const size_t global_i = pt_mapping.local2global(i);
+            for (size_t j=0; j<global_dofTable.getNumberOfVariables(); j++) {
+                // for each DoF(var,pt)
+                long row_id = global_dofTable.mapEqsID(j, mesh_id, global_i);
+                std::set<size_t> &setConnection = row_major_entries[i];
+                // add all DoFs defined in this point
+                for (size_t l=0; l<global_dofTable.getNumberOfVariables(); l++) {
+                    long col_id = global_dofTable.mapEqsID(l, mesh_id, global_i);
+                    setConnection.insert(col_id);
+                }
+                // add DoFs defined in connected nodes
+                for (std::set<size_t>::const_iterator it=connected_nodes.begin(); it!=connected_nodes.end(); it++) {
+                    const size_t global_pt_id = pt_mapping.local2global(*it);
+                    for (size_t l=0; l<global_dofTable.getNumberOfVariables(); l++) {
+                        long col_id = global_dofTable.mapEqsID(l, mesh_id, global_pt_id);
+                        setConnection.insert(col_id);
+                    }
+                }
+            }
+        }
+    }
+
     //static void createRowMajorSparsityFromNodeConnectivity(const MeshLib::ITopologyNode2Nodes &topo_node2nodes, const DofMap &dof, MathLib::RowMajorSparsity &row_major_entries)
     //{
     //    const size_t n_nodes = topo_node2nodes.getNumberOfNodes();
@@ -97,11 +153,17 @@ public:
     SparsityBuilderFromNodeConnectivity(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
     {
         MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes(&msh);
-        if (dofManager.getNumberOfVariables()==1) {
-            SparsityBuilder::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, sparse);
-        } else {
-            SparsityBuilder::createRowMajorSparsityForMultipleDOFs(topo_node2nodes, dofManager.getNumberOfVariables(), sparse);
-        }
+        SparsityBuilder::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, msh.getID(), dofManager, sparse);
+        //if (dofManager.getNumberOfVariables()==1) {
+        //    SparsityBuilder::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, sparse);
+        //} else {
+        //    SparsityBuilder::createRowMajorSparsityForMultipleDOFs(topo_node2nodes, dofManager.getNumberOfVariables(), sparse);
+        //}
+    }
+    SparsityBuilderFromNodeConnectivity(DDCSubDomain &ddc_dom, MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
+    {
+        MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes(&msh);
+        SparsityBuilder::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, *ddc_dom.getGlobalLocalIdMap(), msh.getID(), dofManager, sparse);
     }
 };
 
@@ -157,7 +219,7 @@ public:
         std::vector<MathLib::RowMajorSparsity> local_sparse(ddc_global.getNumberOfSubDomains());
         for (size_t i=0; i<n_dom; i++) {
             DDCSubDomain* dom = ddc_global.getSubDomain(i);
-            T_SPARSITY_BUILDER builder(*dom->getLoalMesh(), dofManager, local_sparse[i]);
+            T_SPARSITY_BUILDER builder(*dom, *dom->getLoalMesh(), dofManager, local_sparse[i]);
         }
 
         for (size_t i=0; i<n_dom; i++) {
@@ -166,10 +228,12 @@ public:
             MathLib::RowMajorSparsity &local_sp = local_sparse[i];
             for (size_t j=0; j<local_sp.size(); j++) {
                 const std::set<size_t> &local_row = local_sp[j];
+                if (local_row.size()==0) continue;
                 const size_t i_gloal = mapping->local2global(j);
                 std::set<size_t> &global_row = sparse[i_gloal];
                 for (std::set<size_t>::iterator itr=local_row.begin(); itr!=local_row.end(); ++itr) {
-                    global_row.insert(mapping->local2global(*itr));
+                    global_row.insert(*itr);
+                    //global_row.insert(mapping->local2global(*itr));
                 }
             }
         }

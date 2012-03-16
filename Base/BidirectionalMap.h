@@ -17,6 +17,20 @@ public:
     typedef std::map<T1, T2> MapA;
     typedef std::map<T2, T1> MapB;
 
+    BidirectionalMap() {};
+    BidirectionalMap(const BidirectionalMap &src)
+    {
+        _map1 = src._map1;
+        _map2 = src._map2;
+    }
+
+    BidirectionalMap &operator=(const BidirectionalMap &src)
+    {
+        _map1 = src._map1;
+        _map2 = src._map2;
+        return *this;
+    }
+
     void insert(const T1 &v1, const T2 &v2)
     {
         _map1[v1] = v2;

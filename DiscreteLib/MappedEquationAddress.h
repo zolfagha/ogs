@@ -5,6 +5,8 @@
 #include <map>
 #include <algorithm>
 #include <cassert>
+#include <iostream>
+
 
 namespace DiscreteLib
 {
@@ -12,14 +14,16 @@ namespace DiscreteLib
 class IMappedAddress
 {
 public:
-    virtual bool has(size_t pt_id) const = 0;
+    virtual bool hasKey(size_t pt_id) const = 0;
+    virtual bool hasValue(size_t eqs_id) const = 0;
     virtual void key_range(size_t &i_start, size_t &i_end) const = 0;
     virtual void activate(size_t pt_id, bool b) = 0;
     virtual bool isActive(size_t pt_id) const = 0;
-    virtual void set(size_t pt_id, size_t eqs_id) = 0;
+    virtual void set(size_t pt_id, long eqs_id) = 0;
     virtual size_t setAll(size_t address_start, size_t dn_pt=1) = 0;
     virtual size_t size() const = 0;
     virtual long address(size_t key_id) const = 0;
+    virtual long key(long address_id) const = 0;
     virtual bool isSequential() const = 0;
 };
 
@@ -34,10 +38,19 @@ public:
 
     bool isSequential() const {return true;};
 
-    bool has(size_t pt_id) const
+    bool hasKey(size_t pt_id) const
     {
         return (_pt_id_start<=pt_id && pt_id<_pt_id_start+_n);
     }
+
+    bool hasValue(size_t eqs_id) const
+    {
+        bool in_range = (address(_pt_id_start) <= eqs_id && eqs_id <= address(_pt_id_start+_n-1));
+        if (!in_range) return false;
+        if ((eqs_id - _dof_begin)%_delta_per_pt!=0) return false;
+        return true;
+    }
+
     void key_range(size_t &i_start, size_t &i_end) const
     {
         i_start = _pt_id_start;
@@ -55,9 +68,10 @@ public:
     
     bool isActive(size_t pt_id) const { return _deactive.count(pt_id)==0;};
 
-    void set(size_t pt_id, size_t eqs_id)
+    void set(size_t pt_id, long eqs_id)
     {
         //invalid
+        std::cout << "***Error: called invalid functioons. SequentiallyMappedAddress::set()." << std::endl;
     }
 
     size_t setAll(size_t address_start, size_t dn_pt)
@@ -92,6 +106,12 @@ public:
         }
     }
 
+    long key(long address_id) const
+    {
+        //TODO
+        return -1;
+    }
+
 private:
     size_t _pt_id_start;
     size_t _n;
@@ -106,23 +126,30 @@ public:
     RandomlyMappedAddress(const std::vector<size_t> &sorted_list_pt_id) : _list_pt_id(sorted_list_pt_id)
     {
         for (size_t i=0; i<sorted_list_pt_id.size(); i++)
-            _map_pt2eqs[sorted_list_pt_id[i]] = 0;
+            set(sorted_list_pt_id[i], 0);
     }
     RandomlyMappedAddress(size_t pt_id_start, size_t n)
     {
         _list_pt_id.resize(n);
         for (size_t i=0; i<n; i++) {
             _list_pt_id[i] = pt_id_start + i;
-            _map_pt2eqs[_list_pt_id[i]] = 0;
+            set(_list_pt_id[i], 0);
         }
     }
 
     bool isSequential() const {return false;};
 
-    bool has(size_t pt_id) const
+    bool hasKey(size_t pt_id) const
     {
         return _list_pt_id.end() !=  std::find(_list_pt_id.begin(), _list_pt_id.end(), pt_id);
     }
+
+    bool hasValue(size_t eqs_id) const
+    {
+        return (_map_pt2eqs.countInB(eqs_id)>0);
+    }
+
+
     void key_range(size_t &i_start, size_t &i_end) const
     {
         i_start = _list_pt_id[0];
@@ -135,15 +162,15 @@ public:
             _deactive.erase(pt_id);
         } else {
             _deactive.insert(pt_id);
-            _map_pt2eqs[pt_id] = -1;
+            set(pt_id, -1);
         }
     }
 
     bool isActive(size_t pt_id) const { return _deactive.count(pt_id)==0;};
 
-    void set(size_t pt_id, size_t eqs_id)
+    void set(size_t pt_id, long eqs_id)
     {
-        _map_pt2eqs[pt_id] = eqs_id;
+        _map_pt2eqs.insert(pt_id, eqs_id);
     }
 
     size_t setAll(size_t dof_start, size_t delta_per_pt)
@@ -152,7 +179,7 @@ public:
         if (_deactive.size()==0) {
             for (size_t i=0; i<_list_pt_id.size(); i++) {
                 last = dof_start + i*delta_per_pt;
-                _map_pt2eqs[_list_pt_id[i]] = last;
+                set(_list_pt_id[i], last);
             }
         } else {
             size_t counter = 0;
@@ -160,7 +187,7 @@ public:
                 const size_t pt_id = _list_pt_id[i];
                 if (_deactive.count(pt_id)>0) continue;
                 last = dof_start + counter*delta_per_pt;
-                _map_pt2eqs[pt_id] = last;
+                set(pt_id, last);
                 counter++;
             }
         }
@@ -171,16 +198,18 @@ public:
 
     long address(size_t pt_id) const
     {
-        std::map<size_t, size_t>::const_iterator itr = _map_pt2eqs.find(pt_id);
-        if (itr!=_map_pt2eqs.end()) {
-            return itr->second;
-        } else {
-            return -1;
-        }
+        if (_map_pt2eqs.countInA(pt_id)==0) return -1;
+        return _map_pt2eqs.mapAtoB(pt_id);
+    }
+
+    long key(long address_id) const
+    {
+        if (_map_pt2eqs.countInB(address_id)==0) return -1;
+        return _map_pt2eqs.mapBtoA(address_id);
     }
 
 private:
-    std::map<size_t, size_t> _map_pt2eqs;
+    Base::BidirectionalMap<long, long> _map_pt2eqs;
     std::vector<size_t> _list_pt_id;
     std::set<size_t> _deactive;
 };

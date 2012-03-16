@@ -5,11 +5,11 @@
 namespace DiscreteLib
 {
 
-void DofEquationIdTable::construct(DofNumberingType::type num, size_t offset)
+void DofEquationIdTable::construct(DofNumberingType::type num, long offset)
 {
     if (num==DofNumberingType::BY_DOF) {
         //order by dof
-        size_t eqs_id = offset;
+        long eqs_id = offset;
         for (size_t i=0; i<_map_var2dof.size(); i++) {
             std::map<size_t, IMappedAddress*> &obj = _map_var2dof[i];
             for (std::map<size_t, IMappedAddress*>::iterator itr = obj.begin(); itr!=obj.end(); ++itr) {
@@ -21,7 +21,7 @@ void DofEquationIdTable::construct(DofNumberingType::type num, size_t offset)
         _total_dofs = eqs_id;
     } else {
         //order by discrete points
-        size_t eqs_id = offset;
+        long eqs_id = offset;
         if (_is_seq_address) {
             assert(_ghost_pt.size()==0);
             for (std::map<size_t, std::vector<size_t> >::iterator itr=_map_msh2var.begin(); itr!=_map_msh2var.end(); itr++) {
@@ -54,7 +54,7 @@ void DofEquationIdTable::construct(DofNumberingType::type num, size_t offset)
                     if (isGhostPoint(mesh_id, i)) continue; //skip ghost
                     for (size_t j=0; j<list_var.size(); j++) {
                         IMappedAddress* pt2eq = getPointEquationIdTable(list_var[j], mesh_id);
-                        if (pt2eq->has(i) && pt2eq->isActive(i)) {
+                        if (pt2eq->hasKey(i) && pt2eq->isActive(i)) {
                             pt2eq->set(i, eqs_id++);
                         }
                     }
@@ -65,7 +65,7 @@ void DofEquationIdTable::construct(DofNumberingType::type num, size_t offset)
                     if (!isGhostPoint(mesh_id, i)) continue; //skip real
                     for (size_t j=0; j<list_var.size(); j++) {
                         IMappedAddress* pt2eq = getPointEquationIdTable(list_var[j], mesh_id);
-                        if (pt2eq->has(i) && pt2eq->isActive(i)) {
+                        if (pt2eq->hasKey(i) && pt2eq->isActive(i)) {
                             pt2eq->set(i, eqs_id++);
                         }
                     }

@@ -170,6 +170,8 @@ public:
     //{
     //    return _eqs->getRHS();
     //}
+
+    T_LINEAR_SOLVER* getLinearSolver() {return _eqs;};
 private:
     T_LINEAR_SOLVER* _eqs;
     bool _do_create_eqs;

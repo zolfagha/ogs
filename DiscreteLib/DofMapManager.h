@@ -112,7 +112,7 @@ public:
     // construct the table
     //---------------------------------------------------------------------------------------------
     /// numbering DoFs
-    virtual void construct(DofNumberingType::type num=DofNumberingType::BY_DOF, size_t offset=0);
+    virtual void construct(DofNumberingType::type num=DofNumberingType::BY_DOF, long offset=0);
 
     //---------------------------------------------------------------------------------------------
     // get summary of the table
@@ -202,6 +202,23 @@ public:
             for (size_t i=0; i<pt_id.size(); i++) {
                 eqs_id[i] = add->address(pt_id[i]);
                 eqs_id_without_ghost[i] = isGhostPoint(mesh_id, pt_id[i]) ? -1 : eqs_id[i];
+            }
+        }
+    }
+    void mapDoF(size_t eqs_id, long &var_id, long &mesh_id, long &pt_id) const
+    {
+        var_id = -1;
+        mesh_id = -1;
+        pt_id = -1;
+        for (size_t i=0; i<_map_var2dof.size(); i++) {
+            const std::map<size_t, IMappedAddress*> &obj = _map_var2dof[i];
+            for (std::map<size_t, IMappedAddress*>::const_iterator itr=obj.begin(); itr!=obj.end(); ++itr) {
+                const IMappedAddress* pt2dof = itr->second;
+                if (!pt2dof->hasValue(eqs_id)) continue;
+                pt_id = pt2dof->key(eqs_id);
+                var_id = i;
+                mesh_id = itr->first;
+                return;
             }
         }
     }
