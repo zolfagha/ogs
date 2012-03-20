@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <vector>
 #include <map>
 #include <set>
@@ -44,6 +45,8 @@ private:
 class ITopologyNode2Nodes
 {
 public:
+	virtual ~ITopologyNode2Nodes() {};
+
     virtual const std::set<size_t>& getConnectedNodes(size_t node_id) const = 0;
     virtual size_t getNumberOfNodes() const = 0;
 };
@@ -55,6 +58,7 @@ class TopologyNode2NodesConnectedByEdges : public ITopologyNode2Nodes
 {
 public:
     TopologyNode2NodesConnectedByEdges(IMesh *msh);
+    virtual ~TopologyNode2NodesConnectedByEdges() {};
 
     const std::set<size_t>& getConnectedNodes(size_t node_id) const 
     {
@@ -74,6 +78,7 @@ class TopologyNode2NodesConnectedByElements : public ITopologyNode2Nodes
 {
 public:
     TopologyNode2NodesConnectedByElements(IMesh *msh);
+    virtual ~TopologyNode2NodesConnectedByElements() {};
 
     const std::set<size_t>& getConnectedNodes(size_t node_id) const 
     {

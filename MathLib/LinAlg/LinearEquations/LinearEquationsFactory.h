@@ -32,9 +32,10 @@ public:
             return new SparseLinearEquations();
         case LinearEquationsType::LIS:
             return new CRSLisSolver();
+        default:
+            assert(false);
+            return 0;
         }
-        assert(false);
-        return 0;
     }
 };
 }

@@ -52,6 +52,7 @@ private:
 class IFeObjectContainer
 {
 public:
+	virtual ~IFeObjectContainer() {};
     /// get a finite element object for the given mesh element
     virtual IFiniteElement* getFeObject(const MeshLib::IElement &e) = 0;
 };
@@ -123,8 +124,9 @@ private:
                 return (order==1) ? FiniteElementType::LINE2 : FiniteElementType::LINE3;
             case MeshLib::ElementShape::QUAD:
                 return (order==1) ? FiniteElementType::QUAD4 : FiniteElementType::QUAD9;
+            default:
+                return FiniteElementType::INVALID;
         }
-        return FiniteElementType::INVALID;
     };
     DISALLOW_COPY_AND_ASSIGN(LagrangianFeObjectContainer);
 };

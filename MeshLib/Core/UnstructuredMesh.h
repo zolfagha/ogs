@@ -34,11 +34,11 @@ private:
     std::map<size_t, size_t> _map_order_nnodes;
 
 public:
-    UnstructuredMesh() : _order(1), _msh_id(0)
+    UnstructuredMesh() : _msh_id(0), _order(1)
     {
     };
 
-    UnstructuredMesh(const CoordinateSystemType::type coord)  : _order(1), _msh_id(0)
+    UnstructuredMesh(const CoordinateSystemType::type coord)  : _msh_id(0), _order(1)
     {
         _geo_prop.setCoordinateSystem(coord);
     };

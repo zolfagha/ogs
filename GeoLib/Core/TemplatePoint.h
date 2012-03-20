@@ -49,12 +49,14 @@ public:
     virtual GeoObjType::type getGeoType() const {return GeoObjType::POINT;};
 
     /** check if the given object equals to this. */
-    bool operator== (const TemplatePoint<T> &p) const
+    inline bool operator== (const TemplatePoint<T> &p) const;
+/*
     {
         for (size_t i=0; i<3; i++)
             if (_x[i]!=p._x[i]) return false;
         return true;
     }
+*/
 
 	/** \brief const access operator
 	 *  The access to the point coordinates is like the access to a field. Code example:
@@ -148,14 +150,21 @@ std::istream& operator>> (std::istream &is, TemplatePoint<T> &p)
 //    return true;
 //}
 
-#ifdef _MSC_VER
+template <class T>
+inline bool TemplatePoint<T>::operator== (const TemplatePoint<T> &p) const
+{
+    for (size_t i=0; i<3; i++)
+        if (_x[i]!=p._x[i]) return false;
+    return true;
+}
+
 template <>
-bool TemplatePoint<double>::operator== (const TemplatePoint<double> &p) const {
+inline bool TemplatePoint<double>::operator== (const TemplatePoint<double> &p) const
+{
     for (size_t i=0; i<3; i++)
         if (fabs(_x[i]-p._x[i])>std::numeric_limits<double>::epsilon()) return false;
     return true;
 }
-#endif
 
 } // end namespace GEO
 

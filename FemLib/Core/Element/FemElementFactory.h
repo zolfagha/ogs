@@ -29,6 +29,8 @@ public:
                 return new QUAD9(msh);
             case FiniteElementType::TRI3CONST:
                 return new TRI3CONST(msh);
+            default:
+            	return 0;
         }
         assert(false);
         return 0;

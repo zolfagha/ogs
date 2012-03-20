@@ -4,7 +4,7 @@
 namespace GeoLib
 {
 
-#ifndef _MSC_VER
+#if 0
 template <>
 bool TemplatePoint<double>::operator== (const TemplatePoint<double> &p) const {
     for (size_t i=0; i<3; i++)

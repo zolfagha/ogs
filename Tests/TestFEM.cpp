@@ -235,6 +235,7 @@ template<typename Tval, typename Tpos>
 class MyFunction : public MathLib::IFunction<Tval, Tpos>
 {
 public:
+	virtual ~MyFunction() {};
     virtual Tval eval(const Tpos& x) 
     {
         if (x[0]<1.0) return 1e-11;

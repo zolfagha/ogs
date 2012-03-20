@@ -1,6 +1,4 @@
 
-#pragma once
-
 #include "MeshGenerator.h"
 
 #include <memory>

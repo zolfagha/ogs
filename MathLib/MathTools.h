@@ -8,10 +8,10 @@
 #ifndef MATHTOOLS_H_
 #define MATHTOOLS_H_
 
+#include <cstddef>
 #include <vector>
 #include <cmath>
 #include <limits>
-
 #ifdef _OPENMP
 #include <omp.h>
 #endif

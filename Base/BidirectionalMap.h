@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <map>
 
 namespace Base

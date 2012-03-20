@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <cstddef>
+
 #include "PartitionedAlgorithm.h"
 
 namespace NumLib
@@ -19,6 +21,8 @@ public:
     AbstractIterativePartitionedMethod(double epsilon, size_t max_count) : _max_itr(max_count), _epsilon(epsilon)
     {
     }
+
+    virtual ~AbstractIterativePartitionedMethod() {};
 
     /// get max. iteration
     size_t getMaximumIterationCounts() const {return _max_itr;};
@@ -53,6 +57,7 @@ public:
     BlockJacobiMethod(double epsilon, size_t max_count) : AbstractIterativePartitionedMethod(epsilon, max_count)
     {
     }
+    virtual ~BlockJacobiMethod() {};
 
     void doPostAfterSolveAll( NamedVariableContainer &vars, VariableMappingTable &mapping );
 };
@@ -67,6 +72,7 @@ public:
     BlockGaussSeidelMethod(double epsilon, size_t max_count) : AbstractIterativePartitionedMethod(epsilon, max_count)
     {
     }
+    virtual ~BlockGaussSeidelMethod() {};
 
     void doPostAfterSolve( ICoupledSystem & solution, NamedVariableContainer& vars, VariableMappingTable &mapping );
 };

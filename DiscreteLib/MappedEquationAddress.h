@@ -14,6 +14,7 @@ namespace DiscreteLib
 class IMappedAddress
 {
 public:
+	virtual ~IMappedAddress() {};
     virtual bool hasKey(size_t pt_id) const = 0;
     virtual bool hasValue(size_t eqs_id) const = 0;
     virtual void key_range(size_t &i_start, size_t &i_end) const = 0;
@@ -35,6 +36,7 @@ public:
         _dof_begin = 0;
         _delta_per_pt = 1;
     }
+    virtual ~SequentiallyMappedAddress() {};
 
     bool isSequential() const {return true;};
 
@@ -136,6 +138,7 @@ public:
             set(_list_pt_id[i], 0);
         }
     }
+    virtual ~RandomlyMappedAddress() {};
 
     bool isSequential() const {return false;};
 

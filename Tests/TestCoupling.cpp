@@ -491,9 +491,10 @@ TEST(Coupling, TransientCouplingParallelStaggered3)
     TransientWeakCouplingEQS1 eqs1(1.0);
     TransientWeakCouplingEQS2 eqs2(2.0);
     TransientWeakCouplingEQS3 eqs3(4.0);
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &MathLib::FunctionConstant<double,double>(.0));
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &MathLib::FunctionConstant<double,double>(.0));
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &MathLib::FunctionConstant<double,double>(.0));
+    MathLib::FunctionConstant<double,double> f_const_zero(.0);
+    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
 
     ParallelStaggeredMethod method(1e-5, 1);
     AsyncPartitionedSystem apart1(method);
@@ -524,33 +525,33 @@ TEST(Coupling, TransientCouplingParallelStaggered3)
     ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
     ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
 
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &MathLib::FunctionConstant<double,double>(.0));
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &MathLib::FunctionConstant<double,double>(.0));
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &MathLib::FunctionConstant<double,double>(.0));
+    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(2.0);
     ASSERT_NEAR(6.9, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
     ASSERT_NEAR(3.37, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
     ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
 
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &MathLib::FunctionConstant<double,double>(.0));
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &MathLib::FunctionConstant<double,double>(.0));
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &MathLib::FunctionConstant<double,double>(.0));
+    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(3.0);
     ASSERT_NEAR(6.98, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
     ASSERT_NEAR(3.37, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
     ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
 
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &MathLib::FunctionConstant<double,double>(.0));
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &MathLib::FunctionConstant<double,double>(.0));
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &MathLib::FunctionConstant<double,double>(.0));
+    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(4.0);
     ASSERT_NEAR(10.43, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
     ASSERT_NEAR(6.692, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
     ASSERT_NEAR(11.96633, part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
 
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &MathLib::FunctionConstant<double,double>(.0));
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &MathLib::FunctionConstant<double,double>(.0));
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &MathLib::FunctionConstant<double,double>(.0));
+    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(5.0);
     ASSERT_NEAR(8.76305, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
     ASSERT_NEAR(6.692, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
@@ -621,9 +622,10 @@ TEST(Coupling, TransientCouplingSerialStaggered2)
     TransientWeakCouplingEQS1 eqs1(1.0);
     TransientWeakCouplingEQS2 eqs2(2.0);
     TransientWeakCouplingEQS3 eqs3(4.0);
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &MathLib::FunctionConstant<double,double>(.0));
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &MathLib::FunctionConstant<double,double>(.0));
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &MathLib::FunctionConstant<double,double>(.0));
+    MathLib::FunctionConstant<double,double> f_const_zero(.0);
+    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
 
     SerialStaggeredMethod method(1e-5, 1);
     AsyncPartitionedSystem apart1(method);
@@ -654,33 +656,33 @@ TEST(Coupling, TransientCouplingSerialStaggered2)
     ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
     ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
 
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &MathLib::FunctionConstant<double,double>(.0));
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &MathLib::FunctionConstant<double,double>(.0));
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &MathLib::FunctionConstant<double,double>(.0));
+    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(2.0);
     ASSERT_NEAR(6.9, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
     ASSERT_NEAR(1.3, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
     ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
 
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &MathLib::FunctionConstant<double,double>(.0));
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &MathLib::FunctionConstant<double,double>(.0));
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &MathLib::FunctionConstant<double,double>(.0));
+    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(3.0);
     ASSERT_NEAR(9.05, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
     ASSERT_NEAR(1.3, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
     ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
 
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &MathLib::FunctionConstant<double,double>(.0));
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &MathLib::FunctionConstant<double,double>(.0));
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &MathLib::FunctionConstant<double,double>(.0));
+    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(4.0);
     ASSERT_NEAR(12.5, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
     ASSERT_NEAR(3.38, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
     ASSERT_NEAR(11.04533, part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
 
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &MathLib::FunctionConstant<double,double>(.0));
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &MathLib::FunctionConstant<double,double>(.0));
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &MathLib::FunctionConstant<double,double>(.0));
+    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(5.0);
     ASSERT_NEAR(12.2132, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
     ASSERT_NEAR(3.38, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);

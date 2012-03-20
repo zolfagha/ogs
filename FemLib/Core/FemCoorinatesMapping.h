@@ -56,6 +56,7 @@ struct CoordMappingProperties
 class IFemCoordinatesMapping
 {
 public:
+	virtual ~IFemCoordinatesMapping() {};
     /// initialize element
     virtual void initialize(MeshLib::IElement &ele) = 0;
     /// compute shape functions

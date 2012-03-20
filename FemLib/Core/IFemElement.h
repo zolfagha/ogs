@@ -26,10 +26,11 @@ namespace FemLib
 class IFiniteElement
 {
 public:
+	virtual ~IFiniteElement() {};
     /// setup object for given mesh elements
     virtual void configure(MeshLib::IElement &e ) = 0;
     /// return finite element type
-    virtual const FiniteElementType::type getFeType() const = 0;
+    virtual FiniteElementType::type getFeType() const = 0;
     /// return this mesh element
     virtual MeshLib::IElement* getElement() const = 0;
     /// return the number of variables
@@ -74,7 +75,7 @@ public:
     /// return the number of variables
     size_t getNumberOfVariables() const { return N_VARIABLES; };
     /// return finite element type
-    const FiniteElementType::type getFeType() const { return T_FETYPE; };
+    FiniteElementType::type getFeType() const { return T_FETYPE; };
 protected:
     void setElement(MeshLib::IElement &e) {_ele = &e;};
 private:

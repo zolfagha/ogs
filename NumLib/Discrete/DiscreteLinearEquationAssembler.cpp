@@ -1,6 +1,4 @@
 
-#pragma once
-
 #include "DiscreteLinearEquationAssembler.h"
 
 #include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"

@@ -1,6 +1,7 @@
 
 #pragma  once
 
+#include <cstddef>
 #include <map>
 
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \

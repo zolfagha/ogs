@@ -259,7 +259,7 @@ private:
 
 
 #ifdef USE_MPI
-
+#if 0
 class MPIDofMapManager : public DofEquationIdTable
 {
 public:
@@ -320,6 +320,7 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(MPIDofMapManager);
 };
+#endif
 #endif
 
 } //end

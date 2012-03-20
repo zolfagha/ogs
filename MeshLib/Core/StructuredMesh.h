@@ -42,7 +42,7 @@ private:
 public:
 
     ///
-    StructuredMesh(CoordinateSystemType::type coord, GeoLib::Point &org_pt, const double* len, const double* spacing) : _origin(org_pt), _msh_id(0)
+    StructuredMesh(CoordinateSystemType::type coord, GeoLib::Point &org_pt, const double* len, const double* spacing) : _msh_id(0), _origin(org_pt)
     {
         _order = 1;
         _isAxisymmetric = false;

@@ -14,7 +14,7 @@ class LisMPILinearSystem : public AbstractMeshBasedDiscreteLinearEquation
 {
 public:
     ///
-    LisMPILinearSystem(MeshLib::IMesh &msh, MathLib::LisMPILinearEquation &linear_solver, DofMapManager &dofManager) 
+    LisMPILinearSystem(MeshLib::IMesh &msh, MathLib::LisMPILinearEquation &linear_solver, DofEquationIdTable &dofManager)
         : AbstractMeshBasedDiscreteLinearEquation(msh, dofManager), _eqs(&linear_solver), _do_create_eqs(true)
     {
 
@@ -27,22 +27,22 @@ public:
         _list_prescribed_dof_id.clear();
         _list_prescribed_values.clear();
 
-        const DofMap* dofMap = getDofMapManger()->getDofMap(dofId);
-        const size_t n = list_discrete_pt_id.size();
-        for (size_t i=0; i<n; i++) {
-            size_t pt_id = list_discrete_pt_id[i];
-            if (dofMap->isActiveDoF(pt_id)) {
-                _list_prescribed_dof_id.push_back(dofMap->getEqsID(pt_id));
-                _list_prescribed_values.push_back(list_prescribed_values[i]);
-            }
-        }
+//        const DofMap* dofMap = getDofMapManger()->getDofMap(dofId);
+//        const size_t n = list_discrete_pt_id.size();
+//        for (size_t i=0; i<n; i++) {
+//            size_t pt_id = list_discrete_pt_id[i];
+//            if (dofMap->isActiveDoF(pt_id)) {
+//                _list_prescribed_dof_id.push_back(dofMap->getEqsID(pt_id));
+//                _list_prescribed_values.push_back(list_prescribed_values[i]);
+//            }
+//        }
     }
 
     /// construct the linear equation
     void construct(IDiscreteLinearEquationAssembler& assemler)
     {
-        DofMapManager* dofManager = getDofMapManger();
-        assert(dofManager->getNumberOfDof()>0);
+    	DofEquationIdTable* dofManager = getDofMapManger();
+        assert(dofManager->getNumberOfVariables()>0);
 
         if (_do_create_eqs) {
             _do_create_eqs = false;
@@ -61,14 +61,14 @@ public:
     /// set additional RHS values
     void addRHS(size_t dofId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> list_rhs_values, double fkt=1.0)
     {
-        const DofMap* dofMap = getDofMapManger()->getDofMap(dofId);
-        const size_t n = list_discrete_pt_id.size();
-        for (size_t i=0; i<n; i++) {
-            size_t pt_id = list_discrete_pt_id[i];
-            if (dofMap->isActiveDoF(pt_id)) {
-                _eqs->addRHS(dofMap->getEqsID(pt_id), list_rhs_values[i]*fkt);
-            }
-        }
+//        const DofMap* dofMap = getDofMapManger()->getDofMap(dofId);
+//        const size_t n = list_discrete_pt_id.size();
+//        for (size_t i=0; i<n; i++) {
+//            size_t pt_id = list_discrete_pt_id[i];
+//            if (dofMap->isActiveDoF(pt_id)) {
+//                _eqs->addRHS(dofMap->getEqsID(pt_id), list_rhs_values[i]*fkt);
+//            }
+//        }
     }
 
 

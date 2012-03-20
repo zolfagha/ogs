@@ -23,14 +23,21 @@ struct TimeUnit
         {
         case TimeUnit::Minute:
             fac = 60.0;
+        	break;
         case TimeUnit::Hour:
             fac = 3600.0;
+        	break;
         case TimeUnit::Day:
             fac = 86400.;
+        	break;
         case TimeUnit::Week:
             fac = 86400.*7.0;
+        	break;
         case TimeUnit::Year:
             fac = 86400.*365.0;
+        	break;
+        default:
+        	break;
         }
         return v*fac;
     }
@@ -46,6 +53,7 @@ public:
     virtual double getNext(double t_current) = 0;
     virtual void accept() = 0;
     virtual ITimeStepFunction* clone() = 0;
+    virtual ~ITimeStepFunction() {};
 };
 
 class AbstractTimeStepFunction : public ITimeStepFunction
@@ -58,6 +66,7 @@ public:
         _t_previous = _t_next = _t0;
         _steps = 0;
     };
+    virtual ~AbstractTimeStepFunction() {};
     double getBeginning() const {return _t0;};
     double getEnd() const {return _tn;};
     void accept()

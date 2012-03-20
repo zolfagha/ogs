@@ -28,6 +28,7 @@ class AbstractTimeSteppingAlgorithm : public ISolutionAlgorithm, public NumLib::
 public:
     /// @param tim Time step function
     AbstractTimeSteppingAlgorithm(NumLib::ITimeStepFunction &tim) : _tim(&tim) {};
+    virtual ~AbstractTimeSteppingAlgorithm() {};
 
     /// get the time step function
     /// @return Time step function

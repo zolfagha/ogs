@@ -141,7 +141,8 @@ TEST(Discrete, NDDCSSEqs2)
     IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivity>(lis, dofManager);
     linear_eq->initialize();
     linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
-    linear_eq->construct(ElementBasedAssembler(ele_assembler));
+    ElementBasedAssembler assem(ele_assembler);
+    linear_eq->construct(assem);
     //linear_eq->getLinearEquation()->printout();
     linear_eq->solve();
 
@@ -167,7 +168,8 @@ TEST(Discrete, NDDCSDEqs2)
     IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivity>(lis, dofManager);
     linear_eq->initialize();
     linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
-    linear_eq->construct(ElementBasedAssembler(ele_assembler));
+    ElementBasedAssembler assem(ele_assembler);
+    linear_eq->construct(assem);
     //linear_eq->getLinearEquation()->printout();
     linear_eq->solve();
 
@@ -276,12 +278,13 @@ TEST(Discrete, Lis1)
 TEST(Discrete, OGS51)
 {
     MeshLib::IMixedOrderMesh* msh;
-    std::set<std::pair<bool, size_t>> set_property;
+    std::set<std::pair<bool, size_t> > set_property;
     OGS5::CPARDomainGroup dg(*msh, set_property);
 }
 #endif
 
 //# OpenMP ###################################################################################################
+#ifdef _OPENMP
 TEST(Discrete, OMP_vec1)
 {
     MeshLib::IMesh* org_msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
@@ -304,6 +307,7 @@ TEST(Discrete, OMP_vec1)
     ASSERT_DOUBLE_ARRAY_EQ(expected, global_v, 10);
 }
 
+#endif
 
 #if 0
 TEST(Discrete, OMP_eqs1)
