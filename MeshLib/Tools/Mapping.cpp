@@ -51,6 +51,7 @@ void EleMapLocalCoordinates::flip(IElement &ele, const CoordinateSystem &coordin
                 _point_vec.push_back(new GeoLib::Point(p->getData()));
             }
         }
+        break;
     }
 }
 

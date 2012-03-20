@@ -879,9 +879,8 @@ void ShapeFunctionLineHQ(double* N1, const double* u)
    01/2006 PCH Correct the sign.
    Last modified:
 **************************************************************************/
-void GradShapeFunctionLine(double* dN1, const double* u)
+void GradShapeFunctionLine(double* dN1, const double*)
 {
-	u = u;
 	dN1[0] = -0.5;
 	dN1[1] = 0.5;
 }
@@ -943,9 +942,8 @@ void ShapeFunctionTri(double* N3, const double* u)
    06/2006     WW        Erste Version
 
  **************************************************************************/
-void GradShapeFunctionTri(double* dN3, const double* u)
+void GradShapeFunctionTri(double* dN3, const double*)
 {
-	u = u;
 	//   d()/dL_1
 	dN3[0] = -1.0;
 	dN3[1] =  1.0;
@@ -1282,7 +1280,6 @@ void ShapeFunctionTet(double* Nt4, const double* x)
  **************************************************************************/
 void GradShapeFunctionTet(double* dNt4, const double* dummy)
 {
-	dummy = dummy;
 	dNt4[0] = -1.0;
 	dNt4[1] = 1.0;
 	dNt4[2] = 0.0;

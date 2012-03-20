@@ -7,7 +7,7 @@
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
 #include "MeshLib/Core/IMesh.h"
-#include "DiscreteLib/ElementLocalAssembler.h"
+#include "DiscreteLib/Assembler/ElementLocalAssembler.h"
 
 struct DiscreteExample1
 {

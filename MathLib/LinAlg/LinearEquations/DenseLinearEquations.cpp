@@ -39,7 +39,7 @@ void DenseLinearEquationsBase::setKnownX(size_t row_id, double x)
     (*_A)(row_id, row_id) = 1.0; //=x
 }
 
-void DenseLinearEquations::setOption(const Base::Options &option)
+void DenseLinearEquations::setOption(const Base::Options&)
 {
 
 }

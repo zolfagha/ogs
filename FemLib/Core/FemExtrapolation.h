@@ -21,6 +21,7 @@ class IFiniteElement;
 class IFeExtrapolationMethod
 {
 public:
+	virtual ~IFeExtrapolationMethod() {};
     virtual void extrapolate(IFiniteElement &fe, const std::vector<MathLib::Vector2D> &gp_values, std::vector<MathLib::Vector2D> &nodal_values) = 0;
 };
 

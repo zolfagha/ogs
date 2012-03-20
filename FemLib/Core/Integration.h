@@ -16,6 +16,7 @@ namespace FemLib
 class IFemNumericalIntegration
 {
 public:
+	virtual ~IFemNumericalIntegration() {};
     virtual void initialize(MeshLib::IElement &e, size_t n_sampl_level) = 0;
     virtual size_t getNumberOfSamplingPoints() const = 0;
     virtual void getSamplingPoint(size_t igp, double *) const = 0;
@@ -31,7 +32,7 @@ public:
     void initialize(MeshLib::IElement&, size_t) {};
     size_t getNumberOfSamplingPoints() const {return 1;};
     void getSamplingPoint(size_t, double*) const {};
-    double getWeight(size_t igp) const {return 1.0;};
+    double getWeight(size_t) const {return 1.0;};
 };
 
 /**
@@ -95,7 +96,7 @@ public:
     }
 
 private:
-    size_t getTotalNumberOfSamplingPoints(MeshLib::IElement &e, size_t n_sampl_level) const
+    size_t getTotalNumberOfSamplingPoints(MeshLib::IElement&, size_t n_sampl_level) const
     {
         return n_sampl_level;
     }
@@ -122,7 +123,7 @@ public:
     }
 
 private:
-    size_t getTotalNumberOfSamplingPoints(MeshLib::IElement &e, size_t n_sampl_level) const
+    size_t getTotalNumberOfSamplingPoints(MeshLib::IElement&, size_t n_sampl_level) const
     {
         return n_sampl_level*n_sampl_level;
     }
@@ -159,7 +160,7 @@ public:
         }
     }
 
-    double getWeight(size_t igp) const
+    double getWeight(size_t) const
     {
         double w = .0;
         switch (getNumberOfSamplingPoints())
@@ -169,20 +170,21 @@ public:
             break;
         case 3:
             w= 0.333333333333333; // = 1/3
+            break;
         }
 
         return w*0.5;
     }
 
 private:
-    size_t getTotalNumberOfSamplingPoints(MeshLib::IElement &e, size_t n_sampl_level) const
+    size_t getTotalNumberOfSamplingPoints(MeshLib::IElement&, size_t n_sampl_level) const
     {
         if (n_sampl_level==1) return 1;
         else if (n_sampl_level==2) return 3;
         else return 6;
     }
 
-    void getSamplePointTri1(size_t igp, double *pt) const
+    void getSamplePointTri1(size_t, double *pt) const
     {
         pt[0] = 0.333333333333333 ;
         pt[1] = 0.333333333333333 ;

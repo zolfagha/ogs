@@ -3,9 +3,9 @@
 
 #include "Base/BidirectionalMap.h"
 #include "MeshLib/Core/IMesh.h"
-#include "DiscreteSystem.h"
+#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/LinearEquation/MeshBasedDiscreteLinearEquation.h"
 #include "DomainDecomposition.h"
-#include "MeshBasedDiscreteLinearEquation.h"
 #include "DDCDiscreteVector.h"
 
 namespace DiscreteLib

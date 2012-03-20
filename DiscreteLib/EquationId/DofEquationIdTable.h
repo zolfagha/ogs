@@ -7,8 +7,11 @@
 #include <algorithm>
 
 #include "Base/CodingTools.h"
-#include "DoF.h"
-#include "MappedEquationAddress.h"
+
+#include "EquationIdStorage.h"
+#include "SequentialEquationIdStorage.h"
+#include "RandomEquationIdStorage.h"
+
 
 namespace DiscreteLib
 {
@@ -61,7 +64,7 @@ public:
     /// @param list_dof_pt_id   a list of discrete point id defined as DoFs
     size_t addVariableDoFs(size_t mesh_id, const std::vector<size_t> &list_dof_pt_id)
     {
-        RandomlyMappedAddress* address = new RandomlyMappedAddress(list_dof_pt_id);
+        RandomEquationIdStorage* address = new RandomEquationIdStorage(list_dof_pt_id);
         size_t var_id = _map_var2dof.size();
         _map_var2dof.resize(_map_var2dof.size()+1);
         _map_var2dof[var_id][mesh_id] = address;
@@ -75,7 +78,7 @@ public:
     /// @param dof_pt_count     the number of discrete points
     size_t addVariableDoFs(size_t mesh_id, size_t dof_pt_id_begin, size_t dof_pt_count)
     {
-        RandomlyMappedAddress* address = new RandomlyMappedAddress(dof_pt_id_begin, dof_pt_count);
+        RandomEquationIdStorage* address = new RandomEquationIdStorage(dof_pt_id_begin, dof_pt_count);
         size_t var_id = _map_var2dof.size();
         _map_var2dof.resize(_map_var2dof.size()+1);
         _map_var2dof[var_id][mesh_id] = address;
@@ -88,7 +91,7 @@ public:
     {
         _is_seq_address = true;
         for (size_t i=0; i<n_var; i++) {
-            SequentiallyMappedAddress* address = new SequentiallyMappedAddress(dof_pt_id_begin, dof_pt_count);
+            SequentialEquationIdStorage* address = new SequentialEquationIdStorage(dof_pt_id_begin, dof_pt_count);
             size_t var_id = _map_var2dof.size();
             _map_var2dof.resize(_map_var2dof.size()+1);
             _map_var2dof[var_id][mesh_id] = address;
@@ -166,13 +169,13 @@ public:
     /// map dof to equation id
     long mapEqsID(size_t var_id, size_t mesh_id, size_t pt_id) const
     {
-        const IMappedAddress* add = getPointEquationIdTable(var_id, mesh_id);
+        const IEquationIdStorage* add = getPointEquationIdTable(var_id, mesh_id);
         return add->address(pt_id);
     }
     void mapEqsID(size_t var_id, size_t mesh_id, const std::vector<size_t> &pt_id, std::vector<long> &eqs_id) const
     {
         eqs_id.resize(pt_id.size());
-        const IMappedAddress* add = getPointEquationIdTable(var_id, mesh_id);
+        const IEquationIdStorage* add = getPointEquationIdTable(var_id, mesh_id);
         for (size_t i=0; i<pt_id.size(); i++)
             eqs_id[i] = add->address(pt_id[i]);
     }
@@ -184,7 +187,7 @@ public:
         eqs_id.resize(list_var.size()*pt_id.size());
         for (size_t i=0; i<list_var.size(); i++) {
             size_t var_id = list_var[i];
-            const IMappedAddress* add = getPointEquationIdTable(var_id, mesh_id);
+            const IEquationIdStorage* add = getPointEquationIdTable(var_id, mesh_id);
             for (size_t i=0; i<pt_id.size(); i++)
                 eqs_id[i] = add->address(pt_id[i]);
         }
@@ -198,7 +201,7 @@ public:
         eqs_id_without_ghost.resize(list_var.size()*pt_id.size());
         for (size_t i=0; i<list_var.size(); i++) {
             size_t var_id = list_var[i];
-            const IMappedAddress* add = getPointEquationIdTable(var_id, mesh_id);
+            const IEquationIdStorage* add = getPointEquationIdTable(var_id, mesh_id);
             for (size_t i=0; i<pt_id.size(); i++) {
                 eqs_id[i] = add->address(pt_id[i]);
                 eqs_id_without_ghost[i] = isGhostPoint(mesh_id, pt_id[i]) ? -1 : eqs_id[i];
@@ -211,9 +214,9 @@ public:
         mesh_id = -1;
         pt_id = -1;
         for (size_t i=0; i<_map_var2dof.size(); i++) {
-            const std::map<size_t, IMappedAddress*> &obj = _map_var2dof[i];
-            for (std::map<size_t, IMappedAddress*>::const_iterator itr=obj.begin(); itr!=obj.end(); ++itr) {
-                const IMappedAddress* pt2dof = itr->second;
+            const std::map<size_t, IEquationIdStorage*> &obj = _map_var2dof[i];
+            for (std::map<size_t, IEquationIdStorage*>::const_iterator itr=obj.begin(); itr!=obj.end(); ++itr) {
+                const IEquationIdStorage* pt2dof = itr->second;
                 if (!pt2dof->hasValue(eqs_id)) continue;
                 pt_id = pt2dof->key(eqs_id);
                 var_id = i;
@@ -223,16 +226,16 @@ public:
         }
     }
 
-    const IMappedAddress* getPointEquationIdTable(size_t var_id, size_t mesh_id) const 
+    const IEquationIdStorage* getPointEquationIdTable(size_t var_id, size_t mesh_id) const 
     {
-        std::map<size_t, IMappedAddress*>::const_iterator itr = _map_var2dof[var_id].find(mesh_id);
+        std::map<size_t, IEquationIdStorage*>::const_iterator itr = _map_var2dof[var_id].find(mesh_id);
         if (itr!=_map_var2dof[var_id].end()) {
             return itr->second;
         } else {
             return 0;
         }
     }
-    IMappedAddress* getPointEquationIdTable(size_t var_id, size_t mesh_id) { return _map_var2dof[var_id][mesh_id]; }
+    IEquationIdStorage* getPointEquationIdTable(size_t var_id, size_t mesh_id) { return _map_var2dof[var_id][mesh_id]; }
 
 protected:
     void setTotalDoFs(size_t n) {_total_dofs = n;};
@@ -244,7 +247,7 @@ private:
 
 
 private:
-    std::vector<std::map<size_t, IMappedAddress*> > _map_var2dof; // var -> (mesh, address)
+    std::vector<std::map<size_t, IEquationIdStorage*> > _map_var2dof; // var -> (mesh, address)
     //std::vector<Base::IMappedAddress*> _map_var2dof;
     std::map<size_t, std::vector<size_t> > _map_msh2var; // mesh -> (var)
     std::map<size_t, std::vector<size_t> > _ghost_pt; // mesh -> ghost points
@@ -253,74 +256,5 @@ private:
     size_t _total_dofs_without_ghosts;
     bool _is_seq_address;
 };
-
-
-
-
-
-#ifdef USE_MPI
-#if 0
-class MPIDofMapManager : public DofEquationIdTable
-{
-public:
-    MPIDofMapManager(MPI_Comm comm, Base::BidirectionalMap<size_t, size_t> &map_global_local) : _map_global_local(map_global_local) 
-    {
-        _my_comm = comm;
-        MPI_Comm_size(_my_comm,&_nprocs);
-        MPI_Comm_rank(_my_comm,&_my_rank);
-    };
-
-    virtual ~MPIDofMapManager()
-    {
-    }
-
-    void construct()
-    {
-        size_t dof_end_prev_rank = 0;
-        //receive from the previous 
-        MPI_Status status;
-        if (_my_rank>0)
-            MPI_Recv(&dof_end_prev_rank, 1, MPI_INT, _my_rank-1, MPI_ANY_TAG, _my_comm, &status);
-        //set
-        DofEquationIdTable::construct(BY_POINT, dof_end_prev_rank);
-        size_t dof_end_current = dof_end_prev_rank + getTotalNumberOfActiveDoFsWithoutGhost();
-        //send to the next
-        if (_my_rank<_nprocs-1)
-            MPI_Send(&dof_end_current, 1, MPI_INT, _my_rank+1, 0, _my_comm);
-        //get total dof
-        size_t n_total_dof = dof_end_current;
-        if (_nprocs>1) {
-            // get total dof from the last process
-            MPI_Bcast(&n_total_dof, 1, MPI_INT, _nprocs-1, _my_comm);
-            // get start dof id of each process
-            std::vector<size_t> proc_dof_start(_nprocs);
-            size_t my_dof_begin = dof_end_prev_rank;
-            MPI_Allgather(&my_dof_begin, 1, MPI_INT, &proc_dof_start[0], 1, MPI_INT, _my_comm);
-            //get ghost node id
-            if (DofEquationIdTable::getTotalNumberOfGhostPoints()>0) {
-                for (size_t i=0; i<DofEquationIdTable::getNumberOfVariables(); i++) {
-                    DofMap* dofMap = DofEquationIdTable::getPointEquationIdTable(i);
-                    std::vector<size_t> list_ghost;
-                    dofMap->getListOfGhostNodeID(list_ghost);
-                    for (size_t j=0; j<list_ghost.size(); j++) {
-                        size_t ghost_global_id = _map_global_local.mapBtoA(list_ghost[j]);
-                        size_t rank_having_real = 0;
-
-                    }
-                }
-            }
-        }
-    }
-
-private:
-    MPI_Comm _my_comm;
-    int _my_rank;
-    int _nprocs;
-    Base::BidirectionalMap<size_t, size_t> _map_global_local;
-
-    DISALLOW_COPY_AND_ASSIGN(MPIDofMapManager);
-};
-#endif
-#endif
 
 } //end

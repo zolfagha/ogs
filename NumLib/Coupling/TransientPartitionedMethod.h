@@ -16,6 +16,7 @@ class AbstractPartitionedStaggeredMethod : public ITransientPartitionedAlgorithm
 public:
     AbstractPartitionedStaggeredMethod() : _part_method() {};
     AbstractPartitionedStaggeredMethod(double epsilon, size_t max_count) : _part_method(epsilon, max_count) {};
+    virtual ~AbstractPartitionedStaggeredMethod() {};
 
     /// solve
     int solve(std::vector<ICoupledSystem*> &subproblems, NamedVariableContainer &vars_t_n, NamedVariableContainer &vars_t_n1, VariableMappingTable &mapping)

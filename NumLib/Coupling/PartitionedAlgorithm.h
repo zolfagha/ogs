@@ -16,6 +16,7 @@ class VariableMappingTable;
 class IPartitionedAlgorithm
 {
 public:
+	virtual ~IPartitionedAlgorithm() {};
     /// solve coupled problems
     /// @param subproblems    a list of subproblems
     /// @param vars           a container for shared variables
@@ -29,6 +30,7 @@ public:
 class ITransientPartitionedAlgorithm
 {
 public:
+	virtual ~ITransientPartitionedAlgorithm() {};
     /// solve coupled problems
     /// @param subproblems    a list of subproblems
     /// @param vars           a container for shared variables

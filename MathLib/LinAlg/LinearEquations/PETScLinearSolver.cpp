@@ -5,6 +5,8 @@
 
 */
 
+#ifdef USE_PETSC
+
 #include<iostream>
 
 #include "PETScLinearSolver.h"
@@ -380,3 +382,5 @@ void PETScLinearSolver::EQSV_Viewer(std::string file_name)
 }
 
 } //end
+
+#endif

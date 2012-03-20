@@ -1,5 +1,5 @@
 
-#include "DiscreteLinearEquationAssembler.h"
+#include "ElementWiseAssembler.h".h"
 
 #include <vector>
 
@@ -8,7 +8,8 @@
 
 #include "MeshLib/Core/IMesh.h"
 
-
+#include "DiscreteLib/EquationId/DofEquationIdTable.h"
+#include "ElementLocalAssembler.h"
 
 namespace DiscreteLib
 {

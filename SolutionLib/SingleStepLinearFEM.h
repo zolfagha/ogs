@@ -13,9 +13,8 @@
 #include "FemLib/BC/FemDirichletBC.h"
 #include "FemLib/BC/FemNeumannBC.h"
 
-#include "DiscreteLib/DoF.h"
-#include "DiscreteLib/DiscreteSystem.h"
-#include "DiscreteLib/SparsityBuilder.h"
+#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Utils/SparsityBuilder.h"
 
 #include "NumLib/Discrete/DiscreteLinearEquationAssembler.h"
 
@@ -132,7 +131,8 @@ private:
 
 		// assembly
         _linear_eqs->initialize();
-        _linear_eqs->construct(NumLib::ElementBasedTransientAssembler(t_n1, vec_un, _element_ode_assembler));
+        NumLib::ElementBasedTransientAssembler assembler(t_n1, vec_un, _element_ode_assembler);
+        _linear_eqs->construct(assembler);
 
         //apply BC1,2
         for (size_t i=0; i<pro->getNumberOfNeumannBC(); i++) {

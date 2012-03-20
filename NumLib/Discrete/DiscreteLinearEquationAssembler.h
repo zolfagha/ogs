@@ -7,9 +7,9 @@
 
 #include "MeshLib/Core/IMesh.h"
 
-#include "DiscreteLib/DiscreteLinearEquationAssembler.h"
-#include "DiscreteLib/DoF.h"
-#include "DiscreteLib/DiscreteVector.h"
+#include "DiscreteLib/EquationId/DofEquationIdTable.h"
+#include "DiscreteLib/Core/DiscreteVector.h"
+#include "DiscreteLib/Assembler/DiscreteLinearEquationAssembler.h"
 
 #include "ElementLocalAssembler.h"
 #include "NumLib/TimeStepping/TimeStep.h"

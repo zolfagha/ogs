@@ -51,7 +51,7 @@ public:
     DiscreteVector(size_t n) : _data(n) {};
     virtual ~DiscreteVector() {};
 
-    virtual void resize(size_t n) {return _data.resize(n);};
+    virtual void resize(size_t n) {_data.resize(n);};
     virtual size_t size() const {return _data.size();};
     virtual double dot(const IDiscreteVector<T> &vec) {return .0;};
     virtual double norm1() {return .0;};

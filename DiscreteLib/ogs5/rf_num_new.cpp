@@ -35,7 +35,7 @@ using namespace std;
 // FEM-Makros
 //#include "files0.h"
 //#include "makros.h"
-extern ios::pos_type GetNextSubKeyword(ifstream* file,string* line, bool* keyword);
+//extern ios::pos_type GetNextSubKeyword(ifstream* file,string* line, bool* keyword);
 // GeoSys-GeoLib
 // GeoSys-FEMLib
 //#include "StringTools.h"

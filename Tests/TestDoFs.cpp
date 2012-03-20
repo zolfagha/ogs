@@ -17,13 +17,7 @@
 #include "MeshLib/Core/IMesh.h"
 
 
-#include "DiscreteLib/DiscreteSystem.h"
-#include "DiscreteLib/OMPDiscreteSystem.h"
-#include "DiscreteLib/DiscreteVector.h"
-#include "DiscreteLib/DiscreteLinearEquation.h"
-#include "DiscreteLib/ElementLocalAssembler.h"
-#include "DiscreteLib/DoF.h"
-#include "DiscreteLib/SparsityBuilder.h"
+#include "DiscreteLib/EquationId/DofEquationIdTable.h"
 
 #include "TestUtil.h"
 #include "TestExamples.h"

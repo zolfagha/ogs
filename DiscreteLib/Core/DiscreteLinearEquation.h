@@ -3,18 +3,21 @@
 
 #include <vector>
 
-#include "DofMapManager.h"
-#include "DiscreteLinearEquationAssembler.h"
+#include "DiscreteVector.h"
 
 namespace DiscreteLib
 {
 
+class DofEquationIdTable;
+class IDiscreteLinearEquationAssembler;
+
 /** 
- * \brief Interface of discrete linear equations
+ * \brief Interface for discrete linear equations
  */
 class IDiscreteLinearEquation
 {
 public:
+	virtual ~IDiscreteLinearEquation() {};
     /// 
     virtual void initialize() = 0;
     /// construct 

@@ -20,6 +20,7 @@ class IProblem {};
 class IVBVProblem : IProblem
 {
 public:
+	virtual ~IVBVProblem() {};
     /// get the number of variables
     virtual size_t getNumberOfVariables() const = 0;
     /// set initial condition

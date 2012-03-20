@@ -86,7 +86,7 @@ bool Polygon::isPntInPolygon (GeoLib::Point const & pnt) const
 					break;
 				default:
 					// do nothing
-					;
+					break;
 				}
 			}
 		}

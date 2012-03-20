@@ -10,8 +10,8 @@
 #include "MathLib/Function/Function.h"
 #include "MeshLib/Core/IMesh.h"
 
-#include "DiscreteLib/DiscreteSystem.h"
-#include "DiscreteLib/DiscreteVector.h"
+#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Core/DiscreteVector.h"
 
 #include "FemLib/Core/IFemElement.h"
 #include "FemLib/FemElementObjectContainer.h"

@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "DiscreteSystem.h"
+#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/LinearEquation/MeshBasedDiscreteLinearEquation.h"
 #include "OMPDiscreteVector.h"
-
 
 namespace DiscreteLib
 {

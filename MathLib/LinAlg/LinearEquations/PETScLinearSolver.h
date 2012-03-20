@@ -1,6 +1,8 @@
 #ifndef PETSC_LSOLVER_INC
 #define PETSC_LSOLVER_INC
- 
+
+#ifdef USE_PETSC
+
 #include <string>
 
 #include "SparseLinearEquations.h"
@@ -130,5 +132,5 @@ private:
 
 } //end
 
-
+#endif
 #endif

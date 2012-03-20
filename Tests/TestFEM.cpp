@@ -11,7 +11,7 @@
 
 #include "MeshLib/Tools/MeshGenerator.h"
 
-#include "DiscreteLib/DiscreteSystem.h"
+#include "DiscreteLib/Core/DiscreteSystem.h"
 
 #include "FemLib/Function/FemFunction.h"
 #include "FemLib/Function/FemFunctionProjection.h"

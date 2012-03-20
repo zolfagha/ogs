@@ -2,13 +2,21 @@
 #pragma once
 
 #include <vector>
+
 #include "Base/CodingTools.h"
-#include "DiscreteVector.h"
-#include "DiscreteLinearEquation.h"
+
+//#include "DiscreteLib/Core/DiscreteVector.h"
+//#include "DiscreteLib/Core/DiscreteLinearEquation.h"
 
 namespace DiscreteLib
 {
 
+class IDiscreteVectorBase;
+class IDiscreteLinearEquation;
+
+/**
+ * \brief Data container for any discrete objects
+ */
 class DiscreteDataContainer
 {
 public:

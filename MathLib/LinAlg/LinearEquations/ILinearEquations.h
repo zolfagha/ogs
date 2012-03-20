@@ -16,6 +16,7 @@ namespace MathLib
 class ILinearEquations
 {
 public:
+	virtual ~ILinearEquations() {};
     //virtual void initialize() = 0;
     //virtual void finalize() = 0;
 

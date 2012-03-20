@@ -26,7 +26,7 @@ public:
         if (_A) delete _A;
     }
 
-    void create(size_t length, RowMajorSparsity *sparsity=0)
+    void create(size_t length, RowMajorSparsity* sp=0)
     {
         resize(length);
     }
@@ -109,7 +109,7 @@ public:
 
     void printout(std::ostream &os=std::cout) const
     {
-
+    	os << "not implemented yet." << std::endl;
     }
 
 private:

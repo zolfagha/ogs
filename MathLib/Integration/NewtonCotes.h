@@ -6,9 +6,6 @@ namespace MathLib
 
 class NewtonCotes
 {
-    double integrate(double (*fun)(double), int sampling_size) {
-    }
-
     double middpoint(double (*fun)(double), double a, double b, size_t n) {
         double h = (b-a) / (double)n;
         double val = .0;

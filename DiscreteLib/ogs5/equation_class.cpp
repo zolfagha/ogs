@@ -191,6 +191,7 @@ void Linear_EQS::ConfigNumerics(CNumerics* m_num, const long n)
 		break;
 	case 12:
 		solver_name = "UMF";
+		break;
 	case 13:                              // 06.2010. WW
 		solver_name = "GMRES";
 		m_gmres = m_num->Get_m();

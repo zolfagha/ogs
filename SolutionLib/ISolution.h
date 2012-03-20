@@ -50,7 +50,7 @@ public:
         return (time.getTime()==_tim->getNext(time.getTime()));
     }
 
-    void accept(const NumLib::TimeStep &time) 
+    void accept(const NumLib::TimeStep &)
     {
         _tim->accept();
     };

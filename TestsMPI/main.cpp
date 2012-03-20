@@ -6,10 +6,10 @@
 
 #include "MeshLib/Tools/MeshGenerator.h"
 
-#include "DiscreteLib/LisDiscreteSystem.h"
-#include "DiscreteLib/LisMPIDiscreteVector.h"
+#include "DiscreteLib/DDC/LisDiscreteSystem.h"
+#include "DiscreteLib/DDC/LisMPIDiscreteVector.h"
 #include "DiscreteLib/ogs5/par_ddc_group.h"
-#include "DiscreteLib/SparsityBuilder.h"
+#include "DiscreteLib/Utils/SparsityBuilder.h"
 
 #include "Tests/TestExamples.h"
 

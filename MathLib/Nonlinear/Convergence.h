@@ -3,7 +3,8 @@
 
 #include <cmath>
 
-namespace MathLib {
+namespace MathLib
+{
 
 class VectorNormCalculater
 {
@@ -14,10 +15,11 @@ public:
 class IConvergenceChecker
 {
 public:
-    virtual bool isConverged(double *x) = 0;
+	virtual ~IConvergenceChecker() {};
+    virtual bool isConverged(double *x, size_t length) = 0;
 };
 
-class ConvergenceChecker : public IConvergenceChecker
+class ConvergenceChecker // : public IConvergenceChecker
 {
 public:
     ConvergenceChecker() {
@@ -25,10 +27,12 @@ public:
         _tolerance = 1.e-10;
     };
 
-    ~ConvergenceChecker() {};
+    virtual ~ConvergenceChecker() {};
 
-    virtual bool isConverged(double *x, size_t length) {
-        double norm = VectorNormCalculater::calculate(x, length, _normType);
+    template<class T_VECTOR>
+    bool isConverged(T_VECTOR &x) {
+        //double norm = VectorNormCalculater::calculate(x, length, _normType);
+    	double norm = 1;
         bool converged = (fabs(norm)<_tolerance);
         return converged;
     }

@@ -14,6 +14,7 @@ namespace NumLib
 class ICoupledSystem
 {
 public:
+	virtual ~ICoupledSystem() {};
     virtual int solve() = 0;
 
     virtual void setParameter(size_t varId, Variable*) = 0;

@@ -3,9 +3,9 @@
 
 #include "Base/BidirectionalMap.h"
 #include "MeshLib/Core/IMesh.h"
-#include "DiscreteSystem.h"
+#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/LinearEquation/MeshBasedDiscreteLinearEquation.h"
 #include "DomainDecomposition.h"
-#include "MeshBasedDiscreteLinearEquation.h"
 #include "DDCDiscreteVector.h"
 
 namespace DiscreteLib
@@ -52,7 +52,7 @@ public:
                 // for each var
                 for (size_t j=0; j<global_dofManager->getNumberOfVariables(); j++) {
                     local_dofManager->addVariableDoFs(mesh_id, 0, local_msh->getNumberOfNodes());
-                    IMappedAddress* local_pt2dof = local_dofManager->getPointEquationIdTable(j, mesh_id);
+                    IEquationIdStorage* local_pt2dof = local_dofManager->getPointEquationIdTable(j, mesh_id);
                     for (size_t k=0; k<local_msh->getNumberOfNodes(); k++) {
                         size_t dof_id = global_dofManager->mapEqsID(mesh_id, j, dom->getGlobalLocalIdMap()->local2global(k));
                         local_pt2dof->set(k, dof_id);
@@ -90,7 +90,7 @@ public:
     /// construct 
     void construct(IDiscreteLinearEquationAssembler& assemler) 
     {
-        DofEquationIdTable* dofManager = getDofMapManger();
+        //DofEquationIdTable* dofManager = getDofMapManger();
 
         // local eqs
         for (size_t i=0; i<_list_local_eq.size(); i++) {

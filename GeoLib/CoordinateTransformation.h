@@ -13,6 +13,7 @@ class ICoordinateSystem
 public:
     virtual size_t getDimension() = 0;
     virtual const MathLib::Matrix<double>* getTransformationMatrix() const = 0;
+    virtual ~ICoordinateSystem() {};
 };
 
 /**

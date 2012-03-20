@@ -82,7 +82,7 @@ public:
     void setVectorAll(size_t i, double v)
     {
         LIS_VECTOR &u = _vec_u[i];
-        lis_vector_set_all(1.0, u);
+        lis_vector_set_all(v, u);
     }
     void matvecToRHS(size_t i)
     {

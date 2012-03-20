@@ -19,18 +19,19 @@
 #include "MeshLib/Core/IMesh.h"
 
 
-#include "DiscreteLib/DiscreteSystem.h"
-#include "DiscreteLib/OMPDiscreteSystem.h"
-#include "DiscreteLib/DiscreteVector.h"
-#include "DiscreteLib/DiscreteLinearEquation.h"
-#include "DiscreteLib/ElementLocalAssembler.h"
-#include "DiscreteLib/DoF.h"
-#include "DiscreteLib/SparsityBuilder.h"
+#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Core/DiscreteVector.h"
+#include "DiscreteLib/Core/DiscreteLinearEquation.h"
+#include "DiscreteLib/EquationId/DofEquationIdTable.h"
+#include "DiscreteLib/OpenMP/OMPDiscreteSystem.h"
+#include "DiscreteLib/Assembler/ElementWiseAssembler.h"
+#include "DiscreteLib/Assembler/ElementLocalAssembler.h"
+#include "DiscreteLib/Utils/SparsityBuilder.h"
 #ifdef USE_MPI
 #include "DiscreteLib/ogs5/par_ddc_group.h"
 #endif
-#include "DiscreteLib/NodeDDCSerialSharedDiscreteSystem.h"
-#include "DiscreteLib/NodeDDCSerialDistributedDiscreteSystem.h"
+#include "DiscreteLib/DDC/NodeDDCSerialSharedDiscreteSystem.h"
+#include "DiscreteLib/DDC/NodeDDCSerialDistributedDiscreteSystem.h"
 
 #include "TestUtil.h"
 #include "TestExamples.h"
@@ -261,7 +262,7 @@ TEST(Discrete, Lis1)
         dofManager.addVariableDoFs(msh->getID(), 0, msh->getNumberOfNodes());
         dofManager.construct(DofNumberingType::BY_DOF);
         // create a linear problem
-        IDiscreteLinearEquation *linear_eq = dis.createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivity>(lis, dofManager);
+        IDiscreteLinearEquation *linear_eq = dis.createLinearEquation<TemplateMeshBasedDiscreteLinearEquation, CRSLisSolver, SparsityBuilderFromNodeConnectivity>(lis, dofManager);
         // solve the equation
         linear_eq->initialize();
         linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);

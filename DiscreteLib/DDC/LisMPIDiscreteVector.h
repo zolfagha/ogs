@@ -8,7 +8,7 @@
 #include "mpi.h"
 #include "lis.h"
 
-#include "DiscreteVector.h"
+#include "DiscreteLib/Core/DiscreteVector.h"
 
 
 namespace DiscreteLib

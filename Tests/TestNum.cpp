@@ -17,12 +17,12 @@
 #include "MeshLib/Core/IMesh.h"
 
 
-#include "DiscreteLib/DiscreteSystem.h"
-#include "DiscreteLib/DiscreteLinearEquation.h"
-#include "DiscreteLib/DiscreteLinearEquationAssembler.h"
-#include "DiscreteLib/ElementLocalAssembler.h"
-#include "DiscreteLib/DoF.h"
-#include "DiscreteLib/SparsityBuilder.h"
+#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Core/DiscreteLinearEquation.h"
+#include "DiscreteLib/EquationId/DofEquationIdTable.h"
+#include "DiscreteLib/Assembler/DiscreteLinearEquationAssembler.h"
+#include "DiscreteLib/Assembler/ElementLocalAssembler.h"
+#include "DiscreteLib/Utils/SparsityBuilder.h"
 #ifdef USE_MPI
 #include "DiscreteLib/ogs5/par_ddc_group.h"
 #endif
@@ -50,6 +50,7 @@ TEST(Num, TimeStepping1)
         double _t0, _tn, _dt, _v;
     public:
         TestProblem(double t0, double tn, double dt) : _t0(t0), _tn(tn), _dt(dt), _v(.0) {};
+        virtual ~TestProblem() {};
         int solveTimeStep(const TimeStep &time) { _v+=1.0; return 0; }
         double suggestNext(const TimeStep &time_current)
         {
@@ -73,20 +74,4 @@ TEST(Num, TimeStepping1)
     ASSERT_EQ(10., problem.getValue());
 }
 
-TEST(Num, OGS5DDC)
-{
-#if 0
-    MeshLib::IMixedOrderMesh* msh;
-    bool msh_order = false;
-
-    std::vector<ITransientSystem*> problems;
-    std::set<std::pair<bool,size_t>> eqs_properties;
-
-    OGS5::CPARDomain *par;
-    OGS5::CPARDomainGroup doms(*msh, eqs_properties);
-    doms.addDomain(par);
-    doms.setup();
-    doms.solveTimeStep(100.);
-#endif
-}
 

@@ -11,6 +11,7 @@ class IFemShapeFunction
 public:
     virtual void computeShapeFunction(const double* pt, double* N) = 0;
     virtual void computeGradShapeFunction(const double* pt, double* dN) = 0;
+    virtual ~IFemShapeFunction() {};
 };
 
 template <size_t N_DIM, size_t N_NODES>
@@ -19,6 +20,7 @@ class TemplateShapeFunction : public IFemShapeFunction
 public:
     virtual void computeShapeFunction(const double* pt, double* N) = 0;
     virtual void computeGradShapeFunction(const double* pt, double* dN) = 0;
+    virtual ~TemplateShapeFunction() {};
 protected:
 };
   
@@ -34,7 +36,7 @@ public:
             N[i] *= 0.5;
     };
 
-    void computeGradShapeFunction(const double* pt, double *dN)
+    void computeGradShapeFunction(const double*, double *dN)
     {
         dN[0] = -0.5;
         dN[1] = 0.5;
@@ -191,7 +193,7 @@ class FemShapeTriangle3 : public TemplateShapeFunction<2, 3>
         N[1] = u[0];
         N[2] = u[1];
     };
-    void computeGradShapeFunction(const double* pt, double *dN3)
+    void computeGradShapeFunction(const double*, double *dN3)
     {
         //   d()/dL_1
         dN3[0] = -1.0;

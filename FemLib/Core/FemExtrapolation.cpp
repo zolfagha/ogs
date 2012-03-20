@@ -46,6 +46,7 @@ void FeExtrapolationGaussLinear::extrapolate(IFiniteElement &fe, const std::vect
             break;
         default:
             reordered_gp_values.assign(gp_values.begin(), gp_values.end());
+            break;
     }
 
     // calculate Xi_p
@@ -188,8 +189,8 @@ int FeExtrapolationGaussLinear::getLocalIndex(const MeshLib::IElement& e, FemInt
         }
         break;
     default:
-        std::cerr << "CElement::GetLocalIndex invalid mesh element type given"
-            << std::endl;
+        std::cerr << "CElement::GetLocalIndex invalid mesh element type given" << std::endl;
+        break;
     }
     return LoIndex;
 }
@@ -285,6 +286,7 @@ void FeExtrapolationGaussLinear::getExtropoGaussPoints(const MeshLib::IElement &
             unit[0] = -0.166666666666667;
             unit[1] = -0.166666666666667;
             unit[2] = 1.5;
+            break;
         }
         break;
     default:

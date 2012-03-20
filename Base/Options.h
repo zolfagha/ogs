@@ -15,6 +15,7 @@ namespace Base
 class IOptionNode 
 {
 public:
+	virtual ~IOptionNode() {};
     virtual bool isValue() const = 0;
 };
 

@@ -39,6 +39,7 @@ void SparseLinearEquations::solveEqs(CRSMatrix<double, unsigned> *A, double *rhs
         break;
     case SolverBiCGStab:
         BiCGStab(*A, rhs, x, eps, steps);
+        break;
     default:
         break;
     }

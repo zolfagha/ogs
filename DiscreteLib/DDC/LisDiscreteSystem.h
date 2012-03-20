@@ -1,4 +1,6 @@
 
+#if defined(USE_LIS) && defined(USE_MPI)
+
 #pragma once
 
 #include <vector>
@@ -8,8 +10,8 @@
 
 #include "MathLib/LinAlg/LinearEquations/LisMPILinearEquation.h"
 
-#include "DiscreteSystem.h"
-#include "MeshBasedDiscreteLinearEquation.h"
+#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/LinearEquation/MeshBasedDiscreteLinearEquation.h"
 #include "LisMPIDiscreteVector.h"
 #include "LisMPILinearSystem.h"
 
@@ -127,7 +129,7 @@ public:
     void setVectorAll(size_t i, double v)
     {
         LIS_VECTOR &u = _vec_u[i];
-        lis_vector_set_all(1.0, u);
+        lis_vector_set_all(v, u);
     }
     void matvecToRHS(size_t i)
     {
@@ -150,3 +152,4 @@ private:
     bool _dynamic;
 };
 } //end
+#endif

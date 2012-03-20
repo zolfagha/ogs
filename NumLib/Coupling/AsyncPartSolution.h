@@ -21,6 +21,8 @@ public:
     {
     }
 
+    virtual ~AsyncPartitionedSystem() {};
+
     /// get the number of parameters
     size_t getNumberOfParameters() const {return _vars_t_n1.size();};
 

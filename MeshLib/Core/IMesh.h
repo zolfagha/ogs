@@ -25,6 +25,8 @@ class MeshGeometricProperty;
 class IMesh
 {
 public:
+	virtual ~IMesh() {};
+
     virtual void setID(size_t id) = 0;
     virtual size_t getID() const = 0;
     ///// get coordinate systems
@@ -66,6 +68,7 @@ public:
 class IMixedOrderMesh : public IMesh
 {
 public:
+	virtual ~IMixedOrderMesh() {};
     //#
     virtual size_t getMaxiumOrder() const = 0;
     virtual void setCurrentOrder(size_t order) = 0;

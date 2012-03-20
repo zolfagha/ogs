@@ -12,6 +12,8 @@ namespace NumLib
 class ITransientSystem
 {
 public:
+	virtual ~ITransientSystem() {};
+
     virtual double suggestNext(const TimeStep &time_current) = 0;
     virtual bool isAwake(const TimeStep &time) = 0;
     virtual int solveTimeStep(const TimeStep &time) = 0;

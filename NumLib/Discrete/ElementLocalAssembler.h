@@ -15,6 +15,7 @@ namespace NumLib
 class ITransientElemenetLocalAssembler
 {
 public:
+    virtual ~ITransientElemenetLocalAssembler() {};
     /// assemble a local linear equation for the given element
     virtual void assembly(const TimeStep &time,  MeshLib::IElement &e, const std::vector<double> &local_u_n, MathLib::DenseLinearEquations &eqs) = 0;
 };
@@ -25,6 +26,7 @@ public:
 class ITimeODEElementAssembler
 {
 public:
+    virtual ~ITimeODEElementAssembler() {};
     virtual void assembly(const TimeStep &time, MeshLib::IElement &e, MathLib::DenseLinearEquations::MatrixType &M, MathLib::DenseLinearEquations::MatrixType &K,  MathLib::DenseLinearEquations::VectorType &F)  = 0;
 };
 
@@ -41,6 +43,8 @@ public:
     TimeEulerElementAssembler(T_USER_ASSEMBLY &a) : _theta(1.0), _time_ode(a)
     {
     };
+
+    virtual ~TimeEulerElementAssembler() {};
 
     void setTheta(double v)
     {

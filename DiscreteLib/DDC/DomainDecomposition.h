@@ -35,6 +35,7 @@ private:
 class IDDCGlobaLocalMapping
 {
 public:
+	virtual ~IDDCGlobaLocalMapping() {};
     virtual bool hasGlobal(size_t global_id) = 0;
     virtual size_t global2local(size_t global) = 0;
     virtual size_t local2global(size_t local) = 0;

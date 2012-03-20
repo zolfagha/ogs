@@ -1,4 +1,6 @@
 
+#if defined(USE_LIS) && defined(USE_MPI)
+
 #include "LisDiscreteSystem.h"
 
 #ifdef USE_MPI
@@ -238,3 +240,5 @@ void LisSolver::solve()
 
 
 } //end
+
+#endif

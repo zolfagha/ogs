@@ -1,8 +1,7 @@
 
 #pragma once
 
-#include "ElementLocalAssembler.h"
-#include "DofMapManager.h"
+#include "DiscreteLinearEquationAssembler.h"
 
 namespace MeshLib 
 {
@@ -17,15 +16,7 @@ namespace MathLib
 namespace DiscreteLib
 {
 
-/**
- * \brief Interface of discrete system assembler classes
- */
-class IDiscreteLinearEquationAssembler
-{
-public:
-    /// assembly
-    virtual void assembly( MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs) = 0;
-};
+class IElemenetLocalAssembler;
 
 /**
  * \brief Element-based discrete system assembler classes
@@ -48,17 +39,5 @@ private:
     IElemenetLocalAssembler* _e_assembler;
 };
 
-
-class NodeBasedAssembler  : public IDiscreteLinearEquationAssembler
-{
-public:
-    void assembly( MeshLib::IMesh& _msh, MathLib::ILinearEquations& _eqs) {};
-};
-
-class EdgeBasedAssembler  : public IDiscreteLinearEquationAssembler
-{
-public:
-    void assembly( MeshLib::IMesh& _msh, MathLib::ILinearEquations& _eqs) {};
-};
 
 }

@@ -55,6 +55,7 @@ class IElementCoordinatesMapping;
 class IElement
 {
 public:
+	virtual ~IElement() {};
     ///
     virtual void initialize() = 0;
     virtual IElement* clone() const = 0;

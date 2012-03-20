@@ -7,8 +7,8 @@
 
 #include "MeshLib/Topology/Topology.h"
 
-#include "DomainDecomposition.h"
-#include "DofMapManager.h"
+#include "DiscreteLib/DDC/DomainDecomposition.h"
+#include "DiscreteLib/EquationId/DofEquationIdTable.h"
 
 namespace DiscreteLib
 {
