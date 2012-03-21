@@ -25,13 +25,20 @@
 
 namespace MathLib {
 
+#ifdef MSVC_VER
 #pragma warning(push)
 #pragma warning(disable: 4018)
+#endif
 
 template<typename FP_TYPE, typename IDX_TYPE>
 class CRSMatrix: public SparseMatrixBase<FP_TYPE, IDX_TYPE>
 {
 public:
+	CRSMatrix()
+	{
+
+	}
+
 	CRSMatrix(std::string const &fname) :
 		SparseMatrixBase<FP_TYPE, IDX_TYPE>(),
 		_row_ptr(NULL), _col_idx(NULL), _data(NULL)
@@ -446,7 +453,9 @@ private:
     DISALLOW_COPY_AND_ASSIGN(CRSMatrix);
 };
 
+#ifdef MSVC_VER
 #pragma warning(pop)
+#endif
 
 } // end namespace MathLib
 

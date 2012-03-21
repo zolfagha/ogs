@@ -2,6 +2,8 @@
 #pragma once
 
 #include <cmath>
+#include "MathLib/LinAlg/VectorNorms.h"
+
 
 namespace MathLib
 {
@@ -45,5 +47,44 @@ private:
     int _normType;
     double _tolerance;
 };
+
+/**
+ * \brief Convergence check for Newton iterations
+ */
+template<class T_D0, class T_ERROR>
+class NRCheckConvergence
+{
+private:
+	double _err;
+public:
+	NRCheckConvergence() : _err(1.e-6) {};
+	NRCheckConvergence(double err) : _err(err) {};
+	bool check(T_D0* r, T_D0* dx, T_D0* x_new)
+	{
+		T_ERROR calc;
+		double error = calc.error(r, dx, x_new);
+		return (fabs(error) < _err);
+	}
+};
+
+/**
+ * \brief Use norm1 of DX as iteration errors
+ */
+class NRErrorNorm1DX
+{
+public:
+	template<class T_D0>
+	inline double error(T_D0* r, T_D0* dx, T_D0* x_new)
+	{
+		if (dx==0) return .0;
+		return norm1(*dx, dx->size());
+	}
+};
+
+template<>
+inline double NRErrorNorm1DX::error(double* r, double* dx, double* x_new)
+{
+	return *dx;
+}
 
 }
