@@ -231,7 +231,7 @@ public:
                 if (local_row.size()==0) continue;
                 const size_t i_gloal = mapping->local2global(j);
                 std::set<size_t> &global_row = sparse[i_gloal];
-                for (std::set<size_t>::iterator itr=local_row.begin(); itr!=local_row.end(); ++itr) {
+                for (std::set<size_t>::const_iterator itr=local_row.begin(); itr!=local_row.end(); ++itr) {
                     global_row.insert(*itr);
                     //global_row.insert(mapping->local2global(*itr));
                 }

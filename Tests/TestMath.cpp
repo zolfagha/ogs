@@ -128,12 +128,18 @@ public:
 		solver.reset();
 		b = 0;
 
-		(*j)(0,0) = x[1];
+		(*j)(0,0) = 3;
 		(*j)(0,1) = -1.0;
-		(*j)(1,0) = .0;
-		(*j)(1,1) = x[1];
-		b[0] = .0;
-		b[1] = 1.;
+		(*j)(1,0) = 2*x[0];
+		(*j)(1,1) = -1;
+		b[0] = -2;
+		b[1] = 0.;
+        //(*j)(0,0) = x[1];
+        //(*j)(0,1) = -1.0;
+        //(*j)(1,0) = .0;
+        //(*j)(1,1) = x[1];
+        //b[0] = .0;
+        //b[1] = 1.;
 		for (size_t i=0; i<x.size(); i++)
 			solver.setRHS(i, b[i]);
 
@@ -263,8 +269,9 @@ TEST(Math, NonlinearPicard_dense2)
 	PicardMethod nr;
 	nr.solve(f2, x0, x);
 
-	double my_expect[] = {1., 1.};
+	double my_expect[] = {-0.5, 0.5};
 	ASSERT_DOUBLE_ARRAY_EQ(my_expect, x, 2, 1e-5);
+//    ASSERT_DOUBLE_ARRAY_EQ(my_expect, x, 2, 1e-5);
 }
 
 
