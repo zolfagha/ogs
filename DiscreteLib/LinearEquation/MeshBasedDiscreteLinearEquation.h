@@ -166,6 +166,13 @@ public:
             x[i] = tmp_x[i];
     }
 
+    void getX(DiscreteVector<double> &x)
+    {
+        double *tmp_x = _eqs->getX();
+        for (size_t i=x.getRangeBegin(); i<x.getRangeEnd(); i++)
+            x[i] = tmp_x[i];
+    };
+
     ///// get the RHS vector
     //double* getRHS()
     //{

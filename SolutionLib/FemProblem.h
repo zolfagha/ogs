@@ -50,25 +50,25 @@ public:
         return _map_var;
     }
 
-    void setIC(int, MathLib::IFunction<double, GeoLib::Point>& ic)
+    void setIC(int, SpatialFunction& ic)
     {
         _map_ic = ic.clone();
     }
 
-    MathLib::IFunction<double, GeoLib::Point>* getIC(int) const 
+    SpatialFunction* getIC(int) const
     {
         return _map_ic;
     };
 
-    void addDirichletBC(int, GeoLib::GeoObject &geo, bool is_transient, MathLib::IFunction<double, GeoLib::Point>& bc1)
+    void addDirichletBC(int, GeoLib::GeoObject &geo, bool is_transient, SpatialFunction& bc1)
     {
-        addDirichletBC(*new FemLib::FemDirichletBC<double>(_map_var, &geo, is_transient, &bc1, &FemLib::DiagonalizeMethod()));
+        addDirichletBC(*new FemLib::FemDirichletBC<double>(_map_var, &geo, is_transient, &bc1, new FemLib::DiagonalizeMethod()));
     }
 
 
     size_t getNumberOfDirichletBC(int n=0) const {return _map_bc1.size();};
 
-    MathLib::IFunction<double, GeoLib::Point>* getDirichletBC(int, int bc_id) const 
+    SpatialFunction* getDirichletBC(int, int bc_id) const
     {
         return _map_bc1[bc_id];
     };
@@ -78,14 +78,14 @@ public:
         return _map_bc1[bc_id];
     };
 
-    void addNeumannBC(int, GeoLib::GeoObject &geo, bool is_transient, MathLib::IFunction<double, GeoLib::Point>& bc2)
+    void addNeumannBC(int, GeoLib::GeoObject &geo, bool is_transient, SpatialFunction& bc2)
     {
         addNeumannBC(*new FemLib::FemNeumannBC<double, double>(_map_var, &geo, is_transient, &bc2));
     }
 
     size_t getNumberOfNeumannBC(int n=0) const {return _map_bc2.size();};
 
-    MathLib::IFunction<double, GeoLib::Point>* getNeumannBC(int, int bc_id) const 
+    SpatialFunction* getNeumannBC(int, int bc_id) const
     {
         return _map_bc2[bc_id];
     };
@@ -104,7 +104,7 @@ private:
     T_ASSEMBLY _user_assembly;
     DiscreteLib::DiscreteSystem* _discrete_system;
     FemLib::FemNodalFunctionScalar* _map_var;
-    MathLib::IFunction<double, GeoLib::Point>* _map_ic;
+    SpatialFunction* _map_ic;
     std::vector<FemLib::FemDirichletBC<double>*> _map_bc1;
     std::vector<FemLib::FemNeumannBC<double, double>*> _map_bc2;
 
@@ -156,17 +156,17 @@ public:
         return _map_var[i];
     }
 
-    void setIC(int var_type, MathLib::IFunction<double, GeoLib::Point>& ic)
+    void setIC(int var_type, SpatialFunction& ic)
     {
         _map_ic[var_type] = &ic;
     }
 
-    MathLib::IFunction<double, GeoLib::Point>* getIC(int var_type) const 
+    SpatialFunction* getIC(int var_type) const
     {
         return _map_ic[var_type];
     };
 
-    void addDirichletBC(int var_type, GeoLib::GeoObject &geo, MathLib::IFunction<double, GeoLib::Point>& bc1)
+    void addDirichletBC(int var_type, GeoLib::GeoObject &geo, SpatialFunction& bc1)
     {
 
     	FemLib::FemDirichletBC<double>* bc = new FemLib::FemDirichletBC<double>(_map_var[var_type], &geo, true, &bc1, new FemLib::DiagonalizeMethod());
@@ -176,7 +176,7 @@ public:
 
     size_t getNumberOfDirichletBC(int var_type) const {return _map_bc1[var_type].size();};
 
-    MathLib::IFunction<double, GeoLib::Point>* getDirichletBC(int var_type, int bc_id) const 
+    SpatialFunction* getDirichletBC(int var_type, int bc_id) const
     {
         return _map_bc1[var_type][bc_id];
     };
@@ -186,14 +186,14 @@ public:
         return _map_bc1[var_type][bc_id];
     };
 
-    void addNeumannBC(int var_type, GeoLib::GeoObject &geo, MathLib::IFunction<double, GeoLib::Point>& bc2)
+    void addNeumannBC(int var_type, GeoLib::GeoObject &geo, SpatialFunction& bc2)
     {
         addNeumannBC(var_type, *new FemLib::FemNeumannBC<double, double>(_map_var[var_type], &geo, true, &bc2));
     }
 
     size_t getNumberOfNeumannBC(int var_type) const {return _map_bc2[var_type].size();};
 
-    MathLib::IFunction<double, GeoLib::Point>* getNeumannBC(int var_type, int bc_id) const 
+    SpatialFunction* getNeumannBC(int var_type, int bc_id) const
     {
         return _map_bc2[var_type][bc_id];
     };
@@ -211,7 +211,7 @@ public:
 private:
     T_ASSEMBLY _user_assembly;
     std::vector<FemLib::FemNodalFunctionScalar*> _map_var;
-    std::vector<MathLib::IFunction<double, GeoLib::Point>*> _map_ic;
+    std::vector<SpatialFunction*> _map_ic;
     std::vector<std::vector<FemLib::FemDirichletBC<double>*> > _map_bc1;
     std::vector<std::vector<FemLib::FemNeumannBC<double, double>*> > _map_bc2;
 

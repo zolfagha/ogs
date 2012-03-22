@@ -8,9 +8,9 @@ namespace MathLib
 {
 
 /**
- *
+ * Solve J dx = -r
  */
-class DxSolverScalar
+class NewtonDxSolverScalar
 {
 public:
     inline bool solve(double &r, double &jac, double &dx)
@@ -23,16 +23,16 @@ public:
 };
 
 /**
- *
+ * Solve J dx = -r
  */
 template <typename T_VEC, typename T_JAC>
-class DxSolverVector
+class NewtonDxSolverVector
 {
 private:
 	MathLib::ILinearEquations* _linear_solver;
 
 public:
-	DxSolverVector(MathLib::ILinearEquations* linear_solver) : _linear_solver(linear_solver) {};
+	NewtonDxSolverVector(MathLib::ILinearEquations* linear_solver) : _linear_solver(linear_solver) {};
 
     void reset()
     {
@@ -80,8 +80,8 @@ class NewtonRaphsonMethod
 {
 public:
 	/// general solver
-    template<class F_PROBLEM, class T_VALUE, class T_JACOBIAN, class T_DX_SOLVER, class T_CONVERGENCE>
-    int solve(F_PROBLEM &fun, T_VALUE &x0, T_VALUE &x_new, T_VALUE &r, T_JACOBIAN &jacobian, T_VALUE &dx, T_DX_SOLVER &dx_solver, size_t max_itr_count=100, T_CONVERGENCE* convergence=0)
+    template<class F_PROBLEM, class F_PROBLEM_DIFF, class T_VALUE, class T_JACOBIAN, class T_DX_SOLVER, class T_CONVERGENCE>
+    int solve(F_PROBLEM &fun, F_PROBLEM_DIFF* df, T_VALUE &x0, T_VALUE &x_new, T_VALUE &r, T_JACOBIAN &jacobian, T_VALUE &dx, T_DX_SOLVER &dx_solver, size_t max_itr_count=100, T_CONVERGENCE* convergence=0)
     {
         T_CONVERGENCE _default_convergence;
     	if (convergence==0) convergence = &_default_convergence;
@@ -92,8 +92,8 @@ public:
     	std::cout << "Nonlinear iteration started!" << std::endl;
     	for (size_t i=0; i<max_itr_count; i++) {
     		dx_solver.reset();
-        	fun.eval0(x_new, r);
-        	fun.eval1(x_new, jacobian);
+        	fun.eval(x_new, r);
+        	df->eval(x_new, jacobian);
             if (!dx_solver.solve(r, jacobian, dx)) {
             	std::cout << "->***Warning: Jacobian was evaluated as zero." << std::endl;
             	return -1;
@@ -113,33 +113,33 @@ public:
     }
 
     /// solve scalar problems
-    template<class F_PROBLEM>
-    int solve(F_PROBLEM &fun, double &x0, double &x_new, double error=1e-6, size_t max_itr_count=100)
+    template<class F_PROBLEM, class F_PROBLEM_DIFF>
+    int solve(F_PROBLEM &fun, F_PROBLEM_DIFF &df, double &x0, double &x_new, double error=1e-6, size_t max_itr_count=100)
     {
     	double r, j, dx;
-    	DxSolverScalar dx_solver;
+    	NewtonDxSolverScalar dx_solver;
     	NRCheckConvergence<double,NRErrorNorm1DX> check(error);
-    	return solve(fun, x0, x_new, r, j, dx, dx_solver, max_itr_count, &check);
+    	return solve(fun, &df, x0, x_new, r, j, dx, dx_solver, max_itr_count, &check);
     }
 
     /// solve vector problems using a direct linear solver
-    template<class F_PROBLEM, class T_V, class T_CONVERGENCE>
-    int solve(F_PROBLEM &fun, T_V &x0, T_V &x_new, T_CONVERGENCE* check_error=0, size_t max_itr_count=100)
+    template<class F_PROBLEM, class F_PROBLEM_DIFF, class T_V, class T_CONVERGENCE>
+    int solve(F_PROBLEM &fun, F_PROBLEM_DIFF &df, T_V &x0, T_V &x_new, T_CONVERGENCE* check_error=0, size_t max_itr_count=100)
     {
     	const size_t n = x0.size();
     	T_V r(n), dx(n);
     	MathLib::DenseLinearEquations dense;
     	dense.create(n);
-    	DxSolverVector<T_V, MathLib::Matrix<double> > dx_solver(&dense);
-    	return solve(fun, x0, x_new, r, *dense.getA(), dx, dx_solver, max_itr_count, check_error);
+    	NewtonDxSolverVector<T_V, MathLib::Matrix<double> > dx_solver(&dense);
+    	return solve(fun, &df, x0, x_new, r, *dense.getA(), dx, dx_solver, max_itr_count, check_error);
     }
 
     /// solve vector problems using a direct linear solver
-    template<class F_PROBLEM, class T_V>
-    int solve(F_PROBLEM &fun, T_V &x0, T_V &x_new, double error=1e-6, size_t max_itr_count=100)
+    template<class F_PROBLEM, class F_PROBLEM_DIFF, class T_V>
+    int solve(F_PROBLEM &fun, F_PROBLEM_DIFF &df, T_V &x0, T_V &x_new, double error=1e-6, size_t max_itr_count=100)
     {
     	NRCheckConvergence<T_V,NRErrorNorm1DX> check(error);
-    	return solve(fun, x0, x_new, &check, max_itr_count);
+    	return solve(fun, df, x0, x_new, &check, max_itr_count);
     }
 
 private:

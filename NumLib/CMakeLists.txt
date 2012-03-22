@@ -9,8 +9,8 @@ FILE(GLOB NumLib_Coupling_Files Coupling/*.h Coupling/*.cpp)
 SOURCE_GROUP( NumLib\\Coupling FILES ${NumLib_Coupling_Files} )
 FILE(GLOB NumLib_Output_Files Output/*.h Output/*.cpp)
 SOURCE_GROUP( NumLib\\Output FILES ${NumLib_Output_Files} )
-FILE(GLOB NumLib_Discrete_Files Discrete/*.h Discrete/*.cpp)
-SOURCE_GROUP( NumLib\\Discrete FILES ${NumLib_Discrete_Files} )
+FILE(GLOB NumLib_TransientAssembler_Files TransientAssembler/*.h TransientAssembler/*.cpp)
+SOURCE_GROUP( NumLib\\TransientAssembler FILES ${NumLib_TransientAssembler_Files} )
 
 
 ADD_LIBRARY( NumLib STATIC 
@@ -19,7 +19,7 @@ ADD_LIBRARY( NumLib STATIC
 	${NumLib_TimeStepping_Files} 
 	${NumLib_Coupling_Files} 
 	${NumLib_Output_Files} 
-	${NumLib_Discrete_Files} 
+	${NumLib_TransientAssembler_Files} 
 )
 
 INCLUDE_DIRECTORIES(

@@ -13,9 +13,9 @@ public:
     FunctionLinear1D(LinearInterpolation* linear) {
         _linear = linear;
     };
-    virtual double eval(const double& x)
+    virtual void eval(const double& x, double &v)
     {
-        return _linear->getValue(x);
+        v = _linear->getValue(x);
     };
     virtual IFunction<double,double>* clone() const
     {

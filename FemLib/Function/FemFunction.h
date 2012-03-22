@@ -35,7 +35,7 @@ struct PolynomialOrder
  * @tparam Tvalue Nodal value type, e.g. double, vector
  */
 template<typename Tvalue>
-class TemplateFEMNodalFunction : public MathLib::IFunction<Tvalue, GeoLib::Point>
+class TemplateFEMNodalFunction : public MathLib::IFunction<GeoLib::Point, Tvalue>
 {
 public:
     /// @param msh Mesh
@@ -74,7 +74,7 @@ public:
 
     /// make a clone of this object
     /// @return MathLib::IFunction*
-    MathLib::IFunction<Tvalue, GeoLib::Point>* clone() const 
+    MathLib::IFunction<GeoLib::Point, Tvalue>* clone() const
     {
         TemplateFEMNodalFunction<Tvalue> *obj = new TemplateFEMNodalFunction<Tvalue>(*this);
         return obj;
@@ -82,17 +82,19 @@ public:
 
     /// get the spatial dimension
     size_t getDimension() const { return _msh->getDimension(); }
+
     /// get the mesh
     const MeshLib::IMesh* getMesh() const { return _msh; }
+
     /// get the number of nodes
     size_t getNumberOfNodes() const { return _msh->getNumberOfNodes(); }
 
 
     /// evaluate this function at the given point
-    Tvalue eval(const GeoLib::Point &pt) 
+    void eval(const GeoLib::Point &pt, Tvalue &v)
     {
         throw "eval() is not implemented yet.";
-        return (*_nodal_values)[0];
+        v = (*_nodal_values)[0];
     };
 
     /// get nodal value
@@ -110,6 +112,7 @@ public:
             return 0;
     }
 
+    ///
     DiscreteLib::DiscreteVector<double>* getNodalValuesAsStdVec() 
     {
         return _nodal_values;
@@ -119,6 +122,12 @@ public:
     void setNodalValues( Tvalue* x ) 
     {
         std::copy(x, x+getNumberOfNodes(), _nodal_values->begin());
+    }
+
+    /// set nodal values
+    void setNodalValues( const DiscreteLib::DiscreteVector<Tvalue> &x )
+    {
+    	*_nodal_values = x;
     }
 
     /// reset nodal values with the given value
@@ -162,7 +171,7 @@ private:
         _feObjects = new LagrangianFeObjectContainer(msh);
     }
 
-    /// assigne this object from the given object
+    /// Assign this object from the given object
     void assign(const TemplateFEMNodalFunction<Tvalue> &org)
     {
         initialize(*org._discrete_system, *org._msh, org._order);
@@ -183,8 +192,8 @@ template<typename Tvalue>
 class TemplateFEMElementalFunction : public MathLib::IFunction<Tvalue,GeoLib::Point>
 {
 public:
-    Tvalue eval(const GeoLib::Point &pt) {
-        return _ele_values[0];
+    void eval(const GeoLib::Point &pt, Tvalue &v) {
+        v = _ele_values[0];
     };
     Tvalue& getValue(size_t id) const {
         return _ele_values[id];
@@ -197,7 +206,7 @@ private:
  * \brief Template class for FEM integration point-based functions
  */
 template<typename Tvalue>
-class TemplateFEMIntegrationPointFunction : public MathLib::IFunction<Tvalue,GeoLib::Point>
+class TemplateFEMIntegrationPointFunction : public MathLib::IFunction<GeoLib::Point,Tvalue>
 {
 public:
     TemplateFEMIntegrationPointFunction(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh) 
@@ -210,7 +219,7 @@ public:
         initialize(*src._discrete_system, *src._msh, src._values->size());
     };
 
-    MathLib::IFunction<Tvalue, GeoLib::Point>* clone() const 
+    MathLib::IFunction<GeoLib::Point, Tvalue>* clone() const
     {
         TemplateFEMIntegrationPointFunction<Tvalue> *obj = new TemplateFEMIntegrationPointFunction<Tvalue>(*this);
         return obj;
@@ -221,7 +230,7 @@ public:
         return _msh;
     }
 
-    Tvalue eval(const GeoLib::Point &pt) 
+    void eval(const GeoLib::Point &pt, Tvalue &v)
     {
         throw "The method or operation is not implemented.";
     };
@@ -244,14 +253,16 @@ public:
 
 private:
     MeshLib::IMesh* _msh;
-    DiscreteLib::DiscreteVector<std::vector<Tvalue> >* _values;
+    std::vector<std::vector<Tvalue> >* _values;
+//    DiscreteLib::DiscreteVector<std::vector<Tvalue> >* _values;
     DiscreteLib::DiscreteSystem* _discrete_system;
 
     void initialize(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh, size_t n)
     {
         _msh = &msh;
         _discrete_system = &dis;
-        _values = _discrete_system->createVector<std::vector<Tvalue> >(n);
+        _values = new std::vector<std::vector<Tvalue> >(n);
+//        _values = _discrete_system->createVector<std::vector<Tvalue> >(n);
     }
 
 

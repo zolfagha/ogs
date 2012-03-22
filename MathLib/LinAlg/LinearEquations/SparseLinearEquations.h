@@ -16,7 +16,7 @@ namespace MathLib
 /**
  * \brief 
  */
-class SparseLinearEquations : public CRSLinearEquationsBase<unsigned>
+class SparseLinearEquation : public AbstractCRSLinearEquation<unsigned>
 {
 public:
     enum SolverType
@@ -49,9 +49,9 @@ public:
         };
     };
 
-    SparseLinearEquations() {};
+    SparseLinearEquation() {};
 
-    virtual ~SparseLinearEquations()
+    virtual ~SparseLinearEquation()
     {
     }
 
@@ -77,7 +77,7 @@ protected:
 private:
     SpLinearOptions _option;
 
-    DISALLOW_COPY_AND_ASSIGN(SparseLinearEquations);
+    DISALLOW_COPY_AND_ASSIGN(SparseLinearEquation);
 };
 
 }

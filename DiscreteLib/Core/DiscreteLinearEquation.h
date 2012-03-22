@@ -27,7 +27,7 @@ public:
     /// get solution
     virtual void getGlobalX(std::vector<double> &x) = 0;
     virtual double* getLocalX() = 0;
-    DiscreteVector<double>* getX() {return 0;};
+    virtual void getX(DiscreteVector<double> &v) = 0;
 //    virtual DiscreteVector<double>* getX() = 0;
     ///// get RHS 
     //virtual double* getRHS() = 0;

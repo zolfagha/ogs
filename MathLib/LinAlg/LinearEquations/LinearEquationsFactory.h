@@ -29,7 +29,7 @@ public:
         case LinearEquationsType::DenseEquations:
             return new DenseLinearEquations();
         case LinearEquationsType::SparseEquations:
-            return new SparseLinearEquations();
+            return new SparseLinearEquation();
         case LinearEquationsType::LIS:
             return new CRSLisSolver();
         default:

@@ -26,10 +26,10 @@ private:
     double a[3], b[3], c[3];
     double A;
     FemIntegrationAnalytical _integration;
-    MathLib::Matrix<double> _shape, _dshape;
+    LocalMatrix _shape, _dshape;
 
     void computeBasisFunction(const double *x,  double *shape);
-    void computeGradBasisFunction(const double *x,  MathLib::Matrix<double> &mat);
+    void computeGradBasisFunction(const double *x,  LocalMatrix &mat);
 public:
     TRI3CONST(MeshLib::IMesh &msh) : TemplateFeBase<FiniteElementType::TRI3CONST, 3>(msh), _shape(1,3), _dshape(2,3) {};
 
@@ -38,21 +38,21 @@ public:
 
     /// 
     void computeBasisFunctions(const double *x);
-    MathLib::Matrix<double>* getBasisFunction();
-    MathLib::Matrix<double>* getGradBasisFunction();
+    LocalMatrix* getBasisFunction();
+    LocalMatrix* getGradBasisFunction();
 
 
     /// make interpolation from nodal values
     double interpolate(double *x, double *nodal_values);
 
     /// compute an matrix M = Int{W^T F N} dV
-    void integrateWxN( MathLib::IFunction<double, double*>* f, MathLib::Matrix<double> &mat);
+    void integrateWxN(SpatialFunction* f, LocalMatrix &mat);
 
     /// compute an matrix M = Int{W^T F dN} dV
-    void integrateWxDN( MathLib::IFunction<double*, double*>* f, MathLib::Matrix<double> &mat);
+    void integrateWxDN(SpatialFunctionVector* f, LocalMatrix &mat);
 
     /// compute an matrix M = Int{dW^T F dN} dV
-    void integrateDWxDN( MathLib::IFunction<double, double*> *f, MathLib::Matrix<double> &mat);
+    void integrateDWxDN(SpatialFunction *f, LocalMatrix &mat);
 
     /// get the integration method
     IFemNumericalIntegration* getIntegrationMethod() const {return (IFemNumericalIntegration*)&_integration;};

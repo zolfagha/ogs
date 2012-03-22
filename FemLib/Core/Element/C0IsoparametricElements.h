@@ -2,6 +2,7 @@
 
 #include "FemLib/Core/IFemElement.h"
 #include "FemLib/Core/FemExtrapolation.h"
+#include "MeshLib/Core/MeshGeometricProperties.h"
 
 namespace FemLib
 {
@@ -50,12 +51,12 @@ public:
         _mapping->compute(x);
     }
 
-    virtual MathLib::Matrix<double>* getBasisFunction()
+    virtual LocalMatrix* getBasisFunction()
     {
         return _mapping->getProperties()->shape_r;
     }
 
-    virtual MathLib::Matrix<double>* getGradBasisFunction()
+    virtual LocalMatrix* getGradBasisFunction()
     {
         return _mapping->getProperties()->dshape_dx;
     }
@@ -77,7 +78,7 @@ public:
     }
 
     /// compute an matrix M = Int{W^T F N} dV
-    virtual void integrateWxN(MathLib::IFunction<double, double*>* f, MathLib::Matrix<double> &mat)
+    virtual void integrateWxN(SpatialFunction* f, LocalMatrix &mat)
     {
         const size_t n_gp = _integration->getNumberOfSamplingPoints();
         double x[3], ox[3];
@@ -86,14 +87,17 @@ public:
             _mapping->compute(x);
             _mapping->mapToPhysicalCoordinates(_mapping->getProperties(), ox);
             double fac = 1.0;
-            if (f!=0)
-                fac *= f->eval(ox);
+            if (f!=0) {
+            	double v;
+                f->eval(ox, v);
+                fac *= v;
+            }
             integrateWxN(i, fac, mat);
         }
     }
 
     /// compute an matrix M = Int{W^T F dN} dV
-    virtual void integrateWxDN(MathLib::IFunction<double*, double*>* f, MathLib::Matrix<double> &mat)
+    virtual void integrateWxDN(SpatialFunctionVector* f, LocalMatrix &mat)
     {
         const size_t n_gp = _integration->getNumberOfSamplingPoints();
         double x[3], ox[3];
@@ -103,13 +107,13 @@ public:
             _mapping->mapToPhysicalCoordinates(_mapping->getProperties(), ox);
             double *fac = 0;
             if (f!=0)
-                fac = f->eval(ox);
+                f->eval(ox, fac);
             integrateWxDN(i, fac, mat);
         }
     }
 
     /// compute an matrix M = Int{dW^T F dN} dV
-    virtual void integrateDWxDN(MathLib::IFunction<double, double*> *f, MathLib::Matrix<double> &mat)
+    virtual void integrateDWxDN(SpatialFunction *f, LocalMatrix &mat)
     {
         const size_t n_gp = _integration->getNumberOfSamplingPoints();
         double x[3], ox[3];
@@ -118,44 +122,47 @@ public:
             const CoordMappingProperties *coord_prop = _mapping->compute(x);
             _mapping->mapToPhysicalCoordinates(coord_prop,  ox);
             double fac = 1.0;
-            if (f!=0)
-                fac *= f->eval(ox);
+            if (f!=0) {
+            	double v;
+                f->eval(ox, v);
+                fac *= v;
+            }
             integrateDWxDN(i, fac, mat);
         }
     }
 
     /// compute an matrix M = Int{W^T F N} dV
-    virtual void integrateWxN(size_t igp, double f, MathLib::Matrix<double> &mat)
+    virtual void integrateWxN(size_t igp, double f, LocalMatrix &mat)
     {
         double x[3];
         _integration->getSamplingPoint(igp, x);
         const CoordMappingProperties *coord_prop = _mapping->getProperties();
-        MathLib::Matrix<double> *basis = coord_prop->shape_r;
-        MathLib::Matrix<double> *test = coord_prop->shape_r;
+        LocalMatrix *basis = coord_prop->shape_r;
+        LocalMatrix *test = coord_prop->shape_r;
         double fac = f * coord_prop->det_jacobian * _integration->getWeight(igp);
         test->transposeAndMultiply(*basis, mat, fac);
     }
 
     /// compute an matrix M = Int{W^T F dN} dV
-    virtual void integrateWxDN(size_t igp, double* f, MathLib::Matrix<double> &mat)
+    virtual void integrateWxDN(size_t igp, double* f, LocalMatrix &mat)
     {
         double x[3];
         _integration->getSamplingPoint(igp, x);
         const CoordMappingProperties *coord_prop = _mapping->getProperties();
-        MathLib::Matrix<double> *dbasis = coord_prop->dshape_dx;
-        MathLib::Matrix<double> *test = coord_prop->dshape_dx;
+        LocalMatrix *dbasis = coord_prop->dshape_dx;
+        LocalMatrix *test = coord_prop->dshape_dx;
         double fac = coord_prop->det_jacobian * _integration->getWeight(igp);
         test->transposeAndMultiply(*dbasis, f, mat, fac);
     }
 
     /// compute an matrix M = Int{dW^T F dN} dV
-    virtual void integrateDWxDN(size_t igp, double f, MathLib::Matrix<double> &mat)
+    virtual void integrateDWxDN(size_t igp, double f, LocalMatrix &mat)
     {
         double x[3];
         _integration->getSamplingPoint(igp, x);
         const CoordMappingProperties *coord_prop = _mapping->getProperties();
-        MathLib::Matrix<double> *dbasis = coord_prop->dshape_dx;
-        MathLib::Matrix<double> *dtest = coord_prop->dshape_dx;
+        LocalMatrix *dbasis = coord_prop->dshape_dx;
+        LocalMatrix *dtest = coord_prop->dshape_dx;
         double fac = f*coord_prop->det_jacobian * _integration->getWeight(igp);
         dtest->transposeAndMultiply(*dbasis, mat, fac);
     }

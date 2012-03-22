@@ -13,6 +13,16 @@ class PicardMethod
 {
 public:
 	/// general solver
+	/// @tparam F_PROBLEM		Fixed point function class
+	/// @tparam T_VALUE			Variable data class
+	/// @tparam T_CONVERGENCE	Convergence checker class
+    /// @param fun				Fixed point function
+    /// @param x0				initial guess
+    /// @param x_new			solution
+    /// @param x_old			temporal data
+    /// @param dx				temporal data
+    /// @param error			error tolerance
+    /// @param max_itr_count	maximum iteration counts
     template<class F_PROBLEM, class T_VALUE, class T_CONVERGENCE>
     int solve(F_PROBLEM &fun,  T_VALUE &x0, T_VALUE &x_new, T_VALUE &x_old, T_VALUE &dx, size_t max_itr_count=100, T_CONVERGENCE* convergence=0)
     {
@@ -23,8 +33,9 @@ public:
     	bool converged = false;
     	std::cout << "Nonlinear iteration started!" << std::endl;
     	for (size_t i=0; i<max_itr_count; i++) {
-        	fun.eval0(x_old, x_new);
-        	dx = x_new - x_old;
+        	fun.eval(x_old, x_new);
+        	dx = x_new;
+        	dx -= x_old;
             printout(i, x_new, dx);
             if (convergence->check(0, &dx, &x_new)) {
                 converged = true;
@@ -67,6 +78,8 @@ public:
 
 
 private:
+
+    /// print out for debugging
     template<class T_VALUE>
     inline void printout(size_t i, T_VALUE& x_new, T_VALUE& dx)
     {

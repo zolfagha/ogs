@@ -77,8 +77,10 @@ int AbstractIterativePartitionedMethod::solve(std::vector<ICoupledSystem*> &subp
 bool AbstractIterativePartitionedMethod::isConverged(NamedVariableContainer& vars_prev, NamedVariableContainer& vars_current, double &v_diff)
 {
     for (size_t i=0; i<vars_prev.size(); i++) {
-        double v_prev = vars_prev.get(i)->eval(.0);
-        double v_cur = vars_current.get(i)->eval(.0);
+        double v_prev;
+        vars_prev.get(i)->eval(.0, v_prev);
+        double v_cur;
+        vars_current.get(i)->eval(.0, v_cur);
         v_diff = fabs(v_cur - v_prev);
         if (v_diff>getEpsilon()) {
             return false;

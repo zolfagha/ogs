@@ -24,8 +24,9 @@ public:
     enum Parameters { a=2, b = 0, c = 1 };
     int solve()
     {
-        double vb = _vec_parameters[WeakCouplingEQS1::b]->eval(.0);
-        double vc = _vec_parameters[WeakCouplingEQS1::c]->eval(.0);
+    	double vb, vc;
+        _vec_parameters[WeakCouplingEQS1::b]->eval(.0, vb);
+        _vec_parameters[WeakCouplingEQS1::c]->eval(.0, vc);
         double va = 1./2.*(6.9 - 2.*vb - 0.3*vc);
         if (_vec_parameters[WeakCouplingEQS1::a]!=0)
             delete _vec_parameters[WeakCouplingEQS1::a];
@@ -40,8 +41,9 @@ public:
     enum Parameters { a = 0, b = 2, c = 1 };
     int solve()
     {
-        double va = _vec_parameters[WeakCouplingEQS2::a]->eval(.0);
-        double vc = _vec_parameters[WeakCouplingEQS2::c]->eval(.0);
+    	double va, vc;
+        _vec_parameters[WeakCouplingEQS2::a]->eval(.0, va);
+        _vec_parameters[WeakCouplingEQS2::c]->eval(.0, vc);
         double vb = 1./5.*(13.6-3*va-0.2*vc);
         if (_vec_parameters[WeakCouplingEQS2::b]!=0)
             delete _vec_parameters[WeakCouplingEQS2::b];
@@ -56,8 +58,9 @@ public:
     enum Parameters { a = 0, b = 1, c = 2 };
     int solve()
     {
-        double va = _vec_parameters[a]->eval(.0);
-        double vb = _vec_parameters[b]->eval(.0);
+    	double va, vb;
+        _vec_parameters[a]->eval(.0, va);
+        _vec_parameters[b]->eval(.0, vb);
         double vc = 1./3.*(10.1-0.5*va-0.3*vb);
         if (_vec_parameters[c]!=0)
             delete _vec_parameters[c];
@@ -252,9 +255,13 @@ TEST(Coupling, SteadyCouplingJacobi)
     part2.solve();
 
     const double epsilon = 1.e-3;
-    ASSERT_NEAR(1., part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(2., part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(3., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    double v1, v2, v3;
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(1., v1, epsilon);
+    ASSERT_NEAR(2., v2, epsilon);
+    ASSERT_NEAR(3., v3, epsilon);
 }
 
 TEST(Coupling, SteadyCouplingSeidel)
@@ -290,9 +297,13 @@ TEST(Coupling, SteadyCouplingSeidel)
     part2.solve();
 
     const double epsilon = 1.e-3;
-    ASSERT_NEAR(1., part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(2., part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(3., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    double v1, v2, v3;
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(1., v1, epsilon);
+    ASSERT_NEAR(2., v2, epsilon);
+    ASSERT_NEAR(3., v3, epsilon);
 }
 
 // 2a + 2*b + .3*c = 6.9*t 
@@ -308,8 +319,9 @@ public:
     int solveTimeStep(const TimeStep &ts) 
     {
         double t = ts.getTime();
-        double vb = _vec_parameters[WeakCouplingEQS1::b]->eval(.0);
-        double vc = _vec_parameters[WeakCouplingEQS1::c]->eval(.0);
+        double vb, vc;
+        _vec_parameters[WeakCouplingEQS1::b]->eval(.0, vb);
+        _vec_parameters[WeakCouplingEQS1::c]->eval(.0, vc);
         double va = 1./2.*(6.9*t - 2.*vb - 0.3*vc);
         if (_vec_parameters[WeakCouplingEQS1::a]!=0)
             delete _vec_parameters[WeakCouplingEQS1::a];
@@ -336,8 +348,9 @@ public:
     int solveTimeStep(const TimeStep &ts) 
     {
         double t = ts.getTime();
-        double va = _vec_parameters[WeakCouplingEQS2::a]->eval(.0);
-        double vc = _vec_parameters[WeakCouplingEQS2::c]->eval(.0);
+        double va, vc;
+        _vec_parameters[WeakCouplingEQS2::a]->eval(.0, va);
+        _vec_parameters[WeakCouplingEQS2::c]->eval(.0, vc);
         double vb = 1./5.*(13.6*t-3*va-0.2*vc);
         if (_vec_parameters[WeakCouplingEQS2::b]!=0)
             delete _vec_parameters[WeakCouplingEQS2::b];
@@ -364,8 +377,9 @@ public:
     int solveTimeStep(const TimeStep &ts) 
     {
         double t = ts.getTime();
-        double va = _vec_parameters[a]->eval(.0);
-        double vb = _vec_parameters[b]->eval(.0);
+        double va, vb;
+        _vec_parameters[a]->eval(.0, va);
+        _vec_parameters[b]->eval(.0, vb);
         double vc = 1./3.*(10.1*t-0.5*va-0.3*vb);
         if (_vec_parameters[c]!=0)
             delete _vec_parameters[c];
@@ -417,14 +431,21 @@ TEST(Coupling, TransientCouplingParallelStaggered1)
     const double epsilon = 1.e-3;
     timestepping.setBeginning(.0);
     timestepping.solve(1.0);
-    ASSERT_NEAR(1., part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(2., part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(3., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    double v1, v2, v3;
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(1., v1, epsilon);
+    ASSERT_NEAR(2., v2, epsilon);
+    ASSERT_NEAR(3., v3, epsilon);
 
     timestepping.solve(2.0);
-    ASSERT_NEAR(2., part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(4., part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(6., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(2., v1, epsilon);
+    ASSERT_NEAR(4., v2, epsilon);
+    ASSERT_NEAR(6., v3, epsilon);
 }
 
 TEST(Coupling, TransientCouplingParallelStaggered2)
@@ -461,29 +482,45 @@ TEST(Coupling, TransientCouplingParallelStaggered2)
     const double epsilon = 1.e-3;
     timestepping.setBeginning(.0);
     timestepping.solve(1.0);
-    ASSERT_NEAR(6.9/2., part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    double v1, v2, v3;
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(6.9/2., v1, epsilon);
+    ASSERT_NEAR(0., v2, epsilon);
+    ASSERT_NEAR(0., v3, epsilon);
 
     timestepping.solve(2.0);
-    ASSERT_NEAR(3.65, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(3.25, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(3.65, v1, epsilon);
+    ASSERT_NEAR(3.25, v2, epsilon);
+    ASSERT_NEAR(0., v3, epsilon);
 
     timestepping.solve(3.0);
-    ASSERT_NEAR(7.1, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(3.25, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(7.1, v1, epsilon);
+    ASSERT_NEAR(3.25, v2, epsilon);
+    ASSERT_NEAR(0., v3, epsilon);
 
     timestepping.solve(4.0);
-    ASSERT_NEAR(4., part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(8., part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(12., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(4., v1, epsilon);
+    ASSERT_NEAR(8., v2, epsilon);
+    ASSERT_NEAR(12., v3, epsilon);
 
     timestepping.solve(5.0);
-    ASSERT_NEAR(7.45, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(8., part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(12., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(7.45, v1, epsilon);
+    ASSERT_NEAR(8., v2, epsilon);
+    ASSERT_NEAR(12., v3, epsilon);
 }
 
 TEST(Coupling, TransientCouplingParallelStaggered3)
@@ -521,41 +558,57 @@ TEST(Coupling, TransientCouplingParallelStaggered3)
     const double epsilon = 1.e-3;
     timestepping.setBeginning(.0);
     timestepping.solve(1.0);
-    ASSERT_NEAR(3.45, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    double v1, v2, v3;
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(3.45, v1, epsilon);
+    ASSERT_NEAR(0., v2, epsilon);
+    ASSERT_NEAR(0., v3, epsilon);
 
     eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
     eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
     eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(2.0);
-    ASSERT_NEAR(6.9, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(3.37, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(6.9, v1, epsilon);
+    ASSERT_NEAR(3.37, v2, epsilon);
+    ASSERT_NEAR(0., v3, epsilon);
 
     eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
     eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
     eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(3.0);
-    ASSERT_NEAR(6.98, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(3.37, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(6.98, v1, epsilon);
+    ASSERT_NEAR(3.37, v2, epsilon);
+    ASSERT_NEAR(0., v3, epsilon);
 
     eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
     eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
     eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(4.0);
-    ASSERT_NEAR(10.43, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(6.692, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(11.96633, part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(10.43, v1, epsilon);
+    ASSERT_NEAR(6.692, v2, epsilon);
+    ASSERT_NEAR(11.96633, v3, epsilon);
 
     eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
     eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
     eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(5.0);
-    ASSERT_NEAR(8.76305, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(6.692, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(11.96633, part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(8.76305, v1, epsilon);
+    ASSERT_NEAR(6.692, v2, epsilon);
+    ASSERT_NEAR(11.96633, v3, epsilon);
 }
 
 TEST(Coupling, TransientCouplingSerialStaggered1)
@@ -592,29 +645,45 @@ TEST(Coupling, TransientCouplingSerialStaggered1)
     const double epsilon = 1.e-3;
     timestepping.setBeginning(.0);
     timestepping.solve(1.0);
-    ASSERT_NEAR(6.9/2., part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    double v1, v2, v3;
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(6.9/2., v1, epsilon);
+    ASSERT_NEAR(0., v2, epsilon);
+    ASSERT_NEAR(0., v3, epsilon);
 
     timestepping.solve(2.0);
-    ASSERT_NEAR(3.65, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(3.25, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(3.65, v1, epsilon);
+    ASSERT_NEAR(3.25, v2, epsilon);
+    ASSERT_NEAR(0., v3, epsilon);
 
     timestepping.solve(3.0);
-    ASSERT_NEAR(7.1, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(3.25, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(7.1, v1, epsilon);
+    ASSERT_NEAR(3.25, v2, epsilon);
+    ASSERT_NEAR(0., v3, epsilon);
 
     timestepping.solve(4.0);
-    ASSERT_NEAR(4., part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(8., part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(12., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(4, v1, epsilon);
+    ASSERT_NEAR(8, v2, epsilon);
+    ASSERT_NEAR(12., v3, epsilon);
 
     timestepping.solve(5.0);
-    ASSERT_NEAR(7.45, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(8., part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(12., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(7.45, v1, epsilon);
+    ASSERT_NEAR(8, v2, epsilon);
+    ASSERT_NEAR(12., v3, epsilon);
 }
 
 TEST(Coupling, TransientCouplingSerialStaggered2)
@@ -652,40 +721,56 @@ TEST(Coupling, TransientCouplingSerialStaggered2)
     const double epsilon = 1.e-3;
     timestepping.setBeginning(.0);
     timestepping.solve(1.0);
-    ASSERT_NEAR(3.45, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    double v1, v2, v3;
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(6.9/2., v1, epsilon);
+    ASSERT_NEAR(0., v2, epsilon);
+    ASSERT_NEAR(0., v3, epsilon);
 
     eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
     eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
     eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(2.0);
-    ASSERT_NEAR(6.9, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(1.3, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(6.9, v1, epsilon);
+    ASSERT_NEAR(1.3, v2, epsilon);
+    ASSERT_NEAR(0., v3, epsilon);
 
     eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
     eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
     eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(3.0);
-    ASSERT_NEAR(9.05, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(1.3, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(0., part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(9.05, v1, epsilon);
+    ASSERT_NEAR(1.3, v2, epsilon);
+    ASSERT_NEAR(0., v3, epsilon);
 
     eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
     eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
     eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(4.0);
-    ASSERT_NEAR(12.5, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(3.38, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(11.04533, part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    part2.getParameter(part2.getParameterID("a"))->eval(0, v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0, v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0, v3);
+    ASSERT_NEAR(12.5, v1, epsilon);
+    ASSERT_NEAR(3.38, v2, epsilon);
+    ASSERT_NEAR(11.04533, v3, epsilon);
 
     eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
     eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
     eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(5.0);
-    ASSERT_NEAR(12.2132, part2.getParameter(part2.getParameterID("a"))->eval(0), epsilon);
-    ASSERT_NEAR(3.38, part2.getParameter(part2.getParameterID("b"))->eval(0), epsilon);
-    ASSERT_NEAR(11.04533, part2.getParameter(part2.getParameterID("c"))->eval(0), epsilon);
+    part2.getParameter(part2.getParameterID("a"))->eval(0., v1);
+    part2.getParameter(part2.getParameterID("b"))->eval(0., v2);
+    part2.getParameter(part2.getParameterID("c"))->eval(0., v3);
+    ASSERT_NEAR(12.2132, v1, epsilon);
+    ASSERT_NEAR(3.38, v2, epsilon);
+    ASSERT_NEAR(11.04533, v3, epsilon);
 }
 

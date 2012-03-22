@@ -87,4 +87,21 @@ inline double NRErrorNorm1DX::error(double* r, double* dx, double* x_new)
 	return *dx;
 }
 
+class NRErrorNorm1Residual
+{
+public:
+	template<class T_D0>
+	inline double error(T_D0* r, T_D0* dx, T_D0* x_new)
+	{
+		if (dx==0) return .0;
+		return norm1(*r, r->size());
+	}
+};
+
+template<>
+inline double NRErrorNorm1Residual::error(double* r, double* dx, double* x_new)
+{
+	return *r;
+}
+
 }

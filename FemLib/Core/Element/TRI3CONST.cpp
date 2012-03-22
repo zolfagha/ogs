@@ -39,12 +39,12 @@ void TRI3CONST::computeBasisFunctions(const double *x)
     computeGradBasisFunction(x, _dshape);
 }
 
-MathLib::Matrix<double>* TRI3CONST::getBasisFunction()
+LocalMatrix* TRI3CONST::getBasisFunction()
 {
     return &_shape;
 }
 
-MathLib::Matrix<double>* TRI3CONST::getGradBasisFunction()
+LocalMatrix* TRI3CONST::getGradBasisFunction()
 {
     return &_dshape;
 }
@@ -55,7 +55,7 @@ void TRI3CONST::computeBasisFunction(const double *x,  double *shape)
         shape[i] = a[i]+b[i]*x[0]+c[i]*x[1];
 }
 
-void TRI3CONST::computeGradBasisFunction(const double*,  MathLib::Matrix<double> &dshape)
+void TRI3CONST::computeGradBasisFunction(const double*,  LocalMatrix &dshape)
 {
     for (size_t i=0; i<3; i++) {
         dshape(0,i) = b[i];
@@ -74,9 +74,10 @@ double TRI3CONST::interpolate(double *x, double *nodal_values)
 }
 
 /// compute an matrix M = Int{W^T F N} dV
-void TRI3CONST::integrateWxN( MathLib::IFunction<double, double*>* f, MathLib::Matrix<double> &mat)
+void TRI3CONST::integrateWxN( SpatialFunction* f, LocalMatrix &mat)
 {
-    const double v = f->eval(0);
+    double v = .0;
+    f->eval(0, v);
     mat(0,0) = 1.0;
     mat(0,1) = 0.5;
     mat(0,2) = 0.5;
@@ -91,9 +92,10 @@ void TRI3CONST::integrateWxN( MathLib::IFunction<double, double*>* f, MathLib::M
 }
 
 /// compute an matrix M = Int{W^T F dN} dV
-void TRI3CONST::integrateWxDN( MathLib::IFunction<double*, double*>* f, MathLib::Matrix<double> &mat)
+void TRI3CONST::integrateWxDN( SpatialFunctionVector* f, LocalMatrix &mat)
 {
-    double *v = f->eval(0);
+    double *v;
+    f->eval(0, v);
     for (int i=0; i<3; i++)
         for (int j=0; j<3; j++)
             mat(i,j) = v[0]*b[j] + v[1]*c[j];
@@ -101,9 +103,10 @@ void TRI3CONST::integrateWxDN( MathLib::IFunction<double*, double*>* f, MathLib:
 }
 
 /// compute an matrix M = Int{dW^T F dN} dV
-void TRI3CONST::integrateDWxDN( MathLib::IFunction<double, double*> *f, MathLib::Matrix<double> &mat)
+void TRI3CONST::integrateDWxDN( SpatialFunction *f, LocalMatrix &mat)
 {
-    const double v = f->eval(0);
+	double v;
+    f->eval(0, v);
     mat(0,0) = b[0]*b[0] + c[0]*c[0];
     mat(0,1) = b[0]*b[1] + c[0]*c[1];
     mat(0,2) = b[0]*b[2] + c[0]*c[2];

@@ -53,11 +53,11 @@ public:
  * DirichletBC class
  */
 template<typename Tval>
-class FemDirichletBC : IFemBC, public MathLib::IFunction<Tval, GeoLib::Point>
+class FemDirichletBC : IFemBC, public MathLib::IFunction<GeoLib::Point, Tval>
 {
 public:
     ///
-    explicit FemDirichletBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, MathLib::IFunction<Tval, GeoLib::Point> *bc_func, IDirichletBCMethod *method)
+    explicit FemDirichletBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, MathLib::IFunction<GeoLib::Point, Tval> *bc_func, IDirichletBCMethod *method)
     {
         _var = var;
         _geo = geo;
@@ -86,7 +86,7 @@ public:
         _vec_values.resize(_vec_nodes.size());
         for (size_t i=0; i<_vec_nodes.size(); i++) {
             const GeoLib::Point* x = msh->getNodeCoordinatesRef(_vec_nodes[i]);
-            _vec_values[i] = _bc_func->eval(*x);
+            _bc_func->eval(*x, _vec_values[i]);
         }
         if (!_is_transient)
             _do_setup = false;
@@ -99,12 +99,12 @@ public:
         method.apply(eqs, _vec_nodes, _vec_values);
     }
 
-    Tval eval(const GeoLib::Point &x) 
+    void eval(const GeoLib::Point &x, Tval &v)
     {
-        return _bc_func->eval(x);
+        _bc_func->eval(x, v);
     }
 
-    MathLib::IFunction<Tval,GeoLib::Point>* clone() const
+    MathLib::IFunction<GeoLib::Point,Tval>* clone() const
     {
         FemDirichletBC<Tval> *f = new FemDirichletBC<Tval>(_var, _geo, _is_transient, _bc_func, _method);
         return f;
@@ -116,7 +116,7 @@ public:
 private:
     TemplateFEMNodalFunction<Tval> *_var;
     GeoLib::GeoObject *_geo;
-    MathLib::IFunction<Tval, GeoLib::Point> *_bc_func;
+    MathLib::IFunction<GeoLib::Point, Tval> *_bc_func;
     std::vector<size_t> _vec_nodes;
     std::vector<Tval> _vec_values;
     // node id, var id, value

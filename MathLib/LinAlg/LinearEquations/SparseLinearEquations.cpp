@@ -12,7 +12,7 @@ namespace MathLib
 {
 
 
-void SparseLinearEquations::setOption(const Base::Options &option)
+void SparseLinearEquation::setOption(const Base::Options &option)
 {
     const Base::Options *op = option.getSubGroup("SpLinearOptions");
     if (op==0) return;
@@ -27,7 +27,7 @@ void SparseLinearEquations::setOption(const Base::Options &option)
         _option.max_iteration_step = op->getOptionAsNum<int>("max_iteration_step");
 }
 
-void SparseLinearEquations::solveEqs(CRSMatrix<double, unsigned> *A, double *rhs, double *x)
+void SparseLinearEquation::solveEqs(CRSMatrix<double, unsigned> *A, double *rhs, double *x)
 {
     double eps = _option.error_tolerance;
     size_t steps =  _option.max_iteration_step;

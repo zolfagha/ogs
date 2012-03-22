@@ -95,7 +95,7 @@ struct LIS_option
     }
 };
 
-class CRSLisSolver : public CRSLinearEquationsBase<signed>
+class CRSLisSolver : public AbstractCRSLinearEquation<signed>
 {
 public:
     void initialize();

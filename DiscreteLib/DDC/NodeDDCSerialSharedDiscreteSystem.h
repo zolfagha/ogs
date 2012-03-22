@@ -122,9 +122,11 @@ public:
         for (size_t i=0; i<x.size(); i++)
             x[i] = tmp_x[i];
     }
-    DiscreteVector<double>* getX() 
+    void getX(DiscreteVector<double> &x)
     {
-        return 0;
+        double *tmp_x = _sheared_eqs->getX();
+        for (size_t i=x.getRangeBegin(); i<x.getRangeEnd(); i++)
+            x[i] = tmp_x[i];
     };
     /// get a Dof map manager
     DofEquationIdTable* getDofMapManger() const

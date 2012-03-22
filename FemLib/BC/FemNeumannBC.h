@@ -21,11 +21,11 @@ namespace FemLib
  * Neumann BC
  */
 template<typename Tval, typename Tflux>
-class FemNeumannBC : IFemBC, public MathLib::IFunction<Tflux, GeoLib::Point>
+class FemNeumannBC : IFemBC, public MathLib::IFunction<GeoLib::Point, Tflux>
 {
 public:
     /// 
-    FemNeumannBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, MathLib::IFunction<Tflux, GeoLib::Point> *func) 
+    FemNeumannBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, MathLib::IFunction<GeoLib::Point, Tflux> *func)
     {
         _var = var;
         _geo = geo;
@@ -51,7 +51,7 @@ public:
             // get discrete values at nodes
             for (size_t i=0; i<_vec_nodes.size(); i++) {
                 const GeoLib::Point* x = msh->getNodeCoordinatesRef(_vec_nodes[i]);
-                _vec_values[i] = _bc_func->eval(*x);
+                _bc_func->eval(*x, _vec_values[i]);
             }
         } else {
             // find edge elements on the geo
@@ -66,7 +66,7 @@ public:
                 std::vector<double> nodal_val(edge_nnodes);
                 for (size_t i_nod=0; i_nod<edge_nnodes; i_nod++) {
                     const GeoLib::Point* x = msh->getNodeCoordinatesRef(e->getNodeID(i_nod));
-                    nodal_val[i_nod] = _bc_func->eval(*x);
+                    _bc_func->eval(*x, nodal_val[i_nod]);
                 } 
                 // compute integrals
                 IFiniteElement *fe_edge = feObjects->getFeObject(*e);
@@ -111,12 +111,12 @@ public:
         return _vec_values[i];
     }
 
-    Tflux eval(const GeoLib::Point& x)
+    void eval(const GeoLib::Point& x, Tflux &v)
     {
-        return _bc_func->eval(x);
+        _bc_func->eval(x, v);
     }
 
-    MathLib::IFunction<Tflux, GeoLib::Point>* clone() const
+    MathLib::IFunction<GeoLib::Point, Tflux>* clone() const
     {
         FemNeumannBC<Tval, Tflux> *f = new FemNeumannBC<Tval, Tflux>(_var, _geo, _is_transient, _bc_func);
         return f;
@@ -129,7 +129,7 @@ private:
     // node id, var id, value
     TemplateFEMNodalFunction<Tval> *_var;
     GeoLib::GeoObject *_geo;
-    MathLib::IFunction<Tflux, GeoLib::Point> *_bc_func;
+    MathLib::IFunction<GeoLib::Point, Tflux> *_bc_func;
     std::vector<size_t> _vec_nodes;
     std::vector<Tval> _vec_values;
     bool _is_transient;

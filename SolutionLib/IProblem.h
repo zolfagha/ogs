@@ -14,6 +14,9 @@ namespace SolutionLib
 
 class IProblem {};
 
+
+typedef MathLib::IFunction<GeoLib::Point, double> SpatialFunction;
+
 /**
  * \brief Initial value boundary value problems
  */
@@ -24,21 +27,21 @@ public:
     /// get the number of variables
     virtual size_t getNumberOfVariables() const = 0;
     /// set initial condition
-    virtual void setIC(int var_type, MathLib::IFunction<double, GeoLib::Point>& ic) = 0;
+    virtual void setIC(int var_type, SpatialFunction& ic) = 0;
     /// get initial condition
-    virtual MathLib::IFunction<double, GeoLib::Point>* getIC(int var_type) const = 0;
+    virtual SpatialFunction* getIC(int var_type) const = 0;
     /// add a Dirichlet boundary condition
-    virtual void addDirichletBC(int var_type,  GeoLib::GeoObject &geo, bool is_transient, MathLib::IFunction<double, GeoLib::Point>& bc1) = 0;
+    virtual void addDirichletBC(int var_type,  GeoLib::GeoObject &geo, bool is_transient, SpatialFunction& bc1) = 0;
     /// get the number of Dirichlet BCs
     virtual size_t getNumberOfDirichletBC(int var_type) const = 0;
     /// get the Dirichlet BC
-    virtual MathLib::IFunction<double, GeoLib::Point>* getDirichletBC(int var_type, int bc_id) const = 0;
+    virtual SpatialFunction* getDirichletBC(int var_type, int bc_id) const = 0;
     /// add a Neumann boundary condition
-    virtual void addNeumannBC(int var_type,  GeoLib::GeoObject &geo, bool is_transient, MathLib::IFunction<double, GeoLib::Point>& bc2) = 0;
+    virtual void addNeumannBC(int var_type,  GeoLib::GeoObject &geo, bool is_transient, SpatialFunction& bc2) = 0;
     /// get the number of Neumann BCs
     virtual size_t getNumberOfNeumannBC(int var_type) const = 0;
     /// get the Neumann BC
-    virtual MathLib::IFunction<double, GeoLib::Point>* getNeumannBC(int var_type, int bc_id) const = 0;
+    virtual SpatialFunction* getNeumannBC(int var_type, int bc_id) const = 0;
 };
 
 /**

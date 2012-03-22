@@ -5,10 +5,10 @@
 
 namespace MathLib
 {
-template class CRSLinearEquationsBase<signed>;
-template class CRSLinearEquationsBase<unsigned>;
+template class AbstractCRSLinearEquation<signed>;
+template class AbstractCRSLinearEquation<unsigned>;
 
-template<typename IDX_TYPE> void CRSLinearEquationsBase<IDX_TYPE>::create(size_t length, RowMajorSparsity *sparsity)
+template<typename IDX_TYPE> void AbstractCRSLinearEquation<IDX_TYPE>::create(size_t length, RowMajorSparsity *sparsity)
 {
     SparseTableCRS<IDX_TYPE> *crs = convertRowMajorSparsityToCRS<IDX_TYPE>(*sparsity);
     assert (length == crs->dimension);
@@ -17,7 +17,7 @@ template<typename IDX_TYPE> void CRSLinearEquationsBase<IDX_TYPE>::create(size_t
     _x.resize(length);
 }
 
-template<typename IDX_TYPE> void CRSLinearEquationsBase<IDX_TYPE>::reset()
+template<typename IDX_TYPE> void AbstractCRSLinearEquation<IDX_TYPE>::reset()
 {
     (*_A) = .0;
     _b.assign(_b.size(), .0);
@@ -27,7 +27,7 @@ template<typename IDX_TYPE> void CRSLinearEquationsBase<IDX_TYPE>::reset()
 }
 
 
-template<typename IDX_TYPE> void CRSLinearEquationsBase<IDX_TYPE>::solve()
+template<typename IDX_TYPE> void AbstractCRSLinearEquation<IDX_TYPE>::solve()
 {
     if (_vec_knownX_id.size()>0) {
         CRSMatrix<double, IDX_TYPE>* tmp_A = getA()->clone();
@@ -56,7 +56,7 @@ template<typename IDX_TYPE> void CRSLinearEquationsBase<IDX_TYPE>::solve()
     }
 }
 
-template<typename IDX_TYPE> void CRSLinearEquationsBase<IDX_TYPE>::setKnownXi_ReduceSizeOfEQS(CRSMatrix<double, IDX_TYPE> *A, double *org_eqsRHS, double *org_eqsX, const std::vector<size_t> &vec_id, const std::vector<double> &vec_x, std::vector<double> &out_b, std::vector<double> &out_x, std::map<size_t,size_t> &map_solved_orgEqs)
+template<typename IDX_TYPE> void AbstractCRSLinearEquation<IDX_TYPE>::setKnownXi_ReduceSizeOfEQS(CRSMatrix<double, IDX_TYPE> *A, double *org_eqsRHS, double *org_eqsX, const std::vector<size_t> &vec_id, const std::vector<double> &vec_x, std::vector<double> &out_b, std::vector<double> &out_x, std::map<size_t,size_t> &map_solved_orgEqs)
 {
     assert(vec_id.size()==vec_x.size());
 

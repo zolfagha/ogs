@@ -19,7 +19,7 @@ namespace DiscreteLib
 class DofEquationIdTable;
 
 /**
- *\brief
+ *\brief Interface class for all kinds of discrete systems
  */
 class IDiscreteSystem
 {
@@ -36,16 +36,18 @@ public:
     /// @param msh a mesh to represent discrete systems by nodes or elements or edges
     DiscreteSystem(MeshLib::IMesh& msh) : _msh(&msh) {};
 
-    virtual ~DiscreteSystem()
-    {
-        //Base::releaseObjectsInStdVector(_vec_linear_sys);
-        //Base::releaseObjectsInStdVector(_vec_vectors);
-    }
+    ///
+    virtual ~DiscreteSystem() {};
 
     /// get this mesh
     MeshLib::IMesh* getMesh() const { return _msh; };
 
     /// create a new linear equation
+    /// @tparam T_LINEAR_EQUATION
+    /// @tparam T_LINEAR_SOLVER
+    /// @tparam T_SPARSITY_BUILDER
+    /// @param linear_solver 		Linear solver
+    /// @param dofManager			Equation index table
 	template <template <class, class> class T_LINEAR_EQUATION, class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
 	IDiscreteLinearEquation* createLinearEquation(T_LINEAR_SOLVER &linear_solver, DofEquationIdTable &dofManager)
 	{
@@ -53,21 +55,12 @@ public:
 		_data.addLinearEquation(eq);
 		return eq;
 	}
-//    template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
-//    IDiscreteLinearEquation* createLinearEquation(T_LINEAR_SOLVER &linear_solver, DofEquationIdTable &dofManager)
-//    {
-//        TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER> *eq = new TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_msh, linear_solver, dofManager);
-//        _data.addLinearEquation(eq);
-//        return eq;
-//    }
 
-    //IDiscreteLinearEquation* getLinearEquation(size_t i)
-    //{
-    //    return _vec_linear_sys[i];
-    //}
-
+	/// create a new vector
+	/// @param n	vector length
+	/// @return vector object
     template<typename T>
-    DiscreteVector<T>* createVector(const size_t &n) 
+    DiscreteVector<T>* createVector(const size_t n)
     {
         DiscreteVector<T>* v = new DiscreteVector<T>(n);
         _data.addVector(v);
@@ -77,16 +70,9 @@ public:
 private:
     DISALLOW_COPY_AND_ASSIGN(DiscreteSystem);
 
-    // discretization
-    MeshLib::IMesh* _msh;
-
-    //// linear equations
-    //std::vector<AbstractMeshBasedDiscreteLinearEquation*> _vec_linear_sys;
-
 protected:
+    MeshLib::IMesh* _msh;
     DiscreteDataContainer _data;
-    //// vector
-    //std::vector<IDiscreteVectorBase*> _vec_vectors;
 };
 
 } //end

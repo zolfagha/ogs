@@ -4,10 +4,144 @@
 #include <vector>
 
 #include "Base/BidirectionalMap.h"
+
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
+
+#include "GeoLib/Shape/Rectangle.h"
+
 #include "MeshLib/Core/IMesh.h"
+
+#include "DiscreteLib/Core/DiscreteSystem.h"
 #include "DiscreteLib/Assembler/ElementLocalAssembler.h"
+
+#include "FemLib/Function/FemFunction.h"
+#include "FemLib/Function/FemFunctionProjection.h"
+#include "FemLib/BC/FemDirichletBC.h"
+#include "FemLib/BC/FemNeumannBC.h"
+#include "FemLib/Post/Extrapolation.h"
+
+
+class GWFemTest
+{
+public:
+    GeoLib::Rectangle *rec;
+    DiscreteLib::DiscreteSystem *dis;
+    MeshLib::IMesh *msh;
+    MathLib::IFunction<double*, double> *_K;
+    FemLib::FemNodalFunctionScalar *head;
+    FemLib::FEMIntegrationPointFunctionVector2d *vel;
+    std::vector<FemLib::FemDirichletBC<double>*> vec_bc1;
+    std::vector<FemLib::FemNeumannBC<double, double>*> vec_bc2;
+
+    void define(MeshLib::IMesh *msh, MathLib::IFunction<double*, double> *K=0)
+    {
+        //#Define a problem
+        //geometry
+        rec = new GeoLib::Rectangle(GeoLib::Point(0.0, 0.0, 0.0),  GeoLib::Point(2.0, 2.0, 0.0));
+        GeoLib::Polyline* poly_left = rec->getLeft();
+        GeoLib::Polyline* poly_right = rec->getRight();
+        //mesh
+        this->msh = msh;
+        dis = new DiscreteLib::DiscreteSystem(*msh);
+        //discretization
+        head = new FemLib::FemNodalFunctionScalar(*dis, *msh, FemLib::PolynomialOrder::Linear);
+        vel = new FemLib::FEMIntegrationPointFunctionVector2d(*dis, *msh);
+        //bc
+        vec_bc1.push_back(new FemLib::FemDirichletBC<double>(head, poly_right, false, new MathLib::FunctionConstant<GeoLib::Point, double>(.0), new FemLib::DiagonalizeMethod()));
+        vec_bc2.push_back(new FemLib::FemNeumannBC<double, double>(head, poly_left, false, new MathLib::FunctionConstant<GeoLib::Point, double>(-1e-5)));
+        // mat
+        _K = (K!=0) ? K : new MathLib::FunctionConstant<double*, double>(1.e-11);
+    }
+
+    static void calculateHead(GWFemTest &gw)
+    {
+        const MeshLib::IMesh *msh = gw.msh;
+        for (size_t i=0; i<gw.vec_bc1.size(); i++) gw.vec_bc1[i]->setup();
+        for (size_t i=0; i<gw.vec_bc2.size(); i++) gw.vec_bc2[i]->setup();
+        // global EQS
+        const size_t n_dof = msh->getNumberOfNodes();
+        MathLib::DenseLinearEquations eqs;
+        eqs.create(n_dof);
+
+        MathLib::DenseLinearEquations::MatrixType* globalA = eqs.getA();
+        double* globalRHS = eqs.getRHS();
+
+        //assembly
+        FemLib::LagrangianFeObjectContainer* feObjects = gw.head->getFeObjectContainer();
+        MathLib::Matrix<double> localK;
+        std::vector<size_t> e_node_id_list;
+        for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
+            MeshLib::IElement *e = msh->getElemenet(i_e);
+            FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
+            const size_t &n_dof = fe->getNumberOfVariables();
+            localK.resize(n_dof, n_dof);
+            localK = .0;
+            fe->integrateDWxDN(gw._K, localK);
+            e->getNodeIDList(e_node_id_list);
+            globalA->add(e_node_id_list, localK); //TODO A(id_list) += K;
+        }
+
+        //outputLinearEQS(*globalA, globalRHS);
+
+        //apply BC
+        for (size_t i=0; i<gw.vec_bc2.size(); i++) gw.vec_bc2[i]->apply(globalRHS);
+        //outputLinearEQS(globalA, globalRHS);
+        for (size_t i=0; i<gw.vec_bc1.size(); i++) gw.vec_bc1[i]->apply(eqs);
+        //outputLinearEQS(*globalA, globalRHS);
+
+        //solve
+        eqs.solve();
+
+        //update head
+        gw.head->setNodalValues(eqs.getX());
+    }
+
+    static void calculateVelocity(GWFemTest &gw)
+    {
+        const MeshLib::IMesh *msh = gw.msh;
+        FemLib::LagrangianFeObjectContainer* feObjects = gw.head->getFeObjectContainer();
+        //calculate vel (vel=f(h))
+        for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
+            MeshLib::IElement* e = msh->getElemenet(i_e);
+            FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
+            std::vector<double> local_h(e->getNumberOfNodes());
+            for (size_t j=0; j<e->getNumberOfNodes(); j++)
+                local_h[j] = gw.head->getValue(e->getNodeID(j));
+            // for each integration points
+            FemLib::IFemNumericalIntegration *integral = fe->getIntegrationMethod();
+            double r[2] = {};
+            const size_t n_gp = integral->getNumberOfSamplingPoints();
+            gw.vel->setNumberOfIntegationPoints(i_e, n_gp);
+            std::vector<double> xi(e->getNumberOfNodes());
+            std::vector<double> yi(e->getNumberOfNodes());
+            for (size_t i=0; i<e->getNumberOfNodes(); i++) {
+                const GeoLib::Point* pt = msh->getNodeCoordinatesRef(e->getNodeID(i));
+                xi[i] = (*pt)[0];
+                yi[i] = (*pt)[1];
+            }
+            for (size_t ip=0; ip<n_gp; ip++) {
+                MathLib::Vector2D q;
+                q.getRawRef()[0] = .0;
+                q.getRawRef()[1] = .0;
+                integral->getSamplingPoint(ip, r);
+                fe->computeBasisFunctions(r);
+                const MathLib::Matrix<double> *dN = fe->getGradBasisFunction();
+                MathLib::Matrix<double>*N = fe->getBasisFunction();
+                std::vector<double> xx(2);
+                N->axpy(1.0, &xi[0], .0, &xx[0]);
+                N->axpy(1.0, &yi[0], .0, &xx[1]);
+
+                double k;
+                gw._K->eval(&xx[0], k);
+                dN->axpy(-k, &local_h[0], .0, q.getRawRef()); //TODO  q = - K * dN * local_h;
+                gw.vel->setIntegrationPointValue(i_e, ip, q);
+            }
+        }
+    }
+};
+
+
 
 struct DiscreteExample1
 {

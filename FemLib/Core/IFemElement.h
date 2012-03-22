@@ -15,6 +15,10 @@
 namespace FemLib
 {
 
+typedef MathLib::IFunction<double*, double> SpatialFunction;
+typedef MathLib::IFunction<double*, double*> SpatialFunctionVector;
+typedef MathLib::Matrix<double> LocalMatrix;
+
 /**
  * \brief IFiniteElement class is an interface to all kinds of finite element classes. 
  *
@@ -39,18 +43,18 @@ public:
     /// compute basis functions \f$ \mathbf{N}_e \f$, \f$ {\nabla}_x \mathbf{N}_e \f$ at the given point
     virtual void computeBasisFunctions(const double *x) = 0;
     /// get evaluated basis functions \f$ \mathbf{N}_e \f$. 
-    virtual MathLib::Matrix<double>* getBasisFunction() = 0;
+    virtual LocalMatrix* getBasisFunction() = 0;
     /// get evaluated gradient of basis functions \f$ {\nabla}_x \mathbf{N}_e \f$. 
-    virtual MathLib::Matrix<double>* getGradBasisFunction() = 0;
+    virtual LocalMatrix* getGradBasisFunction() = 0;
 
     /// make interpolation from nodal values \f$ u^h(\mathbf{x}) = \mathbf{N}_e (\mathbf x) \mathbf{u}_e \f$
     virtual double interpolate(double *pt, double *nodal_values) = 0;
     /// compute an matrix \f$ \mathbf{M}_e = \int_{\Omega_e} {\mathbf{N}_e^*}^T f(\mathbf x) \mathbf{N}_e d\Omega \f$
-    virtual void integrateWxN( MathLib::IFunction<double, double*>*, MathLib::Matrix<double> &) = 0;
+    virtual void integrateWxN( SpatialFunction*, LocalMatrix &) = 0;
     /// compute an matrix \f$ \mathbf{M}_e = \int_{\Omega_e} {\mathbf{N}_e^*}^T \mathbf{f}(\mathbf x) \nabla \mathbf{N}_e d\Omega \f$
-    virtual void integrateWxDN( MathLib::IFunction<double*, double*>*, MathLib::Matrix<double> &) = 0;
+    virtual void integrateWxDN(SpatialFunctionVector*, LocalMatrix &) = 0;
     /// compute an matrix \f$ \mathbf{M}_e = \int_{\Omega_e} {\nabla \mathbf{N}_e^*}^T f(\mathbf x) \nabla \mathbf{N}_e d\Omega \f$
-    virtual void integrateDWxDN( MathLib::IFunction<double, double*> *f, MathLib::Matrix<double> &) = 0;
+    virtual void integrateDWxDN( SpatialFunction *f, LocalMatrix &) = 0;
 
     /// get the integration method
     virtual IFemNumericalIntegration* getIntegrationMethod() const = 0;

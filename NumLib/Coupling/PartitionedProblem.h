@@ -24,6 +24,8 @@ public:
     {
     }
 
+    virtual ~PartitionedProblem() {};
+
     /// get the number of parameters
     size_t getNumberOfParameters() const {return _vars.size();};
 

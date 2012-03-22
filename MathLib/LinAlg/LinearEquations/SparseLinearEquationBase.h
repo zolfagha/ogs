@@ -16,12 +16,12 @@ namespace MathLib
  * \brief 
  */
 template<typename IDX_TYPE>
-class CRSLinearEquationsBase : public ILinearEquations
+class AbstractCRSLinearEquation : public ILinearEquations
 {
 public:
-    CRSLinearEquationsBase() : _A(0) {};
+    AbstractCRSLinearEquation() : _A(0) {};
 
-    virtual ~CRSLinearEquationsBase()
+    virtual ~AbstractCRSLinearEquation()
     {
         Base::releaseObject(_A);
     }
@@ -120,7 +120,7 @@ private:
     std::vector<size_t> _vec_knownX_id;
     std::vector<double> _vec_knownX_x;
 
-    DISALLOW_COPY_AND_ASSIGN(CRSLinearEquationsBase);
+    DISALLOW_COPY_AND_ASSIGN(AbstractCRSLinearEquation);
 
     void setKnownXi_ReduceSizeOfEQS(CRSMatrix<double, IDX_TYPE> *A, double *org_eqsRHS, double *org_eqsX, const std::vector<size_t> &vec_id, const std::vector<double> &vec_x, std::vector<double> &out_b, std::vector<double> &out_x, std::map<size_t,size_t> &map_solved_orgEqs);
 };

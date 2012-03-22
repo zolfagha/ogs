@@ -44,7 +44,7 @@ public:
             const std::set<size_t> connected_nodes = topo_node2nodes.getConnectedNodes(i);
             for (size_t j=0; j<local_dofTable.getNumberOfVariables(); j++) {
                 // for each DoF(var,pt)
-                long row_id = local_dofTable.mapEqsID(j, mesh_id, i);
+                //long row_id = local_dofTable.mapEqsID(j, mesh_id, i);
                 std::set<size_t> &setConnection = row_major_entries[i];
                 // add all DoFs defined in this point
                 for (size_t l=0; l<local_dofTable.getNumberOfVariables(); l++) {
@@ -72,7 +72,7 @@ public:
             const size_t global_i = pt_mapping.local2global(i);
             for (size_t j=0; j<global_dofTable.getNumberOfVariables(); j++) {
                 // for each DoF(var,pt)
-                long row_id = global_dofTable.mapEqsID(j, mesh_id, global_i);
+                //long row_id = global_dofTable.mapEqsID(j, mesh_id, global_i);
                 std::set<size_t> &setConnection = row_major_entries[i];
                 // add all DoFs defined in this point
                 for (size_t l=0; l<global_dofTable.getNumberOfVariables(); l++) {
@@ -197,14 +197,14 @@ public:
 //    }
 //};
 
-class SparsityBuilderFromLocalSparsity
-{
-public:
-    SparsityBuilderFromLocalSparsity(std::vector<MathLib::RowMajorSparsity*> &list_local_sparse, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
-    {
-
-    }
-};
+//class SparsityBuilderFromLocalSparsity
+//{
+//public:
+//    SparsityBuilderFromLocalSparsity(std::vector<MathLib::RowMajorSparsity*> &list_local_sparse, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
+//    {
+//
+//    }
+//};
 
 template <class T_SPARSITY_BUILDER>
 class SparsityBuilderFromDDC

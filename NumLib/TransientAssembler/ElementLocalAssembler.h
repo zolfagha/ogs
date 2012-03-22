@@ -12,6 +12,9 @@
 namespace NumLib
 {
 
+/**
+ * \brief Interface class for element local assembler for transient case
+ */
 class ITransientElemenetLocalAssembler
 {
 public:
@@ -21,7 +24,7 @@ public:
 };
 
 /**
-* \brief Abstract class of element assembler for time ODE formulations with FEM
+* \brief Interface class of element assembler for time ODE formulations
  */
 class ITimeODEElementAssembler
 {
@@ -40,7 +43,7 @@ private:
     T_USER_ASSEMBLY _time_ode;
     double _theta;
 public:
-    TimeEulerElementAssembler(T_USER_ASSEMBLY &a) : _theta(1.0), _time_ode(a)
+    TimeEulerElementAssembler(T_USER_ASSEMBLY &a) : _time_ode(a), _theta(1.0)
     {
     };
 

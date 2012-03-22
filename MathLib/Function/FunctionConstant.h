@@ -6,8 +6,8 @@
 namespace MathLib
 {
 
-template<typename Tval, typename Tpos>
-class FunctionConstant : public IFunction<Tval, Tpos>
+template<typename Tpos, typename Tval>
+class FunctionConstant : public IFunction<Tpos,Tval>
 {
 public:
     FunctionConstant(const Tval &v)
@@ -17,14 +17,14 @@ public:
 
     virtual ~FunctionConstant() {};
 
-    virtual Tval eval(const Tpos&)
+    virtual void eval(const Tpos&, Tval &v)
     {
-        return _v;
+        v = _v;
     };
 
-    virtual IFunction<Tval,Tpos>* clone() const
+    virtual IFunction<Tpos,Tval>* clone() const
     {
-        IFunction<Tval,Tpos>* obj = new FunctionConstant(_v);
+        IFunction<Tpos,Tval>* obj = new FunctionConstant(_v);
         return obj;
     }
 private:

@@ -25,6 +25,7 @@ public:
     //TemplateVector(T &v1, T &v2, T&v3);
 
     TemplateVector<T,N>& operator= (T a);
+    void operator-= (const TemplateVector<T,N> &v);
 
     const T* getRaw() const {return _data;};
     T* getRawRef() {return _data;};
@@ -106,6 +107,13 @@ public:
     {
         for (size_t i = 0; i < 2; i++)
             _data[i] += v._data[i];
+
+        return *this;
+    }
+    TemplateVector<T,2>& operator-= (const TemplateVector<T,2> &v)
+    {
+        for (size_t i = 0; i < 2; i++)
+            _data[i] -= v._data[i];
 
         return *this;
     }

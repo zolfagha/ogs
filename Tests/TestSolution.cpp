@@ -1,13 +1,13 @@
 
-#include <vector>
-
 #include <gtest/gtest.h>
+
+#include <vector>
 
 #include "Base/CodingTools.h"
 
 #include "MathLib/Function/Function.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
-#include "MathLib/LinAlg/LinearEquations/SparseLinearEquations.h"
+#include "MathLib/LinAlg/LinearEquations/LisInterface.h"
 #include "GeoLib/Shape/Rectangle.h"
 
 #include "MeshLib/Tools/MeshGenerator.h"
@@ -16,7 +16,7 @@
 #include "FemLib/FemElementObjectContainer.h"
 
 #include "NumLib/TimeStepping/TimeSteppingController.h"
-#include "NumLib/Discrete/ElementLocalAssembler.h"
+#include "NumLib/TransientAssembler/ElementLocalAssembler.h"
 
 #include "SolutionLib/IProblem.h"
 #include "SolutionLib/FemProblem.h"
@@ -32,15 +32,15 @@ using namespace NumLib;
 using namespace SolutionLib;
 using namespace DiscreteLib;
 
-#ifdef USE_BLAS_LAPACK
 
 class GWAssembler: public NumLib::ITimeODEElementAssembler
 {
 private:
-    MathLib::IFunction<double, double*>* _matK;
+    MathLib::IFunction<double*, double>* _matK;
     FemLib::LagrangianFeObjectContainer* _feObjects;
 public:
-    GWAssembler(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::IFunction<double, double*> &mat) : _feObjects(&feObjects), _matK(&mat) 
+    GWAssembler(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::IFunction<double*, double> &mat)
+    : _matK(&mat), _feObjects(&feObjects)
     {
     };
 
@@ -58,7 +58,7 @@ public:
 class GWFemTestSystem : public NumLib::ITransientSystem
 {
     typedef FemIVBVProblem<GWAssembler> GWFemProblem;
-    typedef SingleStepLinearFEM<TimeEulerElementAssembler, MathLib::SparseLinearEquations, FemIVBVProblem<GWAssembler>> SolutionForHead;
+    typedef SingleStepLinearFEM<TimeEulerElementAssembler, MathLib::CRSLisSolver, FemIVBVProblem<GWAssembler> > SolutionForHead;
 public:
     GWFemTestSystem()
     {
@@ -92,15 +92,15 @@ public:
     };
 
     //#Define a problem
-    void define(DiscreteSystem &dis, MathLib::IFunction<double, double*> &K)
+    void define(DiscreteSystem &dis, MathLib::IFunction<double*, double> &K)
     {
         MeshLib::IMesh *msh = dis.getMesh();
-        size_t nnodes = msh->getNumberOfNodes();
+        //size_t nnodes = msh->getNumberOfNodes();
         _feObjects = new LagrangianFeObjectContainer(*msh);
         //equations
         GWAssembler ele_eqs(*_feObjects, K) ;
         //IVBV problem
-        _problem = new GWFemProblem(dis, *dis.getMesh(), GWAssembler(ele_eqs));
+        _problem = new GWFemProblem(dis, *dis.getMesh(), ele_eqs);
         //BC
         size_t headId = _problem->createField(PolynomialOrder::Linear);
         _head = _problem->getField(headId);
@@ -108,16 +108,19 @@ public:
         Polyline* poly_left = _rec->getLeft();
         Polyline* poly_right = _rec->getRight();
         _problem->setIC(headId, *_head);
-        _problem->addDirichletBC(headId, *poly_right, false, MathLib::FunctionConstant<double, GeoLib::Point>(.0));
-        _problem->addNeumannBC(headId, *poly_left, false, MathLib::FunctionConstant<double, GeoLib::Point>(-1e-5));
+        MathLib::FunctionConstant<GeoLib::Point, double> f1(.0);
+        _problem->addDirichletBC(headId, *poly_right, false, f1);
+        MathLib::FunctionConstant<GeoLib::Point, double> f2(-1e-5);
+        _problem->addNeumannBC(headId, *poly_left, false, f2);
         //transient
-        _problem->setTimeSteppingFunction(TimeStepFunctionConstant(.0, 100.0, 10.0));
+        TimeStepFunctionConstant tim(.0, 100.0, 10.0);
+        _problem->setTimeSteppingFunction(tim);
         //solution algorithm
         _solHead = new SolutionForHead(dis, *_problem);
         _solHead->getTimeODEAssembler()->setTheta(1.0);
-        MathLib::SparseLinearEquations* linear_solver = _solHead->getLinearEquationSolver();
-        linear_solver->getOption().solver_type = SparseLinearEquations::SolverCG;
-        linear_solver->getOption().precon_type = SparseLinearEquations::NONE;
+        MathLib::CRSLisSolver* linear_solver = _solHead->getLinearEquationSolver();
+        linear_solver->getOption().ls_method = MathLib::LIS_option::CG;
+        linear_solver->getOption().ls_precond = MathLib::LIS_option::NONE;
 
 
         //vel = new FEMIntegrationPointFunctionVector2d(msh);
@@ -148,7 +151,7 @@ TEST(Solution, Fem1)
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     DiscreteSystem dis(*msh);
     // mat
-    MathLib::FunctionConstant<double, double*> K(1.e-11);
+    MathLib::FunctionConstant<double*, double> K(1.e-11);
     // BC
     // define problems
     GWFemTestSystem gwProblem;
@@ -176,7 +179,7 @@ TEST(Solution, Fem2)
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     DiscreteSystem dis(*msh);
     // mat
-    MathLib::FunctionConstant<double, double*> K(1.e-11);
+    MathLib::FunctionConstant<double*, double> K(1.e-11);
     // BC
     // define problems
     GWFemTestSystem gwProblem;
@@ -204,4 +207,3 @@ TEST(Solution, Fem2)
     Base::releaseObject(msh);
 }
 
-#endif

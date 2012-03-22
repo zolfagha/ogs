@@ -32,6 +32,18 @@ public:
     virtual T& operator[] (size_t idx) = 0;
     virtual const T& operator[] (size_t idx) const = 0;
 
+    virtual IDiscreteVector<T>& operator= (const IDiscreteVector<T> &src)
+    {
+    	for (size_t i=getRangeBegin(); i<getRangeEnd(); i++)
+    		(*this)[i] = src[i];
+    	return *this;
+    }
+    virtual void operator-= (const IDiscreteVector<T>& v)
+    {
+    	for (size_t i=getRangeBegin(); i<getRangeEnd(); i++)
+    		(*this)[i] -= v[i];
+    }
+
     //virtual typename std::vector<T>::iterator begin() = 0;
     //virtual typename std::vector<T>::iterator end() = 0;
     virtual size_t getRangeBegin() const = 0;
