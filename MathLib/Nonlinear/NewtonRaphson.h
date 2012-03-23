@@ -7,46 +7,24 @@
 namespace MathLib
 {
 
-/**
- * Solve J dx = -r
- */
-class NewtonDxSolverScalar
-{
-public:
-    inline bool solve(double &r, double &jac, double &dx)
-    {
-    	if (jac==0) return false;
-    	dx = -r / jac;
-    	return true;
-    }
-    void reset() {};
-};
 
-/**
- * Solve J dx = -r
- */
-template <typename T_VEC, typename T_JAC>
-class NewtonDxSolverVector
+template<class F_JACOBIAN, class T_LINEAR_SOLVER, class T_JACOB>
+class NewtonFunctionDXVector
 {
 private:
-	MathLib::ILinearEquations* _linear_solver;
-
+	F_JACOBIAN* _f_j;
+	T_LINEAR_SOLVER* _linear_solver;
 public:
-	NewtonDxSolverVector(MathLib::ILinearEquations* linear_solver) : _linear_solver(linear_solver) {};
+	NewtonFunctionDXVector(F_JACOBIAN &f, T_LINEAR_SOLVER &linear_solver)
+		: _f_j(&f), _linear_solver(&linear_solver) {};
 
-    void reset()
-    {
-    	_linear_solver->reset();
-    };
-
-    inline bool solve(T_VEC &r,T_JAC &jac, T_VEC &dx)
-    {
-    	if (!check_jac(jac)) return false;
-
-    	const size_t n_rows = jac.getNRows();
-//    	for (size_t i=0; i<n_rows; i++)
-//    		for (size_t j=0; j<n_rows; j++)
-//    			_linear_solver->setA(i,j,jac(i,j));
+    template<class T_VALUE>
+	void eval(const T_VALUE &x, const T_VALUE &r, T_VALUE &dx)
+	{
+    	const size_t n_rows = _linear_solver->getDimension();
+    	T_JACOB* jac = _linear_solver->getA();
+    	_f_j->eval(x, *jac);
+    	//if (!check_jac(jac)) return false;
 
     	// rhs = -r
     	for (size_t i=0; i<n_rows; ++i)
@@ -56,22 +34,38 @@ public:
     	_linear_solver->solve();
 
     	// get dx
-    	double *x = _linear_solver->getX();
+    	double *u = _linear_solver->getX();
     	for (size_t i=0; i<n_rows; ++i)
-    		dx[i] = x[i];
+    		dx[i] = u[i];
+	}
 
-    	return true;
-    }
-
-    inline bool check_jac(T_JAC &jac)
+    inline bool check_jac(T_JACOB &jac)
     {
-    	for (size_t i=0; i<jac.getNRows(); i++)
-    		for (size_t j=0; j<jac.getNCols(); j++)
+    	const size_t n = _linear_solver->getDimension();
+    	for (size_t i=0; i<n; i++)
+    		for (size_t j=0; j<n; j++)
     			if (jac(i,j)!=.0) return true;
     	return false;
     }
-
 };
+
+template<class F_JACOBIAN>
+class NewtonFunctionDXScalar
+{
+private:
+	F_JACOBIAN* _f_j;
+public:
+	NewtonFunctionDXScalar(F_JACOBIAN &f) : _f_j(&f) {};
+
+	void eval(const double &x, const double &r, double &dx)
+	{
+    	double j;
+    	_f_j->eval(x, j);
+    	if (j==0) return; //TODO error
+    	dx = -r / j;
+	}
+};
+
 
 /**
  * \brief Newton-Raphson method
@@ -80,8 +74,8 @@ class NewtonRaphsonMethod
 {
 public:
 	/// general solver
-    template<class F_PROBLEM, class F_PROBLEM_DIFF, class T_VALUE, class T_JACOBIAN, class T_DX_SOLVER, class T_CONVERGENCE>
-    int solve(F_PROBLEM &fun, F_PROBLEM_DIFF* df, T_VALUE &x0, T_VALUE &x_new, T_VALUE &r, T_JACOBIAN &jacobian, T_VALUE &dx, T_DX_SOLVER &dx_solver, size_t max_itr_count=100, T_CONVERGENCE* convergence=0)
+    template<class F_RESIDUALS, class F_DX, class T_VALUE, class T_CONVERGENCE>
+    int solve(F_RESIDUALS &f_residuals, F_DX &f_dx, T_VALUE &x0, T_VALUE &x_new, T_VALUE &r, T_VALUE &dx, size_t max_itr_count=100, T_CONVERGENCE* convergence=0)
     {
         T_CONVERGENCE _default_convergence;
     	if (convergence==0) convergence = &_default_convergence;
@@ -89,17 +83,13 @@ public:
     	x_new = x0;
 
     	bool converged = false;
-    	std::cout << "Nonlinear iteration started!" << std::endl;
+    	std::cout << "Newton-Raphson iteration started!" << std::endl;
+    	f_residuals.eval(x0, r);
     	for (size_t i=0; i<max_itr_count; i++) {
-    		dx_solver.reset();
-        	fun.eval(x_new, r);
-        	df->eval(x_new, jacobian);
-            if (!dx_solver.solve(r, jacobian, dx)) {
-            	std::cout << "->***Warning: Jacobian was evaluated as zero." << std::endl;
-            	return -1;
-            }
+        	f_dx.eval(x_new, r, dx);
             x_new += dx;
-            printout(i, x_new, dx);
+        	f_residuals.eval(x_new, r);
+            //printout(i, x_new, r, dx);
             if (convergence->check(&r, &dx, &x_new)) {
                 converged = true;
                 break;
@@ -113,53 +103,60 @@ public:
     }
 
     /// solve scalar problems
-    template<class F_PROBLEM, class F_PROBLEM_DIFF>
-    int solve(F_PROBLEM &fun, F_PROBLEM_DIFF &df, double &x0, double &x_new, double error=1e-6, size_t max_itr_count=100)
+    template<class F_RESIDUALS, class F_JACOBIAN>
+    int solve(F_RESIDUALS &f_residuals, F_JACOBIAN &f_jac, double &x0, double &x_new, double error=1e-6, size_t max_itr_count=100)
     {
-    	double r, j, dx;
-    	NewtonDxSolverScalar dx_solver;
-    	NRCheckConvergence<double,NRErrorNorm1DX> check(error);
-    	return solve(fun, &df, x0, x_new, r, j, dx, dx_solver, max_itr_count, &check);
+    	NewtonFunctionDXScalar<F_JACOBIAN> f_dx(f_jac);
+    	double r, dx;
+    	NRCheckConvergence<double,NRErrorAbsResMNormOrRelDxMNorm> check(error);
+    	return solve(f_residuals, f_dx, x0, x_new, r, dx, max_itr_count, &check);
     }
 
     /// solve vector problems using a direct linear solver
-    template<class F_PROBLEM, class F_PROBLEM_DIFF, class T_V, class T_CONVERGENCE>
-    int solve(F_PROBLEM &fun, F_PROBLEM_DIFF &df, T_V &x0, T_V &x_new, T_CONVERGENCE* check_error=0, size_t max_itr_count=100)
+    template<class F_RESIDUALS, class F_JACOBIAN, class T_V, class T_CONVERGENCE>
+    int solve(F_RESIDUALS &f_residuals, F_JACOBIAN &f_jac, T_V &x0, T_V &x_new, T_CONVERGENCE* check_error=0, size_t max_itr_count=100)
     {
     	const size_t n = x0.size();
     	T_V r(n), dx(n);
     	MathLib::DenseLinearEquations dense;
     	dense.create(n);
-    	NewtonDxSolverVector<T_V, MathLib::Matrix<double> > dx_solver(&dense);
-    	return solve(fun, &df, x0, x_new, r, *dense.getA(), dx, dx_solver, max_itr_count, check_error);
+    	NewtonFunctionDXVector<F_JACOBIAN, MathLib::DenseLinearEquations, MathLib::Matrix<double> > f_dx(f_jac, dense);
+    	return solve(f_residuals, f_dx, x0, x_new, r, dx, max_itr_count, check_error);
     }
 
     /// solve vector problems using a direct linear solver
-    template<class F_PROBLEM, class F_PROBLEM_DIFF, class T_V>
-    int solve(F_PROBLEM &fun, F_PROBLEM_DIFF &df, T_V &x0, T_V &x_new, double error=1e-6, size_t max_itr_count=100)
+    template<class F_RESIDUALS, class F_JACOBIAN, class T_V>
+    int solve(F_RESIDUALS &f_residuals, F_JACOBIAN &f_jac, T_V &x0, T_V &x_new, double error=1e-6, size_t max_itr_count=100)
     {
-    	NRCheckConvergence<T_V,NRErrorNorm1DX> check(error);
-    	return solve(fun, df, x0, x_new, &check, max_itr_count);
+    	NRCheckConvergence<T_V,NRErrorAbsResMNormOrRelDxMNorm> check(error);
+    	return solve(f_residuals, f_jac, x0, x_new, &check, max_itr_count);
     }
 
 private:
     template<class T_VALUE>
-    inline void printout(size_t i, T_VALUE& x_new, T_VALUE& dx)
+    inline void printout(size_t i, T_VALUE &x_new, T_VALUE &r, T_VALUE &dx)
     {
+    	std::cout << "-> " << i <<": ";
+#if 0
     	std::cout << "-> " << i <<": x=(";
     	for (size_t i=0; i<x_new.size(); i++) std::cout << x_new[i] << " ";
+    	std::cout << "), r=(";
+    	for (size_t i=0; i<dx.size(); i++) std::cout << r[i] << " ";
     	std::cout << "), dx=(";
     	for (size_t i=0; i<dx.size(); i++) std::cout << dx[i] << " ";
     	std::cout << ")" << std::endl;
+#endif
     }
 };
 
+#if 0
 // template specialization
 template<>
-inline void NewtonRaphsonMethod::printout(size_t i, double& x_new, double& dx)
+inline void NewtonRaphsonMethod::printout(size_t i, double &x_new, double &r, double &dx)
 {
-	std::cout << "-> " << i <<": x=" << x_new << ", dx=" << dx << std::endl;
+	std::cout << "-> " << i << ": x=" << x_new << ", r=" << r << ", dx=" << dx << std::endl;
 }
+#endif
 
 } //end
 

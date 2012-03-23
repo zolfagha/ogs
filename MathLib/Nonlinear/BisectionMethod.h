@@ -21,7 +21,7 @@ public:
     	f_residuals.eval(x_c, r_c);
 
     	bool converged = false;
-    	std::cout << "Nonlinear iteration started!" << std::endl;
+    	std::cout << "Bisection iteration started!" << std::endl;
     	for (size_t i=0; i<max_itr_count; i++) {
     		x_b = x_a+x_c;
     		x_b *= 0.5;

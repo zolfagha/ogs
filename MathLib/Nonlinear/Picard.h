@@ -31,7 +31,7 @@ public:
     	x_old = x0;
 
     	bool converged = false;
-    	std::cout << "Nonlinear iteration started!" << std::endl;
+    	std::cout << "Picard iteration started!" << std::endl;
     	for (size_t i=0; i<max_itr_count; i++) {
         	fun.eval(x_old, x_new);
         	dx = x_new;

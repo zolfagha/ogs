@@ -5,6 +5,7 @@
 
 #include "lis.h"
 
+#include "Base/CodingTools.h"
 #include "MathLib/LinAlg/Sparse/SparseTableCRS.h"
 #include "ILinearEquations.h"
 #include "SparseLinearEquationBase.h"
@@ -78,7 +79,8 @@ struct LIS_option
         GPBiCG = 6,
         TFQMR = 7,
         Orthomin = 8,
-        GMRES = 9
+        GMRES = 9,
+        INVALID = 0
     };
     enum PreconType
     {
@@ -92,6 +94,35 @@ struct LIS_option
         ls_precond = NONE;
         ls_max_iterations = 500;
         ls_error_tolerance = 1.e-6;
+    }
+    SolverType getSolverType(const std::string &str)
+    {
+    	if (str.compare("CG")==0)
+    		return CG;
+    	if (str.compare("BiCG")==0)
+    		return BiCG;
+    	if (str.compare("CGS")==0)
+    		return CGS;
+    	if (str.compare("BiCGSTAB")==0)
+    		return BiCGSTAB;
+    	if (str.compare("BiCGSTABl")==0)
+    		return BiCGSTABl;
+    	if (str.compare("GPBiCG")==0)
+    		return GPBiCG;
+    	if (str.compare("TFQMR")==0)
+    		return TFQMR;
+    	if (str.compare("Orthomin")==0)
+    		return Orthomin;
+
+    	return INVALID;
+    }
+    PreconType getPreconType(const std::string &str)
+    {
+    	RETURN_ENUM_IF_SAME_STRING(NONE, str);
+       	RETURN_ENUM_IF_SAME_STRING(Jacobi, str);
+       	RETURN_ENUM_IF_SAME_STRING(ILU, str);
+
+    	return NONE;
     }
 };
 

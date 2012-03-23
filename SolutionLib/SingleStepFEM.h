@@ -5,7 +5,6 @@
 
 #include "Base/CodingTools.h"
 #include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
-#include "MathLib/Nonlinear/Picard.h"
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "DiscreteLib/LinearEquation/MeshBasedDiscreteLinearEquation.h"
@@ -18,28 +17,19 @@
 
 #include "ISolution.h"
 #include "TransientFemFunctions.h"
+#include "Nonlinear.h"
 
 namespace SolutionLib
 {
 
-//struct FemInput
-//{
-//	const NumLib::TimeStep* t_n1;
-//	std::vector<FemLib::FemNodalFunctionScalar*> u_n;
-//
-//	FemInput(const NumLib::TimeStep &t, std::vector<FemLib::FemNodalFunctionScalar*> &u) : t_n1(&t), u_n(u) {};
-//};
-//
-//struct FemOutput
-//{
-//	std::vector<FemLib::FemNodalFunctionScalar*> u_n1;
-//};
 
-
-template<   template <class> class T_TIME_ODE_ASSEMBLER, 
-            class T_LINEAR_SOLVER, 
-            class T_FEM_PROBLEM_AND_ASSEMBLER >
-class SingleStepLinearFEM;
+template<
+	template <class> class T_TIME_ODE_ASSEMBLER,
+    class T_LINEAR_SOLVER,
+    class T_FEM_PROBLEM_AND_ASSEMBLER,
+    class T_NONLINEAR
+    >
+class SingleStepFEM;
 
 
 /**
@@ -50,11 +40,14 @@ class SingleStepLinearFEM;
  * @tparam T_USER_FEM_PROBLEM  	FEM problem class
  * @tparam T_USER_ASSEMBLY     	Local assembly class
  */
-template<   template <class> class T_TIME_ODE_ASSEMBLER, 
-            class T_LINEAR_SOLVER, 
-            template <class> class T_USER_FEM_PROBLEM, 
-            class T_USER_ASSEMBLY >
-class SingleStepLinearFEM<T_TIME_ODE_ASSEMBLER, T_LINEAR_SOLVER, T_USER_FEM_PROBLEM<T_USER_ASSEMBLY> >
+template <
+	template <class> class T_TIME_ODE_ASSEMBLER,
+    class T_LINEAR_SOLVER,
+    template <class> class T_USER_FEM_PROBLEM,
+    class T_USER_ASSEMBLY,
+    class T_NONLINEAR
+    >
+class SingleStepFEM<T_TIME_ODE_ASSEMBLER, T_LINEAR_SOLVER, T_USER_FEM_PROBLEM<T_USER_ASSEMBLY>, T_NONLINEAR>
 	: public AbstractTimeSteppingAlgorithm
 {
 public:
@@ -68,7 +61,7 @@ public:
     /// - set up DoFs and equation index
     /// - prepare linear equation and solver
     /// - prepare linear functions
-    SingleStepLinearFEM(DiscreteLib::DiscreteSystem &dis, UserFemProblem &problem) 
+    SingleStepFEM(DiscreteLib::DiscreteSystem &dis, UserFemProblem &problem)
         : AbstractTimeSteppingAlgorithm(*problem.getTimeSteppingFunction()), 
           _problem(&problem), _element_ode_assembler(problem.getElementAssemlby()),
           _discrete_system(&dis), _linear_eqs(0)
@@ -96,13 +89,16 @@ public:
         _linear_eqs = _discrete_system->createLinearEquation<DiscreteLib::TemplateMeshBasedDiscreteLinearEquation, T_LINEAR_SOLVER, DiscreteLib::SparsityBuilderFromNodeConnectivity>(*_linear_solver, _dofManager);
         // setup linear function
         _linear_fucntion = new UserLinearFemFunction(problem, *_linear_eqs);
+        //MathLib::NewtonFunctionDXVector<UserLinearFemFunction, T_LINEAR_SOLVER, MathLib::CRSMatrix<double, signed> > f_dx(*_linear_fucntion, _linear_solver);
+        _nonlinear = new T_NONLINEAR(*_linear_fucntion);
     };
 
     ///
-    virtual ~SingleStepLinearFEM()
+    virtual ~SingleStepFEM()
     {
         Base::releaseObject(_linear_solver);
         Base::releaseObject(_linear_fucntion);
+        Base::releaseObject(_nonlinear);
     }
 
     /// get a linear equation solver object
@@ -117,19 +113,12 @@ public:
         this_t_n1.setTimeStepSize(dt);
         *_vec_n0 = *_vec_n1;
 
-        MathLib::PicardMethod picard;
         _linear_fucntion->reset(t_n1);
-        //        _linear_fucntion->eval(in, out);
-        picard.solve(*_linear_fucntion, *_vec_n0, *_vec_n1);
-        //        for (size_t i=0; i<n_var; i++) {
-        //            u_n1[i]->setNodalValues(x); //TODO use DOF
-        //        }
+        _nonlinear->solve(*_linear_fucntion, *_vec_n0, *_vec_n1);
 
-//        _u_n1.assign(out.u_n1.begin(), out.u_n1.end());
         _u_n1[0]->setNodalValues(*_vec_n1);
 
         return 0;
-//        return solve(this_t_n1, _u_n, _u_n1);
     }
 
     /// get the current solution
@@ -151,6 +140,7 @@ private:
 //    std::vector<FemLib::FemNodalFunctionScalar*> _u_n;
     std::vector<FemLib::FemNodalFunctionScalar*> _u_n1;
     UserLinearFemFunction* _linear_fucntion;
+    T_NONLINEAR* _nonlinear;
     MyFemVector *_vec_n0;
     MyFemVector *_vec_n1;
 

@@ -27,21 +27,33 @@ public:
     typedef T_TIME_ODE_ASSEMBLER<T_USER_ASSEMBLY> UserTimeOdeAssembler;
     typedef T_USER_FEM_PROBLEM<T_USER_ASSEMBLY> UserFemProblem;
 
+    /// constructor
+    /// @param problem		Fem problem
+    /// @param linear_eqs	Discrete linear equation
     TemplateTransientLinearFEMFunction(UserFemProblem &problem, DiscreteLib::IDiscreteLinearEquation &linear_eqs)
         : _problem(&problem), _element_ode_assembler(problem.getElementAssemlby()),
           _linear_eqs(&linear_eqs)
     {
     };
 
+    ///
 	virtual ~TemplateTransientLinearFEMFunction() {};
 
+	///
     MathLib::IFunction<MyFemVector,MyFemVector>* clone() const
 	{
     	return new TemplateTransientLinearFEMFunction<T_TIME_ODE_ASSEMBLER,T_LINEAR_SOLVER,T_USER_FEM_PROBLEM,T_USER_ASSEMBLY>(*_problem, *_linear_eqs);
 	}
 
-    void reset(const NumLib::TimeStep &t) {this->_t_n1 = const_cast<NumLib::TimeStep*>(&t);};
-    ///
+    /// reset property
+    void reset(const NumLib::TimeStep &t)
+    {
+    	this->_t_n1 = const_cast<NumLib::TimeStep*>(&t);
+    };
+
+    /// solve linear equations discretized with FEM
+    /// @param u_n	previous results
+    /// @param u_n1 new results
     void eval(const MyFemVector &u_n, MyFemVector &u_n1)
     {
     	// input, output
@@ -49,7 +61,6 @@ public:
 
         // prepare data
         UserFemProblem* pro = _problem;
-        //const size_t n_var = pro->getNumberOfVariables();
 
         // setup BC
         for (size_t i=0; i<pro->getNumberOfDirichletBC(); i++) {
@@ -79,7 +90,6 @@ public:
 
 		// solve
 		_linear_eqs->solve();
-
         _linear_eqs->getX(u_n1);
     }
 
@@ -90,5 +100,6 @@ private:
     DiscreteLib::IDiscreteLinearEquation* _linear_eqs;
     NumLib::TimeStep* _t_n1;
 };
+
 
 } //end

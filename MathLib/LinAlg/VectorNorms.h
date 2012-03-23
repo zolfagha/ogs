@@ -9,7 +9,7 @@
 #define VECTORNORMS_H_
 
 #include <cmath>
-
+#include <algorithm>
 #include "MathLib/MathTools.h"
 
 namespace MathLib {
@@ -36,6 +36,15 @@ inline double norm1(T &v, size_t n)
 	for (size_t i=0; i<n; i++)
 		s += fabs(v[i]);
 	return s;
+};
+
+template<class T>
+inline double norm_max(T &v, size_t n)
+{
+	double u_max = .0;
+	for (size_t i=0; i<n; i++)
+		u_max = std::max(fabs(u_max), v[i]);
+	return u_max;
 };
 
 

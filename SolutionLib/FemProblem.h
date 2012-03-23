@@ -37,6 +37,7 @@ public:
     /// get the number of variables
     size_t getNumberOfVariables() const { return 1; }
 
+    /// create FE approximation field
     size_t createField(FemLib::PolynomialOrder::type order)
     {
         if (_map_var==0) {
@@ -45,6 +46,7 @@ public:
         return 0;
     }
 
+    /// get the FE field
     FemLib::FemNodalFunctionScalar* getField(size_t) const
     {
         return _map_var;

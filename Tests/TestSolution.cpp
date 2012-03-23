@@ -20,7 +20,8 @@
 
 #include "SolutionLib/IProblem.h"
 #include "SolutionLib/FemProblem.h"
-#include "SolutionLib/SingleStepLinearFEM.h"
+#include "SolutionLib/SingleStepFEM.h"
+#include "SolutionLib/Nonlinear.h"
 
 #include "TestUtil.h"
 
@@ -55,10 +56,21 @@ public:
     }
 };
 
+template <
+	class T_NONLINEAR,
+	class T_LINEAR_SOLVER
+	>
 class GWFemTestSystem : public NumLib::ITransientSystem
 {
     typedef FemIVBVProblem<GWAssembler> GWFemProblem;
-    typedef SingleStepLinearFEM<TimeEulerElementAssembler, MathLib::CRSLisSolver, FemIVBVProblem<GWAssembler> > SolutionForHead;
+    typedef SingleStepFEM
+    		<
+    			TimeEulerElementAssembler,
+    			T_LINEAR_SOLVER,
+    			FemIVBVProblem<GWAssembler>,
+    			T_NONLINEAR
+    		> SolutionForHead;
+
 public:
     GWFemTestSystem()
     {
@@ -92,7 +104,7 @@ public:
     };
 
     //#Define a problem
-    void define(DiscreteSystem &dis, MathLib::IFunction<double*, double> &K)
+    void define(DiscreteSystem &dis, MathLib::IFunction<double*, double> &K, Base::Options &option)
     {
         MeshLib::IMesh *msh = dis.getMesh();
         //size_t nnodes = msh->getNumberOfNodes();
@@ -118,9 +130,8 @@ public:
         //solution algorithm
         _solHead = new SolutionForHead(dis, *_problem);
         _solHead->getTimeODEAssembler()->setTheta(1.0);
-        MathLib::CRSLisSolver* linear_solver = _solHead->getLinearEquationSolver();
-        linear_solver->getOption().ls_method = MathLib::LIS_option::CG;
-        linear_solver->getOption().ls_precond = MathLib::LIS_option::NONE;
+        T_LINEAR_SOLVER* linear_solver = _solHead->getLinearEquationSolver();
+        linear_solver->setOption(option);
 
 
         //vel = new FEMIntegrationPointFunctionVector2d(msh);
@@ -145,17 +156,91 @@ private:
 
 
 
-TEST(Solution, Fem1)
+TEST(Solution, Fem1_Linear)
 {
     // create a discrete system
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     DiscreteSystem dis(*msh);
     // mat
     MathLib::FunctionConstant<double*, double> K(1.e-11);
-    // BC
+    // options
+    Base::Options options;
+    Base::Options* op_lis = options.addSubGroup("Lis");
+    op_lis->addOption("solver_type", "CG");
+    op_lis->addOption("precon_type", "NONE");
+    op_lis->addOptionAsNum("error_tolerance", 1e-10);
+    op_lis->addOptionAsNum("max_iteration_step", 500);
     // define problems
-    GWFemTestSystem gwProblem;
-    gwProblem.define(dis, K);
+    GWFemTestSystem<SolutionLib::Linear, MathLib::CRSLisSolver> gwProblem;
+    gwProblem.define(dis, K, options);
+
+    gwProblem.solveTimeStep(TimeStep(1.0, 1.0));
+
+    std::vector<double> expected(9);
+    for (size_t i=0; i<9; i++) {
+        if (i%3==0) expected[i] = 2.e+6;
+        if (i%3==1) expected[i] = 1.e+6;
+        if (i%3==2) expected[i] = 0.e+6;
+    }
+
+    FemNodalFunctionScalar* h = gwProblem.getCurrentHead();
+
+    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], h->getNodalValues(), h->getNumberOfNodes());
+
+    Base::releaseObject(msh);
+}
+
+TEST(Solution, Fem1_Picard)
+{
+    // create a discrete system
+    MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
+    DiscreteSystem dis(*msh);
+    // mat
+    MathLib::FunctionConstant<double*, double> K(1.e-11);
+    // options
+    Base::Options options;
+    Base::Options* op_lis = options.addSubGroup("Lis");
+    op_lis->addOption("solver_type", "CG");
+    op_lis->addOption("precon_type", "NONE");
+    op_lis->addOptionAsNum("error_tolerance", 1e-10);
+    op_lis->addOptionAsNum("max_iteration_step", 500);
+    // define problems
+    GWFemTestSystem<SolutionLib::Picard, MathLib::CRSLisSolver> gwProblem;
+    gwProblem.define(dis, K, options);
+
+    gwProblem.solveTimeStep(TimeStep(1.0, 1.0));
+
+    std::vector<double> expected(9);
+    for (size_t i=0; i<9; i++) {
+        if (i%3==0) expected[i] = 2.e+6;
+        if (i%3==1) expected[i] = 1.e+6;
+        if (i%3==2) expected[i] = 0.e+6;
+    }
+
+    FemNodalFunctionScalar* h = gwProblem.getCurrentHead();
+
+    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], h->getNodalValues(), h->getNumberOfNodes());
+
+    Base::releaseObject(msh);
+}
+
+TEST(Solution, Fem1_Newton)
+{
+    // create a discrete system
+    MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
+    DiscreteSystem dis(*msh);
+    // mat
+    MathLib::FunctionConstant<double*, double> K(1.e-11);
+    // options
+    Base::Options options;
+    Base::Options* op_lis = options.addSubGroup("Lis");
+    op_lis->addOption("solver_type", "CG");
+    op_lis->addOption("precon_type", "NONE");
+    op_lis->addOptionAsNum("error_tolerance", 1e-10);
+    op_lis->addOptionAsNum("max_iteration_step", 500);
+    // define problems
+    GWFemTestSystem<SolutionLib::NewtonRaphson, MathLib::CRSLisSolver> gwProblem;
+    gwProblem.define(dis, K, options);
 
     gwProblem.solveTimeStep(TimeStep(1.0, 1.0));
 
@@ -180,10 +265,16 @@ TEST(Solution, Fem2)
     DiscreteSystem dis(*msh);
     // mat
     MathLib::FunctionConstant<double*, double> K(1.e-11);
-    // BC
+    // options
+    Base::Options options;
+    Base::Options* op_lis = options.addSubGroup("Lis");
+    op_lis->addOption("solver_type", "CG");
+    op_lis->addOption("precon_type", "NONE");
+    op_lis->addOptionAsNum("error_tolerance", 1e-10);
+    op_lis->addOptionAsNum("max_iteration_step", 500);
     // define problems
-    GWFemTestSystem gwProblem;
-    gwProblem.define(dis, K);
+    GWFemTestSystem<SolutionLib::Linear, MathLib::CRSLisSolver> gwProblem;
+    gwProblem.define(dis, K, options);
 
     // start time stepping
     TimeSteppingController timeStepping;

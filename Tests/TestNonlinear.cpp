@@ -102,7 +102,7 @@ public:
 class NL2_NR_D1
 {
 public:
-	void eval(std::valarray<double> &x, MathLib::Matrix<double> &j)
+	void eval(const std::valarray<double> &x, MathLib::Matrix<double> &j)
 	{
 		j(0,0) = 3.;
 		j(0,1) = -1.0;
@@ -191,7 +191,7 @@ public:
 	{
 	}
 
-	void eval(std::valarray<double> &x, MathLib::CRSMatrix<double, signed> &j)
+	void eval(const std::valarray<double> &x, MathLib::CRSMatrix<double, signed> &j)
 	{
 		j.setValue(0, 0, 3.);
 		j.setValue(0, 1, -1.0);
@@ -205,6 +205,96 @@ public:
 private:
   MathLib::CRSLisSolver* _linear_solver;
 };
+
+class NL4_Residual
+{
+public:
+	void eval(std::valarray<double> &x, std::valarray<double> &r)
+	{
+		double P = 1.;
+		double R = 10.;
+		double s = sqrt(2.);
+		r[1-1]= (9*P*x[1-1])/4 + (9*x[2-1]*x[3-1])/(8*s) + (P*R*x[7-1])/s;
+		r[2-1]= (81*P*x[2-1])/4 + (9*x[1-1]*x[3-1])/(8*s) + (P*R*x[8-1])/s;
+		r[3-1]= (-9*x[1-1]*x[2-1])/(4*s) + 9*P*x[3-1] + s*P*R*x[9-1];
+		r[4-1]= 36*P*x[4-1] + s*P*R*x[10-1];
+		r[5-1]= -2*x[5-1] + (x[2-1]*x[7-1])/(2*s) + (x[1-1]*x[8-1])/(2*s) - (x[4-1]*x[9-1])/s + s*x[4-1]*x[9-1] - (x[3-1]*x[10-1])/s + s*x[3-1]*x[10-1];
+		r[6-1]= -8*x[6-1] - (x[1-1]*x[7-1])/s - s*x[3-1]*x[9-1];
+		r[7-1]= -(x[1-1]/s) - (x[2-1]*x[5-1])/(2*s) + (x[1-1]*x[6-1])/s - (3*x[7-1])/2.0 + (3*x[3-1]*x[8-1])/(4*s) + (3*x[2-1]*x[9-1])/(4*s);
+		r[8-1]= -(x[2-1]/s) - (x[1-1]*x[5-1])/(2*s) - (3*x[3-1]*x[7-1])/(4*s) - (9*x[8-1])/2.0 - (3*x[1-1]*x[9-1])/(4*s);
+		r[9-1]= -(s*x[3-1]) - (x[4-1]*x[5-1])/s + s*x[3-1]*x[6-1] - (3*x[2-1]*x[7-1])/(4*s) + (3*x[1-1]*x[8-1])/(4*s) - 3*x[9-1];
+		r[10-1]= -(s*x[4-1]) - (x[3-1]*x[5-1])/s - 6*x[10-1];
+	}
+};
+
+class NL4_Jacobian
+{
+public:
+	void eval(const std::valarray<double> &x, MathLib::Matrix<double> &j)
+	{
+		double P = 1.;
+		double R = 10.;
+		double s = sqrt(2.);
+		j = .0;
+		j(1-1,1-1) = (9*P)/4.0;
+		j(7-1,1-1) = -(1/s)+x[6-1]/s;
+		j(1-1,2-1) = (9*x[3-1])/(8*s);
+		j(7-1,2-1) = -x[5-1]/(2*s) + (3*x[9-1])/(4*s);
+		j(1-1,3-1) = (9*x[2-1])/(8*s);
+		j(7-1,3-1) = (3*x[8-1])/(4*s);
+		j(1-1,7-1) = (P*R)/s;
+		j(7-1,5-1) = -x[2-1]/(2*s);
+		j(2-1,1-1) = (9*x[3-1])/(8*s);
+		j(7-1,6-1) = x[1-1]/s;
+		j(2-1,2-1) = (81*P)/4.0;
+		j(7-1,7-1) = -1.5;
+		j(2-1,3-1) = (9*x[1-1])/(8*s);
+		j(7-1,8-1) = (3*x[3-1])/(4*s);
+		j(2-1,8-1) = (P*R)/s;
+		j(7-1,9-1) = (3*x[2-1])/(4*s);
+		j(3-1,1-1) = (-9*x[2-1])/(4*s);
+		j(8-1,1-1) = -x[5-1]/(2*s) - (3*x[9-1])/(4*s);
+		j(3-1,2-1) = (-9*x[1-1])/(4*s);
+		j(8-1,2-1) = -(1/s);
+		j(3-1,3-1) = 9*P;
+		j(8-1,3-1) = (-3*x[7-1])/(4*s);
+		j(3-1,9-1) = s*P*R;
+		j(8-1,5-1) = -x[1-1]/(2*s);
+		j(4-1,4-1) = 36*P;
+		j(8-1,7-1) = (-3*x[3-1])/(4*s);
+		j(4-1,10-1)= s*P*R;
+		j(8-1,8-1) = -4.5;
+		j(5-1,1-1) = x[8-1]/(2*s);
+		j(8-1,9-1) = (-3*x[1-1])/(4*s);
+		j(5-1,2-1) = x[7-1]/(2*s);
+		j(9-1,1-1) = (3*x[8-1])/(4*s);
+		j(5-1,3-1) = -(x[10-1]/s) + s*x[10-1];
+		j(9-1,2-1) = (-3*x[7-1])/(4*s);
+		j(5-1,4-1) = -(x[9-1]/s) + s*x[9-1];
+		j(9-1,3-1) = -s + s*x[6-1];
+		j(5-1,5-1) = -2.0;
+		j(9-1,4-1) = -(x[5-1]/s);
+		j(5-1,7-1) = x[2-1]/(2*s);
+		j(9-1,5-1) = -(x[4-1]/s);
+		j(5-1,8-1) = x[1-1]/(2*s);
+		j(9-1,6-1) = s*x[3-1];
+		j(5-1,9-1) = -(x[4-1]/s) + s*x[4-1];
+		j(9-1,7-1) = (-3*x[2-1])/(4*s);
+		j(5-1,10-1)= -(x[3-1]/s) + s*x[3-1];
+		j(9-1,8-1) = (3*x[1-1])/(4*s);
+		j(6-1,1-1) = -(x[7-1]/s);
+		j(9-1,9-1) = -3.0;
+		j(6-1,3-1) = -(s*x[9-1]);
+		j(10-1,3-1) = -(x[5-1]/s);
+		j(6-1,6-1) = -8.0;
+		j(10-1,4-1) = -s;
+		j(6-1,7-1) = -(x[1-1]/s);
+		j(10-1,5-1) = -(x[3-1]/s);
+		j(6-1,9-1) = -(s*x[3-1]);
+		j(10-1,10-1)= -6.0;
+	}
+};
+
 //------------------------------------------------------------------
 
 TEST(Math, NonlinearNR_double)
@@ -234,23 +324,40 @@ TEST(Math, NonlinearNR_dense)
 	ASSERT_DOUBLE_ARRAY_EQ(my_expect, x, 2, 1e-5);
 }
 
+TEST(Math, NonlinearNR_dense2)
+{
+	typedef std::valarray<double> MyVector;
+
+	NL4_Residual f2;
+	NL4_Jacobian df2;
+	size_t n = 10;
+	MyVector x0(1.0, n);
+	MyVector x(0.0, n);
+	NewtonRaphsonMethod nr;
+	nr.solve(f2, df2, x0, x);
+
+	double my_expect[] = {3.39935, 3.70074e-018, -1.42576e-017, 1.4903e-021, 4.35602e-018, 0.325, -1.08167, -5.61495e-018, 7.58394e-018, -3.79368e-021};
+////	double my_expect[] = {1., 1.};
+	ASSERT_DOUBLE_ARRAY_EQ(my_expect, x, 10, 1e-5);
+}
+
 TEST(Math, NonlinearNR_sparse)
 {
 	typedef std::valarray<double> MyVector;
 	typedef MathLib::CRSMatrix<double, signed> MyMatrix;
-	typedef NRCheckConvergence<MyVector,NRErrorNorm1DX > MyConverge;
-	typedef NewtonDxSolverVector<MyVector,MyMatrix> MyDxSolver;
+	typedef NRCheckConvergence<MyVector,NRErrorAbsResMNormOrRelDxMNorm > MyConverge;
+	typedef NewtonFunctionDXVector<NL3_NR_D1, MathLib::CRSLisSolver, MyMatrix> MyDxFunction;
 
 	NL3_NR f;
 	NL3_NR_D1 df(f.getLinearSolver());
 	MyVector x0(6.0, 2);
 	MyVector x(0.0, 2);
 	MyVector r(2), dx(2);
-	MyDxSolver dx_solver(f.getLinearSolver());
 	MyMatrix* j = f.getLinearSolver()->getA();
+	MyDxFunction f_dx(df, *f.getLinearSolver());
 
 	NewtonRaphsonMethod nr;
-	nr.solve<NL3_NR,NL3_NR_D1,MyVector,MyMatrix,MyDxSolver,MyConverge>(f, &df, x0, x, r, *j, dx, dx_solver);
+	nr.solve<NL3_NR,MyDxFunction,MyVector,MyConverge>(f, f_dx, x0, x, r, dx);
 
 	double my_expect[] = {2., 8.};
 	ASSERT_DOUBLE_ARRAY_EQ(my_expect, x, 2, 1e-5);

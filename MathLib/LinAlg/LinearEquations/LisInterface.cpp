@@ -30,7 +30,17 @@ CRSLisSolver::~CRSLisSolver()
 
 void CRSLisSolver::setOption(const Base::Options &option)
 {
-    throw "LisSolver::setOption() is not implemented.";
+    const Base::Options *op = option.getSubGroup("Lis");
+    if (op==0) return;
+
+    if (op->hasOption("solver_type"))
+        _option.ls_method = _option.getSolverType(op->getOption("solver_type"));
+    if (op->hasOption("precon_type"))
+        _option.ls_precond = _option.getPreconType(op->getOption("precon_type"));
+    if (op->hasOption("error_tolerance"))
+        _option.ls_error_tolerance = op->getOptionAsNum<double>("error_tolerance");
+    if (op->hasOption("max_iteration_step"))
+        _option.ls_max_iterations = op->getOptionAsNum<int>("max_iteration_step");
 }
 
 void CRSLisSolver::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)
@@ -58,8 +68,12 @@ void CRSLisSolver::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)
     const size_t MAX_ZEILE = 512;
     char solver_options[MAX_ZEILE], tol_option[MAX_ZEILE];
 
+#ifdef _OPENMP
     int nthreads = omp_get_num_threads();
     //omp_set_num_threads (nthreads);
+#else
+    int nthreads = 1;
+#endif
 
     sprintf(solver_options, "-i %d -p %d %s", _option.ls_method, _option.ls_precond, _option.ls_extra_arg.c_str()); 
     sprintf(tol_option, "-tol %e -maxiter %d -omp_num_threads %d -initx_zeros 0", _option.ls_error_tolerance, _option.ls_max_iterations, nthreads);
