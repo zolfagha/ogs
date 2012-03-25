@@ -8,12 +8,13 @@ namespace MathLib
 {
 
 
-template<class F_JACOBIAN, class T_LINEAR_SOLVER, class T_JACOB>
+template<class F_JACOBIAN, class T_LINEAR_SOLVER>
 class NewtonFunctionDXVector
 {
 private:
 	F_JACOBIAN* _f_j;
 	T_LINEAR_SOLVER* _linear_solver;
+	typedef typename T_LINEAR_SOLVER::MatrixType JacobianType;
 public:
 	NewtonFunctionDXVector(F_JACOBIAN &f, T_LINEAR_SOLVER &linear_solver)
 		: _f_j(&f), _linear_solver(&linear_solver) {};
@@ -22,7 +23,7 @@ public:
 	void eval(const T_VALUE &x, const T_VALUE &r, T_VALUE &dx)
 	{
     	const size_t n_rows = _linear_solver->getDimension();
-    	T_JACOB* jac = _linear_solver->getA();
+    	JacobianType* jac = _linear_solver->getA();
     	_f_j->eval(x, *jac);
     	//if (!check_jac(jac)) return false;
 
@@ -39,7 +40,8 @@ public:
     		dx[i] = u[i];
 	}
 
-    inline bool check_jac(T_JACOB &jac)
+private:
+    inline bool check_jac(JacobianType &jac)
     {
     	const size_t n = _linear_solver->getDimension();
     	for (size_t i=0; i<n; i++)
@@ -74,6 +76,10 @@ class NewtonRaphsonMethod
 {
 public:
 	/// general solver
+	/// @tparam F_RESIDUALS
+	/// @tparam F_DX
+	/// @tparam T_VALUE
+	/// @tparam T_CONVERGENCE
     template<class F_RESIDUALS, class F_DX, class T_VALUE, class T_CONVERGENCE>
     int solve(F_RESIDUALS &f_residuals, F_DX &f_dx, T_VALUE &x0, T_VALUE &x_new, T_VALUE &r, T_VALUE &dx, size_t max_itr_count=100, T_CONVERGENCE* convergence=0)
     {
@@ -120,7 +126,7 @@ public:
     	T_V r(n), dx(n);
     	MathLib::DenseLinearEquations dense;
     	dense.create(n);
-    	NewtonFunctionDXVector<F_JACOBIAN, MathLib::DenseLinearEquations, MathLib::Matrix<double> > f_dx(f_jac, dense);
+    	NewtonFunctionDXVector<F_JACOBIAN, MathLib::DenseLinearEquations> f_dx(f_jac, dense);
     	return solve(f_residuals, f_dx, x0, x_new, r, dx, max_itr_count, check_error);
     }
 

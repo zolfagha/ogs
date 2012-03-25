@@ -346,7 +346,7 @@ TEST(Math, NonlinearNR_sparse)
 	typedef std::valarray<double> MyVector;
 	typedef MathLib::CRSMatrix<double, signed> MyMatrix;
 	typedef NRCheckConvergence<MyVector,NRErrorAbsResMNormOrRelDxMNorm > MyConverge;
-	typedef NewtonFunctionDXVector<NL3_NR_D1, MathLib::CRSLisSolver, MyMatrix> MyDxFunction;
+	typedef NewtonFunctionDXVector<NL3_NR_D1, MathLib::CRSLisSolver> MyDxFunction;
 
 	NL3_NR f;
 	NL3_NR_D1 df(f.getLinearSolver());

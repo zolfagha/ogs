@@ -27,7 +27,7 @@ template<
 	template <class> class T_TIME_ODE_ASSEMBLER,
     class T_LINEAR_SOLVER,
     class T_FEM_PROBLEM_AND_ASSEMBLER,
-    class T_NONLINEAR
+    template <class> class T_NONLINEAR
     >
 class SingleStepFEM;
 
@@ -45,7 +45,7 @@ template <
     class T_LINEAR_SOLVER,
     template <class> class T_USER_FEM_PROBLEM,
     class T_USER_ASSEMBLY,
-    class T_NONLINEAR
+    template <class> class T_NONLINEAR
     >
 class SingleStepFEM<T_TIME_ODE_ASSEMBLER, T_LINEAR_SOLVER, T_USER_FEM_PROBLEM<T_USER_ASSEMBLY>, T_NONLINEAR>
 	: public AbstractTimeSteppingAlgorithm
@@ -54,6 +54,7 @@ public:
     typedef T_TIME_ODE_ASSEMBLER<T_USER_ASSEMBLY> UserTimeOdeAssembler;
     typedef T_USER_FEM_PROBLEM<T_USER_ASSEMBLY> UserFemProblem;
     typedef TemplateTransientLinearFEMFunction<T_TIME_ODE_ASSEMBLER,T_LINEAR_SOLVER,T_USER_FEM_PROBLEM,T_USER_ASSEMBLY> UserLinearFemFunction;
+    typedef T_NONLINEAR<UserLinearFemFunction> UserNonlinearFunction;
 
     /// constructor
     ///
@@ -90,7 +91,7 @@ public:
         // setup linear function
         _linear_fucntion = new UserLinearFemFunction(problem, *_linear_eqs);
         //MathLib::NewtonFunctionDXVector<UserLinearFemFunction, T_LINEAR_SOLVER, MathLib::CRSMatrix<double, signed> > f_dx(*_linear_fucntion, _linear_solver);
-        _nonlinear = new T_NONLINEAR(*_linear_fucntion);
+        _nonlinear = new UserNonlinearFunction(*_linear_fucntion);
     };
 
     ///
@@ -114,7 +115,7 @@ public:
         *_vec_n0 = *_vec_n1;
 
         _linear_fucntion->reset(t_n1);
-        _nonlinear->solve(*_linear_fucntion, *_vec_n0, *_vec_n1);
+        _nonlinear->solve(*_vec_n0, *_vec_n1);
 
         _u_n1[0]->setNodalValues(*_vec_n1);
 
@@ -140,7 +141,7 @@ private:
 //    std::vector<FemLib::FemNodalFunctionScalar*> _u_n;
     std::vector<FemLib::FemNodalFunctionScalar*> _u_n1;
     UserLinearFemFunction* _linear_fucntion;
-    T_NONLINEAR* _nonlinear;
+    UserNonlinearFunction* _nonlinear;
     MyFemVector *_vec_n0;
     MyFemVector *_vec_n1;
 

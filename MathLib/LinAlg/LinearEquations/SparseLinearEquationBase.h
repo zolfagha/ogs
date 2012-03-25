@@ -19,6 +19,9 @@ template<typename IDX_TYPE>
 class AbstractCRSLinearEquation : public ILinearEquations
 {
 public:
+	typedef CRSMatrix<double, IDX_TYPE> MatrixType;
+    typedef std::vector<double> VectorType;
+	
     AbstractCRSLinearEquation() : _A(0) {};
 
     virtual ~AbstractCRSLinearEquation()
@@ -36,7 +39,7 @@ public:
 
     virtual void reset();
 
-    CRSMatrix<double, IDX_TYPE>* getA()
+    MatrixType* getA()
     {
         return _A;
     }
@@ -111,18 +114,18 @@ public:
     }
 
 protected:
-    virtual void solveEqs(CRSMatrix<double, IDX_TYPE> *A, double *rhs, double *x) = 0;
+    virtual void solveEqs(MatrixType *A, double *rhs, double *x) = 0;
 
 private:
-    CRSMatrix<double, IDX_TYPE> *_A;
-    std::vector<double> _b;
-    std::vector<double> _x;
+    MatrixType *_A;
+    VectorType _b;
+    VectorType _x;
     std::vector<size_t> _vec_knownX_id;
     std::vector<double> _vec_knownX_x;
 
     DISALLOW_COPY_AND_ASSIGN(AbstractCRSLinearEquation);
 
-    void setKnownXi_ReduceSizeOfEQS(CRSMatrix<double, IDX_TYPE> *A, double *org_eqsRHS, double *org_eqsX, const std::vector<size_t> &vec_id, const std::vector<double> &vec_x, std::vector<double> &out_b, std::vector<double> &out_x, std::map<size_t,size_t> &map_solved_orgEqs);
+    void setKnownXi_ReduceSizeOfEQS(MatrixType *A, double *org_eqsRHS, double *org_eqsX, const std::vector<size_t> &vec_id, const std::vector<double> &vec_x, std::vector<double> &out_b, std::vector<double> &out_x, std::map<size_t,size_t> &map_solved_orgEqs);
 };
 
 

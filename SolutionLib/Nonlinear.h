@@ -7,6 +7,9 @@
 namespace SolutionLib
 {
 
+/**
+ * \brief Linear
+ */
 template <class T_LINEAR_FUNCTION>
 class Linear
 {
@@ -21,6 +24,9 @@ public:
 	}
 };
 
+/**
+ * \brief Picard
+ */
 template <class T_LINEAR_FUNCTION>
 class Picard
 {
@@ -32,17 +38,17 @@ public:
 	void solve(T_VALUE &x_0, T_VALUE &x_new)
 	{
         MathLib::PicardMethod picard;
-        picard.solve(_linear_f, x_0, x_new);
+        picard.solve(*_linear_f, x_0, x_new);
 	}
 };
 
-template <class F_RESIDUALS, class F_DX>
+
+template <class T_LINEAR_FUNCTION>
 class NewtonRaphson
 {
-	F_RESIDUALS* _f_r;
-	F_DX* _f_dx;
+	T_LINEAR_FUNCTION* _f_J_r;
 public:
-	NewtonRaphson(F_RESIDUALS &f_r, F_DX &f_dx) : _f_r(&f_r), _f_dx(f_dx) {};
+	NewtonRaphson(T_LINEAR_FUNCTION &f_J_r) : _f_J_r(&f_J_r) {};
 
 	template <class T_VALUE>
 	void solve(T_VALUE &x_0, T_VALUE &x_new)
@@ -51,6 +57,22 @@ public:
         nr.solve(_f_r, _f_dx, x_0, x_new);
 	}
 };
+
+//template <class F_RESIDUALS, class F_DX>
+//class NewtonRaphson
+//{
+//	F_RESIDUALS* _f_r;
+//	F_DX* _f_dx;
+//public:
+//	NewtonRaphson(F_RESIDUALS &f_r, F_DX &f_dx) : _f_r(&f_r), _f_dx(f_dx) {};
+//
+//	template <class T_VALUE>
+//	void solve(T_VALUE &x_0, T_VALUE &x_new)
+//	{
+//        MathLib::NewtonRaphsonMethod nr;
+//        nr.solve(_f_r, _f_dx, x_0, x_new);
+//	}
+//};
 
 } //end
 

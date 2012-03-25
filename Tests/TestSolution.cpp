@@ -56,8 +56,43 @@ public:
     }
 };
 
+class GWAssemblerNewton //: public NumLib::ITimeODEElementAssembler
+{
+private:
+    MathLib::IFunction<double*, double>* _matK;
+    FemLib::LagrangianFeObjectContainer* _feObjects;
+public:
+    GWAssemblerNewton(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::IFunction<double*, double> &mat)
+    : _matK(&mat), _feObjects(&feObjects)
+    {
+    };
+
+    void assembly(const NumLib::TimeStep &time, MeshLib::IElement &e, MathLib::DenseLinearEquations::VectorType &localX, MathLib::DenseLinearEquations::MatrixType &localJ,  MathLib::DenseLinearEquations::VectorType &localR)
+    {
+        IFiniteElement* fe = _feObjects->getFeObject(e);
+        const size_t n = localR.size();
+
+        const double dt = time.getTimeStepSize();
+        const double theta = 1.0;
+        MathLib::DenseLinearEquations::VectorType localX0;
+        MathLib::DenseLinearEquations::MatrixType localM, localK(n,n);
+        MathLib::DenseLinearEquations::VectorType localF;
+        //localM = .0;
+        //localF.resize(localF.size(), .0);
+        fe->integrateDWxDN(_matK, localK);
+        
+        //localR = (1/dt * localM + theta * localK) * localX - (1/dt * localM + (1-theta) * localK) * localX0 - localF;
+        MathLib::DenseLinearEquations::MatrixType tmpM;
+        tmpM = localK;
+        tmpM *= theta;
+        tmpM.axpy(1.0, &localX[0], 0.0, &localR[0]);
+        
+        localJ = localK;
+    }
+};
+
 template <
-	class T_NONLINEAR,
+	template <class> class T_NONLINEAR,
 	class T_LINEAR_SOLVER
 	>
 class GWFemTestSystem : public NumLib::ITransientSystem
