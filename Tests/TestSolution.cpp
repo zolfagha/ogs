@@ -17,6 +17,7 @@
 
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TransientAssembler/ElementLocalAssembler.h"
+#include "NumLib/TransientAssembler/TimeEulerElementLocalAssembler.h"
 
 #include "SolutionLib/IProblem.h"
 #include "SolutionLib/FemProblem.h"
@@ -46,7 +47,7 @@ public:
     };
 
     //protected:
-    void assembly(const NumLib::TimeStep &time, MeshLib::IElement &e, MathLib::DenseLinearEquations::MatrixType &localM, MathLib::DenseLinearEquations::MatrixType &localK,  MathLib::DenseLinearEquations::VectorType &localF)
+    void assembly(const NumLib::TimeStep &time, MeshLib::IElement &e, const LocalVectorType &u1, const LocalVectorType &u0, LocalMatrixType &localM, LocalMatrixType &localK, LocalVectorType &localF)
     {
         IFiniteElement* fe = _feObjects->getFeObject(e);
 
@@ -56,21 +57,21 @@ public:
     }
 };
 
-class GWAssemblerNewton //: public NumLib::ITimeODEElementAssembler
+class GWAssemblerJacobian //: public NumLib::ITimeODEElementAssembler
 {
 private:
     MathLib::IFunction<double*, double>* _matK;
     FemLib::LagrangianFeObjectContainer* _feObjects;
 public:
-    GWAssemblerNewton(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::IFunction<double*, double> &mat)
+    GWAssemblerJacobian(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::IFunction<double*, double> &mat)
     : _matK(&mat), _feObjects(&feObjects)
     {
     };
 
-    void assembly(const NumLib::TimeStep &time, MeshLib::IElement &e, MathLib::DenseLinearEquations::VectorType &localX, MathLib::DenseLinearEquations::MatrixType &localJ,  MathLib::DenseLinearEquations::VectorType &localR)
+    void assembly(const NumLib::TimeStep &time, MeshLib::IElement &e, MathLib::DenseLinearEquations::VectorType &localX, MathLib::DenseLinearEquations::MatrixType &localJ)
     {
         IFiniteElement* fe = _feObjects->getFeObject(e);
-        const size_t n = localR.size();
+        const size_t n = localX.size();
 
         const double dt = time.getTimeStepSize();
         const double theta = 1.0;
@@ -85,7 +86,7 @@ public:
         MathLib::DenseLinearEquations::MatrixType tmpM;
         tmpM = localK;
         tmpM *= theta;
-        tmpM.axpy(1.0, &localX[0], 0.0, &localR[0]);
+        //tmpM.axpy(1.0, &localX[0], 0.0, &localR[0]);
         
         localJ = localK;
     }
@@ -98,12 +99,23 @@ template <
 class GWFemTestSystem : public NumLib::ITransientSystem
 {
     typedef FemIVBVProblem<GWAssembler> GWFemProblem;
+
+    typedef TemplateTransientLinearFEMFunction<
+    			FemIVBVProblem,
+    			TimeEulerElementLocalAssembler,
+    			T_LINEAR_SOLVER,
+    			GWAssembler
+			> MyLinearFunction;
+
+    typedef T_NONLINEAR<MyLinearFunction> MyNonlinearFunction;
+
     typedef SingleStepFEM
     		<
-    			TimeEulerElementAssembler,
-    			T_LINEAR_SOLVER,
     			FemIVBVProblem<GWAssembler>,
-    			T_NONLINEAR
+    			//TimeEulerElementLocalAssembler,
+    			MyLinearFunction,
+    			MyNonlinearFunction,
+    			T_LINEAR_SOLVER
     		> SolutionForHead;
 
 public:
@@ -164,7 +176,7 @@ public:
         _problem->setTimeSteppingFunction(tim);
         //solution algorithm
         _solHead = new SolutionForHead(dis, *_problem);
-        _solHead->getTimeODEAssembler()->setTheta(1.0);
+        //_solHead->getTimeODEAssembler()->setTheta(1.0);
         T_LINEAR_SOLVER* linear_solver = _solHead->getLinearEquationSolver();
         linear_solver->setOption(option);
 

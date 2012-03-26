@@ -54,7 +54,7 @@ public:
 	void solve(T_VALUE &x_0, T_VALUE &x_new)
 	{
         MathLib::NewtonRaphsonMethod nr;
-        nr.solve(_f_r, _f_dx, x_0, x_new);
+        //nr.solve(_f_r, _f_dx, x_0, x_new);
 	}
 };
 

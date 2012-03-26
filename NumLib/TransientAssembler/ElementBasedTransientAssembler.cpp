@@ -1,8 +1,9 @@
 
-#include "DiscreteLinearEquationAssembler.h"
+#include "ElementBasedTransientAssembler.h"
 
 #include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
-
+#include "MeshLib/Core/IMesh.h"
+#include "NumLib/TimeStepping/TimeStep.h"
 
 namespace NumLib
 {
@@ -40,6 +41,7 @@ void ElementBasedTransientAssembler::assembly(MeshLib::IMesh &msh, DiscreteLib::
     std::vector<long> local_dofmap;
     const size_t n_ele = msh.getNumberOfElements();
 
+    std::vector<double> local_u_n1;
     std::vector<double> local_u_n;
     for (size_t i=0; i<n_ele; i++) {
         MeshLib::IElement *e = msh.getElemenet(i);
@@ -48,11 +50,12 @@ void ElementBasedTransientAssembler::assembly(MeshLib::IMesh &msh, DiscreteLib::
         e->getListOfNumberOfNodesForAllOrders(ele_node_size_order);
         dofManager.mapEqsID(msh.getID(), ele_node_ids, local_dofmap);
         //dofManager.mapEqsID(ele_node_ids, ele_node_size_order, local_dofmap);
-        // get previous time step results
+        // previous and current results
+        getLocalVector(dofManager, ele_node_ids, ele_node_size_order, *_u1, local_u_n1);
         getLocalVector(dofManager, ele_node_ids, ele_node_size_order, *_u0, local_u_n);
         // local assembly
         localEQS.create(local_dofmap.size());
-        _transient_e_assembler->assembly(time, *e, local_u_n, localEQS);
+        _transient_e_assembler->assembly(time, *e, local_u_n1, local_u_n, localEQS);
         // update global
         eqs.addAsub(local_dofmap, *localEQS.getA());
         eqs.addRHSsub(local_dofmap, localEQS.getRHS());

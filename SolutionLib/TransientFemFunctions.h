@@ -17,11 +17,14 @@ typedef DiscreteLib::DiscreteVector<double> MyFemVector;
 /**
  * \brief Template class for transient linear FEM functions
  */
-template<   template <class> class T_TIME_ODE_ASSEMBLER,
-            class T_LINEAR_SOLVER,
-            template <class> class T_USER_FEM_PROBLEM,
-            class T_USER_ASSEMBLY >
-class TemplateTransientLinearFEMFunction : public MathLib::IFunction<MyFemVector, MyFemVector>
+template <
+	template <class> class T_USER_FEM_PROBLEM,
+	template <class> class T_TIME_ODE_ASSEMBLER,
+    class T_LINEAR_SOLVER,
+    class T_USER_ASSEMBLY
+    >
+class TemplateTransientLinearFEMFunction
+	: public MathLib::IFunction<MyFemVector, MyFemVector>
 {
 public:
     typedef T_TIME_ODE_ASSEMBLER<T_USER_ASSEMBLY> UserTimeOdeAssembler;
@@ -42,7 +45,7 @@ public:
 	///
     MathLib::IFunction<MyFemVector,MyFemVector>* clone() const
 	{
-    	return new TemplateTransientLinearFEMFunction<T_TIME_ODE_ASSEMBLER,T_LINEAR_SOLVER,T_USER_FEM_PROBLEM,T_USER_ASSEMBLY>(*_problem, *_linear_eqs);
+    	return new TemplateTransientLinearFEMFunction<T_USER_FEM_PROBLEM, T_TIME_ODE_ASSEMBLER,T_LINEAR_SOLVER,T_USER_ASSEMBLY>(*_problem, *_linear_eqs);
 	}
 
     /// reset property
@@ -75,10 +78,12 @@ public:
         //TODO temporally
         std::vector<MyFemVector*> vec_un;
         vec_un.push_back(const_cast<MyFemVector*>(&u_n));
+        std::vector<MyFemVector*> vec_un1;
+        vec_un.push_back(const_cast<MyFemVector*>(&u_n1));
 
 		// assembly
         _linear_eqs->initialize();
-        NumLib::ElementBasedTransientAssembler assembler(t_n1, vec_un, _element_ode_assembler);
+        NumLib::ElementBasedTransientAssembler assembler(t_n1, vec_un, vec_un1, _element_ode_assembler);
         _linear_eqs->construct(assembler);
 
         //apply BC1,2

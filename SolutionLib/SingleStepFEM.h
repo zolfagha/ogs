@@ -13,7 +13,7 @@
 #include "FemLib/BC/FemDirichletBC.h"
 #include "FemLib/BC/FemNeumannBC.h"
 
-#include "NumLib/TransientAssembler/DiscreteLinearEquationAssembler.h"
+#include "NumLib/TransientAssembler/ElementBasedTransientAssembler.h"
 
 #include "ISolution.h"
 #include "TransientFemFunctions.h"
@@ -22,14 +22,14 @@
 namespace SolutionLib
 {
 
-
-template<
-	template <class> class T_TIME_ODE_ASSEMBLER,
-    class T_LINEAR_SOLVER,
-    class T_FEM_PROBLEM_AND_ASSEMBLER,
-    template <class> class T_NONLINEAR
-    >
-class SingleStepFEM;
+//template<
+//	class T_FEM_PROBLEM_AND_ASSEMBLER,
+//	//template <class> class T_TIME_ODE_ASSEMBLER,
+//	class T_LINEAR_FUNCTION,
+//    class T_NONLINEAR_FUNCTION
+//    class T_LINEAR_SOLVER,
+//    >
+//class SingleStepFEM;
 
 
 /**
@@ -41,20 +41,23 @@ class SingleStepFEM;
  * @tparam T_USER_ASSEMBLY     	Local assembly class
  */
 template <
-	template <class> class T_TIME_ODE_ASSEMBLER,
-    class T_LINEAR_SOLVER,
-    template <class> class T_USER_FEM_PROBLEM,
-    class T_USER_ASSEMBLY,
-    template <class> class T_NONLINEAR
+	class T_USER_FEM_PROBLEM,
+    //class T_USER_ASSEMBLY,
+	//template <class> class T_TIME_ODE_ASSEMBLER,
+	class T_LINEAR_FUNCTION,
+    class T_NONLINEAR_FUNCTION,
+    class T_LINEAR_SOLVER
     >
-class SingleStepFEM<T_TIME_ODE_ASSEMBLER, T_LINEAR_SOLVER, T_USER_FEM_PROBLEM<T_USER_ASSEMBLY>, T_NONLINEAR>
+class SingleStepFEM//</*T_TIME_ODE_ASSEMBLER, */T_LINEAR_FUNCTION, T_LINEAR_SOLVER, T_USER_FEM_PROBLEM<T_USER_ASSEMBLY>, T_NONLINEAR>
 	: public AbstractTimeSteppingAlgorithm
 {
 public:
-    typedef T_TIME_ODE_ASSEMBLER<T_USER_ASSEMBLY> UserTimeOdeAssembler;
-    typedef T_USER_FEM_PROBLEM<T_USER_ASSEMBLY> UserFemProblem;
-    typedef TemplateTransientLinearFEMFunction<T_TIME_ODE_ASSEMBLER,T_LINEAR_SOLVER,T_USER_FEM_PROBLEM,T_USER_ASSEMBLY> UserLinearFemFunction;
-    typedef T_NONLINEAR<UserLinearFemFunction> UserNonlinearFunction;
+    //typedef T_TIME_ODE_ASSEMBLER<T_USER_ASSEMBLY> UserTimeOdeAssembler;
+    typedef T_USER_FEM_PROBLEM UserFemProblem;
+    //typedef T_USER_FEM_PROBLEM<T_USER_ASSEMBLY> UserFemProblem;
+    //typedef TemplateTransientLinearFEMFunction<T_TIME_ODE_ASSEMBLER,T_LINEAR_SOLVER,T_USER_FEM_PROBLEM,T_USER_ASSEMBLY> UserLinearFemFunction;
+    typedef T_LINEAR_FUNCTION UserLinearFemFunction;
+    typedef T_NONLINEAR_FUNCTION UserNonlinearFunction;
 
     /// constructor
     ///
@@ -64,7 +67,7 @@ public:
     /// - prepare linear functions
     SingleStepFEM(DiscreteLib::DiscreteSystem &dis, UserFemProblem &problem)
         : AbstractTimeSteppingAlgorithm(*problem.getTimeSteppingFunction()), 
-          _problem(&problem), _element_ode_assembler(problem.getElementAssemlby()),
+          _problem(&problem), //_element_ode_assembler(problem.getElementAssemlby()),
           _discrete_system(&dis), _linear_eqs(0)
     {
         const size_t n_var = problem.getNumberOfVariables();
@@ -128,12 +131,9 @@ public:
         return _u_n1[var_id];
     }
 
-    /// get the time ode assembler
-    UserTimeOdeAssembler* getTimeODEAssembler() { return &_element_ode_assembler; }
-
 private:
     UserFemProblem* _problem;
-    UserTimeOdeAssembler _element_ode_assembler;
+    //UserTimeOdeAssembler _element_ode_assembler;
     DiscreteLib::DofEquationIdTable _dofManager;
     T_LINEAR_SOLVER* _linear_solver;
     DiscreteLib::DiscreteSystem *_discrete_system;
