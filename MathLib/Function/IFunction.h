@@ -4,21 +4,28 @@
 namespace MathLib
 {
 
-template<typename Tpos, typename Tval>
 class IFunction
 {
 public:
 	virtual ~IFunction() {};
+    virtual IFunction* clone() const = 0;
+};
+
+template<typename Tpos, typename Tval>
+class TemplateFunction : public IFunction
+{
+public:
+	virtual ~TemplateFunction() {};
     virtual void eval(const Tpos &x, Tval &val) = 0;
-    virtual IFunction<Tpos,Tval>* clone() const = 0;
+//    virtual TemplateFunction<Tpos,Tval>* clone() const = 0;
 };
 
 template<typename Tpos, typename Tval, class T_FUNCTION>
-class AbstractDefaultCloneFunction : public IFunction<Tpos, Tval>
+class AbstractDefaultCloneFunction : public TemplateFunction<Tpos, Tval>
 {
 public:
 	virtual ~AbstractDefaultCloneFunction() {};
-    virtual IFunction<Tpos,Tval>* clone() const
+    virtual IFunction* clone() const
 	{
     	return new T_FUNCTION();
 	}

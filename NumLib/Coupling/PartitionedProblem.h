@@ -2,15 +2,19 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
 
 #include "ICoupledProblem.h"
-#include "NamedVariableContainer.h"
+#include "VariableContainer.h"
 #include "VariableMappingTable.h"
+
+#include "NumLib/Coupling/Algorithm/PartitionedAlgorithm.h"
 
 namespace NumLib
 {
 
-class IPartitionedAlgorithm;
+//class IPartitionedAlgorithm;
+
 
 /**
  * \brief Partitioned problem
@@ -18,9 +22,14 @@ class IPartitionedAlgorithm;
 class PartitionedProblem : public ICoupledSystem
 {
 public:
+	typedef MathLib::IFunction Variable;
+	typedef VariableContainer MyNamedVariableContainer;
+	typedef ICoupledSystem MyCoupledSystem;
+	typedef IPartitionedAlgorithm MyPartitionedAlgorithm;
+	typedef VariableMappingTable MyVariableMappingTable;
 
     /// 
-    PartitionedProblem(IPartitionedAlgorithm &algo) : _algorithm(&algo)
+    PartitionedProblem(MyPartitionedAlgorithm &algo) : _algorithm(&algo)
     {
     }
 
@@ -40,8 +49,14 @@ public:
     /// get parameter with the given id
     Variable* getParameter(size_t para_id) const { return _vars.get(para_id); }
 
+    template <class T>
+    T* getParameter(size_t para_id) const
+    {
+    	return static_cast<T*>(_vars.get(para_id));
+    }
+
     /// find subproblem
-    int find(const ICoupledSystem& sub) const;
+    int find(const MyCoupledSystem& sub) const;
 
     /// check consistency
     bool check() const;
@@ -55,7 +70,7 @@ public:
     /// @param sys problem
     /// @param internal_id parameter id in the sys
     /// @return parameter id
-    size_t addParameter(const std::string &name, ICoupledSystem& sub_problem, size_t para_id_in_sub_problem);
+    size_t addParameter(const std::string &name, MyCoupledSystem &sub_problem, size_t para_id_in_sub_problem);
 
     /// set parameter 
     void setParameter(size_t para_id, Variable* var)
@@ -64,21 +79,22 @@ public:
     }
 
     /// connect system input and shared variable
-    void connectInput(const std::string &this_para_name, ICoupledSystem &subproblem, size_t subproblem_para_id);
+    void connectInput(const std::string &this_para_name, MyCoupledSystem &subproblem, size_t subproblem_para_id);
 
     /// solve this system
     int solve();
 
 private:
-    std::vector<ICoupledSystem*> _list_subproblems;
+    std::vector<MyCoupledSystem*> _list_subproblems;
     std::vector<size_t> _list_input_parameters;
-    NamedVariableContainer _vars;
-    VariableMappingTable _map;
-    IPartitionedAlgorithm *_algorithm;
+    MyNamedVariableContainer _vars;
+    MyVariableMappingTable _map;
+    MyPartitionedAlgorithm *_algorithm;
 
-    size_t addSubProblem(ICoupledSystem &sub_problem);
+    size_t addSubProblem(MyCoupledSystem &sub_problem);
 
 };
+
 
 
 }

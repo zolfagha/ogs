@@ -1,46 +1,32 @@
 
 #include "AsyncPartSolution.h"
 
-#include <iostream>
-#include <algorithm>
-#include <limits>
 
 namespace NumLib
 {
-
-//void AsyncPartitionedProblem::addChildren(ITransientCoupledProblem& sys)
-//{
-//    _list_subproblems.push_back(&sys);
-//}
-
-//size_t AsyncPartitionedProblem::getNumberOfChildren() const
-//{
-//    return _list_subproblems.size();
-//}
-
 double AsyncPartitionedSystem::suggestNext(const TimeStep &time_current) {
     double t;
-    t = std::numeric_limits<double>::max(); 
+    t = std::numeric_limits<double>::max();
     for (size_t i=0; i<_list_subproblems.size(); i++) {
-        ITransientCoupledSystem *solution = _list_subproblems[i];
+    	MyTransientCoupledSystem *solution = _list_subproblems[i];
         double suggest = solution->suggestNext(time_current);
         if (suggest>.0)
             t = std::min(t, suggest);
     }
 	return t;
 }
-	
-void AsyncPartitionedSystem::getActiveProblems(const TimeStep &time, std::vector<ICoupledSystem*> &list_active_problems)
+
+void AsyncPartitionedSystem::getActiveProblems(const TimeStep &time, std::vector<MyCoupledSystem*> &list_active_problems)
 {
     for (size_t i=0; i<_list_subproblems.size(); i++) {
-        ITransientCoupledSystem *solution = _list_subproblems[i];
+    	MyTransientCoupledSystem *solution = _list_subproblems[i];
         if (solution->isAwake(time)) {
             list_active_problems.push_back(solution);
         }
     }
 }
 
-int AsyncPartitionedSystem::solveTimeStep(const TimeStep &time)  
+int AsyncPartitionedSystem::solveTimeStep(const TimeStep &time)
 {
 
     std::cout << "->solve partitioned problems" << std::endl;
@@ -49,13 +35,13 @@ int AsyncPartitionedSystem::solveTimeStep(const TimeStep &time)
     _vars_t_n1.clone(_vars_t_n);
 
     // list active problems
-    std::vector<ICoupledSystem*> list_active_problems;
+    std::vector<MyCoupledSystem*> list_active_problems;
     getActiveProblems(time, list_active_problems);
 
     if (list_active_problems.size()>0) {
         // solve
         for (size_t i=0; i<list_active_problems.size(); i++) {
-            ITransientCoupledSystem *solution = (ITransientCoupledSystem*)list_active_problems[i];
+        	MyTransientCoupledSystem *solution = (MyTransientCoupledSystem*)list_active_problems[i];
             solution->setCurrentTime(time);
         }
 
@@ -69,11 +55,11 @@ int AsyncPartitionedSystem::solveTimeStep(const TimeStep &time)
 
     return 0;
 };
-	
-bool AsyncPartitionedSystem::isAwake(const TimeStep &time) 
+
+bool AsyncPartitionedSystem::isAwake(const TimeStep &time)
 {
     for (size_t i=0; i<_list_subproblems.size(); i++) {
-        ITransientCoupledSystem *solution = _list_subproblems[i];
+    	MyTransientCoupledSystem *solution = _list_subproblems[i];
         if (solution->isAwake(time))
             return true;
     }
@@ -83,14 +69,14 @@ bool AsyncPartitionedSystem::isAwake(const TimeStep &time)
 void AsyncPartitionedSystem::accept(const TimeStep &time)
 {
     for (size_t i=0; i<_list_subproblems.size(); i++) {
-        ITransientCoupledSystem *solution = _list_subproblems[i];
+    	MyTransientCoupledSystem *solution = _list_subproblems[i];
         solution->accept(time);
     }
 }
 
-int AsyncPartitionedSystem::find(const ITransientCoupledSystem& sub) const
+int AsyncPartitionedSystem::find(const MyTransientCoupledSystem &sub) const
 {
-    std::vector<ITransientCoupledSystem*>::const_iterator itr = std::find(_list_subproblems.begin(), _list_subproblems.end(), &sub);
+    typename std::vector<MyTransientCoupledSystem*>::const_iterator itr = std::find(_list_subproblems.begin(), _list_subproblems.end(), &sub);
     if (itr!=_list_subproblems.end()) {
         return (itr - _list_subproblems.begin());
     } else {
@@ -105,15 +91,15 @@ bool AsyncPartitionedSystem::check() const
 
     // check for subproblems
     for (size_t i=0; i<_list_subproblems.size(); i++) {
-        if (!_list_subproblems[i]->check()) 
+        if (!_list_subproblems[i]->check())
             flag = false;
     }
 
     // check consistency in input and output of subproblems
     for (size_t i=0; i<_list_subproblems.size(); i++) {
-        const ITransientCoupledSystem* subproblem = _list_subproblems[i];
+        const MyTransientCoupledSystem* subproblem = _list_subproblems[i];
         // check input parameters required for the subproblem
-        const VariableMappingTable::ListOfInputVar &vec_registered_input_var = _map._list_subproblem_input_source[i];
+        const typename MyVariableMappingTable::ListOfInputVar &vec_registered_input_var = _map._list_subproblem_input_source[i];
 
         std::vector<size_t> list1(vec_registered_input_var.size());
         for (size_t j=0; j<list1.size(); j++) {
@@ -144,12 +130,12 @@ bool AsyncPartitionedSystem::check() const
 size_t AsyncPartitionedSystem::addParameter(const std::string &name)
 {
     size_t n = _vars_t_n1.add(name);
-    _map._map_paraId2subproblem.push_back(std::make_pair<ITransientCoupledSystem*,size_t>(0, 0));
+    _map._map_paraId2subproblem.push_back(std::make_pair<MyTransientCoupledSystem*,size_t>(0, 0));
     _list_input_parameters.push_back(n);
     return n;
 }
 
-size_t AsyncPartitionedSystem::addParameter(const std::string &name, ITransientCoupledSystem& sub_problem, size_t para_id_in_sub_problem)
+size_t AsyncPartitionedSystem::addParameter(const std::string &name, MyTransientCoupledSystem& sub_problem, size_t para_id_in_sub_problem)
 {
     size_t var_id = _vars_t_n1.add(name);
     // set reference
@@ -165,7 +151,7 @@ size_t AsyncPartitionedSystem::addParameter(const std::string &name, ITransientC
     return var_id;
 }
 
-void AsyncPartitionedSystem::connectInput(const std::string &this_para_name, ITransientCoupledSystem &subproblem, size_t subproblem_para_id)
+void AsyncPartitionedSystem::connectInput(const std::string &this_para_name, MyTransientCoupledSystem &subproblem, size_t subproblem_para_id)
 {
     int this_para_id = _vars_t_n1.find(this_para_name);
     if (this_para_id<0) return;
@@ -176,11 +162,11 @@ void AsyncPartitionedSystem::connectInput(const std::string &this_para_name, ITr
     }
 }
 
-size_t AsyncPartitionedSystem::addSubProblem(ITransientCoupledSystem &sub_problem)
+size_t AsyncPartitionedSystem::addSubProblem(MyTransientCoupledSystem &sub_problem)
 {
     _list_subproblems.push_back(&sub_problem);
     _map._list_subproblem_input_source.resize(_list_subproblems.size());
 
     return _list_subproblems.size();
 }
-}
+} //end

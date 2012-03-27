@@ -2,6 +2,7 @@
 #pragma once
 
 #include "MathLib/LinAlg/MatrixBase.h"
+#include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
 #include "Convergence.h"
 
 namespace MathLib

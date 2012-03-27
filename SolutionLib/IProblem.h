@@ -15,7 +15,7 @@ namespace SolutionLib
 class IProblem {};
 
 
-typedef MathLib::IFunction<GeoLib::Point, double> SpatialFunction;
+typedef MathLib::TemplateFunction<GeoLib::Point, double> SpatialFunction;
 
 /**
  * \brief Initial value boundary value problems

@@ -7,7 +7,7 @@ namespace MathLib
 {
 
 template<typename Tpos, typename Tval>
-class FunctionConstant : public IFunction<Tpos,Tval>
+class FunctionConstant : public TemplateFunction<Tpos,Tval>
 {
 public:
     FunctionConstant(const Tval &v)
@@ -22,10 +22,9 @@ public:
         v = _v;
     };
 
-    virtual IFunction<Tpos,Tval>* clone() const
+    virtual TemplateFunction<Tpos,Tval>* clone() const
     {
-        IFunction<Tpos,Tval>* obj = new FunctionConstant(_v);
-        return obj;
+    	return new FunctionConstant(_v);
     }
 private:
     Tval _v;

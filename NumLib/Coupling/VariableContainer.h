@@ -12,17 +12,21 @@
 namespace NumLib
 {
 
-typedef MathLib::IFunction<double, double> Variable;  //TODO general function?
+//typedef MathLib::IFunction<double, double> Variable;
 
 
 /**
  * \brief Container of named variables
  */
-class NamedVariableContainer
+class VariableContainer
 {
 public:
-    /// destructor
-    virtual ~NamedVariableContainer()
+	typedef MathLib::IFunction Variable;
+
+	VariableContainer() {};
+
+    ///
+    virtual ~VariableContainer()
     {
         Base::releaseObjectsInStdVector(_list_var_data);
     }
@@ -36,7 +40,7 @@ public:
 
     /// make a copy of this object
     /// @param dest the destination object
-    void clone(NamedVariableContainer &dest) const
+    void clone(VariableContainer &dest) const
     {
         dest.clear();
         dest._list_var_names.assign(_list_var_names.begin(), _list_var_names.end());
@@ -86,6 +90,12 @@ public:
         return _list_var_data[var_id];
     }
 
+    template <class T>
+    T* get(size_t var_id) const
+    {
+        return static_cast<T*>(_list_var_data[var_id]);
+    }
+
     /// register the variable
     size_t add(const std::string &var_name)
     {
@@ -104,6 +114,8 @@ public:
 private:
     std::vector<std::string> _list_var_names;
     std::vector<Variable*> _list_var_data;
+
+    DISALLOW_COPY_AND_ASSIGN(VariableContainer);
 };
 
 }

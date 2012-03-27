@@ -15,8 +15,8 @@
 namespace FemLib
 {
 
-typedef MathLib::IFunction<double*, double> SpatialFunction;
-typedef MathLib::IFunction<double*, double*> SpatialFunctionVector;
+typedef MathLib::TemplateFunction<double*, double> SpatialFunction;
+typedef MathLib::TemplateFunction<double*, double*> SpatialFunctionVector;
 typedef MathLib::Matrix<double> LocalMatrix;
 
 /**

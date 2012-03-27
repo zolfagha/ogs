@@ -35,7 +35,7 @@ struct PolynomialOrder
  * @tparam Tvalue Nodal value type, e.g. double, vector
  */
 template<typename Tvalue>
-class TemplateFEMNodalFunction : public MathLib::IFunction<GeoLib::Point, Tvalue>
+class TemplateFEMNodalFunction : public MathLib::TemplateFunction<GeoLib::Point, Tvalue>
 {
 public:
     /// @param msh Mesh
@@ -74,7 +74,7 @@ public:
 
     /// make a clone of this object
     /// @return MathLib::IFunction*
-    MathLib::IFunction<GeoLib::Point, Tvalue>* clone() const
+    MathLib::TemplateFunction<GeoLib::Point, Tvalue>* clone() const
     {
         TemplateFEMNodalFunction<Tvalue> *obj = new TemplateFEMNodalFunction<Tvalue>(*this);
         return obj;
@@ -189,7 +189,7 @@ typedef TemplateFEMNodalFunction<MathLib::Vector3D> FEMNodalFunctionVector3d;
  * \brief Template class for FEM element-based functions
  */
 template<typename Tvalue>
-class TemplateFEMElementalFunction : public MathLib::IFunction<Tvalue,GeoLib::Point>
+class TemplateFEMElementalFunction : public MathLib::TemplateFunction<GeoLib::Point,Tvalue>
 {
 public:
     void eval(const GeoLib::Point &pt, Tvalue &v) {
@@ -206,7 +206,7 @@ private:
  * \brief Template class for FEM integration point-based functions
  */
 template<typename Tvalue>
-class TemplateFEMIntegrationPointFunction : public MathLib::IFunction<GeoLib::Point,Tvalue>
+class TemplateFEMIntegrationPointFunction : public MathLib::TemplateFunction<GeoLib::Point,Tvalue>
 {
 public:
     TemplateFEMIntegrationPointFunction(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh) 
@@ -219,7 +219,7 @@ public:
         initialize(*src._discrete_system, *src._msh, src._values->size());
     };
 
-    MathLib::IFunction<GeoLib::Point, Tvalue>* clone() const
+    MathLib::TemplateFunction<GeoLib::Point, Tvalue>* clone() const
     {
         TemplateFEMIntegrationPointFunction<Tvalue> *obj = new TemplateFEMIntegrationPointFunction<Tvalue>(*this);
         return obj;

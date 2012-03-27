@@ -113,7 +113,7 @@ TEST(FEM, ExtrapolateAverage1)
 }
 
 template<typename Tval, typename Tpos>
-class MyFunction : public MathLib::IFunction<Tpos, Tval>
+class MyFunction : public MathLib::TemplateFunction<Tpos, Tval>
 {
 public:
 	virtual ~MyFunction() {};
@@ -123,7 +123,7 @@ public:
         else v = 2e-11;
     };
 
-    MathLib::IFunction<Tpos, Tval>* clone() const {return 0;};
+    MathLib::TemplateFunction<Tpos, Tval>* clone() const {return 0;};
 
 };
 

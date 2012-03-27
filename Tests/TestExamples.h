@@ -28,13 +28,13 @@ public:
     GeoLib::Rectangle *rec;
     DiscreteLib::DiscreteSystem *dis;
     MeshLib::IMesh *msh;
-    MathLib::IFunction<double*, double> *_K;
+    MathLib::TemplateFunction<double*, double> *_K;
     FemLib::FemNodalFunctionScalar *head;
     FemLib::FEMIntegrationPointFunctionVector2d *vel;
     std::vector<FemLib::FemDirichletBC<double>*> vec_bc1;
     std::vector<FemLib::FemNeumannBC<double, double>*> vec_bc2;
 
-    void define(MeshLib::IMesh *msh, MathLib::IFunction<double*, double> *K=0)
+    void define(MeshLib::IMesh *msh, MathLib::TemplateFunction<double*, double> *K=0)
     {
         //#Define a problem
         //geometry

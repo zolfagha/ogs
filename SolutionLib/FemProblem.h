@@ -59,7 +59,7 @@ public:
 
     void setIC(int, SpatialFunction& ic)
     {
-        _map_ic = ic.clone();
+        _map_ic = (SpatialFunction*) ic.clone();
     }
 
     SpatialFunction* getIC(int) const

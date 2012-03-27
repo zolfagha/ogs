@@ -7,7 +7,7 @@
 namespace MathLib
 {
 
-class FunctionLinear1D : public IFunction<double, double>
+class FunctionLinear1D : public TemplateFunction<double, double>
 {
 public:
     FunctionLinear1D(LinearInterpolation* linear) {
@@ -17,7 +17,7 @@ public:
     {
         v = _linear->getValue(x);
     };
-    virtual IFunction<double,double>* clone() const
+    virtual TemplateFunction<double,double>* clone() const
     {
         FunctionLinear1D* obj = new FunctionLinear1D(_linear);
         return obj;

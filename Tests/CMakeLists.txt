@@ -1,6 +1,8 @@
 
 FILE(GLOB Test_Files *.h *.cpp)
 
+FILE(GLOB Test_Solution1_Files Solution1/*.h Solution1/*.cpp)
+
 INCLUDE_DIRECTORIES(
 	.
 	..
@@ -9,6 +11,7 @@ INCLUDE_DIRECTORIES(
 # Create the executable
 ADD_EXECUTABLE( tests
         ${Test_Files}
+        ${Test_Solution1_Files}
 )
 
 TARGET_LINK_LIBRARIES ( tests

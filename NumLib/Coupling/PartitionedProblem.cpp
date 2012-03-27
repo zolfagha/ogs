@@ -1,17 +1,12 @@
 
 #include "PartitionedProblem.h"
 
-#include <iostream>
-#include <algorithm>
-
-#include "PartitionedAlgorithm.h"
-
 namespace NumLib
 {
 
-int PartitionedProblem::find(const ICoupledSystem& sub) const
+int PartitionedProblem::find(const MyCoupledSystem& sub) const
 {
-    std::vector<ICoupledSystem*>::const_iterator itr = std::find(_list_subproblems.begin(), _list_subproblems.end(), &sub);
+    std::vector<MyCoupledSystem*>::const_iterator itr = std::find(_list_subproblems.begin(), _list_subproblems.end(), &sub);
     if (itr!=_list_subproblems.end()) {
         return (itr - _list_subproblems.begin());
     } else {
@@ -26,15 +21,15 @@ bool PartitionedProblem::check() const
 
     // check for subproblems
     for (size_t i=0; i<_list_subproblems.size(); i++) {
-        if (!_list_subproblems[i]->check()) 
+        if (!_list_subproblems[i]->check())
             flag = false;
     }
 
     // check consistency in input and output of subproblems
     for (size_t i=0; i<_list_subproblems.size(); i++) {
-        const ICoupledSystem* subproblem = _list_subproblems[i];
+        const MyCoupledSystem* subproblem = _list_subproblems[i];
         // check input parameters required for the subproblem
-        const VariableMappingTable::ListOfInputVar &vec_registered_input_var = _map._list_subproblem_input_source[i];
+        const MyVariableMappingTable::ListOfInputVar &vec_registered_input_var = _map._list_subproblem_input_source[i];
 
         std::vector<size_t> list1(vec_registered_input_var.size());
         for (size_t j=0; j<list1.size(); j++) {
@@ -65,12 +60,12 @@ bool PartitionedProblem::check() const
 size_t PartitionedProblem::addParameter(const std::string &name)
 {
     size_t n = _vars.add(name);
-    _map._map_paraId2subproblem.push_back(std::make_pair<ICoupledSystem*,size_t>(0, 0));
+    _map._map_paraId2subproblem.push_back(std::make_pair<MyCoupledSystem*,size_t>(0, 0));
     _list_input_parameters.push_back(n);
     return n;
 }
 
-size_t PartitionedProblem::addParameter(const std::string &name, ICoupledSystem& sub_problem, size_t para_id_in_sub_problem)
+size_t PartitionedProblem::addParameter(const std::string &name, MyCoupledSystem& sub_problem, size_t para_id_in_sub_problem)
 {
     size_t var_id = _vars.add(name);
     // set reference
@@ -86,7 +81,7 @@ size_t PartitionedProblem::addParameter(const std::string &name, ICoupledSystem&
     return var_id;
 }
 
-void PartitionedProblem::connectInput(const std::string &this_para_name, ICoupledSystem &subproblem, size_t subproblem_para_id)
+void PartitionedProblem::connectInput(const std::string &this_para_name, MyCoupledSystem &subproblem, size_t subproblem_para_id)
 {
     size_t this_para_id = _vars.find(this_para_name);
     int subproblem_id = find(subproblem);
@@ -100,7 +95,7 @@ int PartitionedProblem::solve()
     return _algorithm->solve(_list_subproblems, _vars, _map);
 }
 
-size_t PartitionedProblem::addSubProblem(ICoupledSystem &sub_problem)
+size_t PartitionedProblem::addSubProblem(MyCoupledSystem &sub_problem)
 {
     _list_subproblems.push_back(&sub_problem);
     _map._list_subproblem_input_source.resize(_list_subproblems.size());
@@ -108,4 +103,4 @@ size_t PartitionedProblem::addSubProblem(ICoupledSystem &sub_problem)
     return _list_subproblems.size();
 }
 
-}
+} //end

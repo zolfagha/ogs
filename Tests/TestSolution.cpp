@@ -38,10 +38,10 @@ using namespace DiscreteLib;
 class GWAssembler: public NumLib::ITimeODEElementAssembler
 {
 private:
-    MathLib::IFunction<double*, double>* _matK;
+    MathLib::TemplateFunction<double*, double>* _matK;
     FemLib::LagrangianFeObjectContainer* _feObjects;
 public:
-    GWAssembler(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::IFunction<double*, double> &mat)
+    GWAssembler(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::TemplateFunction<double*, double> &mat)
     : _matK(&mat), _feObjects(&feObjects)
     {
     };
@@ -60,10 +60,10 @@ public:
 class GWAssemblerJacobian //: public NumLib::ITimeODEElementAssembler
 {
 private:
-    MathLib::IFunction<double*, double>* _matK;
+    MathLib::TemplateFunction<double*, double>* _matK;
     FemLib::LagrangianFeObjectContainer* _feObjects;
 public:
-    GWAssemblerJacobian(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::IFunction<double*, double> &mat)
+    GWAssemblerJacobian(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::TemplateFunction<double*, double> &mat)
     : _matK(&mat), _feObjects(&feObjects)
     {
     };
@@ -151,7 +151,7 @@ public:
     };
 
     //#Define a problem
-    void define(DiscreteSystem &dis, MathLib::IFunction<double*, double> &K, Base::Options &option)
+    void define(DiscreteSystem &dis, MathLib::TemplateFunction<double*, double> &K, Base::Options &option)
     {
         MeshLib::IMesh *msh = dis.getMesh();
         //size_t nnodes = msh->getNumberOfNodes();

@@ -7,7 +7,6 @@
 #include "Base/CodingTools.h"
 
 #include "ICoupledProblem.h"
-#include "NumLib/TimeStepping/ITransientSystem.h"
 
 namespace NumLib
 {
@@ -19,6 +18,8 @@ template<class T_SUPER>
 class AbstractMonolithicSystem : public T_SUPER
 {
 public:
+	typedef MathLib::IFunction Variable;
+
     virtual ~AbstractMonolithicSystem()
     {
         Base::releaseObjectsInStdVector(_vec_parameters);
@@ -43,7 +44,8 @@ public:
     bool check() const {return true;};
 
 protected:
-    std::vector<Variable*> _vec_parameters;
+    std::vector<MathLib::IFunction*> _vec_parameters;
+//    std::vector<Variable*> _vec_parameters;
 };
 
 template <class T_SUPER, size_t N_IN, size_t N_OUT>
@@ -62,12 +64,5 @@ template <size_t N_IN, size_t N_OUT>
 class TemplateSteadyMonolithicSystem : public TemplateMonolithicSystem<ICoupledSystem, N_IN, N_OUT>
 {
 };
-
-template <size_t N_IN, size_t N_OUT>
-class TemplateTransientMonolithicSystem : public TemplateMonolithicSystem<ITransientCoupledSystem, N_IN, N_OUT>
-{
-
-};
-
 
 }

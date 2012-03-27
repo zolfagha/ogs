@@ -24,7 +24,7 @@ template <
     class T_USER_ASSEMBLY
     >
 class TemplateTransientLinearFEMFunction
-	: public MathLib::IFunction<MyFemVector, MyFemVector>
+	: public MathLib::TemplateFunction<MyFemVector, MyFemVector>
 {
 public:
     typedef T_TIME_ODE_ASSEMBLER<T_USER_ASSEMBLY> UserTimeOdeAssembler;
@@ -43,7 +43,7 @@ public:
 	virtual ~TemplateTransientLinearFEMFunction() {};
 
 	///
-    MathLib::IFunction<MyFemVector,MyFemVector>* clone() const
+    MathLib::TemplateFunction<MyFemVector,MyFemVector>* clone() const
 	{
     	return new TemplateTransientLinearFEMFunction<T_USER_FEM_PROBLEM, T_TIME_ODE_ASSEMBLER,T_LINEAR_SOLVER,T_USER_ASSEMBLY>(*_problem, *_linear_eqs);
 	}
@@ -79,7 +79,7 @@ public:
         std::vector<MyFemVector*> vec_un;
         vec_un.push_back(const_cast<MyFemVector*>(&u_n));
         std::vector<MyFemVector*> vec_un1;
-        vec_un.push_back(const_cast<MyFemVector*>(&u_n1));
+        vec_un1.push_back(const_cast<MyFemVector*>(&u_n1));
 
 		// assembly
         _linear_eqs->initialize();
