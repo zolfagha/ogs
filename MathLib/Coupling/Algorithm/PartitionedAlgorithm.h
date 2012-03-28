@@ -6,8 +6,8 @@
 namespace MathLib
 {
 class ICoupledSystem;
-class VariableContainer;
-class VariableMappingTable;
+class ParameterTable;
+struct ParameterProblemMappingTable;
 
 /**
  * \brief Interface class for partitioned algorithm
@@ -22,7 +22,7 @@ public:
     /// @param subproblems    a list of subproblems
     /// @param vars           a container for shared variables
     /// @param mapping        mapping data between subproblems and shared variables
-    virtual int solve(const std::vector<ICoupledSystem*> &subproblems, VariableContainer &vars, const VariableMappingTable &mapping) = 0;
+    virtual int solve(const std::vector<ICoupledSystem*> &subproblems, ParameterTable &vars, const ParameterProblemMappingTable &mapping) = 0;
 };
 
 }

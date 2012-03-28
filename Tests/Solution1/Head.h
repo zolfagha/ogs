@@ -63,13 +63,13 @@ public:
         //_solHead->getTimeODEAssembler()->setTheta(1.0);
         T_LINEAR_SOLVER* linear_solver = _solHead->getLinearEquationSolver();
         linear_solver->setOption(option);
-        this->setParameter(Head, problem.getIC(0));
+        this->setOutput(Head, problem.getIC(0));
     }
 
     int solveTimeStep(const TimeStep &time)
     {
         _solHead->solveTimeStep(time);
-        _vec_parameters[Head] = _solHead->getCurrentSolution(0);
+        setOutput(Head, _solHead->getCurrentSolution(0));
         return 0;
     }
 

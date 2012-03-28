@@ -6,8 +6,8 @@
 namespace MathLib
 {
 class ICoupledSystem;
-class VariableContainer;
-class VariableMappingTable;
+class ParameterTable;
+struct ParameterProblemMappingTable;
 
 /**
  * \brief
@@ -15,10 +15,10 @@ class VariableMappingTable;
 class ITransientPartitionedAlgorithm
 {
 public:
-	typedef MathLib::VariableContainer MyNamedVariableContainer;
+	typedef MathLib::ParameterTable MyNamedVariableContainer;
 	typedef MathLib::IFunction Variable;
 	typedef MathLib::ICoupledSystem MyCoupledSystem;
-	typedef MathLib::VariableMappingTable MyVariableMappingTable;
+	typedef MathLib::ParameterProblemMappingTable MyVariableMappingTable;
 
 	virtual ~ITransientPartitionedAlgorithm() {};
 

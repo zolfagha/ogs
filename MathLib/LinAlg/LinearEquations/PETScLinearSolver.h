@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include "SparseLinearEquations.h"
+#include "SparseLinearEquationBase.h"
 #include "petscmat.h"
 #include "petscksp.h"
 
@@ -20,7 +20,7 @@ typedef struct {
     double ls_error_tolerance;
 } PETSc_option;
 
-class PETSc_Solver : public CRSLinearEquationsBase<signed>
+class PETSc_Solver : public AbstractCRSLinearEquation<signed>
 {
 public:
     void initialize();

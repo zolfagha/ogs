@@ -3,8 +3,6 @@
 
 #include <vector>
 
-#include "MathLib/Function/IFunction.h"
-
 namespace MathLib
 {
 
@@ -13,9 +11,8 @@ class ICoupledSystem;
 /**
  * \brief Mapping between variables
  */
-struct VariableMappingTable
+struct ParameterProblemMappingTable
 {
-	typedef IFunction Variable;
     typedef std::pair<ICoupledSystem*,size_t> PairSysVarId;
     typedef std::pair<size_t, size_t> PairInputVar;
     typedef std::vector<PairInputVar> ListOfInputVar;

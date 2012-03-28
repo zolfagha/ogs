@@ -22,11 +22,11 @@ public:
     virtual ~BlockGaussSeidelMethod() {};
 
     ///
-    void doPostAfterSolve( ICoupledSystem & problem, VariableContainer& parameter_table, const VariableMappingTable &mapping );
+    void doPostAfterSolve( ICoupledSystem & problem, ParameterTable& parameter_table, const ParameterProblemMappingTable &mapping );
 };
 
 template <class T_CONVERGENCE_CHECK>
-void BlockGaussSeidelMethod<T_CONVERGENCE_CHECK>::doPostAfterSolve( ICoupledSystem & problem, VariableContainer& parameter_table, const VariableMappingTable &mapping )
+void BlockGaussSeidelMethod<T_CONVERGENCE_CHECK>::doPostAfterSolve( ICoupledSystem & problem, ParameterTable& parameter_table, const ParameterProblemMappingTable &mapping )
 {
     // update shared variables
 	AbstractIterativePartitionedMethod<T_CONVERGENCE_CHECK>::updateParameterTable(problem, mapping, parameter_table);

@@ -22,6 +22,16 @@ public:
         v = _v;
     };
 
+    virtual void eval(const Tpos&, Tval &v) const
+    {
+        v = _v;
+    };
+
+    virtual void eval(Tval &v) const
+    {
+        v = _v;
+    };
+
     virtual TemplateFunction<Tpos,Tval>* clone() const
     {
     	return new FunctionConstant(_v);

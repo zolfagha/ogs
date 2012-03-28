@@ -18,34 +18,60 @@ template<class T_SUPER>
 class AbstractMonolithicSystem : public T_SUPER
 {
 public:
-	typedef MathLib::IFunction Variable;
-
     virtual ~AbstractMonolithicSystem()
     {
-        Base::releaseObjectsInStdVector(_vec_parameters);
     }
 
-    void setParameter(size_t in_var, Variable* var)
+    void setNumberOfParameters(size_t n)
     {
-        assert(in_var<_vec_parameters.size());
-        if (_vec_parameters[in_var]!=0)
-            delete _vec_parameters[in_var];
-        _vec_parameters[in_var] = var->clone();
+        _vec_in_parameters.resize(n, 0);
+        _vec_out_parameters.resize(n, 0);
     }
 
-    Variable* getParameter(size_t out) const
+    void setInput(size_t parameter_id, const Parameter* val)
     {
-        assert(out<_vec_parameters.size());
-        return _vec_parameters[out];
+        assert(parameter_id<_vec_in_parameters.size());
+        _vec_in_parameters[parameter_id] = val;
     }
 
-    size_t getParameterIdForInput(size_t input_id) const {return input_id;};
+    const Parameter* getOutput(size_t parameter_id) const
+    {
+        assert(parameter_id<_vec_out_parameters.size());
+        return _vec_out_parameters[parameter_id];
+    }
+
+    template <class T>
+    const T* getOutput(size_t parameter_id) const
+    {
+        assert(parameter_id<_vec_out_parameters.size());
+        return static_cast<T*>(_vec_out_parameters[parameter_id]);
+    }
+
+    size_t getParameterIdForInput(size_t parameter_id) const {return parameter_id;};
 
     bool check() const {return true;};
 
+    void setOutput(size_t parameter_id, Parameter* val)
+    {
+        assert(parameter_id<_vec_out_parameters.size());
+        _vec_out_parameters[parameter_id] = val;
+    }
 protected:
-    std::vector<MathLib::IFunction*> _vec_parameters;
-//    std::vector<Variable*> _vec_parameters;
+    const Parameter* getInput(size_t parameter_id) const
+    {
+        return _vec_in_parameters[parameter_id];
+    }
+
+    template <class T>
+    const T* getInput(size_t parameter_id) const
+    {
+        assert(parameter_id<_vec_in_parameters.size());
+        return static_cast<const T*>(_vec_in_parameters[parameter_id]);
+    }
+
+private:
+    std::vector<const Parameter*> _vec_in_parameters;
+    std::vector<Parameter*> _vec_out_parameters;
 };
 
 template <class T_SUPER, size_t N_IN, size_t N_OUT>
@@ -53,7 +79,7 @@ class TemplateMonolithicSystem : public AbstractMonolithicSystem<T_SUPER>
 {
 public:
     TemplateMonolithicSystem() {
-	    AbstractMonolithicSystem<T_SUPER>::_vec_parameters.resize(getNumberOfParameters());
+	    AbstractMonolithicSystem<T_SUPER>::setNumberOfParameters(getNumberOfParameters());
     }
 
     size_t getNumberOfInputParameters() const {return N_IN;};

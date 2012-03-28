@@ -7,7 +7,7 @@
 #include <algorithm>
 
 #include "Base/CodingTools.h"
-#include "MathLib/Function/Function.h"
+#include "Parameter.h"
 
 namespace MathLib
 {
@@ -15,16 +15,14 @@ namespace MathLib
 /**
  * \brief Container of named variables
  */
-class VariableContainer
+class ParameterTable
 {
 public:
-	typedef MathLib::IFunction Variable;
-
 	///
-	VariableContainer() {};
+	ParameterTable() {};
 
     ///
-    virtual ~VariableContainer()
+    virtual ~ParameterTable()
     {
         Base::releaseObjectsInStdVector(_list_own_var_data);
     }
@@ -38,7 +36,7 @@ public:
     }
 
     /// make a copy of the given object
-    void assign(const VariableContainer &src)
+    void assign(const ParameterTable &src)
     {
     	this->clear();
         _list_var_names.assign(src._list_var_names.begin(), src._list_var_names.end());
@@ -82,16 +80,16 @@ public:
     }
 
     /// return the variable with the given index
-    Variable* get(size_t var_id) const
+    const Parameter* get(size_t var_id) const
     {
         return _list_var_data[var_id];
     }
 
     /// return the variable with the given index
     template <class T>
-    T* get(size_t var_id) const
+    const T* get(size_t var_id) const
     {
-        return static_cast<T*>(_list_var_data[var_id]);
+        return static_cast<const T*>(_list_var_data[var_id]);
     }
 
     /// register the variable
@@ -105,12 +103,12 @@ public:
 
     /// set variable
 #if 0
-    void set(size_t var_id,  const Variable& v)
+    void set(size_t var_id,  const Parameter& v)
     {
         _list_var_data[var_id] = v.clone();
     }
 #else
-    void set(size_t var_id,  Variable& v)
+    void set(size_t var_id,  const Parameter& v)
     {
         _list_var_data[var_id] = &v; //.clone();
     }
@@ -118,10 +116,10 @@ public:
 
 private:
     std::vector<std::string> _list_var_names;
-    std::vector<Variable*> _list_var_data;
-    std::vector<Variable*> _list_own_var_data;
+    std::vector<const Parameter*> _list_var_data;
+    std::vector<const Parameter*> _list_own_var_data;
 
-    DISALLOW_COPY_AND_ASSIGN(VariableContainer);
+    DISALLOW_COPY_AND_ASSIGN(ParameterTable);
 };
 
 }

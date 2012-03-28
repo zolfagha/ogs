@@ -30,7 +30,7 @@ public:
     int solveTimeStep(const TimeStep &time)
     {
         const MeshLib::IMesh *msh = _dis->getMesh();
-        FemLib::FemNodalFunctionScalar *head = (FemLib::FemNodalFunctionScalar*)_vec_parameters[Head];
+        FemLib::FemNodalFunctionScalar *head = (FemLib::FemNodalFunctionScalar*)getInput(Head);
         FemLib::FEMIntegrationPointFunctionVector2d *vel = _vel;;
 
         FemLib::LagrangianFeObjectContainer* feObjects = head->getFeObjectContainer();
@@ -71,7 +71,7 @@ public:
                 vel->setIntegrationPointValue(i_e, ip, q);
             }
         }
-        _vec_parameters[Velocity] = vel;
+        setOutput(Velocity, vel);
         return 0;
     }
 

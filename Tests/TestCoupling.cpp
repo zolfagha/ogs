@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 #include <vector>
 
+#include "MathLib/Function/Function.h"
 #include "MathLib/Coupling/MonolithicProblem.h"
 #include "MathLib/Coupling/PartitionedProblem.h"
 #include "MathLib/Coupling/Algorithm/PartitionedAlgorithm.h"
@@ -14,19 +15,18 @@
 using namespace MathLib;
 using namespace NumLib;
 
-typedef MathLib::TemplateFunction<double,double> MyFunction;
+typedef MathLib::FunctionConstant<double,double> MyFunction;
 
 class MyConvergenceCheck
 {
-	typedef VariableContainer MyNamedVariableContainer;
 public:
-	bool isConverged(MyNamedVariableContainer& vars_prev, MyNamedVariableContainer& vars_current, double eps, double &v_diff)
+	bool isConverged(ParameterTable& vars_prev, ParameterTable& vars_current, double eps, double &v_diff)
 	{
 	    for (size_t i=0; i<vars_prev.size(); i++) {
 	        double v_prev = .0;
-	        vars_prev.get<MyFunction>(i)->eval(.0, v_prev);
+	        vars_prev.get<MyFunction>(i)->eval(v_prev);
 	        double v_cur = .0;
-	        vars_current.get<MyFunction>(i)->eval(.0, v_cur);
+	        vars_current.get<MyFunction>(i)->eval(v_cur);
 	        v_diff = std::abs(v_cur - v_prev);
 	        if (v_diff>eps) {
 	            return false;
@@ -47,12 +47,10 @@ public:
     int solve()
     {
     	double vb, vc;
-        ((MyFunction*)_vec_parameters[WeakCouplingEQS1::b])->eval(.0, vb);
-        ((MyFunction*)_vec_parameters[WeakCouplingEQS1::c])->eval(.0, vc);
+        getInput<MyFunction>(b)->eval(vb);
+        getInput<MyFunction>(c)->eval(vc);
         double va = 1./2.*(6.9 - 2.*vb - 0.3*vc);
-        if (_vec_parameters[WeakCouplingEQS1::a]!=0)
-            delete _vec_parameters[WeakCouplingEQS1::a];
-        _vec_parameters[WeakCouplingEQS1::a] = new MathLib::FunctionConstant<double,double>(va);
+        setOutput(WeakCouplingEQS1::a, new MathLib::FunctionConstant<double,double>(va));
         return 0;
     }
 };
@@ -64,12 +62,10 @@ public:
     int solve()
     {
     	double va, vc;
-    	((MyFunction*)_vec_parameters[WeakCouplingEQS2::a])->eval(.0, va);
-    	((MyFunction*)_vec_parameters[WeakCouplingEQS2::c])->eval(.0, vc);
+        getInput<MyFunction>(a)->eval(va);
+        getInput<MyFunction>(c)->eval(vc);
         double vb = 1./5.*(13.6-3*va-0.2*vc);
-        if (_vec_parameters[WeakCouplingEQS2::b]!=0)
-            delete _vec_parameters[WeakCouplingEQS2::b];
-        _vec_parameters[WeakCouplingEQS2::b] = new MathLib::FunctionConstant<double,double>(vb);
+        setOutput(b, new MathLib::FunctionConstant<double,double>(vb));
         return 0;
     }
 };
@@ -81,12 +77,10 @@ public:
     int solve()
     {
     	double va, vb;
-        ((MyFunction*)_vec_parameters[a])->eval(.0, va);
-        ((MyFunction*)_vec_parameters[b])->eval(.0, vb);
+        getInput<MyFunction>(a)->eval(va);
+        getInput<MyFunction>(b)->eval(vb);
         double vc = 1./3.*(10.1-0.5*va-0.3*vb);
-        if (_vec_parameters[c]!=0)
-            delete _vec_parameters[c];
-        _vec_parameters[c] = new MathLib::FunctionConstant<double,double>(vc);
+        setOutput(c, new MathLib::FunctionConstant<double,double>(vc));
         return 0;
     }
 private:
@@ -177,9 +171,9 @@ TEST(Coupling, SteadyCouplingCheck1)
     WeakCouplingEQS2 eqs2;
     WeakCouplingEQS3 eqs3;
 
-    eqs1.setParameter(WeakCouplingEQS1::a, new MathLib::FunctionConstant<double,double>(.0));
-    eqs2.setParameter(WeakCouplingEQS2::b, new MathLib::FunctionConstant<double,double>(.0));
-    eqs3.setParameter(WeakCouplingEQS3::c, new MathLib::FunctionConstant<double,double>(.0));
+    eqs1.setOutput(WeakCouplingEQS1::a, new MathLib::FunctionConstant<double,double>(.0));
+    eqs2.setOutput(WeakCouplingEQS2::b, new MathLib::FunctionConstant<double,double>(.0));
+    eqs3.setOutput(WeakCouplingEQS3::c, new MathLib::FunctionConstant<double,double>(.0));
 
     {
         // correct
@@ -249,9 +243,9 @@ TEST(Coupling, SteadyCouplingJacobi)
     WeakCouplingEQS2 eqs2;
     WeakCouplingEQS3 eqs3;
 
-    eqs1.setParameter(WeakCouplingEQS1::a, new MathLib::FunctionConstant<double,double>(.0));
-    eqs2.setParameter(WeakCouplingEQS2::b, new MathLib::FunctionConstant<double,double>(.0));
-    eqs3.setParameter(WeakCouplingEQS3::c, new MathLib::FunctionConstant<double,double>(.0));
+    eqs1.setOutput(WeakCouplingEQS1::a, new MathLib::FunctionConstant<double,double>(.0));
+    eqs2.setOutput(WeakCouplingEQS2::b, new MathLib::FunctionConstant<double,double>(.0));
+    eqs3.setOutput(WeakCouplingEQS3::c, new MathLib::FunctionConstant<double,double>(.0));
 
     BlockJacobiMethod<MyConvergenceCheck> method(1.e-4, 100);
     PartitionedProblem part1(method);
@@ -278,9 +272,9 @@ TEST(Coupling, SteadyCouplingJacobi)
 
     const double epsilon = 1.e-3;
     double v1, v2, v3;
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(v3);
     ASSERT_NEAR(1., v1, epsilon);
     ASSERT_NEAR(2., v2, epsilon);
     ASSERT_NEAR(3., v3, epsilon);
@@ -292,9 +286,9 @@ TEST(Coupling, SteadyCouplingSeidel)
     WeakCouplingEQS2 eqs2;
     WeakCouplingEQS3 eqs3;
 
-    eqs1.setParameter(WeakCouplingEQS1::a, new MathLib::FunctionConstant<double,double>(.0));
-    eqs2.setParameter(WeakCouplingEQS2::b, new MathLib::FunctionConstant<double,double>(.0));
-    eqs3.setParameter(WeakCouplingEQS3::c, new MathLib::FunctionConstant<double,double>(.0));
+    eqs1.setOutput(WeakCouplingEQS1::a, new MathLib::FunctionConstant<double,double>(.0));
+    eqs2.setOutput(WeakCouplingEQS2::b, new MathLib::FunctionConstant<double,double>(.0));
+    eqs3.setOutput(WeakCouplingEQS3::c, new MathLib::FunctionConstant<double,double>(.0));
 
     BlockGaussSeidelMethod<MyConvergenceCheck> method(1.e-5, 100);
     PartitionedProblem part1(method);
@@ -320,9 +314,9 @@ TEST(Coupling, SteadyCouplingSeidel)
 
     const double epsilon = 1.e-3;
     double v1, v2, v3;
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(v3);
     ASSERT_NEAR(1., v1, epsilon);
     ASSERT_NEAR(2., v2, epsilon);
     ASSERT_NEAR(3., v3, epsilon);
@@ -342,12 +336,10 @@ public:
     {
         double t = ts.getTime();
         double vb, vc;
-        ((MyFunction*)_vec_parameters[WeakCouplingEQS1::b])->eval(.0, vb);
-        ((MyFunction*)_vec_parameters[WeakCouplingEQS1::c])->eval(.0, vc);
+        getInput<MyFunction>(b)->eval(vb);
+        getInput<MyFunction>(c)->eval(vc);
         double va = 1./2.*(6.9*t - 2.*vb - 0.3*vc);
-        if (_vec_parameters[WeakCouplingEQS1::a]!=0)
-            delete _vec_parameters[WeakCouplingEQS1::a];
-        _vec_parameters[WeakCouplingEQS1::a] = new MathLib::FunctionConstant<double,double>(va);
+        setOutput(a, new MathLib::FunctionConstant<double,double>(va));
         return 0;
     }
     double suggestNext(const TimeStep &ts) {return ts.getTime()+_dt;};
@@ -371,12 +363,10 @@ public:
     {
         double t = ts.getTime();
         double va, vc;
-        ((MyFunction*)_vec_parameters[WeakCouplingEQS2::a])->eval(.0, va);
-        ((MyFunction*)_vec_parameters[WeakCouplingEQS2::c])->eval(.0, vc);
+        getInput<MyFunction>(a)->eval(va);
+        getInput<MyFunction>(c)->eval(vc);
         double vb = 1./5.*(13.6*t-3*va-0.2*vc);
-        if (_vec_parameters[WeakCouplingEQS2::b]!=0)
-            delete _vec_parameters[WeakCouplingEQS2::b];
-        _vec_parameters[WeakCouplingEQS2::b] = new MathLib::FunctionConstant<double,double>(vb);
+        setOutput(b, new MathLib::FunctionConstant<double,double>(vb));
         return 0;
     }
     double suggestNext(const TimeStep &ts) {return (ts.getTime()+_dt);};
@@ -400,12 +390,10 @@ public:
     {
         double t = ts.getTime();
         double va, vb;
-        ((MyFunction*)_vec_parameters[a])->eval(.0, va);
-        ((MyFunction*)_vec_parameters[b])->eval(.0, vb);
+        getInput<MyFunction>(a)->eval(va);
+        getInput<MyFunction>(b)->eval(vb);
         double vc = 1./3.*(10.1*t-0.5*va-0.3*vb);
-        if (_vec_parameters[c]!=0)
-            delete _vec_parameters[c];
-        _vec_parameters[c] = new MathLib::FunctionConstant<double,double>(vc);
+        setOutput(c, new MathLib::FunctionConstant<double,double>(vc));
         return 0;
     }
     double suggestNext(const TimeStep &ts) {return (ts.getTime()+_dt);};
@@ -424,9 +412,9 @@ TEST(Coupling, TransientCouplingParallelStaggered1)
     TransientWeakCouplingEQS1 eqs1(1.0);
     TransientWeakCouplingEQS2 eqs2(1.0);
     TransientWeakCouplingEQS3 eqs3(1.0);
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, new MathLib::FunctionConstant<double,double>(.0));
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, new MathLib::FunctionConstant<double,double>(.0));
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, new MathLib::FunctionConstant<double,double>(.0));
+    eqs1.setOutput(TransientWeakCouplingEQS1::a, new MathLib::FunctionConstant<double,double>(.0));
+    eqs2.setOutput(TransientWeakCouplingEQS2::b, new MathLib::FunctionConstant<double,double>(.0));
+    eqs3.setOutput(TransientWeakCouplingEQS3::c, new MathLib::FunctionConstant<double,double>(.0));
 
     ParallelStaggeredMethod<MyConvergenceCheck> method(1e-5, 100);
     AsyncPartitionedSystem apart1(method);
@@ -454,17 +442,17 @@ TEST(Coupling, TransientCouplingParallelStaggered1)
     timestepping.setBeginning(.0);
     timestepping.solve(1.0);
     double v1, v2, v3;
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(1., v1, epsilon);
     ASSERT_NEAR(2., v2, epsilon);
     ASSERT_NEAR(3., v3, epsilon);
 
     timestepping.solve(2.0);
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(2., v1, epsilon);
     ASSERT_NEAR(4., v2, epsilon);
     ASSERT_NEAR(6., v3, epsilon);
@@ -475,9 +463,9 @@ TEST(Coupling, TransientCouplingParallelStaggered2)
     TransientWeakCouplingEQS1 eqs1(1.0);
     TransientWeakCouplingEQS2 eqs2(2.0);
     TransientWeakCouplingEQS3 eqs3(4.0);
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, new MathLib::FunctionConstant<double,double>(.0));
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, new MathLib::FunctionConstant<double,double>(.0));
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, new MathLib::FunctionConstant<double,double>(.0));
+    eqs1.setOutput(TransientWeakCouplingEQS1::a, new MathLib::FunctionConstant<double,double>(.0));
+    eqs2.setOutput(TransientWeakCouplingEQS2::b, new MathLib::FunctionConstant<double,double>(.0));
+    eqs3.setOutput(TransientWeakCouplingEQS3::c, new MathLib::FunctionConstant<double,double>(.0));
 
     ParallelStaggeredMethod<MyConvergenceCheck> method(1e-5, 100);
     AsyncPartitionedSystem apart1(method);
@@ -505,41 +493,41 @@ TEST(Coupling, TransientCouplingParallelStaggered2)
     timestepping.setBeginning(.0);
     timestepping.solve(1.0);
     double v1, v2, v3;
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(6.9/2., v1, epsilon);
     ASSERT_NEAR(0., v2, epsilon);
     ASSERT_NEAR(0., v3, epsilon);
 
     timestepping.solve(2.0);
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(3.65, v1, epsilon);
     ASSERT_NEAR(3.25, v2, epsilon);
     ASSERT_NEAR(0., v3, epsilon);
 
     timestepping.solve(3.0);
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(7.1, v1, epsilon);
     ASSERT_NEAR(3.25, v2, epsilon);
     ASSERT_NEAR(0., v3, epsilon);
 
     timestepping.solve(4.0);
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(4., v1, epsilon);
     ASSERT_NEAR(8., v2, epsilon);
     ASSERT_NEAR(12., v3, epsilon);
 
     timestepping.solve(5.0);
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(7.45, v1, epsilon);
     ASSERT_NEAR(8., v2, epsilon);
     ASSERT_NEAR(12., v3, epsilon);
@@ -551,9 +539,9 @@ TEST(Coupling, TransientCouplingParallelStaggered3)
     TransientWeakCouplingEQS2 eqs2(2.0);
     TransientWeakCouplingEQS3 eqs3(4.0);
     MathLib::FunctionConstant<double,double> f_const_zero(.0);
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
+    eqs1.setOutput(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setOutput(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setOutput(TransientWeakCouplingEQS3::c, &f_const_zero);
 
     ParallelStaggeredMethod<MyConvergenceCheck> method(1e-5, 1);
     AsyncPartitionedSystem apart1(method);
@@ -581,53 +569,53 @@ TEST(Coupling, TransientCouplingParallelStaggered3)
     timestepping.setBeginning(.0);
     timestepping.solve(1.0);
     double v1, v2, v3;
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(3.45, v1, epsilon);
     ASSERT_NEAR(0., v2, epsilon);
     ASSERT_NEAR(0., v3, epsilon);
 
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
+    eqs1.setOutput(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setOutput(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setOutput(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(2.0);
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(6.9, v1, epsilon);
     ASSERT_NEAR(3.37, v2, epsilon);
     ASSERT_NEAR(0., v3, epsilon);
 
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
+    eqs1.setOutput(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setOutput(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setOutput(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(3.0);
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(6.98, v1, epsilon);
     ASSERT_NEAR(3.37, v2, epsilon);
     ASSERT_NEAR(0., v3, epsilon);
 
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
+    eqs1.setOutput(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setOutput(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setOutput(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(4.0);
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(10.43, v1, epsilon);
     ASSERT_NEAR(6.692, v2, epsilon);
     ASSERT_NEAR(11.96633, v3, epsilon);
 
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
+    eqs1.setOutput(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setOutput(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setOutput(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(5.0);
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(8.76305, v1, epsilon);
     ASSERT_NEAR(6.692, v2, epsilon);
     ASSERT_NEAR(11.96633, v3, epsilon);
@@ -638,9 +626,9 @@ TEST(Coupling, TransientCouplingSerialStaggered1)
     TransientWeakCouplingEQS1 eqs1(1.0);
     TransientWeakCouplingEQS2 eqs2(2.0);
     TransientWeakCouplingEQS3 eqs3(4.0);
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, new MathLib::FunctionConstant<double,double>(.0));
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, new MathLib::FunctionConstant<double,double>(.0));
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, new MathLib::FunctionConstant<double,double>(.0));
+    eqs1.setOutput(TransientWeakCouplingEQS1::a, new MathLib::FunctionConstant<double,double>(.0));
+    eqs2.setOutput(TransientWeakCouplingEQS2::b, new MathLib::FunctionConstant<double,double>(.0));
+    eqs3.setOutput(TransientWeakCouplingEQS3::c, new MathLib::FunctionConstant<double,double>(.0));
 
     SerialStaggeredMethod<MyConvergenceCheck> method(1e-5, 100);
     AsyncPartitionedSystem apart1(method);
@@ -668,41 +656,41 @@ TEST(Coupling, TransientCouplingSerialStaggered1)
     timestepping.setBeginning(.0);
     timestepping.solve(1.0);
     double v1, v2, v3;
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(6.9/2., v1, epsilon);
     ASSERT_NEAR(0., v2, epsilon);
     ASSERT_NEAR(0., v3, epsilon);
 
     timestepping.solve(2.0);
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(3.65, v1, epsilon);
     ASSERT_NEAR(3.25, v2, epsilon);
     ASSERT_NEAR(0., v3, epsilon);
 
     timestepping.solve(3.0);
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(7.1, v1, epsilon);
     ASSERT_NEAR(3.25, v2, epsilon);
     ASSERT_NEAR(0., v3, epsilon);
 
     timestepping.solve(4.0);
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(4, v1, epsilon);
     ASSERT_NEAR(8, v2, epsilon);
     ASSERT_NEAR(12., v3, epsilon);
 
     timestepping.solve(5.0);
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(7.45, v1, epsilon);
     ASSERT_NEAR(8, v2, epsilon);
     ASSERT_NEAR(12., v3, epsilon);
@@ -714,9 +702,9 @@ TEST(Coupling, TransientCouplingSerialStaggered2)
     TransientWeakCouplingEQS2 eqs2(2.0);
     TransientWeakCouplingEQS3 eqs3(4.0);
     MathLib::FunctionConstant<double,double> f_const_zero(.0);
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
+    eqs1.setOutput(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setOutput(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setOutput(TransientWeakCouplingEQS3::c, &f_const_zero);
 
     SerialStaggeredMethod<MyConvergenceCheck> method(1e-5, 1);
     AsyncPartitionedSystem apart1(method);
@@ -744,53 +732,53 @@ TEST(Coupling, TransientCouplingSerialStaggered2)
     timestepping.setBeginning(.0);
     timestepping.solve(1.0);
     double v1, v2, v3;
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(6.9/2., v1, epsilon);
     ASSERT_NEAR(0., v2, epsilon);
     ASSERT_NEAR(0., v3, epsilon);
 
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
+    eqs1.setOutput(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setOutput(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setOutput(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(2.0);
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(6.9, v1, epsilon);
     ASSERT_NEAR(1.3, v2, epsilon);
     ASSERT_NEAR(0., v3, epsilon);
 
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
+    eqs1.setOutput(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setOutput(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setOutput(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(3.0);
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(9.05, v1, epsilon);
     ASSERT_NEAR(1.3, v2, epsilon);
     ASSERT_NEAR(0., v3, epsilon);
 
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
+    eqs1.setOutput(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setOutput(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setOutput(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(4.0);
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0, v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0, v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0, v3);
     ASSERT_NEAR(12.5, v1, epsilon);
     ASSERT_NEAR(3.38, v2, epsilon);
     ASSERT_NEAR(11.04533, v3, epsilon);
 
-    eqs1.setParameter(TransientWeakCouplingEQS1::a, &f_const_zero);
-    eqs2.setParameter(TransientWeakCouplingEQS2::b, &f_const_zero);
-    eqs3.setParameter(TransientWeakCouplingEQS3::c, &f_const_zero);
+    eqs1.setOutput(TransientWeakCouplingEQS1::a, &f_const_zero);
+    eqs2.setOutput(TransientWeakCouplingEQS2::b, &f_const_zero);
+    eqs3.setOutput(TransientWeakCouplingEQS3::c, &f_const_zero);
     timestepping.solve(5.0);
-    part2.getParameter<MyFunction>(part2.getParameterID("a"))->eval(0., v1);
-    part2.getParameter<MyFunction>(part2.getParameterID("b"))->eval(0., v2);
-    part2.getParameter<MyFunction>(part2.getParameterID("c"))->eval(0., v3);
+    part2.getOutput<MyFunction>(part2.getParameterID("a"))->eval(0., v1);
+    part2.getOutput<MyFunction>(part2.getParameterID("b"))->eval(0., v2);
+    part2.getOutput<MyFunction>(part2.getParameterID("c"))->eval(0., v3);
     ASSERT_NEAR(12.2132, v1, epsilon);
     ASSERT_NEAR(3.38, v2, epsilon);
     ASSERT_NEAR(11.04533, v3, epsilon);

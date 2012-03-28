@@ -90,10 +90,10 @@ TEST(Math, LinearSolverSparse)
     Example1 ex1;
 
     // construct discrete eqs
-    SparseLinearEquations eqs;
+    SparseLinearEquation eqs;
     eqs.create(ex1.sparse.size(), &ex1.sparse);
-    eqs.getOption().solver_type = SparseLinearEquations::SolverCG;
-    eqs.getOption().precon_type = SparseLinearEquations::NONE;
+    eqs.getOption().solver_type = SparseLinearEquation::SolverCG;
+    eqs.getOption().precon_type = SparseLinearEquation::NONE;
 
     //
     for (size_t i=0; i<ex1.dim_eqs; i++) {

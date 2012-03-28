@@ -20,18 +20,18 @@
 
 class FemFunctionConvergenceCheck
 {
-	typedef VariableContainer MyNamedVariableContainer;
+	typedef ParameterTable MyNamedVariableContainer;
 public:
 	bool isConverged(MyNamedVariableContainer& vars_prev, MyNamedVariableContainer& vars_current, double eps, double &v_diff)
 	{
 	    for (size_t i=0; i<vars_prev.size(); i++) {
 	    	if (vars_prev.getName(i).compare("h")==0) {
-		        FemNodalFunctionScalar* f_fem_prev = vars_prev.get<FemNodalFunctionScalar>(i);
-		        FemNodalFunctionScalar* f_fem_cur = vars_current.get<FemNodalFunctionScalar>(i);
+		        const FemNodalFunctionScalar* f_fem_prev = vars_prev.get<FemNodalFunctionScalar>(i);
+		        const FemNodalFunctionScalar* f_fem_cur = vars_current.get<FemNodalFunctionScalar>(i);
 	    		v_diff = f_fem_cur->norm_diff(*f_fem_prev);
 	    	} else {
-	    		FEMIntegrationPointFunctionVector2d* f_fem_prev = vars_prev.get<FEMIntegrationPointFunctionVector2d>(i);
-	    		FEMIntegrationPointFunctionVector2d* f_fem_cur = vars_current.get<FEMIntegrationPointFunctionVector2d>(i);
+	    		const FEMIntegrationPointFunctionVector2d* f_fem_prev = vars_prev.get<FEMIntegrationPointFunctionVector2d>(i);
+	    		const FEMIntegrationPointFunctionVector2d* f_fem_cur = vars_current.get<FEMIntegrationPointFunctionVector2d>(i);
 	    		v_diff = f_fem_cur->norm_diff(*f_fem_prev);
 	    	}
 	        if (v_diff>eps) {
@@ -126,9 +126,9 @@ TEST(Solution, CouplingFem1)
 	    timestepping.setBeginning(.0);
 	    timestepping.solve(1.0);
 
-	    FemNodalFunctionScalar* r_f_head = apart1.getParameter<FemNodalFunctionScalar>(apart1.getParameterID("h"));
-	    FEMIntegrationPointFunctionVector2d* r_f_v = apart1.getParameter<FEMIntegrationPointFunctionVector2d>(apart1.getParameterID("v"));
-	    DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
+	    const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getParameterID("h"));
+	    const FEMIntegrationPointFunctionVector2d* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector2d>(apart1.getParameterID("v"));
+	    const DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
 	    const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
 
 	    r_f_head->printouf();

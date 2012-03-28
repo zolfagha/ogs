@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "MathLib/Coupling/VariableMappingTable.h"
+#include "MathLib/Coupling/ParameterTable.h"
 #include "BlockGaussSeidelMethod.h"
 #include "BlockJacobiMethod.h"
 #include "TransientPartitionedAlgorithm.h"
@@ -16,10 +16,10 @@ template <class T_PARTITIONED>
 class AbstractPartitionedStaggeredMethod : public ITransientPartitionedAlgorithm
 {
 public:
-	typedef MathLib::VariableContainer MyNamedVariableContainer;
+	typedef MathLib::ParameterTable MyNamedVariableContainer;
 	typedef MathLib::IFunction Variable;
 	typedef MathLib::ICoupledSystem MyCoupledSystem;
-    typedef MathLib::VariableMappingTable MyVariableMappingTable;
+    typedef MathLib::ParameterProblemMappingTable MyVariableMappingTable;
 
     AbstractPartitionedStaggeredMethod() : _part_method() {};
     AbstractPartitionedStaggeredMethod(double epsilon, size_t max_count) : _part_method(epsilon, max_count) {};
