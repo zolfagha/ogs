@@ -8,13 +8,10 @@
 #include "VariableContainer.h"
 #include "VariableMappingTable.h"
 
-#include "NumLib/Coupling/Algorithm/PartitionedAlgorithm.h"
+#include "MathLib/Coupling/Algorithm/PartitionedAlgorithm.h"
 
-namespace NumLib
+namespace MathLib
 {
-
-//class IPartitionedAlgorithm;
-
 
 /**
  * \brief Partitioned problem

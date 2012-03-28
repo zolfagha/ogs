@@ -2,18 +2,15 @@
 #pragma once
 
 #include <string>
-#include <map>
+//#include <map>
 #include <vector>
 #include <algorithm>
 
 #include "Base/CodingTools.h"
 #include "MathLib/Function/Function.h"
 
-namespace NumLib
+namespace MathLib
 {
-
-//typedef MathLib::IFunction<double, double> Variable;
-
 
 /**
  * \brief Container of named variables
@@ -23,31 +20,34 @@ class VariableContainer
 public:
 	typedef MathLib::IFunction Variable;
 
+	///
 	VariableContainer() {};
 
     ///
     virtual ~VariableContainer()
     {
-        Base::releaseObjectsInStdVector(_list_var_data);
+        Base::releaseObjectsInStdVector(_list_own_var_data);
     }
 
     /// reset data
     void clear()
     {
         _list_var_names.clear();
-        Base::releaseObjectsInStdVector(_list_var_data);
+        _list_var_data.clear();
+        Base::releaseObjectsInStdVector(_list_own_var_data);
     }
 
-    /// make a copy of this object
-    /// @param dest the destination object
-    void clone(VariableContainer &dest) const
+    /// make a copy of the given object
+    void assign(const VariableContainer &src)
     {
-        dest.clear();
-        dest._list_var_names.assign(_list_var_names.begin(), _list_var_names.end());
-        dest._list_var_data.resize(_list_var_data.size());
-        for (size_t i=0; i<_list_var_data.size(); i++) {
-            if (_list_var_data[i]!=0)  {
-                dest._list_var_data[i] = _list_var_data[i]->clone();
+    	this->clear();
+        _list_var_names.assign(src._list_var_names.begin(), src._list_var_names.end());
+        _list_var_data.resize(src._list_var_data.size());
+        _list_own_var_data.resize(src._list_var_data.size());
+        for (size_t i=0; i<src._list_var_data.size(); i++) {
+            if (src._list_var_data[i]!=0)  {
+                _list_var_data[i] = src._list_var_data[i]->clone();
+                _list_own_var_data[i] = _list_var_data[i];
             }
         }
     }
@@ -59,12 +59,9 @@ public:
     }
 
     /// return if the container has a variable with the given key
-    size_t contain(const std::string &var_name) const
+    bool contain(const std::string &var_name) const
     {
-        if (find(var_name)<0)
-            return 0;
-        else
-            return 1;
+    	return (this->find(var_name)>=0);
     }
 
     /// return the name of the variable with the given index
@@ -90,6 +87,7 @@ public:
         return _list_var_data[var_id];
     }
 
+    /// return the variable with the given index
     template <class T>
     T* get(size_t var_id) const
     {
@@ -106,14 +104,22 @@ public:
     }
 
     /// set variable
+#if 0
     void set(size_t var_id,  const Variable& v)
     {
         _list_var_data[var_id] = v.clone();
     }
+#else
+    void set(size_t var_id,  Variable& v)
+    {
+        _list_var_data[var_id] = &v; //.clone();
+    }
+#endif
 
 private:
     std::vector<std::string> _list_var_names;
     std::vector<Variable*> _list_var_data;
+    std::vector<Variable*> _list_own_var_data;
 
     DISALLOW_COPY_AND_ASSIGN(VariableContainer);
 };

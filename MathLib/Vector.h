@@ -2,6 +2,8 @@
 #pragma once
 
 #include <cassert>
+#include <cmath>
+#include <iostream>
 
 namespace MathLib
 {
@@ -84,6 +86,10 @@ public:
     const T* getRaw() const {return _data;};
     T* getRawRef() {return _data;};
 
+    T& operator[] (size_t idx) {
+        assert (idx <= 2);
+        return _data[idx];
+    }
     const T& operator[] (size_t idx) const {
         assert (idx <= 2);
         return _data[idx];
@@ -140,6 +146,29 @@ public:
 
         return v;
     }
+
+    TemplateVector<T,2> operator- (const TemplateVector<T,2> &ref) const
+    {
+        TemplateVector<T,2> v;
+        for (size_t i = 0; i < 2; i++)
+            v[i] = _data[i] - ref._data[i];
+
+        return v;
+    }
+
+    bool operator<(const TemplateVector<T,2> &ref) const
+    {
+    	return this->magnitude() < ref.magnitude();
+    }
+
+    T magnitude() const
+    {
+    	T m = 0;
+        for (size_t i = 0; i < 2; i++)
+            m += _data[i]*_data[i];
+        return std::sqrt(m);
+    }
+
 private:
     T _data[2];
 };
@@ -160,8 +189,34 @@ private:
     T _data[3];
 };
 
-
-
 typedef TemplateVector<double, 2> Vector2D;
 typedef TemplateVector<double, 3> Vector3D;
+}
+
+inline std::ostream& operator<<(std::ostream& output, const MathLib::TemplateVector<double,2>& p)
+{
+    output << "[";
+    for (size_t i=0; i<2; i++)
+        output << p[i] << " ";
+    output << "]";
+    return output;  // for multiple << operators.
+}
+
+namespace std
+{
+inline MathLib::TemplateVector<double,2> abs(const MathLib::TemplateVector<double,2> &v)
+{
+	MathLib::TemplateVector<double,2> r;
+	for (size_t i=0; i<2; i++)
+		r[i] = std::abs(v[i]);
+	return r;
+}
+
+inline double max(double arg0, const MathLib::TemplateVector<double,2> &arg1)
+{
+	double r = arg0;
+	for (size_t i=0; i<2; i++)
+		r = std::max(r, arg1[i]);
+	return r;
+}
 }

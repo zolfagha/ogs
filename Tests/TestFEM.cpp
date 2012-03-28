@@ -33,7 +33,7 @@ using namespace DiscreteLib;
 typedef MathLib::Matrix<double> GlobalMatrixType;
 typedef std::vector<double> GlobalVectorType;
 
-void outputLinearEQS(MathLib::Matrix<double> &globalA, std::vector<double> &globalRHS)
+static void outputLinearEQS(MathLib::Matrix<double> &globalA, std::vector<double> &globalRHS)
 {
     std::cout << "A=" << std::endl;
     globalA.write(std::cout);
@@ -43,7 +43,7 @@ void outputLinearEQS(MathLib::Matrix<double> &globalA, std::vector<double> &glob
     std::cout << std::endl;
 }
 
-void outputLinearEQS(MathLib::Matrix<double> &globalA, double* globalRHS)
+static void outputLinearEQS(MathLib::Matrix<double> &globalA, double* globalRHS)
 {
     std::cout << "A=" << std::endl;
     globalA.write(std::cout);
@@ -56,7 +56,7 @@ void outputLinearEQS(MathLib::Matrix<double> &globalA, double* globalRHS)
 
 
 
-void getGWExpectedHead(std::vector<double> &expected)
+static void getGWExpectedHead(std::vector<double> &expected)
 {
     expected.resize(9);
     for (size_t i=0; i<9; i++) {
@@ -74,11 +74,11 @@ TEST(FEM, testUnstructuredMesh)
     //#Solve
     GWFemTest::calculateHead(gw);
 
-    double *h = gw.head->getNodalValues();
+    DiscreteLib::DiscreteVector<double>* h = gw.head->getNodalValues();
     std::vector<double> expected;
     getGWExpectedHead(expected);
 
-    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], h, gw.head->getNumberOfNodes());
+    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h)[0], gw.head->getNumberOfNodes());
 }
 
 TEST(FEM, testStructuredMesh)
@@ -89,11 +89,11 @@ TEST(FEM, testStructuredMesh)
     //#Solve
     GWFemTest::calculateHead(gw);
 
-    double *h = gw.head->getNodalValues();
+    DiscreteLib::DiscreteVector<double>* h = gw.head->getNodalValues();
     std::vector<double> expected;
     getGWExpectedHead(expected);
 
-    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], h, gw.head->getNumberOfNodes());
+    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h)[0], gw.head->getNumberOfNodes());
 }
 
 TEST(FEM, ExtrapolateAverage1)
@@ -108,8 +108,8 @@ TEST(FEM, ExtrapolateAverage1)
     FemExtrapolationAverage<MathLib::Vector2D> extrapo;
     extrapo.extrapolate(*gw.vel, nodal_vel);
 
-    MathLib::Vector2D *v = nodal_vel.getNodalValues();
-    ASSERT_DOUBLE_ARRAY_EQ(MathLib::Vector2D(1.e-5, .0), v, gw.head->getNumberOfNodes());
+    DiscreteLib::DiscreteVector<MathLib::Vector2D> *v = nodal_vel.getNodalValues();
+    ASSERT_DOUBLE_ARRAY_EQ(MathLib::Vector2D(1.e-5, .0), &(*v)[0], gw.head->getNumberOfNodes());
 }
 
 template<typename Tval, typename Tpos>
@@ -152,10 +152,10 @@ TEST(FEM, ExtrapolateAverage2)
         if (i%3==2) exH[i] = 0.e+6;
     }
 
-    double *h = gw.head->getNodalValues();
-    ASSERT_DOUBLE_ARRAY_EQ(&exH[0], h, gw.head->getNumberOfNodes());
+    DiscreteLib::DiscreteVector<double> *h = gw.head->getNodalValues();
+    ASSERT_DOUBLE_ARRAY_EQ(&exH[0], &(*h)[0], gw.head->getNumberOfNodes());
 
-    MathLib::Vector2D *v = nodal_vel.getNodalValues();
-    ASSERT_DOUBLE_ARRAY_EQ(MathLib::Vector2D(4./3.*1.e-5, .0), v, gw.head->getNumberOfNodes());
+    DiscreteLib::DiscreteVector<MathLib::Vector2D> *v = nodal_vel.getNodalValues();
+    ASSERT_DOUBLE_ARRAY_EQ(MathLib::Vector2D(4./3.*1.e-5, .0), &(*v)[0], gw.head->getNumberOfNodes());
 }
 

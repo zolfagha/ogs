@@ -232,7 +232,7 @@ TEST(Solution, Fem1_Linear)
 
     FemNodalFunctionScalar* h = gwProblem.getCurrentHead();
 
-    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], h->getNodalValues(), h->getNumberOfNodes());
+    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getNodalValues())[0], h->getNumberOfNodes());
 
     Base::releaseObject(msh);
 }
@@ -266,7 +266,7 @@ TEST(Solution, Fem1_Picard)
 
     FemNodalFunctionScalar* h = gwProblem.getCurrentHead();
 
-    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], h->getNodalValues(), h->getNumberOfNodes());
+    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getNodalValues())[0], h->getNumberOfNodes());
 
     Base::releaseObject(msh);
 }
@@ -300,7 +300,7 @@ TEST(Solution, Fem1_Newton)
 
     FemNodalFunctionScalar* h = gwProblem.getCurrentHead();
 
-    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], h->getNodalValues(), h->getNumberOfNodes());
+    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getNodalValues())[0], h->getNumberOfNodes());
 
     Base::releaseObject(msh);
 }
@@ -339,7 +339,7 @@ TEST(Solution, Fem2)
 
     FemNodalFunctionScalar* h = gwProblem.getCurrentHead();
 
-    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], h->getNodalValues(), h->getNumberOfNodes());
+    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getNodalValues())[0], h->getNumberOfNodes());
 
 
     Base::releaseObject(msh);

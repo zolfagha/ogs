@@ -1,7 +1,7 @@
 
 #include "PartitionedProblem.h"
 
-namespace NumLib
+namespace MathLib
 {
 
 int PartitionedProblem::find(const MyCoupledSystem& sub) const
@@ -72,7 +72,8 @@ size_t PartitionedProblem::addParameter(const std::string &name, MyCoupledSystem
     Variable* v = sub_problem.getParameter(para_id_in_sub_problem);
     _vars.set(var_id, *v);
     // make a link between this and sub-problem variable
-    _map._map_paraId2subproblem.push_back(std::make_pair(&sub_problem, para_id_in_sub_problem));
+    VariableMappingTable::PairSysVarId parObj = std::make_pair(&sub_problem, para_id_in_sub_problem);
+    _map._map_paraId2subproblem.push_back(parObj);
     // update a list of sub-problems
     if (find(sub_problem)<0) {
         addSubProblem(sub_problem);

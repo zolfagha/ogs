@@ -84,12 +84,12 @@ public:
         
     CRSMatrix* clone()
     {
-        CRSMatrix<FP_TYPE, IDX_TYPE> *obj = new CRSMatrix<FP_TYPE, IDX_TYPE>(MatrixBase::_n_rows);
+        CRSMatrix<FP_TYPE, IDX_TYPE> *obj = new CRSMatrix<FP_TYPE, IDX_TYPE>(MatrixBase<IDX_TYPE>::_n_rows);
         const IDX_TYPE n_nz = getNNZ();
-        obj->_row_ptr = new IDX_TYPE[MatrixBase::_n_rows];
+        obj->_row_ptr = new IDX_TYPE[MatrixBase<IDX_TYPE>::_n_rows];
         obj->_col_idx = new IDX_TYPE[n_nz];
         obj->_data = new FP_TYPE[n_nz];
-        for (IDX_TYPE i=0; i<MatrixBase::_n_rows; i++)
+        for (IDX_TYPE i=0; i<MatrixBase<IDX_TYPE>::_n_rows; i++)
             obj->_row_ptr[i] = _row_ptr[i];
         for (IDX_TYPE i=0; i<n_nz; i++)
             obj->_col_idx[i] = _col_idx[i];
@@ -136,7 +136,7 @@ public:
      * get the number of non-zero entries
      * @return number of non-zero entries
      */
-    IDX_TYPE getNNZ() const { return _row_ptr[MatrixBase::_n_rows]; }
+    IDX_TYPE getNNZ() const { return _row_ptr[MatrixBase<IDX_TYPE>::_n_rows]; }
 
     /**
      * This method inserts/overwrites a non-zero matrix entry.
@@ -148,7 +148,7 @@ public:
      */
 	int setValue(IDX_TYPE row, IDX_TYPE col, FP_TYPE val)
 	{
-		assert(0 <= row && row < MatrixBase::_n_rows);
+		assert(0 <= row && row < MatrixBase<IDX_TYPE>::_n_rows);
 
 		// linear search - for matrices with many entries per row binary search is much faster
 		const IDX_TYPE idx_end (_row_ptr[row+1]);
@@ -174,7 +174,7 @@ public:
      */
 	int addValue(IDX_TYPE row, IDX_TYPE col, FP_TYPE val)
 	{
-		assert(0 <= row && row < MatrixBase::_n_rows);
+		assert(0 <= row && row < MatrixBase<IDX_TYPE>::_n_rows);
 
 		// linear search - for matrices with many entries per row binary search is much faster
 		const IDX_TYPE idx_end (_row_ptr[row+1]);
@@ -200,7 +200,7 @@ public:
      */
 	double getValue(IDX_TYPE row, IDX_TYPE col)
 	{
-		assert(0 <= row && row < MatrixBase::_n_rows);
+		assert(0 <= row && row < MatrixBase<IDX_TYPE>::_n_rows);
 
 		// linear search - for matrices with many entries per row binary search is much faster
 		const IDX_TYPE idx_end (_row_ptr[row+1]);
@@ -224,7 +224,7 @@ public:
      */
     FP_TYPE operator() (IDX_TYPE row, IDX_TYPE col) const
     {
-    	assert(0 <= row && row < MatrixBase::_n_rows);
+    	assert(0 <= row && row < MatrixBase<IDX_TYPE>::_n_rows);
 
     	// linear search - for matrices with many entries per row binary search is much faster
     	const IDX_TYPE idx_end (_row_ptr[row+1]);
@@ -264,7 +264,7 @@ public:
 	 */
 	void eraseEntries(IDX_TYPE n_rows_cols, IDX_TYPE const* const rows_cols)
 	{
-		IDX_TYPE n_cols(MatrixBase::_n_rows);
+		IDX_TYPE n_cols(MatrixBase<IDX_TYPE>::_n_rows);
 		//*** remove the rows
 		removeRows(n_rows_cols, rows_cols);
 		//*** transpose
@@ -272,7 +272,7 @@ public:
 		//*** remove columns in original means removing rows in the transposed
 		removeRows(n_rows_cols, rows_cols);
 		//*** transpose again
-		transpose(MatrixBase::_n_rows);
+		transpose(MatrixBase<IDX_TYPE>::_n_rows);
 	}
 
 	/**
@@ -282,7 +282,7 @@ public:
 	 */
 	void getColumn(IDX_TYPE j, FP_TYPE* column_entries) const
 	{
-		for (IDX_TYPE k(0); k<MatrixBase::_n_rows; k++) {
+		for (IDX_TYPE k(0); k<MatrixBase<IDX_TYPE>::_n_rows; k++) {
 			const IDX_TYPE end_row(_row_ptr[k+1]);
 			IDX_TYPE i(_row_ptr[k+1]);
 			while (i<end_row && _col_idx[i] != j) {
@@ -299,7 +299,7 @@ public:
 #ifndef NDEBUG
 	void printMat() const
 	{
-		for (IDX_TYPE k(0); k<MatrixBase::_n_rows; k++) {
+		for (IDX_TYPE k(0); k<MatrixBase<IDX_TYPE>::_n_rows; k++) {
 			std::cout << k << ": " << std::flush;
 			const IDX_TYPE row_end(_row_ptr[k+1]);
 			for (IDX_TYPE j(_row_ptr[k]); j<row_end; j++) {
@@ -319,11 +319,11 @@ protected:
 	void removeRows (IDX_TYPE n_rows_cols, IDX_TYPE const*const rows)
 	{
 		//*** determine the number of new rows and the number of entries without the rows
-		const IDX_TYPE n_new_rows(MatrixBase::_n_rows - n_rows_cols);
+		const IDX_TYPE n_new_rows(MatrixBase<IDX_TYPE>::_n_rows - n_rows_cols);
 		IDX_TYPE *row_ptr_new(new IDX_TYPE[n_new_rows+1]);
 		row_ptr_new[0] = 0;
 		IDX_TYPE row_cnt (1), erase_row_cnt(0);
-		for (unsigned k(0); k<MatrixBase::_n_rows; k++) {
+		for (IDX_TYPE k(0); k<MatrixBase<IDX_TYPE>::_n_rows; k++) {
 			if (erase_row_cnt < n_rows_cols) {
 				if (k != rows[erase_row_cnt]) {
 					row_ptr_new[row_cnt] = _row_ptr[k+1] - _row_ptr[k];
@@ -350,13 +350,13 @@ protected:
 		//*** copy the entries
 		// initialization
 		IDX_TYPE *row_ptr_new_tmp(new IDX_TYPE[n_new_rows+1]);
-		for (unsigned k(0); k<=n_new_rows; k++) {
+		for (IDX_TYPE k(0); k<=n_new_rows; k++) {
 			row_ptr_new_tmp[k] = row_ptr_new[k];
 		}
 		erase_row_cnt = 0;
 		row_cnt = 0;
 		// copy column index and data entries
-		for (IDX_TYPE k(0); k<MatrixBase::_n_rows; k++) {
+		for (IDX_TYPE k(0); k<MatrixBase<IDX_TYPE>::_n_rows; k++) {
 			if (erase_row_cnt < n_rows_cols) {
 				if (k != rows[erase_row_cnt]) {
 					const IDX_TYPE end (_row_ptr[k+1]);
@@ -382,7 +382,7 @@ protected:
 			}
 		}
 
-		MatrixBase::_n_rows -= n_rows_cols;
+		MatrixBase<IDX_TYPE>::_n_rows -= n_rows_cols;
 		Base::swap (row_ptr_new, _row_ptr);
 		Base::swap (col_idx_new, _col_idx);
 		Base::swap (data_new, _data);
@@ -402,7 +402,7 @@ protected:
 		}
 
 		// count entries per row in the transposed matrix
-		IDX_TYPE nnz(_row_ptr[MatrixBase::_n_rows]);
+		IDX_TYPE nnz(_row_ptr[MatrixBase<IDX_TYPE>::_n_rows]);
 		for (IDX_TYPE k(0); k < nnz; k++) {
 			row_ptr_nnz[_col_idx[k]]++;
 		}
@@ -425,7 +425,7 @@ protected:
 		FP_TYPE *data_trans(new FP_TYPE[nnz]);
 
 		// fill arrays col_idx_trans and data_trans
-		for (IDX_TYPE i(0); i < MatrixBase::_n_rows; i++) {
+		for (IDX_TYPE i(0); i < MatrixBase<IDX_TYPE>::_n_rows; i++) {
 			const IDX_TYPE row_end(_row_ptr[i + 1]);
 			for (IDX_TYPE j(_row_ptr[i]); j < row_end; j++) {
 				const IDX_TYPE k(_col_idx[j]);
@@ -435,7 +435,7 @@ protected:
 			}
 		}
 
-		MatrixBase::_n_rows = n_cols;
+		MatrixBase<IDX_TYPE>::_n_rows = n_cols;
 		Base::swap(row_ptr_trans, _row_ptr);
 		Base::swap(col_idx_trans, _col_idx);
 		Base::swap(data_trans, _data);

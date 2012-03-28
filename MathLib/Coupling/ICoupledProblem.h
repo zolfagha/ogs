@@ -3,7 +3,7 @@
 
 #include "VariableContainer.h"
 
-namespace NumLib
+namespace MathLib
 {
 
 /**

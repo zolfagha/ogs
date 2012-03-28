@@ -4,12 +4,10 @@
 #include "Base/CodingTools.h"
 
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
+#include "MathLib/Coupling/Algorithm/TransientPartitionedMethod.h"
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
-#include "NumLib/Coupling/MonolithicProblem.h"
-#include "NumLib/Coupling/Algorithm/PartitionedAlgorithm.h"
-#include "NumLib/TransientCoupling/TransientPartitionedMethod.h"
-#include "NumLib/TransientCoupling/AsyncPartSolution.h"
+#include "NumLib/TransientCoupling/AsyncPartitionedSystem.h"
 
 #include "SolutionLib/Nonlinear.h"
 
@@ -17,7 +15,10 @@
 #include "Velocity.h"
 #include "Concentration.h"
 
-class MyConvergenceCheck
+#include "TestUtil.h"
+
+
+class FemFunctionConvergenceCheck
 {
 	typedef VariableContainer MyNamedVariableContainer;
 public:
@@ -27,17 +28,11 @@ public:
 	    	if (vars_prev.getName(i).compare("h")==0) {
 		        FemNodalFunctionScalar* f_fem_prev = vars_prev.get<FemNodalFunctionScalar>(i);
 		        FemNodalFunctionScalar* f_fem_cur = vars_current.get<FemNodalFunctionScalar>(i);
-	  	        DiscreteLib::DiscreteVector<double>* vec_prev = f_fem_prev->getNodalValuesAsStdVec();
-	  	        DiscreteLib::DiscreteVector<double>* vec_cur = f_fem_cur->getNodalValuesAsStdVec();
-	  	        DiscreteLib::DiscreteVector<double> vec_diff(vec_prev->size());
-	  	        vec_diff = *vec_cur;
-	  	        vec_diff -= *vec_prev;
-	  			v_diff = norm_max(vec_diff, vec_diff.size());
-
+	    		v_diff = f_fem_cur->norm_diff(*f_fem_prev);
 	    	} else {
 	    		FEMIntegrationPointFunctionVector2d* f_fem_prev = vars_prev.get<FEMIntegrationPointFunctionVector2d>(i);
 	    		FEMIntegrationPointFunctionVector2d* f_fem_cur = vars_current.get<FEMIntegrationPointFunctionVector2d>(i);
-
+	    		v_diff = f_fem_cur->norm_diff(*f_fem_prev);
 	    	}
 	        if (v_diff>eps) {
 	            return false;
@@ -73,6 +68,16 @@ GWFemProblem* defineGWProblem(DiscreteSystem &dis, Rectangle &_rec, PorousMedia 
 }
 
 
+static void getGWExpectedHead(std::vector<double> &expected)
+{
+    expected.resize(9);
+    for (size_t i=0; i<9; i++) {
+        if (i%3==0) expected[i] = 2.e+6;
+        if (i%3==1) expected[i] = 1.e+6;
+        if (i%3==2) expected[i] = 0.e+6;
+    }
+}
+
 typedef FunctionHead<Linear,CRSLisSolver> MyFunctionHead;
 typedef FunctionVelocity MyFunctionVelocity;
 typedef FunctionConcentration MyFunctionConcentration;
@@ -98,14 +103,15 @@ TEST(Solution, CouplingFem1)
 
 		MyFunctionHead f_head;
 		f_head.define(dis, *pGW, options);
-		f_head.setParameter(MyFunctionHead::Head, pGW->getIC(0));
+		//f_head.setParameter(MyFunctionHead::Head, pGW->getIC(0));
 		MyFunctionVelocity f_vel;
 		f_vel.define(dis, pm);
-		f_vel.setParameter(MyFunctionVelocity::Velocity, new FemLib::FEMIntegrationPointFunctionVector2d(dis, *msh));
+		//f_vel.setParameter(MyFunctionVelocity::Velocity, 0);
+		//f_vel.setParameter(MyFunctionVelocity::Velocity, new FemLib::FEMIntegrationPointFunctionVector2d(dis, *msh));
 		//MyFunctionConcentration f_c;
 
 
-	    SerialStaggeredMethod<MyConvergenceCheck> method(1e-5, 100);
+	    SerialStaggeredMethod<FemFunctionConvergenceCheck> method(1e-5, 100);
 	    AsyncPartitionedSystem apart1(method);
 	    apart1.addParameter("h", f_head, MyFunctionHead::Head);
 	    apart1.addParameter("v", f_vel, MyFunctionVelocity::Velocity);
@@ -119,6 +125,20 @@ TEST(Solution, CouplingFem1)
 	    const double epsilon = 1.e-3;
 	    timestepping.setBeginning(.0);
 	    timestepping.solve(1.0);
+
+	    FemNodalFunctionScalar* r_f_head = apart1.getParameter<FemNodalFunctionScalar>(apart1.getParameterID("h"));
+	    FEMIntegrationPointFunctionVector2d* r_f_v = apart1.getParameter<FEMIntegrationPointFunctionVector2d>(apart1.getParameterID("v"));
+	    DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
+	    const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
+
+	    r_f_head->printouf();
+	    r_f_v->printouf();
+
+	    std::vector<double> expected;
+	    getGWExpectedHead(expected);
+
+	    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*vec_h)[0], vec_h->size());
+
 	//    double v1, v2, v3;
 	//    apart1.getParameter(apart1.getParameterID("a"))->eval(0, v1);
 	//    apart1.getParameter(apart1.getParameterID("b"))->eval(0, v2);

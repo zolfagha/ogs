@@ -13,6 +13,7 @@ namespace MathLib {
 /**
  * class MatrixBase is the basis for all matrix classes (dense and sparse)
  */
+template <typename IDX_TYPE>
 class MatrixBase {
 public:
 	/**
@@ -21,7 +22,7 @@ public:
 	 * @param ncols number of columns
 	 * @return
 	 */
-	MatrixBase(unsigned nrows=0, unsigned ncols=0) :
+	MatrixBase(IDX_TYPE nrows=0, IDX_TYPE ncols=0) :
 		_n_rows(nrows), _n_cols(ncols)
 	{}
 
@@ -43,22 +44,22 @@ public:
 	 * get the number of rows
 	 * @return the number of rows
 	 */
-	unsigned getNRows () const { return _n_rows; }
+	IDX_TYPE getNRows () const { return _n_rows; }
 	/**
 	 * get the number of columns
 	 * @return the number of columns
 	 */
-	unsigned getNCols () const { return _n_cols; }
+	IDX_TYPE getNCols () const { return _n_cols; }
 
 protected:
 	/**
 	 * the number of rows
 	 */
-	unsigned _n_rows;
+	IDX_TYPE _n_rows;
 	/**
 	 * the number of columns
 	 */
-	unsigned _n_cols;
+	IDX_TYPE _n_cols;
 };
 
 }

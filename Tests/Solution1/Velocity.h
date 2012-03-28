@@ -5,7 +5,7 @@
 #include "MathLib/Function/Function.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "FemLib/Function/FemFunction.h"
-#include "NumLib/TransientCoupling/TransientMonolithicProblem.h"
+#include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "PorousMedia.h"
 

@@ -2,15 +2,14 @@
 #include <gtest/gtest.h>
 #include <vector>
 
+#include "MathLib/Coupling/MonolithicProblem.h"
+#include "MathLib/Coupling/PartitionedProblem.h"
+#include "MathLib/Coupling/Algorithm/PartitionedAlgorithm.h"
+#include "MathLib/Coupling/Algorithm/IterativePartitionedMethod.h"
+#include "MathLib/Coupling/Algorithm/TransientPartitionedMethod.h"
+#include "NumLib/TransientCoupling/AsyncPartitionedSystem.h"
+#include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
-#include "NumLib/Coupling/ICoupledProblem.h"
-#include "NumLib/Coupling/MonolithicProblem.h"
-#include "NumLib/Coupling/PartitionedProblem.h"
-#include "NumLib/Coupling/Algorithm/PartitionedAlgorithm.h"
-#include "NumLib/Coupling/Algorithm/IterativePartitionedMethod.h"
-#include "NumLib/TransientCoupling/AsyncPartSolution.h"
-#include "NumLib/TransientCoupling/TransientPartitionedMethod.h"
-#include "NumLib/TransientCoupling/TransientMonolithicProblem.h"
 
 using namespace MathLib;
 using namespace NumLib;

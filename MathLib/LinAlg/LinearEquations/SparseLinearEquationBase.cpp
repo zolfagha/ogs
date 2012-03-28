@@ -69,7 +69,7 @@ template<typename IDX_TYPE> void AbstractCRSLinearEquation<IDX_TYPE>::setKnownXi
         removed_rows[i] = id;
 
         //b_i -= A(i,k)*val, i!=k
-        for (size_t j=0; j<A->getNCols(); j++)
+        for (IDX_TYPE j=0; j<A->getNCols(); j++)
             org_eqsRHS[j] -= A->getValue(j, id)*val;
         //b_k = A_kk*val
         org_eqsRHS[id] = val; //=eqsA(id, id)*val;

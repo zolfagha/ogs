@@ -94,7 +94,7 @@ public:
         eqs.solve();
 
         //update head
-        gw.head->setNodalValues(eqs.getX());
+        gw.head->setNodalValues(eqs.getX(), 0, eqs.getDimension());
     }
 
     static void calculateVelocity(GWFemTest &gw)

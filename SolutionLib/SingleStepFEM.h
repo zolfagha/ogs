@@ -87,7 +87,7 @@ public:
         _vec_n0 = dis.createVector<double>(n_dofs);
         _vec_n1 = dis.createVector<double>(_dofManager.getTotalNumberOfActiveDoFs());
         FemLib::FemNodalFunctionScalar *f_ic = (FemLib::FemNodalFunctionScalar*) problem.getIC(0); //TODO one var
-        *_vec_n1 = *f_ic->getNodalValuesAsStdVec();
+        *_vec_n1 = *f_ic->getNodalValues();
         // create linear equation systems
         _linear_solver = new T_LINEAR_SOLVER();
         _linear_eqs = _discrete_system->createLinearEquation<DiscreteLib::TemplateMeshBasedDiscreteLinearEquation, T_LINEAR_SOLVER, DiscreteLib::SparsityBuilderFromNodeConnectivity>(*_linear_solver, _dofManager);

@@ -1,13 +1,14 @@
 
 #pragma once
 
-#include "NumLib/Coupling/VariableMappingTable.h"
-#include "NumLib/Coupling/Algorithm/BlockGaussSeidelMethod.h"
-#include "NumLib/Coupling/Algorithm/BlockJacobiMethod.h"
+#include "MathLib/Coupling/VariableMappingTable.h"
+#include "BlockGaussSeidelMethod.h"
+#include "BlockJacobiMethod.h"
 #include "TransientPartitionedAlgorithm.h"
 
-namespace NumLib
+namespace MathLib
 {
+
 /**
  * \brief 
  */
@@ -15,10 +16,10 @@ template <class T_PARTITIONED>
 class AbstractPartitionedStaggeredMethod : public ITransientPartitionedAlgorithm
 {
 public:
-	typedef VariableContainer MyNamedVariableContainer;
+	typedef MathLib::VariableContainer MyNamedVariableContainer;
 	typedef MathLib::IFunction Variable;
-	typedef ICoupledSystem MyCoupledSystem;
-    typedef VariableMappingTable MyVariableMappingTable;
+	typedef MathLib::ICoupledSystem MyCoupledSystem;
+    typedef MathLib::VariableMappingTable MyVariableMappingTable;
 
     AbstractPartitionedStaggeredMethod() : _part_method() {};
     AbstractPartitionedStaggeredMethod(double epsilon, size_t max_count) : _part_method(epsilon, max_count) {};
@@ -47,7 +48,7 @@ private:
 };
 
 template <class T_CONVERGENCE_CHECK>
-class ParallelStaggeredMethod : public AbstractPartitionedStaggeredMethod<BlockJacobiMethod<T_CONVERGENCE_CHECK> >
+class ParallelStaggeredMethod : public AbstractPartitionedStaggeredMethod<MathLib::BlockJacobiMethod<T_CONVERGENCE_CHECK> >
 {
 public:
 	ParallelStaggeredMethod() {};
@@ -56,7 +57,7 @@ public:
 };
 
 template <class T_CONVERGENCE_CHECK>
-class SerialStaggeredMethod : public AbstractPartitionedStaggeredMethod<BlockGaussSeidelMethod<T_CONVERGENCE_CHECK> >
+class SerialStaggeredMethod : public AbstractPartitionedStaggeredMethod<MathLib::BlockGaussSeidelMethod<T_CONVERGENCE_CHECK> >
 {
 public:
 	SerialStaggeredMethod() {};

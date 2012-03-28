@@ -3,12 +3,12 @@
 
 #include <vector>
 
-#include "NumLib/Coupling/ICoupledProblem.h"
-#include "NumLib/Coupling/MonolithicProblem.h"
-#include "NumLib/Coupling/PartitionedProblem.h"
+#include "MathLib/Coupling/ICoupledProblem.h"
+#include "MathLib/Coupling/MonolithicProblem.h"
+#include "MathLib/Coupling/PartitionedProblem.h"
+#include "MathLib/Coupling/Algorithm/TransientPartitionedAlgorithm.h"
 //#include "NumLib/Coupling/Algorithm/PartitionedAlgorithm.h"
 #include "TransientCoupledSystem.h"
-#include "TransientPartitionedAlgorithm.h"
 
 namespace NumLib
 {
@@ -19,11 +19,11 @@ namespace NumLib
 class AsyncPartitionedSystem : public ITransientCoupledSystem
 {
 	typedef MathLib::IFunction Variable;
-	typedef VariableContainer MyNamedVariableContainer;
-	typedef ITransientPartitionedAlgorithm MyTransientPartitionedAlgorithm;
+	typedef MathLib::VariableContainer MyNamedVariableContainer;
+	typedef MathLib::ICoupledSystem MyCoupledSystem;
+    typedef MathLib::VariableMappingTable MyVariableMappingTable;
+	typedef MathLib::ITransientPartitionedAlgorithm MyTransientPartitionedAlgorithm;
 	typedef ITransientCoupledSystem MyTransientCoupledSystem;
-	typedef ICoupledSystem MyCoupledSystem;
-    typedef VariableMappingTable MyVariableMappingTable;
 public:
     AsyncPartitionedSystem(MyTransientPartitionedAlgorithm &algo) : _algorithm(&algo)
     {
@@ -78,8 +78,7 @@ public:
         for (size_t i=0; i<_vars_t_n1.size(); i++) {
             _vars_t_n1.set(i, *var);
         }
-        _vars_t_n.clear();
-        _vars_t_n1.clone(_vars_t_n);
+        _vars_t_n.assign(_vars_t_n1);
     }
 
     /// connect system input and shared variable

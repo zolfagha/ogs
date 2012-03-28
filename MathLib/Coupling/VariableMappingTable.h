@@ -3,7 +3,9 @@
 
 #include <vector>
 
-namespace NumLib
+#include "MathLib/Function/IFunction.h"
+
+namespace MathLib
 {
 
 class ICoupledSystem;
@@ -13,7 +15,7 @@ class ICoupledSystem;
  */
 struct VariableMappingTable
 {
-	typedef MathLib::IFunction Variable;
+	typedef IFunction Variable;
     typedef std::pair<ICoupledSystem*,size_t> PairSysVarId;
     typedef std::pair<size_t, size_t> PairInputVar;
     typedef std::vector<PairInputVar> ListOfInputVar;

@@ -34,11 +34,12 @@ public:
 
         for (size_t i=0; i<msh->getNumberOfElements(); i++) {
             MeshLib::IElement* e = msh->getElemenet(i);
-            const std::vector<Tvalue> &gp_values = ele_var.getIntegrationPointValues(i);
+            const std::valarray<Tvalue> &gp_values = ele_var.getIntegrationPointValues(i);
+            std::vector<Tvalue> vec_gp_values(&gp_values[0], &gp_values[0]+gp_values.size());
             const size_t e_nnodes = e->getNumberOfNodes();
             std::vector<Tvalue> nodal_values(e_nnodes);
             IFiniteElement *fe = feObjects->getFeObject(*e);
-            fe->extrapolate(gp_values, nodal_values);
+            fe->extrapolate(vec_gp_values, nodal_values);
 
             for (size_t j=0; j<e_nnodes; j++) {
                 const size_t nod_id = e->getNodeID(j);
@@ -47,7 +48,7 @@ public:
             }
         }
 
-        nod_var.setNodalValues(&vec_v[0]);
+        nod_var.setNodalValues(&vec_v[0], 0, vec_v.size());
     }
 };
 

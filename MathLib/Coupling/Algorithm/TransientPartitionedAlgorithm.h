@@ -3,8 +3,7 @@
 
 #include <vector>
 
-
-namespace NumLib
+namespace MathLib
 {
 class ICoupledSystem;
 class VariableContainer;
@@ -16,12 +15,13 @@ class VariableMappingTable;
 class ITransientPartitionedAlgorithm
 {
 public:
-	typedef VariableContainer MyNamedVariableContainer;
+	typedef MathLib::VariableContainer MyNamedVariableContainer;
 	typedef MathLib::IFunction Variable;
-	typedef ICoupledSystem MyCoupledSystem;
-	typedef VariableMappingTable MyVariableMappingTable;
+	typedef MathLib::ICoupledSystem MyCoupledSystem;
+	typedef MathLib::VariableMappingTable MyVariableMappingTable;
 
 	virtual ~ITransientPartitionedAlgorithm() {};
+
     /// solve coupled problems
     /// @param subproblems    a list of subproblems
     /// @param vars           a container for shared variables

@@ -50,8 +50,6 @@ public:
     virtual size_t getRangeEnd() const = 0;
 };
 
-
-
 /**
  * \brief Vector container for single memory
  */

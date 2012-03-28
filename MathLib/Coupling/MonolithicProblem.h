@@ -8,7 +8,7 @@
 
 #include "ICoupledProblem.h"
 
-namespace NumLib
+namespace MathLib
 {
 
 /**

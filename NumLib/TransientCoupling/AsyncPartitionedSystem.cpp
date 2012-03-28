@@ -1,5 +1,5 @@
 
-#include "AsyncPartSolution.h"
+#include "AsyncPartitionedSystem.h"
 
 
 namespace NumLib
@@ -32,7 +32,7 @@ int AsyncPartitionedSystem::solveTimeStep(const TimeStep &time)
     std::cout << "->solve partitioned problems" << std::endl;
 
     // copy previous time step result to current one
-    _vars_t_n1.clone(_vars_t_n);
+    _vars_t_n.assign(_vars_t_n1);
 
     // list active problems
     std::vector<MyCoupledSystem*> list_active_problems;

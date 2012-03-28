@@ -6,7 +6,7 @@
 #include "GeoLib/Shape/Rectangle.h"
 #include "FemLib/Function/FemFunction.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
-#include "NumLib/TransientCoupling/TransientMonolithicProblem.h"
+#include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "NumLib/TransientAssembler/ElementLocalAssembler.h"
 #include "NumLib/TransientAssembler/TimeEulerElementLocalAssembler.h"
 #include "SolutionLib/FemProblem.h"
