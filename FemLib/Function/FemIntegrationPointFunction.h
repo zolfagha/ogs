@@ -23,6 +23,7 @@ public:
     TemplateFEMIntegrationPointFunction(const TemplateFEMIntegrationPointFunction &src)
     {
         initialize(*src._discrete_system, *src._msh, src._values->size());
+        (*this->_values) = (*src._values);
     };
 
     MathLib::TemplateFunction<GeoLib::Point, Tvalue>* clone() const
@@ -73,7 +74,10 @@ public:
         	if (n_gp!=val2.size()) {
         		std::cout << "***Warning in TemplateFEMIntegrationPointFunction::norm_diff(): size of two vectors is not same." << std::endl;
         		return .0;
-        	}
+        	} else if (n_gp==0) {
+                std::cout << "***Warning in TemplateFEMIntegrationPointFunction::norm_diff(): size of two vectors is zero." << std::endl;
+                return .0;
+            }
         	std::valarray<Tvalue> val_diff = val1 - val2;
 
         	val_diff = std::abs(val_diff);

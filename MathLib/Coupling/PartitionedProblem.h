@@ -24,6 +24,7 @@ public:
     {
     }
 
+    ///
     virtual ~PartitionedProblem() {};
 
     /// get the number of parameters
@@ -48,11 +49,11 @@ public:
     	return static_cast<const T*>(_parameter_table.get(para_id));
     }
 
-    /// set output parameter
-    void setOutput(size_t parameter_id, Parameter* val)
-    {
-        _parameter_table.set(parameter_id, *val);
-    }
+    ///// set output parameter
+    //void setOutput(size_t parameter_id, Parameter* val)
+    //{
+    //    _parameter_table.set(parameter_id, *val);
+    //}
 
     /// set input parameter
     void setInput(size_t parameter_id, const Parameter* val)
@@ -94,7 +95,7 @@ protected:
 private:
     std::vector<ICoupledSystem*> _list_subproblems;
     std::vector<size_t> _list_input_parameters;
-    ParameterTable _parameter_table;
+    ParameterSet _parameter_table;
     ParameterProblemMappingTable _map;
     IPartitionedAlgorithm *_algorithm;
 

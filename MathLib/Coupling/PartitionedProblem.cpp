@@ -60,7 +60,7 @@ bool PartitionedProblem::check() const
 //input parameter
 size_t PartitionedProblem::addParameter(const std::string &name)
 {
-    size_t n = _parameter_table.add(name);
+    size_t n = _parameter_table.addInput(name);
     _map._map_paraId2subproblem.push_back(std::make_pair<ICoupledSystem*,size_t>(0, 0));
     _list_input_parameters.push_back(n);
     return n;

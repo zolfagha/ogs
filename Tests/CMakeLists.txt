@@ -1,7 +1,8 @@
 
 FILE(GLOB Test_Files *.h *.cpp)
-
+SOURCE_GROUP( Test FILES ${Test_Files} )
 FILE(GLOB Test_Solution1_Files Solution1/*.h Solution1/*.cpp)
+SOURCE_GROUP( Test\\Solution1 FILES ${Test_Solution1_Files} )
 
 INCLUDE_DIRECTORIES(
 	.

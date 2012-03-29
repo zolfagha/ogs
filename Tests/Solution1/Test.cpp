@@ -20,7 +20,7 @@
 
 class FemFunctionConvergenceCheck
 {
-	typedef ParameterTable MyNamedVariableContainer;
+	typedef ParameterSet MyNamedVariableContainer;
 public:
 	bool isConverged(MyNamedVariableContainer& vars_prev, MyNamedVariableContainer& vars_current, double eps, double &v_diff)
 	{

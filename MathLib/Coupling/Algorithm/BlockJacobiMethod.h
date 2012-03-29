@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "IterativePartitionedMethod.h"
+#include "AbstractIterativePartitionedMethod.h"
 
 namespace MathLib
 {
@@ -18,11 +18,11 @@ public:
     }
     virtual ~BlockJacobiMethod() {};
 
-    void doPostAfterSolveAll( ParameterTable &parameter_table, const ParameterProblemMappingTable &mapping );
+    void doPostAfterSolveAll( ParameterSet &parameter_table, const ParameterProblemMappingTable &mapping );
 };
 
 template <class T_CONVERGENCE_CHECK>
-void BlockJacobiMethod<T_CONVERGENCE_CHECK>::doPostAfterSolveAll( ParameterTable &parameter_table, const ParameterProblemMappingTable &mapping )
+void BlockJacobiMethod<T_CONVERGENCE_CHECK>::doPostAfterSolveAll( ParameterSet &parameter_table, const ParameterProblemMappingTable &mapping )
 {
     // set current state to shared variables
 	AbstractIterativePartitionedMethod<T_CONVERGENCE_CHECK>::updateParameterTable(mapping, parameter_table);

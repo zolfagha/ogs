@@ -35,7 +35,7 @@ public:
     //virtual size_t getNumberOfOutputParameters() const = 0;
     //virtual size_t getParameterIdForOutput(size_t input_id) const = 0;
 
-    virtual void setOutput(size_t parameter_id, Parameter* val) = 0;
+    //virtual void setOutput(size_t parameter_id, Parameter* val) = 0;
 protected:
     virtual const Parameter* getInput(size_t parameter_id) const = 0;
 };

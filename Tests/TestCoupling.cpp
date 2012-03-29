@@ -6,7 +6,6 @@
 #include "MathLib/Coupling/MonolithicProblem.h"
 #include "MathLib/Coupling/PartitionedProblem.h"
 #include "MathLib/Coupling/Algorithm/PartitionedAlgorithm.h"
-#include "MathLib/Coupling/Algorithm/IterativePartitionedMethod.h"
 #include "MathLib/Coupling/Algorithm/TransientPartitionedMethod.h"
 #include "NumLib/TransientCoupling/AsyncPartitionedSystem.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
@@ -20,7 +19,7 @@ typedef MathLib::FunctionConstant<double,double> MyFunction;
 class MyConvergenceCheck
 {
 public:
-	bool isConverged(ParameterTable& vars_prev, ParameterTable& vars_current, double eps, double &v_diff)
+	bool isConverged(ParameterSet& vars_prev, ParameterSet& vars_current, double eps, double &v_diff)
 	{
 	    for (size_t i=0; i<vars_prev.size(); i++) {
 	        double v_prev = .0;

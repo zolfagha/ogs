@@ -33,7 +33,8 @@ int AsyncPartitionedSystem::solveTimeStep(const TimeStep &time)
     std::cout << "->solve partitioned problems" << std::endl;
 
     // copy previous time step result to current one
-    _vars_t_n.assign(_vars_t_n1);
+    //_vars_t_n.assign(_vars_t_n1);
+    _vars_t_n1.move(_vars_t_n);
 
     // list active problems
     std::vector<ICoupledSystem*> list_active_problems;
@@ -45,12 +46,30 @@ int AsyncPartitionedSystem::solveTimeStep(const TimeStep &time)
         	ITransientCoupledSystem *solution = (ITransientCoupledSystem*)list_active_problems[i];
             solution->setCurrentTime(time);
         }
+        // set parameter state
+        const size_t n_vars = _vars_t_n1.size();
+        std::vector<bool> list_org_state(n_vars);
+        for (size_t i=0; i<n_vars; i++) {
+            list_org_state[i] = _vars_t_n1.isFixed(i);
+            const MathLib::ParameterProblemMappingTable::PairSysVarId &v = _map._map_paraId2subproblem[i];
+            const MathLib::ICoupledSystem *tmp_problem = v.first;
+            bool is_active = (std::find(list_active_problems.begin(), list_active_problems.end(), tmp_problem)!=list_active_problems.end());
+            if (!is_active) {
+                _vars_t_n1.setFixed(i, true);
+            }
+        }
 
         //if (list_active_problems.size()==1) {
         //    list_active_problems[0]->solve();
         //} else {
             _algorithm->solve(list_active_problems, _vars_t_n, _vars_t_n1, _map);
         //}
+
+            // restore parameter state
+            for (size_t i=0; i<n_vars; i++) {
+                _vars_t_n1.setFixed(i, list_org_state[i]);
+            }
+
     }
 
 
@@ -130,7 +149,7 @@ bool AsyncPartitionedSystem::check() const
 
 size_t AsyncPartitionedSystem::addParameter(const std::string &name)
 {
-    size_t n = _vars_t_n1.add(name);
+    size_t n = _vars_t_n1.addInput(name);
     _map._map_paraId2subproblem.push_back(std::make_pair<ITransientCoupledSystem*,size_t>(0, 0));
     _list_input_parameters.push_back(n);
     return n;
@@ -141,7 +160,8 @@ size_t AsyncPartitionedSystem::addParameter(const std::string &name, ITransientC
     size_t var_id = _vars_t_n1.add(name);
     // set reference
     const MathLib::Parameter* v = sub_problem.getOutput(para_id_in_sub_problem);
-    _vars_t_n1.set(var_id, *v);
+    if (v!=0) 
+        _vars_t_n1.set(var_id, *v);
     // make a link between this and sub-problem variable
     _map._map_paraId2subproblem.push_back(std::make_pair(&sub_problem, para_id_in_sub_problem));
     // update a list of sub-problems

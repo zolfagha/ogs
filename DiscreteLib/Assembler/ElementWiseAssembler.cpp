@@ -1,5 +1,5 @@
 
-#include "ElementWiseAssembler.h".h"
+#include "ElementWiseAssembler.h"
 
 #include <vector>
 

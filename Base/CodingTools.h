@@ -36,6 +36,15 @@ static void releaseObjectsInStdMap(T &object)
 };
 
 template <typename T>
+static void releaseObjectsInStdQueue(T &container) 
+{
+    while (!container.empty()) {
+        if (container.front() !=0) delete container.front();
+        container.pop();
+    }
+};
+
+template <typename T>
 void releaseArrayObject(T* &obj)
 {
     if (obj) {

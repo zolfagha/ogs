@@ -37,15 +37,15 @@ public:
     size_t getIterationCounts() const {return _itr_count;};
 
     /// solve
-    int solve(const std::vector<ICoupledSystem*> &list_coupled_problems, ParameterTable &parameter_table, const ParameterProblemMappingTable &mapping);
+    int solve(const std::vector<ICoupledSystem*> &list_coupled_problems, ParameterSet &parameter_table, const ParameterProblemMappingTable &mapping);
 
 protected:
-    virtual void doPostAfterSolve( ICoupledSystem& /*solution*/, ParameterTable& /*vars*/, const ParameterProblemMappingTable& /*mapping*/ )  {}
+    virtual void doPostAfterSolve( ICoupledSystem& /*solution*/, ParameterSet& /*vars*/, const ParameterProblemMappingTable& /*mapping*/ )  {}
 
-    virtual void doPostAfterSolveAll( ParameterTable& /*vars*/, const ParameterProblemMappingTable& /*mapping*/ ) {}
+    virtual void doPostAfterSolveAll( ParameterSet& /*vars*/, const ParameterProblemMappingTable& /*mapping*/ ) {}
 
     /// update parameter table from all problems
-    void updateParameterTable(const ParameterProblemMappingTable &mapping, ParameterTable &parameter_table)
+    void updateParameterTable(const ParameterProblemMappingTable &mapping, ParameterSet &parameter_table)
     {
         const size_t n_parameters = parameter_table.size();
         for (size_t i=0; i<n_parameters; i++) {
@@ -57,7 +57,7 @@ protected:
     }
 
     /// update parameter table from one problem
-    void updateParameterTable(const ICoupledSystem &src_problem, const ParameterProblemMappingTable &mapping, ParameterTable &parameter_table)
+    void updateParameterTable(const ICoupledSystem &src_problem, const ParameterProblemMappingTable &mapping, ParameterSet &parameter_table)
     {
         const size_t n_vars = parameter_table.size();
         for (size_t i=0; i<n_vars; i++) {
@@ -70,7 +70,7 @@ protected:
     }
 
     /// update problem parameter from parameter table
-    void setInputParameters( const ParameterTable &parameter_table, const std::vector<ParameterProblemMappingTable::PairInputVar> &problem_parameters, ICoupledSystem* problem)
+    void setInputParameters( const ParameterSet &parameter_table, const std::vector<ParameterProblemMappingTable::PairInputVar> &problem_parameters, ICoupledSystem* problem)
     {
         const size_t n_input_parameters = problem_parameters.size();
         for (size_t j=0; j<n_input_parameters; j++) {
@@ -79,6 +79,19 @@ protected:
             problem->setInput(local_var_id, parameter_table.get(shared_var_id));
         }
     }
+
+    /// is para
+    bool isInputParametersUpdated( const ParameterSet &parameter_table, const std::vector<ParameterProblemMappingTable::PairInputVar> &problem_parameters, ICoupledSystem* problem)
+    {
+        const size_t n_input_parameters = problem_parameters.size();
+        for (size_t j=0; j<n_input_parameters; j++) {
+            size_t local_var_id = problem_parameters[j].first;
+            size_t shared_var_id = problem_parameters[j].second;
+            if (parameter_table.isUpdated(shared_var_id)) return true;
+        }
+        return false;
+    }
+
 private:
     size_t _max_itr;
     size_t _itr_count;
@@ -86,7 +99,7 @@ private:
 };
 
 template <class T_CONVERGENCE_CHECK>
-int AbstractIterativePartitionedMethod<T_CONVERGENCE_CHECK>::solve(const std::vector<ICoupledSystem*> &list_coupled_problems, ParameterTable &parameter_table, const ParameterProblemMappingTable &mapping)
+int AbstractIterativePartitionedMethod<T_CONVERGENCE_CHECK>::solve(const std::vector<ICoupledSystem*> &list_coupled_problems, ParameterSet &parameter_table, const ParameterProblemMappingTable &mapping)
 {
     const size_t n_subproblems = list_coupled_problems.size();
 
@@ -98,25 +111,31 @@ int AbstractIterativePartitionedMethod<T_CONVERGENCE_CHECK>::solve(const std::ve
     bool is_converged = false;
     size_t i_itr = 0;
     double v_diff = .0;
-    ParameterTable prev_parameter_table;
+    ParameterSet prev_parameter_table;
     do {
-        prev_parameter_table.assign(parameter_table);
+        //prev_parameter_table.assign(parameter_table);
+        parameter_table.move(prev_parameter_table);
 
         // compute each solution
+        size_t count_calculated = 0;
         for (size_t i=0; i<n_subproblems; i++) {
         	ICoupledSystem *problem = list_coupled_problems[i];
             const std::vector<ParameterProblemMappingTable::PairInputVar> &problem_parameters = mapping._list_subproblem_input_source[i];
-            const size_t n_input_parameters = problem_parameters.size();
 
-            // calculate only once if a problem doesn't take any input
-            if (i_itr>1 && n_input_parameters==0) continue;
+            // calculate all anyway in the 1st iteration
+            //if (i_itr>0 && !isInputParametersUpdated(parameter_table, problem_parameters, problem))
+            //    continue;
 
-            setInputParameters(parameter_table, problem_parameters, problem);
+            setInputParameters(parameter_table, problem_parameters, problem); 
             problem->solve();
             doPostAfterSolve(*problem, parameter_table, mapping);
+            count_calculated++;
         }
 
-        doPostAfterSolveAll(parameter_table, mapping);
+        if (count_calculated>0) {
+            doPostAfterSolveAll(parameter_table, mapping);
+            parameter_table.finishUpdate();
+        }
 
         if (n_subproblems>1) {
             // check convergence

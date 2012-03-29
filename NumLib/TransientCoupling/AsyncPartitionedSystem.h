@@ -67,13 +67,13 @@ public:
     //    _vars_t_n1.set(para_id, *var);
     //}
 
-    void resetParameters( MathLib::Parameter* var)
-    {
-        for (size_t i=0; i<_vars_t_n1.size(); i++) {
-            _vars_t_n1.set(i, *var);
-        }
-        _vars_t_n.assign(_vars_t_n1);
-    }
+    //void resetParameters( MathLib::Parameter* var)
+    //{
+    //    for (size_t i=0; i<_vars_t_n1.size(); i++) {
+    //        _vars_t_n1.set(i, *var);
+    //    }
+    //    _vars_t_n.assign(_vars_t_n1);
+    //}
 
     /// connect system input and shared variable
     void connectInput(const std::string &this_para_name, ITransientCoupledSystem &subproblem, size_t subproblem_para_id);
@@ -91,10 +91,10 @@ public:
 
     void getActiveProblems(const TimeStep &time, std::vector<ICoupledSystem*> &list_active_problems);
 
-    void setOutput(size_t para_id, MathLib::Parameter* var)
-    {
-        _vars_t_n1.set(para_id, *var);
-    }
+    //void setOutput(size_t para_id, MathLib::Parameter* var)
+    //{
+    //    _vars_t_n1.set(para_id, *var);
+    //}
     void setInput(size_t para_id, const MathLib::Parameter* var)
     {
         _vars_t_n1.set(para_id, *var);
@@ -112,8 +112,8 @@ private:
 	
     //std::vector<ITransientCoupledProblem*> _list_subproblems;
     std::vector<size_t> _list_input_parameters;
-    MathLib::ParameterTable _vars_t_n;
-    MathLib::ParameterTable _vars_t_n1;
+    MathLib::ParameterSet _vars_t_n;
+    MathLib::ParameterSet _vars_t_n1;
     MathLib::ParameterProblemMappingTable _map;
 
     size_t addSubProblem(ITransientCoupledSystem &sub_problem);

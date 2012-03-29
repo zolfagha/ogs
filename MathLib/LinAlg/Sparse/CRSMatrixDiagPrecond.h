@@ -11,8 +11,10 @@
 
 namespace MathLib {
 
+#ifdef MSVC_VER
 #pragma warning(push)
 #pragma warning(disable: 4018)
+#endif
 
 /**
  * Class CRSMatrixDiagPrecond represents a matrix in compressed row storage
@@ -91,7 +93,9 @@ private:
 	double *_inv_diag;
 };
 
+#ifdef MSVC_VER
 #pragma warning(pop)
+#endif
 }
 
 #endif

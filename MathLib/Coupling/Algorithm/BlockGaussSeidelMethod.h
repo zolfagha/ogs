@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "IterativePartitionedMethod.h"
+#include "AbstractIterativePartitionedMethod.h"
 
 namespace MathLib
 {
@@ -22,11 +22,11 @@ public:
     virtual ~BlockGaussSeidelMethod() {};
 
     ///
-    void doPostAfterSolve( ICoupledSystem & problem, ParameterTable& parameter_table, const ParameterProblemMappingTable &mapping );
+    void doPostAfterSolve( ICoupledSystem & problem, ParameterSet& parameter_table, const ParameterProblemMappingTable &mapping );
 };
 
 template <class T_CONVERGENCE_CHECK>
-void BlockGaussSeidelMethod<T_CONVERGENCE_CHECK>::doPostAfterSolve( ICoupledSystem & problem, ParameterTable& parameter_table, const ParameterProblemMappingTable &mapping )
+void BlockGaussSeidelMethod<T_CONVERGENCE_CHECK>::doPostAfterSolve( ICoupledSystem & problem, ParameterSet& parameter_table, const ParameterProblemMappingTable &mapping )
 {
     // update shared variables
 	AbstractIterativePartitionedMethod<T_CONVERGENCE_CHECK>::updateParameterTable(problem, mapping, parameter_table);

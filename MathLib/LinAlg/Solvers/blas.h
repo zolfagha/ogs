@@ -5,9 +5,10 @@
 #include <cstdlib>
 #include <cmath>
 
+#ifdef MSVC_VER
 #pragma warning(push)
 #pragma warning(disable: 4244)
-
+#endif
 
 #define SIGN(a) ((a) >= 0 ? 1.0 : -1.0)
 #define SQR(a) ((a)*(a))                             // Quadrat von a
@@ -1696,6 +1697,8 @@ namespace lapack
   }
 }
 
+#ifdef MSVC_VER
 #pragma warning(pop)
+#endif
 
 #endif

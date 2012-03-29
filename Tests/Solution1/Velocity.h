@@ -25,6 +25,7 @@ public:
     	_dis = &dis;
     	_K = pm.K;
         _vel = new FemLib::FEMIntegrationPointFunctionVector2d(dis, *dis.getMesh());
+        //this->setOutput(Velocity, _vel);
     }
 
     int solveTimeStep(const TimeStep &time)

@@ -3,7 +3,7 @@
 
 #include <cassert>
 #include <vector>
-
+#include <queue>
 #include "Base/CodingTools.h"
 
 #include "ICoupledProblem.h"
@@ -20,6 +20,7 @@ class AbstractMonolithicSystem : public T_SUPER
 public:
     virtual ~AbstractMonolithicSystem()
     {
+        //Base::releaseObjectsInStdQueue(_que_own_parameters);
     }
 
     void setNumberOfParameters(size_t n)
@@ -55,6 +56,11 @@ public:
     {
         assert(parameter_id<_vec_out_parameters.size());
         _vec_out_parameters[parameter_id] = val;
+        //if (val!=0) _que_own_parameters.push(val);
+        //if (_que_own_parameters.size()>2) {
+        //    delete _que_own_parameters.front();
+        //    _que_own_parameters.pop();
+        //}
     }
 protected:
     const Parameter* getInput(size_t parameter_id) const
@@ -72,6 +78,7 @@ protected:
 private:
     std::vector<const Parameter*> _vec_in_parameters;
     std::vector<Parameter*> _vec_out_parameters;
+    //std::queue<Parameter*> _que_own_parameters;
 };
 
 template <class T_SUPER, size_t N_IN, size_t N_OUT>
