@@ -44,26 +44,33 @@ protected:
 
     virtual void doPostAfterSolveAll( ParameterSet& /*vars*/, const ParameterProblemMappingTable& /*mapping*/ ) {}
 
+    virtual bool isFixed() const = 0;
+
     /// update parameter table from all problems
-    void updateParameterTable(const ParameterProblemMappingTable &mapping, ParameterSet &parameter_table)
+    void updateParameterTable(const ParameterProblemMappingTable &mapping, bool is_fixed, ParameterSet &parameter_table)
     {
         const size_t n_parameters = parameter_table.size();
         for (size_t i=0; i<n_parameters; i++) {
         	const ParameterProblemMappingTable::PairSysVarId &sysvarid = mapping._map_paraId2subproblem[i];
             const ICoupledSystem *solution = sysvarid.first;
-            if (solution!=0)
+            if (solution!=0) {
+            	if (is_fixed)
+            		parameter_table.setFixed(i, true);
                 parameter_table.set(i, *solution->getOutput(sysvarid.second));
+            }
         }
     }
 
     /// update parameter table from one problem
-    void updateParameterTable(const ICoupledSystem &src_problem, const ParameterProblemMappingTable &mapping, ParameterSet &parameter_table)
+    void updateParameterTable(const ICoupledSystem &src_problem, const ParameterProblemMappingTable &mapping, bool is_fixed, ParameterSet &parameter_table)
     {
         const size_t n_vars = parameter_table.size();
         for (size_t i=0; i<n_vars; i++) {
             const ParameterProblemMappingTable::PairSysVarId &v = mapping._map_paraId2subproblem[i];
             const ICoupledSystem *tmp_problem = v.first;
             if (tmp_problem==&src_problem) {
+            	if (is_fixed)
+            		parameter_table.setFixed(i, true);
                 parameter_table.set(i, *src_problem.getOutput(v.second));
             }
         }
@@ -104,7 +111,7 @@ int AbstractIterativePartitionedMethod<T_CONVERGENCE_CHECK>::solve(const std::ve
     const size_t n_subproblems = list_coupled_problems.size();
 
     // initialize variables
-    updateParameterTable(mapping, parameter_table);
+    updateParameterTable(mapping, isFixed(), parameter_table);
 
     // iteration start
     const size_t max_itr = getMaximumIterationCounts();
@@ -141,6 +148,8 @@ int AbstractIterativePartitionedMethod<T_CONVERGENCE_CHECK>::solve(const std::ve
             // check convergence
         	T_CONVERGENCE_CHECK check;
             is_converged = check.isConverged(prev_parameter_table, parameter_table, getEpsilon(), v_diff);
+            std::cout.setf(std::ios_base::scientific, std::ios_base::floatfield);
+            std::cout.precision(3);
             std::cout << v_diff << " ";
         } else {
             is_converged = true;

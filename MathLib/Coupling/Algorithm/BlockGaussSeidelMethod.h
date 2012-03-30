@@ -21,6 +21,8 @@ public:
     ///
     virtual ~BlockGaussSeidelMethod() {};
 
+protected:
+    bool isFixed() const {return true;};
     ///
     void doPostAfterSolve( ICoupledSystem & problem, ParameterSet& parameter_table, const ParameterProblemMappingTable &mapping );
 };
@@ -29,7 +31,7 @@ template <class T_CONVERGENCE_CHECK>
 void BlockGaussSeidelMethod<T_CONVERGENCE_CHECK>::doPostAfterSolve( ICoupledSystem & problem, ParameterSet& parameter_table, const ParameterProblemMappingTable &mapping )
 {
     // update shared variables
-	AbstractIterativePartitionedMethod<T_CONVERGENCE_CHECK>::updateParameterTable(problem, mapping, parameter_table);
+	AbstractIterativePartitionedMethod<T_CONVERGENCE_CHECK>::updateParameterTable(problem, mapping, isFixed(), parameter_table);
 }
 
 

@@ -18,14 +18,17 @@ public:
     }
     virtual ~BlockJacobiMethod() {};
 
+protected:
     void doPostAfterSolveAll( ParameterSet &parameter_table, const ParameterProblemMappingTable &mapping );
+
+    bool isFixed() const {return false;};
 };
 
 template <class T_CONVERGENCE_CHECK>
 void BlockJacobiMethod<T_CONVERGENCE_CHECK>::doPostAfterSolveAll( ParameterSet &parameter_table, const ParameterProblemMappingTable &mapping )
 {
     // set current state to shared variables
-	AbstractIterativePartitionedMethod<T_CONVERGENCE_CHECK>::updateParameterTable(mapping, parameter_table);
+	AbstractIterativePartitionedMethod<T_CONVERGENCE_CHECK>::updateParameterTable(mapping, isFixed(), parameter_table);
 }
 
 } //end
