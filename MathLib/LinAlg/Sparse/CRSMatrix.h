@@ -86,10 +86,10 @@ public:
     {
         CRSMatrix<FP_TYPE, IDX_TYPE> *obj = new CRSMatrix<FP_TYPE, IDX_TYPE>(MatrixBase<IDX_TYPE>::_n_rows);
         const IDX_TYPE n_nz = getNNZ();
-        obj->_row_ptr = new IDX_TYPE[MatrixBase<IDX_TYPE>::_n_rows];
+        obj->_row_ptr = new IDX_TYPE[MatrixBase<IDX_TYPE>::_n_rows+1];
         obj->_col_idx = new IDX_TYPE[n_nz];
         obj->_data = new FP_TYPE[n_nz];
-        for (IDX_TYPE i=0; i<MatrixBase<IDX_TYPE>::_n_rows; i++)
+        for (IDX_TYPE i=0; i<MatrixBase<IDX_TYPE>::_n_rows+1; i++)
             obj->_row_ptr[i] = _row_ptr[i];
         for (IDX_TYPE i=0; i<n_nz; i++)
             obj->_col_idx[i] = _col_idx[i];
