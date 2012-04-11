@@ -3,14 +3,18 @@
 
 #include "Base/CodingTools.h"
 #include "MathLib/Function/Function.h"
+#include "MathLib/Vector.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "FemLib/Function/FemFunction.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "NumLib/TimeStepping/TimeStep.h"
-#include "PorousMedia.h"
+
+#include "Tests/Geo/Material/PorousMedia.h"
 
 using namespace NumLib;
 
+namespace Geo
+{
 
 class FunctionVelocity
 	: public NumLib::TemplateTransientMonolithicSystem<1,1>
@@ -23,7 +27,7 @@ public:
     void define(DiscreteLib::DiscreteSystem &dis, PorousMedia &pm)
     {
     	_dis = &dis;
-    	_K = pm.K;
+    	_K = pm.hydraulic_conductivity;
         _vel = new FemLib::FEMIntegrationPointFunctionVector2d(dis, *dis.getMesh());
         //this->setOutput(Velocity, _vel);
     }
@@ -55,9 +59,9 @@ public:
                 yi[i] = (*pt)[1];
             }
             for (size_t ip=0; ip<n_gp; ip++) {
-                MathLib::Vector2D q;
-                q.getRawRef()[0] = .0;
-                q.getRawRef()[1] = .0;
+                MathLib::Vector q(2);
+                q[0] = .0;
+                q[1] = .0;
                 integral->getSamplingPoint(ip, r);
                 fe->computeBasisFunctions(r);
                 const MathLib::Matrix<double> *dN = fe->getGradBasisFunction();
@@ -68,7 +72,7 @@ public:
 
                 double k;
                 _K->eval(&xx[0], k);
-                dN->axpy(-k, &local_h[0], .0, q.getRawRef()); // q = - K * dN * local_h;
+                dN->axpy(-k, &local_h[0], .0, &q[0]); // q = - K * dN * local_h;
                 vel->setIntegrationPointValue(i_e, ip, q);
             }
         }
@@ -88,14 +92,16 @@ public:
 
     void accept(const TimeStep &time)
     {
-        //_solHead->accept(time);
+        //std::cout << "Velocity=" << std::endl;
+        //_vel->printout();
     };
 
 private:
     DiscreteLib::DiscreteSystem* _dis;
     FemLib::FEMIntegrationPointFunctionVector2d* _vel;
-    MathLib::TemplateFunction<double*, double> *_K;
+    MathLib::SpatialFunctionScalar *_K;
 
     DISALLOW_COPY_AND_ASSIGN(FunctionVelocity);
 };
 
+}

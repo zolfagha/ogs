@@ -40,7 +40,7 @@ struct PolynomialOrder
  * @tparam Tvalue Nodal value type, e.g. double, vector
  */
 template<typename Tvalue>
-class TemplateFEMNodalFunction : public MathLib::TemplateFunction<GeoLib::Point, Tvalue>
+class TemplateFEMNodalFunction : public MathLib::SpatialFunction<Tvalue>
 {
 public:
     /// @param msh 		Mesh
@@ -79,7 +79,7 @@ public:
 
     /// make a clone of this object
     /// @return MathLib::IFunction*
-    MathLib::TemplateFunction<GeoLib::Point, Tvalue>* clone() const
+    TemplateFEMNodalFunction<Tvalue>* clone() const
     {
         TemplateFEMNodalFunction<Tvalue> *obj = new TemplateFEMNodalFunction<Tvalue>(*this);
         return obj;
@@ -96,7 +96,7 @@ public:
 
 
     /// evaluate this function at the given point
-    void eval(const GeoLib::Point &pt, Tvalue &v)
+    void eval(const MathLib::SpatialPosition &pt, Tvalue &v)
     {
         throw "eval() is not implemented yet.";
         v = (*_nodal_values)[0];
@@ -180,7 +180,7 @@ public:
 		return MathLib::norm_max(vec_diff, vec_diff.size());
     }
 
-    void printouf() const
+    void printout() const
     {
     	std::cout << "nodal_values = ";
     	for (size_t i=_nodal_values->getRangeBegin(); i<_nodal_values->getRangeEnd(); ++i)
@@ -215,7 +215,6 @@ private:
 };
 
 typedef TemplateFEMNodalFunction<double> FemNodalFunctionScalar;
-typedef TemplateFEMNodalFunction<MathLib::Vector2D> FemNodalFunctionVector2d;
-typedef TemplateFEMNodalFunction<MathLib::Vector3D> FEMNodalFunctionVector3d;
+typedef TemplateFEMNodalFunction<MathLib::Vector> FemNodalFunctionVector2d;
 
 } //end

@@ -78,7 +78,7 @@ public:
     }
 
     /// compute an matrix M = Int{W^T F N} dV
-    virtual void integrateWxN(SpatialFunction* f, LocalMatrix &mat)
+    virtual void integrateWxN(MathLib::SpatialFunctionScalar* f, LocalMatrix &mat)
     {
         const size_t n_gp = _integration->getNumberOfSamplingPoints();
         double x[3], ox[3];
@@ -97,7 +97,7 @@ public:
     }
 
     /// compute an matrix M = Int{W^T F dN} dV
-    virtual void integrateWxDN(SpatialFunctionVector* f, LocalMatrix &mat)
+    virtual void integrateWxDN(MathLib::SpatialFunctionVector* f, LocalMatrix &mat)
     {
         const size_t n_gp = _integration->getNumberOfSamplingPoints();
         double x[3], ox[3];
@@ -105,7 +105,7 @@ public:
             _integration->getSamplingPoint(i, x);
             _mapping->compute(x);
             _mapping->mapToPhysicalCoordinates(_mapping->getProperties(), ox);
-            double *fac = 0;
+            MathLib::Vector fac;
             if (f!=0)
                 f->eval(ox, fac);
             integrateWxDN(i, fac, mat);
@@ -113,7 +113,7 @@ public:
     }
 
     /// compute an matrix M = Int{dW^T F dN} dV
-    virtual void integrateDWxDN(SpatialFunction *f, LocalMatrix &mat)
+    virtual void integrateDWxDN(MathLib::SpatialFunctionScalar *f, LocalMatrix &mat)
     {
         const size_t n_gp = _integration->getNumberOfSamplingPoints();
         double x[3], ox[3];
@@ -144,15 +144,15 @@ public:
     }
 
     /// compute an matrix M = Int{W^T F dN} dV
-    virtual void integrateWxDN(size_t igp, double* f, LocalMatrix &mat)
+    virtual void integrateWxDN(size_t igp, MathLib::Vector &f, LocalMatrix &mat)
     {
         double x[3];
         _integration->getSamplingPoint(igp, x);
         const CoordMappingProperties *coord_prop = _mapping->getProperties();
         LocalMatrix *dbasis = coord_prop->dshape_dx;
-        LocalMatrix *test = coord_prop->dshape_dx;
+        LocalMatrix *test = coord_prop->shape_r;
         double fac = coord_prop->det_jacobian * _integration->getWeight(igp);
-        test->transposeAndMultiply(*dbasis, f, mat, fac);
+        test->transposeAndMultiply(*dbasis, &f[0], mat, fac);
     }
 
     /// compute an matrix M = Int{dW^T F dN} dV
@@ -167,7 +167,7 @@ public:
         dtest->transposeAndMultiply(*dbasis, mat, fac);
     }
 
-    void extrapolate(const std::vector<MathLib::Vector2D> &gp_values, std::vector<MathLib::Vector2D> &nodal_values)
+    void extrapolate(const std::vector<MathLib::Vector> &gp_values, std::vector<MathLib::Vector> &nodal_values)
     {
         T_EXTRAPOLATE extrapo;
         extrapo.extrapolate(*this, gp_values, nodal_values);

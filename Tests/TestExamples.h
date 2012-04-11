@@ -28,13 +28,13 @@ public:
     GeoLib::Rectangle *rec;
     DiscreteLib::DiscreteSystem *dis;
     MeshLib::IMesh *msh;
-    MathLib::TemplateFunction<double*, double> *_K;
+    MathLib::SpatialFunctionScalar *_K;
     FemLib::FemNodalFunctionScalar *head;
     FemLib::FEMIntegrationPointFunctionVector2d *vel;
     std::vector<FemLib::FemDirichletBC<double>*> vec_bc1;
     std::vector<FemLib::FemNeumannBC<double, double>*> vec_bc2;
 
-    void define(MeshLib::IMesh *msh, MathLib::TemplateFunction<double*, double> *K=0)
+    void define(MeshLib::IMesh *msh, MathLib::SpatialFunctionScalar *K=0)
     {
         //#Define a problem
         //geometry
@@ -48,10 +48,10 @@ public:
         head = new FemLib::FemNodalFunctionScalar(*dis, *msh, FemLib::PolynomialOrder::Linear);
         vel = new FemLib::FEMIntegrationPointFunctionVector2d(*dis, *msh);
         //bc
-        vec_bc1.push_back(new FemLib::FemDirichletBC<double>(head, poly_right, false, new MathLib::FunctionConstant<GeoLib::Point, double>(.0), new FemLib::DiagonalizeMethod()));
-        vec_bc2.push_back(new FemLib::FemNeumannBC<double, double>(head, poly_left, false, new MathLib::FunctionConstant<GeoLib::Point, double>(-1e-5)));
+        vec_bc1.push_back(new FemLib::FemDirichletBC<double>(head, poly_right, false, new MathLib::SpatialFunctionConstant<double>(.0), new FemLib::DiagonalizeMethod()));
+        vec_bc2.push_back(new FemLib::FemNeumannBC<double, double>(head, poly_left, false, new MathLib::SpatialFunctionConstant<double>(-1e-5)));
         // mat
-        _K = (K!=0) ? K : new MathLib::FunctionConstant<double*, double>(1.e-11);
+        _K = (K!=0) ? K : new MathLib::SpatialFunctionConstant<double>(1.e-11);
     }
 
     static void calculateHead(GWFemTest &gw)
@@ -121,9 +121,9 @@ public:
                 yi[i] = (*pt)[1];
             }
             for (size_t ip=0; ip<n_gp; ip++) {
-                MathLib::Vector2D q;
-                q.getRawRef()[0] = .0;
-                q.getRawRef()[1] = .0;
+                MathLib::Vector q(2);
+                q[0] = .0;
+                q[1] = .0;
                 integral->getSamplingPoint(ip, r);
                 fe->computeBasisFunctions(r);
                 const MathLib::Matrix<double> *dN = fe->getGradBasisFunction();
@@ -134,7 +134,7 @@ public:
 
                 double k;
                 gw._K->eval(&xx[0], k);
-                dN->axpy(-k, &local_h[0], .0, q.getRawRef()); //TODO  q = - K * dN * local_h;
+                dN->axpy(-k, &local_h[0], .0, &q[0]); //TODO  q = - K * dN * local_h;
                 gw.vel->setIntegrationPointValue(i_e, ip, q);
             }
         }

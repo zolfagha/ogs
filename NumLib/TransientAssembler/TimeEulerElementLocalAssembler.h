@@ -16,10 +16,10 @@ template <class T_USER_ASSEMBLY>
 class TimeEulerElementLocalAssembler : public ITransientElemenetLocalAssembler
 {
 private:
-    T_USER_ASSEMBLY _time_ode;
+    T_USER_ASSEMBLY* _time_ode;
     double _theta;
 public:
-    TimeEulerElementLocalAssembler(T_USER_ASSEMBLY &a) : _time_ode(a), _theta(1.0)
+    TimeEulerElementLocalAssembler(T_USER_ASSEMBLY &a) : _time_ode(&a), _theta(1.0)
     {
     };
 
@@ -49,7 +49,10 @@ public:
         M = .0;
         K = .0;
 
-        _time_ode.assembly(time, e, local_u_n1, local_u_n, M, K, F);
+        _time_ode->assembly(time, e, local_u_n1, local_u_n, M, K, F);
+
+        //std::cout << "M="; M.write(std::cout); std::cout << std::endl;
+        //std::cout << "K="; K.write(std::cout); std::cout << std::endl;
 
         MathLib::DenseLinearEquations::MatrixType *localA = eqs.getA();
         double *localRHS = eqs.getRHS();

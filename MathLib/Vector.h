@@ -4,9 +4,118 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
+#include <valarray>
 
 namespace MathLib
 {
+
+template<typename T>
+class TemplateVectorX
+{
+public:
+    TemplateVectorX()
+    {
+    };
+    TemplateVectorX(size_t n)
+    {
+        _data.resize(n);
+    };
+    TemplateVectorX(size_t n, T v)
+    {
+        _data.resize(n, v);
+    }
+    TemplateVectorX(const TemplateVectorX &v)
+    {
+        _data = v._data;
+    }
+
+    void resize(size_t n) {_data.resize(n);};
+    size_t size() const {return _data.size();};
+
+    const T* getRaw() const {return _data.size()>0 ? &_data[0] : 0;};
+    T* getRawRef() {return _data.size()>0 ? &_data[0] : 0;};
+
+    T& operator[] (size_t idx) {
+        return _data[idx];
+    }
+    const T& operator[] (size_t idx) const {
+        return _data[idx];
+    }
+
+    TemplateVectorX<T>& operator= (T a)
+    {
+        _data = a;
+
+        return *this;
+    }
+    TemplateVectorX<T>& operator+= (T a)
+    {
+        _data += a;
+
+        return *this;
+    }
+    TemplateVectorX<T>& operator+= (const TemplateVectorX<T> &v)
+    {
+        _data += v._data;
+
+        return *this;
+    }
+    TemplateVectorX<T>& operator-= (const TemplateVectorX<T> &v)
+    {
+        _data -= v._data;
+
+        return *this;
+    }
+    TemplateVectorX<T>& operator/= (T a)
+    {
+        _data /= a;
+
+        return *this;
+    }
+    TemplateVectorX<T> operator* (T a)
+    {
+        TemplateVectorX<T> v(_data.size());
+        for (size_t i = 0; i < _data.size(); i++)
+            v._data[i] = _data[i]*a;
+
+        return v;
+    }
+    TemplateVectorX<T> operator/ (T a)
+    {
+        TemplateVectorX<T> v(_data.size());
+        for (size_t i = 0; i < _data.size(); i++)
+            v._data[i] = _data[i]/a;
+        return v;
+    }
+
+    TemplateVectorX<T> operator- (const TemplateVectorX<T> &ref) const
+    {
+        TemplateVectorX<T> v(_data.size());
+        for (size_t i = 0; i < _data.size(); i++)
+            v._data[i] = _data[i] - ref._data[i];
+
+        return v;
+    }
+
+    bool operator<(const TemplateVectorX<T> &ref) const
+    {
+    	return this->magnitude() < ref.magnitude();
+    }
+
+    T magnitude() const
+    {
+    	T m = 0;
+        for (size_t i = 0; i < _data.size(); i++)
+            m += _data[i]*_data[i];
+        return std::sqrt(m);
+    }
+
+private:
+    std::valarray<T> _data;
+};
+
+typedef TemplateVectorX<double> Vector;
+
 
 template<typename T, unsigned N>
 class TemplateVector
@@ -191,7 +300,7 @@ private:
 
 typedef TemplateVector<double, 2> Vector2D;
 typedef TemplateVector<double, 3> Vector3D;
-}
+} //end mathLib
 
 inline std::ostream& operator<<(std::ostream& output, const MathLib::TemplateVector<double,2>& p)
 {
@@ -202,8 +311,26 @@ inline std::ostream& operator<<(std::ostream& output, const MathLib::TemplateVec
     return output;  // for multiple << operators.
 }
 
+inline std::ostream& operator<<(std::ostream& output, const MathLib::Vector& p)
+{
+    output << "[";
+    for (size_t i=0; i<p.size(); i++)
+        output << p[i] << " ";
+    output << "]";
+    return output;  // for multiple << operators.
+}
+
 namespace std
 {
+
+inline MathLib::TemplateVectorX<double> abs(const MathLib::TemplateVectorX<double> &v)
+{
+	MathLib::TemplateVectorX<double> r(v.size());
+	for (size_t i=0; i<v.size(); i++)
+		r[i] = std::abs(v[i]);
+	return r;
+}
+
 inline MathLib::TemplateVector<double,2> abs(const MathLib::TemplateVector<double,2> &v)
 {
 	MathLib::TemplateVector<double,2> r;
@@ -219,4 +346,13 @@ inline double max(double arg0, const MathLib::TemplateVector<double,2> &arg1)
 		r = std::max(r, arg1[i]);
 	return r;
 }
+
+inline double max(double arg0, const MathLib::Vector &arg1)
+{
+	double r = arg0;
+	for (size_t i=0; i<arg1.size(); i++)
+		r = std::max(r, arg1[i]);
+	return r;
+}
+
 }

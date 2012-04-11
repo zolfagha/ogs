@@ -3,6 +3,14 @@ FILE(GLOB Test_Files *.h *.cpp)
 SOURCE_GROUP( Test FILES ${Test_Files} )
 FILE(GLOB Test_Solution1_Files Solution1/*.h Solution1/*.cpp)
 SOURCE_GROUP( Test\\Solution1 FILES ${Test_Solution1_Files} )
+FILE(GLOB Test_Geo_Material_Files Geo/Material/*.h Geo/Material/*.cpp)
+SOURCE_GROUP( Test\\Geo\\Material FILES ${Test_Geo_Material_Files} )
+FILE(GLOB Test_Geo_Equation_Files Geo/Equation/*.h Geo/Equation/*.cpp)
+SOURCE_GROUP( Test\\Geo\\Equation FILES ${Test_Geo_Equation_Files} )
+FILE(GLOB Test_Geo_Model_Files Geo/Model/*.h Geo/Model/*.cpp)
+SOURCE_GROUP( Test\\Geo\\Model FILES ${Test_Geo_Model_Files} )
+FILE(GLOB Test_ExactSolution_Files ExactSolution/*.h ExactSolution/*.cpp)
+SOURCE_GROUP( Test\\ExactSolution FILES ${Test_ExactSolution_Files} )
 
 INCLUDE_DIRECTORIES(
 	.
@@ -13,6 +21,10 @@ INCLUDE_DIRECTORIES(
 ADD_EXECUTABLE( tests
         ${Test_Files}
         ${Test_Solution1_Files}
+        ${Test_Geo_Material_Files}
+        ${Test_Geo_Equation_Files}
+        ${Test_Geo_Model_Files}
+        ${Test_ExactSolution_Files}
 )
 
 TARGET_LINK_LIBRARIES ( tests

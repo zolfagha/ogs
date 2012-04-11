@@ -454,13 +454,14 @@ template<class T> void Matrix<T>::transposeAndMultiply(const Matrix<T> &matB, T*
         }
     }
     // C += a* A^T * M
-    for (size_t colA=0; colA<this->ncols; colA++) {
-        for (size_t colB=0; colB<m.getNCols(); colB++) {
-            for (size_t colAcolB=0; colAcolB<this->nrows; colAcolB++) {
-                matC(colA, colB) += a * (*this)(colA, colAcolB) * m(colAcolB, colB);
-            }
-        }
-    }
+    transposeAndMultiply(m, matC, a);
+    //for (size_t colA=0; colA<this->ncols; colA++) {
+    //    for (size_t colB=0; colB<m.getNCols(); colB++) {
+    //        for (size_t colAcolB=0; colAcolB<this->nrows; colAcolB++) {
+    //            matC(colA, colB) += a * (*this)(colA, colAcolB) * m(colAcolB, colB);
+    //        }
+    //    }
+    //}
 }
 
 template<class T> T Matrix<T>::determinant() const

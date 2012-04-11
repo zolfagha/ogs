@@ -1,8 +1,10 @@
 
+#include <cmath>
 #include <gtest/gtest.h>
 
 #include "Base/CodingTools.h"
 
+#include "MathLib/Vector.h"
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
 #include "MathLib/Coupling/Algorithm/TransientPartitionedMethod.h"
 #include "MeshLib/Tools/MeshGenerator.h"
@@ -11,25 +13,26 @@
 
 #include "SolutionLib/Nonlinear.h"
 
-#include "Head.h"
-#include "Velocity.h"
-#include "Concentration.h"
+#include "Tests/Geo/Model/Head.h"
+#include "Tests/Geo/Model/Velocity.h"
+#include "Tests/Geo/Model/Concentration.h"
+
+#include "Tests/ExactSolution/OgataBank.h"
 
 #include "TestUtil.h"
 
 
 class FemFunctionConvergenceCheck
 {
-	typedef ParameterSet MyNamedVariableContainer;
 public:
-	bool isConverged(MyNamedVariableContainer& vars_prev, MyNamedVariableContainer& vars_current, double eps, double &v_diff)
+	bool isConverged(ParameterSet& vars_prev, ParameterSet& vars_current, double eps, double &v_diff)
 	{
 	    for (size_t i=0; i<vars_prev.size(); i++) {
-	    	if (vars_prev.getName(i).compare("h")==0) {
+	    	if (vars_prev.getName(i).compare("h")==0 || vars_prev.getName(i).compare("c")==0) {
 		        const FemNodalFunctionScalar* f_fem_prev = vars_prev.get<FemNodalFunctionScalar>(i);
 		        const FemNodalFunctionScalar* f_fem_cur = vars_current.get<FemNodalFunctionScalar>(i);
 	    		v_diff = f_fem_cur->norm_diff(*f_fem_prev);
-	    	} else {
+	    	} else if (vars_prev.getName(i).compare("v")==0) {
 	    		const FEMIntegrationPointFunctionVector2d* f_fem_prev = vars_prev.get<FEMIntegrationPointFunctionVector2d>(i);
 	    		const FEMIntegrationPointFunctionVector2d* f_fem_cur = vars_current.get<FEMIntegrationPointFunctionVector2d>(i);
 	    		v_diff = f_fem_cur->norm_diff(*f_fem_prev);
@@ -43,26 +46,42 @@ public:
 };
 
 
-GWFemProblem* defineGWProblem(DiscreteSystem &dis, Rectangle &_rec, PorousMedia &pm)
+Geo::GWFemProblem* defineGWProblem(DiscreteSystem &dis, Rectangle &_rec, Geo::PorousMedia &pm)
 {
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
-    GWAssembler ele_eqs(*_feObjects, *pm.K) ;
+    Geo::WeakFormGroundwaterFlow ele_eqs(*_feObjects, pm);
     //IVBV problem
-    GWFemProblem* _problem = new GWFemProblem(dis, *dis.getMesh(), ele_eqs);
+    Geo::GWFemProblem* _problem = new Geo::GWFemProblem(dis, *dis.getMesh(), ele_eqs);
     //BC
     size_t headId = _problem->createField(PolynomialOrder::Linear);
     FemNodalFunctionScalar* _head = _problem->getField(headId);
     Polyline* poly_left = _rec.getLeft();
     Polyline* poly_right = _rec.getRight();
     _problem->setIC(headId, *_head);
-    MathLib::FunctionConstant<GeoLib::Point, double> f1(.0);
+    MathLib::SpatialFunctionConstant<double> f1(.0);
     _problem->addDirichletBC(headId, *poly_right, false, f1);
-    MathLib::FunctionConstant<GeoLib::Point, double> f2(-1e-5);
+    MathLib::SpatialFunctionConstant<double> f2(-1e-5);
     _problem->addNeumannBC(headId, *poly_left, false, f2);
-    //transient
-    TimeStepFunctionConstant tim(.0, 100.0, 10.0);
-    _problem->setTimeSteppingFunction(tim);
+
+    return _problem;
+}
+
+Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, Rectangle &_rec, Geo::PorousMedia &pm, Geo::Compound &comp)
+{
+    LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
+    //equations
+    Geo::WeakFormMassTransport ele_eqs(*_feObjects, pm, comp) ;
+    //IVBV problem
+    Geo::MassFemProblem* _problem = new Geo::MassFemProblem(dis, *dis.getMesh(), ele_eqs);
+    //BC
+    size_t var_id = _problem->createField(PolynomialOrder::Linear);
+    FemNodalFunctionScalar* _conc = _problem->getField(var_id);
+    Polyline* poly_left = _rec.getLeft();
+    //Polyline* poly_right = _rec.getRight();
+    _problem->setIC(var_id, *_conc);
+    MathLib::SpatialFunctionConstant<double> f1(1.0);
+    _problem->addDirichletBC(var_id, *poly_left, false, f1);
 
     return _problem;
 }
@@ -78,9 +97,9 @@ static void getGWExpectedHead(std::vector<double> &expected)
     }
 }
 
-typedef FunctionHead<Linear,CRSLisSolver> MyFunctionHead;
-typedef FunctionVelocity MyFunctionVelocity;
-typedef FunctionConcentration MyFunctionConcentration;
+typedef Geo::FunctionHead<Linear,CRSLisSolver> MyFunctionHead;
+typedef Geo::FunctionVelocity MyFunctionVelocity;
+typedef Geo::FunctionConcentration<Linear,CRSLisSolver> MyFunctionConcentration;
 
 
 TEST(Solution, CouplingFem1)
@@ -88,11 +107,13 @@ TEST(Solution, CouplingFem1)
 	try {
 	    MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
 	    Rectangle* _rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
-	    PorousMedia pm;
-	    pm.K = new MathLib::FunctionConstant<double*, double>(1.e-11);
-	    pm.porosity = new MathLib::FunctionConstant<double*, double>(0.2);
+	    Geo::PorousMedia pm;
+	    pm.hydraulic_conductivity = new MathLib::SpatialFunctionConstant<double>(1.e-11);
+	    pm.porosity = new MathLib::SpatialFunctionConstant<double>(0.2);
 	    DiscreteSystem dis(*msh);
-	    GWFemProblem* pGW = defineGWProblem(dis, *_rec, pm);
+	    Geo::GWFemProblem* pGW = defineGWProblem(dis, *_rec, pm);
+        TimeStepFunctionConstant tim(.0, 100.0, 10.0);
+        pGW->setTimeSteppingFunction(tim);
 	    // options
 	    Base::Options options;
 	    Base::Options* op_lis = options.addSubGroup("Lis");
@@ -103,21 +124,15 @@ TEST(Solution, CouplingFem1)
 
 		MyFunctionHead f_head;
 		f_head.define(dis, *pGW, options);
-		//f_head.setParameter(MyFunctionHead::Head, pGW->getIC(0));
 		MyFunctionVelocity f_vel;
 		f_vel.define(dis, pm);
-		//f_vel.setParameter(MyFunctionVelocity::Velocity, 0);
-		//f_vel.setParameter(MyFunctionVelocity::Velocity, new FemLib::FEMIntegrationPointFunctionVector2d(dis, *msh));
-		//MyFunctionConcentration f_c;
 
 
 	    SerialStaggeredMethod<FemFunctionConvergenceCheck> method(1e-5, 100);
 	    AsyncPartitionedSystem apart1(method);
 	    apart1.addParameter("h", f_head, MyFunctionHead::Head);
 	    apart1.addParameter("v", f_vel, MyFunctionVelocity::Velocity);
-	    //apart1.addParameter("c", f_c, MyFunctionConcentration::Concentration);
 	    apart1.connectInput("h", f_vel, MyFunctionVelocity::Head);
-	    //apart1.connectInput("v", f_c, MyFunctionConcentration::Velocity);
 
 	    TimeSteppingController timestepping;
 	    timestepping.addTransientSystem(apart1);
@@ -131,21 +146,13 @@ TEST(Solution, CouplingFem1)
 	    const DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
 	    const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
 
-	    r_f_head->printouf();
-	    r_f_v->printouf();
+	    r_f_head->printout();
+	    r_f_v->printout();
 
 	    std::vector<double> expected;
 	    getGWExpectedHead(expected);
 
 	    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*vec_h)[0], vec_h->size());
-
-	//    double v1, v2, v3;
-	//    apart1.getParameter(apart1.getParameterID("a"))->eval(0, v1);
-	//    apart1.getParameter(apart1.getParameterID("b"))->eval(0, v2);
-	//    apart1.getParameter(apart1.getParameterID("c"))->eval(0, v3);
-	//    ASSERT_NEAR(1., v1, epsilon);
-	//    ASSERT_NEAR(2., v2, epsilon);
-	//    ASSERT_NEAR(3., v3, epsilon);
 
 	} catch (const char* e) {
 		std::cout << "***Exception caught! " << e << std::endl;
@@ -153,3 +160,103 @@ TEST(Solution, CouplingFem1)
 
 }
 
+
+TEST(Solution, CouplingFem2)
+{
+	try {
+        //space
+	    MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 20, .0, .0, .0);
+	    Rectangle* _rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
+        //time
+        TimeStepFunctionConstant tim(.0, 1e+4, 1e+3);
+        //TimeStepFunctionConstant tim(.0, 2e+5, .5e+5);
+        //material
+	    Geo::PorousMedia pm;
+	    pm.hydraulic_conductivity = new MathLib::SpatialFunctionConstant<double>(1.e-11);
+	    pm.porosity = new MathLib::SpatialFunctionConstant<double>(1.0);
+	    Geo::Compound tracer;
+	    tracer.molecular_diffusion = new MathLib::SpatialFunctionConstant<double>(1.e-6);
+        //problems
+	    DiscreteSystem dis(*msh);
+	    Geo::GWFemProblem* pGW = defineGWProblem(dis, *_rec, pm);
+	    Geo::MassFemProblem* pMass = defineMassTransportProblem(dis, *_rec, pm, tracer);
+        pGW->setTimeSteppingFunction(tim);
+        pMass->setTimeSteppingFunction(tim);
+	    //options
+	    Base::Options optionsGW;
+	    Base::Options* op_lis = optionsGW.addSubGroup("Lis");
+	    op_lis->addOption("solver_type", "CG");
+	    op_lis->addOption("precon_type", "NONE");
+	    op_lis->addOptionAsNum("error_tolerance", 1e-10);
+	    op_lis->addOptionAsNum("max_iteration_step", 1000);
+        Base::Options optionsMT;
+        op_lis = optionsMT.addSubGroup("Lis");
+        op_lis->addOption("solver_type", "BiCG");
+        op_lis->addOption("precon_type", "NONE");
+        op_lis->addOptionAsNum("error_tolerance", 1e-10);
+        op_lis->addOptionAsNum("max_iteration_step", 1000);
+        // unknowns
+		MyFunctionHead f_head;
+		f_head.define(dis, *pGW, optionsGW);
+		MyFunctionVelocity f_vel;
+		f_vel.define(dis, pm);
+		MyFunctionConcentration f_c;
+		f_c.define(dis, *pMass, optionsMT);
+
+
+	    SerialStaggeredMethod<FemFunctionConvergenceCheck> method(1e-5, 100);
+	    AsyncPartitionedSystem apart1(method);
+	    apart1.addParameter("h", f_head, MyFunctionHead::Head);
+	    apart1.addParameter("v", f_vel, MyFunctionVelocity::Velocity);
+	    apart1.addParameter("c", f_c, MyFunctionConcentration::Concentration);
+	    apart1.connectInput("h", f_vel, MyFunctionVelocity::Head);
+	    apart1.connectInput("v", f_c, MyFunctionConcentration::Velocity);
+
+	    TimeSteppingController timestepping;
+	    timestepping.addTransientSystem(apart1);
+
+	    const double epsilon = 1.e-3;
+	    timestepping.setBeginning(.0);
+	    timestepping.solve(tim.getEnd());
+
+	    const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getParameterID("h"));
+	    const FEMIntegrationPointFunctionVector2d* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector2d>(apart1.getParameterID("v"));
+	    const FemNodalFunctionScalar* r_f_c = apart1.getOutput<FemNodalFunctionScalar>(apart1.getParameterID("c"));
+	    const DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
+	    const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
+	    const DiscreteVector<double>* vec_c = r_f_c->getNodalValues();
+
+	    //r_f_head->printout();
+	    //r_f_v->printout();
+#undef OUTPUT_C
+#ifdef OUTPUT_C
+        r_f_c->printout();
+#endif
+	    //std::vector<double> expectedHead;
+	    //getGWExpectedHead(expectedHead);
+        //ASSERT_DOUBLE_ARRAY_EQ(&expectedHead[0], &(*vec_h)[0], vec_h->size());
+
+
+        std::vector<double> expectedC;
+        expectedC.resize(21);
+
+#ifdef OUTPUT_C
+        std::cout << std::endl << "expected=";
+#endif
+        for (size_t i=0; i<expectedC.size(); i++) {
+            expectedC[i] = analyticalOgataBank(i*0.1, tim.getEnd(), 1e-5/1.0, 1e-6);
+#ifdef OUTPUT_C
+            std::cout << expectedC[i] << " ";
+#endif
+        }
+#ifdef OUTPUT_C
+        std::cout << std::endl;
+#endif
+	    ASSERT_DOUBLE_ARRAY_EQ(&expectedC[0], &(*vec_c)[0], expectedC.size(), 5e-2);
+
+
+	} catch (const char* e) {
+		std::cout << "***Exception caught! " << e << std::endl;
+	}
+
+}

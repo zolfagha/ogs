@@ -131,6 +131,8 @@ public:
         return _u_n1[var_id];
     }
 
+    UserFemProblem* getProblem() {return _problem;};
+
 private:
     UserFemProblem* _problem;
     //UserTimeOdeAssembler _element_ode_assembler;

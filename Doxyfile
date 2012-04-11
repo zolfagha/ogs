@@ -664,7 +664,6 @@ INPUT                  = ./Base \
                          ./FemLib \
                          ./FdmLib \
                          ./NumLib \
-                         ./ModelLib \
                          ./scripts \
                          ./SolutionLib \
                          ./DiscreteLib

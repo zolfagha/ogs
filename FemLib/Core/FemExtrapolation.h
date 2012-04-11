@@ -22,7 +22,7 @@ class IFeExtrapolationMethod
 {
 public:
 	virtual ~IFeExtrapolationMethod() {};
-    virtual void extrapolate(IFiniteElement &fe, const std::vector<MathLib::Vector2D> &gp_values, std::vector<MathLib::Vector2D> &nodal_values) = 0;
+    virtual void extrapolate(IFiniteElement &fe, const std::vector<MathLib::Vector> &gp_values, std::vector<MathLib::Vector> &nodal_values) = 0;
 };
 
 /**
@@ -31,7 +31,7 @@ public:
 class FeExtrapolationAverage : public IFeExtrapolationMethod
 {
 public:
-    void extrapolate(IFiniteElement &fe, const std::vector<MathLib::Vector2D> &gp_values, std::vector<MathLib::Vector2D> &nodal_values);
+    void extrapolate(IFiniteElement &fe, const std::vector<MathLib::Vector> &gp_values, std::vector<MathLib::Vector> &nodal_values);
     template<typename Tvalue>
     void extrapolate(IFiniteElement &fe, const std::vector<Tvalue> &gp_values, std::vector<Tvalue> &nodal_values);
 };
@@ -42,7 +42,7 @@ public:
 class FeExtrapolationGaussLinear : public IFeExtrapolationMethod
 {
 public:
-    void extrapolate(IFiniteElement &fe, const std::vector<MathLib::Vector2D> &gp_values, std::vector<MathLib::Vector2D> &nodal_values);
+    void extrapolate(IFiniteElement &fe, const std::vector<MathLib::Vector> &gp_values, std::vector<MathLib::Vector> &nodal_values);
 
     template<typename Tvalue>
     void extrapolate(IFiniteElement &fe, const std::vector<Tvalue> &gp_values, std::vector<Tvalue> &nodal_values);

@@ -5,9 +5,9 @@
 namespace FemLib
 {
 // average
-void FeExtrapolationAverage::extrapolate(IFiniteElement &fe, const std::vector<MathLib::Vector2D> &gp_values, std::vector<MathLib::Vector2D> &nodal_values)
+void FeExtrapolationAverage::extrapolate(IFiniteElement &fe, const std::vector<MathLib::Vector> &gp_values, std::vector<MathLib::Vector> &nodal_values)
 {
-    extrapolate<MathLib::Vector2D>(fe, gp_values, nodal_values);
+    extrapolate<MathLib::Vector>(fe, gp_values, nodal_values);
 }
 
 template<typename Tvalue>
@@ -23,9 +23,9 @@ void FeExtrapolationAverage::extrapolate(IFiniteElement &fe, const std::vector<T
 }
 
 // gauss linear
-void FeExtrapolationGaussLinear::extrapolate(IFiniteElement &fe, const std::vector<MathLib::Vector2D> &gp_values, std::vector<MathLib::Vector2D> &nodal_values)
+void FeExtrapolationGaussLinear::extrapolate(IFiniteElement &fe, const std::vector<MathLib::Vector> &gp_values, std::vector<MathLib::Vector> &nodal_values)
 {
-    extrapolate<MathLib::Vector2D>(fe, gp_values, nodal_values);
+    extrapolate<MathLib::Vector>(fe, gp_values, nodal_values);
 }
 
 template<typename Tvalue>

@@ -4,13 +4,15 @@
 #include <valarray>
 #include <cmath>
 
+#include "MathLib/Vector.h"
+
 namespace FemLib
 {
 /**
  * \brief Template class for FEM integration point-based functions
  */
 template<typename Tvalue>
-class TemplateFEMIntegrationPointFunction : public MathLib::TemplateFunction<GeoLib::Point,Tvalue>
+class TemplateFEMIntegrationPointFunction : public MathLib::SpatialFunction<Tvalue>
 {
 public:
     typedef DiscreteLib::DiscreteVector<std::valarray<Tvalue> > DiscreteVectorType;
@@ -26,7 +28,7 @@ public:
         (*this->_values) = (*src._values);
     };
 
-    MathLib::TemplateFunction<GeoLib::Point, Tvalue>* clone() const
+    MathLib::SpatialFunction<Tvalue>* clone() const
     {
         TemplateFEMIntegrationPointFunction<Tvalue> *obj = new TemplateFEMIntegrationPointFunction<Tvalue>(*this);
         return obj;
@@ -37,9 +39,9 @@ public:
         return _msh;
     }
 
-    void eval(const GeoLib::Point &pt, Tvalue &v)
+    void eval(const MathLib::SpatialPosition &pt, Tvalue &v)
     {
-        throw "The method or operation is not implemented.";
+        v = (*_values)[0][0]; //TODO
     };
 
     void setIntegrationPointValue( size_t i_e, size_t ip, Tvalue &q )
@@ -92,7 +94,7 @@ public:
         return _values;
     }
 
-    void printouf() const
+    void printout() const
     {
     	std::cout << "integration_pt_values = ";
     	for (size_t i=_values->getRangeBegin(); i<_values->getRangeEnd(); ++i) {
@@ -117,11 +119,10 @@ private:
 //        _values = new std::vector<std::vector<Tvalue> >(n);
         _values = _discrete_system->createVector<std::valarray<Tvalue> >(n);
     }
-
-
 };
 
-typedef TemplateFEMIntegrationPointFunction<double> FEMIntegrationPointFunctionScalar2d;
-typedef TemplateFEMIntegrationPointFunction<MathLib::Vector2D> FEMIntegrationPointFunctionVector2d;
+typedef TemplateFEMIntegrationPointFunction<double> FEMIntegrationPointFunctionScalar;
+//typedef TemplateFEMIntegrationPointFunction<MathLib::Vector2D> FEMIntegrationPointFunctionVector2d;
+typedef TemplateFEMIntegrationPointFunction<MathLib::Vector> FEMIntegrationPointFunctionVector2d;
 
 } //end

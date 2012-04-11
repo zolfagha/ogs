@@ -12,8 +12,8 @@
 #include "SolutionLib/FemProblem.h"
 #include "SolutionLib/SingleStepFEM.h"
 
-#include "Assembler.h"
-#include "PorousMedia.h"
+#include "Tests/Geo/Equation/FemGroundwaterFlow.h"
+#include "Tests/Geo/Material/PorousMedia.h"
 
 using namespace GeoLib;
 using namespace MathLib;
@@ -23,7 +23,10 @@ using namespace MeshLib;
 using namespace SolutionLib;
 using namespace DiscreteLib;
 
-typedef FemIVBVProblem<GWAssembler> GWFemProblem;
+namespace Geo
+{
+
+typedef FemIVBVProblem<Geo::WeakFormGroundwaterFlow> GWFemProblem;
 
 template <
 	template <class> class T_NONLINEAR,
@@ -36,14 +39,14 @@ public:
     			FemIVBVProblem,
     			TimeEulerElementLocalAssembler,
     			T_LINEAR_SOLVER,
-    			GWAssembler
+    			Geo::WeakFormGroundwaterFlow
 			> MyLinearFunction;
 
     typedef T_NONLINEAR<MyLinearFunction> MyNonlinearFunction;
 
     typedef SingleStepFEM
     		<
-    			FemIVBVProblem<GWAssembler>,
+    			FemIVBVProblem<Geo::WeakFormGroundwaterFlow>,
     			//TimeEulerElementLocalAssembler,
     			MyLinearFunction,
     			MyNonlinearFunction,
@@ -80,19 +83,22 @@ public:
     void accept(const TimeStep &time)
     {
         _solHead->accept(time);
+
+        //std::cout << "Head=" << std::endl;
+        //_solHead->getCurrentSolution(0)->printout();
     };
 
 private:
     GWFemProblem* _problem;
     SolutionForHead* _solHead;
     Rectangle *_rec;
-    FemNodalFunctionScalar *_head;
+    //FemNodalFunctionScalar *_head;
     LagrangianFeObjectContainer* _feObjects;
 
     DISALLOW_COPY_AND_ASSIGN(FunctionHead);
 };
 
 
-
+} //end
 
 

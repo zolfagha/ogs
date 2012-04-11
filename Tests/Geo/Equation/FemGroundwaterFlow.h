@@ -2,15 +2,19 @@
 #pragma once
 
 #include "FemLib/Core/IFemElement.h"
+#include "Tests/Geo/Material/PorousMedia.h"
 
-class GWAssembler: public NumLib::ITimeODEElementAssembler
+namespace Geo
+{
+
+class WeakFormGroundwaterFlow: public NumLib::ITimeODEElementAssembler
 {
 private:
-	MathLib::TemplateFunction<double*, double>* _matK;
+	PorousMedia* _pm;
 	FemLib::LagrangianFeObjectContainer* _feObjects;
 public:
-	GWAssembler(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::TemplateFunction<double*, double> &mat)
-	: _matK(&mat), _feObjects(&feObjects)
+	WeakFormGroundwaterFlow(FemLib::LagrangianFeObjectContainer &feObjects, PorousMedia &pm)
+	: _pm(&pm), _feObjects(&feObjects)
 	{
 	};
 
@@ -19,8 +23,10 @@ public:
 	{
 		FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
 
-		//localM = .0;
+		//fe->integrateWxN(_pm->storage, localM);
+		fe->integrateDWxDN(_pm->hydraulic_conductivity, localK);
 		//localF.resize(localF.size(), .0);
-		fe->integrateDWxDN(_matK, localK);
 	}
 };
+
+} //end

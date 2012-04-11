@@ -57,17 +57,17 @@ public:
         return _map_var;
     }
 
-    void setIC(int, SpatialFunction& ic)
+    void setIC(int, MathLib::SpatialFunctionScalar& ic)
     {
-        _map_ic = (SpatialFunction*) ic.clone();
+        _map_ic = (MathLib::SpatialFunctionScalar*) ic.clone();
     }
 
-    SpatialFunction* getIC(int) const
+    MathLib::SpatialFunctionScalar* getIC(int) const
     {
         return _map_ic;
     };
 
-    void addDirichletBC(int, GeoLib::GeoObject &geo, bool is_transient, SpatialFunction& bc1)
+    void addDirichletBC(int, GeoLib::GeoObject &geo, bool is_transient, MathLib::SpatialFunctionScalar& bc1)
     {
         addDirichletBC(*new FemLib::FemDirichletBC<double>(_map_var, &geo, is_transient, &bc1, new FemLib::DiagonalizeMethod()));
     }
@@ -75,7 +75,7 @@ public:
 
     size_t getNumberOfDirichletBC(int n=0) const {return _map_bc1.size();};
 
-    SpatialFunction* getDirichletBC(int, int bc_id) const
+    MathLib::SpatialFunctionScalar* getDirichletBC(int, int bc_id) const
     {
         return _map_bc1[bc_id];
     };
@@ -85,14 +85,14 @@ public:
         return _map_bc1[bc_id];
     };
 
-    void addNeumannBC(int, GeoLib::GeoObject &geo, bool is_transient, SpatialFunction& bc2)
+    void addNeumannBC(int, GeoLib::GeoObject &geo, bool is_transient, MathLib::SpatialFunctionScalar& bc2)
     {
         addNeumannBC(*new FemLib::FemNeumannBC<double, double>(_map_var, &geo, is_transient, &bc2));
     }
 
     size_t getNumberOfNeumannBC(int n=0) const {return _map_bc2.size();};
 
-    SpatialFunction* getNeumannBC(int, int bc_id) const
+    MathLib::SpatialFunctionScalar* getNeumannBC(int, int bc_id) const
     {
         return _map_bc2[bc_id];
     };
@@ -111,7 +111,7 @@ private:
     T_ASSEMBLY _user_assembly;
     DiscreteLib::DiscreteSystem* _discrete_system;
     FemLib::FemNodalFunctionScalar* _map_var;
-    SpatialFunction* _map_ic;
+    MathLib::SpatialFunctionScalar* _map_ic;
     std::vector<FemLib::FemDirichletBC<double>*> _map_bc1;
     std::vector<FemLib::FemNeumannBC<double, double>*> _map_bc2;
 

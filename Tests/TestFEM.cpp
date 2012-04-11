@@ -105,25 +105,27 @@ TEST(FEM, ExtrapolateAverage1)
     GWFemTest::calculateVelocity(gw);
 
     FemNodalFunctionVector2d nodal_vel(*gw.dis, *gw.msh, PolynomialOrder::Linear);
-    FemExtrapolationAverage<MathLib::Vector2D> extrapo;
+    FemExtrapolationAverage<MathLib::Vector> extrapo;
     extrapo.extrapolate(*gw.vel, nodal_vel);
 
-    DiscreteLib::DiscreteVector<MathLib::Vector2D> *v = nodal_vel.getNodalValues();
-    ASSERT_DOUBLE_ARRAY_EQ(MathLib::Vector2D(1.e-5, .0), &(*v)[0], gw.head->getNumberOfNodes());
+    DiscreteLib::DiscreteVector<MathLib::Vector> *v = nodal_vel.getNodalValues();
+    MathLib::Vector expected(2);
+    expected[0] = 1.e-5;
+    expected[1] = .0;
+    ASSERT_DOUBLE_ARRAY_EQ(expected, (*v)[0], gw.head->getNumberOfNodes());
 }
 
-template<typename Tval, typename Tpos>
-class MyFunction : public MathLib::TemplateFunction<Tpos, Tval>
+class MyFunction : public MathLib::SpatialFunction<double>
 {
 public:
 	virtual ~MyFunction() {};
-    virtual void eval(const Tpos& x, Tval &v)
+    virtual void eval(const MathLib::SpatialPosition& x, double &v)
     {
         if (x[0]<1.0) v = 1e-11;
         else v = 2e-11;
     };
 
-    MathLib::TemplateFunction<Tpos, Tval>* clone() const {return 0;};
+    MyFunction* clone() const {return 0;};
 
 };
 
@@ -133,8 +135,8 @@ TEST(FEM, ExtrapolateAverage2)
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     gw.define(msh);
     delete gw._K;
-    gw._K = new MyFunction<double, double*>();
-    gw.vec_bc1.push_back(new FemDirichletBC<double>(gw.head, gw.rec->getLeft(), false, new MathLib::FunctionConstant<GeoLib::Point, double>(2.e+6), new DiagonalizeMethod()));
+    gw._K = new MyFunction();
+    gw.vec_bc1.push_back(new FemDirichletBC<double>(gw.head, gw.rec->getLeft(), false, new MathLib::SpatialFunctionConstant<double>(2.e+6), new DiagonalizeMethod()));
     delete gw.vec_bc2[0];
     gw.vec_bc2.clear();
 
@@ -142,7 +144,7 @@ TEST(FEM, ExtrapolateAverage2)
     GWFemTest::calculateVelocity(gw);
 
     FemNodalFunctionVector2d nodal_vel(*gw.dis, *gw.msh, PolynomialOrder::Linear);
-    FemExtrapolationAverage<MathLib::Vector2D> extrapo;
+    FemExtrapolationAverage<MathLib::Vector> extrapo;
     extrapo.extrapolate(*gw.vel, nodal_vel);
 
     std::vector<double> exH(9);
@@ -155,7 +157,10 @@ TEST(FEM, ExtrapolateAverage2)
     DiscreteLib::DiscreteVector<double> *h = gw.head->getNodalValues();
     ASSERT_DOUBLE_ARRAY_EQ(&exH[0], &(*h)[0], gw.head->getNumberOfNodes());
 
-    DiscreteLib::DiscreteVector<MathLib::Vector2D> *v = nodal_vel.getNodalValues();
-    ASSERT_DOUBLE_ARRAY_EQ(MathLib::Vector2D(4./3.*1.e-5, .0), &(*v)[0], gw.head->getNumberOfNodes());
+    DiscreteLib::DiscreteVector<MathLib::Vector> *v = nodal_vel.getNodalValues();
+    MathLib::Vector expected(2);
+    expected[0] = 4./3.*1.e-5;
+    expected[1] = .0;
+    ASSERT_DOUBLE_ARRAY_EQ(expected, (*v)[0], gw.head->getNumberOfNodes());
 }
 

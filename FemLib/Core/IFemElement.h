@@ -15,8 +15,6 @@
 namespace FemLib
 {
 
-typedef MathLib::TemplateFunction<double*, double> SpatialFunction;
-typedef MathLib::TemplateFunction<double*, double*> SpatialFunctionVector;
 typedef MathLib::Matrix<double> LocalMatrix;
 
 /**
@@ -50,16 +48,16 @@ public:
     /// make interpolation from nodal values \f$ u^h(\mathbf{x}) = \mathbf{N}_e (\mathbf x) \mathbf{u}_e \f$
     virtual double interpolate(double *pt, double *nodal_values) = 0;
     /// compute an matrix \f$ \mathbf{M}_e = \int_{\Omega_e} {\mathbf{N}_e^*}^T f(\mathbf x) \mathbf{N}_e d\Omega \f$
-    virtual void integrateWxN( SpatialFunction*, LocalMatrix &) = 0;
+    virtual void integrateWxN(MathLib::SpatialFunctionScalar*, LocalMatrix &) = 0;
     /// compute an matrix \f$ \mathbf{M}_e = \int_{\Omega_e} {\mathbf{N}_e^*}^T \mathbf{f}(\mathbf x) \nabla \mathbf{N}_e d\Omega \f$
-    virtual void integrateWxDN(SpatialFunctionVector*, LocalMatrix &) = 0;
+    virtual void integrateWxDN(MathLib::SpatialFunctionVector*, LocalMatrix &) = 0;
     /// compute an matrix \f$ \mathbf{M}_e = \int_{\Omega_e} {\nabla \mathbf{N}_e^*}^T f(\mathbf x) \nabla \mathbf{N}_e d\Omega \f$
-    virtual void integrateDWxDN( SpatialFunction *f, LocalMatrix &) = 0;
+    virtual void integrateDWxDN( MathLib::SpatialFunctionScalar* f, LocalMatrix &) = 0;
 
     /// get the integration method
     virtual IFemNumericalIntegration* getIntegrationMethod() const = 0;
 
-    virtual void extrapolate(const std::vector<MathLib::Vector2D> &gp_values, std::vector<MathLib::Vector2D> &nodal_values) = 0;
+    virtual void extrapolate(const std::vector<MathLib::Vector> &gp_values, std::vector<MathLib::Vector> &nodal_values) = 0;
 };
 
 /**

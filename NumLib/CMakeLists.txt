@@ -1,8 +1,8 @@
 #Source files grouped by a directory
 FILE(GLOB NumLib_Files *.h *.cpp)
 SOURCE_GROUP( NumLib FILES ${NumLib_Files} )
-FILE(GLOB NumLib_Core_Files Core/*.h Core/*.cpp)
-SOURCE_GROUP( NumLib\\Core FILES ${NumLib_Core_Files} )
+#FILE(GLOB NumLib_Core_Files Core/*.h Core/*.cpp)
+#SOURCE_GROUP( NumLib\\Core FILES ${NumLib_Core_Files} )
 FILE(GLOB NumLib_TimeStepping_Files TimeStepping/*.h TimeStepping/*.cpp)
 SOURCE_GROUP( NumLib\\TimeStepping FILES ${NumLib_TimeStepping_Files} )
 FILE(GLOB NumLib_TransientCoupling_Files TransientCoupling/*.h TransientCoupling/*.cpp)
@@ -16,7 +16,7 @@ SOURCE_GROUP( NumLib\\TransientAssembler FILES ${NumLib_TransientAssembler_Files
 
 ADD_LIBRARY( NumLib STATIC 
 	${NumLib_Files} 
-	${NumLib_Core_Files} 
+#	${NumLib_Core_Files} 
 	${NumLib_TimeStepping_Files} 
     ${NumLib_TransientCoupling_Files} 
 	${NumLib_Output_Files} 

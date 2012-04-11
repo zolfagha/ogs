@@ -46,18 +46,18 @@ public:
     double interpolate(double *x, double *nodal_values);
 
     /// compute an matrix M = Int{W^T F N} dV
-    void integrateWxN(SpatialFunction* f, LocalMatrix &mat);
+    void integrateWxN(MathLib::SpatialFunctionScalar* f, LocalMatrix &mat);
 
     /// compute an matrix M = Int{W^T F dN} dV
-    void integrateWxDN(SpatialFunctionVector* f, LocalMatrix &mat);
+    void integrateWxDN(MathLib::SpatialFunctionVector* f, LocalMatrix &mat);
 
     /// compute an matrix M = Int{dW^T F dN} dV
-    void integrateDWxDN(SpatialFunction *f, LocalMatrix &mat);
+    void integrateDWxDN(MathLib::SpatialFunctionScalar *f, LocalMatrix &mat);
 
     /// get the integration method
     IFemNumericalIntegration* getIntegrationMethod() const {return (IFemNumericalIntegration*)&_integration;};
 
-    void extrapolate(const std::vector<MathLib::Vector2D> &gp_values, std::vector<MathLib::Vector2D> &nodal_values);
+    void extrapolate(const std::vector<MathLib::Vector> &gp_values, std::vector<MathLib::Vector> &nodal_values);
 };
 
 }

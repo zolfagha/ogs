@@ -34,14 +34,13 @@ using namespace NumLib;
 using namespace SolutionLib;
 using namespace DiscreteLib;
 
-
 class GWAssembler: public NumLib::ITimeODEElementAssembler
 {
 private:
-    MathLib::TemplateFunction<double*, double>* _matK;
+    MathLib::SpatialFunctionScalar* _matK;
     FemLib::LagrangianFeObjectContainer* _feObjects;
 public:
-    GWAssembler(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::TemplateFunction<double*, double> &mat)
+    GWAssembler(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::SpatialFunctionScalar &mat)
     : _matK(&mat), _feObjects(&feObjects)
     {
     };
@@ -60,10 +59,10 @@ public:
 class GWAssemblerJacobian //: public NumLib::ITimeODEElementAssembler
 {
 private:
-    MathLib::TemplateFunction<double*, double>* _matK;
+    MathLib::SpatialFunctionScalar* _matK;
     FemLib::LagrangianFeObjectContainer* _feObjects;
 public:
-    GWAssemblerJacobian(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::TemplateFunction<double*, double> &mat)
+    GWAssemblerJacobian(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::SpatialFunctionScalar &mat)
     : _matK(&mat), _feObjects(&feObjects)
     {
     };
@@ -151,7 +150,7 @@ public:
     };
 
     //#Define a problem
-    void define(DiscreteSystem &dis, MathLib::TemplateFunction<double*, double> &K, Base::Options &option)
+    void define(DiscreteSystem &dis, MathLib::SpatialFunctionScalar &K, Base::Options &option)
     {
         MeshLib::IMesh *msh = dis.getMesh();
         //size_t nnodes = msh->getNumberOfNodes();
@@ -167,9 +166,9 @@ public:
         Polyline* poly_left = _rec->getLeft();
         Polyline* poly_right = _rec->getRight();
         _problem->setIC(headId, *_head);
-        MathLib::FunctionConstant<GeoLib::Point, double> f1(.0);
+        MathLib::SpatialFunctionConstant<double> f1(.0);
         _problem->addDirichletBC(headId, *poly_right, false, f1);
-        MathLib::FunctionConstant<GeoLib::Point, double> f2(-1e-5);
+        MathLib::SpatialFunctionConstant<double> f2(-1e-5);
         _problem->addNeumannBC(headId, *poly_left, false, f2);
         //transient
         TimeStepFunctionConstant tim(.0, 100.0, 10.0);
@@ -209,7 +208,7 @@ TEST(Solution, Fem1_Linear)
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     DiscreteSystem dis(*msh);
     // mat
-    MathLib::FunctionConstant<double*, double> K(1.e-11);
+    MathLib::SpatialFunctionConstant<double> K(1.e-11);
     // options
     Base::Options options;
     Base::Options* op_lis = options.addSubGroup("Lis");
@@ -243,7 +242,7 @@ TEST(Solution, Fem1_Picard)
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     DiscreteSystem dis(*msh);
     // mat
-    MathLib::FunctionConstant<double*, double> K(1.e-11);
+    MathLib::SpatialFunctionConstant<double> K(1.e-11);
     // options
     Base::Options options;
     Base::Options* op_lis = options.addSubGroup("Lis");
@@ -277,7 +276,7 @@ TEST(Solution, Fem1_Newton)
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     DiscreteSystem dis(*msh);
     // mat
-    MathLib::FunctionConstant<double*, double> K(1.e-11);
+    MathLib::SpatialFunctionConstant<double> K(1.e-11);
     // options
     Base::Options options;
     Base::Options* op_lis = options.addSubGroup("Lis");
@@ -311,7 +310,7 @@ TEST(Solution, Fem2)
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     DiscreteSystem dis(*msh);
     // mat
-    MathLib::FunctionConstant<double*, double> K(1.e-11);
+    MathLib::SpatialFunctionConstant<double> K(1.e-11);
     // options
     Base::Options options;
     Base::Options* op_lis = options.addSubGroup("Lis");

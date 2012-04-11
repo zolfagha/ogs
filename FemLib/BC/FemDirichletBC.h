@@ -53,15 +53,15 @@ public:
  * DirichletBC class
  */
 template<typename Tval>
-class FemDirichletBC : IFemBC, public MathLib::TemplateFunction<GeoLib::Point, Tval>
+class FemDirichletBC : IFemBC, public MathLib::SpatialFunction<Tval>
 {
 public:
     ///
-    explicit FemDirichletBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, MathLib::TemplateFunction<GeoLib::Point, Tval> *bc_func, IDirichletBCMethod *method)
+    explicit FemDirichletBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, MathLib::SpatialFunction<Tval> *bc_func, IDirichletBCMethod *method)
     {
         _var = var;
         _geo = geo;
-        _bc_func = (MathLib::TemplateFunction<GeoLib::Point, Tval>*)bc_func->clone();
+        _bc_func = (MathLib::SpatialFunction<Tval>*)bc_func->clone();
         _method = method;
         _is_transient = is_transient;
         _do_setup = true;
@@ -86,7 +86,8 @@ public:
         _vec_values.resize(_vec_nodes.size());
         for (size_t i=0; i<_vec_nodes.size(); i++) {
             const GeoLib::Point* x = msh->getNodeCoordinatesRef(_vec_nodes[i]);
-            _bc_func->eval(*x, _vec_values[i]);
+            const MathLib::SpatialPosition &tmp = (const MathLib::SpatialPosition) x->getData();
+            _bc_func->eval(tmp, _vec_values[i]);
         }
         if (!_is_transient)
             _do_setup = false;
@@ -99,12 +100,12 @@ public:
         method.apply(eqs, _vec_nodes, _vec_values);
     }
 
-    void eval(const GeoLib::Point &x, Tval &v)
+    void eval(const MathLib::SpatialPosition &x, Tval &v)
     {
         _bc_func->eval(x, v);
     }
 
-    MathLib::TemplateFunction<GeoLib::Point,Tval>* clone() const
+    MathLib::SpatialFunction<Tval>* clone() const
     {
         FemDirichletBC<Tval> *f = new FemDirichletBC<Tval>(_var, _geo, _is_transient, _bc_func, _method);
         return f;
@@ -116,7 +117,7 @@ public:
 private:
     TemplateFEMNodalFunction<Tval> *_var;
     GeoLib::GeoObject *_geo;
-    MathLib::TemplateFunction<GeoLib::Point, Tval> *_bc_func;
+    MathLib::SpatialFunction<Tval> *_bc_func;
     std::vector<size_t> _vec_nodes;
     std::vector<Tval> _vec_values;
     // node id, var id, value

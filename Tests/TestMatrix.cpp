@@ -15,7 +15,7 @@ using namespace MathLib;
 
 
 // --------------------------------------------------------------------------------
-TEST(Math, Matrix_transposeAndMultiply)
+TEST(Math, Matrix_transposeAndMultiply1)
 {
     MathLib::Matrix<double> matA(1,2);
     MathLib::Matrix<double> matB(1,2);
@@ -32,6 +32,30 @@ TEST(Math, Matrix_transposeAndMultiply)
     ASSERT_EQ(matC(0,1), 4.0);
     ASSERT_EQ(matC(1,0), 6.0);
     ASSERT_EQ(matC(1,1), 8.0);
+}
+
+TEST(Math, Matrix_transposeAndMultiply2)
+{
+    MathLib::Matrix<double> matA(1,2);
+    double vec[2] = {};
+    MathLib::Matrix<double> matB(2,2);
+    MathLib::Matrix<double> matC(2,2);
+
+    matA(0,0) = 1.0;
+    matA(0,1) = 2.0;
+    vec[0] = 1.0;
+    vec[1] = -1.0;
+    matB(0,0) = 1.0;
+    matB(0,1) = 4.0;
+    matB(1,0) = 3.0;
+    matB(1,1) = 2.0;
+    matC = .0;
+    matA.transposeAndMultiply(matB, vec, matC);
+
+    ASSERT_EQ(-2., matC(0,0));
+    ASSERT_EQ(2., matC(0,1));
+    ASSERT_EQ(-4., matC(1,0));
+    ASSERT_EQ(4., matC(1,1));
 }
 
 
