@@ -115,7 +115,7 @@ public:
         NumLib::TimeStep this_t_n1;
         this_t_n1.assign(t_n1);
         this_t_n1.setTimeStepSize(dt);
-        *_vec_n0 = *_vec_n1;
+        //*_vec_n0 = *_vec_n1;
 
         _linear_fucntion->reset(t_n1);
         _nonlinear->solve(*_vec_n0, *_vec_n1);
@@ -132,6 +132,12 @@ public:
     }
 
     UserFemProblem* getProblem() {return _problem;};
+
+    virtual void accept(const NumLib::TimeStep &t)
+    {
+        AbstractTimeSteppingAlgorithm::accept(t);
+        *_vec_n0 = *_vec_n1; //copy current value to previous value
+    };
 
 private:
     UserFemProblem* _problem;
