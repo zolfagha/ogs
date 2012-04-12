@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
+//#include <vector>
 #include <valarray>
 
 namespace MathLib
@@ -56,12 +57,16 @@ public:
     }
     TemplateVectorX<T>& operator+= (const TemplateVectorX<T> &v)
     {
+        if (_data.size()==0)
+            _data.resize(v._data.size(), 0);
         _data += v._data;
 
         return *this;
     }
     TemplateVectorX<T>& operator-= (const TemplateVectorX<T> &v)
     {
+        if (_data.size()==0)
+            _data.resize(v._data.size(), 0);
         _data -= v._data;
 
         return *this;
@@ -109,6 +114,8 @@ public:
             m += _data[i]*_data[i];
         return std::sqrt(m);
     }
+
+    T max() const {return _data.max();};
 
 private:
     std::valarray<T> _data;
@@ -323,13 +330,23 @@ inline std::ostream& operator<<(std::ostream& output, const MathLib::Vector& p)
 namespace std
 {
 
-inline MathLib::TemplateVectorX<double> abs(const MathLib::TemplateVectorX<double> &v)
+//inline MathLib::TemplateVectorX<double> abs(const MathLib::TemplateVectorX<double> &v)
+//{
+//	MathLib::TemplateVectorX<double> r(v.size());
+//	for (size_t i=0; i<v.size(); i++)
+//		r[i] = std::abs(v[i]);
+//	return r;
+//}
+
+template <typename T>
+inline MathLib::TemplateVectorX<T> abs(const MathLib::TemplateVectorX<T> &v)
 {
-	MathLib::TemplateVectorX<double> r(v.size());
-	for (size_t i=0; i<v.size(); i++)
-		r[i] = std::abs(v[i]);
-	return r;
+    MathLib::TemplateVectorX<T> r(v.size());
+    for (size_t i=0; i<v.size(); i++)
+        r[i] = std::abs(v[i]);
+    return r;
 }
+
 
 inline MathLib::TemplateVector<double,2> abs(const MathLib::TemplateVector<double,2> &v)
 {
@@ -347,7 +364,8 @@ inline double max(double arg0, const MathLib::TemplateVector<double,2> &arg1)
 	return r;
 }
 
-inline double max(double arg0, const MathLib::Vector &arg1)
+template <typename T>
+inline double max(double arg0, const MathLib::TemplateVectorX<T> &arg1)
 {
 	double r = arg0;
 	for (size_t i=0; i<arg1.size(); i++)
@@ -355,4 +373,4 @@ inline double max(double arg0, const MathLib::Vector &arg1)
 	return r;
 }
 
-}
+} //end std
