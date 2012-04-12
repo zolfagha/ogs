@@ -112,7 +112,7 @@ TEST(FEM, ExtrapolateAverage1)
     MathLib::Vector expected(2);
     expected[0] = 1.e-5;
     expected[1] = .0;
-    ASSERT_DOUBLE_ARRAY_EQ(expected, (*v)[0], gw.head->getNumberOfNodes());
+    ASSERT_DOUBLE_ARRAY_EQ(expected, (*v)[0], expected.size());
 }
 
 class MyFunction : public MathLib::SpatialFunction<double>
@@ -161,6 +161,6 @@ TEST(FEM, ExtrapolateAverage2)
     MathLib::Vector expected(2);
     expected[0] = 4./3.*1.e-5;
     expected[1] = .0;
-    ASSERT_DOUBLE_ARRAY_EQ(expected, (*v)[0], gw.head->getNumberOfNodes());
+    ASSERT_DOUBLE_ARRAY_EQ(expected, (*v)[0], expected.size());
 }
 
