@@ -8,14 +8,14 @@
 namespace MeshLib
 {
 
-std::auto_ptr<MeshLib::UnstructuredMesh> MeshGenerator::generateLineMesh(const double length, const size_t subdivision, const double origin_x, const double origin_y, const double origin_z) 
+MeshLib::UnstructuredMesh* MeshGenerator::generateLineMesh(const double length, const size_t subdivision, const double origin_x, const double origin_y, const double origin_z) 
 {
-    std::auto_ptr<MeshLib::UnstructuredMesh> msh(new MeshLib::UnstructuredMesh(MeshLib::CoordinateSystemType::X));
+    MeshLib::UnstructuredMesh* msh = new MeshLib::UnstructuredMesh(MeshLib::CoordinateSystemType::X);
 
-    size_t n_eles = subdivision;
-    size_t n_nodes = subdivision+1;
     const double unit_length = length / subdivision;
     const size_t n_nodes_per_axis = subdivision+1;
+    const size_t n_eles = subdivision;
+    const size_t n_nodes = subdivision+1;
 
     //nodes
     size_t node_id(0);
@@ -28,7 +28,11 @@ std::auto_ptr<MeshLib::UnstructuredMesh> MeshGenerator::generateLineMesh(const d
 
     //elements
     size_t ele_id(0);
-    for (size_t i_z=0; i_z<subdivision; i_z++) {
+    for (size_t i_z=0; i_z<n_eles; i_z++) {
+        Line *e = new Line();
+        e->setNodeID(0, i_z);
+        e->setNodeID(1, i_z+1);
+        msh->addElement(e);
     }
 
     return msh;
