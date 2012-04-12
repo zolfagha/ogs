@@ -28,7 +28,7 @@ MeshNodesAlongPolyline::MeshNodesAlongPolyline(GeoLib::Polyline const* const ply
 	_ply(ply), _mesh(mesh), _linear_nodes (0)
 {
 	//std::vector<Node*> const& mesh_nodes (mesh->getNodeVector());
-	double min_edge_length (mesh->getGeometricProperty()->getMinEdgeLength());
+	double min_edge_length (mesh->getGeometricProperty()->getMinEdgeLength() * 0.1);
 
     size_t n_linear_order_nodes (mesh->getNumberOfNodes ());
 	size_t n_nodes (mesh->getNumberOfNodes());
