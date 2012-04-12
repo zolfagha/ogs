@@ -15,7 +15,9 @@ template<typename Tvalue>
 class TemplateFEMIntegrationPointFunction : public MathLib::SpatialFunction<Tvalue>
 {
 public:
-    typedef DiscreteLib::DiscreteVector<std::valarray<Tvalue> > DiscreteVectorType;
+	typedef MathLib::TemplateVectorX<Tvalue> IntegrationPointVectorType;
+    //typedef std::valarray<Tvalue> IntegrationPointVectorType;
+    typedef DiscreteLib::DiscreteVector<IntegrationPointVectorType > DiscreteVectorType;
 
     TemplateFEMIntegrationPointFunction(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh)
     {
@@ -55,7 +57,7 @@ public:
         (*_values)[i_e].resize(n);
     }
 
-    const std::valarray<Tvalue>& getIntegrationPointValues(size_t i_e) const
+    const IntegrationPointVectorType& getIntegrationPointValues(size_t i_e) const
     {
         return (*_values)[i_e];
     }
@@ -70,8 +72,8 @@ public:
 
     	double mnorm = .0;
     	for (size_t i=0; i<n; ++i) {
-    		const std::valarray<Tvalue> &val1 = (*_values)[i];
-    		const std::valarray<Tvalue> &val2 = (*ref._values)[i];
+    		const IntegrationPointVectorType &val1 = (*_values)[i];
+    		const IntegrationPointVectorType &val2 = (*ref._values)[i];
     		const size_t n_gp = val1.size();
         	if (n_gp!=val2.size()) {
         		std::cout << "***Warning in TemplateFEMIntegrationPointFunction::norm_diff(): size of two vectors is not same." << std::endl;
@@ -80,7 +82,7 @@ public:
                 std::cout << "***Warning in TemplateFEMIntegrationPointFunction::norm_diff(): size of two vectors is zero." << std::endl;
                 return .0;
             }
-        	std::valarray<Tvalue> val_diff = val1 - val2;
+        	IntegrationPointVectorType val_diff = val1 - val2;
 
         	val_diff = std::abs(val_diff);
 			mnorm = std::max(mnorm, val_diff.max());
@@ -98,7 +100,7 @@ public:
     {
     	std::cout << "integration_pt_values = ";
     	for (size_t i=_values->getRangeBegin(); i<_values->getRangeEnd(); ++i) {
-    		const std::valarray<Tvalue> &val1 = (*_values)[i];
+    		const IntegrationPointVectorType &val1 = (*_values)[i];
     		std::cout << "(";
         	for (size_t j=0; j<val1.size(); ++j) std::cout << val1[j] << " ";
     		std::cout << ") ";
@@ -117,7 +119,7 @@ private:
         _msh = &msh;
         _discrete_system = &dis;
 //        _values = new std::vector<std::vector<Tvalue> >(n);
-        _values = _discrete_system->createVector<std::valarray<Tvalue> >(n);
+        _values = _discrete_system->createVector<IntegrationPointVectorType >(n);
     }
 };
 

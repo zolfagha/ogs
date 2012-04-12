@@ -34,7 +34,7 @@ public:
 
         for (size_t i=0; i<msh->getNumberOfElements(); i++) {
             MeshLib::IElement* e = msh->getElemenet(i);
-            const std::valarray<Tvalue> &gp_values = ele_var.getIntegrationPointValues(i);
+            const typename TemplateFEMIntegrationPointFunction<Tvalue>::IntegrationPointVectorType &gp_values = ele_var.getIntegrationPointValues(i);
             std::vector<Tvalue> vec_gp_values(&gp_values[0], &gp_values[0]+gp_values.size());
             const size_t e_nnodes = e->getNumberOfNodes();
             std::vector<Tvalue> nodal_values(e_nnodes);

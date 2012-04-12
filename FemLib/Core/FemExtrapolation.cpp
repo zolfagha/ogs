@@ -68,7 +68,7 @@ void FeExtrapolationGaussLinear::extrapolate(IFiniteElement &fe, const std::vect
         getExtropoGaussPoints(*e, j, Xi_p, x);
         fe.computeBasisFunctions(x);
         MathLib::Matrix<double> *N = fe.getBasisFunction();
-        Tvalue EV(.0);
+        Tvalue EV(0);
         for(size_t k=i_s; k<i_e; k++)
             EV += reordered_gp_values[k] * (*N)(0,k - ish);
         nodal_values[j] = EV;
