@@ -37,6 +37,10 @@ public:
         fe->integrateWxDN(_vel, matAdv);
         localK = matDiff;
         localK += matAdv;
+
+        //std::cout << "M="; localM.write(std::cout); std::cout << std::endl;
+        //std::cout << "L="; matDiff.write(std::cout); std::cout << std::endl;
+        //std::cout << "A="; matAdv.write(std::cout); std::cout << std::endl;
 	}
 
 private:

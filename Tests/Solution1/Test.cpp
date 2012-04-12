@@ -229,6 +229,7 @@ TEST(Solution, CouplingFem2)
 	    //r_f_head->printout();
 	    //r_f_v->printout();
 #undef OUTPUT_C
+//#define OUTPUT_C
 #ifdef OUTPUT_C
         r_f_c->printout();
 #endif
