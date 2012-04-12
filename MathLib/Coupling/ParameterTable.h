@@ -53,7 +53,16 @@ public:
     {
         dest.clear();
         dest._list_attributes.assign(this->_list_attributes.begin(), this->_list_attributes.end());
-        dest._list_var_data.assign(this->_list_var_data.begin(), this->_list_var_data.end());
+        //if (copy_val) {
+        //    dest._list_var_data.resize(this->_list_var_data.size());
+        //    for (size_t i=0; i<this->_list_var_data.size(); i++) {
+        //        if (this->_list_var_data[i]!=0)  {
+        //            dest._list_var_data[i] = this->_list_var_data[i]->clone();
+        //        }
+        //    }
+        //} else {
+            dest._list_var_data.assign(this->_list_var_data.begin(), this->_list_var_data.end());
+        //}
         // move ownership of memory
         dest._list_own_data.assign(this->_list_own_data.begin(), this->_list_own_data.end());
         _list_own_data.clear();

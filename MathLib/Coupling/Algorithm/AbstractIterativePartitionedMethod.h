@@ -54,8 +54,8 @@ protected:
         	const ParameterProblemMappingTable::PairSysVarId &sysvarid = mapping._map_paraId2subproblem[i];
             const ICoupledSystem *solution = sysvarid.first;
             if (solution!=0) {
-            	if (is_fixed)
-            		parameter_table.setFixed(i, true);
+            	//if (is_fixed)
+            	//	parameter_table.setFixed(i, true);
                 parameter_table.set(i, *solution->getOutput(sysvarid.second));
             }
         }
