@@ -128,6 +128,14 @@ public:
    void add(std::vector<size_t> &pos, const Matrix<T>& mat);
 
    /**
+    * add values of the matrix with the given matrix
+    * @param row_pos row positions in the matrix
+    * @param col_pos column positions in the matrix
+    * @param mat the given matrix
+    */
+   void add(std::vector<size_t> &row_pos, std::vector<size_t> &col_pos, const Matrix<T>& mat);
+
+   /**
     * multiply values of this matrix A with the given matrix B and add results into a matrix C, i.e. C += A*B
     * @param matB the matrix B
     * @param matC the matrix C
@@ -408,9 +416,14 @@ template<class T> void Matrix<T>::setSubMatrix(
 
 template<class T> void Matrix<T>::add(std::vector<size_t> &pos, const Matrix<T>& mat)
 {
-    for (size_t i=0; i<pos.size(); i++) {
-        for (size_t j=0; j<pos.size(); j++) {
-			data[address(pos[i], pos[j])] += mat(i,j);
+	add(pos, pos, mat);
+}
+
+template<class T> void Matrix<T>::add(std::vector<size_t> &row_pos, std::vector<size_t> &col_pos, const Matrix<T>& mat)
+{
+    for (size_t i=0; i<row_pos.size(); i++) {
+        for (size_t j=0; j<col_pos.size(); j++) {
+			data[address(row_pos[i], col_pos[j])] += mat(i,j);
         }
     }
 }
