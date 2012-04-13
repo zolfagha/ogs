@@ -99,6 +99,11 @@ FILE(GLOB MathLib_Coupling_Algorithm_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     Coupling/Algorithm/*.h 
     Coupling/Algorithm/*.cpp)
 SOURCE_GROUP( MathLib\\Coupling\\Algorithm FILES ${MathLib_Coupling_Algorithm_Files})
+#SystemOfEquations/
+FILE(GLOB MathLib_SystemOfEquations_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
+    SystemOfEquations/*.h 
+    SystemOfEquations/*.cpp)
+SOURCE_GROUP( MathLib\\SystemOfEquations FILES ${MathLib_SystemOfEquations_Files})
 
 # Create the library
 ADD_LIBRARY( MathLib STATIC 
@@ -115,6 +120,7 @@ ADD_LIBRARY( MathLib STATIC
 	${MathLib_Function_Files}
     ${MathLib_Coupling_Files}
     ${MathLib_Coupling_Algorithm_Files}
+    ${MathLib_SystemOfEquations_Files}
 )
 
 #Include
