@@ -38,9 +38,9 @@ void CRSLisSolver::setOption(const Base::Options &option)
     if (op->hasOption("precon_type"))
         _option.ls_precond = _option.getPreconType(op->getOption("precon_type"));
     if (op->hasOption("error_tolerance"))
-        _option.ls_error_tolerance = op->getOptionAsNum<double>("error_tolerance");
+        _option.ls_error_tolerance = op->getOption<double>("error_tolerance");
     if (op->hasOption("max_iteration_step"))
-        _option.ls_max_iterations = op->getOptionAsNum<int>("max_iteration_step");
+        _option.ls_max_iterations = op->getOption<int>("max_iteration_step");
 }
 
 void CRSLisSolver::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)

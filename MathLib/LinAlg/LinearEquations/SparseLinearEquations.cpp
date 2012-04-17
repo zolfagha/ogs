@@ -18,13 +18,13 @@ void SparseLinearEquation::setOption(const Base::Options &option)
     if (op==0) return;
 
     if (op->hasOption("solver_type"))
-        _option.solver_type = (SolverType)op->getOptionAsNum<int>("solver_type");
+        _option.solver_type = (SolverType)op->getOption<int>("solver_type");
     if (op->hasOption("precon_type"))
-        _option.precon_type = (PreconditionerType)op->getOptionAsNum<int>("precon_type");
+        _option.precon_type = (PreconditionerType)op->getOption<int>("precon_type");
     if (op->hasOption("error_tolerance"))
-        _option.error_tolerance = op->getOptionAsNum<double>("error_tolerance");
+        _option.error_tolerance = op->getOption<double>("error_tolerance");
     if (op->hasOption("max_iteration_step"))
-        _option.max_iteration_step = op->getOptionAsNum<int>("max_iteration_step");
+        _option.max_iteration_step = op->getOption<int>("max_iteration_step");
 }
 
 void SparseLinearEquation::solveEqs(CRSMatrix<double, unsigned> *A, double *rhs, double *x)
