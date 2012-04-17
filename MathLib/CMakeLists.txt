@@ -89,6 +89,11 @@ FILE(GLOB MathLib_Function_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
 	Function/*.h 
 	Function/*.cpp)
 SOURCE_GROUP( MathLib\\Function FILES ${MathLib_Function_Files})
+#Parameter/
+FILE(GLOB MathLib_Parameter_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
+    Parameter/*.h 
+    Parameter/*.cpp)
+SOURCE_GROUP( MathLib\\Parameter FILES ${MathLib_Parameter_Files})
 #Coupling/
 FILE(GLOB MathLib_Coupling_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
     Coupling/*.h 
@@ -118,6 +123,7 @@ ADD_LIBRARY( MathLib STATIC
 	${MathLib_Integration_Files}
 	${MathLib_ODE_Files}
 	${MathLib_Function_Files}
+    ${MathLib_Parameter_Files}
     ${MathLib_Coupling_Files}
     ${MathLib_Coupling_Algorithm_Files}
     ${MathLib_SystemOfEquations_Files}

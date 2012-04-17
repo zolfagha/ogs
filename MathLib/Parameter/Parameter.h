@@ -6,7 +6,7 @@
 namespace MathLib
 {
 
-typedef MathLib::IFunction Parameter;
+typedef MathLib::IFunction Parameter; //TODO clonable
 
 } //end
 
