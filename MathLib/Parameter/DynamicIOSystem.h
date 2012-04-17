@@ -6,7 +6,7 @@
 #include <cassert>
 
 #include "Base/CodingTools.h"
-#include "ParameterTable.h"
+#include "ParameterSet.h"
 
 namespace MathLib
 {

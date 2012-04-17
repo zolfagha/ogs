@@ -154,7 +154,7 @@ TEST(Math, SystemOfEqs2)
 class MyConvergenceCheck4Array
 {
 public:
-	bool isConverged(NamedParameterSet& vars_prev, NamedParameterSet& vars_current, double eps, double &v_diff)
+	bool isConverged(UnnamedParameterSet& vars_prev, UnnamedParameterSet& vars_current, double eps, double &v_diff)
 	{
 	    for (size_t i=0; i<vars_prev.size(); i++) {
 	        MyCouplingEQS::ArrayType *v_prev = vars_prev.get<MyCouplingEQS::ParameterType>(i)->getArray();

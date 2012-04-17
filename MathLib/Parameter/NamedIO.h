@@ -7,43 +7,10 @@
 #include <cassert>
 
 #include "Base/CodingTools.h"
+#include "INamedIO.h"
 
 namespace MathLib
 {
-
-class INamedIO
-{
-public:
-	virtual ~INamedIO() {};
-
-    virtual void setInputParameterName(size_t i, const std::string& key) = 0;
-
-    virtual void setOutputParameterName(size_t i, const std::string& key) = 0;
-
-    virtual bool isValid() const = 0;
-
-    virtual bool hasInputParameter(const std::string& key) const = 0;
-
-    virtual bool hasOutputParameter(const std::string& key) const = 0;
-
-    /// get the name of parameter with the given name
-    virtual const std::string& getInputParameterName(size_t i) const = 0;
-
-    /// get the name of parameter with the given name
-    virtual const std::string& getOutputParameterName(size_t i) const = 0;
-
-    /// get the index of parameter with the given name
-    virtual int getInputParameterID(const std::string&  key) const = 0;
-
-    /// get the index of parameter with the given name
-    virtual int getOutputParameterID(const std::string&  key) const = 0;
-
-    /// get the number of output parameters
-    virtual size_t getNumberOfInputParameterNames() const = 0;
-
-    /// get the number of output parameters
-    virtual size_t getNumberOfOutputParameterNames() const = 0;
-};
 
 template <typename T_BASE>
 class NamedIO : public T_BASE
@@ -126,4 +93,5 @@ private:
     std::vector<std::string> _in_para_names;
     std::vector<std::string> _out_para_names;
 };
+
 } //end

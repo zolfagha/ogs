@@ -2,7 +2,7 @@
 #pragma once
 
 #include "MathLib/Parameter/IIOSystem.h"
-#include "MathLib/Parameter/NamedIO.h"
+#include "MathLib/Parameter/INamedIO.h"
 
 namespace MathLib
 {

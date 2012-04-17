@@ -25,9 +25,10 @@
 class FemFunctionConvergenceCheck
 {
 public:
-	bool isConverged(NamedParameterSet& vars_prev, NamedParameterSet& vars_current, double eps, double &v_diff)
+	bool isConverged(UnnamedParameterSet& vars_prev, UnnamedParameterSet& vars_current, double eps, double &v_diff)
 	{
 	    for (size_t i=0; i<vars_prev.size(); i++) {
+#if 1
 	    	if (vars_prev.getName(i).compare("h")==0 || vars_prev.getName(i).compare("c")==0) {
 		        const FemNodalFunctionScalar* f_fem_prev = vars_prev.get<FemNodalFunctionScalar>(i);
 		        const FemNodalFunctionScalar* f_fem_cur = vars_current.get<FemNodalFunctionScalar>(i);
@@ -37,6 +38,7 @@ public:
 	    		const FEMIntegrationPointFunctionVector2d* f_fem_cur = vars_current.get<FEMIntegrationPointFunctionVector2d>(i);
 	    		v_diff = f_fem_cur->norm_diff(*f_fem_prev);
 	    	}
+#endif
 	        if (v_diff>eps) {
 	            return false;
 	        }

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "MathLib/Parameter/ParameterTable.h"
+#include "MathLib/Parameter/ParameterSet.h"
 #include "BlockGaussSeidelMethod.h"
 #include "BlockJacobiMethod.h"
 #include "TransientPartitionedAlgorithm.h"
