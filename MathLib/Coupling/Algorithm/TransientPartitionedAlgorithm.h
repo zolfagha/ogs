@@ -2,11 +2,11 @@
 #pragma once
 
 #include <vector>
+#include "MathLib/Coupling/ICoupledProblem.h"
 
 namespace MathLib
 {
-class ICoupledSystem;
-class ParameterSet;
+class UnnamedParameterSet;
 struct ParameterProblemMappingTable;
 
 /**
@@ -21,7 +21,7 @@ public:
     /// @param subproblems    a list of subproblems
     /// @param vars           a container for shared variables
     /// @param mapping        mapping data between subproblems and shared variables
-    virtual int solve(std::vector<ICoupledSystem*> &subproblems, ParameterSet &vars_t_n, ParameterSet &vars_t_n1, ParameterProblemMappingTable &mapping) = 0;
+    virtual int solve(std::vector<ICoupledSystem*> &subproblems, UnnamedParameterSet &vars_t_n, UnnamedParameterSet &vars_t_n1, ParameterProblemMappingTable &mapping) = 0;
 };
 
 

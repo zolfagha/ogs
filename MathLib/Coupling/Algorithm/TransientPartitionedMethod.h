@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "MathLib/Coupling/ParameterTable.h"
+#include "MathLib/Parameter/ParameterTable.h"
 #include "BlockGaussSeidelMethod.h"
 #include "BlockJacobiMethod.h"
 #include "TransientPartitionedAlgorithm.h"
@@ -21,7 +21,7 @@ public:
     virtual ~AbstractPartitionedStaggeredMethod() {};
 
     /// solve
-    int solve(std::vector<ICoupledSystem*> &subproblems, ParameterSet &parameters_t_n, ParameterSet &parameters_t_n1, ParameterProblemMappingTable &mapping)
+    int solve(std::vector<ICoupledSystem*> &subproblems, UnnamedParameterSet &parameters_t_n, UnnamedParameterSet &parameters_t_n1, ParameterProblemMappingTable &mapping)
     {
         initializeParameters(parameters_t_n, subproblems, mapping, parameters_t_n1);
 
@@ -31,7 +31,7 @@ public:
     }
 
 private:
-    void initializeParameters(const ParameterSet &parameters_t_n, const std::vector<ICoupledSystem*> &subproblems, const ParameterProblemMappingTable &mapping, ParameterSet &parameters_t_n1)
+    void initializeParameters(const UnnamedParameterSet &parameters_t_n, const std::vector<ICoupledSystem*> &subproblems, const ParameterProblemMappingTable &mapping, UnnamedParameterSet &parameters_t_n1)
     {
         const size_t n_para = parameters_t_n.size();
         for (size_t i=0; i<n_para; i++) {

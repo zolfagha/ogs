@@ -34,7 +34,7 @@ template <
 	template <class> class T_NONLINEAR,
 	class T_LINEAR_SOLVER
 	>
-class FunctionConcentration : public TemplateTransientMonolithicSystem<2,1>
+class FunctionConcentration : public TemplateTransientMonolithicSystem
 {
 public:
     typedef TemplateTransientLinearFEMFunction<

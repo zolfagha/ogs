@@ -32,7 +32,7 @@ template <
 	template <class> class T_NONLINEAR,
 	class T_LINEAR_SOLVER
 	>
-class FunctionHead : public TemplateTransientMonolithicSystem<0,1>
+class FunctionHead : public TemplateTransientMonolithicSystem
 {
 public:
     typedef TemplateTransientLinearFEMFunction<

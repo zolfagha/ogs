@@ -5,97 +5,57 @@
 #include <vector>
 #include <queue>
 #include "Base/CodingTools.h"
-
+#include "MathLib/Parameter/NamedIOSystem.h"
 #include "ICoupledProblem.h"
 
 namespace MathLib
 {
 
+
+
 /**
  * \brief MonolithicSolution
  */
-template<class T_SUPER>
-class AbstractMonolithicSystem : public T_SUPER
+template<class T_BASE>
+class AbstractMonolithicSystem : public NamedIOSystem<T_BASE>
 {
 public:
+	///
+    AbstractMonolithicSystem() {};
+
+    ///
     virtual ~AbstractMonolithicSystem()
     {
-        //Base::releaseObjectsInStdQueue(_que_own_parameters);
     }
 
-    void setNumberOfParameters(size_t n)
-    {
-        _vec_in_parameters.resize(n, 0);
-        _vec_out_parameters.resize(n, 0);
-    }
-
-    void setInput(size_t parameter_id, const Parameter* val)
-    {
-        assert(parameter_id<_vec_in_parameters.size());
-        _vec_in_parameters[parameter_id] = val;
-    }
-
-    const Parameter* getOutput(size_t parameter_id) const
-    {
-        assert(parameter_id<_vec_out_parameters.size());
-        return _vec_out_parameters[parameter_id];
-    }
-
-    template <class T>
-    const T* getOutput(size_t parameter_id) const
-    {
-        assert(parameter_id<_vec_out_parameters.size());
-        return static_cast<T*>(_vec_out_parameters[parameter_id]);
-    }
-
-    size_t getParameterIdForInput(size_t parameter_id) const {return parameter_id;};
-
-    bool check() const {return true;};
-
-    void setOutput(size_t parameter_id, Parameter* val)
-    {
-        assert(parameter_id<_vec_out_parameters.size());
-        _vec_out_parameters[parameter_id] = val;
-        //if (val!=0) _que_own_parameters.push(val);
-        //if (_que_own_parameters.size()>2) {
-        //    delete _que_own_parameters.front();
-        //    _que_own_parameters.pop();
-        //}
-    }
-protected:
-    const Parameter* getInput(size_t parameter_id) const
-    {
-        return _vec_in_parameters[parameter_id];
-    }
-
-    template <class T>
-    const T* getInput(size_t parameter_id) const
-    {
-        assert(parameter_id<_vec_in_parameters.size());
-        return static_cast<const T*>(_vec_in_parameters[parameter_id]);
-    }
+    /// check consistency
+    virtual bool check() const {return true;};
 
 private:
-    std::vector<const Parameter*> _vec_in_parameters;
-    std::vector<Parameter*> _vec_out_parameters;
-    //std::queue<Parameter*> _que_own_parameters;
+
+    DISALLOW_COPY_AND_ASSIGN(AbstractMonolithicSystem);
 };
 
-template <class T_SUPER, size_t N_IN, size_t N_OUT>
-class TemplateMonolithicSystem : public AbstractMonolithicSystem<T_SUPER>
-{
-public:
-    TemplateMonolithicSystem() {
-	    AbstractMonolithicSystem<T_SUPER>::setNumberOfParameters(getNumberOfParameters());
-    }
-
-    size_t getNumberOfInputParameters() const {return N_IN;};
-    size_t getNumberOfParameters() const {return N_IN+N_OUT;};
-};
-
-template <size_t N_IN, size_t N_OUT>
-class TemplateSteadyMonolithicSystem : public TemplateMonolithicSystem<ICoupledSystem, N_IN, N_OUT>
+class TemplateSteadyMonolithicSystem : public AbstractMonolithicSystem<ICoupledSystem>
 {
 };
+
+//template <class T_SUPER, size_t N_IN, size_t N_OUT>
+//class TemplateMonolithicSystem : public AbstractMonolithicSystem<T_SUPER>
+//{
+//public:
+//    TemplateMonolithicSystem() {
+//        // assume parameter id is assigned as in0, in1, ..., out0, out1
+//        for (size_t i=0; i<N_IN; i++)
+//            AbstractMonolithicSystem<T_SUPER>::registerInputParameter(i);
+//        for (size_t i=0; i<N_OUT; i++)
+//            AbstractMonolithicSystem<T_SUPER>::addOutputParameter(N_IN + i);
+//    }
+//};
+//
+//template <size_t N_IN, size_t N_OUT>
+//class TemplateSteadyMonolithicSystem : public TemplateMonolithicSystem<ICoupledSystem, N_IN, N_OUT>
+//{
+//};
 
 }

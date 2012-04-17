@@ -4,6 +4,7 @@
 #include <map>
 #include <valarray>
 
+#include "Base/StringTools.h"
 #include "MathLib/Coupling/MonolithicProblem.h"
 
 #include "MyArrayFunction.h"
@@ -23,6 +24,10 @@ public:
 	{
 		findInactiveVariables(equations, _inactive_variables);
 		_f = new MyFunction(variables, equations);
+        for (size_t i=0; i<_inactive_variables.size(); i++)
+            AbstractMonolithicSystem<ICoupledSystem>::setInputParameterName(i, Base::number2str(i));
+        for (size_t i=0; i<_active_variables.size(); i++)
+            AbstractMonolithicSystem<ICoupledSystem>::setOutputParameterName(i, Base::number2str(i));
 	};
 
     int solve()

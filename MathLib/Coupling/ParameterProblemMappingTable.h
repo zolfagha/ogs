@@ -2,11 +2,10 @@
 #pragma once
 
 #include <vector>
+#include "ICoupledProblem.h"
 
 namespace MathLib
 {
-
-class ICoupledSystem;
 
 /**
  * \brief Mapping between variables

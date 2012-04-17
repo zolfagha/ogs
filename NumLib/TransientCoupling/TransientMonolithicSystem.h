@@ -12,8 +12,9 @@
 namespace NumLib
 {
 
-template <size_t N_IN, size_t N_OUT>
-class TemplateTransientMonolithicSystem : public MathLib::TemplateMonolithicSystem<ITransientCoupledSystem, N_IN, N_OUT>
+//template <size_t N_IN, size_t N_OUT>
+//class TemplateTransientMonolithicSystem : public MathLib::TemplateMonolithicSystem<ITransientCoupledSystem, N_IN, N_OUT>
+class TemplateTransientMonolithicSystem : public MathLib::AbstractMonolithicSystem<ITransientCoupledSystem>
 {
 
 };

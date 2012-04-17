@@ -154,7 +154,7 @@ TEST(Math, SystemOfEqs2)
 class MyConvergenceCheck4Array
 {
 public:
-	bool isConverged(ParameterSet& vars_prev, ParameterSet& vars_current, double eps, double &v_diff)
+	bool isConverged(NamedParameterSet& vars_prev, NamedParameterSet& vars_current, double eps, double &v_diff)
 	{
 	    for (size_t i=0; i<vars_prev.size(); i++) {
 	        MyCouplingEQS::ArrayType *v_prev = vars_prev.get<MyCouplingEQS::ParameterType>(i)->getArray();
@@ -168,7 +168,7 @@ public:
 	}
 };
 
-
+#if 0
 TEST(Math, SystemOfEqs3)
 {
 	SystemOfEquations sysEqs;
@@ -184,8 +184,10 @@ TEST(Math, SystemOfEqs3)
 	MyCouplingEQS* eqs1 = probgen.createPartitionedProblem(sysEqs, active_vars1);
 	MyCouplingEQS* eqs2 = probgen.createPartitionedProblem(sysEqs, active_vars2);
 
-//    eqs1.setOutput(WeakCouplingEQS1::a, new MathLib::FunctionConstant<double,double>(.0));
-//    eqs2.setOutput(WeakCouplingEQS2::b, new MathLib::FunctionConstant<double,double>(.0));
+    MyCouplingEQS::ArrayType vec0(1);
+    //eqs1->setOutput(0, new MyCouplingEQS::ParameterType(vec0));
+    //eqs1->setOutput(1, new MyCouplingEQS::ParameterType(vec0));
+    //eqs2->setOutput(2, new MyCouplingEQS::ParameterType(vec0));
 
 	BlockJacobiMethod<MyConvergenceCheck4Array> method(1.e-4, 100);
     PartitionedProblem part1(method);
@@ -211,3 +213,5 @@ TEST(Math, SystemOfEqs3)
     ASSERT_NEAR(3., (*v3)[0], epsilon);
 
 }
+#endif
+

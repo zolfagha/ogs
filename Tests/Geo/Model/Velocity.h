@@ -17,7 +17,7 @@ namespace Geo
 {
 
 class FunctionVelocity
-	: public NumLib::TemplateTransientMonolithicSystem<1,1>
+	: public NumLib::TemplateTransientMonolithicSystem
 {
 public:
     enum Parameters { Head=0, Velocity=1 };

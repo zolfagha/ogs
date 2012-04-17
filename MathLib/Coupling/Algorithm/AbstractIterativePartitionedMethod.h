@@ -5,8 +5,8 @@
 #include <iostream>
 #include <cmath>
 
+#include "MathLib/Parameter/ParameterTable.h"
 #include "MathLib/Coupling/ICoupledProblem.h"
-#include "MathLib/Coupling/ParameterTable.h"
 #include "MathLib/Coupling/ParameterProblemMappingTable.h"
 #include "PartitionedAlgorithm.h"
 
@@ -37,17 +37,17 @@ public:
     size_t getIterationCounts() const {return _itr_count;};
 
     /// solve
-    int solve(const std::vector<ICoupledSystem*> &list_coupled_problems, ParameterSet &parameter_table, const ParameterProblemMappingTable &mapping);
+    int solve(const std::vector<ICoupledSystem*> &list_coupled_problems, UnnamedParameterSet &parameter_table, const ParameterProblemMappingTable &mapping);
 
 protected:
-    virtual void doPostAfterSolve( ICoupledSystem& /*solution*/, ParameterSet& /*vars*/, const ParameterProblemMappingTable& /*mapping*/ )  {}
+    virtual void doPostAfterSolve( ICoupledSystem& /*solution*/, UnnamedParameterSet& /*vars*/, const ParameterProblemMappingTable& /*mapping*/ )  {}
 
-    virtual void doPostAfterSolveAll( ParameterSet& /*vars*/, const ParameterProblemMappingTable& /*mapping*/ ) {}
+    virtual void doPostAfterSolveAll( UnnamedParameterSet& /*vars*/, const ParameterProblemMappingTable& /*mapping*/ ) {}
 
     virtual bool isFixed() const = 0;
 
     /// update parameter table from all problems
-    void updateParameterTable(const ParameterProblemMappingTable &mapping, bool is_fixed, ParameterSet &parameter_table)
+    void updateParameterTable(const ParameterProblemMappingTable &mapping, bool is_fixed, UnnamedParameterSet &parameter_table)
     {
         const size_t n_parameters = parameter_table.size();
         for (size_t i=0; i<n_parameters; i++) {
@@ -62,7 +62,7 @@ protected:
     }
 
     /// update parameter table from one problem
-    void updateParameterTable(const ICoupledSystem &src_problem, const ParameterProblemMappingTable &mapping, bool is_fixed, ParameterSet &parameter_table)
+    void updateParameterTable(const ICoupledSystem &src_problem, const ParameterProblemMappingTable &mapping, bool is_fixed, UnnamedParameterSet &parameter_table)
     {
         const size_t n_vars = parameter_table.size();
         for (size_t i=0; i<n_vars; i++) {
@@ -77,7 +77,7 @@ protected:
     }
 
     /// update problem parameter from parameter table
-    void setInputParameters( const ParameterSet &parameter_table, const std::vector<ParameterProblemMappingTable::PairInputVar> &problem_parameters, ICoupledSystem* problem)
+    void setInputParameters( const UnnamedParameterSet &parameter_table, const std::vector<ParameterProblemMappingTable::PairInputVar> &problem_parameters, ICoupledSystem* problem)
     {
         const size_t n_input_parameters = problem_parameters.size();
         for (size_t j=0; j<n_input_parameters; j++) {
@@ -88,7 +88,7 @@ protected:
     }
 
     /// is para
-    bool isInputParametersUpdated( const ParameterSet &parameter_table, const std::vector<ParameterProblemMappingTable::PairInputVar> &problem_parameters, ICoupledSystem* problem)
+    bool isInputParametersUpdated( const UnnamedParameterSet &parameter_table, const std::vector<ParameterProblemMappingTable::PairInputVar> &problem_parameters, ICoupledSystem* problem)
     {
         const size_t n_input_parameters = problem_parameters.size();
         for (size_t j=0; j<n_input_parameters; j++) {
@@ -106,7 +106,11 @@ private:
 };
 
 template <class T_CONVERGENCE_CHECK>
-int AbstractIterativePartitionedMethod<T_CONVERGENCE_CHECK>::solve(const std::vector<ICoupledSystem*> &list_coupled_problems, ParameterSet &parameter_table, const ParameterProblemMappingTable &mapping)
+int AbstractIterativePartitionedMethod<T_CONVERGENCE_CHECK>::solve (
+		const std::vector<ICoupledSystem*> &list_coupled_problems,
+		UnnamedParameterSet &parameter_table,
+		const ParameterProblemMappingTable &mapping
+		)
 {
     const size_t n_subproblems = list_coupled_problems.size();
 
@@ -118,7 +122,7 @@ int AbstractIterativePartitionedMethod<T_CONVERGENCE_CHECK>::solve(const std::ve
     bool is_converged = false;
     size_t i_itr = 0;
     double v_diff = .0;
-    ParameterSet prev_parameter_table;
+    UnnamedParameterSet prev_parameter_table;
     do {
         //prev_parameter_table.assign(parameter_table);
         parameter_table.move(prev_parameter_table);
