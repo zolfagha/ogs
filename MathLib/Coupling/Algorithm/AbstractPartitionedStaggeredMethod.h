@@ -1,16 +1,17 @@
 
 #pragma once
 
+#include <vector>
 #include "MathLib/Parameter/ParameterSet.h"
-#include "BlockGaussSeidelMethod.h"
-#include "BlockJacobiMethod.h"
-#include "TransientPartitionedAlgorithm.h"
+#include "MathLib/Coupling/ParameterProblemMappingTable.h"
+#include "ITransientPartitionedAlgorithm.h"
+#include "IConvergenceCheck.h"
 
 namespace MathLib
 {
 
 /**
- * \brief 
+ * \brief
  */
 template <class T_PARTITIONED>
 class AbstractPartitionedStaggeredMethod : public ITransientPartitionedAlgorithm
@@ -18,6 +19,7 @@ class AbstractPartitionedStaggeredMethod : public ITransientPartitionedAlgorithm
 public:
     AbstractPartitionedStaggeredMethod() : _part_method() {};
     AbstractPartitionedStaggeredMethod(double epsilon, size_t max_count) : _part_method(epsilon, max_count) {};
+    AbstractPartitionedStaggeredMethod(IConvergenceCheck &checker, double epsilon, size_t max_count) : _part_method(checker, epsilon, max_count) {};
     virtual ~AbstractPartitionedStaggeredMethod() {};
 
     /// solve
@@ -44,24 +46,6 @@ private:
     }
 private:
     T_PARTITIONED _part_method;
-};
-
-template <class T_CONVERGENCE_CHECK>
-class ParallelStaggeredMethod : public AbstractPartitionedStaggeredMethod<MathLib::BlockJacobiMethod<T_CONVERGENCE_CHECK> >
-{
-public:
-    ParallelStaggeredMethod() {};
-    ParallelStaggeredMethod(double epsilon, size_t max_count) : AbstractPartitionedStaggeredMethod<BlockJacobiMethod<T_CONVERGENCE_CHECK> >(epsilon, max_count) {};
-    virtual ~ParallelStaggeredMethod() {};
-};
-
-template <class T_CONVERGENCE_CHECK>
-class SerialStaggeredMethod : public AbstractPartitionedStaggeredMethod<MathLib::BlockGaussSeidelMethod<T_CONVERGENCE_CHECK> >
-{
-public:
-    SerialStaggeredMethod() {};
-    SerialStaggeredMethod(double epsilon, size_t max_count) : AbstractPartitionedStaggeredMethod<BlockGaussSeidelMethod<T_CONVERGENCE_CHECK> >(epsilon, max_count) {};
-    virtual ~SerialStaggeredMethod() {};
 };
 
 }

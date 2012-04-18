@@ -8,7 +8,8 @@
 #include "MathLib/Parameter/ParameterSet.h"
 #include "MathLib/Coupling/ICoupledProblem.h"
 #include "MathLib/Coupling/ParameterProblemMappingTable.h"
-#include "PartitionedAlgorithm.h"
+#include "IPartitionedAlgorithm.h"
+#include "IConvergenceCheck.h"
 
 namespace MathLib
 {
@@ -16,16 +17,19 @@ namespace MathLib
 /**
  * \brief Abstract class for iterative partitioned methods
  */
-template <class T_CONVERGENCE_CHECK>
+//template <class T_CONVERGENCE_CHECK>
 class AbstractIterativePartitionedMethod : public IPartitionedAlgorithm
 {
 public:
 	///
-    AbstractIterativePartitionedMethod() : _max_itr(100), _epsilon(1e-3) {}
+    AbstractIterativePartitionedMethod() : _max_itr(100), _epsilon(1e-3), _convergence_check(0) {}
     ///
-    AbstractIterativePartitionedMethod(double epsilon, size_t max_count) : _max_itr(max_count), _epsilon(epsilon) {}
+    AbstractIterativePartitionedMethod(double epsilon, size_t max_count) : _max_itr(max_count), _epsilon(epsilon), _convergence_check(0) {}
+    AbstractIterativePartitionedMethod(IConvergenceCheck &checker, double epsilon, size_t max_count) : _max_itr(max_count), _epsilon(epsilon), _convergence_check(&checker) {}
     ///
     virtual ~AbstractIterativePartitionedMethod() {};
+
+    void setConvergenceCheck(IConvergenceCheck &checker) {_convergence_check = &checker;};
 
     /// get max. iteration
     size_t getMaximumIterationCounts() const {return _max_itr;};
@@ -37,8 +41,80 @@ public:
     size_t getIterationCounts() const {return _itr_count;};
 
     /// solve
-    int solve(const std::vector<ICoupledSystem*> &list_coupled_problems, UnnamedParameterSet &parameter_table, const ParameterProblemMappingTable &mapping);
+    //virtual int solve(const std::vector<ICoupledSystem*> &list_coupled_problems, UnnamedParameterSet &parameter_table, const ParameterProblemMappingTable &mapping);
+    //template <class T_CONVERGENCE_CHECK>
+    //int AbstractIterativePartitionedMethod<T_CONVERGENCE_CHECK>::solve (
+    int solve (
+    		const std::vector<ICoupledSystem*> &list_coupled_problems,
+    		UnnamedParameterSet &parameter_table,
+    		const ParameterProblemMappingTable &mapping
+    		)
+    {
+    	if (_convergence_check==0) {
+    		std::cout << "***Error: No convergence checker is specified in AbstractIterativePartitionedMethod::solve()" << std::endl;
+    		return -1;
+    	}
+        const size_t n_subproblems = list_coupled_problems.size();
 
+        // initialize variables
+        updateParameterTable(mapping, isFixed(), parameter_table);
+
+        // iteration start
+        const size_t max_itr = getMaximumIterationCounts();
+        bool is_converged = false;
+        size_t i_itr = 0;
+        double v_diff = .0;
+        UnnamedParameterSet prev_parameter_table;
+        do {
+            //prev_parameter_table.assign(parameter_table);
+            parameter_table.move(prev_parameter_table);
+
+            // compute each solution
+            size_t count_calculated = 0;
+            for (size_t i=0; i<n_subproblems; i++) {
+            	ICoupledSystem *problem = list_coupled_problems[i];
+                const std::vector<ParameterProblemMappingTable::PairInputVar> &problem_parameters = mapping._list_subproblem_input_source[i];
+
+                // calculate all anyway in the 1st iteration
+                //if (i_itr>0 && !isInputParametersUpdated(parameter_table, problem_parameters, problem))
+                //    continue;
+
+                setInputParameters(parameter_table, problem_parameters, problem);
+                problem->solve();
+                doPostAfterSolve(*problem, parameter_table, mapping);
+                count_calculated++;
+            }
+
+            if (count_calculated>0) {
+                doPostAfterSolveAll(parameter_table, mapping);
+                parameter_table.finishUpdate();
+            }
+
+            if (n_subproblems>1) {
+                // check convergence
+            	if (_convergence_check!=0) {
+                	//T_CONVERGENCE_CHECK check;
+            		//is_converged = check.isConverged(prev_parameter_table, parameter_table, getEpsilon(), v_diff);
+                    is_converged = _convergence_check->isConverged(prev_parameter_table, parameter_table, getEpsilon(), v_diff);
+            	}
+                std::cout.setf(std::ios_base::scientific, std::ios_base::floatfield);
+                std::cout.precision(3);
+                std::cout << v_diff << " ";
+            } else {
+                is_converged = true;
+            }
+            ++i_itr;
+        } while (!is_converged && i_itr<max_itr);
+        std::cout << std::endl;
+        std::cout << "iteration count=" << i_itr << ", error=" << v_diff << std::endl;
+
+        _itr_count = i_itr;
+        if (i_itr==max_itr) {
+            std::cout << "the iteration reached the maximum count " << max_itr << std::endl;
+        }
+
+        return 0;
+    }
 protected:
     virtual void doPostAfterSolve( ICoupledSystem& /*solution*/, UnnamedParameterSet& /*vars*/, const ParameterProblemMappingTable& /*mapping*/ )  {}
 
@@ -103,73 +179,10 @@ private:
     size_t _max_itr;
     size_t _itr_count;
     double _epsilon;
+    IConvergenceCheck *_convergence_check;
 };
 
-template <class T_CONVERGENCE_CHECK>
-int AbstractIterativePartitionedMethod<T_CONVERGENCE_CHECK>::solve (
-		const std::vector<ICoupledSystem*> &list_coupled_problems,
-		UnnamedParameterSet &parameter_table,
-		const ParameterProblemMappingTable &mapping
-		)
-{
-    const size_t n_subproblems = list_coupled_problems.size();
 
-    // initialize variables
-    updateParameterTable(mapping, isFixed(), parameter_table);
-
-    // iteration start
-    const size_t max_itr = getMaximumIterationCounts();
-    bool is_converged = false;
-    size_t i_itr = 0;
-    double v_diff = .0;
-    UnnamedParameterSet prev_parameter_table;
-    do {
-        //prev_parameter_table.assign(parameter_table);
-        parameter_table.move(prev_parameter_table);
-
-        // compute each solution
-        size_t count_calculated = 0;
-        for (size_t i=0; i<n_subproblems; i++) {
-        	ICoupledSystem *problem = list_coupled_problems[i];
-            const std::vector<ParameterProblemMappingTable::PairInputVar> &problem_parameters = mapping._list_subproblem_input_source[i];
-
-            // calculate all anyway in the 1st iteration
-            //if (i_itr>0 && !isInputParametersUpdated(parameter_table, problem_parameters, problem))
-            //    continue;
-
-            setInputParameters(parameter_table, problem_parameters, problem); 
-            problem->solve();
-            doPostAfterSolve(*problem, parameter_table, mapping);
-            count_calculated++;
-        }
-
-        if (count_calculated>0) {
-            doPostAfterSolveAll(parameter_table, mapping);
-            parameter_table.finishUpdate();
-        }
-
-        if (n_subproblems>1) {
-            // check convergence
-        	T_CONVERGENCE_CHECK check;
-            is_converged = check.isConverged(prev_parameter_table, parameter_table, getEpsilon(), v_diff);
-            std::cout.setf(std::ios_base::scientific, std::ios_base::floatfield);
-            std::cout.precision(3);
-            std::cout << v_diff << " ";
-        } else {
-            is_converged = true;
-        }
-        ++i_itr;
-    } while (!is_converged && i_itr<max_itr);
-    std::cout << std::endl;
-    std::cout << "iteration count=" << i_itr << ", error=" << v_diff << std::endl;
-
-    _itr_count = i_itr;
-    if (i_itr==max_itr) {
-        std::cout << "the iteration reached the maximum count " << max_itr << std::endl;
-    }
-
-    return 0;
-}
 
 
 } //end
