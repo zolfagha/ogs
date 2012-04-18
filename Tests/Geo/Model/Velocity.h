@@ -19,10 +19,15 @@ namespace Geo
 class FunctionVelocity
 	: public NumLib::TemplateTransientMonolithicSystem
 {
+    enum In { Head=0 };
+    enum Out { Velocity=0 };
 public:
-    enum Parameters { Head=0, Velocity=1 };
 
-    FunctionVelocity() {};
+    FunctionVelocity() 
+    {
+        TemplateTransientMonolithicSystem::resizeInputParameter(1);
+        TemplateTransientMonolithicSystem::resizeOutputParameter(1);
+    };
 
     void define(DiscreteLib::DiscreteSystem &dis, PorousMedia &pm)
     {

@@ -34,6 +34,7 @@ template <
 	>
 class FunctionHead : public TemplateTransientMonolithicSystem
 {
+    enum Out { Head=0 };
 public:
     typedef TemplateTransientLinearFEMFunction<
     			FemIVBVProblem,
@@ -53,9 +54,11 @@ public:
     			T_LINEAR_SOLVER
     		> SolutionForHead;
 
-    enum Parameters { Head=0 };
 
-    FunctionHead() {};
+    FunctionHead() 
+    {
+        TemplateTransientMonolithicSystem::resizeOutputParameter(1);
+    };
 
     void define(DiscreteSystem &dis, GWFemProblem &problem, Base::Options &option)
     {

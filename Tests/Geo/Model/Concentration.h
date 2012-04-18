@@ -36,6 +36,9 @@ template <
 	>
 class FunctionConcentration : public TemplateTransientMonolithicSystem
 {
+    enum In { Velocity=0 };
+    enum Out { Concentration = 0 };
+
 public:
     typedef TemplateTransientLinearFEMFunction<
     			FemIVBVProblem,
@@ -55,9 +58,11 @@ public:
     			T_LINEAR_SOLVER
     		> SolutionForConc;
 
-    enum Parameters { Velocity=0, Concentration = 1 };
-
-    FunctionConcentration() {};
+    FunctionConcentration() 
+    {
+        TemplateTransientMonolithicSystem::resizeInputParameter(1);
+        TemplateTransientMonolithicSystem::resizeOutputParameter(1);
+    };
 
     void define(DiscreteSystem &dis, MassFemProblem &problem, Base::Options &option)
     {

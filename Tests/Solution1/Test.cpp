@@ -22,7 +22,7 @@
 #include "TestUtil.h"
 
 
-class FemFunctionConvergenceCheck
+class FemFunctionConvergenceCheck : public IConvergenceCheck
 {
 public:
 	bool isConverged(UnnamedParameterSet& vars_prev, UnnamedParameterSet& vars_current, double eps, double &v_diff)
@@ -103,7 +103,7 @@ typedef Geo::FunctionHead<Linear,CRSLisSolver> MyFunctionHead;
 typedef Geo::FunctionVelocity MyFunctionVelocity;
 typedef Geo::FunctionConcentration<Linear,CRSLisSolver> MyFunctionConcentration;
 
-#if 0
+
 TEST(Solution, CouplingFem1)
 {
 	try {
@@ -126,15 +126,22 @@ TEST(Solution, CouplingFem1)
 
 		MyFunctionHead f_head;
 		f_head.define(dis, *pGW, options);
+        f_head.setOutputParameterName(0, "h");
 		MyFunctionVelocity f_vel;
 		f_vel.define(dis, pm);
+        f_vel.setInputParameterName(0, "h");
+        f_vel.setOutputParameterName(0, "v");
 
-
-	    SerialStaggeredMethod<FemFunctionConvergenceCheck> method(1e-5, 100);
-	    AsyncPartitionedSystem apart1(method);
-	    apart1.addParameter("h", f_head, MyFunctionHead::Head);
-	    apart1.addParameter("v", f_vel, MyFunctionVelocity::Velocity);
-	    apart1.connectInput("h", f_vel, MyFunctionVelocity::Head);
+        FemFunctionConvergenceCheck checker;
+	    SerialStaggeredMethod method(checker, 1e-5, 100);
+	    AsyncPartitionedSystem apart1;
+        apart1.setAlgorithm(method);
+        apart1.resizeOutputParameter(2);
+        apart1.setOutputParameterName(0, "h");
+        apart1.setOutputParameterName(1, "v");
+        apart1.addProblem(f_head);
+        apart1.addProblem(f_vel);
+        apart1.connectParameters();
 
 	    TimeSteppingController timestepping;
 	    timestepping.addTransientSystem(apart1);
@@ -143,8 +150,8 @@ TEST(Solution, CouplingFem1)
 	    timestepping.setBeginning(.0);
 	    timestepping.solve(1.0);
 
-	    const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getParameterID("h"));
-	    const FEMIntegrationPointFunctionVector2d* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector2d>(apart1.getParameterID("v"));
+	    const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
+	    const FEMIntegrationPointFunctionVector2d* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector2d>(apart1.getOutputParameterID("v"));
 	    const DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
 	    const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
 
@@ -162,7 +169,7 @@ TEST(Solution, CouplingFem1)
 
 }
 
-
+#if 1
 TEST(Solution, CouplingFem2)
 {
 	try {
@@ -200,19 +207,29 @@ TEST(Solution, CouplingFem2)
         // unknowns
 		MyFunctionHead f_head;
 		f_head.define(dis, *pGW, optionsGW);
+        f_head.setOutputParameterName(0, "h");
 		MyFunctionVelocity f_vel;
 		f_vel.define(dis, pm);
+        f_vel.setInputParameterName(0, "h");
+        f_vel.setOutputParameterName(0, "v");
 		MyFunctionConcentration f_c;
 		f_c.define(dis, *pMass, optionsMT);
+        f_c.setInputParameterName(0, "v");
+        f_c.setOutputParameterName(0, "c");
 
 
-	    SerialStaggeredMethod<FemFunctionConvergenceCheck> method(1e-5, 100);
-	    AsyncPartitionedSystem apart1(method);
-	    apart1.addParameter("h", f_head, MyFunctionHead::Head);
-	    apart1.addParameter("v", f_vel, MyFunctionVelocity::Velocity);
-	    apart1.addParameter("c", f_c, MyFunctionConcentration::Concentration);
-	    apart1.connectInput("h", f_vel, MyFunctionVelocity::Head);
-	    apart1.connectInput("v", f_c, MyFunctionConcentration::Velocity);
+        FemFunctionConvergenceCheck checker;
+        SerialStaggeredMethod method(checker, 1e-5, 100);
+	    AsyncPartitionedSystem apart1;
+        apart1.setAlgorithm(method);
+        apart1.resizeOutputParameter(3);
+        apart1.setOutputParameterName(0, "h");
+        apart1.setOutputParameterName(1, "v");
+        apart1.setOutputParameterName(2, "c");
+        apart1.addProblem(f_head);
+        apart1.addProblem(f_vel);
+        apart1.addProblem(f_c);
+        apart1.connectParameters();
 
 	    TimeSteppingController timestepping;
 	    timestepping.addTransientSystem(apart1);
@@ -221,9 +238,9 @@ TEST(Solution, CouplingFem2)
 	    timestepping.setBeginning(.0);
 	    timestepping.solve(tim.getEnd());
 
-	    const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getParameterID("h"));
-	    const FEMIntegrationPointFunctionVector2d* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector2d>(apart1.getParameterID("v"));
-	    const FemNodalFunctionScalar* r_f_c = apart1.getOutput<FemNodalFunctionScalar>(apart1.getParameterID("c"));
+	    const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
+	    const FEMIntegrationPointFunctionVector2d* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector2d>(apart1.getOutputParameterID("v"));
+	    const FemNodalFunctionScalar* r_f_c = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("c"));
 	    const DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
 	    const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
 	    const DiscreteVector<double>* vec_c = r_f_c->getNodalValues();
