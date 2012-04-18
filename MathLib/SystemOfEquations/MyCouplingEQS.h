@@ -24,18 +24,28 @@ public:
 	{
 		findInactiveVariables(equations, _inactive_variables);
 		_f = new MyFunction(variables, equations);
+        AbstractMonolithicSystem<ICoupledSystem>::resizeInputParameter(_inactive_variables.size());
+        AbstractMonolithicSystem<ICoupledSystem>::resizeOutputParameter(_active_variables.size());
         for (size_t i=0; i<_inactive_variables.size(); i++)
-            AbstractMonolithicSystem<ICoupledSystem>::setInputParameterName(i, Base::number2str(i));
+            AbstractMonolithicSystem<ICoupledSystem>::setInputParameterName(i, _inactive_variables[i]->name);
         for (size_t i=0; i<_active_variables.size(); i++)
-            AbstractMonolithicSystem<ICoupledSystem>::setOutputParameterName(i, Base::number2str(i));
+            AbstractMonolithicSystem<ICoupledSystem>::setOutputParameterName(i, _active_variables[i]->name);
 	};
+
+    void setInitial(std::vector<ArrayType*> &vec_arrays)
+    {
+        for (size_t i=0; i<_active_variables.size(); i++) {
+            ArrayType* arr = vec_arrays[_active_variables[i]->id];
+            setOutput(i, new ParameterType(*arr));
+        }
+    }
 
     int solve()
     {
         std::map<size_t, ArrayType > inactive_x;
         for (size_t i=0; i<_inactive_variables.size(); i++) {
         	size_t para_id = _inactive_variables[i]->id;
-        	const ParameterType *p = getInput<ParameterType>(para_id);
+        	const ParameterType *p = getInput<ParameterType>(i);
             inactive_x[para_id] = *p->getArray();
         }
 
@@ -52,7 +62,7 @@ public:
         		ret[j] = u1[offset + j];
         	offset += var->n_dof;
 
-        	setOutput(para_id, new ParameterType(ret));
+        	setOutput(i, new ParameterType(ret));
         }
 
         return 0;

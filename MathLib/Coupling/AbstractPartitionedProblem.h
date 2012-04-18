@@ -109,8 +109,15 @@ public:
 
     void addProblem(T_PROBLEM &subproblem)
     {
-    	addSubProblem(subproblem);
+        _list_subproblems.push_back(&subproblem);
+        _map._list_subproblem_input_source.resize(_list_subproblems.size());
+
+        //return _list_subproblems.size();
     }
+
+    size_t getNumberOfSubProblems() const {return _list_subproblems.size();};
+
+    T_PROBLEM* getProblem(size_t i) {return _list_subproblems[i];};
 
     void connectParameters()
     {
@@ -200,15 +207,6 @@ protected:
     std::vector<T_PROBLEM*> _list_subproblems;
     ParameterProblemMappingTable _map;
 
-    size_t addSubProblem(T_PROBLEM &sub_problem)
-    {
-        _list_subproblems.push_back(&sub_problem);
-        _map._list_subproblem_input_source.resize(_list_subproblems.size());
-
-        return _list_subproblems.size();
-    }
-
-    size_t getNumberOfSubProblems() const {return _list_subproblems.size();};
 };
 
 
