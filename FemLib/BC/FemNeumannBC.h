@@ -75,7 +75,13 @@ public:
                 std::vector<double> result(edge_nnodes);
                 MathLib::Matrix<double> M(edge_nnodes, edge_nnodes);
                 M = .0;
-                fe_edge->integrateWxN(0, M);
+                IFemNumericalIntegration *q = fe_edge->getIntegrationMethod();
+                double x_ref[3];
+                for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
+                    q->getSamplingPoint(j, x_ref);
+                    fe_edge->computeBasisFunctions(x_ref);
+                	fe_edge->integrateWxN(j, 1., M);
+                }
                 M.axpy(1.0, &nodal_val[0], 0.0, &result[0]);
                 // add into RHS values
                 for (size_t k=0; k<edge_nnodes; k++)

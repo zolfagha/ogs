@@ -1,8 +1,10 @@
 
 #pragma once
 
-#include "MathLib/LinAlg/Dense/Matrix.h"
-#include "FemLib/Core/IFemElement.h"
+#include <algorithm>
+#include "MeshLib/Core/Element.h"
+#include "FiniteElementType.h"
+#include "TemplateFeBase.h"
 
 namespace FemLib
 {
@@ -27,6 +29,7 @@ private:
     double A;
     FemIntegrationAnalytical _integration;
     LocalMatrix _shape, _dshape;
+    double x_cp[3];
 
     void computeBasisFunction(const double *x,  double *shape);
     void computeGradBasisFunction(const double *x,  LocalMatrix &mat);
@@ -38,6 +41,8 @@ public:
 
     /// 
     void computeBasisFunctions(const double *x);
+    /// compute real coordinates from the given position in reference coordinates
+    virtual void getRealCoordinates(double* x_real);
     LocalMatrix* getBasisFunction();
     LocalMatrix* getGradBasisFunction();
 
@@ -45,14 +50,23 @@ public:
     /// make interpolation from nodal values
     double interpolate(double *x, double *nodal_values);
 
+//    /// compute an matrix M = Int{W^T F N} dV
+//    void integrateWxN(MathLib::SpatialFunctionScalar* f, LocalMatrix &mat);
+//
+//    /// compute an matrix M = Int{W^T F dN} dV
+//    void integrateWxDN(MathLib::SpatialFunctionVector* f, LocalMatrix &mat);
+//
+//    /// compute an matrix M = Int{dW^T F dN} dV
+//    void integrateDWxDN(MathLib::SpatialFunctionScalar *f, LocalMatrix &mat);
+
     /// compute an matrix M = Int{W^T F N} dV
-    void integrateWxN(MathLib::SpatialFunctionScalar* f, LocalMatrix &mat);
+    virtual void integrateWxN(size_t igp, double f, LocalMatrix &mat);
 
     /// compute an matrix M = Int{W^T F dN} dV
-    void integrateWxDN(MathLib::SpatialFunctionVector* f, LocalMatrix &mat);
+    virtual void integrateWxDN(size_t igp, MathLib::Vector &f, LocalMatrix &mat);
 
     /// compute an matrix M = Int{dW^T F dN} dV
-    void integrateDWxDN(MathLib::SpatialFunctionScalar *f, LocalMatrix &mat);
+    virtual void integrateDWxDN(size_t igp, double f, LocalMatrix &mat);
 
     /// get the integration method
     IFemNumericalIntegration* getIntegrationMethod() const {return (IFemNumericalIntegration*)&_integration;};

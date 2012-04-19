@@ -6,7 +6,7 @@
 
 #include "MathLib/LinAlg/Solvers/CG.h"
 #include "MathLib/LinAlg/Solvers/BiCGStab.h"
-#include "MathLib/sparse.h"
+#include "MathLib/LinAlg/Sparse/sparse_io.h"
 
 namespace MathLib
 {

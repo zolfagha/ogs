@@ -4,7 +4,6 @@
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/Function/Function.h"
 #include "GeoLib/Core/Point.h"
-#include "FemLib/Core/IFemElement.h"
 
 namespace FemLib
 {
@@ -12,12 +11,13 @@ namespace FemLib
 void TRI3CONST::configure( MeshLib::IElement &e )
 {
     _ele = static_cast<MeshLib::Triangle*>(&e);
-    double nodes_x[3], nodes_y[3];
+    double nodes_x[3], nodes_y[3], nodes_z[3];
     // xyz
     for (size_t i=0; i<3; i++) {
         const GeoLib::Point *pt = _msh->getNodeCoordinatesRef(_ele->getNodeID(i));
         nodes_x[i] = pt->getData()[0];
         nodes_y[i] = pt->getData()[1];
+        nodes_z[i] = pt->getData()[2];
     }
     // area
     A = GeoLib::triangleArea(_msh->getNodeCoordinates(_ele->getNodeID(0)),_msh->getNodeCoordinates(_ele->getNodeID(1)),_msh->getNodeCoordinates(_ele->getNodeID(2)));
@@ -31,13 +31,28 @@ void TRI3CONST::configure( MeshLib::IElement &e )
     a[2] = 0.5/A*(nodes_x[0]*nodes_y[1]-nodes_x[1]*nodes_y[0]);
     b[2] = 0.5/A*(nodes_y[0]-nodes_y[1]);
     c[2] = 0.5/A*(nodes_x[1]-nodes_x[0]);
+    // gravity point
+    for (size_t i=0; i<3; i++) x_cp[i] = 0;
+    for (size_t i=0; i<3; i++) {
+        x_cp[0] += nodes_x[i];
+        x_cp[1] += nodes_y[i];
+        x_cp[2] += nodes_z[i];
+    }
+    for (size_t i=0; i<3; i++) 
+        x_cp[i] /= 3.0;
 }
 
 void TRI3CONST::computeBasisFunctions(const double *x)
 {
-    computeBasisFunction(x, (double*)_shape.getData());
-    computeGradBasisFunction(x, _dshape);
+    //computeBasisFunction(x, (double*)_shape.getData());
+    //computeGradBasisFunction(x, _dshape);
 }
+
+void TRI3CONST::getRealCoordinates(double* x_real)
+{
+    for (size_t i=0; i<3; i++) 
+        x_real[i] = x_cp[i];
+};
 
 LocalMatrix* TRI3CONST::getBasisFunction()
 {
@@ -73,11 +88,58 @@ double TRI3CONST::interpolate(double *x, double *nodal_values)
     return v;
 }
 
+///// compute an matrix M = Int{W^T F N} dV
+//void TRI3CONST::integrateWxN( MathLib::SpatialFunctionScalar* f, LocalMatrix &mat)
+//{
+//    double v = .0;
+//    f->eval(0, v);
+//    mat(0,0) = 1.0;
+//    mat(0,1) = 0.5;
+//    mat(0,2) = 0.5;
+//    mat(1,1) = 1.0;
+//    mat(1,2) = 0.5;
+//    mat(2,2) = 1.0;
+//    mat *= v*A/6.0;
+//    // make symmetric
+//    for (size_t i=0; i<3; i++)
+//        for (size_t j=0; j<i; j++)
+//            mat(i,j) = mat(j,i);
+//}
+//
+///// compute an matrix M = Int{W^T F dN} dV
+//void TRI3CONST::integrateWxDN( MathLib::SpatialFunctionVector* f, LocalMatrix &mat)
+//{
+//    MathLib::Vector v;
+//    f->eval(0, v);
+//    for (int i=0; i<3; i++)
+//        for (int j=0; j<3; j++)
+//            mat(i,j) = v[0]*b[j] + v[1]*c[j];
+//    mat *= A/3.0;
+//}
+//
+///// compute an matrix M = Int{dW^T F dN} dV
+//void TRI3CONST::integrateDWxDN( MathLib::SpatialFunctionScalar *f, LocalMatrix &mat)
+//{
+//	double v;
+//    f->eval(0, v);
+//    mat(0,0) = b[0]*b[0] + c[0]*c[0];
+//    mat(0,1) = b[0]*b[1] + c[0]*c[1];
+//    mat(0,2) = b[0]*b[2] + c[0]*c[2];
+//    mat(1,1) = b[1]*b[1] + c[1]*c[1];
+//    mat(1,2) = b[1]*b[2] + c[1]*c[2];
+//    mat(2,2) = b[2]*b[2] + c[2]*c[2];
+//    mat *= v*A;
+//    // make symmetric
+//    for (size_t i=0; i<3; i++)
+//        for (size_t j=0; j<i; j++)
+//            mat(i,j) = mat(j,i);
+//}
+
 /// compute an matrix M = Int{W^T F N} dV
-void TRI3CONST::integrateWxN( MathLib::SpatialFunctionScalar* f, LocalMatrix &mat)
+void TRI3CONST::integrateWxN(size_t igp, double v, LocalMatrix &mat)
 {
-    double v = .0;
-    f->eval(0, v);
+	assert(igp==0);
+
     mat(0,0) = 1.0;
     mat(0,1) = 0.5;
     mat(0,2) = 0.5;
@@ -92,10 +154,10 @@ void TRI3CONST::integrateWxN( MathLib::SpatialFunctionScalar* f, LocalMatrix &ma
 }
 
 /// compute an matrix M = Int{W^T F dN} dV
-void TRI3CONST::integrateWxDN( MathLib::SpatialFunctionVector* f, LocalMatrix &mat)
+void TRI3CONST::integrateWxDN(size_t igp, MathLib::Vector &v, LocalMatrix &mat)
 {
-    MathLib::Vector v;
-    f->eval(0, v);
+	assert(igp==0);
+
     for (int i=0; i<3; i++)
         for (int j=0; j<3; j++)
             mat(i,j) = v[0]*b[j] + v[1]*c[j];
@@ -103,10 +165,10 @@ void TRI3CONST::integrateWxDN( MathLib::SpatialFunctionVector* f, LocalMatrix &m
 }
 
 /// compute an matrix M = Int{dW^T F dN} dV
-void TRI3CONST::integrateDWxDN( MathLib::SpatialFunctionScalar *f, LocalMatrix &mat)
+void TRI3CONST::integrateDWxDN(size_t igp, double v, LocalMatrix &mat)
 {
-	double v;
-    f->eval(0, v);
+	assert(igp==0);
+
     mat(0,0) = b[0]*b[0] + c[0]*c[0];
     mat(0,1) = b[0]*b[1] + c[0]*c[1];
     mat(0,2) = b[0]*b[2] + c[0]*c[2];

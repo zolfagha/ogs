@@ -2,28 +2,11 @@
 #pragma once
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
+#include "TemplateShapeFunction.h"
 
 namespace FemLib
 {
 
-class IFemShapeFunction
-{
-public:
-    virtual void computeShapeFunction(const double* pt, double* N) = 0;
-    virtual void computeGradShapeFunction(const double* pt, double* dN) = 0;
-    virtual ~IFemShapeFunction() {};
-};
-
-template <size_t N_DIM, size_t N_NODES>
-class TemplateShapeFunction : public IFemShapeFunction
-{
-public:
-    virtual void computeShapeFunction(const double* pt, double* N) = 0;
-    virtual void computeGradShapeFunction(const double* pt, double* dN) = 0;
-    virtual ~TemplateShapeFunction() {};
-protected:
-};
-  
 
 class FemShapeLine2 : public TemplateShapeFunction<1, 2> 
 {

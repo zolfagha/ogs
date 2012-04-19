@@ -8,7 +8,6 @@
 #include "DiscreteLib/Core/DiscreteSystem.h"
 
 #include "FemLib/Function/FemFunction.h"
-#include "FemLib/Function/FemFunctionProjection.h"
 #include "FemLib/BC/FemDirichletBC.h"
 #include "FemLib/BC/FemNeumannBC.h"
 #include "FemLib/Post/Extrapolation.h"

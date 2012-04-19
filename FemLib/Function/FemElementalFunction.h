@@ -13,8 +13,8 @@
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "DiscreteLib/Core/DiscreteVector.h"
 
-#include "FemLib/Core/IFemElement.h"
-#include "FemLib/FemElementObjectContainer.h"
+#include "FemLib/Core/Element/IFemElement.h"
+#include "FemLib/Tools/FemElementObjectContainer.h"
 
 namespace FemLib
 {

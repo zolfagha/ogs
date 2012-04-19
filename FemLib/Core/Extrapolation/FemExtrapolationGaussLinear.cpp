@@ -1,26 +1,14 @@
 
-#include "FemExtrapolation.h"
-#include "IFemElement.h"
+#include "FemExtrapolationGaussLinear.h"
+
+#include <algorithm>
+#include <cmath>
+
+#include "MathLib/Integration/GaussLegendre.h"
+#include "FemLib/Core/Element/IFemElement.h"
 
 namespace FemLib
 {
-// average
-void FeExtrapolationAverage::extrapolate(IFiniteElement &fe, const std::vector<MathLib::Vector> &gp_values, std::vector<MathLib::Vector> &nodal_values)
-{
-    extrapolate<MathLib::Vector>(fe, gp_values, nodal_values);
-}
-
-template<typename Tvalue>
-void FeExtrapolationAverage::extrapolate(IFiniteElement &fe, const std::vector<Tvalue> &gp_values, std::vector<Tvalue> &nodal_values)
-{
-    Tvalue ele_avg;
-    ele_avg = .0;
-    for (size_t j=0; j<gp_values.size(); j++)
-        ele_avg += gp_values[j];
-    ele_avg /= gp_values.size();
-
-    std::fill(nodal_values.begin(), nodal_values.end(), ele_avg);
-}
 
 // gauss linear
 void FeExtrapolationGaussLinear::extrapolate(IFiniteElement &fe, const std::vector<MathLib::Vector> &gp_values, std::vector<MathLib::Vector> &nodal_values)
@@ -32,7 +20,7 @@ template<typename Tvalue>
 void FeExtrapolationGaussLinear::extrapolate(IFiniteElement &fe, const std::vector<Tvalue> &gp_values, std::vector<Tvalue> &nodal_values)
 {
     const MeshLib::IElement* e = fe.getElement();
-    FemIntegrationGaussBase* gauss = static_cast<FemIntegrationGaussBase*>(fe.getIntegrationMethod());
+    AbstractFemIntegrationGaussBase* gauss = static_cast<AbstractFemIntegrationGaussBase*>(fe.getIntegrationMethod());
     const size_t e_nnodes = e->getNumberOfNodes();
     // reorder gp values
     std::vector<Tvalue> reordered_gp_values(gp_values.size());
@@ -75,7 +63,7 @@ void FeExtrapolationGaussLinear::extrapolate(IFiniteElement &fe, const std::vect
     }
 }
 
-double FeExtrapolationGaussLinear::calcXi_p(const MeshLib::IElement& e, FemIntegrationGaussBase& gauss)
+double FeExtrapolationGaussLinear::calcXi_p(const MeshLib::IElement& e, AbstractFemIntegrationGaussBase& gauss)
 {
     double Xi_p = 0.0;
     if (e.getShapeType() == MeshLib::ElementShape::QUAD || e.getShapeType() == MeshLib::ElementShape::HEXAHEDRON) {
@@ -93,7 +81,7 @@ double FeExtrapolationGaussLinear::calcXi_p(const MeshLib::IElement& e, FemInteg
     return Xi_p;
 }
 
-int FeExtrapolationGaussLinear::getLocalIndex(const MeshLib::IElement& e, FemIntegrationGaussBase& gauss, size_t igp)
+int FeExtrapolationGaussLinear::getLocalIndex(const MeshLib::IElement& e, AbstractFemIntegrationGaussBase& gauss, size_t igp)
 {
     int LoIndex = -1;
     double r,s,t;

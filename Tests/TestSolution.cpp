@@ -13,7 +13,7 @@
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "MeshLib/Core/IMesh.h"
 
-#include "FemLib/FemElementObjectContainer.h"
+#include "FemLib/Tools/FemElementObjectContainer.h"
 
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TransientAssembler/ElementLocalAssembler.h"
@@ -52,7 +52,16 @@ public:
 
         //localM = .0;
         //localF.resize(localF.size(), .0);
-        fe->integrateDWxDN(_matK, localK);
+        FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
+        double gp_x[3], real_x[3];
+        for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
+        	q->getSamplingPoint(j, gp_x);
+            fe->computeBasisFunctions(gp_x);
+            fe->getRealCoordinates(real_x);
+        	double k;
+        	_matK->eval(real_x, k);
+        	fe->integrateDWxDN(j, k, localK);
+        }
     }
 };
 
@@ -79,7 +88,16 @@ public:
         MathLib::DenseLinearEquations::VectorType localF;
         //localM = .0;
         //localF.resize(localF.size(), .0);
-        fe->integrateDWxDN(_matK, localK);
+        FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
+        double gp_x[3], real_x[3];
+        for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
+        	q->getSamplingPoint(j, gp_x);
+            fe->computeBasisFunctions(gp_x);
+            fe->getRealCoordinates(real_x);
+        	double k;
+        	_matK->eval(real_x, k);
+        	fe->integrateDWxDN(j, k, localK);
+        }
         
         //localR = (1/dt * localM + theta * localK) * localX - (1/dt * localM + (1-theta) * localK) * localX0 - localF;
         MathLib::DenseLinearEquations::MatrixType tmpM;

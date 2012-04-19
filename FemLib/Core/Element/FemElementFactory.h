@@ -3,7 +3,7 @@
 
 #include <map>
 
-#include "FemLib/Core/Element/FemElementList.h"
+#include "FemLib/Core/Element/FiniteElementType.h"
 #include "FemLib/Core/Element/C0IsoparametricElements.h"
 #include "FemLib/Core/Element/TRI3CONST.h"
 

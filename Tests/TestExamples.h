@@ -16,7 +16,6 @@
 #include "DiscreteLib/Assembler/ElementLocalAssembler.h"
 
 #include "FemLib/Function/FemFunction.h"
-#include "FemLib/Function/FemFunctionProjection.h"
 #include "FemLib/BC/FemDirichletBC.h"
 #include "FemLib/BC/FemNeumannBC.h"
 #include "FemLib/Post/Extrapolation.h"
@@ -71,15 +70,24 @@ public:
         FemLib::LagrangianFeObjectContainer* feObjects = gw.head->getFeObjectContainer();
         MathLib::Matrix<double> localK;
         std::vector<size_t> e_node_id_list;
+        double gp_x[3], real_x[3];
         for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
             MeshLib::IElement *e = msh->getElemenet(i_e);
             FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
             const size_t &n_dof = fe->getNumberOfVariables();
             localK.resize(n_dof, n_dof);
             localK = .0;
-            fe->integrateDWxDN(gw._K, localK);
+            FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
+            for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
+            	q->getSamplingPoint(j, gp_x);
+            	fe->computeBasisFunctions(gp_x);
+                fe->getRealCoordinates(real_x);
+            	double k;
+            	gw._K->eval(real_x, k);
+            	fe->integrateDWxDN(j, k, localK);
+            }
             e->getNodeIDList(e_node_id_list);
-            globalA->add(e_node_id_list, localK); //TODO A(id_list) += K;
+            globalA->add(e_node_id_list, localK);
         }
 
         //outputLinearEQS(*globalA, globalRHS);
@@ -129,8 +137,7 @@ public:
                 const MathLib::Matrix<double> *dN = fe->getGradBasisFunction();
                 MathLib::Matrix<double>*N = fe->getBasisFunction();
                 std::vector<double> xx(2);
-                N->axpy(1.0, &xi[0], .0, &xx[0]);
-                N->axpy(1.0, &yi[0], .0, &xx[1]);
+                fe->getRealCoordinates(&xx[0]);
 
                 double k;
                 gw._K->eval(&xx[0], k);

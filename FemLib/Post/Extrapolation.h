@@ -6,7 +6,7 @@
 
 #include "MeshLib/Topology/Topology.h"
 #include "FemLib/Function/FemFunction.h"
-#include "FemLib/Core/Integration.h"
+#include "FemLib/Core/Integration/Integration.h"
 
 namespace FemLib
 {

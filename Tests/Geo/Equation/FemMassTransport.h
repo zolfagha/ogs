@@ -2,8 +2,8 @@
 #pragma once
 
 #include "MathLib/Function/IFunction.h"
-#include "FemLib/Core/IFemElement.h"
-#include "FemLib/Core/Integration.h"
+#include "FemLib/Core/Element/IFemElement.h"
+#include "FemLib/Core/Integration/Integration.h"
 #include "Tests/Geo/Material/PorousMedia.h"
 #include "Tests/Geo/Material/Compound.h"
 
@@ -28,13 +28,29 @@ public:
 	{
 		FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
 
- 		fe->integrateWxN(_pm->porosity, localM);
-
         LocalMatrixType matDiff(localK);
         LocalMatrixType matAdv(localK);
         SpatialCompositFunction<double, MathLib::SpatialFunctionScalar, MathLib::SpatialFunctionScalar, MathLib::Multiplication> f_diff_poro(*_cmp->molecular_diffusion, *_pm->porosity);
-		fe->integrateDWxDN(&f_diff_poro, matDiff);
-        fe->integrateWxDN(_vel, matAdv);
+
+        FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
+        double gp_x[3], real_x[3];
+        for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
+        	q->getSamplingPoint(j, gp_x);
+            fe->computeBasisFunctions(gp_x);
+            fe->getRealCoordinates(real_x);
+
+        	double poro;
+        	_pm->porosity->eval(real_x, poro);
+        	double d_poro;
+        	f_diff_poro.eval(real_x, d_poro);
+        	MathLib::Vector v;
+        	_vel->eval(real_x, v);
+
+     		fe->integrateWxN(j, poro, localM);
+    		fe->integrateDWxDN(j, d_poro, matDiff);
+            fe->integrateWxDN(j, v, matAdv);
+        }
+
         localK = matDiff;
         localK += matAdv;
 
