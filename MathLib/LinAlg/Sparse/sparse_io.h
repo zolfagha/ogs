@@ -1,5 +1,5 @@
-#ifndef SPARSE_H
-#define SPARSE_H
+#ifndef SPARSE_IO_H
+#define SPARSE_IO_H
 
 #include <iostream>
 #include <cassert>

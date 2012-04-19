@@ -6,7 +6,7 @@
 #endif
 
 #include "CRSMatrix.h"
-#include "sparse.h"
+#include "sparse_io.h"
 #include "../Preconditioner/generateDiagPrecond.h"
 
 namespace MathLib {

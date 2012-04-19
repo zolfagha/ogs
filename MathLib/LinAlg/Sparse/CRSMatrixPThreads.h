@@ -11,7 +11,7 @@
 #include <string>
 
 #include "SparseMatrixBase.h"
-#include "sparse.h"
+#include "sparse_io.h"
 #include "CRSMatrix.h"
 #include "amuxCRS.h"
 
