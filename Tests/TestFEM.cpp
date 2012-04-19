@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 
 #include "MathLib/Vector.h"
-#include "MathLib/LinearInterpolation.h"
+#include "MathLib/Interpolation/LinearInterpolation.h"
 //#include "MathLib/LinAlg/Solvers/GaussAlgorithm.h"
 #include "MathLib/Function/Function.h"
 #include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"

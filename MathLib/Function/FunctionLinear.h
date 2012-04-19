@@ -2,7 +2,7 @@
 #pragma once
 
 #include "IFunction.h"
-#include "MathLib/LinearInterpolation.h"
+#include "MathLib/Interpolation/LinearInterpolation.h"
 
 namespace MathLib
 {
