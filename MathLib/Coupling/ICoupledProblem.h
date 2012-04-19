@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include "MathLib/Parameter/IIOSystem.h"
-#include "MathLib/Parameter/INamedIO.h"
+#include "MathLib/IOSystem/IIOSystem.h"
+#include "MathLib/IOSystem/INamedIO.h"
 
 namespace MathLib
 {

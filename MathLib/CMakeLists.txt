@@ -89,11 +89,11 @@ FILE(GLOB MathLib_Function_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
 	Function/*.h 
 	Function/*.cpp)
 SOURCE_GROUP( MathLib\\Function FILES ${MathLib_Function_Files})
-#Parameter/
-FILE(GLOB MathLib_Parameter_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
-    Parameter/*.h 
-    Parameter/*.cpp)
-SOURCE_GROUP( MathLib\\Parameter FILES ${MathLib_Parameter_Files})
+#IOSystem/
+FILE(GLOB MathLib_IOSystem_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
+    IOSystem/*.h 
+    IOSystem/*.cpp)
+SOURCE_GROUP( MathLib\\IOSystem FILES ${MathLib_IOSystem_Files})
 #Coupling/
 FILE(GLOB MathLib_Coupling_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
     Coupling/*.h 
@@ -109,23 +109,29 @@ FILE(GLOB MathLib_SystemOfEquations_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     SystemOfEquations/*.h 
     SystemOfEquations/*.cpp)
 SOURCE_GROUP( MathLib\\SystemOfEquations FILES ${MathLib_SystemOfEquations_Files})
+#Interpolation/
+FILE(GLOB MathLib_Interpolation_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
+    Interpolation/*.h 
+    Interpolation/*.cpp)
+SOURCE_GROUP( MathLib\\Interpolation FILES ${MathLib_Interpolation_Files})
 
 # Create the library
 ADD_LIBRARY( MathLib STATIC 
 	${MathLib_Files} 
+    ${MathLib_Coupling_Files}
+    ${MathLib_Coupling_Algorithm_Files}
+    ${MathLib_Function_Files}
+    ${MathLib_Integration_Files}
+    ${MathLib_Interpolation_Files}
+    ${MathLib_IOSystem_Files}
 	${MathLib_LinAlg_Files} 
 	${MathLib_LinAlg_Dense_Files}
 	${MathLib_LinAlg_Sparse_Files}
 	${MathLib_LinAlg_Solvers_Files}
 	${MathLib_LinAlg_Preconditioner_Files}
-	${MathLib_LinAlg_LinearEquations_Files}
+    ${MathLib_LinAlg_LinearEquations_Files}
 	${MathLib_Nonlinear_Files}
-	${MathLib_Integration_Files}
 	${MathLib_ODE_Files}
-	${MathLib_Function_Files}
-    ${MathLib_Parameter_Files}
-    ${MathLib_Coupling_Files}
-    ${MathLib_Coupling_Algorithm_Files}
     ${MathLib_SystemOfEquations_Files}
 )
 

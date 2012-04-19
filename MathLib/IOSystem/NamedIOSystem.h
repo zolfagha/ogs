@@ -3,7 +3,7 @@
 
 #include "IOSystem.h"
 #include "NamedIO.h"
-#include "MathLib/Parameter/DynamicIOSystem.h"
+#include "DynamicIOSystem.h"
 
 namespace MathLib
 {

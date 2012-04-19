@@ -5,7 +5,7 @@
 #include <vector>
 #include <queue>
 #include "Base/CodingTools.h"
-#include "MathLib/Parameter/NamedIOSystem.h"
+#include "MathLib/IOSystem/NamedIOSystem.h"
 
 namespace MathLib
 {

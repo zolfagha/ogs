@@ -2,7 +2,7 @@
 #pragma once
 
 #include <vector>
-#include "MathLib/Parameter/ParameterSet.h"
+#include "MathLib/IOSystem/ParameterSet.h"
 #include "MathLib/Coupling/ParameterProblemMappingTable.h"
 #include "ITransientPartitionedAlgorithm.h"
 #include "IConvergenceCheck.h"

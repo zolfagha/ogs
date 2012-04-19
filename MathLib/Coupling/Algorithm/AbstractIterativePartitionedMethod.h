@@ -5,7 +5,7 @@
 #include <iostream>
 #include <cmath>
 
-#include "MathLib/Parameter/ParameterSet.h"
+#include "MathLib/IOSystem/ParameterSet.h"
 #include "MathLib/Coupling/ICoupledProblem.h"
 #include "MathLib/Coupling/ParameterProblemMappingTable.h"
 #include "IPartitionedAlgorithm.h"

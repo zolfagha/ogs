@@ -4,8 +4,8 @@
 #include <vector>
 #include <iostream>
 
-#include "MathLib/Parameter/ParameterSet.h"
-#include "MathLib/Parameter/NamedIOSystem.h"
+#include "MathLib/IOSystem/ParameterSet.h"
+#include "MathLib/IOSystem/NamedIOSystem.h"
 
 #include "ICoupledProblem.h"
 #include "ParameterProblemMappingTable.h"
