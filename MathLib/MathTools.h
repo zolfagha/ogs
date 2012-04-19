@@ -100,6 +100,20 @@ T fastpow (T base, size_t exp)
 	return result;
 }
 
+/**
+ * Error function
+ * @param x
+ * @return
+ */
+double erf(double x);
+
+/**
+ * Complementary error function
+ * @param x
+ * @return
+ */
+double erfc(double x);
+
 } // namespace
 
 #endif /* MATHTOOLS_H_ */

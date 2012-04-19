@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "MathLib/erf.h"
+#include "MathLib/MathTools.h"
 
 inline double analyticalOgataBank(double x, double t, double v, double alpha)
 {
