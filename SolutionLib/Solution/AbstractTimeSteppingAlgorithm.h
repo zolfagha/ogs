@@ -6,19 +6,10 @@
 #include "NumLib/TimeStepping/ITransientSystem.h"
 #include "NumLib/TimeStepping/TimeStepFunction.h"
 
-#include "IProblem.h"
-
+#include "ISolutionAlgorithm.h"
 
 namespace SolutionLib
 {
-
-/**
- * \brief Interface to all solution algorithm classes
- */
-class ISolutionAlgorithm
-{
-public:
-};
 
 /**
  * \brief Abstract class for time-stepping method

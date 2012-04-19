@@ -12,25 +12,15 @@
 #include "FemLib/Function/FemFunction.h"
 #include "FemLib/BC/FemDirichletBC.h"
 #include "FemLib/BC/FemNeumannBC.h"
-
 #include "NumLib/TransientAssembler/ElementBasedTransientAssembler.h"
 
-#include "ISolution.h"
-#include "TransientFemFunctions.h"
-#include "Nonlinear.h"
+#include "SolutionLib/Tools/TemplateTransientLinearFEMFunction.h"
+#include "SolutionLib/Tools/Nonlinear.h"
+
+#include "AbstractTimeSteppingAlgorithm.h"
 
 namespace SolutionLib
 {
-
-//template<
-//	class T_FEM_PROBLEM_AND_ASSEMBLER,
-//	//template <class> class T_TIME_ODE_ASSEMBLER,
-//	class T_LINEAR_FUNCTION,
-//    class T_NONLINEAR_FUNCTION
-//    class T_LINEAR_SOLVER,
-//    >
-//class SingleStepFEM;
-
 
 /**
  * \brief Solution algorithm for linear transient problems using FEM with Euler time stepping method
@@ -42,22 +32,15 @@ namespace SolutionLib
  */
 template <
 	class T_USER_FEM_PROBLEM,
-    //class T_USER_ASSEMBLY,
-	//template <class> class T_TIME_ODE_ASSEMBLER,
-	class T_LINEAR_FUNCTION,
-    class T_NONLINEAR_FUNCTION,
-    class T_LINEAR_SOLVER
+	class T_LINEAR_SOLVER
     >
-class SingleStepFEM//</*T_TIME_ODE_ASSEMBLER, */T_LINEAR_FUNCTION, T_LINEAR_SOLVER, T_USER_FEM_PROBLEM<T_USER_ASSEMBLY>, T_NONLINEAR>
+class SingleStepFEM
 	: public AbstractTimeSteppingAlgorithm
 {
 public:
-    //typedef T_TIME_ODE_ASSEMBLER<T_USER_ASSEMBLY> UserTimeOdeAssembler;
     typedef T_USER_FEM_PROBLEM UserFemProblem;
-    //typedef T_USER_FEM_PROBLEM<T_USER_ASSEMBLY> UserFemProblem;
-    //typedef TemplateTransientLinearFEMFunction<T_TIME_ODE_ASSEMBLER,T_LINEAR_SOLVER,T_USER_FEM_PROBLEM,T_USER_ASSEMBLY> UserLinearFemFunction;
-    typedef T_LINEAR_FUNCTION UserLinearFemFunction;
-    typedef T_NONLINEAR_FUNCTION UserNonlinearFunction;
+    typedef TemplateTransientLinearFEMFunction<UserFemProblem, typename UserFemProblem::ReisdualAssemblerType, T_LINEAR_SOLVER> UserLinearFemFunction;
+    typedef TemplateTransientLinearFEMFunction<UserFemProblem, typename UserFemProblem::JacobianAssemblerType, T_LINEAR_SOLVER> UserNonlinearFunction;
 
     /// constructor
     ///
@@ -92,9 +75,8 @@ public:
         _linear_solver = new T_LINEAR_SOLVER();
         _linear_eqs = _discrete_system->createLinearEquation<DiscreteLib::TemplateMeshBasedDiscreteLinearEquation, T_LINEAR_SOLVER, DiscreteLib::SparsityBuilderFromNodeConnectivity>(*_linear_solver, _dofManager);
         // setup linear function
-        _linear_fucntion = new UserLinearFemFunction(problem, *_linear_eqs);
-        //MathLib::NewtonFunctionDXVector<UserLinearFemFunction, T_LINEAR_SOLVER, MathLib::CRSMatrix<double, signed> > f_dx(*_linear_fucntion, _linear_solver);
-        _nonlinear = new UserNonlinearFunction(*_linear_fucntion);
+        _linear_fucntion = new UserLinearFemFunction(problem, problem.getResidualAssembler(), *_linear_eqs);
+        //_nonlinear = new UserNonlinearFunction(*_linear_fucntion);
     };
 
     ///
@@ -118,7 +100,7 @@ public:
         //*_vec_n0 = *_vec_n1;
 
         _linear_fucntion->reset(t_n1);
-        _nonlinear->solve(*_vec_n0, *_vec_n1);
+        //TODO _nonlinear->solve(*_vec_n0, *_vec_n1);
 
         _u_n1[0]->setNodalValues(*_vec_n1);
 
@@ -141,12 +123,10 @@ public:
 
 private:
     UserFemProblem* _problem;
-    //UserTimeOdeAssembler _element_ode_assembler;
     DiscreteLib::DofEquationIdTable _dofManager;
     T_LINEAR_SOLVER* _linear_solver;
     DiscreteLib::DiscreteSystem *_discrete_system;
     DiscreteLib::IDiscreteLinearEquation* _linear_eqs;
-//    std::vector<FemLib::FemNodalFunctionScalar*> _u_n;
     std::vector<FemLib::FemNodalFunctionScalar*> _u_n1;
     UserLinearFemFunction* _linear_fucntion;
     UserNonlinearFunction* _nonlinear;

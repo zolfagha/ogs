@@ -9,8 +9,8 @@
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "NumLib/TransientAssembler/ElementLocalAssembler.h"
 #include "NumLib/TransientAssembler/TimeEulerElementLocalAssembler.h"
-#include "SolutionLib/FemProblem.h"
-#include "SolutionLib/SingleStepFEM.h"
+#include "SolutionLib/Problem/FemIVBVProblem.h"
+#include "SolutionLib/Solution/SingleStepFEM.h"
 
 #include "Tests/Geo/Equation/FemGroundwaterFlow.h"
 #include "Tests/Geo/Material/PorousMedia.h"
@@ -26,7 +26,13 @@ using namespace DiscreteLib;
 namespace Geo
 {
 
-typedef FemIVBVProblem<Geo::WeakFormGroundwaterFlow> GWFemProblem;
+typedef FemIVBVProblem
+		<
+			TimeEulerElementLocalAssembler<Geo::WeakFormGroundwaterFlow>,
+			NumLib::ITimeODEElementAssembler
+		> GWFemProblem;
+
+
 
 template <
 	template <class> class T_NONLINEAR,
@@ -36,24 +42,11 @@ class FunctionHead : public TemplateTransientMonolithicSystem
 {
     enum Out { Head=0 };
 public:
-    typedef TemplateTransientLinearFEMFunction<
-    			FemIVBVProblem,
-    			TimeEulerElementLocalAssembler,
-    			T_LINEAR_SOLVER,
-    			Geo::WeakFormGroundwaterFlow
-			> MyLinearFunction;
-
-    typedef T_NONLINEAR<MyLinearFunction> MyNonlinearFunction;
-
     typedef SingleStepFEM
     		<
-    			FemIVBVProblem<Geo::WeakFormGroundwaterFlow>,
-    			//TimeEulerElementLocalAssembler,
-    			MyLinearFunction,
-    			MyNonlinearFunction,
+    			GWFemProblem,
     			T_LINEAR_SOLVER
     		> SolutionForHead;
-
 
     FunctionHead() 
     {

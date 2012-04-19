@@ -9,8 +9,8 @@
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "NumLib/TransientAssembler/ElementLocalAssembler.h"
 #include "NumLib/TransientAssembler/TimeEulerElementLocalAssembler.h"
-#include "SolutionLib/FemProblem.h"
-#include "SolutionLib/SingleStepFEM.h"
+#include "SolutionLib/Problem/FemIVBVProblem.h"
+#include "SolutionLib/Solution/SingleStepFEM.h"
 
 #include "Tests/Geo/Equation/FemMassTransport.h"
 #include "Tests/Geo/Material/PorousMedia.h"
@@ -27,8 +27,11 @@ using namespace DiscreteLib;
 namespace Geo
 {
 
-
-typedef FemIVBVProblem<Geo::WeakFormMassTransport> MassFemProblem;
+typedef FemIVBVProblem
+		<
+			TimeEulerElementLocalAssembler<Geo::WeakFormMassTransport>,
+			Geo::WeakFormMassTransport
+		> MassFemProblem;
 
 template <
 	template <class> class T_NONLINEAR,
@@ -40,21 +43,9 @@ class FunctionConcentration : public TemplateTransientMonolithicSystem
     enum Out { Concentration = 0 };
 
 public:
-    typedef TemplateTransientLinearFEMFunction<
-    			FemIVBVProblem,
-    			TimeEulerElementLocalAssembler,
-    			T_LINEAR_SOLVER,
-    			Geo::WeakFormMassTransport
-			> MyLinearFunction;
-
-    typedef T_NONLINEAR<MyLinearFunction> MyNonlinearFunction;
-
     typedef SingleStepFEM
     		<
-    			FemIVBVProblem<Geo::WeakFormMassTransport>,
-    			//TimeEulerElementLocalAssembler,
-    			MyLinearFunction,
-    			MyNonlinearFunction,
+    			MassFemProblem,
     			T_LINEAR_SOLVER
     		> SolutionForConc;
 
@@ -79,7 +70,7 @@ public:
     int solveTimeStep(const TimeStep &time)
     {
         const MathLib::SpatialFunctionVector *vel = this->getInput<MathLib::SpatialFunctionVector>(Velocity);
-        _solConc->getProblem()->getElementAssemlby().initialize(vel);
+        //TODO _solConc->getProblem()->getResidualAssembler().initialize(vel);
     	_solConc->solveTimeStep(time);
         setOutput(Concentration, _solConc->getCurrentSolution(0));
         return 0;

@@ -100,7 +100,7 @@ public:
         method.apply(eqs, _vec_nodes, _vec_values);
     }
 
-    void eval(const MathLib::SpatialPosition &x, Tval &v)
+    virtual void eval(const MathLib::SpatialPosition &x, Tval &v)
     {
         _bc_func->eval(x, v);
     }

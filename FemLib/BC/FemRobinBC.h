@@ -33,7 +33,7 @@ namespace FemLib
 class RobinBC : IFemBC
 {
 public:
-    void set(TemplateFEMNodalFunction<double,double> *fem, int geo, int func);
+//    void set(TemplateFEMNodalFunction<double,double> *fem, int geo, int func);
 };
 
 }

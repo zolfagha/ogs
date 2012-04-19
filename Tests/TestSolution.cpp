@@ -19,10 +19,9 @@
 #include "NumLib/TransientAssembler/ElementLocalAssembler.h"
 #include "NumLib/TransientAssembler/TimeEulerElementLocalAssembler.h"
 
-#include "SolutionLib/IProblem.h"
-#include "SolutionLib/FemProblem.h"
-#include "SolutionLib/SingleStepFEM.h"
-#include "SolutionLib/Nonlinear.h"
+#include "SolutionLib/Problem/FemIVBVProblem.h"
+#include "SolutionLib/Solution/SingleStepFEM.h"
+#include "SolutionLib/Tools/Nonlinear.h"
 
 #include "TestUtil.h"
 
@@ -115,23 +114,19 @@ template <
 	>
 class GWFemTestSystem : public NumLib::ITransientSystem
 {
-    typedef FemIVBVProblem<GWAssembler> GWFemProblem;
+    typedef FemIVBVProblem<TimeEulerElementLocalAssembler<GWAssembler>,GWAssembler> GWFemProblem;
 
     typedef TemplateTransientLinearFEMFunction<
-    			FemIVBVProblem,
-    			TimeEulerElementLocalAssembler,
-    			T_LINEAR_SOLVER,
-    			GWAssembler
+    			GWFemProblem,
+    			typename GWFemProblem::ReisdualAssemblerType,
+    			T_LINEAR_SOLVER
 			> MyLinearFunction;
 
     typedef T_NONLINEAR<MyLinearFunction> MyNonlinearFunction;
 
     typedef SingleStepFEM
     		<
-    			FemIVBVProblem<GWAssembler>,
-    			//TimeEulerElementLocalAssembler,
-    			MyLinearFunction,
-    			MyNonlinearFunction,
+    			GWFemProblem,
     			T_LINEAR_SOLVER
     		> SolutionForHead;
 

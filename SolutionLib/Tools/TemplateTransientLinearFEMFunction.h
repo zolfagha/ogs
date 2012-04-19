@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "MathLib/Function/IFunction.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "NumLib/TimeStepping/TimeStep.h"
@@ -16,26 +18,29 @@ typedef DiscreteLib::DiscreteVector<double> MyFemVector;
 
 /**
  * \brief Template class for transient linear FEM functions
+ *
+ * \tparam T_FEM_PROBLEM
+ * \tparam T_TIME_ODE_ASSEMBLER
+ * \tparam T_SPACE_ASSEMBLER
+ * \tparam T_LINEAR_SOLVER
  */
 template <
-	template <class> class T_USER_FEM_PROBLEM,
-	template <class> class T_TIME_ODE_ASSEMBLER,
-    class T_LINEAR_SOLVER,
-    class T_USER_ASSEMBLY
+	class T_USER_FEM_PROBLEM,
+    class T_LOCAL_ASSEMBLER,
+    class T_LINEAR_SOLVER
     >
 class TemplateTransientLinearFEMFunction
 	: public MathLib::TemplateFunction<MyFemVector, MyFemVector>
 {
 public:
-    typedef T_TIME_ODE_ASSEMBLER<T_USER_ASSEMBLY> UserTimeOdeAssembler;
-    typedef T_USER_FEM_PROBLEM<T_USER_ASSEMBLY> UserFemProblem;
+    typedef T_USER_FEM_PROBLEM UserFemProblem;
+    typedef T_LOCAL_ASSEMBLER UserLocalAssembler;
 
     /// constructor
     /// @param problem		Fem problem
     /// @param linear_eqs	Discrete linear equation
-    TemplateTransientLinearFEMFunction(UserFemProblem &problem, DiscreteLib::IDiscreteLinearEquation &linear_eqs)
-        : _problem(&problem), _element_ode_assembler(problem.getElementAssemlby()),
-          _linear_eqs(&linear_eqs)
+    TemplateTransientLinearFEMFunction(UserFemProblem &problem, UserLocalAssembler &asssembler, DiscreteLib::IDiscreteLinearEquation &linear_eqs)
+        : _problem(&problem), _local_assembler(&asssembler),  _linear_eqs(&linear_eqs)
     {
     };
 
@@ -45,7 +50,11 @@ public:
 	///
     MathLib::TemplateFunction<MyFemVector,MyFemVector>* clone() const
 	{
-    	return new TemplateTransientLinearFEMFunction<T_USER_FEM_PROBLEM, T_TIME_ODE_ASSEMBLER,T_LINEAR_SOLVER,T_USER_ASSEMBLY>(*_problem, *_linear_eqs);
+    	return new TemplateTransientLinearFEMFunction<
+    				T_USER_FEM_PROBLEM,
+    				T_LOCAL_ASSEMBLER,
+    				T_LINEAR_SOLVER
+    				>(*_problem, *_local_assembler, *_linear_eqs);
 	}
 
     /// reset property
@@ -83,7 +92,7 @@ public:
 
 		// assembly
         _linear_eqs->initialize();
-        NumLib::ElementBasedTransientAssembler assembler(t_n1, vec_un, vec_un1, _element_ode_assembler);
+        NumLib::ElementBasedTransientAssembler assembler(t_n1, vec_un, vec_un1, *_local_assembler);
         _linear_eqs->construct(assembler);
 
         //apply BC1,2
@@ -101,7 +110,7 @@ public:
 
 private:
     UserFemProblem* _problem;
-    UserTimeOdeAssembler _element_ode_assembler;
+    UserLocalAssembler *_local_assembler;
     DiscreteLib::IDiscreteLinearEquation* _linear_eqs;
     NumLib::TimeStep* _t_n1;
 };

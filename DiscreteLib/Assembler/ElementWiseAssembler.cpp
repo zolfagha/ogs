@@ -14,7 +14,7 @@
 namespace DiscreteLib
 {
 
-void ElementBasedAssembler::assembly(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs)
+void ElementWiseAssembler::assembly(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs)
 {
     MathLib::DenseLinearEquations localEQS;
     std::vector<size_t> ele_node_ids, ele_node_size_order;

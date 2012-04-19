@@ -21,11 +21,11 @@ class IElemenetLocalAssembler;
 /**
  * \brief Element-based discrete system assembler classes
  */
-class ElementBasedAssembler : public IDiscreteLinearEquationAssembler
+class ElementWiseAssembler : public IDiscreteLinearEquationAssembler
 {
 public:
     ///
-    ElementBasedAssembler(IElemenetLocalAssembler &a) : _e_assembler(&a) {};
+	ElementWiseAssembler(IElemenetLocalAssembler &a) : _e_assembler(&a) {};
 
     /// Conduct the element by element assembly procedure
     ///
