@@ -1,12 +1,12 @@
 
 #pragma once
 
-#include "MathLib/Function/IFunction.h"
+#include "MathLib/IClonable.h"
 
 namespace MathLib
 {
 
-typedef MathLib::IFunction Parameter; //TODO clonable
+typedef MathLib::IClonable Parameter;
 
 } //end
 

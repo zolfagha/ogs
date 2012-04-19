@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 
 #include "Base/CodingTools.h"
 #include "INamedIO.h"

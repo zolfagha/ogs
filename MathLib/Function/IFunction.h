@@ -3,15 +3,15 @@
 
 #include "MathLib/Vector.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
+#include "MathLib/IClonable.h"
 
 namespace MathLib
 {
 
-class IFunction
+class IFunction : public IClonable
 {
 public:
 	virtual ~IFunction() {};
-    virtual IFunction* clone() const = 0;
 };
 
 template<typename Tpos, typename Tval>
