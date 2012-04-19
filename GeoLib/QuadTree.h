@@ -8,7 +8,11 @@
 #ifndef QUADTREE_H_
 #define QUADTREE_H_
 
-namespace GeoLib {
+#include <cassert>
+#include <cstddef>
+
+namespace GeoLib
+{
 
 /**
  * A quadtree is a rooted tree in which every internal
@@ -21,7 +25,8 @@ namespace GeoLib {
  * the access to its coordinates via operator[] and for debugging
  * purposes operator<<)
  */
-template <typename POINT> class QuadTree {
+template <typename POINT> class QuadTree
+{
 public:
 	enum Quadrant {
 		NE = 0, //!< north east
