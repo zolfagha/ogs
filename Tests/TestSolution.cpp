@@ -114,7 +114,7 @@ template <
 	>
 class GWFemTestSystem : public NumLib::ITransientSystem
 {
-    typedef FemIVBVProblem<TimeEulerElementLocalAssembler<GWAssembler>,GWAssembler> GWFemProblem;
+    typedef FemIVBVProblem<TimeEulerElementLocalAssembler<GWAssembler>,TimeEulerElementLocalAssembler<GWAssembler> > GWFemProblem;
 
     typedef TemplateTransientLinearFEMFunction<
     			GWFemProblem,
@@ -169,7 +169,8 @@ public:
         //size_t nnodes = msh->getNumberOfNodes();
         _feObjects = new LagrangianFeObjectContainer(*msh);
         //equations
-        GWAssembler ele_eqs(*_feObjects, K) ;
+        GWAssembler ele_x_eqs(*_feObjects, K) ;
+        GWFemProblem::ReisdualAssemblerType ele_eqs(ele_x_eqs);
         //IVBV problem
         _problem = new GWFemProblem(dis, *dis.getMesh(), ele_eqs);
         //BC

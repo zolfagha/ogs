@@ -40,7 +40,8 @@ class SingleStepFEM
 public:
     typedef T_USER_FEM_PROBLEM UserFemProblem;
     typedef TemplateTransientLinearFEMFunction<UserFemProblem, typename UserFemProblem::ReisdualAssemblerType, T_LINEAR_SOLVER> UserLinearFemFunction;
-    typedef TemplateTransientLinearFEMFunction<UserFemProblem, typename UserFemProblem::JacobianAssemblerType, T_LINEAR_SOLVER> UserNonlinearFunction;
+    typedef TemplateTransientLinearFEMFunction<UserFemProblem, typename UserFemProblem::ReisdualAssemblerType, T_LINEAR_SOLVER> UserNonlinearFunction;
+    //typedef TemplateTransientLinearFEMFunction<UserFemProblem, typename UserFemProblem::JacobianAssemblerType, T_LINEAR_SOLVER> UserNonlinearFunction;
 
     /// constructor
     ///
