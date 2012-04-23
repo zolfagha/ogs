@@ -1,7 +1,11 @@
 
 #pragma once
 
-#include "ElementLocalAssembler.h"
+#include <cassert>
+
+#include "MeshLib/Core/IElement.h"
+#include "NumLib/TimeStepping/TimeStep.h"
+#include "IElementWiseTransientLinearEQSLocalAssembler.h"
 
 
 namespace NumLib
@@ -13,17 +17,14 @@ namespace NumLib
  * @tparam  T_USER_ASSEMBLY 	User-given assembler
  */
 template <class T_USER_ASSEMBLY>
-class TimeEulerElementLocalAssembler : public ITransientElemenetLocalAssembler
+class ElementWiseTimeEulerEQSLocalAssembler : public IElementWiseTransientLinearEQSLocalAssembler
 {
-private:
-    T_USER_ASSEMBLY* _time_ode;
-    double _theta;
 public:
-    TimeEulerElementLocalAssembler(T_USER_ASSEMBLY &a) : _time_ode(&a), _theta(1.0)
+    ElementWiseTimeEulerEQSLocalAssembler(T_USER_ASSEMBLY &a) : _time_ode(&a), _theta(1.0)
     {
     };
 
-    virtual ~TimeEulerElementLocalAssembler() {};
+    virtual ~ElementWiseTimeEulerEQSLocalAssembler() {};
 
     ///
     void setTheta(double v)
@@ -43,9 +44,9 @@ public:
         const double delta_t = time.getTimeStepSize();
         const size_t n_dof = eqs.getDimension();
 
-        MathLib::DenseLinearEquations::MatrixType M(n_dof, n_dof);
-        MathLib::DenseLinearEquations::MatrixType K(n_dof, n_dof);
-        MathLib::DenseLinearEquations::VectorType F(n_dof, .0);
+        LocalMatrixType M(n_dof, n_dof);
+        LocalMatrixType K(n_dof, n_dof);
+        LocalVectorType F(n_dof, .0);
         M = .0;
         K = .0;
 
@@ -54,10 +55,10 @@ public:
         //std::cout << "M="; M.write(std::cout); std::cout << std::endl;
         //std::cout << "K="; K.write(std::cout); std::cout << std::endl;
 
-        MathLib::DenseLinearEquations::MatrixType *localA = eqs.getA();
+        LocalMatrixType *localA = eqs.getA();
         double *localRHS = eqs.getRHS();
-        MathLib::DenseLinearEquations::MatrixType TMP_M(n_dof, n_dof);
-        MathLib::DenseLinearEquations::MatrixType TMP_M2(n_dof, n_dof);
+        LocalMatrixType TMP_M(n_dof, n_dof);
+        LocalMatrixType TMP_M2(n_dof, n_dof);
 
         // A = 1/dt M + theta K
         TMP_M = M;
@@ -77,6 +78,10 @@ public:
         for (size_t i=0; i<n_dof; i++)
             localRHS[i] += F[i];
     }
+
+private:
+    T_USER_ASSEMBLY* _time_ode;
+    double _theta;
 };
 
 

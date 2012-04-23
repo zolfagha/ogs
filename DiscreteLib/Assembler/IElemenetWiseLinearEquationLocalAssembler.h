@@ -1,12 +1,15 @@
 
 #pragma once
 
-#include <vector>
+namespace MathLib
+{
+class DenseLinearEquations;
+}
 
-#include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
-
-#include "MeshLib/Core/IMesh.h"
-
+namespace MeshLib
+{
+class IElement;
+}
 
 namespace DiscreteLib
 {
@@ -14,10 +17,11 @@ namespace DiscreteLib
 /**
  * \brief Interface of all element local assembler classes
  */
-class IElemenetLocalAssembler
+class IElemenetWiseLinearEquationLocalAssembler
 {
 public:
-	virtual ~IElemenetLocalAssembler() {};
+	virtual ~IElemenetWiseLinearEquationLocalAssembler() {};
+
     /// assemble a local linear equation for the given element
     virtual void assembly(MeshLib::IElement &e, MathLib::DenseLinearEquations &eqs) = 0;
 };

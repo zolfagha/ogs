@@ -20,8 +20,8 @@
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "DiscreteLib/Core/DiscreteLinearEquation.h"
 #include "DiscreteLib/EquationId/DofEquationIdTable.h"
-#include "DiscreteLib/Assembler/DiscreteLinearEquationAssembler.h"
-#include "DiscreteLib/Assembler/ElementLocalAssembler.h"
+#include "DiscreteLib/Assembler/IDiscreteLinearEquationAssembler.h"
+#include "DiscreteLib/Assembler/IElemenetWiseLinearEquationLocalAssembler.h"
 #include "DiscreteLib/Utils/SparsityBuilder.h"
 #ifdef USE_MPI
 #include "DiscreteLib/ogs5/par_ddc_group.h"

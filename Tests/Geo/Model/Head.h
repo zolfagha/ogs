@@ -7,8 +7,7 @@
 #include "FemLib/Function/FemFunction.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
-#include "NumLib/TransientAssembler/ElementLocalAssembler.h"
-#include "NumLib/TransientAssembler/TimeEulerElementLocalAssembler.h"
+#include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
 #include "SolutionLib/Problem/FemIVBVProblem.h"
 #include "SolutionLib/Solution/SingleStepFEM.h"
 
@@ -28,8 +27,8 @@ namespace Geo
 
 typedef FemIVBVProblem
 		<
-			TimeEulerElementLocalAssembler<Geo::WeakFormGroundwaterFlow>,
-			NumLib::ITimeODEElementAssembler
+			ElementWiseTimeEulerEQSLocalAssembler<Geo::WeakFormGroundwaterFlow>,
+			ElementWiseTimeEulerEQSLocalAssembler<Geo::WeakFormGroundwaterFlow>
 		> GWFemProblem;
 
 

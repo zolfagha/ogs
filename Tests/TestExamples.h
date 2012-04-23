@@ -13,7 +13,7 @@
 #include "MeshLib/Core/IMesh.h"
 
 #include "DiscreteLib/Core/DiscreteSystem.h"
-#include "DiscreteLib/Assembler/ElementLocalAssembler.h"
+#include "DiscreteLib/Assembler/IElemenetWiseLinearEquationLocalAssembler.h"
 
 #include "FemLib/Function/FemFunction.h"
 #include "FemLib/BC/FemDirichletBC.h"
@@ -184,7 +184,7 @@ struct DiscreteExample1
     }
 
 
-    class TestElementAssembler : public DiscreteLib::IElemenetLocalAssembler
+    class TestElementAssembler : public DiscreteLib::IElemenetWiseLinearEquationLocalAssembler
     {
         MathLib::Matrix<double> _m;
     public:

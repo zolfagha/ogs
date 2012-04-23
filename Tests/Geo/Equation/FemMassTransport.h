@@ -10,7 +10,7 @@
 namespace Geo
 {
 
-class WeakFormMassTransport: public NumLib::ITimeODEElementAssembler
+class WeakFormMassTransport: public NumLib::IElementWiseTimeODELocalAssembler
 {
 public:
 	WeakFormMassTransport(FemLib::LagrangianFeObjectContainer &feObjects, PorousMedia &pm, Compound &cmp)

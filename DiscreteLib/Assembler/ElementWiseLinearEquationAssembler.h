@@ -1,7 +1,8 @@
 
 #pragma once
 
-#include "DiscreteLinearEquationAssembler.h"
+#include "IDiscreteLinearEquationAssembler.h"
+#include "IElemenetWiseLinearEquationLocalAssembler.h"
 
 namespace MeshLib 
 {
@@ -16,16 +17,14 @@ namespace MathLib
 namespace DiscreteLib
 {
 
-class IElemenetLocalAssembler;
-
 /**
  * \brief Element-based discrete system assembler classes
  */
-class ElementWiseAssembler : public IDiscreteLinearEquationAssembler
+class ElementWiseLinearEquationAssembler : public IDiscreteLinearEquationAssembler
 {
 public:
     ///
-	ElementWiseAssembler(IElemenetLocalAssembler &a) : _e_assembler(&a) {};
+	ElementWiseLinearEquationAssembler(IElemenetWiseLinearEquationLocalAssembler &a) : _e_assembler(&a) {};
 
     /// Conduct the element by element assembly procedure
     ///
@@ -36,7 +35,7 @@ public:
     void assembly(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs);
 
 private:
-    IElemenetLocalAssembler* _e_assembler;
+    IElemenetWiseLinearEquationLocalAssembler* _e_assembler;
 };
 
 

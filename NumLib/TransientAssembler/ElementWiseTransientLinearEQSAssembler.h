@@ -8,9 +8,9 @@
 
 #include "DiscreteLib/EquationId/DofEquationIdTable.h"
 #include "DiscreteLib/Core/DiscreteVector.h"
-#include "DiscreteLib/Assembler/DiscreteLinearEquationAssembler.h"
+#include "DiscreteLib/Assembler/IDiscreteLinearEquationAssembler.h"
 
-#include "ElementLocalAssembler.h"
+#include "IElementWiseTransientLinearEQSLocalAssembler.h"
 
 namespace MeshLib
 {
@@ -26,14 +26,14 @@ class TimeStep;
 /**
  * \brief Element-based discrete system assembler classes
  */
-class ElementBasedTransientAssembler : public DiscreteLib::IDiscreteLinearEquationAssembler
+class ElementWiseTransientLinearEQSAssembler : public DiscreteLib::IDiscreteLinearEquationAssembler
 {
 public:
     /// @param time
     /// @param u0
     /// @param u1
     /// @param a
-    ElementBasedTransientAssembler(const TimeStep &time, const std::vector<DiscreteLib::DiscreteVector<double>*> &u0, const std::vector<DiscreteLib::DiscreteVector<double>*> &u1, ITransientElemenetLocalAssembler &a)
+    ElementWiseTransientLinearEQSAssembler(const TimeStep &time, const std::vector<DiscreteLib::DiscreteVector<double>*> &u0, const std::vector<DiscreteLib::DiscreteVector<double>*> &u1, IElementWiseTransientLinearEQSLocalAssembler &a)
         : _transient_e_assembler(&a), _timestep(&time), _u0(&u0), _u1(&u1)
     { };
 
@@ -47,7 +47,7 @@ public:
     void assembly(MeshLib::IMesh &msh, DiscreteLib::DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs);
 
 private:
-    ITransientElemenetLocalAssembler* _transient_e_assembler;
+    IElementWiseTransientLinearEQSLocalAssembler* _transient_e_assembler;
     const TimeStep* _timestep;
     const std::vector<DiscreteLib::DiscreteVector<double>*>* _u0;
     const std::vector<DiscreteLib::DiscreteVector<double>*>* _u1;

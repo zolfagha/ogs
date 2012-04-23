@@ -1,5 +1,5 @@
 
-#include "ElementWiseAssembler.h"
+#include "ElementWiseLinearEquationAssembler.h"
 
 #include <vector>
 
@@ -9,12 +9,12 @@
 #include "MeshLib/Core/IMesh.h"
 
 #include "DiscreteLib/EquationId/DofEquationIdTable.h"
-#include "ElementLocalAssembler.h"
+#include "IElemenetWiseLinearEquationLocalAssembler.h"
 
 namespace DiscreteLib
 {
 
-void ElementWiseAssembler::assembly(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs)
+void ElementWiseLinearEquationAssembler::assembly(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs)
 {
     MathLib::DenseLinearEquations localEQS;
     std::vector<size_t> ele_node_ids, ele_node_size_order;

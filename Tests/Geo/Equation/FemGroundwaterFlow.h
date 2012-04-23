@@ -2,12 +2,13 @@
 #pragma once
 
 #include "FemLib/Core/Element/IFemElement.h"
+#include "NumLib/TransientAssembler/IElementWiseTimeODELocalAssembler.h"
 #include "Tests/Geo/Material/PorousMedia.h"
 
 namespace Geo
 {
 
-class WeakFormGroundwaterFlow: public NumLib::ITimeODEElementAssembler
+class WeakFormGroundwaterFlow: public NumLib::IElementWiseTimeODELocalAssembler
 {
 private:
 	PorousMedia* _pm;

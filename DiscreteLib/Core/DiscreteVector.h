@@ -2,7 +2,7 @@
 #pragma once
 
 #include <vector>
-
+#include <cstddef>
 
 namespace DiscreteLib
 {
@@ -38,10 +38,22 @@ public:
     		(*this)[i] = src[i];
     	return *this;
     }
+    virtual void operator+= (const IDiscreteVector<T>& v)
+    {
+    	for (size_t i=getRangeBegin(); i<getRangeEnd(); i++)
+    		(*this)[i] += v[i];
+    }
     virtual void operator-= (const IDiscreteVector<T>& v)
     {
     	for (size_t i=getRangeBegin(); i<getRangeEnd(); i++)
     		(*this)[i] -= v[i];
+    }
+
+    virtual void addSubvector(std::vector<long> pos, T* local_v)
+    {
+    	for (size_t i=0; i<pos.size(); ++i) {
+    		(*this)[pos[i]] += local_v[i];
+    	}
     }
 
     //virtual typename std::vector<T>::iterator begin() = 0;

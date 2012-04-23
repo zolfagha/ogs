@@ -12,7 +12,7 @@
 #include "FemLib/Function/FemFunction.h"
 #include "FemLib/BC/FemDirichletBC.h"
 #include "FemLib/BC/FemNeumannBC.h"
-#include "NumLib/TransientAssembler/ElementBasedTransientAssembler.h"
+#include "NumLib/TransientAssembler/ElementWiseTransientLinearEQSAssembler.h"
 
 #include "SolutionLib/Tools/TemplateTransientLinearFEMFunction.h"
 #include "SolutionLib/Tools/Nonlinear.h"

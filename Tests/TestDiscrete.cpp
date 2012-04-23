@@ -24,8 +24,8 @@
 #include "DiscreteLib/Core/DiscreteLinearEquation.h"
 #include "DiscreteLib/EquationId/DofEquationIdTable.h"
 #include "DiscreteLib/OpenMP/OMPDiscreteSystem.h"
-#include "DiscreteLib/Assembler/ElementWiseAssembler.h"
-#include "DiscreteLib/Assembler/ElementLocalAssembler.h"
+#include "DiscreteLib/Assembler/ElementWiseLinearEquationAssembler.h"
+#include "DiscreteLib/Assembler/IElemenetWiseLinearEquationLocalAssembler.h"
 #include "DiscreteLib/Utils/SparsityBuilder.h"
 #ifdef USE_MPI
 #include "DiscreteLib/ogs5/par_ddc_group.h"
@@ -142,7 +142,7 @@ TEST(Discrete, NDDCSSEqs2)
     IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivity>(lis, dofManager);
     linear_eq->initialize();
     linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
-    ElementWiseAssembler assem(ele_assembler);
+    ElementWiseLinearEquationAssembler assem(ele_assembler);
     linear_eq->construct(assem);
     //linear_eq->getLinearEquation()->printout();
     linear_eq->solve();
@@ -169,7 +169,7 @@ TEST(Discrete, NDDCSDEqs2)
     IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivity>(lis, dofManager);
     linear_eq->initialize();
     linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
-    ElementWiseAssembler assem(ele_assembler);
+    ElementWiseLinearEquationAssembler assem(ele_assembler);
     linear_eq->construct(assem);
     //linear_eq->getLinearEquation()->printout();
     linear_eq->solve();
@@ -266,7 +266,7 @@ TEST(Discrete, Lis1)
         // solve the equation
         linear_eq->initialize();
         linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
-        ElementWiseAssembler eqs_assembler(ele_assembler);
+        ElementWiseLinearEquationAssembler eqs_assembler(ele_assembler);
         linear_eq->construct(eqs_assembler);
         //linear_eq->getLinearEquation()->printout();
         linear_eq->solve();

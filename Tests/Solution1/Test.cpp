@@ -53,7 +53,7 @@ Geo::GWFemProblem* defineGWProblem(DiscreteSystem &dis, Rectangle &_rec, Geo::Po
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
     Geo::WeakFormGroundwaterFlow ele_eqs(*_feObjects, pm);
-    TimeEulerElementLocalAssembler<Geo::WeakFormGroundwaterFlow> local_assembler(ele_eqs);
+    ElementWiseTimeEulerEQSLocalAssembler<Geo::WeakFormGroundwaterFlow> local_assembler(ele_eqs);
     //IVBV problem
     Geo::GWFemProblem* _problem = new Geo::GWFemProblem(dis, *dis.getMesh(), local_assembler);
     //BC
@@ -75,7 +75,7 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, Rectangle &
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
     Geo::WeakFormMassTransport ele_eqs(*_feObjects, pm, comp) ;
-    TimeEulerElementLocalAssembler<Geo::WeakFormMassTransport> local_assembler(ele_eqs);
+    ElementWiseTimeEulerEQSLocalAssembler<Geo::WeakFormMassTransport> local_assembler(ele_eqs);
     //IVBV problem
     Geo::MassFemProblem* _problem = new Geo::MassFemProblem(dis, *dis.getMesh(), local_assembler);
     //BC

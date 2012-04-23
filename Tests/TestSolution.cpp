@@ -16,8 +16,8 @@
 #include "FemLib/Tools/FemElementObjectContainer.h"
 
 #include "NumLib/TimeStepping/TimeSteppingController.h"
-#include "NumLib/TransientAssembler/ElementLocalAssembler.h"
-#include "NumLib/TransientAssembler/TimeEulerElementLocalAssembler.h"
+#include "NumLib/TransientAssembler/IElementWiseTimeODELocalAssembler.h"
+#include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
 
 #include "SolutionLib/Problem/FemIVBVProblem.h"
 #include "SolutionLib/Solution/SingleStepFEM.h"
@@ -33,7 +33,7 @@ using namespace NumLib;
 using namespace SolutionLib;
 using namespace DiscreteLib;
 
-class GWAssembler: public NumLib::ITimeODEElementAssembler
+class GWAssembler: public NumLib::IElementWiseTimeODELocalAssembler
 {
 private:
     MathLib::SpatialFunctionScalar* _matK;
@@ -114,7 +114,7 @@ template <
 	>
 class GWFemTestSystem : public NumLib::ITransientSystem
 {
-    typedef FemIVBVProblem<TimeEulerElementLocalAssembler<GWAssembler>,TimeEulerElementLocalAssembler<GWAssembler> > GWFemProblem;
+    typedef FemIVBVProblem<ElementWiseTimeEulerEQSLocalAssembler<GWAssembler>,ElementWiseTimeEulerEQSLocalAssembler<GWAssembler> > GWFemProblem;
 
     typedef TemplateTransientLinearFEMFunction<
     			GWFemProblem,
