@@ -180,6 +180,14 @@ public:
         }
     }
 
+    virtual void addRHS(const GlobalVectorType &v, double fkt=1.0)
+    {
+        const size_t n = v.size();
+        for (size_t i=0; i<n; i++) {
+        	_global_linear_solver->addRHS(i, v[i]*fkt);
+        }
+    }
+
 private:
     DDCGlobal* _ddc_global;
     std::vector<TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>*> _list_local_eq;

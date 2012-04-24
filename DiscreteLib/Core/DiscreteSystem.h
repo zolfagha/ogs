@@ -67,6 +67,18 @@ public:
         return v;
     };
 
+	/// delete a vector
+	/// @param n	vector length
+	/// @return vector object
+    template<typename T>
+    void deleteVector(DiscreteVector<T>* v)
+    {
+    	if (v!=0) {
+            _data.eraseVector(v);
+            delete v;
+    	}
+    };
+
 private:
     DISALLOW_COPY_AND_ASSIGN(DiscreteSystem);
 

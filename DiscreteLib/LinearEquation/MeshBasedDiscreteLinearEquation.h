@@ -12,55 +12,10 @@
 #include "DiscreteLib/Assembler/IDiscreteLinearEquationAssembler.h"
 #include "DiscreteLib/Utils/SparsityBuilder.h"
 
+#include "AbstractMeshBasedDiscreteLinearEquation.h"
+
 namespace DiscreteLib
 {
-
-/**
- * \brief Abstract class for mesh-based discrete linear equations
- */
-class AbstractMeshBasedDiscreteLinearEquation : public IDiscreteLinearEquation
-{
-public:
-    ///
-    AbstractMeshBasedDiscreteLinearEquation(MeshLib::IMesh &msh, DofEquationIdTable &dofManager) : _msh(&msh), _dofManager(&dofManager), _sparsity(0)
-    {
-    }
-
-    virtual ~AbstractMeshBasedDiscreteLinearEquation()
-    {
-        //Base::releaseObject(_dofManager);
-        Base::releaseObject(_sparsity);
-    }
-
-    MeshLib::IMesh* getMesh() const
-    {
-        return _msh;
-    }
-
-    DofEquationIdTable* getDofMapManger() const 
-    {
-        return _dofManager;
-    }
-
-    MathLib::RowMajorSparsity* getSparsity() const
-    {
-        return _sparsity;
-    }
-
-protected:
-    void setSparsity(MathLib::RowMajorSparsity* sp)
-    {
-        _sparsity = sp;;
-    }
-
-private:
-    MeshLib::IMesh* _msh;
-    DofEquationIdTable* _dofManager;
-    MathLib::RowMajorSparsity* _sparsity;
-
-    DISALLOW_COPY_AND_ASSIGN(AbstractMeshBasedDiscreteLinearEquation);
-};
-
 
 /**
  * \brief Implementation of mesh based discrete linear equation classes combined with the specific linear solver class
@@ -144,6 +99,13 @@ public:
         }
     }
 
+    virtual void addRHS(const GlobalVectorType &v, double fkt=1.0)
+    {
+        const size_t n = v.size();
+        for (size_t i=0; i<n; i++) {
+			_eqs->addRHS(i, v[i]*fkt);
+        }
+    }
 
     /// solve
     void solve()
@@ -166,7 +128,7 @@ public:
             x[i] = tmp_x[i];
     }
 
-    void getX(DiscreteVector<double> &x)
+    void getX(GlobalVectorType &x)
     {
         double *tmp_x = _eqs->getX();
         for (size_t i=x.getRangeBegin(); i<x.getRangeEnd(); i++)

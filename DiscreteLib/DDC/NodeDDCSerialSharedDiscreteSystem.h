@@ -145,6 +145,14 @@ public:
         }
     }
 
+    virtual void addRHS(const GlobalVectorType &v, double fkt=1.0)
+    {
+        const size_t n = v.size();
+        for (size_t i=0; i<n; i++) {
+        	_sheared_eqs->addRHS(i, v[i]*fkt);
+        }
+    }
+
 private:
     DDCGlobal* _ddc_global;
     std::vector<AbstractMeshBasedDiscreteLinearEquation*> _list_local_eq;

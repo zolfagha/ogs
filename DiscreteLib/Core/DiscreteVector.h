@@ -4,17 +4,11 @@
 #include <vector>
 #include <cstddef>
 
+#include "IDiscreteVectorBase.h"
+
 namespace DiscreteLib
 {
 
-/**
- * \brief Interface of Vector containers in discrete systems
- */
-class IDiscreteVectorBase
-{
-public:
-    virtual ~IDiscreteVectorBase() {};
-};
 
 template<typename T>
 class IDiscreteVector : public IDiscreteVectorBase

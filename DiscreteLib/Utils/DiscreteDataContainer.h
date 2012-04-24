@@ -5,13 +5,12 @@
 
 #include "Base/CodingTools.h"
 
-//#include "DiscreteLib/Core/DiscreteVector.h"
+#include "DiscreteLib/Core/IDiscreteVectorBase.h"
 //#include "DiscreteLib/Core/DiscreteLinearEquation.h"
 
 namespace DiscreteLib
 {
 
-class IDiscreteVectorBase;
 class IDiscreteLinearEquation;
 
 /**
@@ -30,7 +29,16 @@ public:
     size_t addVector(IDiscreteVectorBase* v)
     {
         _vec_vectors.push_back(v);
+        v->setObjectID(_vec_vectors.size()-1);
         return _vec_vectors.size()-1;
+    }
+
+    void eraseVector(IDiscreteVectorBase* v)
+    {
+    	const size_t i = v->getObjectID();
+    	if (_vec_vectors.size() > i) {
+    		_vec_vectors[i] = 0;
+    	}
     }
 
     size_t getNumberOfVectors() const {return _vec_vectors.size();};
