@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <valarray>
 #include <vector>
 
 #include "ILinearEquations.h"
@@ -17,7 +18,7 @@ class DenseLinearEquationsBase : public ILinearEquations
 {
 public:
     typedef Matrix<double> MatrixType;
-    typedef std::vector<double> VectorType;
+    typedef std::valarray<double> VectorType;
 
     DenseLinearEquationsBase() : _A(0) {};
 
@@ -26,7 +27,7 @@ public:
         if (_A) delete _A;
     }
 
-    void create(size_t length, RowMajorSparsity* sp=0)
+    void create(size_t length, RowMajorSparsity* /*sp*/=0)
     {
         resize(length);
     }
@@ -40,8 +41,8 @@ public:
     void reset()
     {
         (*_A) = .0;
-        _b.assign(_b.size(), .0);
-        _x.assign(_x.size(), .0);
+        _b.resize(_b.size(), .0);
+        _x.resize(_x.size(), .0);
     }
 
     size_t getDimension() const
@@ -113,9 +114,9 @@ public:
     }
 
 private:
-    Matrix<double> *_A;
-    std::vector<double> _b;
-    std::vector<double> _x;
+    MatrixType *_A;
+    VectorType _b;
+    VectorType _x;
 
 };
 

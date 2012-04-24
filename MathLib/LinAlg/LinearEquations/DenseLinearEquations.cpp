@@ -49,7 +49,8 @@ void DenseLinearEquations::solve()
     MathLib::GaussAlgorithm solver(*this->getA());
     DenseLinearEquationsBase::VectorType *b = this->getRHSAsStdVec();
     DenseLinearEquationsBase::VectorType *x = this->getXAsStdVec();
-    std::copy(b->begin(), b->end(), x->begin());
+    //std::copy(b->begin(), b->end(), x->begin());
+    *x = *b;
     solver.execute(&(*x)[0]);
 }
 
