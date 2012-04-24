@@ -82,7 +82,7 @@ public:
 	/// @tparam T_VALUE
 	/// @tparam T_CONVERGENCE
     template<class F_RESIDUALS, class F_DX, class T_VALUE, class T_CONVERGENCE>
-    int solve(F_RESIDUALS &f_residuals, F_DX &f_dx, T_VALUE &x0, T_VALUE &x_new, T_VALUE &r, T_VALUE &dx, size_t max_itr_count=100, T_CONVERGENCE* convergence=0)
+    int solve(F_RESIDUALS &f_residuals, F_DX &f_dx, const T_VALUE &x0, T_VALUE &x_new, T_VALUE &r, T_VALUE &dx, size_t max_itr_count=100, T_CONVERGENCE* convergence=0)
     {
         T_CONVERGENCE _default_convergence;
     	if (convergence==0) convergence = &_default_convergence;
@@ -111,7 +111,7 @@ public:
 
     /// solve scalar problems
     template<class F_RESIDUALS, class F_JACOBIAN>
-    int solve(F_RESIDUALS &f_residuals, F_JACOBIAN &f_jac, double &x0, double &x_new, double error=1e-6, size_t max_itr_count=100)
+    int solve(F_RESIDUALS &f_residuals, F_JACOBIAN &f_jac, const double &x0, double &x_new, double error=1e-6, size_t max_itr_count=100)
     {
     	NewtonFunctionDXScalar<F_JACOBIAN> f_dx(f_jac);
     	double r, dx;
@@ -121,7 +121,7 @@ public:
 
     /// solve vector problems using a direct linear solver
     template<class F_RESIDUALS, class F_JACOBIAN, class T_V, class T_CONVERGENCE>
-    int solve(F_RESIDUALS &f_residuals, F_JACOBIAN &f_jac, T_V &x0, T_V &x_new, T_CONVERGENCE* check_error=0, size_t max_itr_count=100)
+    int solve(F_RESIDUALS &f_residuals, F_JACOBIAN &f_jac, const T_V &x0, T_V &x_new, T_CONVERGENCE* check_error=0, size_t max_itr_count=100)
     {
     	const size_t n = x0.size();
     	T_V r(n), dx(n);
@@ -133,7 +133,7 @@ public:
 
     /// solve vector problems using a direct linear solver
     template<class F_RESIDUALS, class F_JACOBIAN, class T_V>
-    int solve(F_RESIDUALS &f_residuals, F_JACOBIAN &f_jac, T_V &x0, T_V &x_new, double error=1e-6, size_t max_itr_count=100)
+    int solve(F_RESIDUALS &f_residuals, F_JACOBIAN &f_jac, const T_V &x0, T_V &x_new, double error=1e-6, size_t max_itr_count=100)
     {
     	NRCheckConvergence<T_V,NRErrorAbsResMNormOrRelDxMNorm> check(error);
     	return solve(f_residuals, f_jac, x0, x_new, &check, max_itr_count);

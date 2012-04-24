@@ -24,7 +24,7 @@ public:
     /// @param error			error tolerance
     /// @param max_itr_count	maximum iteration counts
     template<class F_PROBLEM, class T_VALUE, class T_CONVERGENCE>
-    int solve(F_PROBLEM &fun,  T_VALUE &x0, T_VALUE &x_new, T_VALUE &x_old, T_VALUE &dx, size_t max_itr_count=100, T_CONVERGENCE* convergence=0)
+    int solve(F_PROBLEM &fun,  const T_VALUE &x0, T_VALUE &x_new, T_VALUE &x_old, T_VALUE &dx, size_t max_itr_count=100, T_CONVERGENCE* convergence=0)
     {
         T_CONVERGENCE _default_convergence;
     	if (convergence==0) convergence = &_default_convergence;
@@ -52,7 +52,7 @@ public:
 
     /// solve scalar problems
     template<class F_PROBLEM>
-    int solve(F_PROBLEM &fun, double &x0, double &x_new, double error=1e-6, size_t max_itr_count=100)
+    int solve(F_PROBLEM &fun, const double x0, double &x_new, double error=1e-6, size_t max_itr_count=100)
     {
     	double x_old, dx;
     	NRCheckConvergence<double,NRErrorNorm1DX> check(error);
@@ -61,7 +61,7 @@ public:
 
     /// solve vector problems using a direct linear solver
     template<class F_PROBLEM, class T_V, class T_CONVERGENCE>
-    int solve(F_PROBLEM &fun, T_V &x0, T_V &x_new, T_CONVERGENCE* check_error=0, size_t max_itr_count=100)
+    int solve(F_PROBLEM &fun, const T_V &x0, T_V &x_new, T_CONVERGENCE* check_error=0, size_t max_itr_count=100)
     {
     	const size_t n = x0.size();
     	T_V x_old(n), dx(n);
@@ -70,7 +70,7 @@ public:
 
     /// solve vector problems using a direct linear solver
     template<class F_PROBLEM, class T_V>
-    int solve(F_PROBLEM &fun, T_V &x0, T_V &x_new, double error=1e-6, size_t max_itr_count=100)
+    int solve(F_PROBLEM &fun, const T_V &x0, T_V &x_new, double error=1e-6, size_t max_itr_count=100)
     {
     	NRCheckConvergence<T_V,NRErrorNorm1DX> check(error);
     	return solve(fun, x0, x_new, &check, max_itr_count);
