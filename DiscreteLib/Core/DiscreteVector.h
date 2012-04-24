@@ -28,9 +28,9 @@ public:
 
     virtual IDiscreteVector<T>& operator= (const IDiscreteVector<T> &src)
     {
-    	for (size_t i=getRangeBegin(); i<getRangeEnd(); i++)
-    		(*this)[i] = src[i];
-    	return *this;
+        for (size_t i=getRangeBegin(); i<getRangeEnd(); i++)
+            (*this)[i] = src[i];
+        return *this;
     }
     virtual void operator+= (const IDiscreteVector<T>& v)
     {
@@ -64,7 +64,7 @@ class DiscreteVector : public IDiscreteVector<T>
 {
 public:
     DiscreteVector() {};
-    DiscreteVector(size_t n) : _data(n) {};
+    explicit DiscreteVector(size_t n) : _data(n) {};
     virtual ~DiscreteVector() {};
 
     virtual void resize(size_t n) {_data.resize(n);};
@@ -73,6 +73,13 @@ public:
     virtual double norm1() {return .0;};
     virtual double norm2() {return .0;};
     virtual double norm_max() {return .0;};
+
+    virtual DiscreteVector<T>& operator= (T v)
+    {
+        for (size_t i=getRangeBegin(); i<getRangeEnd(); i++)
+            (*this)[i] = v;
+        return *this;
+    }
 
     virtual T& operator[] (size_t idx) 
     {

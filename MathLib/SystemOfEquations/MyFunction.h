@@ -57,7 +57,7 @@ public:
                         const std::valarray<double> &x = itr->second;
                         if (comp->stiffness!=0) {
                             std::valarray<double> vec(n_local_row_dof);
-                            comp->stiffness->axpy(1.0, &x[0], .0, &vec[0]);
+                            comp->stiffness->axpy(1.0, &((std::valarray<double>)x)[0], .0, &vec[0]);
                             for (size_t k=0; k<n_local_row_dof; k++)
                                 b[pos_row[k]] -= vec[k];
                         }

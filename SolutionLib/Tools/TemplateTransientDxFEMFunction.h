@@ -30,7 +30,7 @@ template <
     class T_LOCAL_JACOBIAN_ASSEMBLER
     >
 class TemplateTransientDxFEMFunction
-	: public MathLib::TemplateFunction<MyFemVector, MyFemVector>
+	//: public MathLib::TemplateFunction<MyFemVector, MyFemVector>
 {
 public:
     typedef T_USER_FEM_PROBLEM UserFemProblem;

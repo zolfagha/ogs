@@ -74,7 +74,7 @@ public:
         TMP_M = K;
         TMP_M *= - (1.-_theta);
         TMP_M2 += TMP_M;
-        TMP_M2.axpy(1.0, &local_u_n[0], .0, localRHS);
+        TMP_M2.axpy(1.0, &((LocalVectorType)local_u_n)[0], .0, localRHS);
         for (size_t i=0; i<n_dof; i++)
             localRHS[i] += F[i];
     }

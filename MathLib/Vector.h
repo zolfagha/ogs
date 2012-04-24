@@ -17,7 +17,7 @@ public:
     TemplateVectorX()
     {
     };
-    TemplateVectorX(size_t n)
+    explicit TemplateVectorX(size_t n)
     {
         _data.resize(n);
     };
@@ -58,7 +58,7 @@ public:
     TemplateVectorX<T>& operator+= (const TemplateVectorX<T> &v)
     {
         if (_data.size()==0)
-            _data.resize(v._data.size(), 0);
+            _data.resize(v._data.size());
         _data += v._data;
 
         return *this;
@@ -66,7 +66,7 @@ public:
     TemplateVectorX<T>& operator-= (const TemplateVectorX<T> &v)
     {
         if (_data.size()==0)
-            _data.resize(v._data.size(), 0);
+            _data.resize(v._data.size());
         _data -= v._data;
 
         return *this;

@@ -69,7 +69,7 @@ public:
         TMP_M *= _theta;
         TMP_M2 += TMP_M;
         TMP_V = .0;
-        TMP_M2.axpy(1.0, &local_u_n1[0], .0, &TMP_V[0]);
+        TMP_M2.axpy(1.0, &((LocalVectorType)local_u_n1)[0], .0, &TMP_V[0]);
         local_r += TMP_V;
         // r -= (1/dt M - (1-theta) K) u0
         TMP_M = M;
@@ -79,7 +79,7 @@ public:
         TMP_M *= - (1.-_theta);
         TMP_M2 += TMP_M;
         TMP_V = .0;
-        TMP_M2.axpy(1.0, &local_u_n[0], .0, &TMP_V[0]);
+        TMP_M2.axpy(1.0, &((LocalVectorType)local_u_n)[0], .0, &TMP_V[0]);
         local_r -= TMP_V;
         // r -= F
         local_r -= F;
