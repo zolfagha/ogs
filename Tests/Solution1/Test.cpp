@@ -10,8 +10,7 @@
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TransientCoupling/AsyncPartitionedSystem.h"
-
-#include "SolutionLib/Tools/Nonlinear.h"
+#include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
 
 #include "Tests/Geo/Model/Head.h"
 #include "Tests/Geo/Model/Velocity.h"
@@ -52,10 +51,12 @@ Geo::GWFemProblem* defineGWProblem(DiscreteSystem &dis, Rectangle &_rec, Geo::Po
 {
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
-    Geo::WeakFormGroundwaterFlow ele_eqs(*_feObjects, pm);
-    ElementWiseTimeEulerEQSLocalAssembler<Geo::WeakFormGroundwaterFlow> local_assembler(ele_eqs);
+    Geo::GroundwaterFlowTimeODELocalAssembler ele_eqs(*_feObjects, pm);
+    ElementWiseTimeEulerEQSLocalAssembler<Geo::GroundwaterFlowTimeODELocalAssembler> linear_assembler(ele_eqs);
+    ElementWiseTimeEulerResidualLocalAssembler<Geo::GroundwaterFlowTimeODELocalAssembler> r_assembler(ele_eqs);
+    Geo::GroundwaterFlowJacobianLocalAssembler j_eqs(*_feObjects, pm);
     //IVBV problem
-    Geo::GWFemProblem* _problem = new Geo::GWFemProblem(dis, *dis.getMesh(), local_assembler);
+    Geo::GWFemProblem* _problem = new Geo::GWFemProblem(dis, *dis.getMesh(), &linear_assembler, &r_assembler, &j_eqs);
     //BC
     size_t headId = _problem->createField(PolynomialOrder::Linear);
     FemNodalFunctionScalar* _head = _problem->getField(headId);
@@ -74,10 +75,12 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, Rectangle &
 {
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
-    Geo::WeakFormMassTransport ele_eqs(*_feObjects, pm, comp) ;
-    ElementWiseTimeEulerEQSLocalAssembler<Geo::WeakFormMassTransport> local_assembler(ele_eqs);
+    Geo::MassTransportTimeODELocalAssembler ele_eqs(*_feObjects, pm, comp) ;
+    ElementWiseTimeEulerEQSLocalAssembler<Geo::MassTransportTimeODELocalAssembler> linear_assembler(ele_eqs);
+    ElementWiseTimeEulerResidualLocalAssembler<Geo::MassTransportTimeODELocalAssembler> r_assembler(ele_eqs);
+    Geo::MassTransportJacobianLocalAssembler j_eqs(*_feObjects, pm, comp);
     //IVBV problem
-    Geo::MassFemProblem* _problem = new Geo::MassFemProblem(dis, *dis.getMesh(), local_assembler);
+    Geo::MassFemProblem* _problem = new Geo::MassFemProblem(dis, *dis.getMesh(), &linear_assembler, &r_assembler, &j_eqs);
     //BC
     size_t var_id = _problem->createField(PolynomialOrder::Linear);
     FemNodalFunctionScalar* _conc = _problem->getField(var_id);
@@ -101,9 +104,9 @@ static void getGWExpectedHead(std::vector<double> &expected)
     }
 }
 
-typedef Geo::FunctionHead<Linear,CRSLisSolver> MyFunctionHead;
+typedef Geo::FunctionHead<CRSLisSolver> MyFunctionHead;
 typedef Geo::FunctionVelocity MyFunctionVelocity;
-typedef Geo::FunctionConcentration<Linear,CRSLisSolver> MyFunctionConcentration;
+typedef Geo::FunctionConcentration<CRSLisSolver> MyFunctionConcentration;
 
 
 TEST(Solution, CouplingFem1)

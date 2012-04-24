@@ -13,9 +13,11 @@
 #include "FemLib/BC/FemDirichletBC.h"
 #include "FemLib/BC/FemNeumannBC.h"
 #include "NumLib/TransientAssembler/ElementWiseTransientLinearEQSAssembler.h"
+#include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
 
 #include "SolutionLib/Tools/TemplateTransientLinearFEMFunction.h"
-#include "SolutionLib/Tools/Nonlinear.h"
+#include "SolutionLib/Tools/TemplateTransientResidualFEMFunction.h"
+#include "SolutionLib/Tools/TemplateTransientDxFEMFunction.h"
 
 #include "AbstractTimeSteppingAlgorithm.h"
 
@@ -39,9 +41,10 @@ class SingleStepFEM
 {
 public:
     typedef T_USER_FEM_PROBLEM UserFemProblem;
-    typedef TemplateTransientLinearFEMFunction<UserFemProblem, typename UserFemProblem::ReisdualAssemblerType, T_LINEAR_SOLVER> UserLinearFemFunction;
-    typedef TemplateTransientLinearFEMFunction<UserFemProblem, typename UserFemProblem::ReisdualAssemblerType, T_LINEAR_SOLVER> UserNonlinearFunction;
-    //typedef TemplateTransientLinearFEMFunction<UserFemProblem, typename UserFemProblem::JacobianAssemblerType, T_LINEAR_SOLVER> UserNonlinearFunction;
+    typedef TemplateTransientLinearFEMFunction<UserFemProblem, typename UserFemProblem::LinearAssemblerType> UserLinearFemFunction;
+    typedef TemplateTransientResidualFEMFunction<UserFemProblem, typename UserFemProblem::ResidualAssemblerType> UserResidualFunction;
+    typedef TemplateTransientDxFEMFunction<UserFemProblem, typename UserFemProblem::JacobianAssemblerType> UserDxFunction;
+    typedef NumLib::TemplateDiscreteNonlinearSolver<UserLinearFemFunction, UserResidualFunction, UserDxFunction> UserNonlinearFunction;
 
     /// constructor
     ///
@@ -76,16 +79,18 @@ public:
         _linear_solver = new T_LINEAR_SOLVER();
         _linear_eqs = _discrete_system->createLinearEquation<DiscreteLib::TemplateMeshBasedDiscreteLinearEquation, T_LINEAR_SOLVER, DiscreteLib::SparsityBuilderFromNodeConnectivity>(*_linear_solver, _dofManager);
         // setup linear function
-        _linear_fucntion = new UserLinearFemFunction(problem, problem.getResidualAssembler(), *_linear_eqs);
-        //_nonlinear = new UserNonlinearFunction(*_linear_fucntion);
+        _f_linear = new UserLinearFemFunction(problem, *problem.getLinearAssembler(), *_linear_eqs);
+        _f_r = 0;
+        _f_dx = 0;
+        _f_nonlinear = new UserNonlinearFunction(&dis, _f_linear, _f_r, _f_dx);
     };
 
     ///
     virtual ~SingleStepFEM()
     {
         Base::releaseObject(_linear_solver);
-        Base::releaseObject(_linear_fucntion);
-        Base::releaseObject(_nonlinear);
+        Base::releaseObject(_f_linear);
+        Base::releaseObject(_f_r);
     }
 
     /// get a linear equation solver object
@@ -100,8 +105,8 @@ public:
         this_t_n1.setTimeStepSize(dt);
         //*_vec_n0 = *_vec_n1;
 
-        _linear_fucntion->reset(t_n1);
-        //TODO _nonlinear->solve(*_vec_n0, *_vec_n1);
+        _f_linear->reset(t_n1);
+        _f_nonlinear->solve(*_vec_n0, *_vec_n1);
 
         _u_n1[0]->setNodalValues(*_vec_n1);
 
@@ -129,8 +134,10 @@ private:
     DiscreteLib::DiscreteSystem *_discrete_system;
     DiscreteLib::IDiscreteLinearEquation* _linear_eqs;
     std::vector<FemLib::FemNodalFunctionScalar*> _u_n1;
-    UserLinearFemFunction* _linear_fucntion;
-    UserNonlinearFunction* _nonlinear;
+    UserLinearFemFunction* _f_linear;
+    UserResidualFunction* _f_r;
+    UserDxFunction* _f_dx;
+    UserNonlinearFunction* _f_nonlinear;
     MyFemVector *_vec_n0;
     MyFemVector *_vec_n1;
 

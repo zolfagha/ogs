@@ -8,6 +8,7 @@
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
+#include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
 #include "SolutionLib/Problem/FemIVBVProblem.h"
 #include "SolutionLib/Solution/SingleStepFEM.h"
 
@@ -27,14 +28,14 @@ namespace Geo
 
 typedef FemIVBVProblem
 		<
-			ElementWiseTimeEulerEQSLocalAssembler<Geo::WeakFormGroundwaterFlow>,
-			ElementWiseTimeEulerEQSLocalAssembler<Geo::WeakFormGroundwaterFlow>
+			ElementWiseTimeEulerEQSLocalAssembler<Geo::GroundwaterFlowTimeODELocalAssembler>,
+			ElementWiseTimeEulerResidualLocalAssembler<Geo::GroundwaterFlowTimeODELocalAssembler>,
+			Geo::GroundwaterFlowJacobianLocalAssembler
 		> GWFemProblem;
 
 
 
 template <
-	template <class> class T_NONLINEAR,
 	class T_LINEAR_SOLVER
 	>
 class FunctionHead : public TemplateTransientMonolithicSystem

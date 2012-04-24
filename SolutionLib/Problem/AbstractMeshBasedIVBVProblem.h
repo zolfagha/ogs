@@ -20,7 +20,8 @@ class AbstractMeshBasedDiscreteIVBVProblem : public IVBVProblem
 {
 public:
 	///
-    AbstractMeshBasedDiscreteIVBVProblem(MeshLib::IMesh &msh) : _msh(&msh), _tim(0) {};
+    AbstractMeshBasedDiscreteIVBVProblem(MeshLib::IMesh &msh) : _msh(&msh), _tim(0)
+	{};
 
     ///
     virtual ~AbstractMeshBasedDiscreteIVBVProblem()
@@ -42,6 +43,7 @@ public:
 
     /// get the time stepping function
     NumLib::ITimeStepFunction* getTimeSteppingFunction() const {return _tim;};
+
 
 private:
     MeshLib::IMesh* _msh;

@@ -17,11 +17,16 @@
 
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TransientAssembler/IElementWiseTimeODELocalAssembler.h"
+#include "NumLib/TransientAssembler/IElementWiseTransientJacobianLocalAssembler.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
+#include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
+#include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
 
 #include "SolutionLib/Problem/FemIVBVProblem.h"
 #include "SolutionLib/Solution/SingleStepFEM.h"
-#include "SolutionLib/Tools/Nonlinear.h"
+#include "SolutionLib/Tools/TemplateTransientLinearFEMFunction.h"
+#include "SolutionLib/Tools/TemplateTransientResidualFEMFunction.h"
+#include "SolutionLib/Tools/TemplateTransientDxFEMFunction.h"
 
 #include "TestUtil.h"
 
@@ -33,13 +38,13 @@ using namespace NumLib;
 using namespace SolutionLib;
 using namespace DiscreteLib;
 
-class GWAssembler: public NumLib::IElementWiseTimeODELocalAssembler
+class GWTimeODEAssembler: public NumLib::IElementWiseTimeODELocalAssembler
 {
 private:
     MathLib::SpatialFunctionScalar* _matK;
     FemLib::LagrangianFeObjectContainer* _feObjects;
 public:
-    GWAssembler(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::SpatialFunctionScalar &mat)
+    GWTimeODEAssembler(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::SpatialFunctionScalar &mat)
     : _matK(&mat), _feObjects(&feObjects)
     {
     };
@@ -64,21 +69,27 @@ public:
     }
 };
 
-class GWAssemblerJacobian //: public NumLib::ITimeODEElementAssembler
+class GWJacobianAssembler : public NumLib::IElementWiseTransientJacobianLocalAssembler
 {
 private:
     MathLib::SpatialFunctionScalar* _matK;
     FemLib::LagrangianFeObjectContainer* _feObjects;
 public:
-    GWAssemblerJacobian(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::SpatialFunctionScalar &mat)
+    GWJacobianAssembler(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::SpatialFunctionScalar &mat)
     : _matK(&mat), _feObjects(&feObjects)
     {
     };
 
-    void assembly(const NumLib::TimeStep &time, MeshLib::IElement &e, MathLib::DenseLinearEquations::VectorType &localX, MathLib::DenseLinearEquations::MatrixType &localJ)
+    /// assemble a local Jacobian matrix for the given element
+    /// @param time			time step
+    /// @param e			element
+    /// @param local_u_n1	guess of current time step value
+    /// @param local_u_n	previous time step value
+    /// @param local_J		local Jacobian
+    virtual void assembly(const TimeStep &time,  MeshLib::IElement &e, const LocalVectorType &local_u_n1, const LocalVectorType &local_u_n, LocalMatrixType &local_J)
     {
         IFiniteElement* fe = _feObjects->getFeObject(e);
-        const size_t n = localX.size();
+        const size_t n = local_u_n1.size();
 
         const double dt = time.getTimeStepSize();
         const double theta = 1.0;
@@ -97,32 +108,44 @@ public:
         	_matK->eval(real_x, k);
         	fe->integrateDWxDN(j, k, localK);
         }
-        
+
         //localR = (1/dt * localM + theta * localK) * localX - (1/dt * localM + (1-theta) * localK) * localX0 - localF;
         MathLib::DenseLinearEquations::MatrixType tmpM;
         tmpM = localK;
         tmpM *= theta;
         //tmpM.axpy(1.0, &localX[0], 0.0, &localR[0]);
-        
-        localJ = localK;
+
+        local_J = localK;
     }
 };
 
 template <
-	template <class> class T_NONLINEAR,
 	class T_LINEAR_SOLVER
 	>
 class GWFemTestSystem : public NumLib::ITransientSystem
 {
-    typedef FemIVBVProblem<ElementWiseTimeEulerEQSLocalAssembler<GWAssembler>,ElementWiseTimeEulerEQSLocalAssembler<GWAssembler> > GWFemProblem;
+    typedef FemIVBVProblem<
+    			ElementWiseTimeEulerEQSLocalAssembler<GWTimeODEAssembler>,
+    			ElementWiseTimeEulerResidualLocalAssembler<GWTimeODEAssembler>,
+    			GWJacobianAssembler
+    		> GWFemProblem;
 
     typedef TemplateTransientLinearFEMFunction<
     			GWFemProblem,
-    			typename GWFemProblem::ReisdualAssemblerType,
-    			T_LINEAR_SOLVER
+    			typename GWFemProblem::LinearAssemblerType
 			> MyLinearFunction;
 
-    typedef T_NONLINEAR<MyLinearFunction> MyNonlinearFunction;
+    typedef TemplateTransientResidualFEMFunction<
+    			GWFemProblem,
+    			typename GWFemProblem::ResidualAssemblerType
+			> MyResidualFunction;
+
+    typedef TemplateTransientDxFEMFunction<
+    			GWFemProblem,
+    			typename GWFemProblem::JacobianAssemblerType
+			> MyDxFunction;
+
+    typedef TemplateDiscreteNonlinearSolver<MyLinearFunction, MyResidualFunction, MyDxFunction> MyNonlinearFunction;
 
     typedef SingleStepFEM
     		<
@@ -169,10 +192,12 @@ public:
         //size_t nnodes = msh->getNumberOfNodes();
         _feObjects = new LagrangianFeObjectContainer(*msh);
         //equations
-        GWAssembler ele_x_eqs(*_feObjects, K) ;
-        GWFemProblem::ReisdualAssemblerType ele_eqs(ele_x_eqs);
+        GWTimeODEAssembler ele_x_eqs(*_feObjects, K) ;
+        GWFemProblem::LinearAssemblerType local_linear(ele_x_eqs);
+        GWFemProblem::ResidualAssemblerType local_r(ele_x_eqs);
+        GWFemProblem::JacobianAssemblerType local_J(*_feObjects, K);
         //IVBV problem
-        _problem = new GWFemProblem(dis, *dis.getMesh(), ele_eqs);
+        _problem = new GWFemProblem(dis, *dis.getMesh(), &local_linear, &local_r, &local_J);
         //BC
         size_t headId = _problem->createField(PolynomialOrder::Linear);
         _head = _problem->getField(headId);
@@ -231,7 +256,7 @@ TEST(Solution, Fem1_Linear)
     op_lis->addOptionAsNum("error_tolerance", 1e-10);
     op_lis->addOptionAsNum("max_iteration_step", 500);
     // define problems
-    GWFemTestSystem<SolutionLib::Linear, MathLib::CRSLisSolver> gwProblem;
+    GWFemTestSystem<MathLib::CRSLisSolver> gwProblem;
     gwProblem.define(dis, K, options);
 
     gwProblem.solveTimeStep(TimeStep(1.0, 1.0));
@@ -265,7 +290,7 @@ TEST(Solution, Fem1_Picard)
     op_lis->addOptionAsNum("error_tolerance", 1e-10);
     op_lis->addOptionAsNum("max_iteration_step", 500);
     // define problems
-    GWFemTestSystem<SolutionLib::Picard, MathLib::CRSLisSolver> gwProblem;
+    GWFemTestSystem<MathLib::CRSLisSolver> gwProblem;
     gwProblem.define(dis, K, options);
 
     gwProblem.solveTimeStep(TimeStep(1.0, 1.0));
@@ -299,7 +324,7 @@ TEST(Solution, Fem1_Newton)
     op_lis->addOptionAsNum("error_tolerance", 1e-10);
     op_lis->addOptionAsNum("max_iteration_step", 500);
     // define problems
-    GWFemTestSystem<SolutionLib::NewtonRaphson, MathLib::CRSLisSolver> gwProblem;
+    GWFemTestSystem<MathLib::CRSLisSolver> gwProblem;
     gwProblem.define(dis, K, options);
 
     gwProblem.solveTimeStep(TimeStep(1.0, 1.0));
@@ -333,7 +358,7 @@ TEST(Solution, Fem2)
     op_lis->addOptionAsNum("error_tolerance", 1e-10);
     op_lis->addOptionAsNum("max_iteration_step", 500);
     // define problems
-    GWFemTestSystem<SolutionLib::Linear, MathLib::CRSLisSolver> gwProblem;
+    GWFemTestSystem<MathLib::CRSLisSolver> gwProblem;
     gwProblem.define(dis, K, options);
 
     // start time stepping

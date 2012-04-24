@@ -92,7 +92,7 @@ public:
 class NL2_NR
 {
 public:
-	void eval(std::valarray<double> &x, std::valarray<double> &r)
+	void eval(const std::valarray<double> &x, std::valarray<double> &r)
 	{
 		r[0] = 3*x[0]-x[1]+2.;
 		r[1] = 2*x[0]*x[0]-x[1];
@@ -171,7 +171,7 @@ public:
 	  _linear_solver.getOption().ls_method = MathLib::LIS_option::BiCGSTAB;
   }
 
-  void eval(std::valarray<double> &x, std::valarray<double> &r)
+  void eval(const std::valarray<double> &x, std::valarray<double> &r)
   {
 		r[0] = 3*x[0]-x[1]+2.;
 		r[1] = 2*x[0]*x[0]-x[1];
@@ -209,7 +209,7 @@ private:
 class NL4_Residual
 {
 public:
-	void eval(std::valarray<double> &x, std::valarray<double> &r)
+	void eval(const std::valarray<double> &x, std::valarray<double> &r)
 	{
 		double P = 1.;
 		double R = 10.;

@@ -15,8 +15,8 @@ void ElementWiseTransientResidualAssembler::assembly( const MeshLib::IMesh &msh,
     std::vector<long> local_dofmap;
     const size_t n_ele = msh.getNumberOfElements();
 
-    std::vector<double> local_u_n1;
-    std::vector<double> local_u_n;
+    LocalVectorType local_u_n1;
+    LocalVectorType local_u_n;
     for (size_t i=0; i<n_ele; i++) {
         MeshLib::IElement *e = msh.getElemenet(i);
         // get dof map

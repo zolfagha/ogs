@@ -45,7 +45,7 @@ public:
     /// @param dofManager 		Dof map manager
     /// @param list_dofId 		List of Dof IDs used in this problem
     /// @param r 				Residual
-    virtual void assembly( const MeshLib::IMesh &msh, const DiscreteLib::DofEquationIdTable &dofManager, GlobalVectorType &r) = 0;
+    virtual void assembly( const MeshLib::IMesh &msh, const DiscreteLib::DofEquationIdTable &dofManager, GlobalVectorType &r);
 
 private:
     IElementWiseTransientResidualLocalAssembler* _transient_e_assembler;

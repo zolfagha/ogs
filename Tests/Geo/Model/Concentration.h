@@ -28,12 +28,12 @@ namespace Geo
 
 typedef FemIVBVProblem
 		<
-			ElementWiseTimeEulerEQSLocalAssembler<Geo::WeakFormMassTransport>,
-			Geo::WeakFormMassTransport
+			ElementWiseTimeEulerEQSLocalAssembler<Geo::MassTransportTimeODELocalAssembler>,
+			ElementWiseTimeEulerResidualLocalAssembler<Geo::MassTransportTimeODELocalAssembler>,
+			Geo::MassTransportJacobianLocalAssembler
 		> MassFemProblem;
 
 template <
-	template <class> class T_NONLINEAR,
 	class T_LINEAR_SOLVER
 	>
 class FunctionConcentration : public TemplateTransientMonolithicSystem

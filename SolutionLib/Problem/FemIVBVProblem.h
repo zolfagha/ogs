@@ -22,35 +22,43 @@ namespace SolutionLib
  *- BC
  */
 template <
-	class T_ASSEMBLER_RESIDUAL,
-	class T_ASSEMBLER_JACOBIAN
+	class T_LOCAL_ASSEMBLER_LINEAR,
+	class T_LOCAL_ASSEMBLER_RESIDUAL,
+	class T_LOCAL_ASSEMBLER_JACOBIAN
 	>
 class FemIVBVProblem : public AbstractMeshBasedDiscreteIVBVProblem
 {
 public:
-	typedef T_ASSEMBLER_RESIDUAL ReisdualAssemblerType;
-	typedef T_ASSEMBLER_JACOBIAN JacobianAssemblerType;
+	typedef T_LOCAL_ASSEMBLER_LINEAR LinearAssemblerType;
+	typedef T_LOCAL_ASSEMBLER_RESIDUAL ResidualAssemblerType;
+	typedef T_LOCAL_ASSEMBLER_JACOBIAN JacobianAssemblerType;
 
 	///
     FemIVBVProblem(	DiscreteLib::DiscreteSystem &dis,
     				MeshLib::IMesh &msh,
-    				ReisdualAssemblerType &user_assembly
+    				LinearAssemblerType *linear_assembly,
+    				ResidualAssemblerType *residual_assembly,
+    				JacobianAssemblerType *jacobian_assembly
     				)
         : AbstractMeshBasedDiscreteIVBVProblem(msh),
-          _residual_assembler(user_assembly), _jacobian_assembler(0),
-          _discrete_system(&dis)
+          	_discrete_system(&dis),
+			_linear_assembler(linear_assembly),
+			_residual_assembler(residual_assembly),
+			_jacobian_assembler(jacobian_assembly)
     {
         Base::zeroObject(_map_var, _map_ic);
     }
 
     FemIVBVProblem(	DiscreteLib::DiscreteSystem &dis,
     				MeshLib::IMesh &msh,
-    				ReisdualAssemblerType &user_assembly,
-    				JacobianAssemblerType *jacobian_assembler
+    				LinearAssemblerType *linear_assembly,
+    				ResidualAssemblerType *residual_assembly
     				)
         : AbstractMeshBasedDiscreteIVBVProblem(msh),
-          _residual_assembler(user_assembly), _jacobian_assembler(jacobian_assembler),
-          _discrete_system(&dis)
+            _discrete_system(&dis),
+			_linear_assembler(linear_assembly),
+			_residual_assembler(residual_assembly),
+			_jacobian_assembler(0)
     {
         Base::zeroObject(_map_var, _map_ic);
     }
@@ -138,15 +146,14 @@ public:
         return _map_bc2[bc_id];
     };
 
-    ReisdualAssemblerType& getResidualAssembler()
-    {
-        return _residual_assembler;
-    }
+    ///
+    LinearAssemblerType* getLinearAssembler() const { return _linear_assembler; }
 
-    JacobianAssemblerType* getJacobianAssembler()
-    {
-        return _jacobian_assembler;
-    }
+    ///
+    ResidualAssemblerType* getResidualAssembler() const { return _residual_assembler; }
+
+    ///
+    JacobianAssemblerType* getJacobianAssembler() const { return _jacobian_assembler; }
 
 private:
     void addDirichletBC(FemLib::FemDirichletBC<double>& bc1)
@@ -162,14 +169,14 @@ private:
     DISALLOW_COPY_AND_ASSIGN(FemIVBVProblem);
 
 private:
-    ReisdualAssemblerType _residual_assembler;
-    JacobianAssemblerType *_jacobian_assembler;
     DiscreteLib::DiscreteSystem* _discrete_system;
     FemLib::FemNodalFunctionScalar* _map_var;
     MathLib::SpatialFunctionScalar* _map_ic;
     std::vector<FemLib::FemDirichletBC<double>*> _map_bc1;
     std::vector<FemLib::FemNeumannBC<double, double>*> _map_bc2;
+    LinearAssemblerType* _linear_assembler;
+    ResidualAssemblerType* _residual_assembler;
+    JacobianAssemblerType* _jacobian_assembler;
 };
-
 
 } //end
