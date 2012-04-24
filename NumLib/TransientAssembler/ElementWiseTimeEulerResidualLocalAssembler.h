@@ -46,7 +46,7 @@ public:
 
         LocalMatrixType M(n_dof, n_dof);
         LocalMatrixType K(n_dof, n_dof);
-        LocalVectorType F(n_dof, .0);
+        LocalVectorType F(.0, n_dof);
         M = .0;
         K = .0;
 
@@ -58,7 +58,7 @@ public:
 
         LocalMatrixType TMP_M(n_dof, n_dof);
         LocalMatrixType TMP_M2(n_dof, n_dof);
-        LocalVectorType TMP_V(n_dof, .0);
+        LocalVectorType TMP_V(.0, n_dof);
 
         // evaluate r: r = (1/dt M + theta K) * u1 -(1/dt M - (1-theta) K) * u0 - F
         // r = (1/dt M + theta K) * u1

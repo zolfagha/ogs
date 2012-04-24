@@ -46,7 +46,7 @@ public:
 
         LocalMatrixType M(n_dof, n_dof);
         LocalMatrixType K(n_dof, n_dof);
-        LocalVectorType F(n_dof, .0);
+        LocalVectorType F(.0, n_dof);
         M = .0;
         K = .0;
 
