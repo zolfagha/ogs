@@ -16,11 +16,10 @@ namespace NumLib
  *
  * @tparam  T_USER_ASSEMBLY 	User-given assembler
  */
-template <class T_USER_ASSEMBLY>
 class ElementWiseTimeEulerEQSLocalAssembler : public IElementWiseTransientLinearEQSLocalAssembler
 {
 public:
-    explicit ElementWiseTimeEulerEQSLocalAssembler(T_USER_ASSEMBLY* a) : _time_ode(a), _theta(1.0)
+    ElementWiseTimeEulerEQSLocalAssembler() : _theta(1.0)
     {
     };
 
@@ -50,7 +49,7 @@ public:
         M = .0;
         K = .0;
 
-        _time_ode->assembly(time, e, local_u_n1, local_u_n, M, K, F);
+        assembleODE(time, e, local_u_n1, local_u_n, M, K, F);
 
         //std::cout << "M="; M.write(std::cout); std::cout << std::endl;
         //std::cout << "K="; K.write(std::cout); std::cout << std::endl;
@@ -79,8 +78,10 @@ public:
             localRHS[i] += F[i];
     }
 
+protected:
+    virtual void assembleODE(const TimeStep &time, MeshLib::IElement &e, const LocalVectorType &local_u_n1, const LocalVectorType &local_u_n, LocalMatrixType &M, LocalMatrixType &K, LocalVectorType &F)  = 0;
+
 private:
-    T_USER_ASSEMBLY* _time_ode;
     double _theta;
 };
 

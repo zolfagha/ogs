@@ -28,8 +28,8 @@ namespace Geo
 
 typedef FemIVBVProblem
 		<
-			ElementWiseTimeEulerEQSLocalAssembler<Geo::MassTransportTimeODELocalAssembler>,
-			ElementWiseTimeEulerResidualLocalAssembler<Geo::MassTransportTimeODELocalAssembler>,
+			Geo::MassTransportTimeODELocalAssembler<ElementWiseTimeEulerEQSLocalAssembler>,
+			Geo::MassTransportTimeODELocalAssembler<ElementWiseTimeEulerResidualLocalAssembler>,
 			Geo::MassTransportJacobianLocalAssembler
 		> MassFemProblem;
 
@@ -59,7 +59,7 @@ public:
         //solution algorithm
         _solConc = new SolutionForConc(dis, problem);
         //_solConc->getTimeODEAssembler()->setTheta(1.0);
-        SolutionForConc::LinearSolverType* linear_solver = _solConc->getLinearEquationSolver();
+        typename SolutionForConc::LinearSolverType* linear_solver = _solConc->getLinearEquationSolver();
         linear_solver->setOption(option);
         this->setOutput(Concentration, problem->getIC(0));
     }
@@ -68,7 +68,9 @@ public:
     {
         //input
         const MathLib::SpatialFunctionVector *vel = this->getInput<MathLib::SpatialFunctionVector>(Velocity);
-        //TODO _solConc->getProblem()->getResidualAssembler().initialize(vel);
+        _solConc->getProblem()->getLinearAssembler()->initialize(vel);
+        _solConc->getProblem()->getResidualAssembler()->initialize(vel);
+        _solConc->getProblem()->getJacobianAssembler()->initialize(vel);
 
         // solve
         _solConc->solveTimeStep(time);

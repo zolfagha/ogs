@@ -296,7 +296,7 @@ public:
 		}
 	}
 
-#ifndef NDEBUG
+//#ifndef NDEBUG
 	void printMat() const
 	{
 		for (IDX_TYPE k(0); k<MatrixBase<IDX_TYPE>::_n_rows; k++) {
@@ -312,7 +312,7 @@ public:
         }
         std::cout << std::endl;
 	}
-#endif
+//#endif
 
 
 protected:

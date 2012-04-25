@@ -9,19 +9,25 @@
 namespace Geo
 {
 
-class GroundwaterFlowTimeODELocalAssembler: public NumLib::IElementWiseTimeODELocalAssembler
+template <class T>
+class GroundwaterFlowTimeODELocalAssembler: public T
 {
 private:
 	PorousMedia* _pm;
 	FemLib::LagrangianFeObjectContainer* _feObjects;
 public:
+    typedef typename T::LocalVectorType LocalVectorType;
+    typedef typename T::LocalMatrixType LocalMatrixType;
+
 	GroundwaterFlowTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, PorousMedia &pm)
 	: _pm(&pm), _feObjects(&feObjects)
 	{
 	};
 
-	//protected:
-	void assembly(const NumLib::TimeStep &/*time*/, MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/, LocalMatrixType &/*localM*/, LocalMatrixType &localK, LocalVectorType &/*localF*/)
+	virtual ~GroundwaterFlowTimeODELocalAssembler() {};
+
+protected:
+	virtual void assembleODE(const NumLib::TimeStep &/*time*/, MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/, LocalMatrixType &/*localM*/, LocalMatrixType &localK, LocalVectorType &/*localF*/)
 	{
 		FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
 

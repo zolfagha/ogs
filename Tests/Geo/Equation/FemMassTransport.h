@@ -12,21 +12,28 @@
 namespace Geo
 {
 
-class MassTransportTimeODELocalAssembler: public NumLib::IElementWiseTimeODELocalAssembler
+template <class T>
+class MassTransportTimeODELocalAssembler: public T
 {
 public:
+    typedef typename T::LocalVectorType LocalVectorType;
+    typedef typename T::LocalMatrixType LocalMatrixType;
+
 	MassTransportTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, PorousMedia &pm, Compound &cmp)
 	: _pm(&pm), _cmp(&cmp), _feObjects(&feObjects)
 	{
         Base::zeroObject(_vel);
 	};
 
+	virtual ~MassTransportTimeODELocalAssembler() {};
+
     void initialize(const MathLib::SpatialFunctionVector *vel)
     {
         _vel = const_cast<MathLib::SpatialFunctionVector*>(vel);
     }
 
-	void assembly(const NumLib::TimeStep &/*time*/, MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/, LocalMatrixType &localM, LocalMatrixType &localK, LocalVectorType &/*localF*/)
+protected:
+	virtual void assembleODE(const NumLib::TimeStep &/*time*/, MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/, LocalMatrixType &localM, LocalMatrixType &localK, LocalVectorType &/*localF*/)
 	{
 		FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
 

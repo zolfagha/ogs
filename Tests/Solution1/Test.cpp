@@ -51,9 +51,8 @@ Geo::GWFemProblem* defineGWProblem(DiscreteSystem &dis, Rectangle &_rec, Geo::Po
 {
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
-    Geo::GroundwaterFlowTimeODELocalAssembler* ele_eqs = new Geo::GroundwaterFlowTimeODELocalAssembler(*_feObjects, pm);
-    Geo::GWFemProblem::LinearAssemblerType* linear_assembler = new Geo::GWFemProblem::LinearAssemblerType(ele_eqs);
-    Geo::GWFemProblem::ResidualAssemblerType* r_assembler = new Geo::GWFemProblem::ResidualAssemblerType(ele_eqs);
+    Geo::GWFemProblem::LinearAssemblerType* linear_assembler = new Geo::GWFemProblem::LinearAssemblerType(*_feObjects, pm);
+    Geo::GWFemProblem::ResidualAssemblerType* r_assembler = new Geo::GWFemProblem::ResidualAssemblerType(*_feObjects, pm);
     Geo::GWFemProblem::JacobianAssemblerType* j_eqs = new Geo::GWFemProblem::JacobianAssemblerType(*_feObjects, pm);
     //IVBV problem
     Geo::GWFemProblem* _problem = new Geo::GWFemProblem(dis, *dis.getMesh(), linear_assembler, r_assembler, j_eqs);
@@ -75,9 +74,8 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, Rectangle &
 {
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
-    Geo::MassTransportTimeODELocalAssembler* ele_eqs = new Geo::MassTransportTimeODELocalAssembler(*_feObjects, pm, comp) ;
-    Geo::MassFemProblem::LinearAssemblerType* linear_assembler = new Geo::MassFemProblem::LinearAssemblerType(ele_eqs);
-    Geo::MassFemProblem::ResidualAssemblerType* r_assembler = new Geo::MassFemProblem::ResidualAssemblerType(ele_eqs);
+    Geo::MassFemProblem::LinearAssemblerType* linear_assembler = new Geo::MassFemProblem::LinearAssemblerType(*_feObjects, pm, comp);
+    Geo::MassFemProblem::ResidualAssemblerType* r_assembler = new Geo::MassFemProblem::ResidualAssemblerType(*_feObjects, pm, comp);
     Geo::MassFemProblem::JacobianAssemblerType* j_eqs = new Geo::MassFemProblem::JacobianAssemblerType(*_feObjects, pm, comp);
     //IVBV problem
     Geo::MassFemProblem* _problem = new Geo::MassFemProblem(dis, *dis.getMesh(), linear_assembler, r_assembler, j_eqs);
@@ -182,8 +180,8 @@ TEST(Solution, CouplingFem2)
 	    MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 20, .0, .0, .0);
 	    Rectangle* _rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
         //time
+        //TimeStepFunctionConstant tim(.0, 1e+3, 1e+3);
         TimeStepFunctionConstant tim(.0, 1e+4, 1e+3);
-        //TimeStepFunctionConstant tim(.0, 2e+5, .5e+5);
         //material
 	    Geo::PorousMedia pm;
 	    pm.hydraulic_conductivity = new MathLib::SpatialFunctionConstant<double>(1.e-11);
@@ -243,30 +241,43 @@ TEST(Solution, CouplingFem2)
 	    timestepping.setBeginning(.0);
 	    timestepping.solve(tim.getEnd());
 
-//	    const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
-//	    const FEMIntegrationPointFunctionVector2d* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector2d>(apart1.getOutputParameterID("v"));
+	    const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
+	    const FEMIntegrationPointFunctionVector2d* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector2d>(apart1.getOutputParameterID("v"));
 	    const FemNodalFunctionScalar* r_f_c = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("c"));
-	    //const DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
+	    const DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
 	    //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
 	    const DiscreteVector<double>* vec_c = r_f_c->getNodalValues();
 
 	    //r_f_head->printout();
 	    //r_f_v->printout();
-#undef OUTPUT_C
-//#define OUTPUT_C
+//#undef OUTPUT_C
+#define OUTPUT_C
 #ifdef OUTPUT_C
         r_f_c->printout();
 #endif
-	    //std::vector<double> expectedHead;
-	    //getGWExpectedHead(expectedHead);
-        //ASSERT_DOUBLE_ARRAY_EQ(&expectedHead[0], &(*vec_h)[0], vec_h->size());
+	    std::vector<double> expectedHead(21);
+    	const double p_left = 2.e+6;
+    	const double p_right = .0;
+    	const double x_len = 2.0;
+#ifdef OUTPUT_C
+        std::cout << std::endl << "expected p=";
+#endif
+        for (size_t i=0; i<expectedHead.size(); i++) {
+        	double x = i*0.1;
+        	expectedHead[i] = (p_right-p_left) / x_len * x + p_left;
+#ifdef OUTPUT_C
+            std::cout << expectedHead[i] << " ";
+#endif
+        }
+//	    getGWExpectedHead(expectedHead);
+        ASSERT_DOUBLE_ARRAY_EQ(&expectedHead[0], &(*vec_h)[0], expectedHead.size(), 1e-5);
 
 
         std::vector<double> expectedC;
         expectedC.resize(21);
 
 #ifdef OUTPUT_C
-        std::cout << std::endl << "expected=";
+        std::cout << std::endl << "expected C=";
 #endif
         for (size_t i=0; i<expectedC.size(); i++) {
             expectedC[i] = analyticalOgataBank(i*0.1, tim.getEnd(), 1e-5/1.0, 1e-6);

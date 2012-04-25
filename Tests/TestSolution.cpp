@@ -38,19 +38,22 @@ using namespace NumLib;
 using namespace SolutionLib;
 using namespace DiscreteLib;
 
-class GWTimeODEAssembler: public NumLib::IElementWiseTimeODELocalAssembler
+template <class T>
+class GWTimeODEAssembler: public T
 {
-private:
-    MathLib::SpatialFunctionScalar* _matK;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
 public:
+    typedef typename T::LocalVectorType LocalVectorType;
+    typedef typename T::LocalMatrixType LocalMatrixType;
+
     GWTimeODEAssembler(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::SpatialFunctionScalar &mat)
     : _matK(&mat), _feObjects(&feObjects)
     {
     };
 
-    //protected:
-    void assembly(const NumLib::TimeStep &/*time*/, MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/, LocalMatrixType &/*localM*/, LocalMatrixType &localK, LocalVectorType &/*localF*/)
+    virtual ~GWTimeODEAssembler() {};
+
+protected:
+    virtual void assembleODE(const NumLib::TimeStep &/*time*/, MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/, LocalMatrixType &/*localM*/, LocalMatrixType &localK, LocalVectorType &/*localF*/)
     {
         IFiniteElement* fe = _feObjects->getFeObject(e);
 
@@ -67,6 +70,9 @@ public:
         	fe->integrateDWxDN(j, k, localK);
         }
     }
+private:
+    MathLib::SpatialFunctionScalar* _matK;
+    FemLib::LagrangianFeObjectContainer* _feObjects;
 };
 
 class GWJacobianAssembler : public NumLib::IElementWiseTransientJacobianLocalAssembler
@@ -127,8 +133,8 @@ class GWFemTestSystem : public NumLib::ITransientSystem
 {
     typedef FemIVBVProblem
             <
-    			ElementWiseTimeEulerEQSLocalAssembler<GWTimeODEAssembler>,
-    			ElementWiseTimeEulerResidualLocalAssembler<GWTimeODEAssembler>,
+            	GWTimeODEAssembler<ElementWiseTimeEulerEQSLocalAssembler>,
+            	GWTimeODEAssembler<ElementWiseTimeEulerResidualLocalAssembler>,
     			GWJacobianAssembler
     		> GWFemProblem;
 
@@ -202,9 +208,8 @@ public:
         //size_t nnodes = msh->getNumberOfNodes();
         _feObjects = new LagrangianFeObjectContainer(*msh);
         //equations
-        GWTimeODEAssembler* ele_x_eqs = new GWTimeODEAssembler(*_feObjects, K) ;
-        GWFemProblem::LinearAssemblerType* local_linear = new GWFemProblem::LinearAssemblerType(ele_x_eqs);
-        GWFemProblem::ResidualAssemblerType* local_r = new GWFemProblem::ResidualAssemblerType(ele_x_eqs);
+        GWFemProblem::LinearAssemblerType* local_linear = new GWFemProblem::LinearAssemblerType(*_feObjects, K);
+        GWFemProblem::ResidualAssemblerType* local_r = new GWFemProblem::ResidualAssemblerType(*_feObjects, K);
         GWFemProblem::JacobianAssemblerType* local_J = new GWFemProblem::JacobianAssemblerType(*_feObjects, K);
         //IVBV problem
         _problem = new GWFemProblem(dis, *dis.getMesh(), local_linear, local_r, local_J);

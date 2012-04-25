@@ -28,8 +28,8 @@ namespace Geo
 
 typedef FemIVBVProblem
 		<
-			ElementWiseTimeEulerEQSLocalAssembler<Geo::GroundwaterFlowTimeODELocalAssembler>,
-			ElementWiseTimeEulerResidualLocalAssembler<Geo::GroundwaterFlowTimeODELocalAssembler>,
+			Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerEQSLocalAssembler>,
+			Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerResidualLocalAssembler>,
 			Geo::GroundwaterFlowJacobianLocalAssembler
 		> GWFemProblem;
 
@@ -60,7 +60,7 @@ public:
         //solution algorithm
         _solHead = new SolutionForHead(dis, problem);
         //_solHead->getTimeODEAssembler()->setTheta(1.0);
-        SolutionForHead::LinearSolverType* linear_solver = _solHead->getLinearEquationSolver();
+        typename SolutionForHead::LinearSolverType* linear_solver = _solHead->getLinearEquationSolver();
         linear_solver->setOption(option);
         this->setOutput(Head, problem->getIC(0));
     }
