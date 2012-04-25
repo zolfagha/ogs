@@ -41,7 +41,7 @@ public:
         return _msh;
     }
 
-    void eval(const MathLib::SpatialPosition &pt, Tvalue &v)
+    void eval(const MathLib::SpatialPosition &/*pt*/, Tvalue &v)
     {
         v = (*_values)[0][0]; //TODO
     };

@@ -88,7 +88,7 @@ void EleMapLocalCoordinates::rotate(IElement &ele, const CoordinateSystem &coord
 };
 
 // x=Rx' where x is original coordinates and x' is local coordinates
-void EleMapLocalCoordinates::getRotationMatrixToOriginal(const IElement &ele, const CoordinateSystem &coordinate_system, const std::vector<GeoLib::Point> &vec_pt)
+void EleMapLocalCoordinates::getRotationMatrixToOriginal(const IElement &ele, const CoordinateSystem &/*coordinate_system*/, const std::vector<GeoLib::Point> &vec_pt)
 {
     const IElement* e = &ele;
     double xx[3];

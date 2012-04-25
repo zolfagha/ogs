@@ -33,7 +33,7 @@ public:
     }
 
 private:
-    void initializeParameters(const UnnamedParameterSet &parameters_t_n, const std::vector<ICoupledSystem*> &subproblems, const ParameterProblemMappingTable &mapping, UnnamedParameterSet &parameters_t_n1)
+    void initializeParameters(const UnnamedParameterSet &parameters_t_n, const std::vector<ICoupledSystem*> &/*subproblems*/, const ParameterProblemMappingTable &mapping, UnnamedParameterSet &parameters_t_n1)
     {
         const size_t n_para = parameters_t_n.size();
         for (size_t i=0; i<n_para; i++) {

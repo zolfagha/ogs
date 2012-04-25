@@ -55,7 +55,7 @@ private:
 class OMPMasterNodeDecomposedDiscreteSystem : public DiscreteSystem
 {
 public:
-    OMPMasterNodeDecomposedDiscreteSystem(MeshLib::IMesh &global_msh, size_t n_dom)
+    OMPMasterNodeDecomposedDiscreteSystem(MeshLib::IMesh &global_msh, size_t /*n_dom*/)
         : DiscreteSystem(global_msh)
     {
     }

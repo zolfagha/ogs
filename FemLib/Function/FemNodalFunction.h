@@ -96,7 +96,7 @@ public:
 
 
     /// evaluate this function at the given point
-    void eval(const MathLib::SpatialPosition &pt, Tvalue &v)
+    void eval(const MathLib::SpatialPosition &/*pt*/, Tvalue &v)
     {
         throw "eval() is not implemented yet.";
         v = (*_nodal_values)[0];

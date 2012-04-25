@@ -151,14 +151,14 @@ TEST(Solution, CouplingFem1)
 	    TimeSteppingController timestepping;
 	    timestepping.addTransientSystem(apart1);
 
-	    const double epsilon = 1.e-3;
+	    //const double epsilon = 1.e-3;
 	    timestepping.setBeginning(.0);
 	    timestepping.solve(1.0);
 
 	    const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
 	    const FEMIntegrationPointFunctionVector2d* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector2d>(apart1.getOutputParameterID("v"));
 	    const DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
-	    const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
+	    //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
 
 	    r_f_head->printout();
 	    r_f_v->printout();
@@ -239,15 +239,15 @@ TEST(Solution, CouplingFem2)
 	    TimeSteppingController timestepping;
 	    timestepping.addTransientSystem(apart1);
 
-	    const double epsilon = 1.e-3;
+	    //const double epsilon = 1.e-3;
 	    timestepping.setBeginning(.0);
 	    timestepping.solve(tim.getEnd());
 
-	    const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
-	    const FEMIntegrationPointFunctionVector2d* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector2d>(apart1.getOutputParameterID("v"));
+//	    const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
+//	    const FEMIntegrationPointFunctionVector2d* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector2d>(apart1.getOutputParameterID("v"));
 	    const FemNodalFunctionScalar* r_f_c = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("c"));
-	    const DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
-	    const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
+	    //const DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
+	    //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
 	    const DiscreteVector<double>* vec_c = r_f_c->getNodalValues();
 
 	    //r_f_head->printout();

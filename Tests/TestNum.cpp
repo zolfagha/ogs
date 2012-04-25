@@ -51,14 +51,14 @@ TEST(Num, TimeStepping1)
     public:
         TestProblem(double t0, double tn, double dt) : _t0(t0), _tn(tn), _dt(dt), _v(.0) {};
         virtual ~TestProblem() {};
-        int solveTimeStep(const TimeStep &time) { _v+=1.0; return 0; }
+        int solveTimeStep(const TimeStep &/*time*/) { _v+=1.0; return 0; }
         double suggestNext(const TimeStep &time_current)
         {
             if (time_current.getTime() < _t0) return _t0;
             else return (time_current.getTime()+_dt <= _tn) ? time_current.getTime()+_dt : time_current.getTime();
         }
         bool isAwake(const TimeStep &time)  { return (time.getTime()>=_t0 && time.getTime()<=_tn); }
-        void accept(const TimeStep &time) {};
+        void accept(const TimeStep &/*time*/) {};
         double getValue() {return _v;};
     };
     TestProblem problem(.0, 100., 10.);

@@ -73,7 +73,7 @@ TEST(Math, MatrixAddSubMatrix)
     eqs.create(10);
 
     for (size_t i=0; i<3; i++) {
-        std::vector<long> pos(4);
+        std::vector<size_t> pos(4);
         for (size_t j=0; j<4; j++)
             pos[j] = i*3 + j;
         eqs.addAsub(pos, _m);

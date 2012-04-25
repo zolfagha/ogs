@@ -135,7 +135,7 @@ public:
                 integral->getSamplingPoint(ip, r);
                 fe->computeBasisFunctions(r);
                 const MathLib::Matrix<double> *dN = fe->getGradBasisFunction();
-                MathLib::Matrix<double>*N = fe->getBasisFunction();
+                //MathLib::Matrix<double>*N = fe->getBasisFunction();
                 std::vector<double> xx(2);
                 fe->getRealCoordinates(&xx[0]);
 
@@ -199,7 +199,7 @@ struct DiscreteExample1
                 for (size_t j=0; j<i; j++) _m(i,j) = _m(j,i);
             _m *= 1.e-11/6.0;
         }
-        void assembly(MeshLib::IElement &e, MathLib::DenseLinearEquations &eqs)
+        void assembly(MeshLib::IElement &/*e*/, MathLib::DenseLinearEquations &eqs)
         {
             (*eqs.getA()) = _m;
         }

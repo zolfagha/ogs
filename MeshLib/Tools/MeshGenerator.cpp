@@ -15,7 +15,7 @@ MeshLib::UnstructuredMesh* MeshGenerator::generateLineMesh(const double length, 
     const double unit_length = length / subdivision;
     const size_t n_nodes_per_axis = subdivision+1;
     const size_t n_eles = subdivision;
-    const size_t n_nodes = subdivision+1;
+    //const size_t n_nodes = subdivision+1;
 
     //nodes
     size_t node_id(0);
@@ -27,7 +27,7 @@ MeshLib::UnstructuredMesh* MeshGenerator::generateLineMesh(const double length, 
     }
 
     //elements
-    size_t ele_id(0);
+    //size_t ele_id(0);
     for (size_t i_z=0; i_z<n_eles; i_z++) {
         Line *e = new Line();
         e->setNodeID(0, i_z);
@@ -43,8 +43,8 @@ MeshLib::UnstructuredMesh* MeshGenerator::generateRegularQuadMesh(const double l
 
     MeshLib::UnstructuredMesh* msh = new MeshLib::UnstructuredMesh(MeshLib::CoordinateSystemType::XY);
 
-    size_t n_eles = static_cast<size_t>(pow(static_cast<double>(subdivision), 2));
-    size_t n_nodes = static_cast<size_t>(pow(static_cast<double>(subdivision+1), 2));
+    //size_t n_eles = static_cast<size_t>(pow(static_cast<double>(subdivision), 2));
+    //size_t n_nodes = static_cast<size_t>(pow(static_cast<double>(subdivision+1), 2));
     const double unit_length = length / subdivision;
     const size_t n_nodes_per_axis = subdivision+1;
 
@@ -62,7 +62,7 @@ MeshLib::UnstructuredMesh* MeshGenerator::generateRegularQuadMesh(const double l
     }
 
     //elements
-    size_t ele_id(0);
+    //size_t ele_id(0);
     for (size_t j=0; j<subdivision; j++) {
         const size_t offset_y1 = j*n_nodes_per_axis;
         const size_t offset_y2 = (j+1)*n_nodes_per_axis;

@@ -71,7 +71,7 @@ public:
         MyFemVector *u_n = 0;
 
         // prepare data
-        UserFemProblem* pro = _problem;
+        //UserFemProblem* pro = _problem;
 
         //TODO temporally
         std::vector<MyFemVector*> vec_un;

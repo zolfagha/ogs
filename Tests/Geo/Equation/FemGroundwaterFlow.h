@@ -21,7 +21,7 @@ public:
 	};
 
 	//protected:
-	void assembly(const NumLib::TimeStep &time, MeshLib::IElement &e, const LocalVectorType &u1, const LocalVectorType &u0, LocalMatrixType &localM, LocalMatrixType &localK, LocalVectorType &localF)
+	void assembly(const NumLib::TimeStep &/*time*/, MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/, LocalMatrixType &/*localM*/, LocalMatrixType &localK, LocalVectorType &/*localF*/)
 	{
 		FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
 
@@ -52,7 +52,7 @@ public:
 	{
 	};
 
-	void assembly(const NumLib::TimeStep &time, MeshLib::IElement &e, const LocalVectorType &u1, const LocalVectorType &u0,  LocalMatrixType &localJ)
+	void assembly(const NumLib::TimeStep &/*time*/, MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/,  LocalMatrixType &localJ)
 	{
 		FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
 

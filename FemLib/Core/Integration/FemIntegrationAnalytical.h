@@ -16,7 +16,7 @@ class FemIntegrationAnalytical : public IFemNumericalIntegration
 public:
     virtual ~FemIntegrationAnalytical() {};
 
-    virtual void initialize(MeshLib::IElement &e, size_t) 
+    virtual void initialize(MeshLib::IElement &/*e*/, size_t)
     {
     };
 

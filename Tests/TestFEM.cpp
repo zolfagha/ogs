@@ -32,25 +32,25 @@ using namespace DiscreteLib;
 typedef MathLib::Matrix<double> GlobalMatrixType;
 typedef std::vector<double> GlobalVectorType;
 
-static void outputLinearEQS(MathLib::Matrix<double> &globalA, std::vector<double> &globalRHS)
-{
-    std::cout << "A=" << std::endl;
-    globalA.write(std::cout);
-    std::cout << "x=" << std::endl;
-    for (size_t i=0; i<globalRHS.size(); i++)
-        std::cout << globalRHS[i] << " ";
-    std::cout << std::endl;
-}
-
-static void outputLinearEQS(MathLib::Matrix<double> &globalA, double* globalRHS)
-{
-    std::cout << "A=" << std::endl;
-    globalA.write(std::cout);
-    std::cout << "x=" << std::endl;
-    for (size_t i=0; i<globalA.getNRows(); i++)
-        std::cout << globalRHS[i] << " ";
-    std::cout << std::endl;
-}
+//static void outputLinearEQS(MathLib::Matrix<double> &globalA, std::vector<double> &globalRHS)
+//{
+//    std::cout << "A=" << std::endl;
+//    globalA.write(std::cout);
+//    std::cout << "x=" << std::endl;
+//    for (size_t i=0; i<globalRHS.size(); i++)
+//        std::cout << globalRHS[i] << " ";
+//    std::cout << std::endl;
+//}
+//
+//static void outputLinearEQS(MathLib::Matrix<double> &globalA, double* globalRHS)
+//{
+//    std::cout << "A=" << std::endl;
+//    globalA.write(std::cout);
+//    std::cout << "x=" << std::endl;
+//    for (size_t i=0; i<globalA.getNRows(); i++)
+//        std::cout << globalRHS[i] << " ";
+//    std::cout << std::endl;
+//}
 
 
 

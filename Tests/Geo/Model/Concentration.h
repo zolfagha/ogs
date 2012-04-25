@@ -68,7 +68,7 @@ public:
 
     int solveTimeStep(const TimeStep &time)
     {
-        const MathLib::SpatialFunctionVector *vel = this->getInput<MathLib::SpatialFunctionVector>(Velocity);
+        //const MathLib::SpatialFunctionVector *vel = this->getInput<MathLib::SpatialFunctionVector>(Velocity);
         //TODO _solConc->getProblem()->getResidualAssembler().initialize(vel);
     	_solConc->solveTimeStep(time);
         setOutput(Concentration, _solConc->getCurrentSolution(0));

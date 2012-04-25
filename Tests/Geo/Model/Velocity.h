@@ -37,7 +37,7 @@ public:
         //this->setOutput(Velocity, _vel);
     }
 
-    int solveTimeStep(const TimeStep &time)
+    int solveTimeStep(const TimeStep &/*time*/)
     {
         const MeshLib::IMesh *msh = _dis->getMesh();
         FemLib::FemNodalFunctionScalar *head = (FemLib::FemNodalFunctionScalar*)getInput(Head);
@@ -85,17 +85,17 @@ public:
         return 0;
     }
 
-    double suggestNext(const TimeStep &time_current)
+    double suggestNext(const TimeStep &/*time_current*/)
     {
         return .0;
     }
 
-    bool isAwake(const TimeStep &time)
+    bool isAwake(const TimeStep &/*time*/)
     {
         return true;
     }
 
-    void accept(const TimeStep &time)
+    void accept(const TimeStep &/*time*/)
     {
         //std::cout << "Velocity=" << std::endl;
         //_vel->printout();

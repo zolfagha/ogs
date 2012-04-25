@@ -76,7 +76,7 @@ void CRSLisSolver::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)
 #endif
 
     sprintf(solver_options, "-i %d -p %d %s", _option.ls_method, _option.ls_precond, _option.ls_extra_arg.c_str()); 
-    sprintf(tol_option, "-tol %e -maxiter %d -omp_num_threads %ld -initx_zeros 0", _option.ls_error_tolerance, _option.ls_max_iterations, nthreads);
+    sprintf(tol_option, "-tol %e -maxiter %ld -omp_num_threads %d -initx_zeros 0", _option.ls_error_tolerance, _option.ls_max_iterations, nthreads);
 
     ierr = lis_matrix_set_crs(A->getNNZ(), (int*)A->getRowPtrArray(), (int*)A->getColIdxArray(), (double*)A->getEntryArray(), AA);
     ierr = lis_matrix_assemble(AA);

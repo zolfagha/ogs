@@ -6,7 +6,7 @@
 
 using namespace MeshLib;
 
-int main (int argc, char* argv[]) {
+int main (int /*argc*/, char* /*argv*/[]) {
 
     Quadrirateral quad;
 

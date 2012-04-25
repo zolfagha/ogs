@@ -123,7 +123,7 @@ protected:
     virtual bool isFixed() const = 0;
 
     /// update parameter table from all problems
-    void updateParameterTable(const ParameterProblemMappingTable &mapping, bool is_fixed, UnnamedParameterSet &parameter_table)
+    void updateParameterTable(const ParameterProblemMappingTable &mapping, bool /*is_fixed*/, UnnamedParameterSet &parameter_table)
     {
         const size_t n_parameters = parameter_table.size();
         for (size_t i=0; i<n_parameters; i++) {
@@ -164,11 +164,11 @@ protected:
     }
 
     /// is para
-    bool isInputParametersUpdated( const UnnamedParameterSet &parameter_table, const std::vector<ParameterProblemMappingTable::PairInputVar> &problem_parameters, ICoupledSystem* problem)
+    bool isInputParametersUpdated( const UnnamedParameterSet &parameter_table, const std::vector<ParameterProblemMappingTable::PairInputVar> &problem_parameters, ICoupledSystem* /*problem*/)
     {
         const size_t n_input_parameters = problem_parameters.size();
         for (size_t j=0; j<n_input_parameters; j++) {
-            size_t local_var_id = problem_parameters[j].first;
+            //size_t local_var_id = problem_parameters[j].first;
             size_t shared_var_id = problem_parameters[j].second;
             if (parameter_table.isUpdated(shared_var_id)) return true;
         }

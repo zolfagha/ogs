@@ -9,8 +9,8 @@ namespace MathLib
 struct Variable
 {
 	size_t id;
-	std::string name;
 	size_t n_dof;
+	std::string name;
 
 	Variable(size_t i, size_t n, std::string str) : id(i), n_dof(n), name(str) {};
 };

@@ -13,7 +13,7 @@ void FeExtrapolationAverage::extrapolate(IFiniteElement &fe, const std::vector<M
 }
 
 template<typename Tvalue>
-void FeExtrapolationAverage::extrapolate(IFiniteElement &fe, const std::vector<Tvalue> &gp_values, std::vector<Tvalue> &nodal_values)
+void FeExtrapolationAverage::extrapolate(IFiniteElement &/*fe*/, const std::vector<Tvalue> &gp_values, std::vector<Tvalue> &nodal_values)
 {
     Tvalue ele_avg;
     ele_avg = .0;

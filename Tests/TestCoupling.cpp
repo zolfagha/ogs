@@ -540,7 +540,7 @@ public:
         if (mod==.0) return true;
         return false;
     };
-    void accept(const TimeStep &time) {};
+    void accept(const TimeStep &/*time*/) {};
 };
 
 class TransientWeakCouplingEQS2 :  public TemplateTransientMonolithicSystem
@@ -587,7 +587,7 @@ public:
         if (mod==.0) return true;
         return false;
     };
-    void accept(const TimeStep &time) {};
+    void accept(const TimeStep &/*time*/) {};
 };
 
 class TransientWeakCouplingEQS3 : public TemplateTransientMonolithicSystem
@@ -634,7 +634,7 @@ public:
         if (mod==.0) return true;
         return false;
     };
-    void accept(const TimeStep &time) {};
+    void accept(const TimeStep &/*time*/) {};
 };
 
 void defineTransientExample1(TransientWeakCouplingEQS1 &eqs1, TransientWeakCouplingEQS2 &eqs2, TransientWeakCouplingEQS3 &eqs3, AsyncPartitionedSystem &part1, AsyncPartitionedSystem &part2, ITransientPartitionedAlgorithm &algorithm1, ITransientPartitionedAlgorithm &algorithm2)

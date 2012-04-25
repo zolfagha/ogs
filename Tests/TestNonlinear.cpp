@@ -353,7 +353,7 @@ TEST(Math, NonlinearNR_sparse)
 	MyVector x0(6.0, 2);
 	MyVector x(0.0, 2);
 	MyVector r(2), dx(2);
-	MyMatrix* j = f.getLinearSolver()->getA();
+	//MyMatrix* j = f.getLinearSolver()->getA();
 	MyDxFunction f_dx(df, *f.getLinearSolver());
 
 	NewtonRaphsonMethod nr;

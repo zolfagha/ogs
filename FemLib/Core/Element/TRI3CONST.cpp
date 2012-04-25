@@ -42,7 +42,7 @@ void TRI3CONST::configure( MeshLib::IElement &e )
         x_cp[i] /= 3.0;
 }
 
-void TRI3CONST::computeBasisFunctions(const double *x)
+void TRI3CONST::computeBasisFunctions(const double* /*x*/)
 {
     //computeBasisFunction(x, (double*)_shape.getData());
     //computeGradBasisFunction(x, _dshape);

@@ -18,7 +18,7 @@ enum type
 class IOutput
 {
 public:
-    IOutput(TimeType::type time_tpye) {};
+    IOutput(TimeType::type /*time_tpye*/) {};
 
     void addNodal(int);
     void addElemental(int);

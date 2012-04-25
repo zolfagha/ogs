@@ -72,7 +72,7 @@ DDCGlobal* setupNDDC2()
         DDCSubDomain* dom = new DDCSubDomain(*local_msh, *mapping, &list_ghost);
         ddc->addSubDomain(dom);
     }
-    size_t offset = ddc->getSubDomain(0)->getLoalMesh()->getNumberOfNodes() - ddc->getSubDomain(0)->getNumberOfGhosts();
+    //size_t offset = ddc->getSubDomain(0)->getLoalMesh()->getNumberOfNodes() - ddc->getSubDomain(0)->getNumberOfGhosts();
     {
         MeshLib::IMesh* local_msh;
         int dom1_eles[] = {1, 2, 3};
@@ -136,7 +136,7 @@ TEST(Discrete, NDDCSSEqs2)
     NodeDDCSerialSharedDiscreteSystem dis(*ddc);
     // dof
     DofEquationIdTable dofManager;
-    size_t varId = dofManager.addVariableDoFs(0, 0, ddc->getTotalNumberOfDecomposedObjects());
+    //size_t varId = dofManager.addVariableDoFs(0, 0, ddc->getTotalNumberOfDecomposedObjects());
     dofManager.construct(DofNumberingType::BY_DOF);
     // eqs
     IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivity>(lis, dofManager);
@@ -163,7 +163,7 @@ TEST(Discrete, NDDCSDEqs2)
     NodeDDCSerialDistributedDiscreteSystem dis(*ddc);
     // dof
     DofEquationIdTable dofManager;
-    size_t varId = dofManager.addVariableDoFs(0, 0, ddc->getTotalNumberOfDecomposedObjects());
+    //size_t varId = dofManager.addVariableDoFs(0, 0, ddc->getTotalNumberOfDecomposedObjects());
     dofManager.construct(DofNumberingType::BY_DOF);
     // eqs
     IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivity>(lis, dofManager);
@@ -288,13 +288,13 @@ TEST(Discrete, OGS51)
 #ifdef _OPENMP
 TEST(Discrete, OMP_vec1)
 {
-    MeshLib::IMesh* org_msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
+    //MeshLib::IMesh* org_msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     const size_t n_dom = 2;
     OMPGlobalDiscreteVector<double> global_v(10, n_dom);
 
     omp_set_num_threads(n_dom);
 
-    #pragma omp parallel shared(global_v, org_msh, std::cout) default(none)
+    #pragma omp parallel shared(global_v, /*org_msh,*/ std::cout) default(none)
     {
         int iam = omp_get_thread_num();
         //std::cout << "threads " << iam << std::endl;

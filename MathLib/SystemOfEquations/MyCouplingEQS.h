@@ -56,7 +56,7 @@ public:
         size_t offset = 0;
         for (size_t i=0; i<_active_variables.size(); i++) {
         	Variable *var = _active_variables[i];
-        	size_t para_id = var->id;
+        	//size_t para_id = var->id;
         	ArrayType ret(var->n_dof);
         	for (size_t j=0; j<var->n_dof; j++)
         		ret[j] = u1[offset + j];
