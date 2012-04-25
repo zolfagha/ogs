@@ -14,6 +14,8 @@
 namespace Base
 {
 
+const size_t index_npos = -1;
+
 template <typename T>
 static void releaseObjectsInStdVector(T &object) 
 {

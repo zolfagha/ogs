@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "Base/CodingTools.h"
 #include "Base/BidirectionalMap.h"
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
@@ -119,18 +120,18 @@ public:
                 // for each var
                 for (size_t i_var=0; i_var<n_var; i_var++) {
                     // eqs id
-                    const long local_row_id = local_dofTable->mapEqsID(i_var, mesh_id, i_pt);
-                    if (local_row_id<0) continue;
-                    const long global_row_id = global_dofManager->mapEqsID(i_var, mesh_id, i_global_pt);
+                    const size_t local_row_id = local_dofTable->mapEqsID(i_var, mesh_id, i_pt);
+                    if (local_row_id==Base::index_npos) continue;
+                    const size_t global_row_id = global_dofManager->mapEqsID(i_var, mesh_id, i_global_pt);
                     // add RHS
                     global_solver->addRHS(global_row_id, local_solver->getRHS(local_row_id));
                     // add A
                     const std::set<size_t> &local_sp_row = (*local_sp)[local_row_id];
                     for (std::set<size_t>::const_iterator itr=local_sp_row.begin(); itr!=local_sp_row.end(); ++itr) {
                         const size_t local_column_id = *itr;
-                        long tmp_var_id, tmp_mesh_id, tmp_pt_id;
+                        size_t tmp_var_id, tmp_mesh_id, tmp_pt_id;
                         local_dofTable->mapDoF(local_column_id, tmp_var_id, tmp_mesh_id, tmp_pt_id);
-                        long global_column_id = global_dofManager->mapEqsID(tmp_var_id, tmp_mesh_id, pt_id_mapping->local2global(tmp_pt_id));
+                        size_t global_column_id = global_dofManager->mapEqsID(tmp_var_id, tmp_mesh_id, pt_id_mapping->local2global(tmp_pt_id));
                         global_solver->addA(global_row_id, global_column_id, local_solver->getA(local_row_id, local_column_id)); 
                     }
                 }

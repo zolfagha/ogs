@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstddef>
 
+#include "Base/CodingTools.h"
 #include "IDiscreteVectorBase.h"
 
 namespace DiscreteLib
@@ -18,7 +19,7 @@ public:
 
     //virtual void resize(size_t n) = 0;
     virtual size_t size() const = 0;
-    virtual double dot(const IDiscreteVector<T> &vec) {return .0;};
+    virtual double dot(const IDiscreteVector<T> &/*vec*/) {return .0;};
     virtual double norm1() {return .0;};
     virtual double norm2() {return .0;};
     virtual double norm_max() {return .0;};
@@ -43,9 +44,10 @@ public:
     		(*this)[i] -= v[i];
     }
 
-    virtual void addSubvector(std::vector<long> pos, T* local_v)
+    virtual void addSubvector(std::vector<size_t> pos, T* local_v)
     {
     	for (size_t i=0; i<pos.size(); ++i) {
+            if (pos[i]==Base::index_npos) continue;
     		(*this)[pos[i]] += local_v[i];
     	}
     }
@@ -69,7 +71,7 @@ public:
 
     virtual void resize(size_t n) {_data.resize(n);};
     virtual size_t size() const {return _data.size();};
-    virtual double dot(const IDiscreteVector<T> &vec) {return .0;};
+    virtual double dot(const IDiscreteVector<T> &/*vec*/) {return .0;};
     virtual double norm1() {return .0;};
     virtual double norm2() {return .0;};
     virtual double norm_max() {return .0;};

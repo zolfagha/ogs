@@ -6,6 +6,7 @@
 #include <cassert>
 #include <iostream>
 
+#include "Base/CodingTools.h"
 #include "EquationIdStorage.h"
 
 
@@ -54,7 +55,7 @@ public:
     
     bool isActive(size_t pt_id) const { return _deactive.count(pt_id)==0;};
 
-    void set(size_t pt_id, long eqs_id)
+    void set(size_t /*pt_id*/, long /*eqs_id*/)
     {
         //invalid
         std::cout << "***Error: called invalid functions. SequentiallyMappedAddress::set()." << std::endl;
@@ -69,7 +70,7 @@ public:
 
     size_t size() const {return _n;};
 
-    long address(size_t pt_id) const
+    size_t address(size_t pt_id) const
     {
         assert(_pt_id_start<=pt_id && pt_id<_pt_id_start+_n);
 
@@ -88,14 +89,14 @@ public:
             }
             return loc;
         } else {
-            return -1;
+            return Base::index_npos;
         }
     }
 
-    long key(long address_id) const
+    size_t key(size_t /*address_id*/) const
     {
         //TODO
-        return -1;
+        return Base::index_npos;
     }
 
 private:

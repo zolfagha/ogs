@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include "Base/Options.h"
+#include "Base/CodingTools.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/LinAlg/Sparse/SparseTableCRS.h"
 
@@ -29,21 +30,21 @@ public:
     virtual double getA(size_t rowId, size_t colId) = 0;
     virtual void setA(size_t rowId, size_t colId, double v) = 0;
     virtual void addA(size_t rowId, size_t colId, double v) = 0;
-    virtual void addAsub(const std::vector<long> &vec_row_pos, const std::vector<long> &vec_col_pos, MathLib::Matrix<double> &sub_matrix, double fkt=1.0)
+    virtual void addAsub(const std::vector<size_t> &vec_row_pos, const std::vector<size_t> &vec_col_pos, MathLib::Matrix<double> &sub_matrix, double fkt=1.0)
     {
         const size_t n_rows = vec_row_pos.size();
         const size_t n_cols = vec_col_pos.size();
         for (size_t i=0; i<n_rows; i++) {
-            const long rowId = vec_row_pos[i];
-            if (rowId<0) continue;
+            const size_t rowId = vec_row_pos[i];
+            if (rowId==Base::index_npos) continue;
             for (size_t j=0; j<n_cols; j++) {
-                const long colId = vec_col_pos[j];
-                if (colId<0) continue;
+                const size_t colId = vec_col_pos[j];
+                if (colId==Base::index_npos) continue;
                 addA(rowId, colId, fkt*sub_matrix(i,j));
             }
         }
     }
-    virtual void addAsub(std::vector<long> &vec_pos, MathLib::Matrix<double> &sub_matrix, double fkt=1.0)
+    virtual void addAsub(std::vector<size_t> &vec_pos, MathLib::Matrix<double> &sub_matrix, double fkt=1.0)
     {
         addAsub(vec_pos, vec_pos, sub_matrix, fkt);
     }
@@ -52,11 +53,11 @@ public:
     virtual double* getRHS() = 0;
     virtual void setRHS(size_t rowId, double v) = 0;
     virtual void addRHS(size_t rowId, double v) = 0;
-    virtual void addRHSsub(const std::vector<long> &vec_row_pos, double *sub_vector, double fkt=1.0)
+    virtual void addRHSsub(const std::vector<size_t> &vec_row_pos, double *sub_vector, double fkt=1.0)
     {
         for (size_t i=0; i<vec_row_pos.size(); i++) {
-            const long rowId = vec_row_pos[i];
-            if (rowId<0) continue;
+            const size_t rowId = vec_row_pos[i];
+            if (rowId==Base::index_npos) continue;
             addRHS(rowId, sub_vector[i]*fkt);
         }
     }

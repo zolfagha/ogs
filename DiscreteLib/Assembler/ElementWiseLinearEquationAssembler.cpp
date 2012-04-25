@@ -18,8 +18,8 @@ void ElementWiseLinearEquationAssembler::assembly(MeshLib::IMesh &msh, DofEquati
 {
     MathLib::DenseLinearEquations localEQS;
     std::vector<size_t> ele_node_ids, ele_node_size_order;
-    std::vector<long> local_dofmap_row;
-    std::vector<long> local_dofmap_column;
+    std::vector<size_t> local_dofmap_row;
+    std::vector<size_t> local_dofmap_column;
     const size_t n_ele = msh.getNumberOfElements();
 
     std::vector<double> local_u_n;

@@ -8,6 +8,7 @@
 #include <cassert>
 #include <iostream>
 
+#include "Base/CodingTools.h"
 #include "Base/BidirectionalMap.h"
 #include "EquationIdStorage.h"
 
@@ -91,20 +92,20 @@ public:
 
     size_t size() const {return _map_pt2eqs.size();};
 
-    long address(size_t pt_id) const
+    size_t address(size_t pt_id) const
     {
         if (_map_pt2eqs.countInA(pt_id)==0) return -1;
         return _map_pt2eqs.mapAtoB(pt_id);
     }
 
-    long key(long address_id) const
+    size_t key(size_t address_id) const
     {
         if (_map_pt2eqs.countInB(address_id)==0) return -1;
         return _map_pt2eqs.mapBtoA(address_id);
     }
 
 private:
-    Base::BidirectionalMap<long, long> _map_pt2eqs;
+    Base::BidirectionalMap<size_t, size_t> _map_pt2eqs;
     std::vector<size_t> _list_pt_id;
     std::set<size_t> _deactive;
 };

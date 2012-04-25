@@ -12,7 +12,7 @@ void ElementWiseTransientResidualAssembler::assembly( const MeshLib::IMesh &msh,
     const TimeStep &time = *_timestep;
 	LocalVectorType localVec;
     std::vector<size_t> ele_node_ids, ele_node_size_order;
-    std::vector<long> local_dofmap;
+    std::vector<size_t> local_dofmap;
     const size_t n_ele = msh.getNumberOfElements();
 
     LocalVectorType local_u_n1;

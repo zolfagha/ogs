@@ -167,19 +167,19 @@ public:
     // equation address mapping
     //---------------------------------------------------------------------------------------------
     /// map dof to equation id
-    long mapEqsID(size_t var_id, size_t mesh_id, size_t pt_id) const
+    size_t mapEqsID(size_t var_id, size_t mesh_id, size_t pt_id) const
     {
         const IEquationIdStorage* add = getPointEquationIdTable(var_id, mesh_id);
         return add->address(pt_id);
     }
-    void mapEqsID(size_t var_id, size_t mesh_id, const std::vector<size_t> &pt_id, std::vector<long> &eqs_id) const
+    void mapEqsID(size_t var_id, size_t mesh_id, const std::vector<size_t> &pt_id, std::vector<size_t> &eqs_id) const
     {
         eqs_id.resize(pt_id.size());
         const IEquationIdStorage* add = getPointEquationIdTable(var_id, mesh_id);
         for (size_t i=0; i<pt_id.size(); i++)
             eqs_id[i] = add->address(pt_id[i]);
     }
-    void mapEqsID(size_t mesh_id, const std::vector<size_t> &pt_id, std::vector<long> &eqs_id) const
+    void mapEqsID(size_t mesh_id, const std::vector<size_t> &pt_id, std::vector<size_t> &eqs_id) const
     {
         if (_map_msh2var.count(mesh_id)==0) return;
 
@@ -192,7 +192,7 @@ public:
                 eqs_id[i] = add->address(pt_id[i]);
         }
     }
-    void mapEqsID(size_t mesh_id, const std::vector<size_t> &pt_id, std::vector<long> &eqs_id, std::vector<long> &eqs_id_without_ghost) const
+    void mapEqsID(size_t mesh_id, const std::vector<size_t> &pt_id, std::vector<size_t> &eqs_id, std::vector<size_t> &eqs_id_without_ghost) const
     {
         if (_map_msh2var.count(mesh_id)==0) return;
 
@@ -204,15 +204,15 @@ public:
             const IEquationIdStorage* add = getPointEquationIdTable(var_id, mesh_id);
             for (size_t i=0; i<pt_id.size(); i++) {
                 eqs_id[i] = add->address(pt_id[i]);
-                eqs_id_without_ghost[i] = isGhostPoint(mesh_id, pt_id[i]) ? -1 : eqs_id[i];
+                eqs_id_without_ghost[i] = isGhostPoint(mesh_id, pt_id[i]) ? Base::index_npos : eqs_id[i];
             }
         }
     }
-    void mapDoF(size_t eqs_id, long &var_id, long &mesh_id, long &pt_id) const
+    void mapDoF(size_t eqs_id, size_t &var_id, size_t &mesh_id, size_t &pt_id) const
     {
-        var_id = -1;
-        mesh_id = -1;
-        pt_id = -1;
+        var_id = Base::index_npos;
+        mesh_id = Base::index_npos;
+        pt_id = Base::index_npos;
         for (size_t i=0; i<_map_var2dof.size(); i++) {
             const std::map<size_t, IEquationIdStorage*> &obj = _map_var2dof[i];
             for (std::map<size_t, IEquationIdStorage*>::const_iterator itr=obj.begin(); itr!=obj.end(); ++itr) {
