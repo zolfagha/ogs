@@ -86,9 +86,9 @@ StructuredMesh<ElementShape::QUAD>* MeshGenerator::generateStructuredRegularQuad
 {
     GeoLib::Point org(origin_x, origin_y, origin_z);
     GeoLib::Point pt_length(length, length, .0);
-    GeoLib::Point pt_unit_len(length/subdivision, length/subdivision, .0);
+    size_t unit_div[3] = {subdivision, subdivision, 1};
 
-    return new StructuredMesh<ElementShape::QUAD>(MeshLib::CoordinateSystemType::XY, org, pt_length.getData(), pt_unit_len.getData());
+    return new StructuredMesh<ElementShape::QUAD>(MeshLib::CoordinateSystemType::XY, org, pt_length.getData(), unit_div);
 
 };
 

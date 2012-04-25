@@ -42,7 +42,7 @@ private:
 public:
 
     ///
-    StructuredMesh(CoordinateSystemType::type coord, GeoLib::Point &org_pt, const double* len, const double* spacing) : _msh_id(0), _origin(org_pt)
+    StructuredMesh(CoordinateSystemType::type coord, GeoLib::Point &org_pt, const double* len, const size_t* division) : _msh_id(0), _origin(org_pt)
     {
         _order = 1;
         _isAxisymmetric = false;
@@ -51,7 +51,9 @@ public:
         for (size_t i=0; i<dim; i++)
             _length[i] = len[i];
         for (size_t i=0; i<dim; i++)
-            _spacing[i] = spacing[i];
+        	_number_of_elements_per_dimension[i] = division[i];
+        for (size_t i=0; i<dim; i++)
+            _spacing[i] = _length[i] / division[i];
 
         double d = _spacing[0];
         for (size_t i=1; i<getDimension(); i++)
