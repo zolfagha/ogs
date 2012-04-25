@@ -136,7 +136,7 @@ TEST(Discrete, NDDCSSEqs2)
     NodeDDCSerialSharedDiscreteSystem dis(*ddc);
     // dof
     DofEquationIdTable dofManager;
-    //size_t varId = dofManager.addVariableDoFs(0, 0, ddc->getTotalNumberOfDecomposedObjects());
+    dofManager.addVariableDoFs(0, 0, ddc->getTotalNumberOfDecomposedObjects());
     dofManager.construct(DofNumberingType::BY_DOF);
     // eqs
     IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivity>(lis, dofManager);
@@ -163,7 +163,7 @@ TEST(Discrete, NDDCSDEqs2)
     NodeDDCSerialDistributedDiscreteSystem dis(*ddc);
     // dof
     DofEquationIdTable dofManager;
-    //size_t varId = dofManager.addVariableDoFs(0, 0, ddc->getTotalNumberOfDecomposedObjects());
+    dofManager.addVariableDoFs(0, 0, ddc->getTotalNumberOfDecomposedObjects());
     dofManager.construct(DofNumberingType::BY_DOF);
     // eqs
     IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivity>(lis, dofManager);

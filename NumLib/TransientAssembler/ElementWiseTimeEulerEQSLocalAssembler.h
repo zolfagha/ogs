@@ -20,7 +20,7 @@ template <class T_USER_ASSEMBLY>
 class ElementWiseTimeEulerEQSLocalAssembler : public IElementWiseTransientLinearEQSLocalAssembler
 {
 public:
-    ElementWiseTimeEulerEQSLocalAssembler(T_USER_ASSEMBLY &a) : _time_ode(&a), _theta(1.0)
+    explicit ElementWiseTimeEulerEQSLocalAssembler(T_USER_ASSEMBLY* a) : _time_ode(a), _theta(1.0)
     {
     };
 

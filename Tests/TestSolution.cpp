@@ -94,9 +94,10 @@ public:
         //const double dt = time.getTimeStepSize();
         const double theta = 1.0;
         MathLib::DenseLinearEquations::VectorType localX0;
-        MathLib::DenseLinearEquations::MatrixType localM, localK(n,n);
+        MathLib::DenseLinearEquations::MatrixType localM(n,n), localK(n,n);
         MathLib::DenseLinearEquations::VectorType localF;
-        //localM = .0;
+        localM = .0;
+        localK = .0;
         //localF.resize(localF.size(), .0);
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
@@ -110,7 +111,7 @@ public:
         }
 
         //localR = (1/dt * localM + theta * localK) * localX - (1/dt * localM + (1-theta) * localK) * localX0 - localF;
-        MathLib::DenseLinearEquations::MatrixType tmpM;
+        MathLib::DenseLinearEquations::MatrixType tmpM(n, n);
         tmpM = localK;
         tmpM *= theta;
         //tmpM.axpy(1.0, &localX[0], 0.0, &localR[0]);
@@ -124,28 +125,37 @@ template <
 	>
 class GWFemTestSystem : public NumLib::ITransientSystem
 {
-    typedef FemIVBVProblem<
+    typedef FemIVBVProblem
+            <
     			ElementWiseTimeEulerEQSLocalAssembler<GWTimeODEAssembler>,
     			ElementWiseTimeEulerResidualLocalAssembler<GWTimeODEAssembler>,
     			GWJacobianAssembler
     		> GWFemProblem;
 
-    typedef TemplateTransientLinearFEMFunction<
+    typedef TemplateTransientLinearFEMFunction
+            <
     			GWFemProblem,
     			typename GWFemProblem::LinearAssemblerType
 			> MyLinearFunction;
 
-    typedef TemplateTransientResidualFEMFunction<
+    typedef TemplateTransientResidualFEMFunction
+            <
     			GWFemProblem,
     			typename GWFemProblem::ResidualAssemblerType
 			> MyResidualFunction;
 
-    typedef TemplateTransientDxFEMFunction<
+    typedef TemplateTransientDxFEMFunction
+            <
     			GWFemProblem,
     			typename GWFemProblem::JacobianAssemblerType
 			> MyDxFunction;
 
-    typedef TemplateDiscreteNonlinearSolver<MyLinearFunction, MyResidualFunction, MyDxFunction> MyNonlinearFunction;
+    typedef TemplateDiscreteNonlinearSolver
+            <
+                MyLinearFunction, 
+                MyResidualFunction, 
+                MyDxFunction
+            > MyNonlinearFunction;
 
     typedef SingleStepFEM
     		<
@@ -192,12 +202,12 @@ public:
         //size_t nnodes = msh->getNumberOfNodes();
         _feObjects = new LagrangianFeObjectContainer(*msh);
         //equations
-        GWTimeODEAssembler ele_x_eqs(*_feObjects, K) ;
-        GWFemProblem::LinearAssemblerType local_linear(ele_x_eqs);
-        GWFemProblem::ResidualAssemblerType local_r(ele_x_eqs);
-        GWFemProblem::JacobianAssemblerType local_J(*_feObjects, K);
+        GWTimeODEAssembler* ele_x_eqs = new GWTimeODEAssembler(*_feObjects, K) ;
+        GWFemProblem::LinearAssemblerType* local_linear = new GWFemProblem::LinearAssemblerType(ele_x_eqs);
+        GWFemProblem::ResidualAssemblerType* local_r = new GWFemProblem::ResidualAssemblerType(ele_x_eqs);
+        GWFemProblem::JacobianAssemblerType* local_J = new GWFemProblem::JacobianAssemblerType(*_feObjects, K);
         //IVBV problem
-        _problem = new GWFemProblem(dis, *dis.getMesh(), &local_linear, &local_r, &local_J);
+        _problem = new GWFemProblem(dis, *dis.getMesh(), local_linear, local_r, local_J);
         //BC
         size_t headId = _problem->createField(PolynomialOrder::Linear);
         _head = _problem->getField(headId);
@@ -213,10 +223,12 @@ public:
         TimeStepFunctionConstant tim(.0, 100.0, 10.0);
         _problem->setTimeSteppingFunction(tim);
         //solution algorithm
-        _solHead = new SolutionForHead(dis, *_problem);
+        _solHead = new SolutionForHead(&dis, _problem);
         //_solHead->getTimeODEAssembler()->setTheta(1.0);
-        T_LINEAR_SOLVER* linear_solver = _solHead->getLinearEquationSolver();
+        typename SolutionForHead::LinearSolverType* linear_solver = _solHead->getLinearEquationSolver();
         linear_solver->setOption(option);
+        typename SolutionForHead::NonlinearSolverType* nonlinear_solver = _solHead->getNonlinearSolver();
+        nonlinear_solver->setOption(option);
 
 
         //vel = new FEMIntegrationPointFunctionVector2d(msh);
@@ -289,6 +301,10 @@ TEST(Solution, Fem1_Picard)
     op_lis->addOption("precon_type", "NONE");
     op_lis->addOptionAsNum("error_tolerance", 1e-10);
     op_lis->addOptionAsNum("max_iteration_step", 500);
+    Base::Options* op_nl = options.addSubGroup("Nonlinear");
+    op_nl->addOption("solver_type", "Picard");
+    op_nl->addOptionAsNum("error_tolerance", 1e-6);
+    op_nl->addOptionAsNum("max_iteration_step", 500);
     // define problems
     GWFemTestSystem<MathLib::CRSLisSolver> gwProblem;
     gwProblem.define(dis, K, options);
@@ -323,6 +339,10 @@ TEST(Solution, Fem1_Newton)
     op_lis->addOption("precon_type", "NONE");
     op_lis->addOptionAsNum("error_tolerance", 1e-10);
     op_lis->addOptionAsNum("max_iteration_step", 500);
+    Base::Options* op_nl = options.addSubGroup("Nonlinear");
+    op_nl->addOption("solver_type", "Newton");
+    op_nl->addOptionAsNum("error_tolerance", 1e-6);
+    op_nl->addOptionAsNum("max_iteration_step", 10);
     // define problems
     GWFemTestSystem<MathLib::CRSLisSolver> gwProblem;
     gwProblem.define(dis, K, options);

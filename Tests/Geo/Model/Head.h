@@ -53,16 +53,16 @@ public:
         TemplateTransientMonolithicSystem::resizeOutputParameter(1);
     };
 
-    void define(DiscreteSystem &dis, GWFemProblem &problem, Base::Options &option)
+    void define(DiscreteSystem* dis, GWFemProblem* problem, Base::Options &option)
     {
         //MeshLib::IMesh *msh = dis.getMesh();
         //size_t nnodes = msh->getNumberOfNodes();
         //solution algorithm
         _solHead = new SolutionForHead(dis, problem);
         //_solHead->getTimeODEAssembler()->setTheta(1.0);
-        T_LINEAR_SOLVER* linear_solver = _solHead->getLinearEquationSolver();
+        SolutionForHead::LinearSolverType* linear_solver = _solHead->getLinearEquationSolver();
         linear_solver->setOption(option);
-        this->setOutput(Head, problem.getIC(0));
+        this->setOutput(Head, problem->getIC(0));
     }
 
     int solveTimeStep(const TimeStep &time)

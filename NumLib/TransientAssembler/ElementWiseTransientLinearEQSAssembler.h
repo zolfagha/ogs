@@ -37,8 +37,8 @@ public:
     /// @param u0
     /// @param u1
     /// @param a
-    ElementWiseTransientLinearEQSAssembler(const TimeStep &time, const std::vector<DiscreteLib::DiscreteVector<double>*> &u0, const std::vector<DiscreteLib::DiscreteVector<double>*> &u1, IElementWiseTransientLinearEQSLocalAssembler &a)
-        : _transient_e_assembler(&a), _timestep(&time), _u0(&u0), _u1(&u1)
+    ElementWiseTransientLinearEQSAssembler(const TimeStep* time, const std::vector<DiscreteLib::DiscreteVector<double>*>* u0, const std::vector<DiscreteLib::DiscreteVector<double>*>* u1, IElementWiseTransientLinearEQSLocalAssembler* a)
+        : _transient_e_assembler(a), _timestep(time), _u0(u0), _u1(u1)
     { };
 
 

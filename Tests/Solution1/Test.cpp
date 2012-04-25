@@ -51,12 +51,12 @@ Geo::GWFemProblem* defineGWProblem(DiscreteSystem &dis, Rectangle &_rec, Geo::Po
 {
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
-    Geo::GroundwaterFlowTimeODELocalAssembler ele_eqs(*_feObjects, pm);
-    ElementWiseTimeEulerEQSLocalAssembler<Geo::GroundwaterFlowTimeODELocalAssembler> linear_assembler(ele_eqs);
-    ElementWiseTimeEulerResidualLocalAssembler<Geo::GroundwaterFlowTimeODELocalAssembler> r_assembler(ele_eqs);
-    Geo::GroundwaterFlowJacobianLocalAssembler j_eqs(*_feObjects, pm);
+    Geo::GroundwaterFlowTimeODELocalAssembler* ele_eqs = new Geo::GroundwaterFlowTimeODELocalAssembler(*_feObjects, pm);
+    Geo::GWFemProblem::LinearAssemblerType* linear_assembler = new Geo::GWFemProblem::LinearAssemblerType(ele_eqs);
+    Geo::GWFemProblem::ResidualAssemblerType* r_assembler = new Geo::GWFemProblem::ResidualAssemblerType(ele_eqs);
+    Geo::GWFemProblem::JacobianAssemblerType* j_eqs = new Geo::GWFemProblem::JacobianAssemblerType(*_feObjects, pm);
     //IVBV problem
-    Geo::GWFemProblem* _problem = new Geo::GWFemProblem(dis, *dis.getMesh(), &linear_assembler, &r_assembler, &j_eqs);
+    Geo::GWFemProblem* _problem = new Geo::GWFemProblem(dis, *dis.getMesh(), linear_assembler, r_assembler, j_eqs);
     //BC
     size_t headId = _problem->createField(PolynomialOrder::Linear);
     FemNodalFunctionScalar* _head = _problem->getField(headId);
@@ -75,12 +75,12 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, Rectangle &
 {
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
-    Geo::MassTransportTimeODELocalAssembler ele_eqs(*_feObjects, pm, comp) ;
-    ElementWiseTimeEulerEQSLocalAssembler<Geo::MassTransportTimeODELocalAssembler> linear_assembler(ele_eqs);
-    ElementWiseTimeEulerResidualLocalAssembler<Geo::MassTransportTimeODELocalAssembler> r_assembler(ele_eqs);
-    Geo::MassTransportJacobianLocalAssembler j_eqs(*_feObjects, pm, comp);
+    Geo::MassTransportTimeODELocalAssembler* ele_eqs = new Geo::MassTransportTimeODELocalAssembler(*_feObjects, pm, comp) ;
+    Geo::MassFemProblem::LinearAssemblerType* linear_assembler = new Geo::MassFemProblem::LinearAssemblerType(ele_eqs);
+    Geo::MassFemProblem::ResidualAssemblerType* r_assembler = new Geo::MassFemProblem::ResidualAssemblerType(ele_eqs);
+    Geo::MassFemProblem::JacobianAssemblerType* j_eqs = new Geo::MassFemProblem::JacobianAssemblerType(*_feObjects, pm, comp);
     //IVBV problem
-    Geo::MassFemProblem* _problem = new Geo::MassFemProblem(dis, *dis.getMesh(), &linear_assembler, &r_assembler, &j_eqs);
+    Geo::MassFemProblem* _problem = new Geo::MassFemProblem(dis, *dis.getMesh(), linear_assembler, r_assembler, j_eqs);
     //BC
     size_t var_id = _problem->createField(PolynomialOrder::Linear);
     FemNodalFunctionScalar* _conc = _problem->getField(var_id);
@@ -130,7 +130,7 @@ TEST(Solution, CouplingFem1)
 	    op_lis->addOptionAsNum("max_iteration_step", 500);
 
 		MyFunctionHead f_head;
-		f_head.define(dis, *pGW, options);
+		f_head.define(&dis, pGW, options);
         f_head.setOutputParameterName(0, "h");
 		MyFunctionVelocity f_vel;
 		f_vel.define(dis, pm);
@@ -211,14 +211,14 @@ TEST(Solution, CouplingFem2)
         op_lis->addOptionAsNum("max_iteration_step", 1000);
         // unknowns
 		MyFunctionHead f_head;
-		f_head.define(dis, *pGW, optionsGW);
+		f_head.define(&dis, pGW, optionsGW);
         f_head.setOutputParameterName(0, "h");
 		MyFunctionVelocity f_vel;
 		f_vel.define(dis, pm);
         f_vel.setInputParameterName(0, "h");
         f_vel.setOutputParameterName(0, "v");
 		MyFunctionConcentration f_c;
-		f_c.define(dis, *pMass, optionsMT);
+		f_c.define(&dis, pMass, optionsMT);
         f_c.setInputParameterName(0, "v");
         f_c.setOutputParameterName(0, "c");
 

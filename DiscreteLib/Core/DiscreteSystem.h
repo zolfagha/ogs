@@ -56,6 +56,14 @@ public:
 		return eq;
 	}
 
+    void deleteLinearEquation(IDiscreteLinearEquation* eqs)
+    {
+        if (eqs!=0) {
+            _data.eraseLinearEquation(eqs);
+            delete eqs;
+        }
+    }
+
 	/// create a new vector
 	/// @param n	vector length
 	/// @return vector object

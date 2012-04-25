@@ -20,7 +20,7 @@ template <class T_USER_ASSEMBLY>
 class ElementWiseTimeEulerResidualLocalAssembler : public IElementWiseTransientResidualLocalAssembler
 {
 public:
-	ElementWiseTimeEulerResidualLocalAssembler(T_USER_ASSEMBLY &a) : _time_ode(&a), _theta(1.0)
+	explicit ElementWiseTimeEulerResidualLocalAssembler(T_USER_ASSEMBLY* a) : _time_ode(a), _theta(1.0)
     {
     };
 

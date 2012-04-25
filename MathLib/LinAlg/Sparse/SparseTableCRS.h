@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <set>
+#include <cassert>
 
 namespace MathLib 
 {
@@ -36,6 +37,9 @@ template<class INTTYPE>
 MathLib::SparseTableCRS<INTTYPE>* convertRowMajorSparsityToCRS(RowMajorSparsity &row_major_entries)
 {
     const size_t n_rows = row_major_entries.size();
+    assert(n_rows > 0);
+    if (n_rows==0) return 0;
+         
 
     //get number of nonzero 
     std::vector<INTTYPE> *ptr = new std::vector<INTTYPE>(n_rows+1);

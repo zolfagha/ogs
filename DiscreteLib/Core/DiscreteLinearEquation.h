@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include "IDiscreteResource.h"
 #include "DiscreteVector.h"
 
 namespace DiscreteLib
@@ -14,7 +15,7 @@ class IDiscreteLinearEquationAssembler;
 /** 
  * \brief Interface for discrete linear equations
  */
-class IDiscreteLinearEquation
+class IDiscreteLinearEquation : public IDiscreteResource
 {
 public:
 	typedef DiscreteVector<double> GlobalVectorType;

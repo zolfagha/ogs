@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cstddef>
+#include "IDiscreteResource.h"
 
 namespace DiscreteLib
 {
@@ -9,15 +10,11 @@ namespace DiscreteLib
 /**
  * \brief Interface of Vector containers in discrete systems
  */
-class IDiscreteVectorBase
+class IDiscreteVectorBase : public IDiscreteResource
 {
 public:
-	IDiscreteVectorBase() : _obj_id(0) {};
+	IDiscreteVectorBase() {};
     virtual ~IDiscreteVectorBase() {};
-    size_t getObjectID() const {return _obj_id;};
-    void setObjectID(size_t i) {_obj_id = i;};
-private:
-    size_t _obj_id;
 };
 
 } // end

@@ -6,12 +6,10 @@
 #include "Base/CodingTools.h"
 
 #include "DiscreteLib/Core/IDiscreteVectorBase.h"
-//#include "DiscreteLib/Core/DiscreteLinearEquation.h"
+#include "DiscreteLib/Core/DiscreteLinearEquation.h"
 
 namespace DiscreteLib
 {
-
-class IDiscreteLinearEquation;
 
 /**
  * \brief Data container for any discrete objects
@@ -51,7 +49,16 @@ public:
     size_t addLinearEquation(IDiscreteLinearEquation* eq)
     {
         _vec_linear_sys.push_back(eq);
+        eq->setObjectID(_vec_linear_sys.size()-1);
         return _vec_linear_sys.size()-1;
+    }
+
+    void eraseLinearEquation(IDiscreteLinearEquation* eq)
+    {
+    	const size_t i = eq->getObjectID();
+    	if (_vec_linear_sys.size() > i) {
+    		_vec_linear_sys[i] = 0;
+    	}
     }
 
     size_t getNumberOfLinearEquations() const {return _vec_linear_sys.size();};

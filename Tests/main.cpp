@@ -14,9 +14,9 @@ int main(int argc, char *argv[])
 #if 1
     argc = 2;
     //argv[1] = "--gtest_filter=Math.Nonlinear*";
-    argv[1] = "--gtest_filter=Num.Discrete*:FEM.*";
+    //argv[1] = "--gtest_filter=Num.Discrete*:FEM.*";
     //argv[1] = "--gtest_filter=Discrete.NDDC*";
-    //argv[1] = "--gtest_filter=Solution.CouplingFem*";
+    argv[1] = "--gtest_filter=Solution.Coupling*";
     //argv[1] = "--gtest_filter=Math.Matrix*";
     //argv[1] = "--gtest_filter=Coupling.*";
     //argv[1] = "--gtest_filter=Math.SystemOfEqs*";

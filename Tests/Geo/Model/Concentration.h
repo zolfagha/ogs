@@ -54,24 +54,28 @@ public:
         TemplateTransientMonolithicSystem::resizeOutputParameter(1);
     };
 
-    void define(DiscreteSystem &dis, MassFemProblem &problem, Base::Options &option)
+    void define(DiscreteSystem* dis, MassFemProblem* problem, Base::Options &option)
     {
-        //MeshLib::IMesh *msh = dis.getMesh();
-        //size_t nnodes = msh->getNumberOfNodes();
         //solution algorithm
         _solConc = new SolutionForConc(dis, problem);
-        //_solHead->getTimeODEAssembler()->setTheta(1.0);
-        T_LINEAR_SOLVER* linear_solver = _solConc->getLinearEquationSolver();
+        //_solConc->getTimeODEAssembler()->setTheta(1.0);
+        SolutionForConc::LinearSolverType* linear_solver = _solConc->getLinearEquationSolver();
         linear_solver->setOption(option);
-        this->setOutput(Concentration, problem.getIC(0));
+        this->setOutput(Concentration, problem->getIC(0));
     }
 
     int solveTimeStep(const TimeStep &time)
     {
-        //const MathLib::SpatialFunctionVector *vel = this->getInput<MathLib::SpatialFunctionVector>(Velocity);
+        //input
+        const MathLib::SpatialFunctionVector *vel = this->getInput<MathLib::SpatialFunctionVector>(Velocity);
         //TODO _solConc->getProblem()->getResidualAssembler().initialize(vel);
-    	_solConc->solveTimeStep(time);
+
+        // solve
+        _solConc->solveTimeStep(time);
+
+        // output
         setOutput(Concentration, _solConc->getCurrentSolution(0));
+
         return 0;
     }
 

@@ -24,7 +24,7 @@ struct NonlinerSolverOption
 
 	NonlinerSolverOption()
 	{
-		solver_type = Picard;
+		solver_type = Linear;
 		error_tolerance = 1.e-6;
 		max_iteration = 500;
 	}

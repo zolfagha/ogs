@@ -69,6 +69,7 @@ public:
 
     virtual ~FemDirichletBC()
     {
+        delete _bc_func;
     	//if (_method!=0) delete _method;
     	//_method = 0;
     }

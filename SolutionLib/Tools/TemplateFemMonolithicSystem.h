@@ -24,18 +24,23 @@ public:
     			T_LINEAR_SOLVER
     		> MySolutionType;
 
-    TemplateFemMonolithicSystem(size_t n_in, size_t n_out)
+    TemplateFemMonolithicSystem(size_t n_in, size_t n_out) : _solution(0)
     {
         TemplateTransientMonolithicSystem::resizeInputParameter(n_in);
         TemplateTransientMonolithicSystem::resizeOutputParameter(n_out);
     };
 
-    void define(DiscreteLib::DiscreteSystem &dis, MyProblemType &problem, Base::Options &option)
+    virtual ~TemplateFemMonolithicSystem()
+    {
+        Base::releaseObject(_solution);
+    }
+
+    void define(DiscreteLib::DiscreteSystem* dis, MyProblemType* problem, Base::Options &option)
     {
         _solution = new MySolutionType(dis, problem);
         T_LINEAR_SOLVER* linear_solver = _solution->getLinearEquationSolver();
         linear_solver->setOption(option);
-        this->setOutput(0, problem.getIC(0));
+        this->setOutput(0, problem->getIC(0));
     }
 
     int solveTimeStep(const NumLib::TimeStep &time)
@@ -61,10 +66,12 @@ public:
     };
 
 private:
-    MyProblemType* _problem;
-    MySolutionType* _solution;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
-
     DISALLOW_COPY_AND_ASSIGN(TemplateFemMonolithicSystem);
+
+private:
+    //MyProblemType* _problem;
+    MySolutionType* _solution;
+    //FemLib::LagrangianFeObjectContainer* _feObjects;
+
 };
 } //end

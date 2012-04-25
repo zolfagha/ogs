@@ -38,8 +38,9 @@ public:
     /// constructor
     /// @param problem		Fem problem
     /// @param linear_eqs	Discrete linear equation
-    TemplateTransientLinearFEMFunction(UserFemProblem &problem, UserLocalAssembler &asssembler, DiscreteLib::IDiscreteLinearEquation &linear_eqs)
-        : _problem(&problem), _local_assembler(&asssembler),  _linear_eqs(&linear_eqs)
+    TemplateTransientLinearFEMFunction(UserFemProblem* problem, UserLocalAssembler* asssembler, DiscreteLib::IDiscreteLinearEquation* linear_eqs)
+        : _problem(problem), _local_assembler(asssembler),  _linear_eqs(linear_eqs),
+          _t_n1(0), _u_n0(0)
     {
     };
 
@@ -52,22 +53,24 @@ public:
     	return new TemplateTransientLinearFEMFunction<
     				T_USER_FEM_PROBLEM,
     				T_LOCAL_ASSEMBLER
-    				>(*_problem, *_local_assembler, *_linear_eqs);
+    				>(_problem, _local_assembler, _linear_eqs);
 	}
 
     /// reset property
-    void reset(const NumLib::TimeStep &t)
+    void reset(const NumLib::TimeStep* t, MyFemVector* u_n0)
     {
-    	this->_t_n1 = const_cast<NumLib::TimeStep*>(&t);
+    	this->_t_n1 = const_cast<NumLib::TimeStep*>(t);
+    	this->_u_n0 = u_n0;
     };
 
     /// solve linear equations discretized with FEM
-    /// @param u_n	previous results
+    /// @param u0	initial guess
     /// @param u_n1 new results
-    void eval(const MyFemVector &u_n, MyFemVector &u_n1)
+    void eval(const MyFemVector &/*u0*/, MyFemVector &u_n1)
     {
     	// input, output
         const NumLib::TimeStep &t_n1 = *this->_t_n1;
+        MyFemVector* u_n = this->_u_n0;
 
         // prepare data
         UserFemProblem* pro = _problem;
@@ -84,13 +87,13 @@ public:
 
         //TODO temporally
         std::vector<MyFemVector*> vec_un;
-        vec_un.push_back(const_cast<MyFemVector*>(&u_n));
+        vec_un.push_back(const_cast<MyFemVector*>(u_n));
         std::vector<MyFemVector*> vec_un1;
         vec_un1.push_back(const_cast<MyFemVector*>(&u_n1));
 
 		// assembly
         _linear_eqs->initialize();
-        NumLib::ElementWiseTransientLinearEQSAssembler assembler(t_n1, vec_un, vec_un1, *_local_assembler);
+        NumLib::ElementWiseTransientLinearEQSAssembler assembler(&t_n1, &vec_un, &vec_un1, _local_assembler);
         _linear_eqs->construct(assembler);
 
         //apply BC1,2
@@ -111,6 +114,7 @@ private:
     UserLocalAssembler *_local_assembler;
     DiscreteLib::IDiscreteLinearEquation* _linear_eqs;
     NumLib::TimeStep* _t_n1;
+    MyFemVector* _u_n0;
 };
 
 
