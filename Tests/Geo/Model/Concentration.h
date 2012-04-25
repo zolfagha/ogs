@@ -61,6 +61,7 @@ public:
         //_solConc->getTimeODEAssembler()->setTheta(1.0);
         typename SolutionForConc::LinearSolverType* linear_solver = _solConc->getLinearEquationSolver();
         linear_solver->setOption(option);
+        _solConc->getNonlinearSolver()->setOption(option);
         this->setOutput(Concentration, problem->getIC(0));
     }
 

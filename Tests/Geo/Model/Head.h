@@ -62,6 +62,7 @@ public:
         //_solHead->getTimeODEAssembler()->setTheta(1.0);
         typename SolutionForHead::LinearSolverType* linear_solver = _solHead->getLinearEquationSolver();
         linear_solver->setOption(option);
+        _solHead->getNonlinearSolver()->setOption(option);
         this->setOutput(Head, problem->getIC(0));
     }
 

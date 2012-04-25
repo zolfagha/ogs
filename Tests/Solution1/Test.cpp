@@ -126,6 +126,10 @@ TEST(Solution, CouplingFem1)
 	    op_lis->addOption("precon_type", "NONE");
 	    op_lis->addOptionAsNum("error_tolerance", 1e-10);
 	    op_lis->addOptionAsNum("max_iteration_step", 500);
+	    Base::Options* op_nl = options.addSubGroup("Nonlinear");
+	    op_nl->addOption("solver_type", "Picard");
+	    op_nl->addOptionAsNum("error_tolerance", 1e-6);
+	    op_nl->addOptionAsNum("max_iteration_step", 500);
 
 		MyFunctionHead f_head;
 		f_head.define(&dis, pGW, options);
@@ -201,12 +205,20 @@ TEST(Solution, CouplingFem2)
 	    op_lis->addOption("precon_type", "NONE");
 	    op_lis->addOptionAsNum("error_tolerance", 1e-10);
 	    op_lis->addOptionAsNum("max_iteration_step", 1000);
+	    Base::Options* op_nl = optionsGW.addSubGroup("Nonlinear");
+	    op_nl->addOption("solver_type", "Picard");
+	    op_nl->addOptionAsNum("error_tolerance", 1e-6);
+	    op_nl->addOptionAsNum("max_iteration_step", 500);
         Base::Options optionsMT;
         op_lis = optionsMT.addSubGroup("Lis");
         op_lis->addOption("solver_type", "BiCG");
         op_lis->addOption("precon_type", "NONE");
         op_lis->addOptionAsNum("error_tolerance", 1e-10);
         op_lis->addOptionAsNum("max_iteration_step", 1000);
+	    Base::Options* op_nl2 = optionsMT.addSubGroup("Nonlinear");
+	    op_nl2->addOption("solver_type", "Picard");
+	    op_nl2->addOptionAsNum("error_tolerance", 1e-6);
+	    op_nl2->addOptionAsNum("max_iteration_step", 500);
         // unknowns
 		MyFunctionHead f_head;
 		f_head.define(&dis, pGW, optionsGW);

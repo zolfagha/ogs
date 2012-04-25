@@ -11,7 +11,7 @@ TEST(Dummy, Test1)
 
 int main(int argc, char *argv[])
 {
-#if 0
+#if 1
     argc = 2;
     //argv[1] = "--gtest_filter=Math.Nonlinear*";
     //argv[1] = "--gtest_filter=Num.Discrete*:FEM.*";
