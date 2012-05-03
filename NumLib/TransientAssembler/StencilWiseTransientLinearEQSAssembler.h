@@ -9,7 +9,7 @@
 #include "DiscreteLib/EquationId/DofEquationIdTable.h"
 #include "DiscreteLib/Core/DiscreteVector.h"
 #include "DiscreteLib/Assembler/IDiscreteLinearEquationAssembler.h"
-
+#include "DiscreteLib/Utils/Tools.h"
 #include "IStencilWiseTransientLinearEQSLocalAssembler.h"
 
 namespace MeshLib

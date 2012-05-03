@@ -16,10 +16,11 @@ int main(int argc, char *argv[])
     //argv[1] = "--gtest_filter=Math.Nonlinear*";
     //argv[1] = "--gtest_filter=Num.Discrete*:FEM.*";
     //argv[1] = "--gtest_filter=Discrete.NDDC*";
-    argv[1] = "--gtest_filter=Solution.Coupling*";
+    //argv[1] = "--gtest_filter=Solution.Coupling*";
     //argv[1] = "--gtest_filter=Math.Matrix*";
     //argv[1] = "--gtest_filter=Coupling.*";
     //argv[1] = "--gtest_filter=Math.SystemOfEqs*";
+    argv[1] = "--gtest_filter=Fdm.*";
     //argv[1] = "--gtest_filter=*";
 #endif
     ::testing::InitGoogleTest(&argc, argv);

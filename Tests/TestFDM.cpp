@@ -8,6 +8,8 @@
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
 #include "MathLib/Coupling/Algorithm/IConvergenceCheck.h"
 #include "MathLib/Coupling/Algorithm/SerialStaggeredMethod.h"
+#include "GeoLib/Core/Polyline.h"
+#include "GeoLib/Shape/Line.h"
 #include "GeoLib/Shape/Rectangle.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "MeshLib/Core/IStencil.h"
@@ -23,34 +25,45 @@
 
 #include "Tests/Geo/Material/PorousMedia.h"
 
-class FdmGwLocalAssembler: public NumLib::IStencilWiseTransientLinearEQSLocalAssembler
+class FdmGw1DLocalAssembler: public NumLib::IStencilWiseTransientLinearEQSLocalAssembler
 {
 private:
 	Geo::PorousMedia* _pm;
 	double _h;
 	double _h2;
 public:
-	FdmGwLocalAssembler(double h, Geo::PorousMedia &pm)
+	FdmGw1DLocalAssembler(double h, Geo::PorousMedia &pm)
 	: _pm(&pm), _h(h), _h2(h*h)
 	{
 	};
 
     virtual void assembly(const NumLib::TimeStep &time,  MeshLib::IStencil &s, const LocalVectorType &local_u_n1, const LocalVectorType &local_u_n, LocalEquationType &eqs)
     {
-    	double dt = time.getTimeStepSize();
-    	double storage = .0;
-    	_pm->storage->eval(0, storage);
+    	const double dt = time.getTimeStepSize();
+    	const size_t center_point_id = s.getCentralNodeID();
+    	//double storage = .0;
+    	//_pm->storage->eval(0, storage);
 		double k = .0;
     	_pm->hydraulic_conductivity->eval(0, k);
-    	const size_t center_point = s.getCentralNodeID();
-    	eqs.addA(0, 0, storage/dt - 4.0*k/_h2);
 
-		const std::vector<size_t> &neighbor_points = s.getSurroundingNodes();
+    	if (center_point_id==0) {
+            eqs.addA(0, 0, k/_h);
+            const std::vector<size_t> &neighbor_points = s.getSurroundingNodes();
+            for(size_t i=0; i<neighbor_points.size(); i++)
+            {
+                eqs.addA(0, i+1, -k/_h);
+            }
+    	} else if (center_point_id == 10) {
+            eqs.addA(0, 0, 1.0);
+    	} else {
+        	eqs.addA(0, 0, 2.0*k/_h2);
+    		const std::vector<size_t> &neighbor_points = s.getSurroundingNodes();
 
-        for(size_t i=0; i<neighbor_points.size(); i++)
-        {
-		  eqs.addA(0, i, k/_h2);
-        }
+            for(size_t i=0; i<neighbor_points.size(); i++)
+            {
+    		  eqs.addA(0, i+1, -k/_h2);
+            }
+    	}
 
     }
 };
@@ -87,7 +100,7 @@ public:
 
 typedef SolutionLib::FdmIVBVProblem
 		<
-		FdmGwLocalAssembler,
+		FdmGw1DLocalAssembler,
 		FdmGwResidualLocalAssembler,
 		FdmGwJacobianLocalAssembler
 		> GWFdmProblem;
@@ -183,7 +196,7 @@ public:
 };
 
 
-GWFdmProblem* defineGWProblem4FDM(DiscreteSystem &dis, double h, Rectangle &_rec, Geo::PorousMedia &pm)
+GWFdmProblem* defineGWProblem4FDM(DiscreteSystem &dis, double h, Line &line, Geo::PorousMedia &pm)
 {
     //equations
     GWFdmProblem::LinearAssemblerType* linear_assembler = new GWFdmProblem::LinearAssemblerType(h, pm);
@@ -194,13 +207,11 @@ GWFdmProblem* defineGWProblem4FDM(DiscreteSystem &dis, double h, Rectangle &_rec
     //BC
     size_t headId = _problem->createField();
     FdmFunctionScalar* _head = _problem->getField(headId);
-    Polyline* poly_left = _rec.getLeft();
-    Polyline* poly_right = _rec.getRight();
     _problem->setIC(headId, *_head);
     MathLib::SpatialFunctionConstant<double> f1(.0);
-    _problem->addDirichletBC(headId, *poly_right, false, f1);
+    _problem->addDirichletBC(headId, *line.getPoint2(), false, f1);
     MathLib::SpatialFunctionConstant<double> f2(-1e-5);
-    _problem->addNeumannBC(headId, *poly_left, false, f2);
+    _problem->addNeumannBC(headId, *line.getPoint1(), false, f2);
 
     return _problem;
 }
@@ -209,28 +220,23 @@ TEST(Fdm, fdm1)
 {
 	try {
 		const double len = 2.0;
-		const double div = 2;
+		const double div = 10;
 		const double h = len / div;
-	    MeshLib::IMesh *msh = MeshLib::MeshGenerator::generateStructuredRegularQuadMesh(len, div, .0, .0, .0);
-	    GeoLib::Rectangle* _rec = new GeoLib::Rectangle(GeoLib::Point(0.0, 0.0, 0.0),  GeoLib::Point(len, len, 0.0));
+	    MeshLib::IMesh *msh = MeshLib::MeshGenerator::generateLineMesh(len, div, .0, .0, .0);
+	    GeoLib::Line line(Point(0.0, .0, .0), Point(len, .0, .0));
 	    Geo::PorousMedia pm;
 	    pm.hydraulic_conductivity = new MathLib::SpatialFunctionConstant<double>(1.e-11);
-	    pm.porosity = new MathLib::SpatialFunctionConstant<double>(0.2);
 	    DiscreteSystem dis(*msh);
-	    GWFdmProblem* pGW = defineGWProblem4FDM(dis, h, *_rec, pm);
-        TimeStepFunctionConstant tim(.0, 100.0, 10.0);
+	    GWFdmProblem* pGW = defineGWProblem4FDM(dis, h, line, pm);
+        TimeStepFunctionConstant tim(.0, 10.0, 10.0);
         pGW->setTimeSteppingFunction(tim);
 	    // options
 	    Base::Options options;
 	    Base::Options* op_lis = options.addSubGroup("Lis");
-	    op_lis->addOption("solver_type", "CG");
+	    op_lis->addOption("solver_type", "BiCG");
 	    op_lis->addOption("precon_type", "NONE");
 	    op_lis->addOptionAsNum("error_tolerance", 1e-10);
 	    op_lis->addOptionAsNum("max_iteration_step", 500);
-	    Base::Options* op_nl = options.addSubGroup("Nonlinear");
-	    op_nl->addOption("solver_type", "Picard");
-	    op_nl->addOptionAsNum("error_tolerance", 1e-6);
-	    op_nl->addOptionAsNum("max_iteration_step", 500);
 
 		MyFunctionHead f_head;
 		f_head.define(&dis, pGW, options);
@@ -263,11 +269,13 @@ TEST(Fdm, fdm1)
 	    //r_f_v->printout();
 
 	    std::vector<double> expected;
-	    expected.resize(9);
-	    for (size_t i=0; i<9; i++) {
-	        if (i%3==0) expected[i] = 2.e+6;
-	        if (i%3==1) expected[i] = 1.e+6;
-	        if (i%3==2) expected[i] = 0.e+6;
+	    expected.resize(div+1);
+        const double p_left = 2.e+6;
+        const double p_right = .0;
+        const double x_len = 2.0;
+	    for (size_t i=0; i<expected.size(); i++) {
+            double x = i*h;
+            expected[i] = (p_right-p_left) / x_len * x + p_left;
 	    }
 
 	    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*vec_h)[0], vec_h->size());

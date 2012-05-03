@@ -54,6 +54,8 @@ public:
         : AbstractTimeSteppingAlgorithm(*problem->getTimeSteppingFunction()), 
           _problem(problem), _discrete_system(dis)
     {
+    	//this->caterogorizeGridPoint();
+
         const size_t n_var = problem->getNumberOfVariables();
         // create dof map
         for (size_t i=0; i<n_var; i++) {
@@ -61,12 +63,8 @@ public:
         }
         _dofManager.construct();
         // initialize solution vectors
-//        _u_n.resize(n_var, 0);
         _u_n1.resize(n_var, 0);
         _u_n1[0] = (FdmLib::FdmFunctionScalar*) problem->getIC(0)->clone();
-//        for (size_t i=0; i<n_var; i++) {
-//            _u_n1[i] = (FemLib::FemNodalFunctionScalar*) problem.getIC(i)->clone();
-//        }
         const size_t n_dofs = _dofManager.getTotalNumberOfActiveDoFs();
         _vec_n0 = dis->createVector<double>(n_dofs);
         _vec_n1 = dis->createVector<double>(n_dofs);
@@ -196,6 +194,7 @@ private:
         }
     }
 
+#if 0
     void caterogorizeGridPoint()
     {
         /// Sort neighbor point index
@@ -205,8 +204,10 @@ private:
         MeshLib::IMesh* msh = _discrete_system->getMesh();
         const size_t n_nodes = msh->getNumberOfNodes();
         const size_t n_cells = msh->getNumberOfElements();
-        std::vector<bool> cell_status(n_cells);
-        std::vector<bool> pt_status(n_nodes, false);
+        std::vector<bool> cell_is_active(n_cells, false);
+        std::vector<bool> pt_is_active(n_nodes, false);
+        _list_node_type.resize(n_nodes);
+        std::vector<std::vector<size_t> > pt2active_cells;
 
 
         size_t num_cell_in_use = 0;
@@ -219,247 +220,40 @@ private:
         	e->getNodeIDList(list_e_node_id);
         	msh->getListOfNodeCoordinates(list_e_node_id, list_e_node_pt);
 
-            cell_status[i] = false;
-
             GeoLib::Surface *boundary;
             if(  boundary->isPntInSfc(list_e_node_pt[0].getData())
-               &&boundary->isPntInSfc(list_e_node_pt[0].getData())
-               &&boundary->isPntInSfc(list_e_node_pt[0].getData())
-               &&boundary->isPntInSfc(list_e_node_pt[0].getData()))
+               &&boundary->isPntInSfc(list_e_node_pt[1].getData())
+               &&boundary->isPntInSfc(list_e_node_pt[2].getData())
+               &&boundary->isPntInSfc(list_e_node_pt[3].getData()))
             {
                num_cell_in_use++;
-               cell_status[i] = true;
-               if(pt_status[e->getNodeID(0)] == false)
-               {
-                  Point *new_grid_pnt = new Point((long)grid_point_in_use.size(), x0, y0);
-                  new_grid_pnt->point_type = intern;
-                  pnt_eqs_index[i*(ncols+1)+j] = new_grid_pnt->Index();
-                  new_grid_pnt->grid_i = i;
-                  new_grid_pnt->grid_j = j;
-                  grid_point_in_use.push_back(new_grid_pnt);
-               }
-               if(pnt_eqs_index[(i+1)*(ncols+1)+j] == -1)
-               {
-                  Point *new_grid_pnt = new Point((long)grid_point_in_use.size(), x0, y1);
-                  new_grid_pnt->point_type = intern;
-                  pnt_eqs_index[(i+1)*(ncols+1)+j] = new_grid_pnt->Index();
-                  new_grid_pnt->grid_i = i+1;
-                  new_grid_pnt->grid_j = j;
-                  grid_point_in_use.push_back(new_grid_pnt);
-               }
-               if(pnt_eqs_index[(i+1)*(ncols+1)+j+1] == -1)
-               {
-                  Point *new_grid_pnt = new Point((long)grid_point_in_use.size(), x1, y1);
-                  new_grid_pnt->point_type = intern;
-                  pnt_eqs_index[(i+1)*(ncols+1)+j+1] = new_grid_pnt->Index();
-                  new_grid_pnt->grid_i = i+1;
-                  new_grid_pnt->grid_j = j+1;
-                  grid_point_in_use.push_back(new_grid_pnt);
-               }
-               if(pnt_eqs_index[i*(ncols+1)+j+1] == -1)
-               {
-                  Point *new_grid_pnt = new Point((long)grid_point_in_use.size(), x1, y0);
-                  new_grid_pnt->point_type = intern;
-                  pnt_eqs_index[i*(ncols+1)+j+1] = new_grid_pnt->Index();
-                  new_grid_pnt->grid_i = i+1;
-                  new_grid_pnt->grid_j = j+1;
-                  grid_point_in_use.push_back(new_grid_pnt);
-               }
+               cell_is_active[i] = true;
 
-               /// Add this cell as a neighbor
-               grid_point_in_use[pnt_eqs_index[i*(ncols+1)+j]]->neighbor_cell_type.push_back(NE);
-               grid_point_in_use[pnt_eqs_index[i*(ncols+1)+j+1]]->neighbor_cell_type.push_back(NW);
-               grid_point_in_use[pnt_eqs_index[(i+1)*(ncols+1)+j+1]]->neighbor_cell_type.push_back(SW);
-               grid_point_in_use[pnt_eqs_index[(i+1)*(ncols+1)+j]]->neighbor_cell_type.push_back(SE);
+               // internal points
+               for (size_t j=0; j<list_e_node_id.size(); i++) {
+            	   const size_t pt_id = list_e_node_id[j];
+                   pt_is_active[pt_id] = true;
+                   pt2active_cells[pt_id].push_back(i);
+               }
             }
         }
 
+        MeshLib::TopologySequentialNodes2Elements node2conn_ele(msh);
 
-        /// Configure the topology of the grid
-        long jw, je, jn, js;
-        for(i=0; i<nrows+1; i++)
+        for (size_t i=0; i<n_nodes; i++)
         {
-           for(j=0; j<ncols+1; j++)
-           {
-              /// If the point is not in use
-              if(pnt_eqs_index[i*(ncols+1)+j] == -1)
-                 continue;
+        	if (!pt_is_active[i]) continue;
 
-              Point *pnt = grid_point_in_use[pnt_eqs_index[i*(ncols+1)+j]];
-
-              /// This point is the center
-              pnt->neighbor_points.push_back(pnt->Index());
-              pnt->np_position.push_back(C);
-
-              je = i*(ncols+1)+j+1;
-              jw = i*(ncols+1)+j-1;
-              jn = (i+1)*(ncols+1)+j;
-              js = (i-1)*(ncols+1)+j;
-
-
-
-              if(pnt->neighbor_cell_type.size() ==1 )
-              {
-                 switch(pnt->neighbor_cell_type[0])
-                 {
-                   case NE:
-                     //   |
-                     //   |
-                     //   ----
-                     pnt->point_type = nm_24;
-                     pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[jn]]->Index());
-                     pnt->np_position.push_back(N);
-                     pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[je]]->Index());
-                     pnt->np_position.push_back(E);
-                     break;
-                   case NW:
-                     //      |
-                     //      |
-                     //   ----
-                     pnt->point_type = nm_23;
-                     pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[jn]]->Index());
-                     pnt->np_position.push_back(N);
-                     pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[jw]]->Index());
-                     pnt->np_position.push_back(W);
-                     break;
-                   case SW:
-                     //  ---
-                     //     |
-                     //     |
-                     pnt->point_type = nm_22;
-                     pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[js]]->Index());
-                     pnt->np_position.push_back(S);
-                     pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[jw]]->Index());
-                     pnt->np_position.push_back(W);
-                     break;
-                   case SE:
-                     //   ---
-                     //  |
-                     //  |
-                     pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[je]]->Index());
-                     pnt->np_position.push_back(E);
-                     pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[js]]->Index());
-                     pnt->np_position.push_back(S);
-                     pnt->point_type = nm_21;
-                     break;
-
-                 }
-              }
-              else if(pnt->neighbor_cell_type.size() ==2 )
-              {
-                 ///
-                 ///-----.---.---.-----
-                 ///-------------------
-                 ///-------------------
-                 if(   (pnt->neighbor_cell_type[0] == NE&&pnt->neighbor_cell_type[1] == NW)
-                     ||(pnt->neighbor_cell_type[1] == NE&&pnt->neighbor_cell_type[0] == NW))
-                 {
-                     pnt->point_type = nm_14;
-
-                     pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[je]]->Index());
-                     pnt->np_position.push_back(E);
-                     pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[jw]]->Index());
-                     pnt->np_position.push_back(W);
-                 }
-                 ///       ||||
-                 ///       .|||
-                 ///       ||||
-                 else if( (pnt->neighbor_cell_type[0] == SW&&pnt->neighbor_cell_type[1] == NW)
-                        ||(pnt->neighbor_cell_type[1] == SW&&pnt->neighbor_cell_type[0] == NW))
-                 {
-                     pnt->point_type = nm_12;
-
-                     pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[jn]]->Index());
-                     pnt->np_position.push_back(N);
-                     pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[js]]->Index());
-                     pnt->np_position.push_back(S);
-
-                 }
-                 ///||||
-                 ///|||.
-                 ///||||
-                 else if( (pnt->neighbor_cell_type[0] == SE&&pnt->neighbor_cell_type[1] == NE)
-                        ||(pnt->neighbor_cell_type[1] == SE&&pnt->neighbor_cell_type[0] == NE))
-                 {
-                     pnt->point_type = nm_11;
-
-                     pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[jn]]->Index());
-                     pnt->np_position.push_back(N);
-                     pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[js]]->Index());
-                     pnt->np_position.push_back(S);
-                 }
-                 ///-------------------
-                 ///-------------------
-                 ///-----.---.---.-----
-                 ///
-                 else if( (pnt->neighbor_cell_type[0] == SW&&pnt->neighbor_cell_type[1] == SE)
-                        ||(pnt->neighbor_cell_type[1] == SW&&pnt->neighbor_cell_type[0] == SE))
-                 {
-                     pnt->point_type = nm_13;
-
-                     pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[je]]->Index());
-                     pnt->np_position.push_back(E);
-                     pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[jw]]->Index());
-                     pnt->np_position.push_back(W);
-                 }
-
-              }
-
-              // This is a point inside the domain or the point is at a corner but has
-              // four neighbours.
-              else if(pnt->neighbor_cell_type.size()>2)
-              {
-                  pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[jn]]->Index());
-                  pnt->np_position.push_back(N);
-                  pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[je]]->Index());
-                  pnt->np_position.push_back(E);
-                  pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[jw]]->Index());
-                  pnt->np_position.push_back(W);
-                  pnt->neighbor_points.push_back(grid_point_in_use[pnt_eqs_index[js]]->Index());
-                  pnt->np_position.push_back(S);
-
-                  if(pnt->neighbor_cell_type.size()==3)
-                    pnt->point_type = border;
-                  else if(pnt->neighbor_cell_type.size()==4)
-                    pnt->point_type = intern;
-
-              }
-
-
-              for(k=0; k<(int)pnt->neighbor_points.size(); k++)
-                idx_buff[k] = pnt->neighbor_points[k];
-              for(k=0; k<(int)pnt->neighbor_points.size(); k++)
-              {
-                 buff0 = idx_buff[k];
-                 buff1 = pnt->neighbor_points[k];
-                 nbp_type =  pnt->np_position[k];
-                 l = k;
-                 while(l>0&&idx_buff[l-1]>buff0)
-                 {
-                    idx_buff[l] = idx_buff[l-1];
-                    pnt->neighbor_points[l] = pnt->neighbor_points[l-1];
-                    pnt->np_position[l] = pnt->np_position[l-1];
-                    l--;
-                 }
-                 idx_buff[l] = buff0;
-                 pnt->neighbor_points[l] = buff1;
-                 pnt->np_position[l] = nbp_type;
-              }
-
-              /// Assign boundary condition to this point, if it is close to
-              /// the geometry entity for the boundary conditions.
-              if(!CheckDirichletBC(pnt))
-              {
-                 if(pnt->point_type != intern)
-                   CheckNuemannBC(pnt);
-              }
-
-              /// Check whether this point is assigned with the source/sink term
-              CheckSourceSink(pnt);
-           }
+        	const size_t n_connected_ele = node2conn_ele.getConnectedElements(i).size();
+        	if (n_connected_ele<4) {
+                _list_node_type[i] = FdmLib::border;
+        	} else {
+                _list_node_type[i] = FdmLib::intern;
+        	}
         }
 
     }
+#endif
 
 private:
     DiscreteLib::DofEquationIdTable _dofManager;

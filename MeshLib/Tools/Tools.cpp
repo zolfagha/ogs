@@ -19,10 +19,23 @@ void findNodesOnPolyline(IMesh const* msh, GeoLib::Polyline const* poly, std::ve
     vec_nodes->assign(vec_node_id.begin(), vec_node_id.end());
 };
 
+void findNodesOnPoint(IMesh const* msh, GeoLib::Point const* point, std::vector<size_t> *vec_nodes)
+{
+    for (size_t i=0; i<msh->getNumberOfNodes(); ++i) {
+        if (*msh->getNodeCoordinatesRef(i) == *point) {
+            vec_nodes->push_back(i);
+            break;
+        }
+    }
+};
+
 ///
 void findNodesOnGeometry(IMesh const* msh, GeoLib::GeoObject const* obj, std::vector<size_t> *vec_nodes)
 {
     switch (obj->getGeoType()) {
+    case GeoLib::GeoObjType::POINT:
+        findNodesOnPoint(msh, static_cast<GeoLib::Point const*>(obj), vec_nodes);
+        break;
         case GeoLib::GeoObjType::POLYLINE:
             findNodesOnPolyline(msh, static_cast<GeoLib::Polyline const*>(obj), vec_nodes);
             break;

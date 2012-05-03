@@ -16,6 +16,8 @@ namespace MeshLib
 /// seeks all nodes located on a given object and returns a list of the found node pointers.
 void findNodesOnGeometry(IMesh const* msh, GeoLib::GeoObject const* obj, std::vector<size_t> *vec_nodes);
 
+void findNodesOnPoint(IMesh const* msh, GeoLib::Point const* point, std::vector<size_t> *vec_nodes);
+
 /// seeks all nodes located on a given polyline and returns a list of the found node pointers.
 void findNodesOnPolyline(IMesh const* msh, GeoLib::Polyline const* poly, std::vector<size_t> *vec_nodes);
 

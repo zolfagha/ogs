@@ -33,7 +33,7 @@ TARGET_LINK_LIBRARIES ( tests
 	GeoLib
 	MeshLib
 	DiscreteLib
-	FdmLib
+	#FdmLib
 	FemLib
 	NumLib
 )
