@@ -19,10 +19,9 @@
 #include "SurfaceVec.h"
 #include "GeoLib/Core/Surface.h"
 
-#include "Color.h"
-#include "Station.h"
 
-namespace GeoLib {
+namespace GeoLib
+{
 
 ///
 /**
@@ -92,22 +91,6 @@ public:
 	 * else the return value is false.
 	 */
 	virtual bool removePointVec(const std::string &name);
-
-	/// Adds a vector of stations with the given name and colour to GEOObjects.
-	virtual void addStationVec(std::vector<Point*> *stations, std::string &name,
-			const Color* const color);
-	/// Filters a list of stations with the given name based on the criteria in PropertyBounds.
-	/// (See property system in Station class for more information.)
-	std::vector<Point*> *filterStationVec(const std::string &name,
-			const std::vector<PropertyBounds> &bounds);
-	/// Returns the station vector with the given name.
-	const std::vector<Point*> *getStationVec(const std::string &name) const;
-
-	/// Removes the station vector with the given name from GEOObjects
-	virtual bool removeStationVec(const std::string &name) {
-		return removePointVec(name);
-	}
-
 
 	/**
 	 * Adds a vector of polylines with the given name to GEOObjects.
@@ -187,9 +170,6 @@ public:
 
 	/// Returns the names of all geometry vectors.
 	void getGeometryNames (std::vector<std::string>& names) const;
-
-	/// Returns the names of all station vectors.
-	void getStationNames(std::vector<std::string>& names) const;
 
 	/**
 	 * merge geometries

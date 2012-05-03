@@ -11,6 +11,7 @@
 #include "DiscreteLib/Assembler/IDiscreteLinearEquationAssembler.h"
 #include "DiscreteLib/Utils/Tools.h"
 #include "IStencilWiseTransientLinearEQSLocalAssembler.h"
+#include "IStencil.h"
 
 namespace MeshLib
 {
@@ -21,7 +22,10 @@ namespace NumLib
 {
 
 class TimeStep;
+}
 
+namespace FdmLib
+{
 
 /**
  * \brief Element-based discrete system assembler classes
@@ -37,7 +41,7 @@ public:
     /// @param u0
     /// @param u1
     /// @param a
-	StencilWiseTransientLinearEQSAssembler(const TimeStep* time, const std::vector<DiscreteLib::DiscreteVector<double>*>* u0, const std::vector<DiscreteLib::DiscreteVector<double>*>* u1, IStencilWiseTransientLinearEQSLocalAssembler* a)
+	StencilWiseTransientLinearEQSAssembler(const NumLib::TimeStep* time, const std::vector<DiscreteLib::DiscreteVector<double>*>* u0, const std::vector<DiscreteLib::DiscreteVector<double>*>* u1, IStencilWiseTransientLinearEQSLocalAssembler* a)
         : _transient_e_assembler(a), _timestep(time), _u0(u0), _u1(u1)
     { };
 
@@ -50,7 +54,7 @@ public:
     /// @param eqs 				Linear equation solver
     void assembly(MeshLib::IMesh &msh, DiscreteLib::DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs)
     {
-        const TimeStep &time = *_timestep;
+        const NumLib::TimeStep &time = *_timestep;
         MathLib::DenseLinearEquations localEQS;
         std::vector<size_t> ele_node_ids, ele_node_size_order;
         std::vector<size_t> local_dofmap;
@@ -64,7 +68,7 @@ public:
         	ele_node_ids.clear();
         	ele_node_size_order.clear();
         	local_dofmap.clear();
-        	MeshLib::Stencil5 stencil;
+        	Stencil5 stencil;
         	// set stencil
         	stencil.setCentralNodeID(nod->getNodeID());
     		ele_node_ids.push_back(nod->getNodeID());
@@ -90,7 +94,7 @@ public:
 
 private:
     IStencilWiseTransientLinearEQSLocalAssembler* _transient_e_assembler;
-    const TimeStep* _timestep;
+    const NumLib::TimeStep* _timestep;
     const std::vector<DiscreteLib::DiscreteVector<double>*>* _u0;
     const std::vector<DiscreteLib::DiscreteVector<double>*>* _u1;
 };

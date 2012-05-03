@@ -9,19 +9,16 @@
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "DiscreteLib/LinearEquation/MeshBasedDiscreteLinearEquation.h"
 #include "DiscreteLib/Utils/SparsityBuilder.h"
-#include "FdmLib/FdmFunction.h"
-#include "FdmLib/BoundaryConditions.h"
-#include "FdmLib/FDM.h"
 #include "NumLib/TransientAssembler/ElementWiseTransientLinearEQSAssembler.h"
 #include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
 
-#include "SolutionLib/Tools/TemplateTransientLinearFDMFunction.h"
-#include "SolutionLib/Tools/TemplateTransientResidualFDMFunction.h"
-#include "SolutionLib/Tools/TemplateTransientDxFDMFunction.h"
+#include "SolutionLib/Solution/AbstractTimeSteppingAlgorithm.h"
 
-#include "AbstractTimeSteppingAlgorithm.h"
+#include "FdmFunction.h"
+#include "BoundaryConditions.h"
+#include "TemplateTransientLinearFDMFunction.h"
 
-namespace SolutionLib
+namespace FdmLib
 {
 
 /**
@@ -35,14 +32,11 @@ template <
 	class T_LINEAR_SOLVER
     >
 class SingleStepFDM
-	: public AbstractTimeSteppingAlgorithm
+	: public SolutionLib::AbstractTimeSteppingAlgorithm
 {
 public:
     typedef T_USER_PROBLEM UserFemProblem;
     typedef TemplateTransientLinearFDMFunction<UserFemProblem, typename UserFemProblem::LinearAssemblerType> UserLinearFemFunction;
-    typedef TemplateTransientResidualFDMFunction<UserFemProblem, typename UserFemProblem::ResidualAssemblerType> UserResidualFunction;
-    typedef TemplateTransientDxFDMFunction<UserFemProblem, typename UserFemProblem::JacobianAssemblerType> UserDxFunction;
-    typedef NumLib::TemplateDiscreteNonlinearSolver<UserLinearFemFunction, UserResidualFunction, UserDxFunction> NonlinearSolverType;
     typedef T_LINEAR_SOLVER LinearSolverType;
 
     /// constructor
@@ -77,10 +71,6 @@ public:
         _linear_eqs = _discrete_system->createLinearEquation<DiscreteLib::TemplateMeshBasedDiscreteLinearEquation, LinearSolverType, DiscreteLib::SparsityBuilderFromNodeConnectivity>(*_linear_solver, _dofManager);
         // setup functions
         _f_linear = new UserLinearFemFunction(problem, problem->getLinearAssembler(), _linear_eqs);
-        _f_r = new UserResidualFunction(problem, &_dofManager, problem->getResidualAssembler());
-        _f_dx = new UserDxFunction(problem, problem->getJacobianAssembler(), _linear_eqs);
-        // setup nonlinear solver
-        _f_nonlinear = new NonlinearSolverType(dis, _f_linear, _f_r, _f_dx);
     };
 
     ///
@@ -93,9 +83,6 @@ public:
         _discrete_system->deleteVector(_vec_st);
         Base::releaseObject(_linear_solver);
         Base::releaseObject(_f_linear);
-        Base::releaseObject(_f_r);
-        Base::releaseObject(_f_dx);
-        Base::releaseObject(_f_nonlinear);
     }
 
     /// solve 
@@ -140,8 +127,6 @@ public:
 
         // setup functions
         _f_linear->reset(&t_n1, _vec_n0);
-        _f_r->reset(&t_n1, _vec_n0, _vec_st);
-        _f_dx->reset(&t_n1, _vec_n0);
 
         // initial guess
         *_vec_n1_0 = *_vec_n0;
@@ -150,7 +135,7 @@ public:
 		}
         
         // solve
-        _f_nonlinear->solve(*_vec_n1_0, *_vec_n1);
+        _f_linear->eval(*_vec_n1_0, *_vec_n1);
 
         _u_n1[0]->setNodalValues(*_vec_n1);
 
@@ -168,8 +153,6 @@ public:
 
     /// get a linear solver
     LinearSolverType* getLinearEquationSolver() { return _linear_solver; };
-    /// get a nonlinear solver
-    NonlinearSolverType* getNonlinearSolver() { return _f_nonlinear;};
 
     ///
     virtual void accept(const NumLib::TimeStep &t)
@@ -194,67 +177,6 @@ private:
         }
     }
 
-#if 0
-    void caterogorizeGridPoint()
-    {
-        /// Sort neighbor point index
-        size_t idx_buff[5], buff1, buff0;
-        FdmLib::NeighborPoint_Type nbp_type;
-
-        MeshLib::IMesh* msh = _discrete_system->getMesh();
-        const size_t n_nodes = msh->getNumberOfNodes();
-        const size_t n_cells = msh->getNumberOfElements();
-        std::vector<bool> cell_is_active(n_cells, false);
-        std::vector<bool> pt_is_active(n_nodes, false);
-        _list_node_type.resize(n_nodes);
-        std::vector<std::vector<size_t> > pt2active_cells;
-
-
-        size_t num_cell_in_use = 0;
-        /// Loop over grid cells
-        for(size_t i=0; i<n_cells; i++)
-        {
-        	MeshLib::IElement* e = msh->getElemenet(i);
-        	std::vector<size_t> list_e_node_id;
-        	std::vector<GeoLib::Point> list_e_node_pt;
-        	e->getNodeIDList(list_e_node_id);
-        	msh->getListOfNodeCoordinates(list_e_node_id, list_e_node_pt);
-
-            GeoLib::Surface *boundary;
-            if(  boundary->isPntInSfc(list_e_node_pt[0].getData())
-               &&boundary->isPntInSfc(list_e_node_pt[1].getData())
-               &&boundary->isPntInSfc(list_e_node_pt[2].getData())
-               &&boundary->isPntInSfc(list_e_node_pt[3].getData()))
-            {
-               num_cell_in_use++;
-               cell_is_active[i] = true;
-
-               // internal points
-               for (size_t j=0; j<list_e_node_id.size(); i++) {
-            	   const size_t pt_id = list_e_node_id[j];
-                   pt_is_active[pt_id] = true;
-                   pt2active_cells[pt_id].push_back(i);
-               }
-            }
-        }
-
-        MeshLib::TopologySequentialNodes2Elements node2conn_ele(msh);
-
-        for (size_t i=0; i<n_nodes; i++)
-        {
-        	if (!pt_is_active[i]) continue;
-
-        	const size_t n_connected_ele = node2conn_ele.getConnectedElements(i).size();
-        	if (n_connected_ele<4) {
-                _list_node_type[i] = FdmLib::border;
-        	} else {
-                _list_node_type[i] = FdmLib::intern;
-        	}
-        }
-
-    }
-#endif
-
 private:
     DiscreteLib::DofEquationIdTable _dofManager;
     UserFemProblem* _problem;
@@ -263,14 +185,10 @@ private:
     DiscreteLib::IDiscreteLinearEquation* _linear_eqs;
     std::vector<FdmLib::FdmFunctionScalar*> _u_n1;
     UserLinearFemFunction* _f_linear;
-    UserResidualFunction* _f_r;
-    UserDxFunction* _f_dx;
-    NonlinearSolverType* _f_nonlinear;
     MyFemVector *_vec_n0;
     MyFemVector *_vec_n1_0;
     MyFemVector *_vec_n1;
     MyFemVector *_vec_st;
-    std::vector<FdmLib::Point_Type> _list_node_type;
 };
 
 

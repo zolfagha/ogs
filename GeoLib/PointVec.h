@@ -8,7 +8,6 @@
 
 // GEOLIB
 #include "GeoLib/Core/Point.h"
-#include "Station.h"
 #include "AxisAlignedBoundingBox.h"
 
 // Base
@@ -38,8 +37,8 @@ public:
 	/// Signals if the vector contains object of type Point or Station
 	enum PointType
 	{
-		POINT    = 0,
-		STATION  = 1
+		POINT    = 0
+//		STATION  = 1
 	};
 
 	/**
@@ -95,8 +94,6 @@ public:
 	 */
 	const std::vector<Point*>* getVector () const { return _pnt_vec; }
 
-	std::vector<Point*> *filterStations(const std::vector<PropertyBounds> &bounds) const;
-
 	/** sets the name of the object
 	 * \param n the name as standard string */
 	void setName(const std::string & n) { _name = n; }
@@ -143,7 +140,7 @@ public:
 	const std::vector<size_t>& getIDMap () const { return _pnt_id_map; }
 
 	double getShortestPointDistance () const;
-	const GeoLib::AABB& getAxisAlignedBoundingBox () const;
+	const GeoLib::AxisAlignedBoundingBox& getAxisAlignedBoundingBox () const;
 
 private:
 	void makePntsUnique (std::vector<GeoLib::Point*>* pnt_vec, std::vector<size_t> &pnt_id_map);
@@ -192,7 +189,7 @@ private:
 	double _sqr_shortest_dist;
 
 	void calculateAxisAlignedBoundingBox ();
-	AABB aabb;
+	AxisAlignedBoundingBox aabb;
 };
 
 } // end namespace

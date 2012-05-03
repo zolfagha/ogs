@@ -4,13 +4,11 @@
 #include <vector>
 
 #include "Base/CodingTools.h"
-#include "FdmLib/FdmFunction.h"
-#include "FdmLib/BoundaryConditions.h"
+#include "SolutionLib/Problem/AbstractMeshBasedIVBVProblem.h"
+#include "FdmFunction.h"
+#include "BoundaryConditions.h"
 
-
-#include "AbstractMeshBasedIVBVProblem.h"
-
-namespace SolutionLib
+namespace FdmLib
 {
 
 /**
@@ -22,43 +20,29 @@ namespace SolutionLib
  *- BC
  */
 template <
-	class T_LOCAL_ASSEMBLER_LINEAR,
-	class T_LOCAL_ASSEMBLER_RESIDUAL,
-	class T_LOCAL_ASSEMBLER_JACOBIAN
+	class T_LOCAL_ASSEMBLER_LINEAR
+//	class T_LOCAL_ASSEMBLER_RESIDUAL,
+//	class T_LOCAL_ASSEMBLER_JACOBIAN
 	>
-class FdmIVBVProblem : public AbstractMeshBasedDiscreteIVBVProblem
+class FdmIVBVProblem : public SolutionLib::AbstractMeshBasedDiscreteIVBVProblem
 {
 public:
 	typedef T_LOCAL_ASSEMBLER_LINEAR LinearAssemblerType;
-	typedef T_LOCAL_ASSEMBLER_RESIDUAL ResidualAssemblerType;
-	typedef T_LOCAL_ASSEMBLER_JACOBIAN JacobianAssemblerType;
+//	typedef T_LOCAL_ASSEMBLER_RESIDUAL ResidualAssemblerType;
+//	typedef T_LOCAL_ASSEMBLER_JACOBIAN JacobianAssemblerType;
 
 	///
 	FdmIVBVProblem(	DiscreteLib::DiscreteSystem &dis,
     				MeshLib::IMesh &msh,
-    				LinearAssemblerType *linear_assembly,
-    				ResidualAssemblerType *residual_assembly,
-    				JacobianAssemblerType *jacobian_assembly
+    				LinearAssemblerType *linear_assembly
+//    				ResidualAssemblerType *residual_assembly,
+//    				JacobianAssemblerType *jacobian_assembly
     				)
         : AbstractMeshBasedDiscreteIVBVProblem(msh),
           	_discrete_system(&dis),
-			_linear_assembler(linear_assembly),
-			_residual_assembler(residual_assembly),
-			_jacobian_assembler(jacobian_assembly)
-    {
-        Base::zeroObject(_map_var, _map_ic);
-    }
-
-	FdmIVBVProblem(	DiscreteLib::DiscreteSystem &dis,
-    				MeshLib::IMesh &msh,
-    				LinearAssemblerType *linear_assembly,
-    				ResidualAssemblerType *residual_assembly
-    				)
-        : AbstractMeshBasedDiscreteIVBVProblem(msh),
-            _discrete_system(&dis),
-			_linear_assembler(linear_assembly),
-			_residual_assembler(residual_assembly),
-			_jacobian_assembler(0)
+			_linear_assembler(linear_assembly)
+//			_residual_assembler(residual_assembly),
+//			_jacobian_assembler(jacobian_assembly)
     {
         Base::zeroObject(_map_var, _map_ic);
     }
@@ -149,11 +133,11 @@ public:
     ///
     LinearAssemblerType* getLinearAssembler() const { return _linear_assembler; }
 
-    ///
-    ResidualAssemblerType* getResidualAssembler() const { return _residual_assembler; }
-
-    ///
-    JacobianAssemblerType* getJacobianAssembler() const { return _jacobian_assembler; }
+//    ///
+//    ResidualAssemblerType* getResidualAssembler() const { return _residual_assembler; }
+//
+//    ///
+//    JacobianAssemblerType* getJacobianAssembler() const { return _jacobian_assembler; }
 
 private:
     void addDirichletBC(FdmLib::FdmDirichletBC<double>& bc1)
@@ -175,8 +159,8 @@ private:
     std::vector<FdmLib::FdmDirichletBC<double>*> _map_bc1;
     std::vector<FdmLib::FdmNeumannBC<double, double>*> _map_bc2;
     LinearAssemblerType* _linear_assembler;
-    ResidualAssemblerType* _residual_assembler;
-    JacobianAssemblerType* _jacobian_assembler;
+//    ResidualAssemblerType* _residual_assembler;
+//    JacobianAssemblerType* _jacobian_assembler;
 };
 
 } //end

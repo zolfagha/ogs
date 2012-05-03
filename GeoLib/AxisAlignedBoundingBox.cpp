@@ -12,7 +12,7 @@
 
 namespace GeoLib {
 
-AABB::AABB ()
+AxisAlignedBoundingBox::AxisAlignedBoundingBox ()
 {
 	for (std::size_t k(0); k<3; k++) {
 		_min_pnt[k] = std::numeric_limits<double>::max();
@@ -20,7 +20,7 @@ AABB::AABB ()
 	}
 }
 
-AABB::AABB ( const std::vector<GeoLib::Point*> *points )
+AxisAlignedBoundingBox::AxisAlignedBoundingBox ( const std::vector<GeoLib::Point*> *points )
 {
 	size_t nPoints (points->size());
 	for (size_t i=0; i<nPoints; i++)
@@ -29,12 +29,12 @@ AABB::AABB ( const std::vector<GeoLib::Point*> *points )
 	}
 }
 
-void AABB::update (GeoLib::Point const & pnt)
+void AxisAlignedBoundingBox::update (GeoLib::Point const & pnt)
 {
 	update (pnt[0], pnt[1], pnt[2]);
 }
 
-void AABB::update (double x, double y, double z)
+void AxisAlignedBoundingBox::update (double x, double y, double z)
 {
 	if (x < _min_pnt[0]) _min_pnt[0] = x;
 	if (_max_pnt[0] < x) _max_pnt[0] = x;
@@ -44,17 +44,17 @@ void AABB::update (double x, double y, double z)
 	if (_max_pnt[2] < z) _max_pnt[2] = z;
 }
 
-bool AABB::containsPoint (GeoLib::Point const & pnt, double eps) const
+bool AxisAlignedBoundingBox::containsPoint (GeoLib::Point const & pnt, double eps) const
 {
 	return containsPoint (pnt[0], pnt[1], pnt[2], eps);
 }
 
-bool AABB::containsPoint (const double *pnt, double eps) const
+bool AxisAlignedBoundingBox::containsPoint (const double *pnt, double eps) const
 {
 	return containsPoint (pnt[0], pnt[1], pnt[2], eps);
 }
 
-bool AABB::containsPoint (double x, double y, double z, double eps) const
+bool AxisAlignedBoundingBox::containsPoint (double x, double y, double z, double eps) const
 {
 	if ((_min_pnt[0] <= x && x <= _max_pnt[0])
 			|| std::fabs(_min_pnt[0]-x) < eps

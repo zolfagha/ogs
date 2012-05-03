@@ -4,15 +4,15 @@
 #include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
 
 
-namespace MeshLib
-{
-class IStencil;
-};
-
 namespace NumLib
 {
 
 class TimeStep;
+}
+
+namespace FdmLib
+{
+class IStencil;
 
 class IStencilWiseTransientLinearEQSLocalAssembler
 {
@@ -29,7 +29,7 @@ public:
     /// @param local_u_n1	guess of current time step value
     /// @param local_u_n	previous time step value
     /// @param eqs			local algebraic equation
-    virtual void assembly(const TimeStep &time,  MeshLib::IStencil &nod, const LocalVectorType &local_u_n1, const LocalVectorType &local_u_n, LocalEquationType &eqs) = 0;
+    virtual void assembly(const NumLib::TimeStep &time,  IStencil &nod, const LocalVectorType &local_u_n1, const LocalVectorType &local_u_n, LocalEquationType &eqs) = 0;
 };
 
 } //end

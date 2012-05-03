@@ -158,4 +158,46 @@ private:
 
 typedef TemplateFDMFunction<double> FdmFunctionScalar;
 
+
+class FdmCellVectorFunction : public MathLib::SpatialFunctionVector
+{
+public:
+	explicit FdmCellVectorFunction(size_t n)
+    {
+		_vec.resize(n);
+    };
+	virtual ~FdmCellVectorFunction() {};
+
+	virtual FdmCellVectorFunction* clone() const
+    {
+		FdmCellVectorFunction *obj = new FdmCellVectorFunction(_vec.size());
+        return obj;
+    };
+
+    virtual void eval(const MathLib::SpatialPosition &x, MathLib::Vector &val)
+    {
+    	val = _vec[0];
+    }
+
+    void setValue(size_t i, MathLib::Vector &v)
+    {
+    	_vec[i] = v;
+    }
+
+    void printout() const
+    {
+        std::cout << "cell_values = ";
+        for (size_t i=0; i<_vec.size(); ++i) {
+            const MathLib::Vector &val1 = _vec[i];
+            std::cout << "(";
+            for (size_t j=0; j<val1.size(); ++j) std::cout << val1[j] << " ";
+            std::cout << ") ";
+        }
+        std::cout << std::endl;
+    }
+
+private:
+    std::vector<MathLib::Vector> _vec;
+};
+
 } //end

@@ -3,7 +3,7 @@
 
 #include <vector>
 
-namespace MeshLib
+namespace FdmLib
 {
 
 class IStencil

@@ -95,7 +95,7 @@ private:
 	void splitPolygonAtIntersection (std::list<Polygon*>::iterator polygon_it);
 	void splitPolygonAtPoint (std::list<Polygon*>::iterator polygon_it);
 	std::list<Polygon*> _simple_polygon_list;
-	AABB _aabb;
+	AxisAlignedBoundingBox _aabb;
 };
 
 GeoLib::Polygon* createPolygonFromCircle (GeoLib::Point const& middle_pnt, double radius,

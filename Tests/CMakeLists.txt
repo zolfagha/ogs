@@ -11,6 +11,8 @@ FILE(GLOB Test_Geo_Model_Files Geo/Model/*.h Geo/Model/*.cpp)
 SOURCE_GROUP( Test\\Geo\\Model FILES ${Test_Geo_Model_Files} )
 FILE(GLOB Test_ExactSolution_Files ExactSolution/*.h ExactSolution/*.cpp)
 SOURCE_GROUP( Test\\ExactSolution FILES ${Test_ExactSolution_Files} )
+FILE(GLOB Test_FDM_Files FDM/*.h FDM/*.cpp)
+SOURCE_GROUP( Test\\FDM FILES ${Test_FDM_Files} )
 
 INCLUDE_DIRECTORIES(
 	.
@@ -25,6 +27,7 @@ ADD_EXECUTABLE( tests
         ${Test_Geo_Equation_Files}
         ${Test_Geo_Model_Files}
         ${Test_ExactSolution_Files}
+        ${Test_FDM_Files}
 )
 
 TARGET_LINK_LIBRARIES ( tests

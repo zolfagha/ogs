@@ -20,18 +20,18 @@ namespace GeoLib {
  *
  * \brief Class AABB is a bounding box around a given geometric entity
  * */
-class AABB
+class AxisAlignedBoundingBox
 {
 public:
 	/**
 	 * construction of object, initialization the axis aligned bounding box
 	 * */
-	AABB ();
+	AxisAlignedBoundingBox ();
 
 	/**
 	 * construction of object using vector of points
 	 * */
-	AABB ( const std::vector<GeoLib::Point*> *points );
+	AxisAlignedBoundingBox ( const std::vector<GeoLib::Point*> *points );
 
 	void update (GeoLib::Point const & pnt);
 	/**

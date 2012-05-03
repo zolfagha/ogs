@@ -7,6 +7,7 @@
 
 #include "PointVec.h"
 #include "BruteForceClosestPair.h"
+#include "MathTools.h"
 
 namespace GeoLib {
 
@@ -82,16 +83,6 @@ size_t PointVec::uniqueInsert (Point* pnt)
 	delete pnt;
 	pnt = NULL;
 	return k;
-}
-
-std::vector<Point*> * PointVec::filterStations(const std::vector<PropertyBounds> &bounds) const
-{
-	std::vector<Point*> *tmpStations (new std::vector<Point*>);
-	size_t size (_pnt_vec->size());
-	for (size_t i=0; i<size; i++) {
-		if (static_cast<Station*>((*_pnt_vec)[i])->inSelection(bounds)) tmpStations->push_back((*_pnt_vec)[i]);
-	}
-	return tmpStations;
 }
 
 bool PointVec::getElementIDByName (const std::string& name, size_t &id) const

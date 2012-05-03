@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "MathLib/Function/IFunction.h"
+#include "MathLib/Function/Function.h"
 #include "FemLib/Core/Element/IFemElement.h"
 #include "FemLib/Core/Integration/Integration.h"
 #include "NumLib/TransientAssembler/IElementWiseTimeODELocalAssembler.h"
@@ -39,7 +39,7 @@ protected:
 
         LocalMatrixType matDiff(localK);
         LocalMatrixType matAdv(localK);
-        SpatialCompositFunction<double, MathLib::SpatialFunctionScalar, MathLib::SpatialFunctionScalar, MathLib::Multiplication> f_diff_poro(*_cmp->molecular_diffusion, *_pm->porosity);
+        MathLib::SpatialCompositFunction<double, MathLib::SpatialFunctionScalar, MathLib::SpatialFunctionScalar, MathLib::Multiplication> f_diff_poro(*_cmp->molecular_diffusion, *_pm->porosity);
 
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
@@ -98,7 +98,7 @@ public:
         LocalMatrixType matM(localJ);
         LocalMatrixType matDiff(localJ);
         LocalMatrixType matAdv(localJ);
-        SpatialCompositFunction<double, MathLib::SpatialFunctionScalar, MathLib::SpatialFunctionScalar, MathLib::Multiplication> f_diff_poro(*_cmp->molecular_diffusion, *_pm->porosity);
+        MathLib::SpatialCompositFunction<double, MathLib::SpatialFunctionScalar, MathLib::SpatialFunctionScalar, MathLib::Multiplication> f_diff_poro(*_cmp->molecular_diffusion, *_pm->porosity);
 
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];

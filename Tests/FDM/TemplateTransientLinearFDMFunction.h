@@ -6,12 +6,12 @@
 #include "MathLib/Function/IFunction.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "NumLib/TimeStepping/TimeStep.h"
-#include "NumLib/TransientAssembler/StencilWiseTransientLinearEQSAssembler.h"
-#include "FdmLib/FdmFunction.h"
-#include "FdmLib/BoundaryConditions.h"
+#include "StencilWiseTransientLinearEQSAssembler.h"
+#include "FdmFunction.h"
+#include "BoundaryConditions.h"
 
 
-namespace SolutionLib
+namespace FdmLib
 {
 
 typedef DiscreteLib::DiscreteVector<double> MyFemVector;
@@ -93,7 +93,7 @@ public:
 
 		// assembly
         _linear_eqs->initialize();
-        NumLib::StencilWiseTransientLinearEQSAssembler assembler(&t_n1, &vec_un, &vec_un1, _local_assembler);
+        StencilWiseTransientLinearEQSAssembler assembler(&t_n1, &vec_un, &vec_un1, _local_assembler);
         _linear_eqs->construct(assembler);
 
         //apply BC1,2
