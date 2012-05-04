@@ -505,30 +505,32 @@ template<class T> void Matrix<T>::inverse(Matrix<T> *y) const
     assert(nrows<4);
 
     if (nrows==1) {
-        (*y)(0,0) = (*this)(0,0);
-    } else if (nrows==2) {
-        (*y)(0,0) = (*this)(1,1);
-        (*y)(0,1) = -(*this)(0,1);
-        (*y)(1,0) = -(*this)(1,0);
-        (*y)(1,1) = (*this)(0,0);
-    } else if (nrows==3) {
-        (*y)(0,0) = (*this)(1,1)*(*this)(2,2)-(*this)(2,1)*(*this)(1,2);
-        (*y)(0,1) = (*this)(0,2)*(*this)(2,1)-(*this)(0,1)*(*this)(2,2);
-        (*y)(0,2) =  (*this)(0,1)*(*this)(1,2)-(*this)(0,2)*(*this)(1,1);
-        //
-        (*y)(1,0) =  (*this)(1,2)*(*this)(2,0)-(*this)(2,2)*(*this)(1,0);
-        (*y)(1,1) =  (*this)(0,0)*(*this)(2,2)-(*this)(2,0)*(*this)(0,2);
-        (*y)(1,2) =  (*this)(0,2)*(*this)(1,0)-(*this)(1,2)*(*this)(0,0);
-        //
-        (*y)(2,0) =  (*this)(1,0)*(*this)(2,1)-(*this)(2,0)*(*this)(1,1);
-        (*y)(2,1) =  (*this)(0,1)*(*this)(2,0)-(*this)(2,1)*(*this)(0,0);
-        (*y)(2,2) =  (*this)(0,0)*(*this)(1,1)-(*this)(1,0)*(*this)(0,1);
+        (*y)(0,0) = 1.0 / (*this)(0,0);
     } else {
-        //error
+        if (nrows==2) {
+            (*y)(0,0) = (*this)(1,1);
+            (*y)(0,1) = -(*this)(0,1);
+            (*y)(1,0) = -(*this)(1,0);
+            (*y)(1,1) = (*this)(0,0);
+        } else if (nrows==3) {
+            (*y)(0,0) = (*this)(1,1)*(*this)(2,2)-(*this)(2,1)*(*this)(1,2);
+            (*y)(0,1) = (*this)(0,2)*(*this)(2,1)-(*this)(0,1)*(*this)(2,2);
+            (*y)(0,2) =  (*this)(0,1)*(*this)(1,2)-(*this)(0,2)*(*this)(1,1);
+            //
+            (*y)(1,0) =  (*this)(1,2)*(*this)(2,0)-(*this)(2,2)*(*this)(1,0);
+            (*y)(1,1) =  (*this)(0,0)*(*this)(2,2)-(*this)(2,0)*(*this)(0,2);
+            (*y)(1,2) =  (*this)(0,2)*(*this)(1,0)-(*this)(1,2)*(*this)(0,0);
+            //
+            (*y)(2,0) =  (*this)(1,0)*(*this)(2,1)-(*this)(2,0)*(*this)(1,1);
+            (*y)(2,1) =  (*this)(0,1)*(*this)(2,0)-(*this)(2,1)*(*this)(0,0);
+            (*y)(2,2) =  (*this)(0,0)*(*this)(1,1)-(*this)(1,0)*(*this)(0,1);
+        } else {
+            //error
+            std::cout << "***Error in Matrix::inverse(): nrows>3 is not supported." << std::endl;
+        }
+        double detA = determinant();
+        (*y) /= detA;
     }
-
-    double detA = determinant();
-    (*y) /= detA;
 }
 
 template<class T> Matrix<T>* Matrix<T>::inverse() const
