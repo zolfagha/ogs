@@ -16,6 +16,7 @@
 #include "Tests/Geo/Model/Head.h"
 #include "Tests/Geo/Model/Velocity.h"
 #include "Tests/Geo/Model/Concentration.h"
+#include "Tests/Geo/Model/Displacement.h"
 
 #include "Tests/ExactSolution/OgataBank.h"
 
@@ -56,7 +57,7 @@ Geo::GWFemProblem* defineGWProblem(DiscreteSystem &dis, Rectangle &_rec, Geo::Po
     Geo::GWFemProblem::ResidualAssemblerType* r_assembler = new Geo::GWFemProblem::ResidualAssemblerType(*_feObjects, pm);
     Geo::GWFemProblem::JacobianAssemblerType* j_eqs = new Geo::GWFemProblem::JacobianAssemblerType(*_feObjects, pm);
     //IVBV problem
-    Geo::GWFemProblem* _problem = new Geo::GWFemProblem(dis, *dis.getMesh(), linear_assembler, r_assembler, j_eqs);
+    Geo::GWFemProblem* _problem = new Geo::GWFemProblem(dis, linear_assembler, r_assembler, j_eqs);
     //BC
     size_t headId = _problem->createField(PolynomialOrder::Linear);
     FemNodalFunctionScalar* _head = _problem->getField(headId);
@@ -79,7 +80,7 @@ Geo::GWFemProblem* defineGWProblem1D(DiscreteSystem &dis, GeoLib::Line &line, Ge
     Geo::GWFemProblem::ResidualAssemblerType* r_assembler = new Geo::GWFemProblem::ResidualAssemblerType(*_feObjects, pm);
     Geo::GWFemProblem::JacobianAssemblerType* j_eqs = new Geo::GWFemProblem::JacobianAssemblerType(*_feObjects, pm);
     //IVBV problem
-    Geo::GWFemProblem* _problem = new Geo::GWFemProblem(dis, *dis.getMesh(), linear_assembler, r_assembler, j_eqs);
+    Geo::GWFemProblem* _problem = new Geo::GWFemProblem(dis, linear_assembler, r_assembler, j_eqs);
     //BC
     size_t headId = _problem->createField(PolynomialOrder::Linear);
     FemNodalFunctionScalar* _head = _problem->getField(headId);
@@ -100,7 +101,7 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, Rectangle &
     Geo::MassFemProblem::ResidualAssemblerType* r_assembler = new Geo::MassFemProblem::ResidualAssemblerType(*_feObjects, pm, comp);
     Geo::MassFemProblem::JacobianAssemblerType* j_eqs = new Geo::MassFemProblem::JacobianAssemblerType(*_feObjects, pm, comp);
     //IVBV problem
-    Geo::MassFemProblem* _problem = new Geo::MassFemProblem(dis, *dis.getMesh(), linear_assembler, r_assembler, j_eqs);
+    Geo::MassFemProblem* _problem = new Geo::MassFemProblem(dis, linear_assembler, r_assembler, j_eqs);
     //BC
     size_t var_id = _problem->createField(PolynomialOrder::Linear);
     FemNodalFunctionScalar* _conc = _problem->getField(var_id);
@@ -127,6 +128,7 @@ static void getGWExpectedHead(std::vector<double> &expected)
 typedef Geo::FunctionHead<CRSLisSolver> MyFunctionHead;
 typedef Geo::FunctionVelocity MyFunctionVelocity;
 typedef Geo::FunctionConcentration<CRSLisSolver> MyFunctionConcentration;
+typedef Geo::FunctionDisplacement<CRSLisSolver> MyFunctionDisplacement;
 
 
 TEST(Solution, CouplingFem2D)
@@ -273,7 +275,6 @@ TEST(FEM, line)
 
 }
 
-#if 1
 TEST(Solution, CouplingFem2)
 {
 	try {
@@ -406,4 +407,71 @@ TEST(Solution, CouplingFem2)
 
 }
 
-#endif
+TEST(Fem, LinearElastic2D)
+{
+	try {
+	    MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
+	    Rectangle* _rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
+	    Geo::PorousMedia pm;
+	    pm.hydraulic_conductivity = new MathLib::SpatialFunctionConstant<double>(1.e-11);
+	    pm.porosity = new MathLib::SpatialFunctionConstant<double>(0.2);
+	    DiscreteSystem dis(*msh);
+	    Geo::FemLinearElasticProblem* pGW = 0; //defineGWProblem(dis, *_rec, pm);
+        TimeStepFunctionConstant tim(.0, 100.0, 10.0);
+        pGW->setTimeSteppingFunction(tim);
+	    // options
+	    Base::Options options;
+	    Base::Options* op_lis = options.addSubGroup("Lis");
+	    op_lis->addOption("solver_type", "CG");
+	    op_lis->addOption("precon_type", "NONE");
+	    op_lis->addOptionAsNum("error_tolerance", 1e-10);
+	    op_lis->addOptionAsNum("max_iteration_step", 500);
+	    Base::Options* op_nl = options.addSubGroup("Nonlinear");
+	    op_nl->addOption("solver_type", "Picard");
+	    op_nl->addOptionAsNum("error_tolerance", 1e-6);
+	    op_nl->addOptionAsNum("max_iteration_step", 500);
+
+		MyFunctionDisplacement f_u;
+		f_u.define(&dis, pGW, options);
+		f_u.setOutputParameterName(0, "u");
+//		MyFunctionVelocity f_vel;
+//		f_vel.define(dis, pm);
+//        f_vel.setInputParameterName(0, "h");
+//        f_vel.setOutputParameterName(0, "v");
+//
+//        FemFunctionConvergenceCheck checker;
+//	    SerialStaggeredMethod method(checker, 1e-5, 100);
+//	    AsyncPartitionedSystem apart1;
+//        apart1.setAlgorithm(method);
+//        apart1.resizeOutputParameter(2);
+//        apart1.setOutputParameterName(0, "h");
+//        apart1.setOutputParameterName(1, "v");
+//        apart1.addProblem(f_head);
+//        apart1.addProblem(f_vel);
+//        apart1.connectParameters();
+//
+//	    TimeSteppingController timestepping;
+//	    timestepping.addTransientSystem(apart1);
+//
+//	    //const double epsilon = 1.e-3;
+//	    timestepping.setBeginning(.0);
+//	    timestepping.solve(1.0);
+//
+//	    const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
+//	    const FEMIntegrationPointFunctionVector2d* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector2d>(apart1.getOutputParameterID("v"));
+//	    const DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
+//	    //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
+//
+//	    r_f_head->printout();
+//	    r_f_v->printout();
+//
+//	    std::vector<double> expected;
+//	    getGWExpectedHead(expected);
+//
+//	    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*vec_h)[0], vec_h->size());
+
+	} catch (const char* e) {
+		std::cout << "***Exception caught! " << e << std::endl;
+	}
+
+}

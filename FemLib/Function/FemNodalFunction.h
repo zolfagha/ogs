@@ -7,32 +7,23 @@
 #include "Base/CodingTools.h"
 
 #include "MathLib/Vector.h"
-#include "MathLib/Function/Function.h"
 #include "MathLib/LinAlg/VectorNorms.h"
 #include "MeshLib/Core/IMesh.h"
 
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "DiscreteLib/Core/DiscreteVector.h"
 
+#include "NumLib/TXFunction/TXFunction.h"
+
 #include "FemLib/Core/Element/IFemElement.h"
 #include "FemLib/Tools/FemElementObjectContainer.h"
 
 
+#include "PolynomialOrder.h"
+
 
 namespace FemLib
 {
-
-
-/// Polynomial order
-struct PolynomialOrder
-{
-    enum type {
-        Linear = 1,
-        Quadratic = 2,
-        INVALID = -1
-    };
-};
-
 
 /**
  * \brief Template class for FEM node-based functions (assuming Lagrangian elements)
@@ -40,22 +31,22 @@ struct PolynomialOrder
  * @tparam Tvalue Nodal value type, e.g. double, vector
  */
 template<typename Tvalue>
-class TemplateFEMNodalFunction : public MathLib::SpatialFunction<Tvalue>
+class TemplateFEMNodalFunction : public MathLib::TemplateSpatialFunction<Tvalue>
 {
 public:
     /// @param msh 		Mesh
     /// @param order 	Polynomial order
-    TemplateFEMNodalFunction(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh, PolynomialOrder::type order, Tvalue v0)
+    TemplateFEMNodalFunction(DiscreteLib::DiscreteSystem &dis, PolynomialOrder::type order, Tvalue v0)
     {
-        initialize(dis, msh, order);
+        initialize(dis, *dis.getMesh(), order);
         resetNodalValues(v0);
     }
 
     /// @param msh Mesh
     /// @param order Polynomial order
-    TemplateFEMNodalFunction(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh, PolynomialOrder::type order)
+    TemplateFEMNodalFunction(DiscreteLib::DiscreteSystem &dis, PolynomialOrder::type order)
     {
-        initialize(dis, msh, order);
+        initialize(dis, *dis.getMesh(), order);
     }
 
     /// @param org source object for copying
@@ -85,14 +76,8 @@ public:
         return obj;
     };
 
-    /// get the spatial dimension
-    size_t getDimension() const { return _msh->getDimension(); }
-
     /// get the mesh
     const MeshLib::IMesh* getMesh() const { return _msh; }
-
-    /// get the number of nodes
-    size_t getNumberOfNodes() const { return _msh->getNumberOfNodes(); }
 
 
     /// evaluate this function at the given point
@@ -107,15 +92,6 @@ public:
     {
         return (*_nodal_values)[node_id];
     }
-
-//    /// get an array of nodal values
-//    Tvalue* getNodalValues()
-//    {
-//        if (_nodal_values->size()>0)
-//            return &(*_nodal_values)[0];
-//        else
-//            return 0;
-//    }
 
     /// get nodal values
     DiscreteLib::DiscreteVector<Tvalue>* getNodalValues()
@@ -152,17 +128,6 @@ public:
     {
         return _feObjects;
     }
-
-    ///// get finite element object
-    //IFiniteElement* getFiniteElement(MeshLib::IElement &e)
-    //{
-    //    _feObjects->setPolynomialOrder(_order);
-    //    IFiniteElement* fe = _feObjects->getFeObject(e);
-    //    fe->configure(e);
-    //    fe->getIntegrationMethod()->initialize(e, 2);
-
-    //    return fe;
-    //}
 
     double norm_diff(const TemplateFEMNodalFunction<Tvalue> &ref) const
     {

@@ -55,7 +55,7 @@ public:
         typename SolutionForConc::LinearSolverType* linear_solver = _solConc->getLinearEquationSolver();
         linear_solver->setOption(option);
         _solConc->getNonlinearSolver()->setOption(option);
-        this->setOutput(Concentration, problem->getIC(0));
+        this->setOutput(Concentration, problem->getVariable(0)->getIC());
     }
 
     int solveTimeStep(const NumLib::TimeStep &time)

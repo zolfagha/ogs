@@ -82,7 +82,7 @@ GWFdmProblem* defineGWProblem4FDM(DiscreteSystem &dis, double h, GeoLib::Line &l
     //equations
     GWFdmProblem::LinearAssemblerType* linear_assembler = new GWFdmProblem::LinearAssemblerType(h, pm);
     //IVBV problem
-    GWFdmProblem* _problem = new GWFdmProblem(dis, *dis.getMesh(), linear_assembler);
+    GWFdmProblem* _problem = new GWFdmProblem(dis, linear_assembler);
     //BC
     size_t headId = _problem->createField();
     FdmFunctionScalar* _head = _problem->getField(headId);
@@ -105,13 +105,14 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Lin
     Geo::MassFemProblem::ResidualAssemblerType* r_assembler = new Geo::MassFemProblem::ResidualAssemblerType(*_feObjects, pm, comp);
     Geo::MassFemProblem::JacobianAssemblerType* j_eqs = new Geo::MassFemProblem::JacobianAssemblerType(*_feObjects, pm, comp);
     //IVBV problem
-    Geo::MassFemProblem* _problem = new Geo::MassFemProblem(dis, *dis.getMesh(), linear_assembler, r_assembler, j_eqs);
+    Geo::MassFemProblem* _problem = new Geo::MassFemProblem(dis, linear_assembler, r_assembler, j_eqs);
     //BC
-    size_t var_id = _problem->createField(PolynomialOrder::Linear);
-    FemNodalFunctionScalar* _conc = _problem->getField(var_id);
-    _problem->setIC(var_id, *_conc);
-    MathLib::SpatialFunctionConstant<double> f1(1.0);
-    _problem->addDirichletBC(var_id, *line.getPoint1(), false, f1);
+    FemVariable* var = _problem->createVariables("concentration");
+    FemNodalFunctionScalar* conc = 0; //_problem->getVariable()(var_id);
+    ITXFunction *f_c0 = 0; //TODO
+    var->setIC(f_c0);
+    NumLib::TXFunctionConstantScalar* f1 = new  NumLib::TXFunctionConstantScalar(1.0);
+    var->addDirichletBC(new FemDirichletBC(dis.getMesh(), line.getPoint1(), f1));
 
     return _problem;
 }

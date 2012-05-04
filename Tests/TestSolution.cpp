@@ -212,7 +212,7 @@ public:
         GWFemProblem::ResidualAssemblerType* local_r = new GWFemProblem::ResidualAssemblerType(*_feObjects, K);
         GWFemProblem::JacobianAssemblerType* local_J = new GWFemProblem::JacobianAssemblerType(*_feObjects, K);
         //IVBV problem
-        _problem = new GWFemProblem(dis, *dis.getMesh(), local_linear, local_r, local_J);
+        _problem = new GWFemProblem(dis, local_linear, local_r, local_J);
         //BC
         size_t headId = _problem->createField(PolynomialOrder::Linear);
         _head = _problem->getField(headId);

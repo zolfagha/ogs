@@ -19,15 +19,15 @@ class IFdmBC {};
  * DirichletBC class
  */
 template<typename Tval>
-class FdmDirichletBC : IFdmBC, public MathLib::SpatialFunction<Tval>
+class FdmDirichletBC : IFdmBC, public MathLib::TemplateSpatialFunction<Tval>
 {
 public:
     ///
-    FdmDirichletBC(TemplateFDMFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, MathLib::SpatialFunction<Tval> *bc_func)
+    FdmDirichletBC(TemplateFDMFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, MathLib::TemplateSpatialFunction<Tval> *bc_func)
     {
         _var = var;
         _geo = geo;
-        _bc_func = (MathLib::SpatialFunction<Tval>*)bc_func->clone();
+        _bc_func = (MathLib::TemplateSpatialFunction<Tval>*)bc_func->clone();
         _is_transient = is_transient;
         _do_setup = true;
     }
@@ -69,7 +69,7 @@ public:
         _bc_func->eval(x, v);
     }
 
-    MathLib::SpatialFunction<Tval>* clone() const
+    MathLib::TemplateSpatialFunction<Tval>* clone() const
     {
     	FdmDirichletBC<Tval> *f = new FdmDirichletBC<Tval>(_var, _geo, _is_transient, _bc_func);
         return f;
@@ -81,7 +81,7 @@ public:
 private:
     TemplateFDMFunction<Tval> *_var;
     GeoLib::GeoObject *_geo;
-    MathLib::SpatialFunction<Tval> *_bc_func;
+    MathLib::TemplateSpatialFunction<Tval> *_bc_func;
     std::vector<size_t> _vec_nodes;
     std::vector<Tval> _vec_values;
     bool _is_transient;
@@ -90,15 +90,15 @@ private:
 
 
 template<typename Tval, typename Tflux>
-class FdmNeumannBC : IFdmBC, public MathLib::SpatialFunction<Tflux>
+class FdmNeumannBC : IFdmBC, public MathLib::TemplateSpatialFunction<Tflux>
 {
 public:
     ///
-	FdmNeumannBC(TemplateFDMFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, MathLib::SpatialFunction<Tflux> *func)
+	FdmNeumannBC(TemplateFDMFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, MathLib::TemplateSpatialFunction<Tflux> *func)
     {
         _var = var;
         _geo = geo;
-        _bc_func = (MathLib::SpatialFunction<Tflux>*)func->clone();
+        _bc_func = (MathLib::TemplateSpatialFunction<Tflux>*)func->clone();
         _is_transient = is_transient;
         _do_setup = true;
     }
@@ -176,7 +176,7 @@ public:
         _bc_func->eval(x, v);
     }
 
-    MathLib::SpatialFunction<Tflux>* clone() const
+    MathLib::TemplateSpatialFunction<Tflux>* clone() const
     {
     	FdmNeumannBC<Tval, Tflux> *f = new FdmNeumannBC<Tval, Tflux>(_var, _geo, _is_transient, _bc_func);
         return f;
@@ -189,7 +189,7 @@ private:
     // node id, var id, value
     TemplateFDMFunction<Tval> *_var;
     GeoLib::GeoObject *_geo;
-    MathLib::SpatialFunction<Tflux> *_bc_func;
+    MathLib::TemplateSpatialFunction<Tflux> *_bc_func;
     std::vector<size_t> _vec_nodes;
     std::vector<Tval> _vec_values;
     bool _is_transient;

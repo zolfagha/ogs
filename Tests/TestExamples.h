@@ -17,6 +17,7 @@
 
 #include "FemLib/Function/FemFunction.h"
 #include "FemLib/BC/FemDirichletBC.h"
+#include "FemLib/BC/FemDirichletBCMethod.h"
 #include "FemLib/BC/FemNeumannBC.h"
 #include "FemLib/Post/Extrapolation.h"
 
@@ -30,7 +31,7 @@ public:
     MathLib::SpatialFunctionScalar *_K;
     FemLib::FemNodalFunctionScalar *head;
     FemLib::FEMIntegrationPointFunctionVector2d *vel;
-    std::vector<FemLib::FemDirichletBC<double>*> vec_bc1;
+    std::vector<FemLib::FemDirichletBC*> vec_bc1;
     std::vector<FemLib::FemNeumannBC<double, double>*> vec_bc2;
 
     void define(MeshLib::IMesh *msh, MathLib::SpatialFunctionScalar *K=0)
@@ -44,11 +45,11 @@ public:
         this->msh = msh;
         dis = new DiscreteLib::DiscreteSystem(*msh);
         //discretization
-        head = new FemLib::FemNodalFunctionScalar(*dis, *msh, FemLib::PolynomialOrder::Linear);
+        head = new FemLib::FemNodalFunctionScalar(*dis, FemLib::PolynomialOrder::Linear);
         vel = new FemLib::FEMIntegrationPointFunctionVector2d(*dis, *msh);
         //bc
-        vec_bc1.push_back(new FemLib::FemDirichletBC<double>(head, poly_right, false, new MathLib::SpatialFunctionConstant<double>(.0), new FemLib::DiagonalizeMethod()));
-        vec_bc2.push_back(new FemLib::FemNeumannBC<double, double>(head, poly_left, false, new MathLib::SpatialFunctionConstant<double>(-1e-5)));
+        vec_bc1.push_back(new FemLib::FemDirichletBC(msh, poly_right, new NumLib::TXFunctionConstantScalar(.0)));
+        vec_bc2.push_back(new FemLib::FemNeumannBC<double, double>(head, poly_left, new MathLib::SpatialFunctionConstant<double>(-1e-5)));
         // mat
         _K = (K!=0) ? K : new MathLib::SpatialFunctionConstant<double>(1.e-11);
     }
@@ -93,9 +94,16 @@ public:
         //outputLinearEQS(*globalA, globalRHS);
 
         //apply BC
-        for (size_t i=0; i<gw.vec_bc2.size(); i++) gw.vec_bc2[i]->apply(globalRHS);
+        for (size_t i=0; i<gw.vec_bc2.size(); i++) {
+    		for (size_t i=0; i<gw.vec_bc2[i]->getNumberOfConditions(); i++)
+    			globalRHS[gw.vec_bc2[i]->getConditionDoF(i)] -= gw.vec_bc2[i]->getConditionValue(i);
+        }
         //outputLinearEQS(globalA, globalRHS);
-        for (size_t i=0; i<gw.vec_bc1.size(); i++) gw.vec_bc1[i]->apply(eqs);
+        FemLib::DiagonalizeMethod diag;
+        for (size_t i=0; i<gw.vec_bc1.size(); i++) {
+            diag.apply(eqs, *gw.vec_bc1[i]);
+        }
+        //for (size_t i=0; i<gw.vec_bc1.size(); i++) gw.vec_bc1[i]->apply(eqs);
         //outputLinearEQS(*globalA, globalRHS);
 
         //solve

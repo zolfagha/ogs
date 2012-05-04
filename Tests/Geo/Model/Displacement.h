@@ -12,8 +12,9 @@
 #include "SolutionLib/Problem/FemIVBVProblem.h"
 #include "SolutionLib/Solution/SingleStepFEM.h"
 
-#include "Tests/Geo/Equation/FemGroundwaterFlow.h"
+#include "Tests/Geo/Equation/FemLinearElasticity.h"
 #include "Tests/Geo/Material/PorousMedia.h"
+#include "Tests/Geo/Material/Solid.h"
 
 using namespace GeoLib;
 using namespace MathLib;
@@ -28,71 +29,67 @@ namespace Geo
 
 typedef FemIVBVProblem
 		<
-			Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerEQSLocalAssembler>,
-			Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerResidualLocalAssembler>,
-			Geo::GroundwaterFlowJacobianLocalAssembler
-		> GWFemProblem;
+			Geo::FemLinearElasticLinearLocalAssembler,
+			Geo::FemLinearElasticResidualLocalAssembler,
+			Geo::FemLinearElasticJacobianLocalAssembler
+		> FemLinearElasticProblem;
 
 
 
 template <
 	class T_LINEAR_SOLVER
 	>
-class FunctionHead : public TemplateTransientMonolithicSystem
+class FunctionDisplacement : public TemplateTransientMonolithicSystem
 {
-    enum Out { Head=0 };
+    enum Out { Displacement=0 };
 public:
     typedef SingleStepFEM
     		<
-    			GWFemProblem,
+    			FemLinearElasticProblem,
     			T_LINEAR_SOLVER
-    		> SolutionForHead;
+    		> MySolution;
 
-    FunctionHead() 
+    FunctionDisplacement()
     {
         TemplateTransientMonolithicSystem::resizeOutputParameter(1);
     };
 
-    void define(DiscreteSystem* dis, GWFemProblem* problem, Base::Options &option)
+    void define(DiscreteSystem* dis, FemLinearElasticProblem* problem, Base::Options &option)
     {
-        //MeshLib::IMesh *msh = dis.getMesh();
-        //size_t nnodes = msh->getNumberOfNodes();
         //solution algorithm
-        _solHead = new SolutionForHead(dis, problem);
+        _sol = new MySolution(dis, problem);
         //_solHead->getTimeODEAssembler()->setTheta(1.0);
-        typename SolutionForHead::LinearSolverType* linear_solver = _solHead->getLinearEquationSolver();
+        typename MySolution::LinearSolverType* linear_solver = _sol->getLinearEquationSolver();
         linear_solver->setOption(option);
-        _solHead->getNonlinearSolver()->setOption(option);
-        this->setOutput(Head, problem->getVariable(0)->getIC());
+        _sol->getNonlinearSolver()->setOption(option);
+        this->setOutput(Displacement, problem->getIC(0));
     }
 
     int solveTimeStep(const TimeStep &time)
     {
-        _solHead->solveTimeStep(time);
-        setOutput(Head, _solHead->getCurrentSolution(0));
+        _sol->solveTimeStep(time);
+        setOutput(Displacement, _sol->getCurrentSolution(0));
         return 0;
     }
 
-    double suggestNext(const TimeStep &time_current) { return _solHead->suggestNext(time_current); }
+    double suggestNext(const TimeStep &time_current) { return _sol->suggestNext(time_current); }
 
-    bool isAwake(const TimeStep &time) { return _solHead->isAwake(time);  }
+    bool isAwake(const TimeStep &time) { return _sol->isAwake(time);  }
 
     void accept(const TimeStep &time)
     {
-        _solHead->accept(time);
+        _sol->accept(time);
 
         //std::cout << "Head=" << std::endl;
         //_solHead->getCurrentSolution(0)->printout();
     };
 
 private:
-    GWFemProblem* _problem;
-    SolutionForHead* _solHead;
-    Rectangle *_rec;
-    //FemNodalFunctionScalar *_head;
+    FemLinearElasticProblem* _problem;
+    MySolution* _sol;
     LagrangianFeObjectContainer* _feObjects;
 
-    DISALLOW_COPY_AND_ASSIGN(FunctionHead);
+    DISALLOW_COPY_AND_ASSIGN(FunctionDisplacement);
 };
 
 

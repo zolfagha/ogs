@@ -78,8 +78,9 @@ public:
         UserFemProblem* pro = _problem;
 
         // setup BC1
-        for (size_t i=0; i<pro->getNumberOfDirichletBC(); i++) {
-            FemLib::FemDirichletBC<double> *bc1 = pro->getFemDirichletBC(i);
+        FemVariable* var = pro->getVariable(0);
+        for (size_t i=0; i<var->getNumberOfDirichletBC(); i++) {
+            FemLib::IFemDirichletBC* bc1 = var->getDirichletBC(i);
             bc1->setup();
             size_t varid = 0; //?
             std::vector<double> bc_value_for_dx(bc1->getListOfBCNodes().size(), .0);

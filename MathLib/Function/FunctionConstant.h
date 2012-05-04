@@ -41,7 +41,7 @@ private:
 };
 
 template<typename Tval>
-class SpatialFunctionConstant : public SpatialFunction<Tval>
+class SpatialFunctionConstant : public TemplateSpatialFunction<Tval>
 {
 public:
     SpatialFunctionConstant(const Tval &v)

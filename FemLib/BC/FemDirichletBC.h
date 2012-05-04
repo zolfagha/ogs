@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
 #include "MathLib/Function/Function.h"
 #include "GeoLib/Core/Point.h"
@@ -11,67 +13,49 @@
 #include "FemLib/Function/FemFunction.h"
 #include "IFemBC.h"
 
+
 namespace FemLib
 {
-//----------------------------------------------------------
 
-class IDirichletBCMethod
+
+
+/**
+ * \brief BC1 nodal value constructor?
+ *
+ */
+class IFemDirichletBC
 {
 public:
-//    virtual void apply(int linearEqs, DirichletBC &bc) = 0;
-};
+    ///
+    virtual ~IFemDirichletBC() {};
 
-class DiagonalizeMethod : public IDirichletBCMethod
-{
-public:
-    void apply( MathLib::ILinearEquations& eqs, const std::vector<size_t> &vec_nodes, const std::vector<double> &vec_values)
-    {
-        eqs.setKnownX(vec_nodes, vec_values);
-    }
-};
+    /// setup B.C.
+    virtual void setup() = 0;
 
-class ResizeMethod : public IDirichletBCMethod
-{
-public:
-    void apply(int linearEqs, int &bc);
+    ///
+    virtual std::vector<size_t>& getListOfBCNodes() = 0;
+    virtual std::vector<double>& getListOfBCValues() = 0;
 };
-
-class PenaltyMethod : public IDirichletBCMethod
-{
-public:
-    void apply(int linearEqs, int &bc);
-};
-
-class LagrangeMultiplier : public IDirichletBCMethod
-{
-public:
-    void apply(int linearEqs, int &bc);
-};
-
 
 /**
  * DirichletBC class
  */
-template<typename Tval>
-class FemDirichletBC : IFemBC, public MathLib::SpatialFunction<Tval>
+class FemDirichletBC : public IFemDirichletBC //: IFemBC, public MathLib::SpatialFunction<Tval>
 {
 public:
     ///
-    explicit FemDirichletBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, MathLib::SpatialFunction<Tval> *bc_func, IDirichletBCMethod *method)
+    FemDirichletBC(MeshLib::IMesh *msh, GeoLib::GeoObject *geo, NumLib::ITXFunctionScalar *bc_func)
     {
-        _var = var;
+        _msh = msh;
         _geo = geo;
-        _bc_func = (MathLib::SpatialFunction<Tval>*)bc_func->clone();
-        _method = method;
-        _is_transient = is_transient;
+        _bc_func = bc_func;
+        _is_transient = !bc_func->isTemporallyConst();
         _do_setup = true;
     }
 
+    ///
     virtual ~FemDirichletBC()
     {
-        delete _bc_func;
-    	//if (_method!=0) delete _method;
-    	//_method = 0;
     }
 
     /// setup B.C.
@@ -80,49 +64,27 @@ public:
         if (!_do_setup) return;
         if (!_is_transient) _do_setup = false;
 
-        const MeshLib::IMesh *msh = _var->getMesh();
         // pickup nodes on geo
-        MeshLib::findNodesOnGeometry(msh, _geo, &_vec_nodes);
+        MeshLib::findNodesOnGeometry(_msh, _geo, &_vec_nodes);
         // set values
         _vec_values.resize(_vec_nodes.size());
         for (size_t i=0; i<_vec_nodes.size(); i++) {
-            const GeoLib::Point* x = msh->getNodeCoordinatesRef(_vec_nodes[i]);
-            const MathLib::SpatialPosition &tmp = (const MathLib::SpatialPosition) x->getData();
-            _bc_func->eval(tmp, _vec_values[i]);
+            const GeoLib::Point* x = _msh->getNodeCoordinatesRef(_vec_nodes[i]);
+            _bc_func->eval(x, _vec_values[i]);
         }
         if (!_is_transient)
             _do_setup = false;
     }
 
-    /// apply B.C.
-    void apply( MathLib::ILinearEquations& eqs ) 
-    {
-        DiagonalizeMethod method;
-        method.apply(eqs, _vec_nodes, _vec_values);
-    }
-
-    virtual void eval(const MathLib::SpatialPosition &x, Tval &v)
-    {
-        _bc_func->eval(x, v);
-    }
-
-    MathLib::SpatialFunction<Tval>* clone() const
-    {
-        FemDirichletBC<Tval> *f = new FemDirichletBC<Tval>(_var, _geo, _is_transient, _bc_func, _method);
-        return f;
-    }
-
     std::vector<size_t>& getListOfBCNodes() {return _vec_nodes;};
-    std::vector<Tval>& getListOfBCValues() {return _vec_values;};
+    std::vector<double>& getListOfBCValues() {return _vec_values;};
 
 private:
-    TemplateFEMNodalFunction<Tval> *_var;
+    MeshLib::IMesh *_msh;
     GeoLib::GeoObject *_geo;
-    MathLib::SpatialFunction<Tval> *_bc_func;
+    NumLib::ITXFunctionScalar *_bc_func;
     std::vector<size_t> _vec_nodes;
-    std::vector<Tval> _vec_values;
-    // node id, var id, value
-    IDirichletBCMethod *_method;
+    std::vector<double> _vec_values;
     bool _is_transient;
     bool _do_setup;
 };

@@ -1,12 +1,12 @@
 
 #include <gtest/gtest.h>
 
-int add (int x, int y) {return x+y;};
-
-TEST(Dummy, Test1)
-{
-    ASSERT_EQ(2, add(1, 1));
-}
+//int add (int x, int y) {return x+y;};
+//
+//TEST(Dummy, Test1)
+//{
+//    ASSERT_EQ(2, add(1, 1));
+//}
 
 
 int main(int argc, char *argv[])

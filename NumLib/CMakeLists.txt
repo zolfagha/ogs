@@ -11,6 +11,8 @@ FILE(GLOB NumLib_TransientAssembler_Files TransientAssembler/*.h TransientAssemb
 SOURCE_GROUP( NumLib\\TransientAssembler FILES ${NumLib_TransientAssembler_Files} )
 FILE(GLOB NumLib_Nonlinear_Files Nonlinear/*.h Nonlinear/*.cpp)
 SOURCE_GROUP( NumLib\\Nonlinear FILES ${NumLib_Nonlinear_Files} )
+FILE(GLOB NumLib_TXFunction_Files TXFunction/*.h TXFunction/*.cpp)
+SOURCE_GROUP( NumLib\\TXFunction FILES ${NumLib_TXFunction_Files} )
 
 
 ADD_LIBRARY( NumLib STATIC 
@@ -21,6 +23,7 @@ ADD_LIBRARY( NumLib STATIC
 	${NumLib_TimeStepping_Files} 
     ${NumLib_TransientCoupling_Files} 
 	${NumLib_TransientAssembler_Files} 
+    ${NumLib_TXFunction_Files} 
 )
 
 INCLUDE_DIRECTORIES(

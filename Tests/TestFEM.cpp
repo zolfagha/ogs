@@ -116,7 +116,7 @@ TEST(FEM, ExtrapolateAverage1)
     ASSERT_DOUBLE_ARRAY_EQ(expected, (*v)[0], expected.size());
 }
 
-class MyFunction : public MathLib::SpatialFunction<double>
+class MyFunction : public MathLib::TemplateSpatialFunction<double>
 {
 public:
 	virtual ~MyFunction() {};

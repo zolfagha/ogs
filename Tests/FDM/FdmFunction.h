@@ -13,7 +13,7 @@ namespace FdmLib
  *
  */
 template<typename Tvalue>
-class TemplateFDMFunction : public MathLib::SpatialFunction<Tvalue>
+class TemplateFDMFunction : public MathLib::TemplateSpatialFunction<Tvalue>
 {
 public:
     /// @param msh 		Mesh

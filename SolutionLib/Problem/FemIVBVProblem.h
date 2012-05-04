@@ -8,10 +8,64 @@
 #include "FemLib/BC/FemDirichletBC.h"
 #include "FemLib/BC/FemNeumannBC.h"
 
-#include "AbstractMeshBasedIVBVProblem.h"
+#include "IVBVProblem.h"
+#include "MeshBasedProblem.h"
+#include "TimeSteppingProblem.h"
+#include "LocalAssemblerProblem.h"
 
 namespace SolutionLib
 {
+
+
+class FemVariable
+{
+public:
+	FemVariable(size_t id, const std::string &name) : _id(id), _name(name)
+	{
+
+	}
+
+	//----------------------------------------------------------------------
+	size_t getID() const {return _id;};
+	const std::string& getName() const { return _name;}
+
+
+	//----------------------------------------------------------------------
+    void setIC(NumLib::ITXFunction* ic) { _f_ic = ic; };
+    NumLib::ITXFunction* getIC() const { return _f_ic; };
+
+
+	//----------------------------------------------------------------------
+    void addDirichletBC(FemLib::IFemDirichletBC *bc)
+    {
+        _map_bc1.push_back(bc);
+    }
+    size_t getNumberOfDirichletBC() const {return _map_bc1.size();};
+    FemLib::IFemDirichletBC* getDirichletBC(size_t bc_id) const
+    {
+        return _map_bc1[bc_id];
+    };
+
+
+	//----------------------------------------------------------------------
+    void addNeumannBC(FemLib::IFemNeumannBC& bc2)
+    {
+        _map_bc2.push_back(&bc2);
+    }
+    size_t getNumberOfNeumannBC() const {return _map_bc2.size();};
+    FemLib::IFemNeumannBC* getNeumannBC(size_t bc_id) const
+    {
+        return _map_bc2[bc_id];
+    };
+
+private:
+    size_t _id;
+    std::string _name;
+    NumLib::ITXFunction* _f_ic;
+    std::vector<FemLib::IFemDirichletBC*> _map_bc1;
+    std::vector<FemLib::IFemNeumannBC*> _map_bc2;
+};
+
 
 /**
  * \brief IVBV problems using FEM
@@ -21,162 +75,62 @@ namespace SolutionLib
  *- IC
  *- BC
  */
-template <
+template
+	<
 	class T_LOCAL_ASSEMBLER_LINEAR,
 	class T_LOCAL_ASSEMBLER_RESIDUAL,
 	class T_LOCAL_ASSEMBLER_JACOBIAN
 	>
-class FemIVBVProblem : public AbstractMeshBasedDiscreteIVBVProblem
+class FemIVBVProblem
+: //public IVBVProblem,
+  public MeshBasedProblem,
+  public TimeSteppingProblem,
+  public LocalAssemblerProblem<T_LOCAL_ASSEMBLER_LINEAR, T_LOCAL_ASSEMBLER_RESIDUAL, T_LOCAL_ASSEMBLER_JACOBIAN>
 {
 public:
 	typedef T_LOCAL_ASSEMBLER_LINEAR LinearAssemblerType;
 	typedef T_LOCAL_ASSEMBLER_RESIDUAL ResidualAssemblerType;
 	typedef T_LOCAL_ASSEMBLER_JACOBIAN JacobianAssemblerType;
+	typedef LocalAssemblerProblem<T_LOCAL_ASSEMBLER_LINEAR, T_LOCAL_ASSEMBLER_RESIDUAL, T_LOCAL_ASSEMBLER_JACOBIAN> MyLocalAssemblerProblem;
 
 	///
     FemIVBVProblem(	DiscreteLib::DiscreteSystem &dis,
-    				MeshLib::IMesh &msh,
     				LinearAssemblerType *linear_assembly,
     				ResidualAssemblerType *residual_assembly,
     				JacobianAssemblerType *jacobian_assembly
     				)
-        : AbstractMeshBasedDiscreteIVBVProblem(msh),
-          	_discrete_system(&dis),
-			_linear_assembler(linear_assembly),
-			_residual_assembler(residual_assembly),
-			_jacobian_assembler(jacobian_assembly)
+        : MeshBasedProblem(dis.getMesh()),
+        	MyLocalAssemblerProblem(linear_assembly, residual_assembly, jacobian_assembly),
+          	_discrete_system(&dis)
     {
-        Base::zeroObject(_map_var, _map_ic);
     }
 
-    FemIVBVProblem(	DiscreteLib::DiscreteSystem &dis,
-    				MeshLib::IMesh &msh,
-    				LinearAssemblerType *linear_assembly,
-    				ResidualAssemblerType *residual_assembly
-    				)
-        : AbstractMeshBasedDiscreteIVBVProblem(msh),
-            _discrete_system(&dis),
-			_linear_assembler(linear_assembly),
-			_residual_assembler(residual_assembly),
-			_jacobian_assembler(0)
-    {
-        Base::zeroObject(_map_var, _map_ic);
-    }
 
     ///
     virtual ~FemIVBVProblem()
     {
-        Base::releaseObject(_map_var, _map_ic);
-        Base::releaseObjectsInStdVector(_map_bc1);
-        Base::releaseObjectsInStdVector(_map_bc2);
+        Base::releaseObjectsInStdVector(_variables);
     }
 
     /// get the number of variables
-    size_t getNumberOfVariables() const { return 1; }
+    size_t getNumberOfVariables() const { return _variables.size(); }
 
     /// create FE approximation field
-    size_t createField(FemLib::PolynomialOrder::type order)
+    FemVariable* createVariables(const std::string name)
     {
-        if (_map_var==0) {
-            _map_var = new FemLib::FemNodalFunctionScalar(*_discrete_system, *getMesh(), order);
-        }
-        return 0;
+    	_variables.push_back(new FemVariable(_variables.size(), name));
+        return _variables.back();
     }
 
     /// get the FE field
-    FemLib::FemNodalFunctionScalar* getField(size_t) const
-    {
-        return _map_var;
-    }
-
-    ///
-    void setIC(int, MathLib::SpatialFunctionScalar& ic)
-    {
-        _map_ic = (MathLib::SpatialFunctionScalar*) ic.clone();
-    }
-
-    ///
-    MathLib::SpatialFunctionScalar* getIC(int) const
-    {
-        return _map_ic;
-    };
-
-    ///
-    void addDirichletBC(int, GeoLib::GeoObject &geo, bool is_transient, MathLib::SpatialFunctionScalar& bc1)
-    {
-        addDirichletBC(*new FemLib::FemDirichletBC<double>(_map_var, &geo, is_transient, &bc1, new FemLib::DiagonalizeMethod()));
-    }
-
-
-    ///
-    size_t getNumberOfDirichletBC(int) const {return getNumberOfDirichletBC();};
-    size_t getNumberOfDirichletBC() const {return _map_bc1.size();};
-
-    ///
-    MathLib::SpatialFunctionScalar* getDirichletBC(int, int bc_id) const
-    {
-        return _map_bc1[bc_id];
-    };
-
-    ///
-    FemLib::FemDirichletBC<double>* getFemDirichletBC(int bc_id) const 
-    {
-        return _map_bc1[bc_id];
-    };
-
-    ///
-    void addNeumannBC(int, GeoLib::GeoObject &geo, bool is_transient, MathLib::SpatialFunctionScalar& bc2)
-    {
-        addNeumannBC(*new FemLib::FemNeumannBC<double, double>(_map_var, &geo, is_transient, &bc2));
-    }
-
-    ///
-    size_t getNumberOfNeumannBC(int) const {return getNumberOfNeumannBC();};
-    size_t getNumberOfNeumannBC() const {return _map_bc2.size();};
-
-    ///
-    MathLib::SpatialFunctionScalar* getNeumannBC(int, int bc_id) const
-    {
-        return _map_bc2[bc_id];
-    };
-
-    ///
-    FemLib::FemNeumannBC<double, double>* getFemNeumannBC(int bc_id) const 
-    {
-        return _map_bc2[bc_id];
-    };
-
-    ///
-    LinearAssemblerType* getLinearAssembler() const { return _linear_assembler; }
-
-    ///
-    ResidualAssemblerType* getResidualAssembler() const { return _residual_assembler; }
-
-    ///
-    JacobianAssemblerType* getJacobianAssembler() const { return _jacobian_assembler; }
+    FemVariable* getVariable(size_t i) const { return _variables[i]; }
 
 private:
-    void addDirichletBC(FemLib::FemDirichletBC<double>& bc1)
-    {
-        _map_bc1.push_back(&bc1);
-    }
-
-    void addNeumannBC(FemLib::FemNeumannBC<double, double>& bc2)
-    {
-        _map_bc2.push_back(&bc2);
-    }
-
     DISALLOW_COPY_AND_ASSIGN(FemIVBVProblem);
 
 private:
     DiscreteLib::DiscreteSystem* _discrete_system;
-    FemLib::FemNodalFunctionScalar* _map_var;
-    MathLib::SpatialFunctionScalar* _map_ic;
-    std::vector<FemLib::FemDirichletBC<double>*> _map_bc1;
-    std::vector<FemLib::FemNeumannBC<double, double>*> _map_bc2;
-    LinearAssemblerType* _linear_assembler;
-    ResidualAssemblerType* _residual_assembler;
-    JacobianAssemblerType* _jacobian_assembler;
+    std::vector<FemVariable*> _variables;
 };
 
 } //end

@@ -76,14 +76,15 @@ public:
         UserFemProblem* pro = _problem;
 
         // setup BC
-        for (size_t i=0; i<pro->getNumberOfDirichletBC(); i++) {
-            FemLib::FemDirichletBC<double> *bc1 = pro->getFemDirichletBC(i);
+        FemVariable* var = pro->getVariable(0);
+        for (size_t i=0; i<var->getNumberOfDirichletBC(); i++) {
+            FemLib::IFemDirichletBC* bc1 = var->getDirichletBC(i);
             bc1->setup();
             size_t varid = 0; //?
             _linear_eqs->setPrescribedDoF(varid, bc1->getListOfBCNodes(), bc1->getListOfBCValues());
         }
-        for (size_t i=0; i<pro->getNumberOfNeumannBC(); i++)
-            pro->getFemNeumannBC(i)->setup();
+        for (size_t i=0; i<var->getNumberOfNeumannBC(); i++)
+            pro->getNeumannBC(i)->setup();
 
         //TODO temporally
         std::vector<MyFemVector*> vec_un;
@@ -97,8 +98,8 @@ public:
         _linear_eqs->construct(assembler);
 
         //apply BC1,2
-        for (size_t i=0; i<pro->getNumberOfNeumannBC(); i++) {
-            FemLib::FemNeumannBC<double, double> *bc2 = pro->getFemNeumannBC(i);
+        for (size_t i=0; i<var->getNumberOfNeumannBC(); i++) {
+            FemLib::IFemNeumannBC* bc2 = var->getNeumannBC(i);
             size_t varid = 0; //?
             _linear_eqs->addRHS(varid, bc2->getListOfBCNodes(), bc2->getListOfBCValues(), -1.0);
         }

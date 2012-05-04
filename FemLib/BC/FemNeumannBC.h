@@ -17,20 +17,34 @@
 namespace FemLib
 {
 
+class IFemNeumannBC
+{
+public:
+    ///
+    virtual ~IFemNeumannBC() {};
+
+    /// setup B.C.
+    virtual void setup() = 0;
+
+    ///
+    virtual std::vector<size_t>& getListOfBCNodes() = 0;
+    virtual std::vector<double>& getListOfBCValues() = 0;
+};
+
 /**
  * Neumann BC
  */
 template<typename Tval, typename Tflux>
-class FemNeumannBC : IFemBC, public MathLib::SpatialFunction<Tflux>
+class FemNeumannBC : public IFemNeumannBC //: IFemBC, public MathLib::TemplateSpatialFunction<Tflux>
 {
 public:
     /// 
-    FemNeumannBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, MathLib::SpatialFunction<Tflux> *func)
+    FemNeumannBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, MathLib::TemplateSpatialFunction<Tflux> *func)
     {
         _var = var;
         _geo = geo;
-        _bc_func = (MathLib::SpatialFunction<Tflux>*)func->clone();
-        _is_transient = is_transient;
+        _bc_func = (MathLib::TemplateSpatialFunction<Tflux>*)func->clone();
+        _is_transient = false;
         _do_setup = true;
     }
 
@@ -46,7 +60,7 @@ public:
         MeshLib::findNodesOnGeometry(msh, _geo, &_vec_nodes);
         // distribute to RHS
         _vec_values.resize(_vec_nodes.size());
-        if (_var->getDimension()==1) {
+        if (msh->getDimension()==1) {
             // no need to integrate
             // get discrete values at nodes
             for (size_t i=0; i<_vec_nodes.size(); i++) {
@@ -93,13 +107,13 @@ public:
         }
     }
 
-    ///
-    template<typename T>
-    void apply( T* globalRHS ) 
-    {
-        for (size_t i=0; i<this->getNumberOfConditions(); i++)
-            globalRHS[this->getConditionDoF(i)] -= this->getConditionValue(i);
-    }
+//    ///
+//    template<typename T>
+//    void apply( T* globalRHS )
+//    {
+//        for (size_t i=0; i<this->getNumberOfConditions(); i++)
+//            globalRHS[this->getConditionDoF(i)] -= this->getConditionValue(i);
+//    }
 
 
     size_t getNumberOfConditions() const
@@ -117,12 +131,12 @@ public:
         return _vec_values[i];
     }
 
-    void eval(const MathLib::SpatialPosition& x, Tflux &v)
-    {
-        _bc_func->eval(x, v);
-    }
+//    void eval(const MathLib::SpatialPosition& x, Tflux &v)
+//    {
+//        _bc_func->eval(x, v);
+//    }
 
-    MathLib::SpatialFunction<Tflux>* clone() const
+    MathLib::TemplateSpatialFunction<Tflux>* clone() const
     {
         FemNeumannBC<Tval, Tflux> *f = new FemNeumannBC<Tval, Tflux>(_var, _geo, _is_transient, _bc_func);
         return f;
@@ -135,7 +149,7 @@ private:
     // node id, var id, value
     TemplateFEMNodalFunction<Tval> *_var;
     GeoLib::GeoObject *_geo;
-    MathLib::SpatialFunction<Tflux> *_bc_func;
+    MathLib::TemplateSpatialFunction<Tflux> *_bc_func;
     std::vector<size_t> _vec_nodes;
     std::vector<Tval> _vec_values;
     bool _is_transient;

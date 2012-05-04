@@ -125,8 +125,9 @@ public:
         // bc1
         std::vector<size_t> list_bc1_eqs_id;
         std::vector<double> list_bc1_val;
-        for (size_t i=0; i<_problem->getNumberOfDirichletBC(); i++) {
-            FemLib::FemDirichletBC<double> *bc1 = _problem->getFemDirichletBC(i);
+        FemVariable* var = _problem->getVariable(0);
+        for (size_t i=0; i<var->getNumberOfDirichletBC(); i++) {
+            FemLib::IFemDirichletBC *bc1 = var->getDirichletBC(i);
             bc1->setup();
             size_t varId = 0; //TODO var id
             std::vector<size_t> &list_bc_nodes = bc1->getListOfBCNodes();
@@ -138,8 +139,8 @@ public:
         // st
         std::vector<size_t> list_st_eqs_id;
         std::vector<double> list_st_val;
-        for (size_t i=0; i<_problem->getNumberOfNeumannBC(); i++) {
-        	FemLib::FemNeumannBC<double, double> *bc2 = _problem->getFemNeumannBC(i);
+        for (size_t i=0; i<var->getNumberOfNeumannBC(); i++) {
+        	FemLib::IFemNeumannBC *bc2 = var->getNeumannBC(i);
         	bc2->setup();
             std::vector<size_t> &list_bc_nodes = bc2->getListOfBCNodes();
             std::vector<double> &list_bc_values = bc2->getListOfBCValues();

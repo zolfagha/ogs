@@ -4,7 +4,8 @@
 #include <vector>
 
 #include "Base/CodingTools.h"
-#include "SolutionLib/Problem/AbstractMeshBasedIVBVProblem.h"
+#include "SolutionLib/Problem/MeshBasedProblem.h"
+#include "SolutionLib/Problem/TimeSteppingProblem.h"
 #include "FdmFunction.h"
 #include "BoundaryConditions.h"
 
@@ -24,7 +25,9 @@ template <
 //	class T_LOCAL_ASSEMBLER_RESIDUAL,
 //	class T_LOCAL_ASSEMBLER_JACOBIAN
 	>
-class FdmIVBVProblem : public SolutionLib::AbstractMeshBasedDiscreteIVBVProblem
+class FdmIVBVProblem
+: public SolutionLib::MeshBasedProblem,
+  public SolutionLib::TimeSteppingProblem
 {
 public:
 	typedef T_LOCAL_ASSEMBLER_LINEAR LinearAssemblerType;
@@ -33,12 +36,11 @@ public:
 
 	///
 	FdmIVBVProblem(	DiscreteLib::DiscreteSystem &dis,
-    				MeshLib::IMesh &msh,
     				LinearAssemblerType *linear_assembly
 //    				ResidualAssemblerType *residual_assembly,
 //    				JacobianAssemblerType *jacobian_assembly
     				)
-        : AbstractMeshBasedDiscreteIVBVProblem(msh),
+        : MeshBasedProblem(dis.getMesh()),
           	_discrete_system(&dis),
 			_linear_assembler(linear_assembly)
 //			_residual_assembler(residual_assembly),

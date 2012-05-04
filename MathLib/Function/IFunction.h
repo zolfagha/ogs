@@ -8,21 +8,29 @@
 namespace MathLib
 {
 
+/**
+ *
+ */
 class IFunction : public IClonable
 {
 public:
 	virtual ~IFunction() {};
 };
 
+/**
+ *
+ */
 template<typename Tpos, typename Tval>
 class TemplateFunction : public IFunction
 {
 public:
 	virtual ~TemplateFunction() {};
     virtual void eval(const Tpos &x, Tval &val) = 0;
-//    virtual TemplateFunction<Tpos,Tval>* clone() const = 0;
 };
 
+/**
+ *
+ */
 template<typename Tpos, typename Tval, class T_FUNCTION>
 class AbstractDefaultCloneFunction : public TemplateFunction<Tpos, Tval>
 {
@@ -34,19 +42,29 @@ public:
 	}
 };
 
+/**
+ *
+ */
 typedef double* SpatialPosition;
 
+/**
+ *
+ */
 template<typename Tval>
-class SpatialFunction : public TemplateFunction<SpatialPosition, Tval>
+class TemplateSpatialFunction : public TemplateFunction<SpatialPosition, Tval>
 {
 public:
-	virtual ~SpatialFunction() {};
+	virtual ~TemplateSpatialFunction() {};
 };
 
-typedef SpatialFunction<double> SpatialFunctionScalar;
-typedef SpatialFunction<MathLib::Vector> SpatialFunctionVector;
-typedef SpatialFunction<MathLib::Matrix<double> > SpatialFunctionTensor;
+typedef TemplateSpatialFunction<double> SpatialFunctionScalar;
+typedef TemplateSpatialFunction<MathLib::Vector> SpatialFunctionVector;
+typedef TemplateSpatialFunction<MathLib::Matrix<double> > SpatialFunctionTensor;
 
+
+/**
+ *
+ */
 template <typename Tval>
 class Multiplication
 {
@@ -57,8 +75,11 @@ public:
     }
 };
 
+/**
+ *
+ */
 template <typename Tval, class T1, class T2, template <typename> class T_OPERATOR>
-class SpatialCompositFunction : public SpatialFunction<Tval>
+class SpatialCompositFunction : public TemplateSpatialFunction<Tval>
 {
     T1 *_f1;
     T2 *_f2;
