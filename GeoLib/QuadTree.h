@@ -237,7 +237,7 @@ public:
 
 		if (_father == NULL) {
 			size_t ply_pos (plys.size());
-			plys.push_back (new Polyline (pnts));
+			plys.push_back (new GeoLib::Polyline (pnts));
 			for (size_t i(0); i<4; i++)
 				plys[ply_pos]->addPoint (pnt_pos+i);
 			plys[ply_pos]->addPoint (pnt_pos);
