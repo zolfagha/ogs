@@ -95,6 +95,8 @@ TEST(FEM, testStructuredMesh)
     ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h)[0], gw.head->getNumberOfNodes());
 }
 
+
+
 TEST(FEM, ExtrapolateAverage1)
 {
     GWFemTest gw;

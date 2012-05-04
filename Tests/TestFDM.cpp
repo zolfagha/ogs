@@ -21,6 +21,8 @@
 #include "TestUtil.h"
 
 #include "Tests/Geo/Material/PorousMedia.h"
+#include "Tests/Geo/Model/Head.h"
+#include "Tests/Geo/Model/Velocity.h"
 #include "Tests/Geo/Model/Concentration.h"
 #include "Tests/ExactSolution/OgataBank.h"
 
@@ -71,6 +73,8 @@ typedef TemplateConvergenceCheck<FemNodalFunctionScalar> FemFunctionConvergenceC
 
 
 typedef FunctionHead<MathLib::CRSLisSolver> MyFunctionHead;
+typedef Geo::FunctionHead<CRSLisSolver> MyFemFunctionHead;
+typedef Geo::FunctionVelocity MyFemFunctionVelocity;
 typedef Geo::FunctionConcentration<CRSLisSolver> MyFunctionConcentration;
 
 GWFdmProblem* defineGWProblem4FDM(DiscreteSystem &dis, double h, GeoLib::Line &line, Geo::PorousMedia &pm)
@@ -91,7 +95,9 @@ GWFdmProblem* defineGWProblem4FDM(DiscreteSystem &dis, double h, GeoLib::Line &l
     return _problem;
 }
 
-Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, Line &line, Geo::PorousMedia &pm, Geo::Compound &comp)
+
+
+Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Line &line, Geo::PorousMedia &pm, Geo::Compound &comp)
 {
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
@@ -169,6 +175,7 @@ TEST(Fdm, fdm1)
 
 }
 
+
 TEST(Fdm, fdm_fem1)
 {
 	try {
@@ -186,7 +193,7 @@ TEST(Fdm, fdm_fem1)
 	    GWFdmProblem* pGW = defineGWProblem4FDM(dis, h, line, pm);
 	    Geo::MassFemProblem* pMass = defineMassTransportProblem(dis, line, pm, tracer);
 
-        TimeStepFunctionConstant tim(.0, 1e+5, 1e+5);
+        TimeStepFunctionConstant tim(.0, 1e+4, 1e+3);
         pGW->setTimeSteppingFunction(tim);
         pMass->setTimeSteppingFunction(tim);
 	    // options
@@ -233,7 +240,7 @@ TEST(Fdm, fdm_fem1)
 
 	    //const double epsilon = 1.e-3;
 	    timestepping.setBeginning(.0);
-	    timestepping.solve(1.0);
+        timestepping.solve(tim.getEnd());
 
 	    const FdmFunctionScalar* r_f_head = apart1.getOutput<FdmFunctionScalar>(apart1.getOutputParameterID("h"));
 	    const FdmCellVectorFunction* r_f_v = apart1.getOutput<FdmCellVectorFunction>(apart1.getOutputParameterID("v"));
