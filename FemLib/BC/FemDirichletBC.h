@@ -3,7 +3,6 @@
 
 #include <vector>
 
-#include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
 #include "GeoLib/Core/Point.h"
 
 #include "MeshLib/Core/IMesh.h"
@@ -11,39 +10,19 @@
 
 #include "FemLib/Function/FemFunction.h"
 #include "IFemBC.h"
-
+#include "DirichletBC2FEM.h"
 
 namespace FemLib
 {
 
-
-
 /**
- * \brief BC1 nodal value constructor?
- *
+ * \brief A class contains DirichletBC data for FEM
  */
-class IFemDirichletBC
+class FemDirichletBC
 {
 public:
     ///
-    virtual ~IFemDirichletBC() {};
-
-    /// setup B.C.
-    virtual void setup() = 0;
-
-    ///
-    virtual std::vector<size_t>& getListOfBCNodes() = 0;
-    virtual std::vector<double>& getListOfBCValues() = 0;
-};
-
-/**
- * DirichletBC class
- */
-class FemDirichletBC : public IFemDirichletBC //: IFemBC, public MathLib::SpatialFunction<Tval>
-{
-public:
-    ///
-    FemDirichletBC(MeshLib::IMesh *msh, GeoLib::GeoObject *geo, NumLib::ITXFunctionScalar *bc_func)
+    FemDirichletBC(MeshLib::IMesh* msh, GeoLib::GeoObject* geo, NumLib::ITXFunction* bc_func)
     {
         _msh = msh;
         _geo = geo;
@@ -63,14 +42,8 @@ public:
         if (!_do_setup) return;
         if (!_is_transient) _do_setup = false;
 
-        // pickup nodes on geo
-        MeshLib::findNodesOnGeometry(_msh, _geo, &_vec_nodes);
-        // set values
-        _vec_values.resize(_vec_nodes.size());
-        for (size_t i=0; i<_vec_nodes.size(); i++) {
-            const GeoLib::Point* x = _msh->getNodeCoordinatesRef(_vec_nodes[i]);
-            _bc_func->eval(x, _vec_values[i]);
-        }
+        DirichletBC2FEM convert(*_msh, *_geo, *_bc_func, _vec_nodes, _vec_values);
+
         if (!_is_transient)
             _do_setup = false;
     }
@@ -79,9 +52,9 @@ public:
     std::vector<double>& getListOfBCValues() {return _vec_values;};
 
 private:
-    MeshLib::IMesh *_msh;
-    GeoLib::GeoObject *_geo;
-    NumLib::ITXFunctionScalar *_bc_func;
+    MeshLib::IMesh* _msh;
+    GeoLib::GeoObject* _geo;
+    NumLib::ITXFunction* _bc_func;
     std::vector<size_t> _vec_nodes;
     std::vector<double> _vec_values;
     bool _is_transient;

@@ -1,12 +1,6 @@
 
 #pragma once
 
-#include "MathLib/Function/Function.h"
-
-#include "MeshLib/Core/IMesh.h"
-#include "MeshLib/Tools/Tools.h"
-
-#include "FemFunction.h"
 #include "IFemBC.h"
 
 namespace FemLib

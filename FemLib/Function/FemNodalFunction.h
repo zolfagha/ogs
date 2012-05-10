@@ -28,10 +28,13 @@ namespace FemLib
 /**
  * \brief Template class for FEM node-based functions (assuming Lagrangian elements)
  *
+ * This class represents the following
+ * u^h(x) = N(x)*u_i
+ *
  * @tparam Tvalue Nodal value type, e.g. double, vector
  */
 template<typename Tvalue>
-class TemplateFEMNodalFunction : public NumLib::TemplateSpatialFunction<Tvalue>
+class TemplateFEMNodalFunction : public NumLib::ITXFunction
 {
 public:
     /// @param msh 		Mesh
@@ -81,7 +84,7 @@ public:
 
 
     /// evaluate this function at the given point
-    void eval(const NumLib::SpatialPosition &/*pt*/, Tvalue &v)
+    void eval(const NumLib::TXPosition &/*pt*/, Tvalue &v)
     {
         throw "eval() is not implemented yet.";
         v = (*_nodal_values)[0];

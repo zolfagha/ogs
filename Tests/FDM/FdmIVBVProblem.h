@@ -4,8 +4,8 @@
 #include <vector>
 
 #include "Base/CodingTools.h"
-#include "SolutionLib/Problem/MeshBasedProblem.h"
-#include "SolutionLib/Problem/TimeSteppingProblem.h"
+#include "SolutionLib/FemProblem/MeshBasedProblem.h"
+#include "SolutionLib/FemProblem/TimeSteppingProblem.h"
 #include "FdmFunction.h"
 #include "BoundaryConditions.h"
 

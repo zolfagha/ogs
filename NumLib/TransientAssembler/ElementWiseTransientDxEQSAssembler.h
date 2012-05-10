@@ -14,11 +14,6 @@
 
 #include "IElementWiseTransientJacobianLocalAssembler.h"
 
-//namespace MeshLib
-//{
-//class IMesh;
-//}
-
 namespace NumLib
 {
 
@@ -31,10 +26,6 @@ namespace NumLib
 class ElementWiseTransientDxEQSAssembler : public DiscreteLib::IDiscreteLinearEquationAssembler
 {
 public:
-	typedef IElementWiseTransientJacobianLocalAssembler::LocalEquationType LocalEquationType;
-	typedef IElementWiseTransientJacobianLocalAssembler::LocalMatrixType LocalMatrixType;
-	typedef IElementWiseTransientJacobianLocalAssembler::LocalVectorType LocalVectorType;
-
     /// @param u0
     /// @param u1
     /// @param a
@@ -57,8 +48,8 @@ public:
         std::vector<size_t> local_dofmap;
         const size_t n_ele = msh.getNumberOfElements();
 
-        LocalVectorType local_u_n1;
-        LocalVectorType local_u_n;
+        LocalVector local_u_n1;
+        LocalVector local_u_n;
         for (size_t i=0; i<n_ele; i++) {
             MeshLib::IElement *e = msh.getElemenet(i);
             // get dof map

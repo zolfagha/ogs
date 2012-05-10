@@ -11,9 +11,9 @@ namespace FemLib
 {
 
 // gauss linear
-void FeExtrapolationGaussLinear::extrapolate(IFiniteElement &fe, const std::vector<MathLib::Vector> &gp_values, std::vector<MathLib::Vector> &nodal_values)
+void FeExtrapolationGaussLinear::extrapolate(IFiniteElement &fe, const std::vector<LocalVector> &gp_values, std::vector<LocalVector> &nodal_values)
 {
-    extrapolate<MathLib::Vector>(fe, gp_values, nodal_values);
+    extrapolate<LocalVector>(fe, gp_values, nodal_values);
 }
 
 template<typename Tvalue>
@@ -55,7 +55,7 @@ void FeExtrapolationGaussLinear::extrapolate(IFiniteElement &fe, const std::vect
     for (size_t j=0; j<e_nnodes; j++) {
         getExtropoGaussPoints(*e, j, Xi_p, x);
         fe.computeBasisFunctions(x);
-        MathLib::Matrix<double> *N = fe.getBasisFunction();
+        LocalMatrix *N = fe.getBasisFunction();
         Tvalue EV(0);
         for(size_t k=i_s; k<i_e; k++)
             EV += reordered_gp_values[k] * (*N)(0,k - ish);

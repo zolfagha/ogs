@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "MathLib/Vector.h"
+#include "FemLib/Core/DataType.h"
 
 namespace FemLib
 {
@@ -17,7 +17,7 @@ class IFeExtrapolationMethod
 {
 public:
 	virtual ~IFeExtrapolationMethod() {};
-    virtual void extrapolate(IFiniteElement &fe, const std::vector<MathLib::Vector> &gp_values, std::vector<MathLib::Vector> &nodal_values) = 0;
+    virtual void extrapolate(IFiniteElement &fe, const std::vector<LocalVector> &gp_values, std::vector<LocalVector> &nodal_values) = 0;
 };
 
 } // end

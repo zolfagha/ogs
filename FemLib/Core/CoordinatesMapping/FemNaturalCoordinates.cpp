@@ -20,11 +20,11 @@ void FemNaturalCoordinates::initialize(MeshLib::IElement &ele)
 	_prop->dshape_dx->resize(dim, nnodes);
 	_prop->jacobian_dxdr->resize(dim, dim);
 	_prop->inv_jacobian_drdx->resize(dim, dim);
-	(*_prop->shape_r) = .0;
-	(*_prop->dshape_dr) = .0;
-	(*_prop->dshape_dx) = .0;
-	(*_prop->jacobian_dxdr) = .0;
-	(*_prop->inv_jacobian_drdx) = .0;
+	(*_prop->shape_r) *= 0;
+	(*_prop->dshape_dr) *= 0;
+	(*_prop->dshape_dx) *= 0;
+	(*_prop->jacobian_dxdr) *= 0;
+	(*_prop->inv_jacobian_drdx) *= 0;
 	x.resize(dim, nnodes);
 	MeshLib::IElementCoordinatesMapping *ele_local_coord = _ele->getMappedCoordinates();
 	for (size_t i=0; i<nnodes; i++)
@@ -40,14 +40,17 @@ const CoordinateMappingProperty* FemNaturalCoordinates::compute(const double* na
 	const size_t nnodes = _ele->getNumberOfNodes();
 
 	//shape, dshape
-	MathLib::Matrix<double> *shape  = _prop->shape_r;
-	MathLib::Matrix<double> *dshape_dr = _prop->dshape_dr;
-	_shape->computeShapeFunction(natural_pt, (double*)shape->getData());
-	_shape->computeGradShapeFunction(natural_pt, (double*)dshape_dr->getData());
+	LocalMatrix *shape  = _prop->shape_r;
+	LocalMatrix *dshape_dr = _prop->dshape_dr;
+	_shape->computeShapeFunction(natural_pt, &(*shape)(0,0));
+	_shape->computeGradShapeFunction(natural_pt, &(*dshape_dr)(0,0));
+//	_shape->computeShapeFunction(natural_pt, (double*)shape->getData());
+//	_shape->computeGradShapeFunction(natural_pt, (double*)dshape_dr->getData());
 
 	//jacobian: J=[dx/dr dy/dr // dx/ds dy/ds]
-	MathLib::Matrix<double> *jac = _prop->jacobian_dxdr;
-	(*jac) = .0;
+	LocalMatrix *jac = _prop->jacobian_dxdr;
+	//(*jac) = .0;
+	(*jac) *= .0;
 	for (size_t i_r=0; i_r<dim; i_r++) {
 		for (size_t j_x=0; j_x<dim; j_x++) {
 			for (size_t k=0; k<nnodes; k++) {
@@ -61,13 +64,15 @@ const CoordinateMappingProperty* FemNaturalCoordinates::compute(const double* na
 	_prop->det_jacobian = det_j;
 	if (det_j>.0) {
 		//inverse of J
-		MathLib::Matrix<double> *inv_jac = _prop->inv_jacobian_drdx;
-		jac->inverse(inv_jac);
+		LocalMatrix *inv_jac = _prop->inv_jacobian_drdx;
+		//jac->inverse(inv_jac);
+		(*inv_jac) = jac->inverse();
 
 		//dshape/dx = invJ * dNdr
-		MathLib::Matrix<double> *dshape_dx = _prop->dshape_dx;
-		(*dshape_dx) = .0;
-		inv_jac->multiply(*dshape_dr, *dshape_dx);
+		LocalMatrix *dshape_dx = _prop->dshape_dx;
+//		(*dshape_dx) = .0;
+//		inv_jac->multiply(*dshape_dr, *dshape_dx);
+		(*dshape_dx) = (*inv_jac) * (*dshape_dr);
 	} else {
 		std::cout << "***error: det_j is not positive." << std::endl;
 	}
@@ -86,8 +91,8 @@ void FemNaturalCoordinates::mapToPhysicalCoordinates(const double* natural_pt, d
 {
 	const size_t dim = _ele->getDimension();
 	const size_t nnodes = _ele->getNumberOfNodes();
-	MathLib::Matrix<double> *shape  = _prop->shape_r;
-	_shape->computeShapeFunction(natural_pt, (double*)shape->getData());
+	LocalMatrix *shape  = _prop->shape_r;
+	_shape->computeShapeFunction(natural_pt, &(*shape)(0,0));
 
 	for (size_t i=0; i<dim; i++) {
 		physical_pt[i] = .0;
@@ -107,7 +112,7 @@ void FemNaturalCoordinates::mapToPhysicalCoordinates(const CoordinateMappingProp
 {
 	const size_t dim = _ele->getDimension();
 	const size_t nnodes = _ele->getNumberOfNodes();
-	MathLib::Matrix<double> *shape  = prop->shape_r;
+	LocalMatrix *shape  = prop->shape_r;
 
 	for (size_t i=0; i<dim; i++) {
 		physical_pt[i] = .0;
@@ -128,7 +133,7 @@ void FemNaturalCoordinates::mapFromPhysicalCoordinates(const double* physical_pt
 {
 	const size_t dim = _ele->getDimension();
 	const size_t nnodes = _ele->getNumberOfNodes();
-	MathLib::Matrix<double> *inv_jac = _prop->inv_jacobian_drdx;
+	LocalMatrix *inv_jac = _prop->inv_jacobian_drdx;
 
 	// calculate dx which is relative coordinates from element center
 	std::vector<double> dx(dim, .0);

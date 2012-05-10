@@ -9,7 +9,7 @@
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
-#include "SolutionLib/Problem/FemIVBVProblem.h"
+#include "SolutionLib/FemProblem/FemIVBVProblem.h"
 #include "SolutionLib/Solution/SingleStepFEM.h"
 
 #include "Tests/Geo/Equation/FemMassTransport.h"

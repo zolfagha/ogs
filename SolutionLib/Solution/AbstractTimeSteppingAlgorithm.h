@@ -19,6 +19,8 @@ class AbstractTimeSteppingAlgorithm : public ISolutionAlgorithm, public NumLib::
 public:
     /// @param tim Time step function
     AbstractTimeSteppingAlgorithm(NumLib::ITimeStepFunction &tim) : _tim(&tim) {};
+
+    /// destructor
     virtual ~AbstractTimeSteppingAlgorithm() {};
 
     /// get the time step function

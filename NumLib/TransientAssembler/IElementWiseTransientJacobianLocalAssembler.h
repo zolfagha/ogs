@@ -1,8 +1,7 @@
 
 #pragma once
 
-#include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
-
+#include "NumLib/DataType.h"
 
 namespace MeshLib
 {
@@ -20,10 +19,6 @@ class TimeStep;
 class IElementWiseTransientJacobianLocalAssembler
 {
 public:
-	typedef MathLib::DenseLinearEquations LocalEquationType;
-	typedef LocalEquationType::MatrixType LocalMatrixType;
-	typedef LocalEquationType::VectorType LocalVectorType;
-
     virtual ~IElementWiseTransientJacobianLocalAssembler() {};
 
     /// assemble a local Jacobian matrix for the given element
@@ -32,17 +27,13 @@ public:
     /// @param local_u_n1	guess of current time step value
     /// @param local_u_n	previous time step value
     /// @param local_J		local Jacobian
-    virtual void assembly(const TimeStep &time,  MeshLib::IElement &e, const LocalVectorType &local_u_n1, const LocalVectorType &local_u_n, LocalMatrixType &local_J) = 0;
+    virtual void assembly(const TimeStep &time,  MeshLib::IElement &e, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalMatrix &local_J) = 0;
 };
 
 
 class DummyElementWiseTransientJacobianLocalAssembler : public IElementWiseTransientJacobianLocalAssembler
 {
 public:
-	typedef MathLib::DenseLinearEquations LocalEquationType;
-	typedef LocalEquationType::MatrixType LocalMatrixType;
-	typedef LocalEquationType::VectorType LocalVectorType;
-
     virtual ~DummyElementWiseTransientJacobianLocalAssembler() {};
 
     /// assemble a local Jacobian matrix for the given element
@@ -51,7 +42,7 @@ public:
     /// @param local_u_n1	guess of current time step value
     /// @param local_u_n	previous time step value
     /// @param local_J		local Jacobian
-    virtual void assembly(const TimeStep &,  MeshLib::IElement &, const LocalVectorType &, const LocalVectorType &, LocalMatrixType &) {};
+    virtual void assembly(const TimeStep &,  MeshLib::IElement &, const LocalVector &, const LocalVector &, LocalMatrix &) {};
 };
 
 

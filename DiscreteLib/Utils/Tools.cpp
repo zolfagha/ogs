@@ -32,7 +32,7 @@ void getLocalVector2(const DofEquationIdTable &dofManager, const std::vector<siz
 }
 
 /// create a subset of vector u corresponding to the given vector index
-void getLocalVector(const DofEquationIdTable &dofManager, const std::vector<size_t> &list_vec_entry_id, const std::vector<size_t> &list_vec_size_for_order, const std::vector<DiscreteVector<double>*> &list_multiple_u, std::valarray<double> &local_u)
+void getLocalVector(const DofEquationIdTable &dofManager, const std::vector<size_t> &list_vec_entry_id, const std::vector<size_t> &list_vec_size_for_order, const std::vector<DiscreteVector<double>*> &list_multiple_u, LocalVector &local_u)
 {
 	std::vector<double> temp_v;
 	getLocalVector2(dofManager, list_vec_entry_id, list_vec_size_for_order, list_multiple_u, temp_v);

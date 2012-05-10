@@ -15,9 +15,7 @@
 #include "NumLib/TransientAssembler/ElementWiseTransientLinearEQSAssembler.h"
 #include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
 
-#include "SolutionLib/Tools/TemplateTransientLinearFEMFunction.h"
-#include "SolutionLib/Tools/TemplateTransientResidualFEMFunction.h"
-#include "SolutionLib/Tools/TemplateTransientDxFEMFunction.h"
+#include "SolutionLib/FemProblem/FemEquation.h"
 
 #include "AbstractTimeSteppingAlgorithm.h"
 
@@ -39,10 +37,10 @@ class SingleStepFEM
 {
 public:
     typedef T_USER_FEM_PROBLEM UserFemProblem;
-    typedef TemplateTransientLinearFEMFunction<UserFemProblem, typename UserFemProblem::LinearAssemblerType> UserLinearFemFunction;
-    typedef TemplateTransientResidualFEMFunction<UserFemProblem, typename UserFemProblem::ResidualAssemblerType> UserResidualFunction;
-    typedef TemplateTransientDxFEMFunction<UserFemProblem, typename UserFemProblem::JacobianAssemblerType> UserDxFunction;
-    typedef NumLib::TemplateDiscreteNonlinearSolver<UserLinearFemFunction, UserResidualFunction, UserDxFunction> NonlinearSolverType;
+    typedef typename UserFemProblem::EquationType::LinearEQSType UserLinearFunction;
+    typedef typename UserFemProblem::EquationType::ResidualEQSType UserResidualFunction;
+    typedef typename UserFemProblem::EquationType::DxEQSType UserDxFunction;
+    typedef NumLib::TemplateDiscreteNonlinearSolver<UserLinearFunction, UserResidualFunction, UserDxFunction> NonlinearSolverType;
     typedef T_LINEAR_SOLVER LinearSolverType;
 
     /// constructor
@@ -78,7 +76,7 @@ public:
         _linear_solver = new LinearSolverType();
         _linear_eqs = _discrete_system->createLinearEquation<DiscreteLib::TemplateMeshBasedDiscreteLinearEquation, LinearSolverType, DiscreteLib::SparsityBuilderFromNodeConnectivity>(*_linear_solver, _dofManager);
         // setup functions
-        _f_linear = new UserLinearFemFunction(problem, problem->getLinearAssembler(), _linear_eqs);
+        _f_linear = new UserLinearFunction(problem, problem->getLinearAssembler(), _linear_eqs);
         _f_r = new UserResidualFunction(problem, &_dofManager, problem->getResidualAssembler());
         _f_dx = new UserDxFunction(problem, problem->getJacobianAssembler(), _linear_eqs);
         // setup nonlinear solver
@@ -127,7 +125,7 @@ public:
         std::vector<double> list_bc1_val;
         FemVariable* var = _problem->getVariable(0);
         for (size_t i=0; i<var->getNumberOfDirichletBC(); i++) {
-            FemLib::IFemDirichletBC *bc1 = var->getDirichletBC(i);
+            FemLib::FemDirichletBC *bc1 = var->getDirichletBC(i);
             bc1->setup();
             size_t varId = 0; //TODO var id
             std::vector<size_t> &list_bc_nodes = bc1->getListOfBCNodes();
@@ -204,7 +202,7 @@ private:
     DiscreteLib::DiscreteSystem *_discrete_system;
     DiscreteLib::IDiscreteLinearEquation* _linear_eqs;
     std::vector<FemLib::FemNodalFunctionScalar*> _u_n1;
-    UserLinearFemFunction* _f_linear;
+    UserLinearFunction* _f_linear;
     UserResidualFunction* _f_r;
     UserDxFunction* _f_dx;
     NonlinearSolverType* _f_nonlinear;

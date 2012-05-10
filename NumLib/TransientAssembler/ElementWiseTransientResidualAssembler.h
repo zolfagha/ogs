@@ -28,7 +28,6 @@ class ElementWiseTransientResidualAssembler : public DiscreteLib::IDiscreteVecto
 {
 public:
 	typedef DiscreteLib::IDiscreteVectorAssembler<double>::VectorType GlobalVectorType;
-	typedef IElementWiseTransientResidualLocalAssembler::LocalVectorType LocalVectorType;
 
     /// @param time
     /// @param u0

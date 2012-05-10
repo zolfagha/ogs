@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "MathLib/LinAlg/Dense/Matrix.h"
+//#include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Core/ElementCoordinatesMapping.h"
 #include "FemLib/Core/ShapeFunction/IFemShapeFunction.h"
@@ -71,7 +71,7 @@ private:
     CoordinateMappingProperty* _prop;
     IFemShapeFunction* _shape;
     MeshLib::IElement* _ele;
-    MathLib::Matrix<double> x;
+    LocalMatrix x;
 
 };
 

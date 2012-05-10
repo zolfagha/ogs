@@ -7,15 +7,49 @@
 namespace NumLib
 {
 
-struct TXPosition
+/**
+ * \brief Position in space-time domain
+ */
+class TXPosition
 {
-	TXPosition(double t_, double* x_) : t(t_), x(x_) {};
-	TXPosition(double* x_) : x(x_) {};
-	TXPosition(const GeoLib::Point* p) : x(p->getData()) {};
+public:
+	TXPosition(double t_, double* x_) : _t(t_), _x(x_) {};
+	TXPosition(double* x_) : _x(x_) {};
+	TXPosition(const GeoLib::Point* p) : _x(p->getData()) {};
 
-	double t;
-	const double* x;
+	double getTime() const {return _t;};
+	const double* getSpace() const {return _x;};
+private:
+	double _t;
+	const double* _x;
 };
+
+/**
+ * \brief Value
+ */
+class TXValue
+{
+public:
+
+
+private:
+};
+
+/**
+ * \brief Interface to functions in space-time domain
+ */
+class ITXFunction : public IClonable
+{
+public:
+	virtual ~ITXFunction() {};
+	virtual void eval(const TXPosition x, TXValue &v) = 0;
+	virtual void eval(const TXPosition x, double &v) const = 0;
+	virtual bool isConst() = 0;
+	virtual bool isTemporallyConst() = 0;
+	virtual bool isSpatiallyConst() = 0;
+};
+
+
 
 class ITXValue
 {
@@ -24,40 +58,6 @@ public:
 	virtual bool isScalar() const = 0;
 	virtual bool isVector() const = 0;
 	virtual bool isTensor() const = 0;
-};
-
-class TXValueScalar
-{
-public:
-	virtual ~TXValueScalar() {};
-	bool isScalar() const {return true;};
-	bool isVector() const {return false;};
-	bool isTensor() const {return false;};
-};
-
-class ITXFunction
-{
-public:
-	virtual ~ITXFunction() {};
-	virtual void eval(const TXPosition x, ITXValue &v) = 0;
-	virtual bool isConst() = 0;
-	virtual bool isTemporallyConst() = 0;
-	virtual bool isSpatiallyConst() = 0;
-};
-
-class ITXFunctionScalar : public ITXFunction
-{
-public:
-	virtual ~ITXFunctionScalar() {};
-//	void eval(const TXPosition x, ITXValue &v)
-//	{
-//		eval(x, (TXValueScalar)v);
-//	}
-//	virtual void eval(const TXPosition x, TXValueScalar &v) = 0;
-	virtual void eval(const TXPosition x, double &v) = 0;
-	virtual bool isConst() = 0;
-	virtual bool isTemporallyConst() = 0;
-	virtual bool isSpatiallyConst() = 0;
 };
 
 
@@ -94,6 +94,45 @@ private:
     Tval _v;
 };
 
-typedef TXFunctionConstant<double, ITXFunctionScalar> TXFunctionConstantScalar;
+typedef TXFunctionConstant<double, ITXFunction> TXFunctionConstantScalar;
 
+/**
+ *
+ */
+template <typename Tval>
+class Multiplication
+{
+public:
+    void doit(const Tval &v1, const Tval &v2, Tval &val)
+    {
+        val = v1 * v2;
+    }
+};
+
+/**
+ *
+ */
+template <typename Tval, class T1, class T2, template <typename> class T_OPERATOR>
+class TXCompositFunction : public ITXFunction
+{
+    T1 *_f1;
+    T2 *_f2;
+public:
+    TXCompositFunction(T1 &f1, T2 &f2) : _f1(&f1), _f2(&f2) {};
+    virtual ~TXCompositFunction() {};
+    virtual void eval(const TXPosition &x, Tval &val)
+    {
+        Tval v1, v2;
+        _f1->eval(x, v1);
+        _f2->eval(x, v2);
+        T_OPERATOR<Tval> op;
+        op.doit(v1, v2, val);
+    }
+    virtual TXCompositFunction* clone() const
+    {
+        return new TXCompositFunction<Tval, T1, T2, T_OPERATOR>(*_f1, *_f2);
+    }
+
+
+};
 } //end

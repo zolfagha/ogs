@@ -4,20 +4,14 @@
 #include "GeoLib/Core/GeoObject.h"
 #include "NumLib/TXFunction/TXFunction.h"
 
-#include "IProblem.h"
-
 namespace SolutionLib
 {
 
-struct BoundaryConditionType
+class Variable
 {
-	enum type
-	{
-		Dirichlet=1,
-		Neumann=2,
-		Robin=3
-	};
+
 };
+
 
 /**
  * \brief Initial value - boundary value (IVBV) problems
@@ -29,7 +23,7 @@ struct BoundaryConditionType
  * - BC
  * - domain (space & time)?
  */
-class IVBVProblem : IProblem
+class IVBVProblem
 {
 public:
 	///

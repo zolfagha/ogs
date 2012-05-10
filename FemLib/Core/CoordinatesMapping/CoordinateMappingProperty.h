@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "MathLib/LinAlg/Dense/Matrix.h"
+#include "FemLib/Core/DataType.h"
 
 namespace FemLib
 {
@@ -11,29 +11,28 @@ namespace FemLib
  */
 struct CoordinateMappingProperty
 {
-	typedef MathLib::Matrix<double> MatrixType;
     ///// mapping locations in computed coordinates
     //double r[3];
     /// shape function N(r)
-	MatrixType *shape_r;
+	LocalMatrix *shape_r;
     /// gradient of shape functions, dN(r)/dr
-	MatrixType *dshape_dr;
+	LocalMatrix *dshape_dr;
     /// gradient of shape functions, dN(r)/dx
-	MatrixType *dshape_dx;
+	LocalMatrix *dshape_dx;
     /// Jacobian matrix, J=dx/dr
-	MatrixType *jacobian_dxdr;
+	LocalMatrix *jacobian_dxdr;
     /// determinant of the Jacobian
     double det_jacobian;
     /// inverse of the Jacobian
-    MatrixType *inv_jacobian_drdx;
+    LocalMatrix *inv_jacobian_drdx;
 
     CoordinateMappingProperty()
     {
-        shape_r = new MatrixType();
-        dshape_dr = new MatrixType();
-        dshape_dx = new MatrixType();
-        jacobian_dxdr = new MatrixType();
-        inv_jacobian_drdx = new MatrixType();
+        shape_r = new LocalMatrix();
+        dshape_dr = new LocalMatrix();
+        dshape_dx = new LocalMatrix();
+        jacobian_dxdr = new LocalMatrix();
+        inv_jacobian_drdx = new LocalMatrix();
     }
 
     ~CoordinateMappingProperty()

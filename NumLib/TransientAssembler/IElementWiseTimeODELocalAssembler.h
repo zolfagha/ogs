@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
+#include "NumLib/DataType.h"
 
 
 namespace MeshLib
@@ -20,10 +20,6 @@ class TimeStep;
 class IElementWiseTimeODELocalAssembler
 {
 public:
-	typedef MathLib::DenseLinearEquations LocalEquationType;
-	typedef LocalEquationType::MatrixType LocalMatrixType;
-	typedef LocalEquationType::VectorType LocalVectorType;
-
     virtual ~IElementWiseTimeODELocalAssembler() {};
 
     /// assemble components of a local linear equation for the given element
@@ -34,7 +30,7 @@ public:
     /// @param M		mass matrix
     /// @param K		laplace matrix
     /// @param F		source/sink terms
-    virtual void assembly(const TimeStep &time, MeshLib::IElement &e, const LocalVectorType &local_u_n1, const LocalVectorType &local_u_n, LocalMatrixType &M, LocalMatrixType &K, LocalVectorType &F)  = 0;
+    virtual void assembly(const TimeStep &time, MeshLib::IElement &e, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalMatrix &M, LocalMatrix &K, LocalVector &F)  = 0;
 };
 
 } //end

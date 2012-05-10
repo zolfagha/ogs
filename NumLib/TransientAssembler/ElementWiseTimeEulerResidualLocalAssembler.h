@@ -38,14 +38,14 @@ public:
     /// @param local_u_n1	guess of current time step value
     /// @param local_u_n	previous time step value
     /// @param eqs			local algebraic equation
-    virtual void assembly(const TimeStep &time, MeshLib::IElement &e, const LocalVectorType &local_u_n1, const LocalVectorType &local_u_n, LocalVectorType &local_r)
+    virtual void assembly(const TimeStep &time, MeshLib::IElement &e, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalVector &local_r)
     {
         const double delta_t = time.getTimeStepSize();
         const size_t n_dof = local_r.size();
 
-        LocalMatrixType M(n_dof, n_dof);
-        LocalMatrixType K(n_dof, n_dof);
-        LocalVectorType F(.0, n_dof);
+        LocalMatrix M(n_dof, n_dof);
+        LocalMatrix K(n_dof, n_dof);
+        LocalVector F(.0, n_dof);
         M = .0;
         K = .0;
 
@@ -55,9 +55,9 @@ public:
         //std::cout << "M="; M.write(std::cout); std::cout << std::endl;
         //std::cout << "K="; K.write(std::cout); std::cout << std::endl;
 
-        LocalMatrixType TMP_M(n_dof, n_dof);
-        LocalMatrixType TMP_M2(n_dof, n_dof);
-        LocalVectorType TMP_V(.0, n_dof);
+        LocalMatrix TMP_M(n_dof, n_dof);
+        LocalMatrix TMP_M2(n_dof, n_dof);
+        LocalVector TMP_V(.0, n_dof);
 
         // evaluate r: r = (1/dt M + theta K) * u1 -(1/dt M - (1-theta) K) * u0 - F
         // r = (1/dt M + theta K) * u1
@@ -68,7 +68,7 @@ public:
         TMP_M *= _theta;
         TMP_M2 += TMP_M;
         TMP_V = .0;
-        TMP_M2.axpy(1.0, &((LocalVectorType)local_u_n1)[0], .0, &TMP_V[0]);
+        TMP_M2.axpy(1.0, &((LocalVector)local_u_n1)[0], .0, &TMP_V[0]);
         local_r += TMP_V;
         // r -= (1/dt M - (1-theta) K) u0
         TMP_M = M;
@@ -78,7 +78,7 @@ public:
         TMP_M *= - (1.-_theta);
         TMP_M2 += TMP_M;
         TMP_V = .0;
-        TMP_M2.axpy(1.0, &((LocalVectorType)local_u_n)[0], .0, &TMP_V[0]);
+        TMP_M2.axpy(1.0, &((LocalVector)local_u_n)[0], .0, &TMP_V[0]);
         local_r -= TMP_V;
         // r -= F
         local_r -= F;

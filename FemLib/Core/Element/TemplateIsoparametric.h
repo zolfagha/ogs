@@ -97,7 +97,7 @@ public:
     virtual double interpolate(double *natural_pt, double *nodal_values)
     {
         const CoordinateMappingProperty *prop = _mapping->compute(natural_pt);
-        double *N = (double*)prop->shape_r->getData();
+        double *N = &(*prop->shape_r)(0,0);
         double v = .0;
         for (size_t i=0; i<TemplateFeBase<T_FETYPE, N_VARIABLES>::getNumberOfVariables(); i++)
             v+=N[i]*nodal_values[i];
@@ -166,18 +166,20 @@ public:
         LocalMatrix *basis = coord_prop->shape_r;
         LocalMatrix *test = coord_prop->shape_r;
         double fac = f * coord_prop->det_jacobian * _integration->getWeight(igp);
-        test->transposeAndMultiply(*basis, mat, fac);
+        //test->transposeAndMultiply(*basis, mat, fac);
+        mat.noalias() += test->transpose() * (*basis) * fac;
     }
 
     /// compute an matrix M = Int{W^T F dN} dV
-    virtual void integrateWxDN(size_t igp, MathLib::Vector &f, LocalMatrix &mat)
+    virtual void integrateWxDN(size_t igp, LocalVector &f, LocalMatrix &mat)
     {
     	assert(_is_basis_computed);
         const CoordinateMappingProperty *coord_prop = _mapping->getProperties();
         LocalMatrix *dbasis = coord_prop->dshape_dx;
         LocalMatrix *test = coord_prop->shape_r;
         double fac = coord_prop->det_jacobian * _integration->getWeight(igp);
-        test->transposeAndMultiply(*dbasis, &f[0], mat, fac);
+//        test->transposeAndMultiply(*dbasis, &f[0], mat, fac);
+        mat.noalias() += test->transpose() * f * (*dbasis) * fac;
     }
 
     /// compute an matrix M = Int{dW^T F dN} dV
@@ -188,10 +190,11 @@ public:
         LocalMatrix *dbasis = coord_prop->dshape_dx;
         LocalMatrix *dtest = coord_prop->dshape_dx;
         double fac = f*coord_prop->det_jacobian * _integration->getWeight(igp);
-        dtest->transposeAndMultiply(*dbasis, mat, fac);
+//        dtest->transposeAndMultiply(*dbasis, mat, fac);
+        mat.noalias() += dtest->transpose() * (*dbasis) * fac;
     }
 
-    void extrapolate(const std::vector<MathLib::Vector> &gp_values, std::vector<MathLib::Vector> &nodal_values)
+    void extrapolate(const std::vector<LocalVector> &gp_values, std::vector<LocalVector> &nodal_values)
     {
         T_EXTRAPOLATE extrapo;
         extrapo.extrapolate(*this, gp_values, nodal_values);

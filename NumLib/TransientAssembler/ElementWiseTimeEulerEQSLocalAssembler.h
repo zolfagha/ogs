@@ -38,26 +38,26 @@ public:
     /// @param local_u_n1	guess of current time step value
     /// @param local_u_n	previous time step value
     /// @param eqs			local algebraic equation
-    virtual void assembly(const TimeStep &time, MeshLib::IElement &e, const LocalVectorType &local_u_n1, const LocalVectorType &local_u_n, LocalEquationType &eqs)
+    virtual void assembly(const TimeStep &time, MeshLib::IElement &e, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalEquationType &eqs)
     {
         const double delta_t = time.getTimeStepSize();
         const size_t n_dof = eqs.getDimension();
 
-        LocalMatrixType M(n_dof, n_dof);
-        LocalMatrixType K(n_dof, n_dof);
-        LocalVectorType F(.0, n_dof);
-        M = .0;
-        K = .0;
+        LocalMatrix M(n_dof, n_dof);
+        LocalMatrix K(n_dof, n_dof);
+        LocalVector F(.0, n_dof);
+        M *= .0;
+        K *= .0;
 
         assembleODE(time, e, local_u_n1, local_u_n, M, K, F);
 
         //std::cout << "M="; M.write(std::cout); std::cout << std::endl;
         //std::cout << "K="; K.write(std::cout); std::cout << std::endl;
 
-        LocalMatrixType *localA = eqs.getA();
+        LocalMatrix *localA = eqs.getA();
         double *localRHS = eqs.getRHS();
-        LocalMatrixType TMP_M(n_dof, n_dof);
-        LocalMatrixType TMP_M2(n_dof, n_dof);
+        LocalMatrix TMP_M(n_dof, n_dof);
+        LocalMatrix TMP_M2(n_dof, n_dof);
 
         // A = 1/dt M + theta K
         TMP_M = M;
@@ -73,13 +73,14 @@ public:
         TMP_M = K;
         TMP_M *= - (1.-_theta);
         TMP_M2 += TMP_M;
-        TMP_M2.axpy(1.0, &((LocalVectorType)local_u_n)[0], .0, localRHS);
+        //TMP_M2.axpy(1.0, &((LocalVector)local_u_n)[0], .0, localRHS);
+        localRHS = TMP_M2 * local_u_n;
         for (size_t i=0; i<n_dof; i++)
             localRHS[i] += F[i];
     }
 
 protected:
-    virtual void assembleODE(const TimeStep &time, MeshLib::IElement &e, const LocalVectorType &local_u_n1, const LocalVectorType &local_u_n, LocalMatrixType &M, LocalMatrixType &K, LocalVectorType &F)  = 0;
+    virtual void assembleODE(const TimeStep &time, MeshLib::IElement &e, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalMatrix &M, LocalMatrix &K, LocalVector &F)  = 0;
 
 private:
     double _theta;

@@ -3,19 +3,16 @@
 
 #include <vector>
 
-#include "MathLib/LinAlg/Dense/Matrix.h"
-
 #include "MeshLib/Core/IElement.h"
 #include "NumLib/Function/Function.h"
 
+#include "FemLib/Core/DataType.h"
 #include "FemLib/Core/Integration/Integration.h"
 #include "FemLib/Core/ShapeFunction/ShapeFunction.h"
 #include "FiniteElementType.h"
 
 namespace FemLib
 {
-
-typedef MathLib::Matrix<double> LocalMatrix;
 
 /**
  * \brief IFiniteElement class is an interface to all kinds of finite element classes. 
@@ -61,7 +58,7 @@ public:
     virtual void integrateWxN(size_t igp, double f, LocalMatrix &mat) = 0;
 
     /// compute an matrix M = Int{W^T F dN} dV
-    virtual void integrateWxDN(size_t igp, MathLib::Vector &f, LocalMatrix &mat) = 0;
+    virtual void integrateWxDN(size_t igp, LocalVector &f, LocalMatrix &mat) = 0;
 
     /// compute an matrix M = Int{dW^T F dN} dV
     virtual void integrateDWxDN(size_t igp, double f, LocalMatrix &mat) = 0;
@@ -69,7 +66,7 @@ public:
     /// get the integration method
     virtual IFemNumericalIntegration* getIntegrationMethod() const = 0;
 
-    virtual void extrapolate(const std::vector<MathLib::Vector> &gp_values, std::vector<MathLib::Vector> &nodal_values) = 0;
+    virtual void extrapolate(const std::vector<LocalVector> &gp_values, std::vector<LocalVector> &nodal_values) = 0;
 };
 
 

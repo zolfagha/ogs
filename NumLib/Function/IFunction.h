@@ -1,8 +1,6 @@
 
 #pragma once
 
-#include "MathLib/Vector.h"
-#include "MathLib/LinAlg/Dense/Matrix.h"
 #include "IClonable.h"
 
 namespace NumLib
@@ -40,66 +38,6 @@ public:
 	{
     	return new T_FUNCTION();
 	}
-};
-
-/**
- *
- */
-typedef double* SpatialPosition;
-
-/**
- *
- */
-template<typename Tval>
-class TemplateSpatialFunction : public TemplateFunction<SpatialPosition, Tval>
-{
-public:
-	virtual ~TemplateSpatialFunction() {};
-};
-
-typedef TemplateSpatialFunction<double> SpatialFunctionScalar;
-typedef TemplateSpatialFunction<MathLib::Vector> SpatialFunctionVector;
-typedef TemplateSpatialFunction<MathLib::Matrix<double> > SpatialFunctionTensor;
-
-
-/**
- *
- */
-template <typename Tval>
-class Multiplication
-{
-public:
-    void doit(const Tval &v1, const Tval &v2, Tval &val)
-    {
-        val = v1 * v2;
-    }
-};
-
-/**
- *
- */
-template <typename Tval, class T1, class T2, template <typename> class T_OPERATOR>
-class SpatialCompositFunction : public TemplateSpatialFunction<Tval>
-{
-    T1 *_f1;
-    T2 *_f2;
-public:
-    SpatialCompositFunction(T1 &f1, T2 &f2) : _f1(&f1), _f2(&f2) {};
-    virtual ~SpatialCompositFunction() {};
-    virtual void eval(const SpatialPosition &x, Tval &val)
-    {
-        Tval v1, v2;
-        _f1->eval(x, v1);
-        _f2->eval(x, v2);
-        T_OPERATOR<Tval> op;
-        op.doit(v1, v2, val);
-    }
-    virtual SpatialCompositFunction* clone() const
-    {
-        return new SpatialCompositFunction<Tval, T1, T2, T_OPERATOR>(*_f1, *_f2);
-    }
-
-
 };
 
 }

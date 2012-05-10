@@ -29,9 +29,6 @@ class TimeStep;
 class ElementWiseTransientLinearEQSAssembler : public DiscreteLib::IDiscreteLinearEquationAssembler
 {
 public:
-	typedef IElementWiseTransientLinearEQSLocalAssembler::LocalEquationType LocalEquationType;
-	typedef IElementWiseTransientLinearEQSLocalAssembler::LocalMatrixType LocalMatrixType;
-	typedef IElementWiseTransientLinearEQSLocalAssembler::LocalVectorType LocalVectorType;
 
     /// @param time
     /// @param u0

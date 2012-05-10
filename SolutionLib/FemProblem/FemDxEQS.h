@@ -11,6 +11,7 @@
 #include "FemLib/BC/FemDirichletBC.h"
 #include "FemLib/BC/FemNeumannBC.h"
 
+#include "FemVariable.h"
 
 namespace SolutionLib
 {
@@ -20,28 +21,23 @@ typedef DiscreteLib::DiscreteVector<double> MyFemVector;
 /**
  * \brief Template class for transient linear FEM functions
  *
- * \tparam T_FEM_PROBLEM
- * \tparam T_TIME_ODE_ASSEMBLER
  * \tparam T_SPACE_ASSEMBLER
- * \tparam T_LINEAR_SOLVER
  */
 template <
-	class T_USER_FEM_PROBLEM,
     class T_LOCAL_JACOBIAN_ASSEMBLER
     >
 class TemplateTransientDxFEMFunction
 	//: public MathLib::TemplateFunction<MyFemVector, MyFemVector>
 {
 public:
-    typedef T_USER_FEM_PROBLEM UserFemProblem;
     typedef T_LOCAL_JACOBIAN_ASSEMBLER UserLocalJacobianAssembler;
 
     /// constructor
     /// @param problem		Fem problem
     /// @param linear_eqs	Discrete linear equation
-    TemplateTransientDxFEMFunction(UserFemProblem* problem, UserLocalJacobianAssembler* asssembler, DiscreteLib::IDiscreteLinearEquation* linear_eqs)
-        : _problem(problem), _local_assembler(asssembler),  _linear_eqs(linear_eqs),
-          _t_n1(0), _u_n0(0)
+    TemplateTransientDxFEMFunction(std::vector<FemVariable*>* list_var, UserLocalJacobianAssembler* asssembler, DiscreteLib::IDiscreteLinearEquation* linear_eqs)
+        : _local_assembler(asssembler),  _linear_eqs(linear_eqs),
+          _t_n1(0), _u_n0(0), _list_var(list_var)
     {
     };
 
@@ -52,9 +48,8 @@ public:
 	NumLib::TemplateFunction<MyFemVector,MyFemVector>* clone() const
 	{
     	return new TemplateTransientDxFEMFunction<
-    				T_USER_FEM_PROBLEM,
     				T_LOCAL_JACOBIAN_ASSEMBLER
-    				>(_problem, _local_assembler, _linear_eqs);
+    				>(_list_var, _local_assembler, _linear_eqs);
 	}
 
     /// reset property
@@ -74,17 +69,15 @@ public:
         const NumLib::TimeStep &t_n1 = *this->_t_n1;
         MyFemVector* u_n = this->_u_n0;
 
-        // prepare data
-        UserFemProblem* pro = _problem;
-
         // setup BC1
-        FemVariable* var = pro->getVariable(0);
-        for (size_t i=0; i<var->getNumberOfDirichletBC(); i++) {
-            FemLib::IFemDirichletBC* bc1 = var->getDirichletBC(i);
-            bc1->setup();
-            size_t varid = 0; //?
-            std::vector<double> bc_value_for_dx(bc1->getListOfBCNodes().size(), .0);
-            _linear_eqs->setPrescribedDoF(varid, bc1->getListOfBCNodes(), bc_value_for_dx);
+        for (size_t i=0; i<_list_var->size(); i++) {
+        	FemVariable* var = (*_list_var)[i];
+            for (size_t j=0; j<var->getNumberOfDirichletBC(); j++) {
+                FemLib::FemDirichletBC* bc1 = var->getDirichletBC(j);
+                bc1->setup();
+                std::vector<double> bc_value_for_dx(bc1->getListOfBCNodes().size(), .0);
+                _linear_eqs->setPrescribedDoF(i, bc1->getListOfBCNodes(), bc1->getListOfBCValues());
+            }
         }
 
         //TODO temporally
@@ -108,11 +101,11 @@ public:
 
 
 private:
-    UserFemProblem* _problem;
     UserLocalJacobianAssembler *_local_assembler;
     DiscreteLib::IDiscreteLinearEquation* _linear_eqs;
     NumLib::TimeStep* _t_n1;
     MyFemVector* _u_n0;
+    std::vector<FemVariable*>* _list_var;
 };
 
 

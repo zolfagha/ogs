@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
+#include "NumLib/DataType.h"
 
 
 namespace MeshLib
@@ -20,9 +20,6 @@ class TimeStep;
 class IElementWiseTransientResidualLocalAssembler
 {
 public:
-	typedef MathLib::DenseLinearEquations LocalEquationType;
-	typedef LocalEquationType::MatrixType LocalMatrixType;
-	typedef LocalEquationType::VectorType LocalVectorType;
 
     virtual ~IElementWiseTransientResidualLocalAssembler() {};
 
@@ -32,7 +29,7 @@ public:
     /// @param local_u_n1	guess of current time step value
     /// @param local_u_n	previous time step value
     /// @param local_r		local residual
-    virtual void assembly(const TimeStep &time,  MeshLib::IElement &e, const LocalVectorType &local_u_n1, const LocalVectorType &local_u_n, LocalVectorType &local_r) = 0;
+    virtual void assembly(const TimeStep &time,  MeshLib::IElement &e, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalVector &local_r) = 0;
 };
 
 } //end

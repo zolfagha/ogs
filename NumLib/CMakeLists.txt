@@ -5,8 +5,8 @@ FILE(GLOB NumLib_TimeStepping_Files TimeStepping/*.h TimeStepping/*.cpp)
 SOURCE_GROUP( NumLib\\TimeStepping FILES ${NumLib_TimeStepping_Files} )
 FILE(GLOB NumLib_TransientCoupling_Files TransientCoupling/*.h TransientCoupling/*.cpp)
 SOURCE_GROUP( NumLib\\TransientCoupling FILES ${NumLib_TransientCoupling_Files} )
-FILE(GLOB NumLib_Output_Files Output/*.h Output/*.cpp)
-SOURCE_GROUP( NumLib\\Output FILES ${NumLib_Output_Files} )
+FILE(GLOB NumLib_FileIO_Files FileIO/*.h FileIO/*.cpp)
+SOURCE_GROUP( NumLib\\FileIO FILES ${NumLib_FileIO_Files} )
 FILE(GLOB NumLib_TransientAssembler_Files TransientAssembler/*.h TransientAssembler/*.cpp)
 SOURCE_GROUP( NumLib\\TransientAssembler FILES ${NumLib_TransientAssembler_Files} )
 FILE(GLOB NumLib_Nonlinear_Files Nonlinear/*.h Nonlinear/*.cpp)
@@ -43,7 +43,7 @@ ADD_LIBRARY( NumLib STATIC
 	${NumLib_Files} 
 #	${NumLib_Core_Files} 
     ${NumLib_Nonlinear_Files} 
-    ${NumLib_Output_Files} 
+    ${NumLib_FileIO_Files} 
 	${NumLib_TimeStepping_Files} 
     ${NumLib_TransientCoupling_Files} 
 	${NumLib_TransientAssembler_Files} 

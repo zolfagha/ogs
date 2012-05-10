@@ -51,10 +51,6 @@ ADD_LIBRARY(FemLib STATIC
 INCLUDE_DIRECTORIES(
 	.
 	..
-#	../Base
-#	../GeoLib
-#	../MathLib
-#	../MeshLib
 )
 
 

@@ -154,7 +154,7 @@ void TRI3CONST::integrateWxN(size_t igp, double v, LocalMatrix &mat)
 }
 
 /// compute an matrix M = Int{W^T F dN} dV
-void TRI3CONST::integrateWxDN(size_t igp, MathLib::Vector &v, LocalMatrix &mat)
+void TRI3CONST::integrateWxDN(size_t igp, LocalVector &v, LocalMatrix &mat)
 {
 	assert(igp==0);
 
@@ -182,10 +182,10 @@ void TRI3CONST::integrateDWxDN(size_t igp, double v, LocalMatrix &mat)
             mat(i,j) = mat(j,i);
 }
 
-void TRI3CONST::extrapolate(const std::vector<MathLib::Vector> &gp_values, std::vector<MathLib::Vector> &nodal_values)
+void TRI3CONST::extrapolate(const std::vector<LocalVector> &gp_values, std::vector<LocalVector> &nodal_values)
 {
     // gp_values are all same
-    MathLib::Vector v = gp_values[0];
+	LocalVector v = gp_values[0];
     for (size_t i=0; i<nodal_values.size(); i++) {
         nodal_values[i] = v;
     }

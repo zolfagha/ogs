@@ -63,7 +63,7 @@ public:
     virtual void integrateWxN(size_t igp, double f, LocalMatrix &mat);
 
     /// compute an matrix M = Int{W^T F dN} dV
-    virtual void integrateWxDN(size_t igp, MathLib::Vector &f, LocalMatrix &mat);
+    virtual void integrateWxDN(size_t igp, LocalVector &f, LocalMatrix &mat);
 
     /// compute an matrix M = Int{dW^T F dN} dV
     virtual void integrateDWxDN(size_t igp, double f, LocalMatrix &mat);
@@ -71,7 +71,7 @@ public:
     /// get the integration method
     IFemNumericalIntegration* getIntegrationMethod() const {return (IFemNumericalIntegration*)&_integration;};
 
-    void extrapolate(const std::vector<MathLib::Vector> &gp_values, std::vector<MathLib::Vector> &nodal_values);
+    void extrapolate(const std::vector<LocalVector> &gp_values, std::vector<LocalVector> &nodal_values);
 };
 
 }

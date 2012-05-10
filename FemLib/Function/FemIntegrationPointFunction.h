@@ -12,7 +12,7 @@ namespace FemLib
  * \brief Template class for FEM integration point-based functions
  */
 template<typename Tvalue>
-class TemplateFEMIntegrationPointFunction : public NumLib::TemplateSpatialFunction<Tvalue>
+class TemplateFEMIntegrationPointFunction : public NumLib::ITXFunction
 {
 public:
 	typedef MathLib::TemplateVectorX<Tvalue> IntegrationPointVectorType;
@@ -41,7 +41,7 @@ public:
         return _msh;
     }
 
-    void eval(const NumLib::SpatialPosition &/*pt*/, Tvalue &v)
+    void eval(const NumLib::TXPosition &/*pt*/, Tvalue &v)
     {
         v = (*_values)[0][0]; //TODO
     };
@@ -125,6 +125,6 @@ private:
 
 typedef TemplateFEMIntegrationPointFunction<double> FEMIntegrationPointFunctionScalar;
 //typedef TemplateFEMIntegrationPointFunction<MathLib::Vector2D> FEMIntegrationPointFunctionVector2d;
-typedef TemplateFEMIntegrationPointFunction<MathLib::Vector> FEMIntegrationPointFunctionVector2d;
+typedef TemplateFEMIntegrationPointFunction<LocalVector> FEMIntegrationPointFunctionVector2d;
 
 } //end

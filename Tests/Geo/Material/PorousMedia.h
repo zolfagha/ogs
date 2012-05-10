@@ -2,7 +2,7 @@
 #pragma once
 
 #include "Base/CodingTools.h"
-#include "NumLib/Function/IFunction.h"
+#include "NumLib/TXFunction/TXFunction.h"
 
 #include "Solid.h"
 
@@ -11,9 +11,9 @@ namespace Geo
 
 struct PorousMedia
 {
-	NumLib::SpatialFunctionScalar* hydraulic_conductivity;
-	NumLib::SpatialFunctionScalar* porosity;
-	NumLib::SpatialFunctionScalar* storage;
+	NumLib::ITXFunction* hydraulic_conductivity;
+	NumLib::ITXFunction* porosity;
+	NumLib::ITXFunction* storage;
 	Solid* solidphase;
 
 	PorousMedia()

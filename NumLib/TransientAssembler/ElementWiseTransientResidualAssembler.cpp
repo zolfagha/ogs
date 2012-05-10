@@ -10,13 +10,13 @@ namespace NumLib
 void ElementWiseTransientResidualAssembler::assembly( const MeshLib::IMesh &msh, const DiscreteLib::DofEquationIdTable &dofManager, GlobalVectorType &globalVec)
 {
     const TimeStep &time = *_timestep;
-	LocalVectorType localVec;
+	LocalVector localVec;
     std::vector<size_t> ele_node_ids, ele_node_size_order;
     std::vector<size_t> local_dofmap;
     const size_t n_ele = msh.getNumberOfElements();
 
-    LocalVectorType local_u_n1;
-    LocalVectorType local_u_n;
+    LocalVector local_u_n1;
+    LocalVector local_u_n;
     for (size_t i=0; i<n_ele; i++) {
         MeshLib::IElement *e = msh.getElemenet(i);
         // get dof map
