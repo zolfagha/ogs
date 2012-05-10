@@ -184,7 +184,7 @@ public:
 private:
     DiscreteLib::DiscreteSystem* _dis;
     FdmLib::FdmCellVectorFunction* _vel;
-    MathLib::SpatialFunctionScalar *_K;
+    NumLib::SpatialFunctionScalar *_K;
 
     DISALLOW_COPY_AND_ASSIGN(FunctionFdmVelocity);
 };

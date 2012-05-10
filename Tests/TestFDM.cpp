@@ -4,15 +4,15 @@
 #include <gtest/gtest.h>
 
 #include "Base/CodingTools.h"
-#include "MathLib/Function/Function.h"
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
-#include "MathLib/Coupling/Algorithm/IConvergenceCheck.h"
-#include "MathLib/Coupling/Algorithm/SerialStaggeredMethod.h"
 #include "GeoLib/Core/Polyline.h"
 #include "GeoLib/Shape/Line.h"
 #include "GeoLib/Shape/Rectangle.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "MeshLib/Tools/MeshGenerator.h"
+#include "NumLib/Function/Function.h"
+#include "NumLib/Coupling/Algorithm/IConvergenceCheck.h"
+#include "NumLib/Coupling/Algorithm/SerialStaggeredMethod.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TimeStepping/TimeStepFunction.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
@@ -87,9 +87,9 @@ GWFdmProblem* defineGWProblem4FDM(DiscreteSystem &dis, double h, GeoLib::Line &l
     size_t headId = _problem->createField();
     FdmFunctionScalar* _head = _problem->getField(headId);
     _problem->setIC(headId, *_head);
-    MathLib::SpatialFunctionConstant<double> f1(.0);
+    SpatialFunctionConstant<double> f1(.0);
     _problem->addDirichletBC(headId, *line.getPoint2(), false, f1);
-    MathLib::SpatialFunctionConstant<double> f2(-1e-5);
+    SpatialFunctionConstant<double> f2(-1e-5);
     _problem->addNeumannBC(headId, *line.getPoint1(), false, f2);
 
     return _problem;
@@ -126,7 +126,7 @@ TEST(Fdm, fdm1)
 	    MeshLib::IMesh *msh = MeshLib::MeshGenerator::generateLineMesh(len, div, .0, .0, .0);
 	    GeoLib::Line line(Point(0.0, .0, .0), Point(len, .0, .0));
 	    Geo::PorousMedia pm;
-	    pm.hydraulic_conductivity = new MathLib::SpatialFunctionConstant<double>(1.e-11);
+	    pm.hydraulic_conductivity = new SpatialFunctionConstant<double>(1.e-11);
 	    DiscreteSystem dis(*msh);
 	    GWFdmProblem* pGW = defineGWProblem4FDM(dis, h, line, pm);
         TimeStepFunctionConstant tim(.0, 10.0, 10.0);
@@ -186,10 +186,10 @@ TEST(Fdm, fdm_fem1)
 	    MeshLib::IMesh *msh = MeshLib::MeshGenerator::generateLineMesh(len, div, .0, .0, .0);
 	    GeoLib::Line line(Point(0.0, .0, .0), Point(len, .0, .0));
 	    Geo::PorousMedia pm;
-	    pm.hydraulic_conductivity = new MathLib::SpatialFunctionConstant<double>(1.e-11);
-	    pm.porosity = new MathLib::SpatialFunctionConstant<double>(1.0);
+	    pm.hydraulic_conductivity = new NumLib::SpatialFunctionConstant<double>(1.e-11);
+	    pm.porosity = new NumLib::SpatialFunctionConstant<double>(1.0);
 	    Geo::Compound tracer;
-	    tracer.molecular_diffusion = new MathLib::SpatialFunctionConstant<double>(1.e-6);
+	    tracer.molecular_diffusion = new NumLib::SpatialFunctionConstant<double>(1.e-6);
 	    DiscreteSystem dis(*msh);
 	    GWFdmProblem* pGW = defineGWProblem4FDM(dis, h, line, pm);
 	    Geo::MassFemProblem* pMass = defineMassTransportProblem(dis, line, pm, tracer);

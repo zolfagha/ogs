@@ -49,9 +49,9 @@ public:
         vel = new FemLib::FEMIntegrationPointFunctionVector2d(*dis, *msh);
         //bc
         vec_bc1.push_back(new FemLib::FemDirichletBC(msh, poly_right, new NumLib::TXFunctionConstantScalar(.0)));
-        vec_bc2.push_back(new FemLib::FemNeumannBC<double, double>(head, poly_left, new MathLib::SpatialFunctionConstant<double>(-1e-5)));
+        vec_bc2.push_back(new FemLib::FemNeumannBC<double, double>(head, poly_left, new NumLib::SpatialFunctionConstant<double>(-1e-5)));
         // mat
-        _K = (K!=0) ? K : new MathLib::SpatialFunctionConstant<double>(1.e-11);
+        _K = (K!=0) ? K : new NumLib::SpatialFunctionConstant<double>(1.e-11);
     }
 
     static void calculateHead(GWFemTest &gw)

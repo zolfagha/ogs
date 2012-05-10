@@ -6,7 +6,7 @@
 
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Core/UnstructuredMesh.h"
-#include "MeshLib/Tools/Mapping.h"
+#include "MeshLib/Core/ElementCoordinatesMapping.h"
 #include "MeshLib/Topology/Topology.h"
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "MeshLib/Tools/Tools.h"

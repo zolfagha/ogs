@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "MathLib/Function/Function.h"
+#include "NumLib/Function/Function.h"
 #include "GeoLib/Core/GeoObject.h"
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Tools/Tools.h"
@@ -19,15 +19,15 @@ class IFdmBC {};
  * DirichletBC class
  */
 template<typename Tval>
-class FdmDirichletBC : IFdmBC, public MathLib::TemplateSpatialFunction<Tval>
+class FdmDirichletBC : IFdmBC, public NumLib::TemplateSpatialFunction<Tval>
 {
 public:
     ///
-    FdmDirichletBC(TemplateFDMFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, MathLib::TemplateSpatialFunction<Tval> *bc_func)
+    FdmDirichletBC(TemplateFDMFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, NumLib::TemplateSpatialFunction<Tval> *bc_func)
     {
         _var = var;
         _geo = geo;
-        _bc_func = (MathLib::TemplateSpatialFunction<Tval>*)bc_func->clone();
+        _bc_func = (NumLib::TemplateSpatialFunction<Tval>*)bc_func->clone();
         _is_transient = is_transient;
         _do_setup = true;
     }
@@ -50,7 +50,7 @@ public:
         _vec_values.resize(_vec_nodes.size());
         for (size_t i=0; i<_vec_nodes.size(); i++) {
             const GeoLib::Point* x = msh->getNodeCoordinatesRef(_vec_nodes[i]);
-            const MathLib::SpatialPosition &tmp = (const MathLib::SpatialPosition) x->getData();
+            const NumLib::SpatialPosition &tmp = (const NumLib::SpatialPosition) x->getData();
             _bc_func->eval(tmp, _vec_values[i]);
         }
         if (!_is_transient)
@@ -64,12 +64,12 @@ public:
 //        method.apply(eqs, _vec_nodes, _vec_values);
 //    }
 
-    virtual void eval(const MathLib::SpatialPosition &x, Tval &v)
+    virtual void eval(const NumLib::SpatialPosition &x, Tval &v)
     {
         _bc_func->eval(x, v);
     }
 
-    MathLib::TemplateSpatialFunction<Tval>* clone() const
+    NumLib::TemplateSpatialFunction<Tval>* clone() const
     {
     	FdmDirichletBC<Tval> *f = new FdmDirichletBC<Tval>(_var, _geo, _is_transient, _bc_func);
         return f;
@@ -81,7 +81,7 @@ public:
 private:
     TemplateFDMFunction<Tval> *_var;
     GeoLib::GeoObject *_geo;
-    MathLib::TemplateSpatialFunction<Tval> *_bc_func;
+    NumLib::TemplateSpatialFunction<Tval> *_bc_func;
     std::vector<size_t> _vec_nodes;
     std::vector<Tval> _vec_values;
     bool _is_transient;
@@ -90,15 +90,15 @@ private:
 
 
 template<typename Tval, typename Tflux>
-class FdmNeumannBC : IFdmBC, public MathLib::TemplateSpatialFunction<Tflux>
+class FdmNeumannBC : IFdmBC, public NumLib::TemplateSpatialFunction<Tflux>
 {
 public:
     ///
-	FdmNeumannBC(TemplateFDMFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, MathLib::TemplateSpatialFunction<Tflux> *func)
+	FdmNeumannBC(TemplateFDMFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, NumLib::TemplateSpatialFunction<Tflux> *func)
     {
         _var = var;
         _geo = geo;
-        _bc_func = (MathLib::TemplateSpatialFunction<Tflux>*)func->clone();
+        _bc_func = (NumLib::TemplateSpatialFunction<Tflux>*)func->clone();
         _is_transient = is_transient;
         _do_setup = true;
     }
@@ -119,7 +119,7 @@ public:
             // get discrete values at nodes
             for (size_t i=0; i<_vec_nodes.size(); i++) {
                 const GeoLib::Point* x = msh->getNodeCoordinatesRef(_vec_nodes[i]);
-                _bc_func->eval((const MathLib::SpatialPosition)x->getData(), _vec_values[i]);
+                _bc_func->eval((const NumLib::SpatialPosition)x->getData(), _vec_values[i]);
             }
         } else {
             // find edge elements on the geo
@@ -134,7 +134,7 @@ public:
                 std::vector<double> nodal_val(edge_nnodes);
                 for (size_t i_nod=0; i_nod<edge_nnodes; i_nod++) {
                     const GeoLib::Point* x = msh->getNodeCoordinatesRef(e->getNodeID(i_nod));
-                    _bc_func->eval((const MathLib::SpatialPosition)x->getData(), nodal_val[i_nod]);
+                    _bc_func->eval((const NumLib::SpatialPosition)x->getData(), nodal_val[i_nod]);
                 }
                 //TODO compute integrals
                 // add into RHS values
@@ -171,12 +171,12 @@ public:
         return _vec_values[i];
     }
 
-    void eval(const MathLib::SpatialPosition& x, Tflux &v)
+    void eval(const NumLib::SpatialPosition& x, Tflux &v)
     {
         _bc_func->eval(x, v);
     }
 
-    MathLib::TemplateSpatialFunction<Tflux>* clone() const
+    NumLib::TemplateSpatialFunction<Tflux>* clone() const
     {
     	FdmNeumannBC<Tval, Tflux> *f = new FdmNeumannBC<Tval, Tflux>(_var, _geo, _is_transient, _bc_func);
         return f;
@@ -189,7 +189,7 @@ private:
     // node id, var id, value
     TemplateFDMFunction<Tval> *_var;
     GeoLib::GeoObject *_geo;
-    MathLib::TemplateSpatialFunction<Tflux> *_bc_func;
+    NumLib::TemplateSpatialFunction<Tflux> *_bc_func;
     std::vector<size_t> _vec_nodes;
     std::vector<Tval> _vec_values;
     bool _is_transient;

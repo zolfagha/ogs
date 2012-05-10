@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "MathLib/Function/IFunction.h"
+#include "NumLib/Function/IFunction.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "StencilWiseTransientLinearEQSAssembler.h"
@@ -29,7 +29,7 @@ template <
     class T_LOCAL_ASSEMBLER
     >
 class TemplateTransientLinearFDMFunction
-	: public MathLib::TemplateFunction<MyFemVector, MyFemVector>
+	: public NumLib::TemplateFunction<MyFemVector, MyFemVector>
 {
 public:
     typedef T_USER_FEM_PROBLEM UserFemProblem;
@@ -48,7 +48,7 @@ public:
 	virtual ~TemplateTransientLinearFDMFunction() {};
 
 	///
-    MathLib::TemplateFunction<MyFemVector,MyFemVector>* clone() const
+	NumLib::TemplateFunction<MyFemVector,MyFemVector>* clone() const
 	{
     	return new TemplateTransientLinearFDMFunction<
     				T_USER_FEM_PROBLEM,

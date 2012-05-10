@@ -76,19 +76,19 @@ public:
     }
 
     ///
-    void setIC(int, MathLib::SpatialFunctionScalar& ic)
+    void setIC(int, NumLib::SpatialFunctionScalar& ic)
     {
-        _map_ic = (MathLib::SpatialFunctionScalar*) ic.clone();
+        _map_ic = (NumLib::SpatialFunctionScalar*) ic.clone();
     }
 
     ///
-    MathLib::SpatialFunctionScalar* getIC(int) const
+    NumLib::SpatialFunctionScalar* getIC(int) const
     {
         return _map_ic;
     };
 
     ///
-    void addDirichletBC(int, GeoLib::GeoObject &geo, bool is_transient, MathLib::SpatialFunctionScalar& bc1)
+    void addDirichletBC(int, GeoLib::GeoObject &geo, bool is_transient, NumLib::SpatialFunctionScalar& bc1)
     {
         addDirichletBC(*new FdmLib::FdmDirichletBC<double>(_map_var, &geo, is_transient, &bc1));
     }
@@ -99,7 +99,7 @@ public:
     size_t getNumberOfDirichletBC() const {return _map_bc1.size();};
 
     ///
-    MathLib::SpatialFunctionScalar* getDirichletBC(int, int bc_id) const
+    NumLib::SpatialFunctionScalar* getDirichletBC(int, int bc_id) const
     {
         return _map_bc1[bc_id];
     };
@@ -111,7 +111,7 @@ public:
     };
 
     ///
-    void addNeumannBC(int, GeoLib::GeoObject &geo, bool is_transient, MathLib::SpatialFunctionScalar& bc2)
+    void addNeumannBC(int, GeoLib::GeoObject &geo, bool is_transient, NumLib::SpatialFunctionScalar& bc2)
     {
         addNeumannBC(*new FdmLib::FdmNeumannBC<double, double>(_map_var, &geo, is_transient, &bc2));
     }
@@ -121,7 +121,7 @@ public:
     size_t getNumberOfNeumannBC() const {return _map_bc2.size();};
 
     ///
-    MathLib::SpatialFunctionScalar* getNeumannBC(int, int bc_id) const
+    NumLib::SpatialFunctionScalar* getNeumannBC(int, int bc_id) const
     {
         return _map_bc2[bc_id];
     };
@@ -157,7 +157,7 @@ private:
 private:
     DiscreteLib::DiscreteSystem* _discrete_system;
     FdmLib::TemplateFDMFunction<double>* _map_var;
-    MathLib::SpatialFunctionScalar* _map_ic;
+    NumLib::SpatialFunctionScalar* _map_ic;
     std::vector<FdmLib::FdmDirichletBC<double>*> _map_bc1;
     std::vector<FdmLib::FdmNeumannBC<double, double>*> _map_bc2;
     LinearAssemblerType* _linear_assembler;

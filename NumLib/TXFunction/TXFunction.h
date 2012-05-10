@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "MathLib/Function/IFunction.h"
+#include "NumLib/Function/IFunction.h"
 #include "GeoLib/Core/Point.h"
 
 namespace NumLib

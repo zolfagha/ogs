@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include "MathLib/Function/IFunction.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
+#include "NumLib/Function/IFunction.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "NumLib/TransientAssembler/ElementWiseTransientDxEQSAssembler.h"
 #include "FemLib/Function/FemFunction.h"
@@ -49,7 +49,7 @@ public:
 	virtual ~TemplateTransientDxFEMFunction() {};
 
 	///
-    MathLib::TemplateFunction<MyFemVector,MyFemVector>* clone() const
+	NumLib::TemplateFunction<MyFemVector,MyFemVector>* clone() const
 	{
     	return new TemplateTransientDxFEMFunction<
     				T_USER_FEM_PROBLEM,

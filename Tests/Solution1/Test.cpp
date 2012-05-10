@@ -64,9 +64,9 @@ Geo::GWFemProblem* defineGWProblem(DiscreteSystem &dis, Rectangle &_rec, Geo::Po
     Polyline* poly_left = _rec.getLeft();
     Polyline* poly_right = _rec.getRight();
     _problem->setIC(headId, *_head);
-    MathLib::SpatialFunctionConstant<double> f1(.0);
+    NumLib::SpatialFunctionConstant<double> f1(.0);
     _problem->addDirichletBC(headId, *poly_right, false, f1);
-    MathLib::SpatialFunctionConstant<double> f2(-1e-5);
+    NumLib::SpatialFunctionConstant<double> f2(-1e-5);
     _problem->addNeumannBC(headId, *poly_left, false, f2);
 
     return _problem;
@@ -85,9 +85,9 @@ Geo::GWFemProblem* defineGWProblem1D(DiscreteSystem &dis, GeoLib::Line &line, Ge
     size_t headId = _problem->createField(PolynomialOrder::Linear);
     FemNodalFunctionScalar* _head = _problem->getField(headId);
     _problem->setIC(headId, *_head);
-    MathLib::SpatialFunctionConstant<double> f1(.0);
+    NumLib::SpatialFunctionConstant<double> f1(.0);
     _problem->addDirichletBC(headId, *line.getPoint2(), false, f1);
-    MathLib::SpatialFunctionConstant<double> f2(-1e-5);
+    NumLib::SpatialFunctionConstant<double> f2(-1e-5);
     _problem->addNeumannBC(headId, *line.getPoint1(), false, f2);
 
     return _problem;
@@ -108,7 +108,7 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, Rectangle &
     Polyline* poly_left = _rec.getLeft();
     //Polyline* poly_right = _rec.getRight();
     _problem->setIC(var_id, *_conc);
-    MathLib::SpatialFunctionConstant<double> f1(1.0);
+    NumLib::SpatialFunctionConstant<double> f1(1.0);
     _problem->addDirichletBC(var_id, *poly_left, false, f1);
 
     return _problem;
@@ -137,8 +137,8 @@ TEST(Solution, CouplingFem2D)
 	    MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
 	    Rectangle* _rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
 	    Geo::PorousMedia pm;
-	    pm.hydraulic_conductivity = new MathLib::SpatialFunctionConstant<double>(1.e-11);
-	    pm.porosity = new MathLib::SpatialFunctionConstant<double>(0.2);
+	    pm.hydraulic_conductivity = new NumLib::SpatialFunctionConstant<double>(1.e-11);
+	    pm.porosity = new NumLib::SpatialFunctionConstant<double>(0.2);
 	    DiscreteSystem dis(*msh);
 	    Geo::GWFemProblem* pGW = defineGWProblem(dis, *_rec, pm);
         TimeStepFunctionConstant tim(.0, 100.0, 10.0);
@@ -209,8 +209,8 @@ TEST(FEM, line)
         MeshLib::IMesh *msh = MeshGenerator::generateLineMesh(len, div, .0, .0, .0);
         GeoLib::Line* line = new GeoLib::Line(Point(0.0, 0.0, 0.0),  Point(2.0, 0.0, 0.0));
         Geo::PorousMedia pm;
-        pm.hydraulic_conductivity = new MathLib::SpatialFunctionConstant<double>(1.e-11);
-        pm.porosity = new MathLib::SpatialFunctionConstant<double>(0.2);
+        pm.hydraulic_conductivity = new NumLib::SpatialFunctionConstant<double>(1.e-11);
+        pm.porosity = new NumLib::SpatialFunctionConstant<double>(0.2);
         DiscreteSystem dis(*msh);
         Geo::GWFemProblem* pGW = defineGWProblem1D(dis, *line, pm);
         TimeStepFunctionConstant tim(.0, 10.0, 10.0);
@@ -286,10 +286,10 @@ TEST(Solution, CouplingFem2)
         TimeStepFunctionConstant tim(.0, 1e+4, 1e+3);
         //material
 	    Geo::PorousMedia pm;
-	    pm.hydraulic_conductivity = new MathLib::SpatialFunctionConstant<double>(1.e-11);
-	    pm.porosity = new MathLib::SpatialFunctionConstant<double>(1.0);
+	    pm.hydraulic_conductivity = new NumLib::SpatialFunctionConstant<double>(1.e-11);
+	    pm.porosity = new NumLib::SpatialFunctionConstant<double>(1.0);
 	    Geo::Compound tracer;
-	    tracer.molecular_diffusion = new MathLib::SpatialFunctionConstant<double>(1.e-6);
+	    tracer.molecular_diffusion = new NumLib::SpatialFunctionConstant<double>(1.e-6);
         //problems
 	    DiscreteSystem dis(*msh);
 	    Geo::GWFemProblem* pGW = defineGWProblem(dis, *_rec, pm);
@@ -413,8 +413,8 @@ TEST(Fem, LinearElastic2D)
 	    MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
 	    Rectangle* _rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
 	    Geo::PorousMedia pm;
-	    pm.hydraulic_conductivity = new MathLib::SpatialFunctionConstant<double>(1.e-11);
-	    pm.porosity = new MathLib::SpatialFunctionConstant<double>(0.2);
+	    pm.hydraulic_conductivity = new NumLib::SpatialFunctionConstant<double>(1.e-11);
+	    pm.porosity = new NumLib::SpatialFunctionConstant<double>(0.2);
 	    DiscreteSystem dis(*msh);
 	    Geo::FemLinearElasticProblem* pGW = 0; //defineGWProblem(dis, *_rec, pm);
         TimeStepFunctionConstant tim(.0, 100.0, 10.0);

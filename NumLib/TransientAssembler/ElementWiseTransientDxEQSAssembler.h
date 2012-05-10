@@ -4,6 +4,7 @@
 #include <vector>
 #include <valarray>
 
+#include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/EquationId/DofEquationIdTable.h"
 #include "DiscreteLib/Core/DiscreteVector.h"

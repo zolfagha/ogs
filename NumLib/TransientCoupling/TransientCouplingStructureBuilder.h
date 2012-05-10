@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include "MathLib/Coupling/CouplingStrucutreBuilder.h"
-#include "MathLib/Coupling/Algorithm/TransientPartitionedAlgorithmFactory.h"
+#include "NumLib/Coupling/CouplingStrucutreBuilder.h"
+#include "NumLib/Coupling/Algorithm/TransientPartitionedAlgorithmFactory.h"
 
 #include "TransientCoupledSystem.h"
 #include "TransientMonolithicSystem.h"
@@ -12,12 +12,12 @@
 namespace NumLib
 {
 
-typedef class MathLib::TemplateCouplingStrucutreBuilder
+typedef class NumLib::TemplateCouplingStrucutreBuilder
 	<
 	ITransientCoupledSystem,
 	TemplateTransientMonolithicSystem,
 	AsyncPartitionedSystem,
-	MathLib::TransientPartitionedAlgorithmFactory
+	NumLib::TransientPartitionedAlgorithmFactory
 	> TransientCoulplingStrucutreBuilder;
 
 } //end

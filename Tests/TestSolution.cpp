@@ -220,9 +220,9 @@ public:
         Polyline* poly_left = _rec->getLeft();
         Polyline* poly_right = _rec->getRight();
         _problem->setIC(headId, *_head);
-        MathLib::SpatialFunctionConstant<double> f1(.0);
+        NumLib::SpatialFunctionConstant<double> f1(.0);
         _problem->addDirichletBC(headId, *poly_right, false, f1);
-        MathLib::SpatialFunctionConstant<double> f2(-1e-5);
+        NumLib::SpatialFunctionConstant<double> f2(-1e-5);
         _problem->addNeumannBC(headId, *poly_left, false, f2);
         //transient
         TimeStepFunctionConstant tim(.0, 100.0, 10.0);
@@ -264,7 +264,7 @@ TEST(Solution, Fem1_Linear)
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     DiscreteSystem dis(*msh);
     // mat
-    MathLib::SpatialFunctionConstant<double> K(1.e-11);
+    NumLib::SpatialFunctionConstant<double> K(1.e-11);
     // options
     Base::Options options;
     Base::Options* op_lis = options.addSubGroup("Lis");
@@ -298,7 +298,7 @@ TEST(Solution, Fem1_Picard)
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     DiscreteSystem dis(*msh);
     // mat
-    MathLib::SpatialFunctionConstant<double> K(1.e-11);
+    NumLib::SpatialFunctionConstant<double> K(1.e-11);
     // options
     Base::Options options;
     Base::Options* op_lis = options.addSubGroup("Lis");
@@ -336,7 +336,7 @@ TEST(Solution, Fem1_Newton)
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     DiscreteSystem dis(*msh);
     // mat
-    MathLib::SpatialFunctionConstant<double> K(1.e-11);
+    NumLib::SpatialFunctionConstant<double> K(1.e-11);
     // options
     Base::Options options;
     Base::Options* op_lis = options.addSubGroup("Lis");
@@ -374,7 +374,7 @@ TEST(Solution, Fem2)
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     DiscreteSystem dis(*msh);
     // mat
-    MathLib::SpatialFunctionConstant<double> K(1.e-11);
+    NumLib::SpatialFunctionConstant<double> K(1.e-11);
     // options
     Base::Options options;
     Base::Options* op_lis = options.addSubGroup("Lis");

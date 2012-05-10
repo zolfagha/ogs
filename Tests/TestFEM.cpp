@@ -137,7 +137,7 @@ TEST(FEM, ExtrapolateAverage2)
     gw.define(msh);
     delete gw._K;
     gw._K = new MyFunction();
-    gw.vec_bc1.push_back(new FemDirichletBC<double>(gw.head, gw.rec->getLeft(), false, new MathLib::SpatialFunctionConstant<double>(2.e+6), new DiagonalizeMethod()));
+    gw.vec_bc1.push_back(new FemDirichletBC<double>(gw.head, gw.rec->getLeft(), false, new NumLib::SpatialFunctionConstant<double>(2.e+6), new DiagonalizeMethod()));
     delete gw.vec_bc2[0];
     gw.vec_bc2.clear();
 

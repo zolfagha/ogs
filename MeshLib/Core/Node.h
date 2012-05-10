@@ -38,16 +38,6 @@ public:
     {
         _x = x;
     };
-    const std::set<size_t>& getConnectedNodes() const
-    {
-        return _connected_nodes;
-    }
-
-    void addConnectedNode(size_t node_id)
-    {
-        _connected_nodes.insert(node_id);
-    }
-
 };
 
 } // end namespace

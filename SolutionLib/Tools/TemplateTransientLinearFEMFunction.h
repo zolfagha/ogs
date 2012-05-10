@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include "MathLib/Function/IFunction.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
+#include "NumLib/Function/IFunction.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "FemLib/Function/FemFunction.h"
 #include "FemLib/BC/FemDirichletBC.h"
@@ -29,7 +29,7 @@ template <
     class T_LOCAL_ASSEMBLER
     >
 class TemplateTransientLinearFEMFunction
-	: public MathLib::TemplateFunction<MyFemVector, MyFemVector>
+	: public NumLib::TemplateFunction<MyFemVector, MyFemVector>
 {
 public:
     typedef T_USER_FEM_PROBLEM UserFemProblem;
@@ -48,7 +48,7 @@ public:
 	virtual ~TemplateTransientLinearFEMFunction() {};
 
 	///
-    MathLib::TemplateFunction<MyFemVector,MyFemVector>* clone() const
+	NumLib::TemplateFunction<MyFemVector,MyFemVector>* clone() const
 	{
     	return new TemplateTransientLinearFEMFunction<
     				T_USER_FEM_PROBLEM,

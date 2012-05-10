@@ -2,8 +2,8 @@
 #include "TRI3CONST.h"
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
-#include "MathLib/Function/Function.h"
 #include "GeoLib/Core/Point.h"
+#include "NumLib/Function/Function.h"
 
 namespace FemLib
 {

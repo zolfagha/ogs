@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "MathLib/Function/Function.h"
+#include "NumLib/Function/Function.h"
 #include "MathLib/LinAlg/VectorNorms.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
 
@@ -13,7 +13,7 @@ namespace FdmLib
  *
  */
 template<typename Tvalue>
-class TemplateFDMFunction : public MathLib::TemplateSpatialFunction<Tvalue>
+class TemplateFDMFunction : public NumLib::TemplateSpatialFunction<Tvalue>
 {
 public:
     /// @param msh 		Mesh
@@ -66,7 +66,7 @@ public:
 
 
     /// evaluate this function at the given point
-    void eval(const MathLib::SpatialPosition &/*pt*/, Tvalue &v)
+    void eval(const NumLib::SpatialPosition &/*pt*/, Tvalue &v)
     {
         throw "eval() is not implemented yet.";
         v = (*_nodal_values)[0];
@@ -159,7 +159,7 @@ private:
 typedef TemplateFDMFunction<double> FdmFunctionScalar;
 
 
-class FdmCellVectorFunction : public MathLib::SpatialFunctionVector
+class FdmCellVectorFunction : public NumLib::SpatialFunctionVector
 {
 public:
 	explicit FdmCellVectorFunction(size_t n)
@@ -174,7 +174,7 @@ public:
         return obj;
     };
 
-    virtual void eval(const MathLib::SpatialPosition &x, MathLib::Vector &val)
+    virtual void eval(const NumLib::SpatialPosition &x, MathLib::Vector &val)
     {
     	val = _vec[0];
     }

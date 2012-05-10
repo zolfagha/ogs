@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include "MathLib/Function/IFunction.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
+#include "NumLib/Function/IFunction.h"
 #include "NumLib/TransientAssembler/ElementWiseTransientResidualAssembler.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "FemLib/Function/FemFunction.h"
@@ -27,7 +27,7 @@ template <
     class T_LOCAL_RESIDUAL_ASSEMBLER
     >
 class TemplateTransientResidualFEMFunction
-	: public MathLib::TemplateFunction<MyFemVector, MyFemVector>
+	: public NumLib::TemplateFunction<MyFemVector, MyFemVector>
 {
 public:
     typedef T_USER_FEM_PROBLEM UserFemProblem;
@@ -46,7 +46,7 @@ public:
 	virtual ~TemplateTransientResidualFEMFunction() {};
 
 	///
-    MathLib::TemplateFunction<MyFemVector,MyFemVector>* clone() const
+	NumLib::TemplateFunction<MyFemVector,MyFemVector>* clone() const
 	{
     	return new TemplateTransientResidualFEMFunction
     				<

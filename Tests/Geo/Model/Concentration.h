@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "MathLib/Function/Function.h"
+#include "NumLib/Function/Function.h"
 #include "MathLib/LinAlg/VectorNorms.h"
 #include "GeoLib/Shape/Rectangle.h"
 #include "FemLib/Function/FemFunction.h"
@@ -61,7 +61,7 @@ public:
     int solveTimeStep(const NumLib::TimeStep &time)
     {
         //input
-        const MathLib::SpatialFunctionVector *vel = this->getInput<MathLib::SpatialFunctionVector>(Velocity);
+        const NumLib::SpatialFunctionVector *vel = this->getInput<NumLib::SpatialFunctionVector>(Velocity);
         _solConc->getProblem()->getLinearAssembler()->initialize(vel);
         _solConc->getProblem()->getResidualAssembler()->initialize(vel);
         _solConc->getProblem()->getJacobianAssembler()->initialize(vel);

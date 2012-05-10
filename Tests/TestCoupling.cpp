@@ -3,13 +3,13 @@
 #include <vector>
 
 #include "Base/Options.h"
-#include "MathLib/Function/Function.h"
-#include "MathLib/Coupling/MonolithicProblem.h"
-#include "MathLib/Coupling/PartitionedProblem.h"
-#include "MathLib/Coupling/CouplingStrucutreBuilder.h"
-#include "MathLib/Coupling/Algorithm/PartitionedAlgorithm.h"
-#include "MathLib/Coupling/Algorithm/TransientPartitionedAlgorithm.h"
-#include "MathLib/Coupling/Algorithm/IConvergenceCheck.h"
+#include "NumLib/Function/Function.h"
+#include "NumLib/Coupling/MonolithicProblem.h"
+#include "NumLib/Coupling/PartitionedProblem.h"
+#include "NumLib/Coupling/CouplingStrucutreBuilder.h"
+#include "NumLib/Coupling/Algorithm/PartitionedAlgorithm.h"
+#include "NumLib/Coupling/Algorithm/TransientPartitionedAlgorithm.h"
+#include "NumLib/Coupling/Algorithm/IConvergenceCheck.h"
 #include "NumLib/TransientCoupling/AsyncPartitionedSystem.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "NumLib/TransientCoupling/TransientCouplingStructureBuilder.h"
@@ -18,7 +18,7 @@
 using namespace MathLib;
 using namespace NumLib;
 
-typedef MathLib::FunctionConstant<double,double> MyFunction;
+typedef NumLib::FunctionConstant<double,double> MyFunction;
 
 class MyConvergenceCheck : public IConvergenceCheck
 {
@@ -132,7 +132,7 @@ public:
     	resizeInputParameter(2);
     	resizeOutputParameter(1);
 
-        setOutput(a, new MathLib::FunctionConstant<double,double>(.0));
+        setOutput(a, new FunctionConstant<double,double>(.0));
     }
 
     int solve()
@@ -141,7 +141,7 @@ public:
         getInput<MyFunction>(b)->eval(vb);
         getInput<MyFunction>(c)->eval(vc);
         double va = 1./2.*(6.9 - 2.*vb - 0.3*vc);
-        setOutput(a, new MathLib::FunctionConstant<double,double>(va));
+        setOutput(a, new FunctionConstant<double,double>(va));
         return 0;
     }
 };
@@ -156,7 +156,7 @@ public:
     {
     	resizeInputParameter(2);
     	resizeOutputParameter(1);
-        setOutput(b, new MathLib::FunctionConstant<double,double>(.0));
+        setOutput(b, new FunctionConstant<double,double>(.0));
     }
 
     int solve()
@@ -165,7 +165,7 @@ public:
         getInput<MyFunction>(a)->eval(va);
         getInput<MyFunction>(c)->eval(vc);
         double vb = 1./5.*(13.6-3*va-0.2*vc);
-        setOutput(b, new MathLib::FunctionConstant<double,double>(vb));
+        setOutput(b, new FunctionConstant<double,double>(vb));
         return 0;
     }
 };
@@ -180,7 +180,7 @@ public:
     {
     	resizeInputParameter(2);
     	resizeOutputParameter(1);
-        setOutput(c, new MathLib::FunctionConstant<double,double>(.0));
+        setOutput(c, new FunctionConstant<double,double>(.0));
     }
 
     int solve()
@@ -189,7 +189,7 @@ public:
         getInput<MyFunction>(a)->eval(va);
         getInput<MyFunction>(b)->eval(vb);
         double vc = 1./3.*(10.1-0.5*va-0.3*vb);
-        setOutput(c, new MathLib::FunctionConstant<double,double>(vc));
+        setOutput(c, new FunctionConstant<double,double>(vc));
         return 0;
     }
 private:
@@ -519,7 +519,7 @@ public:
     {
     	resizeInputParameter(2);
     	resizeOutputParameter(1);
-        setOutput(a, new MathLib::FunctionConstant<double,double>(.0));
+        setOutput(a, new FunctionConstant<double,double>(.0));
     }
 
     int solveTimeStep(const TimeStep &ts) 
@@ -529,7 +529,7 @@ public:
         getInput<MyFunction>(b)->eval(vb);
         getInput<MyFunction>(c)->eval(vc);
         double va = 1./2.*(6.9*t - 2.*vb - 0.3*vc);
-        setOutput(a, new MathLib::FunctionConstant<double,double>(va));
+        setOutput(a, new FunctionConstant<double,double>(va));
         return 0;
     }
     double suggestNext(const TimeStep &ts) {return ts.getTime()+_dt;};
@@ -566,7 +566,7 @@ public:
     {
     	resizeInputParameter(2);
     	resizeOutputParameter(1);
-        setOutput(b, new MathLib::FunctionConstant<double,double>(.0));
+        setOutput(b, new FunctionConstant<double,double>(.0));
     }
 
     int solveTimeStep(const TimeStep &ts) 
@@ -576,7 +576,7 @@ public:
         getInput<MyFunction>(a)->eval(va);
         getInput<MyFunction>(c)->eval(vc);
         double vb = 1./5.*(13.6*t-3*va-0.2*vc);
-        setOutput(b, new MathLib::FunctionConstant<double,double>(vb));
+        setOutput(b, new FunctionConstant<double,double>(vb));
         return 0;
     }
     double suggestNext(const TimeStep &ts) {return (ts.getTime()+_dt);};
@@ -613,7 +613,7 @@ public:
     {
     	resizeInputParameter(2);
     	resizeOutputParameter(1);
-        setOutput(c, new MathLib::FunctionConstant<double,double>(.0));
+        setOutput(c, new FunctionConstant<double,double>(.0));
     }
 
     int solveTimeStep(const TimeStep &ts) 
@@ -623,7 +623,7 @@ public:
         getInput<MyFunction>(a)->eval(va);
         getInput<MyFunction>(b)->eval(vb);
         double vc = 1./3.*(10.1*t-0.5*va-0.3*vb);
-        setOutput(c, new MathLib::FunctionConstant<double,double>(vc));
+        setOutput(c, new FunctionConstant<double,double>(vc));
         return 0;
     }
     double suggestNext(const TimeStep &ts) {return (ts.getTime()+_dt);};

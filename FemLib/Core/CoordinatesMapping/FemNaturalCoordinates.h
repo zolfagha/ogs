@@ -3,7 +3,7 @@
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MeshLib/Core/IMesh.h"
-#include "MeshLib/Tools/Mapping.h"
+#include "MeshLib/Core/ElementCoordinatesMapping.h"
 #include "FemLib/Core/ShapeFunction/IFemShapeFunction.h"
 #include "IFemCoordinatesMapping.h"
 

@@ -5,10 +5,11 @@
 #include <vector>
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
-#include "MathLib/Function/Function.h"
 
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Tools/Tools.h"
+
+#include "NumLib/Function/Function.h"
 
 #include "FemLib/Function/FemFunction.h"
 #include "IFemBC.h"
@@ -39,11 +40,11 @@ class FemNeumannBC : public IFemNeumannBC //: IFemBC, public MathLib::TemplateSp
 {
 public:
     /// 
-    FemNeumannBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, MathLib::TemplateSpatialFunction<Tflux> *func)
+    FemNeumannBC(TemplateFEMNodalFunction<Tval> *var, GeoLib::GeoObject *geo, NumLib::TemplateSpatialFunction<Tflux> *func)
     {
         _var = var;
         _geo = geo;
-        _bc_func = (MathLib::TemplateSpatialFunction<Tflux>*)func->clone();
+        _bc_func = (NumLib::TemplateSpatialFunction<Tflux>*)func->clone();
         _is_transient = false;
         _do_setup = true;
     }
@@ -65,7 +66,7 @@ public:
             // get discrete values at nodes
             for (size_t i=0; i<_vec_nodes.size(); i++) {
                 const GeoLib::Point* x = msh->getNodeCoordinatesRef(_vec_nodes[i]);
-                _bc_func->eval((const MathLib::SpatialPosition)x->getData(), _vec_values[i]);
+                _bc_func->eval((const NumLib::SpatialPosition)x->getData(), _vec_values[i]);
             }
         } else {
             // find edge elements on the geo
@@ -80,7 +81,7 @@ public:
                 std::vector<double> nodal_val(edge_nnodes);
                 for (size_t i_nod=0; i_nod<edge_nnodes; i_nod++) {
                     const GeoLib::Point* x = msh->getNodeCoordinatesRef(e->getNodeID(i_nod));
-                    _bc_func->eval((const MathLib::SpatialPosition)x->getData(), nodal_val[i_nod]);
+                    _bc_func->eval((const NumLib::SpatialPosition)x->getData(), nodal_val[i_nod]);
                 } 
                 // compute integrals
                 IFiniteElement *fe_edge = feObjects->getFeObject(*e);
@@ -136,7 +137,7 @@ public:
 //        _bc_func->eval(x, v);
 //    }
 
-    MathLib::TemplateSpatialFunction<Tflux>* clone() const
+    NumLib::TemplateSpatialFunction<Tflux>* clone() const
     {
         FemNeumannBC<Tval, Tflux> *f = new FemNeumannBC<Tval, Tflux>(_var, _geo, _is_transient, _bc_func);
         return f;
@@ -149,7 +150,7 @@ private:
     // node id, var id, value
     TemplateFEMNodalFunction<Tval> *_var;
     GeoLib::GeoObject *_geo;
-    MathLib::TemplateSpatialFunction<Tflux> *_bc_func;
+    NumLib::TemplateSpatialFunction<Tflux> *_bc_func;
     std::vector<size_t> _vec_nodes;
     std::vector<Tval> _vec_values;
     bool _is_transient;

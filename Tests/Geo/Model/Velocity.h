@@ -2,10 +2,10 @@
 #pragma once
 
 #include "Base/CodingTools.h"
-#include "MathLib/Function/Function.h"
 #include "MathLib/Vector.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "FemLib/Function/FemFunction.h"
+#include "NumLib/Function/Function.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 
@@ -104,7 +104,7 @@ public:
 private:
     DiscreteLib::DiscreteSystem* _dis;
     FemLib::FEMIntegrationPointFunctionVector2d* _vel;
-    MathLib::SpatialFunctionScalar *_K;
+    NumLib::SpatialFunctionScalar *_K;
 
     DISALLOW_COPY_AND_ASSIGN(FunctionVelocity);
 };

@@ -18,7 +18,7 @@ double AsyncPartitionedSystem::suggestNext(const TimeStep &time_current)
 	return t;
 }
 
-void AsyncPartitionedSystem::getActiveProblems(const TimeStep &time, std::vector<MathLib::ICoupledSystem*> &list_active_problems)
+void AsyncPartitionedSystem::getActiveProblems(const TimeStep &time, std::vector<NumLib::ICoupledSystem*> &list_active_problems)
 {
     for (size_t i=0; i<_list_subproblems.size(); i++) {
     	ITransientCoupledSystem *solution = _list_subproblems[i];
@@ -35,11 +35,11 @@ int AsyncPartitionedSystem::solveTimeStep(const TimeStep &time)
 
     // copy previous time step result to current one
     //_vars_t_n.assign(_vars_t_n1);
-    MathLib::UnnamedParameterSet *vars_t_n1 = getParameters();
+    NumLib::UnnamedParameterSet *vars_t_n1 = getParameters();
     vars_t_n1->move(_vars_t_n);
 
     // list active problems
-    std::vector<MathLib::ICoupledSystem*> list_active_problems;
+    std::vector<NumLib::ICoupledSystem*> list_active_problems;
     getActiveProblems(time, list_active_problems);
 
     if (list_active_problems.size()>0) {
@@ -53,8 +53,8 @@ int AsyncPartitionedSystem::solveTimeStep(const TimeStep &time)
         std::vector<bool> list_org_state(n_vars);
         for (size_t i=0; i<n_vars; i++) {
             list_org_state[i] = vars_t_n1->isFixed(i);
-            const MathLib::ParameterProblemMappingTable::PairSysVarId &v = _map._map_paraId2subproblem[i];
-            const MathLib::ICoupledSystem *tmp_problem = v.first;
+            const NumLib::ParameterProblemMappingTable::PairSysVarId &v = _map._map_paraId2subproblem[i];
+            const NumLib::ICoupledSystem *tmp_problem = v.first;
             bool is_active = (std::find(list_active_problems.begin(), list_active_problems.end(), tmp_problem)!=list_active_problems.end());
             if (!is_active) {
             	vars_t_n1->setFixed(i, true);
@@ -121,7 +121,7 @@ void AsyncPartitionedSystem::accept(const TimeStep &time)
 //    for (size_t i=0; i<_list_subproblems.size(); i++) {
 //        const ITransientCoupledSystem* subproblem = _list_subproblems[i];
 //        // check input parameters required for the subproblem
-//        const MathLib::ParameterProblemMappingTable::ListOfInputVar &vec_registered_input_var = _map._list_subproblem_input_source[i];
+//        const NumLib::ParameterProblemMappingTable::ListOfInputVar &vec_registered_input_var = _map._list_subproblem_input_source[i];
 //
 //        std::vector<size_t> list1(vec_registered_input_var.size());
 //        for (size_t j=0; j<list1.size(); j++) {
@@ -160,7 +160,7 @@ void AsyncPartitionedSystem::accept(const TimeStep &time)
 //{
 //    size_t var_id = registerOutputParameter(name);
 //    // set reference
-//    const MathLib::Parameter* v = sub_problem.getOutput(para_id_in_sub_problem);
+//    const NumLib::Parameter* v = sub_problem.getOutput(para_id_in_sub_problem);
 //    if (v!=0)
 //    	setOutput(var_id, v);
 //    // make a link between this and sub-problem variable

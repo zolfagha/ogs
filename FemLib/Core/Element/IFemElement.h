@@ -4,9 +4,9 @@
 #include <vector>
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
-#include "MathLib/Function/Function.h"
 
 #include "MeshLib/Core/IElement.h"
+#include "NumLib/Function/Function.h"
 
 #include "FemLib/Core/Integration/Integration.h"
 #include "FemLib/Core/ShapeFunction/ShapeFunction.h"

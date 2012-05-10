@@ -3,10 +3,10 @@
 
 #include <vector>
 
-#include "MathLib/Coupling/ICoupledProblem.h"
-#include "MathLib/Coupling/MonolithicProblem.h"
-#include "MathLib/Coupling/PartitionedProblem.h"
-#include "MathLib/Coupling/Algorithm/TransientPartitionedAlgorithm.h"
+#include "NumLib/Coupling/ICoupledProblem.h"
+#include "NumLib/Coupling/MonolithicProblem.h"
+#include "NumLib/Coupling/PartitionedProblem.h"
+#include "NumLib/Coupling/Algorithm/TransientPartitionedAlgorithm.h"
 #include "TransientCoupledSystem.h"
 
 namespace NumLib
@@ -15,7 +15,7 @@ namespace NumLib
 /**
  * \brief Asynchronized partitioned problem
  */
-class AsyncPartitionedSystem : public MathLib::AbstractPartitionedProblem<ITransientCoupledSystem>
+class AsyncPartitionedSystem : public NumLib::AbstractPartitionedProblem<ITransientCoupledSystem>
 {
 public:
 	typedef size_t InternalID;
@@ -27,7 +27,7 @@ public:
 
     virtual ~AsyncPartitionedSystem() {};
 
-    virtual void setAlgorithm(MathLib::ITransientPartitionedAlgorithm &algo)
+    virtual void setAlgorithm(NumLib::ITransientPartitionedAlgorithm &algo)
     {
     	_algorithm = &algo;
     }
@@ -40,13 +40,13 @@ public:
 
     void accept(const TimeStep &time);
 
-    void getActiveProblems(const TimeStep &time, std::vector<MathLib::ICoupledSystem*> &list_active_problems);
+    void getActiveProblems(const TimeStep &time, std::vector<NumLib::ICoupledSystem*> &list_active_problems);
 
 private:
-    MathLib::ITransientPartitionedAlgorithm *_algorithm;
+    NumLib::ITransientPartitionedAlgorithm *_algorithm;
     std::vector<TimeStep> _list_synchronize_time;
 	
-    MathLib::UnnamedParameterSet _vars_t_n;
+    NumLib::UnnamedParameterSet _vars_t_n;
 };
 
 

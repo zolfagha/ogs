@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
-#include "MathLib/Function/Function.h"
 #include "GeoLib/Core/Point.h"
 
 #include "MeshLib/Core/IMesh.h"

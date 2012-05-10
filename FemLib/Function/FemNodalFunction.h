@@ -31,7 +31,7 @@ namespace FemLib
  * @tparam Tvalue Nodal value type, e.g. double, vector
  */
 template<typename Tvalue>
-class TemplateFEMNodalFunction : public MathLib::TemplateSpatialFunction<Tvalue>
+class TemplateFEMNodalFunction : public NumLib::TemplateSpatialFunction<Tvalue>
 {
 public:
     /// @param msh 		Mesh
@@ -81,7 +81,7 @@ public:
 
 
     /// evaluate this function at the given point
-    void eval(const MathLib::SpatialPosition &/*pt*/, Tvalue &v)
+    void eval(const NumLib::SpatialPosition &/*pt*/, Tvalue &v)
     {
         throw "eval() is not implemented yet.";
         v = (*_nodal_values)[0];

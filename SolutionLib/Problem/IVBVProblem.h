@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include "MathLib/Function/Function.h"
 #include "GeoLib/Core/GeoObject.h"
 #include "NumLib/TXFunction/TXFunction.h"
 
