@@ -10,10 +10,11 @@
 #include "MathLib/Nonlinear/NewtonRaphson.h"
 #include "MathLib/Nonlinear/Picard.h"
 #include "MathLib/Nonlinear/BisectionMethod.h"
-#include "MathLib/Function/IFunction.h"
+#include "NumLib/Function/IFunction.h"
 #include "TestUtil.h"
 
 using namespace MathLib;
+using namespace NumLib;
 
 template<class T_F, class T_DF>
 class TemplateFixedPointFunctonUsingC1Equation

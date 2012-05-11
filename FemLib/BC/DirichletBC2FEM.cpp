@@ -9,7 +9,6 @@
 namespace FemLib
 {
 
-///
 DirichletBC2FEM::DirichletBC2FEM(const MeshLib::IMesh &msh, const GeoLib::GeoObject &geo, const NumLib::ITXFunction &bc_func, std::vector<size_t> &vec_nodes, std::vector<double> &vec_values)
 {
 	// pickup nodes on geometry
@@ -28,4 +27,4 @@ DirichletBC2FEM::DirichletBC2FEM(const MeshLib::IMesh &msh, const GeoLib::GeoObj
 	}
 }
 
-}
+} //end

@@ -38,7 +38,7 @@ public:
     /// @param local_u_n1	guess of current time step value
     /// @param local_u_n	previous time step value
     /// @param eqs			local algebraic equation
-    virtual void assembly(const TimeStep &time, MeshLib::IElement &e, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalEquationType &eqs)
+    virtual void assembly(const TimeStep &time, MeshLib::IElement &e, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalEquation &eqs)
     {
         const double delta_t = time.getTimeStepSize();
         const size_t n_dof = eqs.getDimension();
@@ -55,7 +55,7 @@ public:
         //std::cout << "K="; K.write(std::cout); std::cout << std::endl;
 
         LocalMatrix *localA = eqs.getA();
-        double *localRHS = eqs.getRHS();
+        LocalVector *localRHS = eqs.getRHSAsVec();
         LocalMatrix TMP_M(n_dof, n_dof);
         LocalMatrix TMP_M2(n_dof, n_dof);
 
@@ -74,9 +74,9 @@ public:
         TMP_M *= - (1.-_theta);
         TMP_M2 += TMP_M;
         //TMP_M2.axpy(1.0, &((LocalVector)local_u_n)[0], .0, localRHS);
-        localRHS = TMP_M2 * local_u_n;
+        *localRHS = TMP_M2 * local_u_n;
         for (size_t i=0; i<n_dof; i++)
-            localRHS[i] += F[i];
+            (*localRHS)[i] += F[i];
     }
 
 protected:

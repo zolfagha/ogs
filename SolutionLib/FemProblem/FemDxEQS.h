@@ -35,7 +35,7 @@ public:
     /// constructor
     /// @param problem		Fem problem
     /// @param linear_eqs	Discrete linear equation
-    TemplateTransientDxFEMFunction(std::vector<FemVariable*>* list_var, UserLocalJacobianAssembler* asssembler, DiscreteLib::IDiscreteLinearEquation* linear_eqs)
+    TemplateTransientDxFEMFunction(std::vector<FemVariable*> &list_var, UserLocalJacobianAssembler* asssembler, DiscreteLib::IDiscreteLinearEquation* linear_eqs)
         : _local_assembler(asssembler),  _linear_eqs(linear_eqs),
           _t_n1(0), _u_n0(0), _list_var(list_var)
     {
@@ -70,8 +70,8 @@ public:
         MyFemVector* u_n = this->_u_n0;
 
         // setup BC1
-        for (size_t i=0; i<_list_var->size(); i++) {
-        	FemVariable* var = (*_list_var)[i];
+        for (size_t i=0; i<_list_var.size(); i++) {
+        	FemVariable* var = _list_var[i];
             for (size_t j=0; j<var->getNumberOfDirichletBC(); j++) {
                 FemLib::FemDirichletBC* bc1 = var->getDirichletBC(j);
                 bc1->setup();
@@ -105,7 +105,7 @@ private:
     DiscreteLib::IDiscreteLinearEquation* _linear_eqs;
     NumLib::TimeStep* _t_n1;
     MyFemVector* _u_n0;
-    std::vector<FemVariable*>* _list_var;
+    std::vector<FemVariable*> _list_var;
 };
 
 

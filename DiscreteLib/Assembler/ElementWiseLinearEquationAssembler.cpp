@@ -8,15 +8,17 @@
 
 #include "MeshLib/Core/IMesh.h"
 
+#include "DiscreteLib/Core/DataType.h"
 #include "DiscreteLib/EquationId/DofEquationIdTable.h"
 #include "IElemenetWiseLinearEquationLocalAssembler.h"
+
 
 namespace DiscreteLib
 {
 
 void ElementWiseLinearEquationAssembler::assembly(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs)
 {
-    MathLib::DenseLinearEquations localEQS;
+    LocalEquation localEQS;
     std::vector<size_t> ele_node_ids, ele_node_size_order;
     std::vector<size_t> local_dofmap_row;
     std::vector<size_t> local_dofmap_column;

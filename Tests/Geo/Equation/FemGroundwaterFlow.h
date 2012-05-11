@@ -16,8 +16,8 @@ private:
 	PorousMedia* _pm;
 	FemLib::LagrangianFeObjectContainer* _feObjects;
 public:
-    typedef typename T::LocalVectorType LocalVectorType;
-    typedef typename T::LocalMatrixType LocalMatrixType;
+    typedef NumLib::LocalVector LocalVector;
+    typedef NumLib::LocalMatrix LocalMatrix;
 
 	GroundwaterFlowTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, PorousMedia &pm)
 	: _pm(&pm), _feObjects(&feObjects)
@@ -27,7 +27,7 @@ public:
 	virtual ~GroundwaterFlowTimeODELocalAssembler() {};
 
 protected:
-	virtual void assembleODE(const NumLib::TimeStep &/*time*/, MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/, LocalMatrixType &/*localM*/, LocalMatrixType &localK, LocalVectorType &/*localF*/)
+	virtual void assembleODE(const NumLib::TimeStep &/*time*/, MeshLib::IElement &e, const LocalVector &/*u1*/, const LocalVector &/*u0*/, LocalMatrix &/*localM*/, LocalMatrix &localK, LocalVector &/*localF*/)
 	{
 		FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
 
@@ -38,7 +38,7 @@ protected:
             fe->computeBasisFunctions(gp_x);
             fe->getRealCoordinates(real_x);
 
-        	double k;
+        	LocalMatrix k;
         	_pm->hydraulic_conductivity->eval(real_x, k);
 
     		//fe->integrateWxN(_pm->storage, localM);
@@ -58,7 +58,7 @@ public:
 	{
 	};
 
-	void assembly(const NumLib::TimeStep &/*time*/, MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/,  LocalMatrixType &localJ)
+	void assembly(const NumLib::TimeStep &/*time*/, MeshLib::IElement &e, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/,  NumLib::LocalMatrix &localJ)
 	{
 		FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
 
@@ -69,7 +69,7 @@ public:
             fe->computeBasisFunctions(gp_x);
             fe->getRealCoordinates(real_x);
 
-        	double k;
+        	NumLib::LocalMatrix k;
         	_pm->hydraulic_conductivity->eval(real_x, k);
 
     		//fe->integrateWxN(_pm->storage, localM);

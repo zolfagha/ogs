@@ -6,12 +6,12 @@
 
 #include "MathLib/Vector.h"
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
-#include "MathLib/Coupling/Algorithm/TransientPartitionedAlgorithm.h"
 #include "GeoLib/Shape/Line.h"
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TransientCoupling/AsyncPartitionedSystem.h"
 #include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
+#include "NumLib/Coupling/Algorithm/TransientPartitionedAlgorithm.h"
 
 #include "Tests/Geo/Model/Head.h"
 #include "Tests/Geo/Model/Velocity.h"
@@ -35,8 +35,8 @@ public:
 		        const FemNodalFunctionScalar* f_fem_cur = vars_current.get<FemNodalFunctionScalar>(i);
 	    		v_diff = f_fem_cur->norm_diff(*f_fem_prev);
 	    	} else if (vars_prev.getName(i).compare("v")==0) {
-	    		const FEMIntegrationPointFunctionVector2d* f_fem_prev = vars_prev.get<FEMIntegrationPointFunctionVector2d>(i);
-	    		const FEMIntegrationPointFunctionVector2d* f_fem_cur = vars_current.get<FEMIntegrationPointFunctionVector2d>(i);
+	    		const FEMIntegrationPointFunctionVector* f_fem_prev = vars_prev.get<FEMIntegrationPointFunctionVector>(i);
+	    		const FEMIntegrationPointFunctionVector* f_fem_cur = vars_current.get<FEMIntegrationPointFunctionVector>(i);
 	    		v_diff = f_fem_cur->norm_diff(*f_fem_prev);
 	    	}
 #endif
@@ -48,47 +48,49 @@ public:
 	}
 };
 
-
-Geo::GWFemProblem* defineGWProblem(DiscreteSystem &dis, Rectangle &_rec, Geo::PorousMedia &pm)
+Geo::GWFemProblem* createGWProblem(DiscreteSystem &dis, Geo::PorousMedia &pm)
 {
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
-    Geo::GWFemProblem::LinearAssemblerType* linear_assembler = new Geo::GWFemProblem::LinearAssemblerType(*_feObjects, pm);
-    Geo::GWFemProblem::ResidualAssemblerType* r_assembler = new Geo::GWFemProblem::ResidualAssemblerType(*_feObjects, pm);
-    Geo::GWFemProblem::JacobianAssemblerType* j_eqs = new Geo::GWFemProblem::JacobianAssemblerType(*_feObjects, pm);
+    Geo::GWFemEquation::LinearAssemblerType* linear_assembler = new Geo::GWFemEquation::LinearAssemblerType(*_feObjects, pm);
+    Geo::GWFemEquation::ResidualAssemblerType* r_assembler = new Geo::GWFemEquation::ResidualAssemblerType(*_feObjects, pm);
+    Geo::GWFemEquation::JacobianAssemblerType* j_eqs = new Geo::GWFemEquation::JacobianAssemblerType(*_feObjects, pm);
+    Geo::GWFemEquation* eqs = new  Geo::GWFemEquation(linear_assembler, r_assembler, j_eqs);
     //IVBV problem
-    Geo::GWFemProblem* _problem = new Geo::GWFemProblem(dis, linear_assembler, r_assembler, j_eqs);
+    Geo::GWFemProblem* _problem = new Geo::GWFemProblem(&dis);
+    _problem->setEquation(eqs);
+    return _problem;
+}
+
+
+Geo::GWFemProblem* defineGWProblem(DiscreteSystem &dis, Rectangle &_rec, Geo::PorousMedia &pm)
+{
+    Geo::GWFemProblem* _problem = createGWProblem(dis, pm);
+    // var
+    FemVariable* head = _problem->addVariable("head");
+    // IC
+    FemNodalFunctionScalar* h0 = new FemNodalFunctionScalar(dis, PolynomialOrder::Linear, 0);
+    head->setIC(h0);
     //BC
-    size_t headId = _problem->createField(PolynomialOrder::Linear);
-    FemNodalFunctionScalar* _head = _problem->getField(headId);
     Polyline* poly_left = _rec.getLeft();
     Polyline* poly_right = _rec.getRight();
-    _problem->setIC(headId, *_head);
-    NumLib::SpatialFunctionConstant<double> f1(.0);
-    _problem->addDirichletBC(headId, *poly_right, false, f1);
-    NumLib::SpatialFunctionConstant<double> f2(-1e-5);
-    _problem->addNeumannBC(headId, *poly_left, false, f2);
+    head->addDirichletBC(new FemDirichletBC(dis.getMesh(), poly_right, new NumLib::TXFunctionConstant(.0)));
+    head->addNeumannBC(new FemNeumannBC(dis.getMesh(), h0->getFeObjectContainer(), poly_left, new NumLib::TXFunctionConstant(-1e-5)));
 
     return _problem;
 }
 
 Geo::GWFemProblem* defineGWProblem1D(DiscreteSystem &dis, GeoLib::Line &line, Geo::PorousMedia &pm)
 {
-    LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
-    //equations
-    Geo::GWFemProblem::LinearAssemblerType* linear_assembler = new Geo::GWFemProblem::LinearAssemblerType(*_feObjects, pm);
-    Geo::GWFemProblem::ResidualAssemblerType* r_assembler = new Geo::GWFemProblem::ResidualAssemblerType(*_feObjects, pm);
-    Geo::GWFemProblem::JacobianAssemblerType* j_eqs = new Geo::GWFemProblem::JacobianAssemblerType(*_feObjects, pm);
-    //IVBV problem
-    Geo::GWFemProblem* _problem = new Geo::GWFemProblem(dis, linear_assembler, r_assembler, j_eqs);
+    Geo::GWFemProblem* _problem = createGWProblem(dis, pm);
+    // var
+    FemVariable* head = _problem->addVariable("head");
+    // IC
+    FemNodalFunctionScalar* h0 = new FemNodalFunctionScalar(dis, PolynomialOrder::Linear, 0);
+    head->setIC(h0);
     //BC
-    size_t headId = _problem->createField(PolynomialOrder::Linear);
-    FemNodalFunctionScalar* _head = _problem->getField(headId);
-    _problem->setIC(headId, *_head);
-    NumLib::SpatialFunctionConstant<double> f1(.0);
-    _problem->addDirichletBC(headId, *line.getPoint2(), false, f1);
-    NumLib::SpatialFunctionConstant<double> f2(-1e-5);
-    _problem->addNeumannBC(headId, *line.getPoint1(), false, f2);
+    head->addDirichletBC(new FemDirichletBC(dis.getMesh(), line.getPoint2(), new NumLib::TXFunctionConstant(.0)));
+    head->addNeumannBC(new FemNeumannBC(dis.getMesh(), h0->getFeObjectContainer(), line.getPoint1(), new NumLib::TXFunctionConstant(-1e-5)));
 
     return _problem;
 }
@@ -97,19 +99,21 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, Rectangle &
 {
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
-    Geo::MassFemProblem::LinearAssemblerType* linear_assembler = new Geo::MassFemProblem::LinearAssemblerType(*_feObjects, pm, comp);
-    Geo::MassFemProblem::ResidualAssemblerType* r_assembler = new Geo::MassFemProblem::ResidualAssemblerType(*_feObjects, pm, comp);
-    Geo::MassFemProblem::JacobianAssemblerType* j_eqs = new Geo::MassFemProblem::JacobianAssemblerType(*_feObjects, pm, comp);
+    Geo::MassFemEquation::LinearAssemblerType* linear_assembler = new Geo::MassFemEquation::LinearAssemblerType(*_feObjects, pm, comp);
+    Geo::MassFemEquation::ResidualAssemblerType* r_assembler = new Geo::MassFemEquation::ResidualAssemblerType(*_feObjects, pm, comp);
+    Geo::MassFemEquation::JacobianAssemblerType* j_eqs = new Geo::MassFemEquation::JacobianAssemblerType(*_feObjects, pm, comp);
+    Geo::MassFemEquation* eqs = new  Geo::MassFemEquation(linear_assembler, r_assembler, j_eqs);
     //IVBV problem
-    Geo::MassFemProblem* _problem = new Geo::MassFemProblem(dis, linear_assembler, r_assembler, j_eqs);
+    Geo::MassFemProblem* _problem = new Geo::MassFemProblem(&dis);
+    _problem->setEquation(eqs);
+    // var
+    FemVariable* c = _problem->addVariable("c");
+    // IC
+    FemNodalFunctionScalar* c0 = new FemNodalFunctionScalar(dis, PolynomialOrder::Linear, 0);
+    c->setIC(c0);
     //BC
-    size_t var_id = _problem->createField(PolynomialOrder::Linear);
-    FemNodalFunctionScalar* _conc = _problem->getField(var_id);
     Polyline* poly_left = _rec.getLeft();
-    //Polyline* poly_right = _rec.getRight();
-    _problem->setIC(var_id, *_conc);
-    NumLib::SpatialFunctionConstant<double> f1(1.0);
-    _problem->addDirichletBC(var_id, *poly_left, false, f1);
+    c->addDirichletBC(new FemDirichletBC(dis.getMesh(), poly_left, new NumLib::TXFunctionConstant(1.0)));
 
     return _problem;
 }
@@ -128,7 +132,7 @@ static void getGWExpectedHead(std::vector<double> &expected)
 typedef Geo::FunctionHead<CRSLisSolver> MyFunctionHead;
 typedef Geo::FunctionVelocity MyFunctionVelocity;
 typedef Geo::FunctionConcentration<CRSLisSolver> MyFunctionConcentration;
-typedef Geo::FunctionDisplacement<CRSLisSolver> MyFunctionDisplacement;
+//typedef Geo::FunctionDisplacement<CRSLisSolver> MyFunctionDisplacement;
 
 
 TEST(Solution, CouplingFem2D)
@@ -137,8 +141,8 @@ TEST(Solution, CouplingFem2D)
 	    MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
 	    Rectangle* _rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
 	    Geo::PorousMedia pm;
-	    pm.hydraulic_conductivity = new NumLib::SpatialFunctionConstant<double>(1.e-11);
-	    pm.porosity = new NumLib::SpatialFunctionConstant<double>(0.2);
+	    pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
+	    pm.porosity = new NumLib::TXFunctionConstant(0.2);
 	    DiscreteSystem dis(*msh);
 	    Geo::GWFemProblem* pGW = defineGWProblem(dis, *_rec, pm);
         TimeStepFunctionConstant tim(.0, 100.0, 10.0);
@@ -182,7 +186,7 @@ TEST(Solution, CouplingFem2D)
 	    timestepping.solve(1.0);
 
 	    const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
-	    const FEMIntegrationPointFunctionVector2d* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector2d>(apart1.getOutputParameterID("v"));
+	    const FEMIntegrationPointFunctionVector* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
 	    const DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
 	    //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
 
@@ -209,8 +213,8 @@ TEST(FEM, line)
         MeshLib::IMesh *msh = MeshGenerator::generateLineMesh(len, div, .0, .0, .0);
         GeoLib::Line* line = new GeoLib::Line(Point(0.0, 0.0, 0.0),  Point(2.0, 0.0, 0.0));
         Geo::PorousMedia pm;
-        pm.hydraulic_conductivity = new NumLib::SpatialFunctionConstant<double>(1.e-11);
-        pm.porosity = new NumLib::SpatialFunctionConstant<double>(0.2);
+	    pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
+	    pm.porosity = new NumLib::TXFunctionConstant(0.2);
         DiscreteSystem dis(*msh);
         Geo::GWFemProblem* pGW = defineGWProblem1D(dis, *line, pm);
         TimeStepFunctionConstant tim(.0, 10.0, 10.0);
@@ -250,7 +254,7 @@ TEST(FEM, line)
         timestepping.solve(1.0);
 
         const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
-        const FEMIntegrationPointFunctionVector2d* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector2d>(apart1.getOutputParameterID("v"));
+        const FEMIntegrationPointFunctionVector* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
         const DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
         //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
 
@@ -286,10 +290,10 @@ TEST(Solution, CouplingFem2)
         TimeStepFunctionConstant tim(.0, 1e+4, 1e+3);
         //material
 	    Geo::PorousMedia pm;
-	    pm.hydraulic_conductivity = new NumLib::SpatialFunctionConstant<double>(1.e-11);
-	    pm.porosity = new NumLib::SpatialFunctionConstant<double>(1.0);
+	    pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
+	    pm.porosity = new NumLib::TXFunctionConstant(1.0);
 	    Geo::Compound tracer;
-	    tracer.molecular_diffusion = new NumLib::SpatialFunctionConstant<double>(1.e-6);
+	    tracer.molecular_diffusion = new NumLib::TXFunctionConstant(1.e-6);
         //problems
 	    DiscreteSystem dis(*msh);
 	    Geo::GWFemProblem* pGW = defineGWProblem(dis, *_rec, pm);
@@ -352,7 +356,7 @@ TEST(Solution, CouplingFem2)
 	    timestepping.solve(tim.getEnd());
 
 	    const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
-	    const FEMIntegrationPointFunctionVector2d* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector2d>(apart1.getOutputParameterID("v"));
+	    const FEMIntegrationPointFunctionVector* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
 	    const FemNodalFunctionScalar* r_f_c = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("c"));
 	    const DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
 	    //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
@@ -407,14 +411,15 @@ TEST(Solution, CouplingFem2)
 
 }
 
+#if 0
 TEST(Fem, LinearElastic2D)
 {
 	try {
 	    MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
 	    Rectangle* _rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
 	    Geo::PorousMedia pm;
-	    pm.hydraulic_conductivity = new NumLib::SpatialFunctionConstant<double>(1.e-11);
-	    pm.porosity = new NumLib::SpatialFunctionConstant<double>(0.2);
+	    pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
+	    pm.porosity = new NumLib::TXFunctionConstant(0.2);
 	    DiscreteSystem dis(*msh);
 	    Geo::FemLinearElasticProblem* pGW = 0; //defineGWProblem(dis, *_rec, pm);
         TimeStepFunctionConstant tim(.0, 100.0, 10.0);
@@ -475,3 +480,5 @@ TEST(Fem, LinearElastic2D)
 	}
 
 }
+#endif
+

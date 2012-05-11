@@ -5,9 +5,13 @@
 #include <cmath>
 
 #include "MathLib/Vector.h"
+#include "FemLib/Core/DataType.h"
+#include "DiscreteLib/Core/DiscreteVector.h"
+
 
 namespace FemLib
 {
+
 /**
  * \brief Template class for FEM integration point-based functions
  */
@@ -19,14 +23,14 @@ public:
     //typedef std::valarray<Tvalue> IntegrationPointVectorType;
     typedef DiscreteLib::DiscreteVector<IntegrationPointVectorType > DiscreteVectorType;
 
-    TemplateFEMIntegrationPointFunction(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh)
+    TemplateFEMIntegrationPointFunction(DiscreteLib::DiscreteSystem &dis)
     {
-        initialize(dis, msh, msh.getNumberOfElements());
+        initialize(dis);
     };
 
     TemplateFEMIntegrationPointFunction(const TemplateFEMIntegrationPointFunction &src)
     {
-        initialize(*src._discrete_system, *src._msh, src._values->size());
+        initialize(*src._discrete_system);
         (*this->_values) = (*src._values);
     };
 
@@ -38,7 +42,7 @@ public:
 
     const MeshLib::IMesh* getMesh() const
     {
-        return _msh;
+        return this->_discrete_system->getMesh();
     }
 
     void eval(const NumLib::TXPosition &/*pt*/, Tvalue &v)
@@ -84,8 +88,12 @@ public:
             }
         	IntegrationPointVectorType val_diff = val1 - val2;
 
-        	val_diff = std::abs(val_diff);
-			mnorm = std::max(mnorm, val_diff.max());
+//        	val_diff = std::abs(val_diff);
+        	double val_diff_max = .0; // val_diff.max
+        	for (size_t j=0; j<val_diff.size(); j++) {
+        		val_diff_max = std::max(val_diff_max, val_diff[j].array().abs().maxCoeff());
+        	}
+			mnorm = std::max(mnorm, val_diff_max);
     	}
 
     	return mnorm;
@@ -109,22 +117,18 @@ public:
     }
 
 private:
-    MeshLib::IMesh* _msh;
-    //std::vector<std::vector<Tvalue> >* _values;
-    DiscreteVectorType* _values;
     DiscreteLib::DiscreteSystem* _discrete_system;
+    DiscreteVectorType* _values;
 
-    void initialize(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh, size_t n)
+    void initialize(DiscreteLib::DiscreteSystem &dis)
     {
-        _msh = &msh;
         _discrete_system = &dis;
-//        _values = new std::vector<std::vector<Tvalue> >(n);
-        _values = _discrete_system->createVector<IntegrationPointVectorType >(n);
+        _values = _discrete_system->createVector<IntegrationPointVectorType >(dis.getMesh()->getNumberOfElements());
     }
 };
 
-typedef TemplateFEMIntegrationPointFunction<double> FEMIntegrationPointFunctionScalar;
+//typedef TemplateFEMIntegrationPointFunction<double> FEMIntegrationPointFunctionScalar;
 //typedef TemplateFEMIntegrationPointFunction<MathLib::Vector2D> FEMIntegrationPointFunctionVector2d;
-typedef TemplateFEMIntegrationPointFunction<LocalVector> FEMIntegrationPointFunctionVector2d;
+typedef TemplateFEMIntegrationPointFunction<LocalVector> FEMIntegrationPointFunctionVector;
 
 } //end

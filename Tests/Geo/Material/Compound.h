@@ -9,14 +9,18 @@
 #define COMPOUND_H_
 
 #include "Base/CodingTools.h"
-#include "NumLib/Function/IFunction.h"
+
+namespace NumLib
+{
+class ITXFunction;
+}
 
 namespace Geo
 {
 
 struct Compound
 {
-	NumLib::SpatialFunctionScalar* molecular_diffusion;
+	NumLib::ITXFunction* molecular_diffusion;
 
 	Compound()
 	{

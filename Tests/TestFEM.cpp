@@ -4,7 +4,7 @@
 #include "MathLib/Vector.h"
 #include "MathLib/Interpolation/LinearInterpolation.h"
 //#include "MathLib/LinAlg/Solvers/GaussAlgorithm.h"
-#include "MathLib/Function/Function.h"
+#include "NumLib/Function/Function.h"
 #include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
 
 #include "GeoLib/Shape/Rectangle.h"
@@ -105,22 +105,22 @@ TEST(FEM, ExtrapolateAverage1)
     GWFemTest::calculateHead(gw);
     GWFemTest::calculateVelocity(gw);
 
-    FemNodalFunctionVector2d nodal_vel(*gw.dis, *gw.msh, PolynomialOrder::Linear);
-    FemExtrapolationAverage<MathLib::Vector> extrapo;
+    FemNodalFunctionVector2d nodal_vel(*gw.dis, PolynomialOrder::Linear);
+    FemExtrapolationAverage<NumLib::LocalVector> extrapo;
     extrapo.extrapolate(*gw.vel, nodal_vel);
 
-    DiscreteLib::DiscreteVector<MathLib::Vector> *v = nodal_vel.getNodalValues();
-    MathLib::Vector expected(2);
+    DiscreteLib::DiscreteVector<NumLib::LocalVector> *v = nodal_vel.getNodalValues();
+    NumLib::LocalVector expected(2);
     expected[0] = 1.e-5;
     expected[1] = .0;
     ASSERT_DOUBLE_ARRAY_EQ(expected, (*v)[0], expected.size());
 }
 
-class MyFunction : public MathLib::TemplateSpatialFunction<double>
+class MyFunction : public NumLib::ITXFunction
 {
 public:
 	virtual ~MyFunction() {};
-    virtual void eval(const MathLib::SpatialPosition& x, double &v)
+    virtual void eval(const double* x, double &v)
     {
         if (x[0]<1.0) v = 1e-11;
         else v = 2e-11;
@@ -137,15 +137,15 @@ TEST(FEM, ExtrapolateAverage2)
     gw.define(msh);
     delete gw._K;
     gw._K = new MyFunction();
-    gw.vec_bc1.push_back(new FemDirichletBC<double>(gw.head, gw.rec->getLeft(), false, new NumLib::SpatialFunctionConstant<double>(2.e+6), new DiagonalizeMethod()));
+    gw.vec_bc1.push_back(new FemDirichletBC(msh, gw.rec->getLeft(), new NumLib::TXFunctionConstant(2.e+6)));
     delete gw.vec_bc2[0];
     gw.vec_bc2.clear();
 
     GWFemTest::calculateHead(gw);
     GWFemTest::calculateVelocity(gw);
 
-    FemNodalFunctionVector2d nodal_vel(*gw.dis, *gw.msh, PolynomialOrder::Linear);
-    FemExtrapolationAverage<MathLib::Vector> extrapo;
+    FemNodalFunctionVector2d nodal_vel(*gw.dis, PolynomialOrder::Linear);
+    FemExtrapolationAverage<NumLib::LocalVector> extrapo;
     extrapo.extrapolate(*gw.vel, nodal_vel);
 
     std::vector<double> exH(9);
@@ -158,8 +158,8 @@ TEST(FEM, ExtrapolateAverage2)
     DiscreteLib::DiscreteVector<double> *h = gw.head->getNodalValues();
     ASSERT_DOUBLE_ARRAY_EQ(&exH[0], &(*h)[0], gw.head->getNumberOfNodes());
 
-    DiscreteLib::DiscreteVector<MathLib::Vector> *v = nodal_vel.getNodalValues();
-    MathLib::Vector expected(2);
+    DiscreteLib::DiscreteVector<NumLib::LocalVector> *v = nodal_vel.getNodalValues();
+    NumLib::LocalVector expected(2);
     expected[0] = 4./3.*1.e-5;
     expected[1] = .0;
     ASSERT_DOUBLE_ARRAY_EQ(expected, (*v)[0], expected.size());

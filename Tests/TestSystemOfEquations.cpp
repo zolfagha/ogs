@@ -2,15 +2,17 @@
 #include <gtest/gtest.h>
 
 #include "Base/Options.h"
-#include "MathLib/Coupling/PartitionedProblem.h"
-#include "MathLib/Coupling/Algorithm/BlockJacobiMethod.h"
-#include "MathLib/SystemOfEquations/SystemOfEquations.h"
-#include "MathLib/SystemOfEquations/CoupledProblemConstructor.h"
-#include "MathLib/SystemOfEquations/CouplingStrucutreBuilder4SysEqs.h"
+#include "MathLib/LinAlg/Dense/Matrix.h"
+#include "NumLib/Coupling/PartitionedProblem.h"
+#include "NumLib/Coupling/Algorithm/BlockJacobiMethod.h"
+#include "NumLib/SystemOfEquations/SystemOfEquations.h"
+#include "NumLib/SystemOfEquations/CoupledProblemConstructor.h"
+#include "NumLib/SystemOfEquations/CouplingStrucutreBuilder4SysEqs.h"
 
 #include "TestUtil.h"
 
 using namespace MathLib;
+using namespace NumLib;
 
 
 void defineProblem1(SystemOfEquations &sysEqs)
@@ -19,27 +21,27 @@ void defineProblem1(SystemOfEquations &sysEqs)
 	// 3a + 5b + .2c = 13.6
 	// .5a + .3b + 3c = 10.1
 	// A. a=1, b=2, c=3
-	std::vector<Matrix<double>* > vecCp(3);
-	for (size_t i=0; i<3; i++) vecCp[i] = new Matrix<double>(1,1);
-	std::valarray<double>* Fp = new std::valarray<double>(1);
+	std::vector<LocalMatrix* > vecCp(3);
+	for (size_t i=0; i<3; i++) vecCp[i] = new LocalMatrix(1,1);
+	LocalVector* Fp = new LocalVector(1);
 	(*vecCp[0])(0,0) = 2;
 	(*vecCp[1])(0,0) = 2;
 	(*vecCp[2])(0,0) = .3;
-	Fp[0] = 6.9;
-	std::vector<Matrix<double>* > vecCT(3);
-	for (size_t i=0; i<3; i++) vecCT[i] = new Matrix<double>(1,1);
-	std::valarray<double>* FT = new std::valarray<double>(1);
+	(*Fp)[0] = 6.9;
+	std::vector<LocalMatrix* > vecCT(3);
+	for (size_t i=0; i<3; i++) vecCT[i] = new LocalMatrix(1,1);
+	LocalVector* FT = new LocalVector(1);
 	(*vecCT[0])(0,0) = 3;
 	(*vecCT[1])(0,0) = 5;
 	(*vecCT[2])(0,0) = .2;
-	FT[0] = 13.6;
-	std::vector<Matrix<double>* > vecCc(3);
-	for (size_t i=0; i<3; i++) vecCc[i] = new Matrix<double>(1,1);
-	std::valarray<double>* Fc = new std::valarray<double>(1);
+	(*FT)[0] = 13.6;
+	std::vector<LocalMatrix* > vecCc(3);
+	for (size_t i=0; i<3; i++) vecCc[i] = new LocalMatrix(1,1);
+	LocalVector* Fc = new LocalVector(1);
 	(*vecCc[0])(0,0) = .5;
 	(*vecCc[1])(0,0) = .3;
 	(*vecCc[2])(0,0) = 3;
-	Fc[0] = 10.1;
+	(*Fc)[0] = 10.1;
 
 	Variable *p = new Variable(0, 1, "p");
 	Variable *T = new Variable(1, 1, "T");
@@ -78,7 +80,7 @@ void defineProblem1(SystemOfEquations &sysEqs)
 
 }
 
-class MyConvergenceCheck4Array : public MathLib::IConvergenceCheck
+class MyConvergenceCheck4Array : public NumLib::IConvergenceCheck
 {
 public:
     bool isConverged(UnnamedParameterSet& vars_prev, UnnamedParameterSet& vars_current, double eps, double &v_diff)

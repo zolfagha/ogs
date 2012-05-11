@@ -1,8 +1,7 @@
 
 #pragma once
 
-#include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
-
+#include "NumLib/DataType.h"
 
 namespace NumLib
 {
@@ -17,7 +16,7 @@ class IStencil;
 class IStencilWiseTransientLinearEQSLocalAssembler
 {
 public:
-	typedef MathLib::DenseLinearEquations LocalEquationType;
+	typedef NumLib::LocalEquation LocalEquationType;
 	typedef LocalEquationType::MatrixType LocalMatrixType;
 	typedef LocalEquationType::VectorType LocalVectorType;
 

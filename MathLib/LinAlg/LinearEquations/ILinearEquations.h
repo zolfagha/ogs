@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <Eigen>
 #include "Base/Options.h"
 #include "Base/CodingTools.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
@@ -17,9 +18,10 @@ namespace MathLib
 class ILinearEquations
 {
 public:
+	typedef Eigen::MatrixXd LocalMatrix;
+	typedef Eigen::VectorXd LocalVector;
+
 	virtual ~ILinearEquations() {};
-    //virtual void initialize() = 0;
-    //virtual void finalize() = 0;
 
     virtual void create(size_t length, RowMajorSparsity *sparsity=0) = 0;
     virtual bool isCreated() const = 0;
@@ -30,7 +32,7 @@ public:
     virtual double getA(size_t rowId, size_t colId) = 0;
     virtual void setA(size_t rowId, size_t colId, double v) = 0;
     virtual void addA(size_t rowId, size_t colId, double v) = 0;
-    virtual void addAsub(const std::vector<size_t> &vec_row_pos, const std::vector<size_t> &vec_col_pos, MathLib::Matrix<double> &sub_matrix, double fkt=1.0)
+    virtual void addAsub(const std::vector<size_t> &vec_row_pos, const std::vector<size_t> &vec_col_pos, LocalMatrix &sub_matrix, double fkt=1.0)
     {
         const size_t n_rows = vec_row_pos.size();
         const size_t n_cols = vec_col_pos.size();
@@ -44,7 +46,7 @@ public:
             }
         }
     }
-    virtual void addAsub(std::vector<size_t> &vec_pos, MathLib::Matrix<double> &sub_matrix, double fkt=1.0)
+    virtual void addAsub(std::vector<size_t> &vec_pos, LocalMatrix &sub_matrix, double fkt=1.0)
     {
         addAsub(vec_pos, vec_pos, sub_matrix, fkt);
     }

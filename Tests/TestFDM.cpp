@@ -10,7 +10,7 @@
 #include "GeoLib/Shape/Rectangle.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "MeshLib/Tools/MeshGenerator.h"
-#include "NumLib/Function/Function.h"
+#include "NumLib/Function/TXFunction.h"
 #include "NumLib/Coupling/Algorithm/IConvergenceCheck.h"
 #include "NumLib/Coupling/Algorithm/SerialStaggeredMethod.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
@@ -87,9 +87,9 @@ GWFdmProblem* defineGWProblem4FDM(DiscreteSystem &dis, double h, GeoLib::Line &l
     size_t headId = _problem->createField();
     FdmFunctionScalar* _head = _problem->getField(headId);
     _problem->setIC(headId, *_head);
-    SpatialFunctionConstant<double> f1(.0);
+    TXFunctionConstant f1(.0);
     _problem->addDirichletBC(headId, *line.getPoint2(), false, f1);
-    SpatialFunctionConstant<double> f2(-1e-5);
+    TXFunctionConstant f2(-1e-5);
     _problem->addNeumannBC(headId, *line.getPoint1(), false, f2);
 
     return _problem;
@@ -101,17 +101,19 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Lin
 {
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
-    Geo::MassFemProblem::LinearAssemblerType* linear_assembler = new Geo::MassFemProblem::LinearAssemblerType(*_feObjects, pm, comp);
-    Geo::MassFemProblem::ResidualAssemblerType* r_assembler = new Geo::MassFemProblem::ResidualAssemblerType(*_feObjects, pm, comp);
-    Geo::MassFemProblem::JacobianAssemblerType* j_eqs = new Geo::MassFemProblem::JacobianAssemblerType(*_feObjects, pm, comp);
+    Geo::MassFemEquation::LinearAssemblerType* linear_assembler = new Geo::MassFemEquation::LinearAssemblerType(*_feObjects, pm, comp);
+    Geo::MassFemEquation::ResidualAssemblerType* r_assembler = new Geo::MassFemEquation::ResidualAssemblerType(*_feObjects, pm, comp);
+    Geo::MassFemEquation::JacobianAssemblerType* j_eqs = new Geo::MassFemEquation::JacobianAssemblerType(*_feObjects, pm, comp);
+    Geo::MassFemEquation* eqs = new Geo::MassFemEquation(linear_assembler, r_assembler, j_eqs);
     //IVBV problem
-    Geo::MassFemProblem* _problem = new Geo::MassFemProblem(dis, linear_assembler, r_assembler, j_eqs);
+    Geo::MassFemProblem* _problem = new Geo::MassFemProblem(&dis);
+    _problem->setEquation(eqs);
     //BC
-    FemVariable* var = _problem->createVariables("concentration");
+    FemVariable* var = _problem->addVariable("concentration");
     FemNodalFunctionScalar* conc = 0; //_problem->getVariable()(var_id);
     ITXFunction *f_c0 = 0; //TODO
     var->setIC(f_c0);
-    NumLib::TXFunctionConstantScalar* f1 = new  NumLib::TXFunctionConstantScalar(1.0);
+    NumLib::TXFunctionConstant* f1 = new  NumLib::TXFunctionConstant(1.0);
     var->addDirichletBC(new FemDirichletBC(dis.getMesh(), line.getPoint1(), f1));
 
     return _problem;
@@ -126,7 +128,7 @@ TEST(Fdm, fdm1)
 	    MeshLib::IMesh *msh = MeshLib::MeshGenerator::generateLineMesh(len, div, .0, .0, .0);
 	    GeoLib::Line line(Point(0.0, .0, .0), Point(len, .0, .0));
 	    Geo::PorousMedia pm;
-	    pm.hydraulic_conductivity = new SpatialFunctionConstant<double>(1.e-11);
+	    pm.hydraulic_conductivity = new TXFunctionConstant(1.e-11);
 	    DiscreteSystem dis(*msh);
 	    GWFdmProblem* pGW = defineGWProblem4FDM(dis, h, line, pm);
         TimeStepFunctionConstant tim(.0, 10.0, 10.0);
@@ -186,10 +188,10 @@ TEST(Fdm, fdm_fem1)
 	    MeshLib::IMesh *msh = MeshLib::MeshGenerator::generateLineMesh(len, div, .0, .0, .0);
 	    GeoLib::Line line(Point(0.0, .0, .0), Point(len, .0, .0));
 	    Geo::PorousMedia pm;
-	    pm.hydraulic_conductivity = new NumLib::SpatialFunctionConstant<double>(1.e-11);
-	    pm.porosity = new NumLib::SpatialFunctionConstant<double>(1.0);
+	    pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
+	    pm.porosity = new NumLib::TXFunctionConstant(1.0);
 	    Geo::Compound tracer;
-	    tracer.molecular_diffusion = new NumLib::SpatialFunctionConstant<double>(1.e-6);
+	    tracer.molecular_diffusion = new NumLib::TXFunctionConstant(1.e-6);
 	    DiscreteSystem dis(*msh);
 	    GWFdmProblem* pGW = defineGWProblem4FDM(dis, h, line, pm);
 	    Geo::MassFemProblem* pMass = defineMassTransportProblem(dis, line, pm, tracer);

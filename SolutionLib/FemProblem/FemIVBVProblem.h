@@ -26,14 +26,14 @@ template
 	<
 	class T_FEM_EQUATION
 	>
-class FemIVBVProblem
+class FemIVBVProblem : public TimeSteppingProblem
 {
 public:
 	typedef T_FEM_EQUATION EquationType;
 
 	///
     FemIVBVProblem(	DiscreteLib::DiscreteSystem* dis)
-        : _discrete_system(&dis), _eqs(0)
+        : _discrete_system(dis), _eqs(0)
     {
     }
 
@@ -45,6 +45,9 @@ public:
 
     /// get this discrete system
     DiscreteLib::DiscreteSystem* getDiscreteSystem() {return _discrete_system;};
+
+    /// get the mesh
+    MeshLib::IMesh* getMesh() {return _discrete_system->getMesh();};
 
     /// create FE approximation field
     FemVariable* addVariable(const std::string name)

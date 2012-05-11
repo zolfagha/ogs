@@ -1,15 +1,15 @@
 
 #pragma once
 
-#include "MathLib/Function/Function.h"
 #include "MathLib/LinAlg/VectorNorms.h"
 #include "GeoLib/Shape/Rectangle.h"
-#include "FemLib/Function/FemFunction.h"
+#include "NumLib/Function/Function.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
-#include "SolutionLib/Problem/FemIVBVProblem.h"
+#include "FemLib/Function/FemFunction.h"
+#include "SolutionLib/FemProblem/FemIVBVProblem.h"
 #include "SolutionLib/Solution/SingleStepFEM.h"
 
 #include "Tests/Geo/Equation/FemLinearElasticity.h"
@@ -27,6 +27,7 @@ using namespace DiscreteLib;
 namespace Geo
 {
 
+#if 0
 typedef FemIVBVProblem
 		<
 			Geo::FemLinearElasticLinearLocalAssembler,
@@ -92,6 +93,7 @@ private:
     DISALLOW_COPY_AND_ASSIGN(FunctionDisplacement);
 };
 
+#endif
 
 } //end
 

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "NumLib/Function/Function.h"
+#include "NumLib/Function/TXFunction.h"
 #include "MathLib/LinAlg/VectorNorms.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
 
@@ -13,7 +13,7 @@ namespace FdmLib
  *
  */
 template<typename Tvalue>
-class TemplateFDMFunction : public NumLib::TemplateSpatialFunction<Tvalue>
+class TemplateFDMFunction : public NumLib::ITXFunction
 {
 public:
     /// @param msh 		Mesh
@@ -66,14 +66,14 @@ public:
 
 
     /// evaluate this function at the given point
-    void eval(const NumLib::SpatialPosition &/*pt*/, Tvalue &v)
+    void eval(const NumLib::TXPosition &/*pt*/, Tvalue &v)
     {
         throw "eval() is not implemented yet.";
         v = (*_nodal_values)[0];
     };
 
     /// get nodal value
-    Tvalue& getValue(int node_id)
+    Tvalue& getValue(size_t node_id)
     {
         return (*_nodal_values)[node_id];
     }
@@ -159,7 +159,7 @@ private:
 typedef TemplateFDMFunction<double> FdmFunctionScalar;
 
 
-class FdmCellVectorFunction : public NumLib::SpatialFunctionVector
+class FdmCellVectorFunction : public NumLib::ITXFunction
 {
 public:
 	explicit FdmCellVectorFunction(size_t n)
@@ -174,12 +174,12 @@ public:
         return obj;
     };
 
-    virtual void eval(const NumLib::SpatialPosition &x, MathLib::Vector &val)
+    virtual void eval(const NumLib::TXPosition &x, NumLib::ITXFunction::DataType &val)
     {
     	val = _vec[0];
     }
 
-    void setValue(size_t i, MathLib::Vector &v)
+    void setValue(size_t i, NumLib::LocalVector &v)
     {
     	_vec[i] = v;
     }
@@ -188,7 +188,7 @@ public:
     {
         std::cout << "cell_values = ";
         for (size_t i=0; i<_vec.size(); ++i) {
-            const MathLib::Vector &val1 = _vec[i];
+            const NumLib::LocalVector &val1 = _vec[i];
             std::cout << "(";
             for (size_t j=0; j<val1.size(); ++j) std::cout << val1[j] << " ";
             std::cout << ") ";
@@ -197,7 +197,7 @@ public:
     }
 
 private:
-    std::vector<MathLib::Vector> _vec;
+    std::vector<NumLib::LocalVector> _vec;
 };
 
 } //end

@@ -80,7 +80,7 @@ struct DiscreteExample1
 
     class TestElementAssembler : public DiscreteLib::IElemenetWiseLinearEquationLocalAssembler
     {
-        MathLib::Matrix<double> _m;
+    	DiscreteLib::LocalMatrix _m;
     public:
         TestElementAssembler()
         {
@@ -93,7 +93,7 @@ struct DiscreteExample1
                 for (size_t j=0; j<i; j++) _m(i,j) = _m(j,i);
             _m *= 1.e-11/6.0;
         }
-        void assembly(MeshLib::IElement &/*e*/, MathLib::DenseLinearEquations &eqs)
+        void assembly(MeshLib::IElement &/*e*/, DiscreteLib::LocalEquation &eqs)
         {
             (*eqs.getA()) = _m;
         }

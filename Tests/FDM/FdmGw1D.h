@@ -152,7 +152,7 @@ public:
                 xi[i] = (*pt)[0];
                 yi[i] = (*pt)[1];
             }
-            MathLib::Vector q(2);
+            NumLib::LocalVector q(2);
             q[0] = .0;
             q[1] = .0;
             double k;
@@ -184,7 +184,7 @@ public:
 private:
     DiscreteLib::DiscreteSystem* _dis;
     FdmLib::FdmCellVectorFunction* _vel;
-    NumLib::SpatialFunctionScalar *_K;
+    NumLib::ITXFunction *_K;
 
     DISALLOW_COPY_AND_ASSIGN(FunctionFdmVelocity);
 };

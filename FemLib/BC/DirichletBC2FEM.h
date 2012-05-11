@@ -6,7 +6,7 @@
 
 #include "GeoLib/Core/GeoObject.h"
 #include "MeshLib/Core/IMesh.h"
-#include "NumLib/TXFunction/TXFunction.h"
+#include "NumLib/Function/TXFunction.h"
 
 namespace FemLib
 {

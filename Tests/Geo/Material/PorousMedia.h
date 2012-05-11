@@ -2,9 +2,13 @@
 #pragma once
 
 #include "Base/CodingTools.h"
-#include "NumLib/TXFunction/TXFunction.h"
 
 #include "Solid.h"
+
+namespace NumLib
+{
+class ITXFunction;
+}
 
 namespace Geo
 {

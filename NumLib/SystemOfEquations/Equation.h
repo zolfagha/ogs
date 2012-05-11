@@ -5,8 +5,7 @@
 #include <valarray>
 
 #include "Base/CodingTools.h"
-#include "MathLib/LinAlg/Dense/Matrix.h"
-
+#include "NumLib/DataType.h"
 #include "Variable.h"
 
 
@@ -15,19 +14,13 @@ namespace NumLib
 
 struct TimeODEComponent
 {
-	typedef Matrix<double> MatrixType;
-	typedef std::valarray<double> VectorType;
-
-	MatrixType* mass;
-	MatrixType* stiffness;
-	VectorType* source;
+	LocalMatrix* mass;
+	LocalMatrix* stiffness;
+	LocalVector* source;
 };
 
 struct TimeODE
 {
-	typedef Matrix<double> MatrixType;
-	typedef std::valarray<double> VectorType;
-
 	std::vector<Variable> variables;
 	std::vector<TimeODEComponent> componets;
 	Variable primary_variable;
@@ -47,13 +40,10 @@ struct TimeODE
 
 struct LinearComponent
 {
-	typedef Matrix<double> MatrixType;
-	typedef std::valarray<double> VectorType;
+	LocalMatrix* stiffness;
+	LocalVector* source;
 
-	MatrixType* stiffness;
-	VectorType* source;
-
-	LinearComponent(MatrixType* m, VectorType* v = 0) : stiffness(m), source(v) {};
+	LinearComponent(LocalMatrix* m, LocalVector* v = 0) : stiffness(m), source(v) {};
 };
 
 struct LinearEquation

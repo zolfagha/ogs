@@ -19,12 +19,15 @@
 namespace Geo
 {
 
-typedef SolutionLib::FemIVBVProblem
-		<
-			Geo::MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler>,
-			Geo::MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler>,
-			Geo::MassTransportJacobianLocalAssembler
-		> MassFemProblem;
+typedef TemplateFemEquation<
+		Geo::MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler>,
+		Geo::MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler>,
+		Geo::MassTransportJacobianLocalAssembler
+		>
+		MassFemEquation;
+
+typedef FemIVBVProblem< MassFemEquation > MassFemProblem;
+
 
 template <
 	class T_LINEAR_SOLVER
@@ -61,10 +64,10 @@ public:
     int solveTimeStep(const NumLib::TimeStep &time)
     {
         //input
-        const NumLib::SpatialFunctionVector *vel = this->getInput<NumLib::SpatialFunctionVector>(Velocity);
-        _solConc->getProblem()->getLinearAssembler()->initialize(vel);
-        _solConc->getProblem()->getResidualAssembler()->initialize(vel);
-        _solConc->getProblem()->getJacobianAssembler()->initialize(vel);
+        const NumLib::ITXFunction *vel = this->getInput<NumLib::ITXFunction>(Velocity);
+        _solConc->getProblem()->getEquation()->getLinearAssembler()->initialize(vel);
+        _solConc->getProblem()->getEquation()->getResidualAssembler()->initialize(vel);
+        _solConc->getProblem()->getEquation()->getJacobianAssembler()->initialize(vel);
 
         // solve
         _solConc->solveTimeStep(time);

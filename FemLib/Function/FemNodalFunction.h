@@ -13,7 +13,7 @@
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "DiscreteLib/Core/DiscreteVector.h"
 
-#include "NumLib/TXFunction/TXFunction.h"
+#include "NumLib/Function/TXFunction.h"
 
 #include "FemLib/Core/Element/IFemElement.h"
 #include "FemLib/Tools/FemElementObjectContainer.h"
@@ -95,6 +95,8 @@ public:
     {
         return (*_nodal_values)[node_id];
     }
+
+    size_t getNumberOfNodes() const {return _nodal_values->size();};
 
     /// get nodal values
     DiscreteLib::DiscreteVector<Tvalue>* getNodalValues()
@@ -183,6 +185,6 @@ private:
 };
 
 typedef TemplateFEMNodalFunction<double> FemNodalFunctionScalar;
-typedef TemplateFEMNodalFunction<MathLib::Vector> FemNodalFunctionVector2d;
+typedef TemplateFEMNodalFunction<NumLib::LocalVector> FemNodalFunctionVector2d;
 
 } //end

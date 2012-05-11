@@ -26,12 +26,14 @@ using namespace DiscreteLib;
 namespace Geo
 {
 
-typedef FemIVBVProblem
-		<
-			Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerEQSLocalAssembler>,
-			Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerResidualLocalAssembler>,
-			Geo::GroundwaterFlowJacobianLocalAssembler
-		> GWFemProblem;
+typedef TemplateFemEquation<
+		Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerEQSLocalAssembler>,
+		Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerResidualLocalAssembler>,
+		Geo::GroundwaterFlowJacobianLocalAssembler
+		>
+		GWFemEquation;
+
+typedef FemIVBVProblem< GWFemEquation > GWFemProblem;
 
 
 

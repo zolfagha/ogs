@@ -5,7 +5,6 @@
 
 #include "Base/CodingTools.h"
 
-#include "MathLib/Function/Function.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
 #include "GeoLib/Shape/Rectangle.h"
@@ -15,6 +14,7 @@
 
 #include "FemLib/Tools/FemElementObjectContainer.h"
 
+#include "NumLib/Function/TXFunction.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TransientAssembler/IElementWiseTimeODELocalAssembler.h"
 #include "NumLib/TransientAssembler/IElementWiseTransientJacobianLocalAssembler.h"
@@ -22,11 +22,8 @@
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
 #include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
 
-#include "SolutionLib/Problem/FemIVBVProblem.h"
+#include "SolutionLib/FemProblem/FemIVBVProblem.h"
 #include "SolutionLib/Solution/SingleStepFEM.h"
-#include "SolutionLib/Tools/TemplateTransientLinearFEMFunction.h"
-#include "SolutionLib/Tools/TemplateTransientResidualFEMFunction.h"
-#include "SolutionLib/Tools/TemplateTransientDxFEMFunction.h"
 
 #include "TestUtil.h"
 
@@ -42,10 +39,10 @@ template <class T>
 class GWTimeODEAssembler: public T
 {
 public:
-    typedef typename T::LocalVectorType LocalVectorType;
-    typedef typename T::LocalMatrixType LocalMatrixType;
+    typedef NumLib::LocalVector LocalVectorType;
+    typedef NumLib::LocalMatrix LocalMatrixType;
 
-    GWTimeODEAssembler(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::SpatialFunctionScalar &mat)
+    GWTimeODEAssembler(FemLib::LagrangianFeObjectContainer &feObjects, NumLib::ITXFunction &mat)
     : _matK(&mat), _feObjects(&feObjects)
     {
     };
@@ -65,23 +62,25 @@ protected:
         	q->getSamplingPoint(j, gp_x);
             fe->computeBasisFunctions(gp_x);
             fe->getRealCoordinates(real_x);
-        	double k;
+        	LocalMatrixType k;
         	_matK->eval(real_x, k);
         	fe->integrateDWxDN(j, k, localK);
         }
     }
 private:
-    MathLib::SpatialFunctionScalar* _matK;
+    NumLib::ITXFunction* _matK;
     FemLib::LagrangianFeObjectContainer* _feObjects;
 };
 
 class GWJacobianAssembler : public NumLib::IElementWiseTransientJacobianLocalAssembler
 {
 private:
-    MathLib::SpatialFunctionScalar* _matK;
+	NumLib::ITXFunction* _matK;
     FemLib::LagrangianFeObjectContainer* _feObjects;
+    typedef NumLib::LocalMatrix LocalMatrixType;
+    typedef NumLib::LocalVector LocalVectorType;
 public:
-    GWJacobianAssembler(FemLib::LagrangianFeObjectContainer &feObjects, MathLib::SpatialFunctionScalar &mat)
+    GWJacobianAssembler(FemLib::LagrangianFeObjectContainer &feObjects, NumLib::ITXFunction &mat)
     : _matK(&mat), _feObjects(&feObjects)
     {
     };
@@ -99,11 +98,11 @@ public:
 
         //const double dt = time.getTimeStepSize();
         const double theta = 1.0;
-        MathLib::DenseLinearEquations::VectorType localX0;
-        MathLib::DenseLinearEquations::MatrixType localM(n,n), localK(n,n);
-        MathLib::DenseLinearEquations::VectorType localF;
-        localM = .0;
-        localK = .0;
+        LocalVectorType localX0;
+        LocalMatrixType localM(n,n), localK(n,n);
+        LocalVectorType localF;
+        localM *= .0;
+        localK *= .0;
         //localF.resize(localF.size(), .0);
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
@@ -111,13 +110,13 @@ public:
         	q->getSamplingPoint(j, gp_x);
             fe->computeBasisFunctions(gp_x);
             fe->getRealCoordinates(real_x);
-        	double k;
+        	NumLib::LocalMatrix k;
         	_matK->eval(real_x, k);
         	fe->integrateDWxDN(j, k, localK);
         }
 
         //localR = (1/dt * localM + theta * localK) * localX - (1/dt * localM + (1-theta) * localK) * localX0 - localF;
-        MathLib::DenseLinearEquations::MatrixType tmpM(n, n);
+        LocalMatrixType tmpM(n, n);
         tmpM = localK;
         tmpM *= theta;
         //tmpM.axpy(1.0, &localX[0], 0.0, &localR[0]);
@@ -131,30 +130,18 @@ template <
 	>
 class GWFemTestSystem : public NumLib::ITransientSystem
 {
-    typedef FemIVBVProblem
+	typedef TemplateFemEquation
             <
             	GWTimeODEAssembler<ElementWiseTimeEulerEQSLocalAssembler>,
             	GWTimeODEAssembler<ElementWiseTimeEulerResidualLocalAssembler>,
     			GWJacobianAssembler
-    		> GWFemProblem;
+    		> GWFemEquation;
 
-    typedef TemplateTransientLinearFEMFunction
-            <
-    			GWFemProblem,
-    			typename GWFemProblem::LinearAssemblerType
-			> MyLinearFunction;
+    typedef FemIVBVProblem<GWFemEquation> GWFemProblem;
 
-    typedef TemplateTransientResidualFEMFunction
-            <
-    			GWFemProblem,
-    			typename GWFemProblem::ResidualAssemblerType
-			> MyResidualFunction;
-
-    typedef TemplateTransientDxFEMFunction
-            <
-    			GWFemProblem,
-    			typename GWFemProblem::JacobianAssemblerType
-			> MyDxFunction;
+    typedef GWFemEquation::LinearEQSType MyLinearFunction;
+    typedef GWFemEquation::ResidualEQSType MyResidualFunction;
+    typedef GWFemEquation::DxEQSType MyDxFunction;
 
     typedef TemplateDiscreteNonlinearSolver
             <
@@ -202,28 +189,31 @@ public:
     };
 
     //#Define a problem
-    void define(DiscreteSystem &dis, MathLib::SpatialFunctionScalar &K, Base::Options &option)
+    void define(DiscreteSystem &dis, NumLib::ITXFunction &K, Base::Options &option)
     {
         MeshLib::IMesh *msh = dis.getMesh();
         //size_t nnodes = msh->getNumberOfNodes();
         _feObjects = new LagrangianFeObjectContainer(*msh);
         //equations
-        GWFemProblem::LinearAssemblerType* local_linear = new GWFemProblem::LinearAssemblerType(*_feObjects, K);
-        GWFemProblem::ResidualAssemblerType* local_r = new GWFemProblem::ResidualAssemblerType(*_feObjects, K);
-        GWFemProblem::JacobianAssemblerType* local_J = new GWFemProblem::JacobianAssemblerType(*_feObjects, K);
+        GWFemEquation::LinearAssemblerType* local_linear = new GWFemEquation::LinearAssemblerType(*_feObjects, K);
+        GWFemEquation::ResidualAssemblerType* local_r = new GWFemEquation::ResidualAssemblerType(*_feObjects, K);
+        GWFemEquation::JacobianAssemblerType* local_J = new GWFemEquation::JacobianAssemblerType(*_feObjects, K);
+        GWFemEquation* eqs = new GWFemEquation(local_linear, local_r, local_J);
         //IVBV problem
-        _problem = new GWFemProblem(dis, local_linear, local_r, local_J);
+        _problem = new GWFemProblem(&dis);
+        _problem->setEquation(eqs);
+        // var
+        FemVariable* _head = _problem->addVariable("head");
+        //IC
+        FemNodalFunctionScalar* h0 = new FemNodalFunctionScalar(dis, PolynomialOrder::Linear, .0);
+        _head->setIC(h0);
         //BC
-        size_t headId = _problem->createField(PolynomialOrder::Linear);
-        _head = _problem->getField(headId);
         _rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
         Polyline* poly_left = _rec->getLeft();
         Polyline* poly_right = _rec->getRight();
-        _problem->setIC(headId, *_head);
-        NumLib::SpatialFunctionConstant<double> f1(.0);
-        _problem->addDirichletBC(headId, *poly_right, false, f1);
-        NumLib::SpatialFunctionConstant<double> f2(-1e-5);
-        _problem->addNeumannBC(headId, *poly_left, false, f2);
+        //_head->setIC();
+        _head->addDirichletBC(new FemLib::FemDirichletBC(msh, poly_right,  new NumLib::TXFunctionConstant(.0)));
+        _head->addNeumannBC(new FemLib::FemNeumannBC(msh, _feObjects, poly_left, new NumLib::TXFunctionConstant(-1e-5)));
         //transient
         TimeStepFunctionConstant tim(.0, 100.0, 10.0);
         _problem->setTimeSteppingFunction(tim);
@@ -264,7 +254,7 @@ TEST(Solution, Fem1_Linear)
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     DiscreteSystem dis(*msh);
     // mat
-    NumLib::SpatialFunctionConstant<double> K(1.e-11);
+    NumLib::TXFunctionConstant K(1.e-11);
     // options
     Base::Options options;
     Base::Options* op_lis = options.addSubGroup("Lis");
@@ -298,7 +288,7 @@ TEST(Solution, Fem1_Picard)
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     DiscreteSystem dis(*msh);
     // mat
-    NumLib::SpatialFunctionConstant<double> K(1.e-11);
+    NumLib::TXFunctionConstant K(1.e-11);
     // options
     Base::Options options;
     Base::Options* op_lis = options.addSubGroup("Lis");
@@ -336,7 +326,7 @@ TEST(Solution, Fem1_Newton)
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     DiscreteSystem dis(*msh);
     // mat
-    NumLib::SpatialFunctionConstant<double> K(1.e-11);
+    NumLib::TXFunctionConstant K(1.e-11);
     // options
     Base::Options options;
     Base::Options* op_lis = options.addSubGroup("Lis");
@@ -374,7 +364,7 @@ TEST(Solution, Fem2)
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     DiscreteSystem dis(*msh);
     // mat
-    NumLib::SpatialFunctionConstant<double> K(1.e-11);
+    NumLib::TXFunctionConstant K(1.e-11);
     // options
     Base::Options options;
     Base::Options* op_lis = options.addSubGroup("Lis");

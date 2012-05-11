@@ -6,7 +6,6 @@
 #include "Base/CodingTools.h"
 #include "Base/BidirectionalMap.h"
 
-#include "MathLib/Function/Function.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/LinAlg/LinearEquations/SparseLinearEquations.h"
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
@@ -26,10 +25,11 @@
 #ifdef USE_MPI
 #include "DiscreteLib/ogs5/par_ddc_group.h"
 #endif
+#include "NumLib/Function/Function.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TimeStepping/TimeStepFunction.h"
 
-#include "NumLib/Output/Output.h"
+//#include "NumLib/Output/Output.h"
 
 #include "TestUtil.h"
 

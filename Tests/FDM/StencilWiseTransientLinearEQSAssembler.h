@@ -55,7 +55,7 @@ public:
     void assembly(MeshLib::IMesh &msh, DiscreteLib::DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs)
     {
         const NumLib::TimeStep &time = *_timestep;
-        MathLib::DenseLinearEquations localEQS;
+        LocalEquationType localEQS;
         std::vector<size_t> ele_node_ids, ele_node_size_order;
         std::vector<size_t> local_dofmap;
         const size_t n_nod = msh.getNumberOfNodes();

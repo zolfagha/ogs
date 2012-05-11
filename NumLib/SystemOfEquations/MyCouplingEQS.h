@@ -16,7 +16,7 @@ namespace NumLib
 class MyCouplingEQS : public AbstractMonolithicSystem<ICoupledSystem>
 {
 public:
-	typedef std::valarray<double> ArrayType;
+	typedef NumLib::LocalVector ArrayType;
 	typedef MyArrayFunction<ArrayType > ParameterType;
 
 	MyCouplingEQS(const std::vector<Variable*> &variables, const std::vector<LinearEquation*> &equations)
@@ -49,7 +49,7 @@ public:
             inactive_x[para_id] = *p->getArray();
         }
 
-        DenseLinearEquations eqs1;
+        NumLib::LocalEquation eqs1;
         _f->eval(inactive_x, eqs1);
         eqs1.solve();
         double *u1 = eqs1.getX();

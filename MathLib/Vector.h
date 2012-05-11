@@ -6,6 +6,7 @@
 #include <iostream>
 //#include <vector>
 #include <valarray>
+#include <Eigen>
 
 namespace MathLib
 {
@@ -364,12 +365,22 @@ inline double max(double arg0, const MathLib::TemplateVector<double,2> &arg1)
 	return r;
 }
 
-template <typename T>
-inline double max(double arg0, const MathLib::TemplateVectorX<T> &arg1)
+//template <typename T>
+//inline double max(double arg0, const MathLib::TemplateVectorX<T> &arg1)
+//{
+//	double r = arg0;
+//	for (size_t i=0; i<arg1.size(); i++)
+//		r = std::max(r, arg1[i]);
+//	return r;
+//}
+
+inline double max(double arg0, const MathLib::TemplateVectorX<Eigen::VectorXd> &arg1)
 {
 	double r = arg0;
-	for (size_t i=0; i<arg1.size(); i++)
-		r = std::max(r, arg1[i]);
+	for (size_t i=0; i<arg1.size(); i++) {
+		r = std::max(r, arg1[i].maxCoeff());
+	}
+
 	return r;
 }
 

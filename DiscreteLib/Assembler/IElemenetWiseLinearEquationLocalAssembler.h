@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "DiscreteLib/Core/DataType.h"
+
 namespace MathLib
 {
 class DenseLinearEquations;
@@ -23,7 +25,7 @@ public:
 	virtual ~IElemenetWiseLinearEquationLocalAssembler() {};
 
     /// assemble a local linear equation for the given element
-    virtual void assembly(MeshLib::IElement &e, MathLib::DenseLinearEquations &eqs) = 0;
+    virtual void assembly(MeshLib::IElement &e, LocalEquation &eqs) = 0;
 };
 
 } //end

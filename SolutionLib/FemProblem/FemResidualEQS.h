@@ -34,9 +34,9 @@ public:
     /// constructor
     /// @param problem		Fem problem
     /// @param linear_eqs	Discrete linear equation
-    TemplateTransientResidualFEMFunction(MeshLib::IMesh* msh, std::vector<FemVariable*>* list_var, DiscreteLib::DofEquationIdTable* dofManager, UserLocalResidualAssembler* asssembler)
+    TemplateTransientResidualFEMFunction(MeshLib::IMesh* msh, const std::vector<FemVariable*> &list_var, DiscreteLib::DofEquationIdTable* dofManager, UserLocalResidualAssembler* asssembler)
         : _local_assembler(asssembler), _dofManager(dofManager),
-          _t_n1(0), _u_n0(0), _st(0), _msh(msh)
+          _t_n1(0), _u_n0(0), _st(0), _list_var(list_var), _msh(msh)
     {
     };
 
@@ -49,7 +49,7 @@ public:
     	return new TemplateTransientResidualFEMFunction
     				<
 						UserLocalResidualAssembler
-    				>(_list_var, _dofManager, _local_assembler);
+    				>(_msh, _list_var, _dofManager, _local_assembler);
 	}
 
     /// reset property
@@ -91,7 +91,7 @@ private:
     NumLib::TimeStep* _t_n1;
     MyFemVector* _u_n0;
     MyFemVector* _st;
-    std::vector<FemVariable*>* _list_var;
+    std::vector<FemVariable*> _list_var;
     MeshLib::IMesh* _msh;
 };
 

@@ -33,7 +33,7 @@ public:
 
     /// constructor
     /// @param linear_eqs	Discrete linear equation
-    TemplateTransientLinearFEMFunction(std::vector<FemVariable*>* list_var, UserLocalAssembler* asssembler, DiscreteLib::IDiscreteLinearEquation* linear_eqs)
+    TemplateTransientLinearFEMFunction(const std::vector<FemVariable*> &list_var, UserLocalAssembler* asssembler, DiscreteLib::IDiscreteLinearEquation* linear_eqs)
         : _local_assembler(asssembler),  _linear_eqs(linear_eqs),
           _t_n1(0), _u_n0(0), _list_var(list_var)
     {
@@ -67,8 +67,8 @@ public:
         MyFemVector* u_n = this->_u_n0;
 
         // setup BC
-        for (size_t i=0; i<_list_var->size(); i++) {
-        	FemVariable* var = (*_list_var)[i];
+        for (size_t i=0; i<_list_var.size(); i++) {
+        	FemVariable* var = _list_var[i];
             for (size_t j=0; j<var->getNumberOfDirichletBC(); j++) {
                 FemLib::FemDirichletBC* bc1 = var->getDirichletBC(j);
                 bc1->setup();
@@ -91,8 +91,8 @@ public:
         _linear_eqs->construct(assembler);
 
         //apply BC1,2
-        for (size_t i=0; i<_list_var->size(); i++) {
-        	FemVariable* var = (*_list_var)[i];
+        for (size_t i=0; i<_list_var.size(); i++) {
+        	FemVariable* var = _list_var[i];
             for (size_t j=0; j<var->getNumberOfNeumannBC(); j++) {
                 FemLib::IFemNeumannBC* bc2 = var->getNeumannBC(j);
                 _linear_eqs->addRHS(i, bc2->getListOfBCNodes(), bc2->getListOfBCValues(), -1.0);
@@ -110,7 +110,7 @@ private:
     DiscreteLib::IDiscreteLinearEquation* _linear_eqs;
     NumLib::TimeStep* _t_n1;
     MyFemVector* _u_n0;
-    std::vector<FemVariable*>* _list_var;
+    std::vector<FemVariable*> _list_var;
 };
 
 

@@ -3,7 +3,7 @@
 
 #include "FemLib/Core/Element/IFemElement.h"
 #include "FemLib/Core/Integration/Integration.h"
-#include "NumLib/Function/Function.h"
+#include "NumLib/Function/TXFunction.h"
 #include "NumLib/TransientAssembler/IElementWiseTimeODELocalAssembler.h"
 #include "NumLib/TransientAssembler/IElementWiseTransientJacobianLocalAssembler.h"
 #include "Tests/Geo/Material/PorousMedia.h"
@@ -16,8 +16,8 @@ template <class T>
 class MassTransportTimeODELocalAssembler: public T
 {
 public:
-    typedef typename T::LocalVectorType LocalVectorType;
-    typedef typename T::LocalMatrixType LocalMatrixType;
+    typedef NumLib::LocalVector LocalVectorType;
+    typedef NumLib::LocalMatrix LocalMatrixType;
 
 	MassTransportTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, PorousMedia &pm, Compound &cmp)
 	: _pm(&pm), _cmp(&cmp), _feObjects(&feObjects)
@@ -27,9 +27,9 @@ public:
 
 	virtual ~MassTransportTimeODELocalAssembler() {};
 
-    void initialize(const NumLib::SpatialFunctionVector *vel)
+    void initialize(const NumLib::ITXFunction *vel)
     {
-        _vel = const_cast<NumLib::SpatialFunctionVector*>(vel);
+        _vel = const_cast<NumLib::ITXFunction*>(vel);
     }
 
 protected:
@@ -39,7 +39,7 @@ protected:
 
         LocalMatrixType matDiff(localK);
         LocalMatrixType matAdv(localK);
-        NumLib::SpatialCompositFunction<double, NumLib::SpatialFunctionScalar, NumLib::SpatialFunctionScalar, NumLib::Multiplication> f_diff_poro(*_cmp->molecular_diffusion, *_pm->porosity);
+        NumLib::TXCompositFunction<NumLib::ITXFunction, NumLib::ITXFunction, NumLib::Multiplication> f_diff_poro(*_cmp->molecular_diffusion, *_pm->porosity);
 
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
@@ -52,11 +52,13 @@ protected:
         	_pm->porosity->eval(real_x, poro);
         	double d_poro;
         	f_diff_poro.eval(real_x, d_poro);
-        	MathLib::Vector v;
+        	NumLib::ITXFunction::DataType v;
         	_vel->eval(real_x, v);
+        	LocalMatrix mat_poro(1,1);
+        	mat_poro(0,0) = d_poro;
 
      		fe->integrateWxN(j, poro, localM);
-    		fe->integrateDWxDN(j, d_poro, matDiff);
+    		fe->integrateDWxDN(j, mat_poro, matDiff);
             fe->integrateWxDN(j, v, matAdv);
         }
 
@@ -72,7 +74,7 @@ private:
     PorousMedia* _pm;
     Compound* _cmp;
     FemLib::LagrangianFeObjectContainer* _feObjects;
-    NumLib::SpatialFunctionVector* _vel;
+    NumLib::ITXFunction* _vel;
 };
 
 
@@ -86,19 +88,19 @@ public:
         Base::zeroObject(_vel);
 	};
 
-    void initialize(const NumLib::SpatialFunctionVector *vel)
+    void initialize(const NumLib::ITXFunction *vel)
     {
-        _vel = const_cast<NumLib::SpatialFunctionVector*>(vel);
+        _vel = const_cast<NumLib::ITXFunction*>(vel);
     }
 
-	void assembly(const NumLib::TimeStep &time, MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/, LocalMatrixType &localJ)
+	void assembly(const NumLib::TimeStep &time, MeshLib::IElement &e, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/, NumLib::LocalMatrix &localJ)
 	{
 		FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
 
-        LocalMatrixType matM(localJ);
-        LocalMatrixType matDiff(localJ);
-        LocalMatrixType matAdv(localJ);
-        NumLib::SpatialCompositFunction<double, NumLib::SpatialFunctionScalar, NumLib::SpatialFunctionScalar, NumLib::Multiplication> f_diff_poro(*_cmp->molecular_diffusion, *_pm->porosity);
+		NumLib::LocalMatrix matM(localJ);
+		NumLib::LocalMatrix matDiff(localJ);
+		NumLib::LocalMatrix matAdv(localJ);
+        NumLib::TXCompositFunction<NumLib::ITXFunction, NumLib::ITXFunction, NumLib::Multiplication> f_diff_poro(*_cmp->molecular_diffusion, *_pm->porosity);
 
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
@@ -111,11 +113,13 @@ public:
         	_pm->porosity->eval(real_x, poro);
         	double d_poro;
         	f_diff_poro.eval(real_x, d_poro);
-        	MathLib::Vector v;
+        	NumLib::ITXFunction::DataType v;
         	_vel->eval(real_x, v);
+        	LocalMatrix mat_poro(1,1);
+        	mat_poro(0,0) = d_poro;
 
      		fe->integrateWxN(j, poro, matM);
-    		fe->integrateDWxDN(j, d_poro, matDiff);
+    		fe->integrateDWxDN(j, mat_poro, matDiff);
             fe->integrateWxDN(j, v, matAdv);
         }
 
@@ -137,6 +141,6 @@ private:
     PorousMedia* _pm;
     Compound* _cmp;
     FemLib::LagrangianFeObjectContainer* _feObjects;
-    NumLib::SpatialFunctionVector* _vel;
+    NumLib::ITXFunction* _vel;
 };
 } //end

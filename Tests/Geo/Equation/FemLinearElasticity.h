@@ -11,15 +11,15 @@
 
 namespace Geo
 {
-
+#if 0
 class FemLinearElasticLinearLocalAssembler: public NumLib::IElementWiseTransientLinearEQSLocalAssembler
 {
 private:
 	PorousMedia* _pm;
 	FemLib::LagrangianFeObjectContainer* _feObjects;
 public:
-    typedef typename NumLib::IElementWiseTransientLinearEQSLocalAssembler::LocalVectorType LocalVectorType;
-    typedef typename NumLib::IElementWiseTransientLinearEQSLocalAssembler::LocalMatrixType LocalMatrixType;
+    typedef NumLib::LocalVector LocalVectorType;
+    typedef NumLib::LocalMatrix LocalMatrixType;
 
     FemLinearElasticLinearLocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, PorousMedia &pm)
 	: _pm(&pm), _feObjects(&feObjects)
@@ -29,7 +29,7 @@ public:
 	virtual ~FemLinearElasticLinearLocalAssembler() {};
 
 protected:
-    virtual void assembly(const NumLib::TimeStep &time,  MeshLib::IElement &e, const LocalVectorType &local_u_n1, const LocalVectorType &local_u_n, LocalEquationType &eqs)
+    virtual void assembly(const NumLib::TimeStep &time,  MeshLib::IElement &e, const LocalVectorType &local_u_n1, const LocalVectorType &local_u_n, NumLib::LocalEquationType &eqs)
     {
 		FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
 
@@ -127,5 +127,6 @@ public:
 	}
 };
 
+#endif
 
 } //end

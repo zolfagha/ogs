@@ -4,10 +4,13 @@
 #include <string>
 #include <vector>
 
-#include "NumLib/TXFunction/TXFunction.h"
 #include "FemLib/BC/FemDirichletBC.h"
 #include "FemLib/BC/FemNeumannBC.h"
 
+namespace NumLib
+{
+class ITXFunction;
+}
 
 namespace SolutionLib
 {
@@ -34,7 +37,7 @@ public:
 
 
 	//----------------------------------------------------------------------
-    void addDirichletBC(FemLib::FemDirichletBC *bc)
+    void addDirichletBC(FemLib::FemDirichletBC* bc)
     {
         _map_bc1.push_back(bc);
     }
@@ -46,9 +49,9 @@ public:
 
 
 	//----------------------------------------------------------------------
-    void addNeumannBC(FemLib::IFemNeumannBC& bc2)
+    void addNeumannBC(FemLib::IFemNeumannBC* bc2)
     {
-        _map_bc2.push_back(&bc2);
+        _map_bc2.push_back(bc2);
     }
     size_t getNumberOfNeumannBC() const {return _map_bc2.size();};
     FemLib::IFemNeumannBC* getNeumannBC(size_t bc_id) const

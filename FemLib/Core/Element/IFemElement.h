@@ -58,10 +58,10 @@ public:
     virtual void integrateWxN(size_t igp, double f, LocalMatrix &mat) = 0;
 
     /// compute an matrix M = Int{W^T F dN} dV
-    virtual void integrateWxDN(size_t igp, LocalVector &f, LocalMatrix &mat) = 0;
+    virtual void integrateWxDN(size_t igp, LocalMatrix &f, LocalMatrix &mat) = 0;
 
     /// compute an matrix M = Int{dW^T F dN} dV
-    virtual void integrateDWxDN(size_t igp, double f, LocalMatrix &mat) = 0;
+    virtual void integrateDWxDN(size_t igp, LocalMatrix &f, LocalMatrix &mat) = 0;
 
     /// get the integration method
     virtual IFemNumericalIntegration* getIntegrationMethod() const = 0;
