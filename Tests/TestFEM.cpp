@@ -120,7 +120,7 @@ class MyFunction : public NumLib::ITXFunction
 {
 public:
 	virtual ~MyFunction() {};
-    virtual void eval(const double* x, double &v)
+    virtual void eval(const double* x, double &v) const
     {
         if (x[0]<1.0) v = 1e-11;
         else v = 2e-11;
@@ -138,7 +138,11 @@ TEST(FEM, ExtrapolateAverage2)
     delete gw._K;
     gw._K = new MyFunction();
     NumLib::TXFunctionConstant f_bc2(2.e+6);
-    FemLib::DirichletBC2FEM bc2(*msh, *gw.rec->getLeft(), f_bc2, gw.vec_bc1_nodes, gw.vec_bc1_vals);
+    std::vector<size_t> bc2_nodes;
+    std::vector<double> bc2_vals;
+    FemLib::DirichletBC2FEM bc2(*msh, *gw.rec->getLeft(), f_bc2, bc2_nodes, bc2_vals);
+    gw.vec_bc1_nodes.insert(gw.vec_bc1_nodes.end(), bc2_nodes.begin(), bc2_nodes.end());
+    gw.vec_bc1_vals.insert(gw.vec_bc1_vals.end(), bc2_vals.begin(), bc2_vals.end());
     gw.vec_bc2_nodes.clear();
     gw.vec_bc2_vals.clear();
 
@@ -157,7 +161,7 @@ TEST(FEM, ExtrapolateAverage2)
     }
 
     DiscreteLib::IDiscreteVector<double> *h = gw.head->getNodalValues();
-    ASSERT_DOUBLE_ARRAY_EQ(&exH[0], &(*h)[0], gw.head->getNumberOfNodes());
+    ASSERT_DOUBLE_ARRAY_EQ(&exH[0], &(*h)[0], gw.head->getNumberOfNodes(), 10);
 
     DiscreteLib::IDiscreteVector<NumLib::LocalVector> *v = nodal_vel.getNodalValues();
     NumLib::LocalVector expected(2);

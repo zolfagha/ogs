@@ -89,9 +89,11 @@ public:
             	q->getSamplingPoint(j, gp_x);
             	fe->computeBasisFunctions(gp_x);
                 fe->getRealCoordinates(real_x);
-            	NumLib::LocalMatrix k;
+            	double k = .0;
             	gw._K->eval(real_x, k);
-            	fe->integrateDWxDN(j, k, localK);
+                NumLib::LocalMatrix mat_k(1,1);
+                mat_k(0,0) = k;
+            	fe->integrateDWxDN(j, mat_k, localK);
             }
             e->getNodeIDList(e_node_id_list);
             eqs.addAsub(e_node_id_list, localK);
@@ -153,7 +155,7 @@ public:
                 double k;
                 gw._K->eval(&xx[0], k);
                 //dN->axpy(-k, &local_h[0], .0, &q[0]); //TODO  q = - K * dN * local_h;
-                q = -1.0 * (*dN) * local_h;
+                q = -k * (*dN) * local_h;
                 gw.vel->setIntegrationPointValue(i_e, ip, q);
             }
         }

@@ -17,7 +17,7 @@ namespace MathLib
 class EigenDenseLinearEquation : public ILinearEquations
 {
 public:
-    typedef Eigen::MatrixXd MatrixType;
+    typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> MatrixType;
     typedef Eigen::VectorXd VectorType;
 
     EigenDenseLinearEquation() {};

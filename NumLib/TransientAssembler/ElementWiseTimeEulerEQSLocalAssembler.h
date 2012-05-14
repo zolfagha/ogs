@@ -45,9 +45,10 @@ public:
 
         LocalMatrix M(n_dof, n_dof);
         LocalMatrix K(n_dof, n_dof);
-        LocalVector F(.0, n_dof);
+        LocalVector F(n_dof);
         M *= .0;
         K *= .0;
+        F *= .0;
 
         assembleODE(time, e, local_u_n1, local_u_n, M, K, F);
 

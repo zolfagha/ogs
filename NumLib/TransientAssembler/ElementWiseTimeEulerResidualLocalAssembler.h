@@ -45,9 +45,10 @@ public:
 
         LocalMatrix M(n_dof, n_dof);
         LocalMatrix K(n_dof, n_dof);
-        LocalVector F(.0, n_dof);
+        LocalVector F(n_dof);
         M *= .0;
         K *= .0;
+        F *= .0;
 
         // get M,K,F in M du/dt + K = F
         assembleODE(time, e, local_u_n1, local_u_n, M, K, F);
@@ -57,7 +58,7 @@ public:
 
         LocalMatrix TMP_M(n_dof, n_dof);
         LocalMatrix TMP_M2(n_dof, n_dof);
-        LocalVector TMP_V(.0, n_dof);
+        LocalVector TMP_V(n_dof);
 
         // evaluate r: r = (1/dt M + theta K) * u1 -(1/dt M - (1-theta) K) * u0 - F
         // r = (1/dt M + theta K) * u1

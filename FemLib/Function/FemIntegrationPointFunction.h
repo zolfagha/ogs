@@ -45,7 +45,7 @@ public:
         return this->_discrete_system->getMesh();
     }
 
-    void eval(const NumLib::TXPosition &/*pt*/, Tvalue &v)
+    void eval(const NumLib::TXPosition /*pt*/, NumLib::ITXFunction::DataType &v) const
     {
         v = (*_values)[0][0]; //TODO
     };

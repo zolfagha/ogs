@@ -114,11 +114,12 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Lin
     //IVBV problem
     Geo::MassFemProblem* _problem = new Geo::MassFemProblem(&dis);
     _problem->setEquation(eqs);
-    //BC
+    // var
     FemVariable* var = _problem->addVariable("concentration");
-    FemNodalFunctionScalar* conc = 0; //_problem->getVariable()(var_id);
-    ITXFunction *f_c0 = 0; //TODO
-    var->setIC(f_c0);
+    //IC
+    FemNodalFunctionScalar* c0 = new FemNodalFunctionScalar(dis, PolynomialOrder::Linear, 0);
+    var->setIC(c0);
+    //BC
     NumLib::TXFunctionConstant* f1 = new  NumLib::TXFunctionConstant(1.0);
     var->addDirichletBC(new FemDirichletBC(dis.getMesh(), line.getPoint1(), f1));
 

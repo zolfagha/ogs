@@ -36,6 +36,7 @@ protected:
 	virtual void assembleODE(const NumLib::TimeStep &/*time*/, MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/, LocalMatrixType &localM, LocalMatrixType &localK, LocalVectorType &/*localF*/)
 	{
 		FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
+        const size_t n_dim = e.getDimension();
 
         LocalMatrixType matDiff(localK);
         LocalMatrixType matAdv(localK);
@@ -54,12 +55,13 @@ protected:
         	f_diff_poro.eval(real_x, d_poro);
         	NumLib::ITXFunction::DataType v;
         	_vel->eval(real_x, v);
+            NumLib::ITXFunction::DataType v2 = v.topRows(n_dim).transpose();
         	NumLib::LocalMatrix mat_poro(1,1);
         	mat_poro(0,0) = d_poro;
 
      		fe->integrateWxN(j, poro, localM);
     		fe->integrateDWxDN(j, mat_poro, matDiff);
-            fe->integrateWxDN(j, v, matAdv);
+            fe->integrateWxDN(j, v2, matAdv);
         }
 
         localK = matDiff;

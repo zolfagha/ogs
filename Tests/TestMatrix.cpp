@@ -63,7 +63,7 @@ TEST(Math, Matrix_transposeAndMultiply2)
 TEST(Math, MatrixAddSubMatrix)
 {
     //Matrix<double> _m(4,4);
-    Eigen::MatrixXd _m(4,4);
+    DenseLinearEquations::LocalMatrix _m(4,4);
     _m(0,0) = 4.0; _m(0,1) = -1.0; _m(0,2) = -2.0; _m(0,3) = -1.0; 
     _m(1,1) = 4.0; _m(1,2) = -1.0; _m(1,3) = -2.0;
     _m(2,2) = 4.0; _m(2,3) = -1.0;

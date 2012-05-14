@@ -86,7 +86,11 @@ public:
                 NumLib::LocalMatrix k;
                 _K->eval(pos, k);
                 //dN->axpy(-k, &local_h[0], .0, &q[0]); // q = - K * dN * local_h;
-                q.noalias() = (*dN) * k * local_h * (-1.0);
+                if (k.rows()==1) {
+                    q.noalias() = (*dN) * local_h * (-1.0) * k(0,0);
+                } else {
+                    q.noalias() = (*dN) * k * local_h * (-1.0);
+                }
                 vel->setIntegrationPointValue(i_e, ip, q);
             }
         }

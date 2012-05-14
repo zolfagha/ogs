@@ -179,7 +179,10 @@ public:
         LocalMatrix *test = coord_prop->shape_r;
         double fac = coord_prop->det_jacobian * _integration->getWeight(igp);
 //        test->transposeAndMultiply(*dbasis, &f[0], mat, fac);
-        mat.noalias() += test->transpose() * f * (*dbasis) * fac;
+        //LocalMatrix temp2 = test->transpose();
+        //LocalMatrix temp3 = temp2 * temp;
+        //mat.noalias() += temp3 * fac;
+        mat.noalias() += test->transpose() * (f * (*dbasis)) * fac;
     }
 
     /// compute an matrix M = Int{dW^T F dN} dV
@@ -191,7 +194,11 @@ public:
         LocalMatrix *dtest = coord_prop->dshape_dx;
         double fac = coord_prop->det_jacobian * _integration->getWeight(igp);
 //        dtest->transposeAndMultiply(*dbasis, mat, fac);
-        mat.noalias() += dtest->transpose() * f * (*dbasis) * fac;
+        if (f.rows()==1) {
+            mat.noalias() += dtest->transpose() * f(0,0) * (*dbasis) * fac;
+        } else {
+            mat.noalias() += dtest->transpose() * f * (*dbasis) * fac;
+        }
     }
 
     void extrapolate(const std::vector<LocalVector> &gp_values, std::vector<LocalVector> &nodal_values)

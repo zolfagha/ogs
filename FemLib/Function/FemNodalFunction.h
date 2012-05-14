@@ -181,7 +181,7 @@ private:
         initialize(*org._discrete_system, *org._msh, org._order);
         //std::copy(org._nodal_values->begin(), org._nodal_values->end(), _nodal_values->begin());
         for (size_t i=org._nodal_values->getRangeBegin(); i<org._nodal_values->getRangeEnd(); ++i)
-        	_nodal_values[i] = org._nodal_values[i];
+        	(*_nodal_values)[i] = (*org._nodal_values)[i];
     }
 
 private:

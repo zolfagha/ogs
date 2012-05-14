@@ -147,7 +147,7 @@ private:
     {
         initialize(*org._discrete_system, *org._msh);
         for (size_t i=org._nodal_values->getRangeBegin(); i<org._nodal_values->getRangeEnd(); ++i)
-        	_nodal_values[i] = org._nodal_values[i];
+        	(*_nodal_values)[i] = (*org._nodal_values)[i];
         //std::copy(org._nodal_values->begin(), org._nodal_values->end(), _nodal_values->begin());
     }
 
@@ -176,7 +176,7 @@ public:
         return obj;
     };
 
-    virtual void eval(const NumLib::TXPosition &x, NumLib::ITXFunction::DataType &val)
+    virtual void eval(const NumLib::TXPosition x, NumLib::ITXFunction::DataType &val) const
     {
     	val = _vec[0];
     }

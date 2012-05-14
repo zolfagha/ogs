@@ -27,7 +27,8 @@ void ElementWiseTransientResidualAssembler::assembly( const MeshLib::IMesh &msh,
         DiscreteLib::getLocalVector(dofManager, ele_node_ids, ele_node_size_order, *_u1, local_u_n1);
         DiscreteLib::getLocalVector(dofManager, ele_node_ids, ele_node_size_order, *_u0, local_u_n);
         // local assembly
-        localVec.resize(local_dofmap.size(), .0);
+        localVec.resize(local_dofmap.size());
+        localVec *= .0;
         _transient_e_assembler->assembly(time, *e, local_u_n1, local_u_n, localVec);
         // update global
         globalVec.addSubvector(local_dofmap, &localVec[0]);

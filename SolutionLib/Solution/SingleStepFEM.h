@@ -56,7 +56,7 @@ public:
         const size_t n_var = problem->getNumberOfVariables();
         // create dof map
         for (size_t i=0; i<n_var; i++) {
-        	size_t n_dof_per_var = 0; //problem->getVariable(i)->getNumberOfNodes();
+        	size_t n_dof_per_var = problem->getMesh()->getNumberOfNodes();
             _dofManager.addVariableDoFs(dis->getMesh()->getID(), 0, n_dof_per_var);
         }
         _dofManager.construct();
@@ -72,7 +72,7 @@ public:
         _vec_n1 = dis->createVector<ImplVector>(n_dofs);
         _vec_n1_0 = dis->createVector<ImplVector>(n_dofs);
         _vec_st = dis->createVector<ImplVector>(n_dofs);
-        FemLib::FemNodalFunctionScalar *f_ic = (FemLib::FemNodalFunctionScalar*) problem->getVariable(0)->getIC(); //TODO one var
+        FemLib::FemNodalFunctionScalar *f_ic = problem->getVariable(0)->getIC(); //TODO one var
         *_vec_n1 = *f_ic->getNodalValues();
         // create linear equation systems
         _linear_solver = new LinearSolverType();

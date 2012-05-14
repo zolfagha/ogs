@@ -30,7 +30,9 @@ public:
         const MeshLib::IMesh* msh = ele_var.getMesh();
         LagrangianFeObjectContainer* feObjects = nod_var.getFeObjectContainer();
         MeshLib::TopologySequentialNodes2Elements node2eles(*msh);
-        std::vector<Tvalue> vec_v(msh->getNumberOfNodes());
+        Tvalue v0 = ele_var.getIntegrationPointValues(0)[0];
+        v0 *= .0;
+        std::vector<Tvalue> vec_v(msh->getNumberOfNodes(), v0);
 
         for (size_t i=0; i<msh->getNumberOfElements(); i++) {
             MeshLib::IElement* e = msh->getElemenet(i);

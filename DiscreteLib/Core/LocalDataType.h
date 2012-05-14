@@ -7,7 +7,7 @@
 namespace DiscreteLib
 {
 typedef MathLib::EigenDenseLinearEquation LocalEquation;
-typedef Eigen::MatrixXd LocalMatrix;
+typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> LocalMatrix;
 typedef Eigen::VectorXd LocalVector;
 
 }
