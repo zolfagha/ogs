@@ -7,7 +7,7 @@
 
 #include "MeshLib/Core/IMesh.h"
 
-#include "DiscreteLib/Core/DiscreteLinearEquation.h"
+#include "DiscreteLib/Core/IDiscreteLinearEquation.h"
 #include "DiscreteLib/Utils/SparsityBuilder.h"
 
 namespace DiscreteLib

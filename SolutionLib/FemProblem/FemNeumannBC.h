@@ -12,10 +12,9 @@
 #include "NumLib/Function/Function.h"
 
 #include "FemLib/Function/FemFunction.h"
-#include "IFemBC.h"
 #include "FemLib/BC/NeumannBC2FEM.h"
 
-namespace FemLib
+namespace SolutionLib
 {
 
 class IFemNeumannBC
@@ -39,7 +38,7 @@ class FemNeumannBC : public IFemNeumannBC //: IFemBC, public MathLib::TemplateSp
 {
 public:
     /// 
-    FemNeumannBC(MeshLib::IMesh *msh, LagrangianFeObjectContainer* feObjects, GeoLib::GeoObject *geo, NumLib::ITXFunction *func)
+    FemNeumannBC(MeshLib::IMesh *msh, FemLib::LagrangianFeObjectContainer* feObjects, GeoLib::GeoObject *geo, NumLib::ITXFunction *func)
     {
         _msh = msh;
         _feObjects = feObjects;
@@ -55,7 +54,7 @@ public:
         if (!_do_setup) return;
         if (!_is_transient) _do_setup = false;
 
-        NeumannBC2FEM convert(*_msh, *_feObjects, *_geo, *_bc_func, _vec_nodes, _vec_values);
+        FemLib::NeumannBC2FEM convert(*_msh, *_feObjects, *_geo, *_bc_func, _vec_nodes, _vec_values);
 
         if (!_is_transient)
             _do_setup = false;
@@ -102,7 +101,7 @@ public:
 private:
     // node id, var id, value
     MeshLib::IMesh* _msh;
-    LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangianFeObjectContainer* _feObjects;
     GeoLib::GeoObject *_geo;
     NumLib::ITXFunction *_bc_func;
     std::vector<size_t> _vec_nodes;

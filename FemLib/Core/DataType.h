@@ -1,14 +1,10 @@
 
 #pragma once
 
-#include <Eigen>
-//#include "MathLib/LinAlg/Dense/Matrix.h"
+#include "DiscreteLib/Core/LocalDataType.h"
 
 namespace FemLib
 {
-
-//typedef MathLib::Matrix<double> LocalMatrix;
-typedef Eigen::MatrixXd LocalMatrix;
-typedef Eigen::VectorXd LocalVector;
-
+typedef DiscreteLib::LocalMatrix LocalMatrix;
+typedef DiscreteLib::LocalVector LocalVector;
 }

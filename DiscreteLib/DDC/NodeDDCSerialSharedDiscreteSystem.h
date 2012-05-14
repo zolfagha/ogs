@@ -122,7 +122,7 @@ public:
         for (size_t i=0; i<x.size(); i++)
             x[i] = tmp_x[i];
     }
-    void getX(DiscreteVector<double> &x)
+    void getX(IDiscreteVector<double> &x)
     {
         double *tmp_x = _sheared_eqs->getX();
         for (size_t i=x.getRangeBegin(); i<x.getRangeEnd(); i++)
@@ -217,6 +217,7 @@ private:
     // linear equations
     std::vector<IDiscreteLinearEquation*> _vec_linear_sys;
     // vector
-    std::vector<IDiscreteVectorBase*> _vec_vectors;};
+    std::vector<IDiscreteResource*> _vec_vectors;
+};
 
 } //end

@@ -5,7 +5,7 @@
 #include <valarray>
 
 #include "DiscreteLib/EquationId/DofEquationIdTable.h"
-#include "DiscreteLib/Core/DiscreteVector.h"
+#include "DiscreteLib/Vector/DiscreteVector.h"
 #include "DiscreteLib/Assembler/IDiscreteVectorAssembler.h"
 
 #include "IElementWiseTransientResidualLocalAssembler.h"
@@ -33,7 +33,7 @@ public:
     /// @param u0
     /// @param u1
     /// @param a
-	ElementWiseTransientResidualAssembler(const TimeStep* time, const std::vector<DiscreteLib::DiscreteVector<double>*>* u0, const std::vector<DiscreteLib::DiscreteVector<double>*>* u1, IElementWiseTransientResidualLocalAssembler* a)
+	ElementWiseTransientResidualAssembler(const TimeStep* time, const std::vector<GlobalVectorType*>* u0, const std::vector<GlobalVectorType*>* u1, IElementWiseTransientResidualLocalAssembler* a)
         : _transient_e_assembler(a), _timestep(time), _u0(u0), _u1(u1)
     { };
 
@@ -49,8 +49,8 @@ public:
 private:
     IElementWiseTransientResidualLocalAssembler* _transient_e_assembler;
     const TimeStep* _timestep;
-    const std::vector<DiscreteLib::DiscreteVector<double>*>* _u0;
-    const std::vector<DiscreteLib::DiscreteVector<double>*>* _u1;
+    const std::vector<GlobalVectorType*>* _u0;
+    const std::vector<GlobalVectorType*>* _u1;
 };
 
 

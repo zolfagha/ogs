@@ -83,7 +83,7 @@ public:
                 xx[1] = tmp_v[0];
                 NumLib::TXPosition pos(&xx[0]);
 
-                LocalMatrix k;
+                NumLib::LocalMatrix k;
                 _K->eval(pos, k);
                 //dN->axpy(-k, &local_h[0], .0, &q[0]); // q = - K * dN * local_h;
                 q.noalias() = (*dN) * k * local_h * (-1.0);

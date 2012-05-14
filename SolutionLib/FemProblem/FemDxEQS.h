@@ -8,15 +8,15 @@
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "NumLib/TransientAssembler/ElementWiseTransientDxEQSAssembler.h"
 #include "FemLib/Function/FemFunction.h"
-#include "FemLib/BC/FemDirichletBC.h"
-#include "FemLib/BC/FemNeumannBC.h"
+#include "FemDirichletBC.h"
+#include "FemNeumannBC.h"
 
 #include "FemVariable.h"
 
 namespace SolutionLib
 {
 
-typedef DiscreteLib::DiscreteVector<double> MyFemVector;
+typedef DiscreteLib::IDiscreteVector<double> MyFemVector;
 
 /**
  * \brief Template class for transient linear FEM functions
@@ -73,7 +73,7 @@ public:
         for (size_t i=0; i<_list_var.size(); i++) {
         	FemVariable* var = _list_var[i];
             for (size_t j=0; j<var->getNumberOfDirichletBC(); j++) {
-                FemLib::FemDirichletBC* bc1 = var->getDirichletBC(j);
+                FemDirichletBC* bc1 = var->getDirichletBC(j);
                 bc1->setup();
                 std::vector<double> bc_value_for_dx(bc1->getListOfBCNodes().size(), .0);
                 _linear_eqs->setPrescribedDoF(i, bc1->getListOfBCNodes(), bc1->getListOfBCValues());

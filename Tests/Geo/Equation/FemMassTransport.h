@@ -54,7 +54,7 @@ protected:
         	f_diff_poro.eval(real_x, d_poro);
         	NumLib::ITXFunction::DataType v;
         	_vel->eval(real_x, v);
-        	LocalMatrix mat_poro(1,1);
+        	NumLib::LocalMatrix mat_poro(1,1);
         	mat_poro(0,0) = d_poro;
 
      		fe->integrateWxN(j, poro, localM);
@@ -115,7 +115,7 @@ public:
         	f_diff_poro.eval(real_x, d_poro);
         	NumLib::ITXFunction::DataType v;
         	_vel->eval(real_x, v);
-        	LocalMatrix mat_poro(1,1);
+        	NumLib::LocalMatrix mat_poro(1,1);
         	mat_poro(0,0) = d_poro;
 
      		fe->integrateWxN(j, poro, matM);

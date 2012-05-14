@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "DiscreteLib/Core/DataType.h"
+#include "DiscreteLib/Core/LocalDataType.h"
 
 namespace MathLib
 {

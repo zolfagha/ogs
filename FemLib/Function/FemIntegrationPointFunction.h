@@ -6,7 +6,7 @@
 
 #include "MathLib/Vector.h"
 #include "FemLib/Core/DataType.h"
-#include "DiscreteLib/Core/DiscreteVector.h"
+#include "DiscreteLib/Vector/DiscreteVector.h"
 
 
 namespace FemLib
@@ -66,38 +66,38 @@ public:
         return (*_values)[i_e];
     }
 
-    double norm_diff(const TemplateFEMIntegrationPointFunction<Tvalue> &ref) const
-    {
-    	const size_t n = _values->size();
-    	if (n!=ref._values->size()) {
-    		std::cout << "***Warning in TemplateFEMIntegrationPointFunction::norm_diff(): size of two vectors is not same." << std::endl;
-    		return .0;
-    	}
-
-    	double mnorm = .0;
-    	for (size_t i=0; i<n; ++i) {
-    		const IntegrationPointVectorType &val1 = (*_values)[i];
-    		const IntegrationPointVectorType &val2 = (*ref._values)[i];
-    		const size_t n_gp = val1.size();
-        	if (n_gp!=val2.size()) {
-        		std::cout << "***Warning in TemplateFEMIntegrationPointFunction::norm_diff(): size of two vectors is not same." << std::endl;
-        		return .0;
-        	} else if (n_gp==0) {
-                std::cout << "***Warning in TemplateFEMIntegrationPointFunction::norm_diff(): size of two vectors is zero." << std::endl;
-                return .0;
-            }
-        	IntegrationPointVectorType val_diff = val1 - val2;
-
-//        	val_diff = std::abs(val_diff);
-        	double val_diff_max = .0; // val_diff.max
-        	for (size_t j=0; j<val_diff.size(); j++) {
-        		val_diff_max = std::max(val_diff_max, val_diff[j].array().abs().maxCoeff());
-        	}
-			mnorm = std::max(mnorm, val_diff_max);
-    	}
-
-    	return mnorm;
-    }
+//    double norm_diff(const TemplateFEMIntegrationPointFunction<Tvalue> &ref) const
+//    {
+//    	const size_t n = _values->size();
+//    	if (n!=ref._values->size()) {
+//    		std::cout << "***Warning in TemplateFEMIntegrationPointFunction::norm_diff(): size of two vectors is not same." << std::endl;
+//    		return .0;
+//    	}
+//
+//    	double mnorm = .0;
+//    	for (size_t i=0; i<n; ++i) {
+//    		const IntegrationPointVectorType &val1 = (*_values)[i];
+//    		const IntegrationPointVectorType &val2 = (*ref._values)[i];
+//    		const size_t n_gp = val1.size();
+//        	if (n_gp!=val2.size()) {
+//        		std::cout << "***Warning in TemplateFEMIntegrationPointFunction::norm_diff(): size of two vectors is not same." << std::endl;
+//        		return .0;
+//        	} else if (n_gp==0) {
+//                std::cout << "***Warning in TemplateFEMIntegrationPointFunction::norm_diff(): size of two vectors is zero." << std::endl;
+//                return .0;
+//            }
+//        	IntegrationPointVectorType val_diff = val1 - val2;
+//
+////        	val_diff = std::abs(val_diff);
+//        	double val_diff_max = .0; // val_diff.max
+//        	for (size_t j=0; j<val_diff.size(); j++) {
+//        		val_diff_max = std::max(val_diff_max, val_diff[j].array().abs().maxCoeff());
+//        	}
+//			mnorm = std::max(mnorm, val_diff_max);
+//    	}
+//
+//    	return mnorm;
+//    }
 
     const DiscreteVectorType* getNodalValues() const
     {
@@ -123,7 +123,7 @@ private:
     void initialize(DiscreteLib::DiscreteSystem &dis)
     {
         _discrete_system = &dis;
-        _values = _discrete_system->createVector<IntegrationPointVectorType >(dis.getMesh()->getNumberOfElements());
+        _values = _discrete_system->createVector<DiscreteVectorType>(dis.getMesh()->getNumberOfElements());
     }
 };
 

@@ -7,7 +7,7 @@
 #include "MeshLib/Topology/Topology.h"
 
 #include "DiscreteLib/EquationId/DofEquationIdTable.h"
-#include "DiscreteLib/Core/DiscreteVector.h"
+#include "DiscreteLib/Vector/DiscreteVector.h"
 #include "DiscreteLib/Assembler/IDiscreteLinearEquationAssembler.h"
 #include "DiscreteLib/Utils/Tools.h"
 #include "IStencilWiseTransientLinearEQSLocalAssembler.h"
@@ -41,7 +41,7 @@ public:
     /// @param u0
     /// @param u1
     /// @param a
-	StencilWiseTransientLinearEQSAssembler(const NumLib::TimeStep* time, const std::vector<DiscreteLib::DiscreteVector<double>*>* u0, const std::vector<DiscreteLib::DiscreteVector<double>*>* u1, IStencilWiseTransientLinearEQSLocalAssembler* a)
+	StencilWiseTransientLinearEQSAssembler(const NumLib::TimeStep* time, const std::vector<DiscreteLib::IDiscreteVector<double>*>* u0, const std::vector<DiscreteLib::IDiscreteVector<double>*>* u1, IStencilWiseTransientLinearEQSLocalAssembler* a)
         : _transient_e_assembler(a), _timestep(time), _u0(u0), _u1(u1)
     { };
 
@@ -95,8 +95,8 @@ public:
 private:
     IStencilWiseTransientLinearEQSLocalAssembler* _transient_e_assembler;
     const NumLib::TimeStep* _timestep;
-    const std::vector<DiscreteLib::DiscreteVector<double>*>* _u0;
-    const std::vector<DiscreteLib::DiscreteVector<double>*>* _u1;
+    const std::vector<DiscreteLib::IDiscreteVector<double>*>* _u0;
+    const std::vector<DiscreteLib::IDiscreteVector<double>*>* _u1;
 };
 
 

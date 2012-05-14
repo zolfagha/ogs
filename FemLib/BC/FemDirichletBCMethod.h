@@ -3,7 +3,6 @@
 
 #include <vector>
 #include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
-#include "FemDirichletBC.h"
 
 namespace FemLib
 {
@@ -17,9 +16,9 @@ public:
 class DiagonalizeMethod : public IDirichletBCMethod
 {
 public:
-    void apply( MathLib::ILinearEquations& eqs, FemDirichletBC &bc)
+    void apply(const std::vector<size_t> &bc_nodes, const std::vector<double> &bc_values, MathLib::ILinearEquations& eqs)
     {
-        eqs.setKnownX(bc.getListOfBCNodes(), bc.getListOfBCValues());
+        eqs.setKnownX(bc_nodes, bc_values);
     }
 };
 

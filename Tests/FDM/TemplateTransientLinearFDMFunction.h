@@ -14,7 +14,7 @@
 namespace FdmLib
 {
 
-typedef DiscreteLib::DiscreteVector<double> MyFemVector;
+typedef DiscreteLib::IDiscreteVector<double> MyFemVector;
 
 /**
  * \brief Template class for transient linear FEM functions

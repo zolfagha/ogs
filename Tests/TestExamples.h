@@ -18,9 +18,9 @@
 #include "NumLib/Function/TXFunction.h"
 
 #include "FemLib/Function/FemFunction.h"
-#include "FemLib/BC/FemDirichletBC.h"
+#include "FemLib/BC/DirichletBC2FEM.h"
 #include "FemLib/BC/FemDirichletBCMethod.h"
-#include "FemLib/BC/FemNeumannBC.h"
+#include "FemLib/BC/NeumannBC2FEM.h"
 #include "FemLib/Post/Extrapolation.h"
 
 
@@ -33,8 +33,10 @@ public:
     NumLib::ITXFunction *_K;
     FemLib::FemNodalFunctionScalar *head;
     FemLib::FEMIntegrationPointFunctionVector *vel;
-    std::vector<FemLib::FemDirichletBC*> vec_bc1;
-    std::vector<FemLib::FemNeumannBC*> vec_bc2;
+    std::vector<size_t> vec_bc1_nodes;
+    std::vector<double> vec_bc1_vals;
+    std::vector<size_t> vec_bc2_nodes;
+    std::vector<double> vec_bc2_vals;
 
     void define(MeshLib::IMesh *msh, NumLib::ITXFunction *K=0)
     {
@@ -50,8 +52,10 @@ public:
         head = new FemLib::FemNodalFunctionScalar(*dis, FemLib::PolynomialOrder::Linear);
         vel = new FemLib::FEMIntegrationPointFunctionVector(*dis);
         //bc
-        vec_bc1.push_back(new FemLib::FemDirichletBC(msh, poly_right, new NumLib::TXFunctionConstant(.0)));
-        vec_bc2.push_back(new FemLib::FemNeumannBC(msh, head->getFeObjectContainer(), poly_left, new NumLib::TXFunctionConstant(-1e-5)));
+        NumLib::TXFunctionConstant f_bc1(.0);
+        FemLib::DirichletBC2FEM bc1(*msh, *poly_right, f_bc1, vec_bc1_nodes, vec_bc1_vals);
+        NumLib::TXFunctionConstant f_bc2(-1e-5);
+        FemLib::NeumannBC2FEM bc2(*msh, *head->getFeObjectContainer(), *poly_left, f_bc2, vec_bc2_nodes, vec_bc2_vals);
         // mat
         _K = (K!=0) ? K : new NumLib::TXFunctionConstant(1.e-11);
     }
@@ -59,8 +63,8 @@ public:
     static void calculateHead(GWFemTest &gw)
     {
         const MeshLib::IMesh *msh = gw.msh;
-        for (size_t i=0; i<gw.vec_bc1.size(); i++) gw.vec_bc1[i]->setup();
-        for (size_t i=0; i<gw.vec_bc2.size(); i++) gw.vec_bc2[i]->setup();
+//        for (size_t i=0; i<gw.vec_bc1.size(); i++) gw.vec_bc1[i]->setup();
+//        for (size_t i=0; i<gw.vec_bc2.size(); i++) gw.vec_bc2[i]->setup();
         // global EQS
         const size_t n_dof = msh->getNumberOfNodes();
         MathLib::EigenDenseLinearEquation eqs;
@@ -96,15 +100,12 @@ public:
         //outputLinearEQS(*globalA, globalRHS);
 
         //apply BC
-        for (size_t i=0; i<gw.vec_bc2.size(); i++) {
-    		for (size_t i=0; i<gw.vec_bc2[i]->getNumberOfConditions(); i++)
-    			globalRHS[gw.vec_bc2[i]->getConditionDoF(i)] -= gw.vec_bc2[i]->getConditionValue(i);
+        for (size_t i=0; i<gw.vec_bc2_nodes.size(); i++) {
+			globalRHS[gw.vec_bc2_nodes[i]] -= gw.vec_bc2_vals[i];
         }
         //outputLinearEQS(globalA, globalRHS);
         FemLib::DiagonalizeMethod diag;
-        for (size_t i=0; i<gw.vec_bc1.size(); i++) {
-            diag.apply(eqs, *gw.vec_bc1[i]);
-        }
+        diag.apply(gw.vec_bc1_nodes, gw.vec_bc1_vals, eqs);
         //for (size_t i=0; i<gw.vec_bc1.size(); i++) gw.vec_bc1[i]->apply(eqs);
         //outputLinearEQS(*globalA, globalRHS);
 

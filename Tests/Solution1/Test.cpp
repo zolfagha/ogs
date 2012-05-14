@@ -12,7 +12,7 @@
 #include "NumLib/TransientCoupling/AsyncPartitionedSystem.h"
 #include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
 #include "NumLib/Coupling/Algorithm/TransientPartitionedAlgorithm.h"
-
+#include "FemLib/Function/FemNorm.h"
 #include "Tests/Geo/Model/Head.h"
 #include "Tests/Geo/Model/Velocity.h"
 #include "Tests/Geo/Model/Concentration.h"
@@ -25,7 +25,13 @@
 
 class FemFunctionConvergenceCheck : public IConvergenceCheck
 {
+	FemLib::NormOfFemNodalFunction<double> _norm;
 public:
+	explicit FemFunctionConvergenceCheck(DiscreteLib::DiscreteSystem *dis) : _norm(dis)
+	{
+
+	}
+
 	bool isConverged(UnnamedParameterSet& vars_prev, UnnamedParameterSet& vars_current, double eps, double &v_diff)
 	{
 	    for (size_t i=0; i<vars_prev.size(); i++) {
@@ -33,11 +39,13 @@ public:
 	    	if (vars_prev.getName(i).compare("h")==0 || vars_prev.getName(i).compare("c")==0) {
 		        const FemNodalFunctionScalar* f_fem_prev = vars_prev.get<FemNodalFunctionScalar>(i);
 		        const FemNodalFunctionScalar* f_fem_cur = vars_current.get<FemNodalFunctionScalar>(i);
-	    		v_diff = f_fem_cur->norm_diff(*f_fem_prev);
+	    		//v_diff = f_fem_cur->norm_diff(*f_fem_prev);
+	    		v_diff = _norm(*f_fem_prev, *f_fem_cur);
 	    	} else if (vars_prev.getName(i).compare("v")==0) {
 	    		const FEMIntegrationPointFunctionVector* f_fem_prev = vars_prev.get<FEMIntegrationPointFunctionVector>(i);
 	    		const FEMIntegrationPointFunctionVector* f_fem_cur = vars_current.get<FEMIntegrationPointFunctionVector>(i);
-	    		v_diff = f_fem_cur->norm_diff(*f_fem_prev);
+	    		//v_diff = f_fem_cur->norm_diff(*f_fem_prev);
+	    		v_diff = _norm(*f_fem_prev, *f_fem_cur);
 	    	}
 #endif
 	        if (v_diff>eps) {
@@ -167,7 +175,7 @@ TEST(Solution, CouplingFem2D)
         f_vel.setInputParameterName(0, "h");
         f_vel.setOutputParameterName(0, "v");
 
-        FemFunctionConvergenceCheck checker;
+        FemFunctionConvergenceCheck checker(&dis);
 	    SerialStaggeredMethod method(checker, 1e-5, 100);
 	    AsyncPartitionedSystem apart1;
         apart1.setAlgorithm(method);
@@ -187,7 +195,7 @@ TEST(Solution, CouplingFem2D)
 
 	    const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
 	    const FEMIntegrationPointFunctionVector* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
-	    const DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
+	    const IDiscreteVector<double>* vec_h = r_f_head->getNodalValues();
 	    //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
 
 	    r_f_head->printout();
@@ -235,7 +243,7 @@ TEST(FEM, line)
         f_vel.setInputParameterName(0, "h");
         f_vel.setOutputParameterName(0, "v");
 
-        FemFunctionConvergenceCheck checker;
+        FemFunctionConvergenceCheck checker(&dis);
         SerialStaggeredMethod method(checker, 1e-5, 100);
         AsyncPartitionedSystem apart1;
         apart1.setAlgorithm(method);
@@ -255,7 +263,7 @@ TEST(FEM, line)
 
         const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
         const FEMIntegrationPointFunctionVector* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
-        const DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
+        const IDiscreteVector<double>* vec_h = r_f_head->getNodalValues();
         //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
 
         r_f_head->printout();
@@ -335,7 +343,7 @@ TEST(Solution, CouplingFem2)
         f_c.setOutputParameterName(0, "c");
 
 
-        FemFunctionConvergenceCheck checker;
+        FemFunctionConvergenceCheck checker(&dis);
         SerialStaggeredMethod method(checker, 1e-5, 100);
 	    AsyncPartitionedSystem apart1;
         apart1.setAlgorithm(method);
@@ -358,9 +366,9 @@ TEST(Solution, CouplingFem2)
 	    const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
 	    const FEMIntegrationPointFunctionVector* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
 	    const FemNodalFunctionScalar* r_f_c = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("c"));
-	    const DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
+	    const IDiscreteVector<double>* vec_h = r_f_head->getNodalValues();
 	    //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
-	    const DiscreteVector<double>* vec_c = r_f_c->getNodalValues();
+	    const IDiscreteVector<double>* vec_c = r_f_c->getNodalValues();
 
 	    //r_f_head->printout();
 	    //r_f_v->printout();

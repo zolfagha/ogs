@@ -14,8 +14,8 @@
 #include "DiscreteLib/Core/DiscreteSystem.h"
 
 #include "FemLib/Function/FemFunction.h"
-#include "FemLib/BC/FemDirichletBC.h"
-#include "FemLib/BC/FemNeumannBC.h"
+#include "FemLib/BC/DirichletBC2FEM.h"
+#include "FemLib/BC/NeumannBC2FEM.h"
 #include "FemLib/Post/Extrapolation.h"
 
 #include "TestExamples.h"
@@ -73,7 +73,7 @@ TEST(FEM, testUnstructuredMesh)
     //#Solve
     GWFemTest::calculateHead(gw);
 
-    DiscreteLib::DiscreteVector<double>* h = gw.head->getNodalValues();
+    DiscreteLib::IDiscreteVector<double>* h = gw.head->getNodalValues();
     std::vector<double> expected;
     getGWExpectedHead(expected);
 
@@ -88,7 +88,7 @@ TEST(FEM, testStructuredMesh)
     //#Solve
     GWFemTest::calculateHead(gw);
 
-    DiscreteLib::DiscreteVector<double>* h = gw.head->getNodalValues();
+    DiscreteLib::IDiscreteVector<double>* h = gw.head->getNodalValues();
     std::vector<double> expected;
     getGWExpectedHead(expected);
 
@@ -109,7 +109,7 @@ TEST(FEM, ExtrapolateAverage1)
     FemExtrapolationAverage<NumLib::LocalVector> extrapo;
     extrapo.extrapolate(*gw.vel, nodal_vel);
 
-    DiscreteLib::DiscreteVector<NumLib::LocalVector> *v = nodal_vel.getNodalValues();
+    DiscreteLib::IDiscreteVector<NumLib::LocalVector> *v = nodal_vel.getNodalValues();
     NumLib::LocalVector expected(2);
     expected[0] = 1.e-5;
     expected[1] = .0;
@@ -137,9 +137,10 @@ TEST(FEM, ExtrapolateAverage2)
     gw.define(msh);
     delete gw._K;
     gw._K = new MyFunction();
-    gw.vec_bc1.push_back(new FemDirichletBC(msh, gw.rec->getLeft(), new NumLib::TXFunctionConstant(2.e+6)));
-    delete gw.vec_bc2[0];
-    gw.vec_bc2.clear();
+    NumLib::TXFunctionConstant f_bc2(2.e+6);
+    FemLib::DirichletBC2FEM bc2(*msh, *gw.rec->getLeft(), f_bc2, gw.vec_bc1_nodes, gw.vec_bc1_vals);
+    gw.vec_bc2_nodes.clear();
+    gw.vec_bc2_vals.clear();
 
     GWFemTest::calculateHead(gw);
     GWFemTest::calculateVelocity(gw);
@@ -155,10 +156,10 @@ TEST(FEM, ExtrapolateAverage2)
         if (i%3==2) exH[i] = 0.e+6;
     }
 
-    DiscreteLib::DiscreteVector<double> *h = gw.head->getNodalValues();
+    DiscreteLib::IDiscreteVector<double> *h = gw.head->getNodalValues();
     ASSERT_DOUBLE_ARRAY_EQ(&exH[0], &(*h)[0], gw.head->getNumberOfNodes());
 
-    DiscreteLib::DiscreteVector<NumLib::LocalVector> *v = nodal_vel.getNodalValues();
+    DiscreteLib::IDiscreteVector<NumLib::LocalVector> *v = nodal_vel.getNodalValues();
     NumLib::LocalVector expected(2);
     expected[0] = 4./3.*1.e-5;
     expected[1] = .0;

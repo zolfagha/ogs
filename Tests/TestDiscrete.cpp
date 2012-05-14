@@ -20,8 +20,8 @@
 
 
 #include "DiscreteLib/Core/DiscreteSystem.h"
-#include "DiscreteLib/Core/DiscreteVector.h"
-#include "DiscreteLib/Core/DiscreteLinearEquation.h"
+#include "DiscreteLib/Vector/DiscreteVector.h"
+#include "DiscreteLib/Core/IDiscreteLinearEquation.h"
 #include "DiscreteLib/EquationId/DofEquationIdTable.h"
 #include "DiscreteLib/OpenMP/OMPDiscreteSystem.h"
 #include "DiscreteLib/Assembler/ElementWiseLinearEquationAssembler.h"
@@ -238,7 +238,7 @@ TEST(Discrete, VecSingle1)
 {
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     DiscreteSystem dis(*msh);
-    DiscreteVector<double> *v = dis.createVector<double>(msh->getNumberOfNodes());
+    DiscreteVector<double> *v = dis.createVector<DiscreteVector<double> >(msh->getNumberOfNodes());
 
     double expected[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
     std::copy(expected, expected+9, v->begin());

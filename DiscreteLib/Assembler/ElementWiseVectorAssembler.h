@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include "MathLib/MatrixVector.h"
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/EquationId/DofEquationIdTable.h"
 
@@ -18,17 +19,16 @@ namespace DiscreteLib
 {
 
 /**
- * \brief Element-based discrete system assembler classes
+ * \brief Element-based discrete vector assembler classes
  */
 template <class T>
 class ElementWiseVectorAssembler : public IDiscreteVectorAssembler<T>
 {
 public:
 	typedef IDiscreteVectorAssembler<T>::VectorType GlobalVectorType;
-	typedef std::valarray<T> LocalVectorType;
 
     ///
-	ElementWiseVectorAssembler(IElemenetWiseVectorLocalAssembler<T> &a) : _e_assembler(&a) {};
+	explicit ElementWiseVectorAssembler(IElemenetWiseVectorLocalAssembler<T> &a) : _e_assembler(&a) {};
 
     /// Conduct the element by element assembly procedure
     ///
@@ -37,7 +37,7 @@ public:
     /// @param vec Discrete vector
     void assembly(const MeshLib::IMesh &msh, const DofEquationIdTable &dofManager, GlobalVectorType &globalVec)
     {
-    	LocalVectorType localVec;
+    	MathLib::Vector localVec;
         std::vector<size_t> ele_node_ids, ele_node_size_order;
         std::vector<long> local_dofmap_row;
         const size_t n_ele = msh.getNumberOfElements();

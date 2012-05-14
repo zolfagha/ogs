@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "FemLib/BC/FemDirichletBC.h"
-#include "FemLib/BC/FemNeumannBC.h"
+#include "FemDirichletBC.h"
+#include "FemNeumannBC.h"
 
 namespace NumLib
 {
@@ -37,24 +37,24 @@ public:
 
 
 	//----------------------------------------------------------------------
-    void addDirichletBC(FemLib::FemDirichletBC* bc)
+    void addDirichletBC(FemDirichletBC* bc)
     {
         _map_bc1.push_back(bc);
     }
     size_t getNumberOfDirichletBC() const {return _map_bc1.size();};
-    FemLib::FemDirichletBC* getDirichletBC(size_t bc_id) const
+    FemDirichletBC* getDirichletBC(size_t bc_id) const
     {
         return _map_bc1[bc_id];
     };
 
 
 	//----------------------------------------------------------------------
-    void addNeumannBC(FemLib::IFemNeumannBC* bc2)
+    void addNeumannBC(IFemNeumannBC* bc2)
     {
         _map_bc2.push_back(bc2);
     }
     size_t getNumberOfNeumannBC() const {return _map_bc2.size();};
-    FemLib::IFemNeumannBC* getNeumannBC(size_t bc_id) const
+    IFemNeumannBC* getNeumannBC(size_t bc_id) const
     {
         return _map_bc2[bc_id];
     };
@@ -63,8 +63,8 @@ private:
     size_t _id;
     std::string _name;
     NumLib::ITXFunction* _f_ic;
-    std::vector<FemLib::FemDirichletBC*> _map_bc1;
-    std::vector<FemLib::IFemNeumannBC*> _map_bc2;
+    std::vector<FemDirichletBC*> _map_bc1;
+    std::vector<IFemNeumannBC*> _map_bc2;
 };
 
 } //end

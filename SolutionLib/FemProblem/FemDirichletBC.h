@@ -9,10 +9,9 @@
 #include "MeshLib/Tools/Tools.h"
 
 #include "FemLib/Function/FemFunction.h"
-#include "IFemBC.h"
-#include "DirichletBC2FEM.h"
+#include "FemLib/BC/DirichletBC2FEM.h"
 
-namespace FemLib
+namespace SolutionLib
 {
 
 /**
@@ -42,7 +41,7 @@ public:
         if (!_do_setup) return;
         if (!_is_transient) _do_setup = false;
 
-        DirichletBC2FEM convert(*_msh, *_geo, *_bc_func, _vec_nodes, _vec_values);
+        FemLib::DirichletBC2FEM convert(*_msh, *_geo, *_bc_func, _vec_nodes, _vec_values);
 
         if (!_is_transient)
             _do_setup = false;

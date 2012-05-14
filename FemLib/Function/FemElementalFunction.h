@@ -9,8 +9,8 @@
 #include "MathLib/Vector.h"
 #include "MeshLib/Core/IMesh.h"
 
-#include "DiscreteLib/Core/DiscreteSystem.h"
-#include "DiscreteLib/Core/DiscreteVector.h"
+//#include "DiscreteLib/Core/DiscreteSystem.h"
+//#include "DiscreteLib/Core/DiscreteVector.h"
 
 #include "NumLib/Function/Function.h"
 

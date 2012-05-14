@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "DiscreteLib/Core/DiscreteVector.h"
+#include "DiscreteLib/Core/IDiscreteResource.h"
 
 namespace DiscreteLib
 {
@@ -109,7 +109,7 @@ private:
  * This vector container utilizes shared memory systems and makes local vectors keep actual memory
  */
 template<typename T>
-class OMPGlobalDiscreteVector : public IDiscreteVectorBase
+class OMPGlobalDiscreteVector : public IDiscreteResource
 {
 public:
     /// @param n_global the size of vector

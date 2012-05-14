@@ -5,7 +5,7 @@
 
 #include "Base/Options.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
-#include "DiscreteLib/Core/DiscreteVector.h"
+#include "DiscreteLib/Core/IDiscreteVector.h"
 #include "NonlinearSolver.h"
 #include "NonlinearSolverOption.h"
 
@@ -16,7 +16,7 @@ template <class F_LINEAR, class F_R, class F_DX>
 class TemplateDiscreteNonlinearSolver
 {
 public:
-	typedef DiscreteLib::DiscreteVector<double> VectorType;
+	typedef DiscreteLib::IDiscreteVector<double> VectorType;
 
 	TemplateDiscreteNonlinearSolver(DiscreteLib::DiscreteSystem* dis_sys, F_LINEAR* f_l, F_R* f_r, F_DX* f_dx)
 	: _dis_sys(dis_sys), _f_l(f_l), _f_r(f_r), _f_dx(f_dx), _solver(0)
@@ -64,7 +64,7 @@ private:
 			solver = new Linear<F_LINEAR>(_f_l);
 			break;
 		case NonlinerSolverOption::Picard:
-			solver = new Picard<F_LINEAR>(_f_l);
+			solver = new Picard<F_LINEAR>(_dis_sys, _f_l);
 			break;
 		case NonlinerSolverOption::Newton:
 			solver = new NewtonRaphson<F_R, F_DX>(_dis_sys, _f_r, _f_dx);

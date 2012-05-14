@@ -2,16 +2,16 @@
 #pragma once
 
 #include "Base/CodingTools.h"
-#include "Base/BidirectionalMap.h"
 
-#include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
-
-#include "MeshLib/Core/IMesh.h"
-
-#include "DiscreteVector.h"
-#include "DiscreteLinearEquation.h"
+#include "IDiscreteLinearEquation.h"
+#include "DiscreteLib/Vector/DiscreteVector.h"
 #include "DiscreteLib/Utils/DiscreteDataContainer.h"
-//#include "MeshBasedDiscreteLinearEquation.h"
+
+
+namespace MeshLib
+{
+class IMesh;
+}
 
 namespace DiscreteLib
 {
@@ -34,7 +34,7 @@ class DiscreteSystem : public IDiscreteSystem
 {
 public:
     /// @param msh a mesh to represent discrete systems by nodes or elements or edges
-    DiscreteSystem(MeshLib::IMesh& msh) : _msh(&msh) {};
+    explicit DiscreteSystem(MeshLib::IMesh& msh) : _msh(&msh) {};
 
     ///
     virtual ~DiscreteSystem() {};
@@ -56,6 +56,7 @@ public:
 		return eq;
 	}
 
+	/// delete this linear equation object
     void deleteLinearEquation(IDiscreteLinearEquation* eqs)
     {
         if (eqs!=0) {
@@ -67,19 +68,18 @@ public:
 	/// create a new vector
 	/// @param n	vector length
 	/// @return vector object
-    template<typename T>
-    DiscreteVector<T>* createVector(const size_t n)
+    template<class T_VECTOR>
+    T_VECTOR* createVector(const size_t n)
     {
-        DiscreteVector<T>* v = new DiscreteVector<T>(n);
+    	T_VECTOR* v = new T_VECTOR(n);
         _data.addVector(v);
         return v;
     };
 
-	/// delete a vector
+	/// delete this vector object
 	/// @param n	vector length
 	/// @return vector object
-    template<typename T>
-    void deleteVector(DiscreteVector<T>* v)
+    void deleteVector(IDiscreteResource* v)
     {
     	if (v!=0) {
             _data.eraseVector(v);

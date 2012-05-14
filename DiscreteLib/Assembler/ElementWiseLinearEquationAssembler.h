@@ -24,7 +24,7 @@ class ElementWiseLinearEquationAssembler : public IDiscreteLinearEquationAssembl
 {
 public:
     ///
-	ElementWiseLinearEquationAssembler(IElemenetWiseLinearEquationLocalAssembler &a) : _e_assembler(&a) {};
+	explicit ElementWiseLinearEquationAssembler(IElemenetWiseLinearEquationLocalAssembler &a) : _e_assembler(&a) {};
 
     /// Conduct the element by element assembly procedure
     ///

@@ -17,6 +17,7 @@
 #include "NumLib/TimeStepping/TimeStepFunction.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "NumLib/TransientCoupling/AsyncPartitionedSystem.h"
+#include "FemLib/Function/FemNorm.h"
 
 #include "TestUtil.h"
 
@@ -30,7 +31,7 @@
 #include "Tests/FDM/SingleStepFDM.h"
 #include "Tests/FDM/IStencil.h"
 #include "Tests/FDM/FdmGw1D.h"
-
+#include "Tests/FDM/FdmNorm.h"
 
 
 
@@ -44,17 +45,22 @@ using namespace NumLib;
 using namespace FdmLib;
 using namespace FemLib;
 
-template <class T>
+template <class T, class T_NORM>
 class TemplateConvergenceCheck : public IConvergenceCheck
 {
+	T_NORM _norm;
+
 public:
+	TemplateConvergenceCheck(DiscreteLib::DiscreteSystem* dis) : _norm(dis) {};
+
 	bool isConverged(UnnamedParameterSet& vars_prev, UnnamedParameterSet& vars_current, double eps, double &v_diff)
 	{
 	    for (size_t i=0; i<vars_prev.size(); i++) {
 	    	if (vars_prev.getName(i).compare("h")==0 || vars_prev.getName(i).compare("c")==0) {
 		        const T* f_fem_prev = vars_prev.get<T>(i);
 		        const T* f_fem_cur = vars_current.get<T>(i);
-	    		v_diff = f_fem_cur->norm_diff(*f_fem_prev);
+	    		//v_diff = f_fem_cur->norm_diff(*f_fem_prev);
+	    		v_diff = _norm(*f_fem_prev, *f_fem_cur);
 //	    	} else if (vars_prev.getName(i).compare("v")==0) {
 //	    		const FEMIntegrationPointFunctionVector2d* f_fem_prev = vars_prev.get<FEMIntegrationPointFunctionVector2d>(i);
 //	    		const FEMIntegrationPointFunctionVector2d* f_fem_cur = vars_current.get<FEMIntegrationPointFunctionVector2d>(i);
@@ -68,8 +74,8 @@ public:
 	}
 };
 
-typedef TemplateConvergenceCheck<FdmFunctionScalar> FdmFunctionConvergenceCheck;
-typedef TemplateConvergenceCheck<FemNodalFunctionScalar> FemFunctionConvergenceCheck;
+typedef TemplateConvergenceCheck<FdmFunctionScalar, FdmLib::NormOfFdmNodalFunction<double> > FdmFunctionConvergenceCheck;
+typedef TemplateConvergenceCheck<FemNodalFunctionScalar, FemLib::NormOfFemNodalFunction<double> > FemFunctionConvergenceCheck;
 
 
 typedef FunctionHead<MathLib::CRSLisSolver> MyFunctionHead;
@@ -154,7 +160,7 @@ TEST(Fdm, fdm1)
 
 	    const FdmFunctionScalar* r_f_head = (FdmFunctionScalar*) f_head.getOutput(0);
 	    //const FEMIntegrationPointFunctionVector2d* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector2d>(apart1.getOutputParameterID("v"));
-	    const DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
+	    const IDiscreteVector<double>* vec_h = r_f_head->getNodalValues();
 	    //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
 
 	    r_f_head->printout();
@@ -225,7 +231,7 @@ TEST(Fdm, fdm_fem1)
         f_c.setInputParameterName(0, "v");
         f_c.setOutputParameterName(0, "c");
 
-        FdmFunctionConvergenceCheck checker;
+        FdmFunctionConvergenceCheck checker(&dis);
 	    SerialStaggeredMethod method(checker, 1e-5, 100);
 	    AsyncPartitionedSystem apart1;
         apart1.setAlgorithm(method);
@@ -247,11 +253,11 @@ TEST(Fdm, fdm_fem1)
 
 	    const FdmFunctionScalar* r_f_head = apart1.getOutput<FdmFunctionScalar>(apart1.getOutputParameterID("h"));
 	    const FdmCellVectorFunction* r_f_v = apart1.getOutput<FdmCellVectorFunction>(apart1.getOutputParameterID("v"));
-	    const DiscreteVector<double>* vec_h = r_f_head->getNodalValues();
+	    const IDiscreteVector<double>* vec_h = r_f_head->getNodalValues();
 	    //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
         const FdmFunctionScalar* r_f_c = apart1.getOutput<FdmFunctionScalar>(apart1.getOutputParameterID("c"));
         //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
-        const DiscreteVector<double>* vec_c = r_f_c->getNodalValues();
+        const IDiscreteVector<double>* vec_c = r_f_c->getNodalValues();
 
 	    r_f_head->printout();
 	    r_f_v->printout();

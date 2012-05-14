@@ -10,12 +10,12 @@
 #include "DiscreteLib/LinearEquation/MeshBasedDiscreteLinearEquation.h"
 #include "DiscreteLib/Utils/SparsityBuilder.h"
 #include "FemLib/Function/FemFunction.h"
-#include "FemLib/BC/FemDirichletBC.h"
-#include "FemLib/BC/FemNeumannBC.h"
 #include "NumLib/TransientAssembler/ElementWiseTransientLinearEQSAssembler.h"
 #include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
 
 #include "SolutionLib/FemProblem/FemEquation.h"
+#include "SolutionLib/FemProblem/FemDirichletBC.h"
+#include "SolutionLib/FemProblem/FemNeumannBC.h"
 
 #include "AbstractTimeSteppingAlgorithm.h"
 
@@ -42,6 +42,7 @@ public:
     typedef typename UserFemProblem::EquationType::DxEQSType UserDxFunction;
     typedef NumLib::TemplateDiscreteNonlinearSolver<UserLinearFunction, UserResidualFunction, UserDxFunction> NonlinearSolverType;
     typedef T_LINEAR_SOLVER LinearSolverType;
+    typedef DiscreteLib::DiscreteVector<double> ImplVector;
 
     /// constructor
     /// - initialize solution vectors
@@ -67,10 +68,10 @@ public:
 //            _u_n1[i] = (FemLib::FemNodalFunctionScalar*) problem.getIC(i)->clone();
 //        }
         const size_t n_dofs = _dofManager.getTotalNumberOfActiveDoFs();
-        _vec_n0 = dis->createVector<double>(n_dofs);
-        _vec_n1 = dis->createVector<double>(n_dofs);
-        _vec_n1_0 = dis->createVector<double>(n_dofs);
-        _vec_st = dis->createVector<double>(n_dofs);
+        _vec_n0 = dis->createVector<ImplVector>(n_dofs);
+        _vec_n1 = dis->createVector<ImplVector>(n_dofs);
+        _vec_n1_0 = dis->createVector<ImplVector>(n_dofs);
+        _vec_st = dis->createVector<ImplVector>(n_dofs);
         FemLib::FemNodalFunctionScalar *f_ic = (FemLib::FemNodalFunctionScalar*) problem->getVariable(0)->getIC(); //TODO one var
         *_vec_n1 = *f_ic->getNodalValues();
         // create linear equation systems
@@ -128,7 +129,7 @@ public:
         std::vector<double> list_bc1_val;
         FemVariable* var = _problem->getVariable(0);
         for (size_t i=0; i<var->getNumberOfDirichletBC(); i++) {
-            FemLib::FemDirichletBC *bc1 = var->getDirichletBC(i);
+        	SolutionLib::FemDirichletBC *bc1 = var->getDirichletBC(i);
             bc1->setup();
             size_t varId = 0; //TODO var id
             std::vector<size_t> &list_bc_nodes = bc1->getListOfBCNodes();
@@ -141,7 +142,7 @@ public:
         std::vector<size_t> list_st_eqs_id;
         std::vector<double> list_st_val;
         for (size_t i=0; i<var->getNumberOfNeumannBC(); i++) {
-        	FemLib::IFemNeumannBC *bc2 = var->getNeumannBC(i);
+        	SolutionLib::IFemNeumannBC *bc2 = var->getNeumannBC(i);
         	bc2->setup();
             std::vector<size_t> &list_bc_nodes = bc2->getListOfBCNodes();
             std::vector<double> &list_bc_values = bc2->getListOfBCValues();

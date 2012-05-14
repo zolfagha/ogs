@@ -22,6 +22,8 @@
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
 #include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
 
+#include "SolutionLib/FemProblem/FemDirichletBC.h"
+#include "SolutionLib/FemProblem/FemNeumannBC.h"
 #include "SolutionLib/FemProblem/FemIVBVProblem.h"
 #include "SolutionLib/Solution/SingleStepFEM.h"
 
@@ -212,8 +214,8 @@ public:
         Polyline* poly_left = _rec->getLeft();
         Polyline* poly_right = _rec->getRight();
         //_head->setIC();
-        _head->addDirichletBC(new FemLib::FemDirichletBC(msh, poly_right,  new NumLib::TXFunctionConstant(.0)));
-        _head->addNeumannBC(new FemLib::FemNeumannBC(msh, _feObjects, poly_left, new NumLib::TXFunctionConstant(-1e-5)));
+        _head->addDirichletBC(new SolutionLib::FemDirichletBC(msh, poly_right,  new NumLib::TXFunctionConstant(.0)));
+        _head->addNeumannBC(new SolutionLib::FemNeumannBC(msh, _feObjects, poly_left, new NumLib::TXFunctionConstant(-1e-5)));
         //transient
         TimeStepFunctionConstant tim(.0, 100.0, 10.0);
         _problem->setTimeSteppingFunction(tim);

@@ -8,14 +8,13 @@
 #include "NumLib/TransientAssembler/ElementWiseTransientResidualAssembler.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "FemLib/Function/FemFunction.h"
-#include "FemLib/BC/FemNeumannBC.h"
 
 #include "FemVariable.h"
 
 namespace SolutionLib
 {
 
-typedef DiscreteLib::DiscreteVector<double> MyFemVector;
+typedef DiscreteLib::IDiscreteVector<double> MyFemVector;
 
 /**
  * \brief Template class for FEM residual functions

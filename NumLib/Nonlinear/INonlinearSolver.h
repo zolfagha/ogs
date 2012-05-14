@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "DiscreteLib/Core/DiscreteVector.h"
+#include "DiscreteLib/Core/IDiscreteVector.h"
 #include "NonlinearSolverOption.h"
 
 namespace NumLib
@@ -13,7 +13,7 @@ namespace NumLib
 class INonlinearSolver
 {
 public:
-	typedef DiscreteLib::DiscreteVector<double> VectorType;
+	typedef DiscreteLib::IDiscreteVector<double> VectorType;
 
 	virtual ~INonlinearSolver() {};
 

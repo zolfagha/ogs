@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "DiscreteLib/Core/IDiscreteVector.h"
+
 namespace MeshLib 
 {
 class IMesh;
@@ -21,6 +23,8 @@ class DofEquationIdTable;
 class IDiscreteLinearEquationAssembler
 {
 public:
+	typedef DiscreteLib::IDiscreteVector<double> GlobalVector;
+
 	virtual ~IDiscreteLinearEquationAssembler() {};
 
     /// assembly

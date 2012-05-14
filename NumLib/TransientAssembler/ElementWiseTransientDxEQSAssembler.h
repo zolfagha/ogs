@@ -7,7 +7,7 @@
 #include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/EquationId/DofEquationIdTable.h"
-#include "DiscreteLib/Core/DiscreteVector.h"
+#include "DiscreteLib/Core/IDiscreteVector.h"
 #include "DiscreteLib/Assembler/IDiscreteVectorAssembler.h"
 #include "DiscreteLib/Utils/Tools.h"
 #include "NumLib/TimeStepping/TimeStep.h"
@@ -29,7 +29,7 @@ public:
     /// @param u0
     /// @param u1
     /// @param a
-	ElementWiseTransientDxEQSAssembler(const TimeStep* time, const std::vector<DiscreteLib::DiscreteVector<double>*>* u0, const std::vector<DiscreteLib::DiscreteVector<double>*>* u1, IElementWiseTransientJacobianLocalAssembler* a)
+	ElementWiseTransientDxEQSAssembler(const TimeStep* time, const std::vector<GlobalVector*>* u0, const std::vector<GlobalVector*>* u1, IElementWiseTransientJacobianLocalAssembler* a)
         : _transient_e_assembler(a), _timestep(time), _u0(u0), _u1(u1)
     { };
 
@@ -70,8 +70,8 @@ public:
 private:
     IElementWiseTransientJacobianLocalAssembler* _transient_e_assembler;
     const TimeStep* _timestep;
-    const std::vector<DiscreteLib::DiscreteVector<double>*>* _u0;
-    const std::vector<DiscreteLib::DiscreteVector<double>*>* _u1;
+    const std::vector<GlobalVector*>* _u0;
+    const std::vector<GlobalVector*>* _u1;
 };
 
 

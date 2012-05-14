@@ -60,10 +60,10 @@ public:
         _u_n1.resize(n_var, 0);
         _u_n1[0] = (FdmLib::FdmFunctionScalar*) problem->getIC(0)->clone();
         const size_t n_dofs = _dofManager.getTotalNumberOfActiveDoFs();
-        _vec_n0 = dis->createVector<double>(n_dofs);
-        _vec_n1 = dis->createVector<double>(n_dofs);
-        _vec_n1_0 = dis->createVector<double>(n_dofs);
-        _vec_st = dis->createVector<double>(n_dofs);
+        _vec_n0 = dis->createVector<DiscreteLib::DiscreteVector<double> >(n_dofs);
+        _vec_n1 = dis->createVector<DiscreteLib::DiscreteVector<double> >(n_dofs);
+        _vec_n1_0 = dis->createVector<DiscreteLib::DiscreteVector<double> >(n_dofs);
+        _vec_st = dis->createVector<DiscreteLib::DiscreteVector<double> >(n_dofs);
         FdmLib::FdmFunctionScalar *f_ic = (FdmLib::FdmFunctionScalar*) problem->getIC(0); //TODO one var
         *_vec_n1 = *f_ic->getNodalValues();
         // create linear equation systems

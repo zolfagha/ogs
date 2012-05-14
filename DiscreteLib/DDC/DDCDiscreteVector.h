@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "DiscreteLib/Core/DiscreteVector.h"
+#include "DiscreteLib/Core/IDiscreteVector.h"
 
 namespace DiscreteLib
 {

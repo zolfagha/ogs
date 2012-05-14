@@ -7,7 +7,7 @@
 
 
 #include "DiscreteLib/EquationId/DofEquationIdTable.h"
-#include "DiscreteLib/Core/DiscreteVector.h"
+#include "DiscreteLib/Vector/DiscreteVector.h"
 #include "DiscreteLib/Assembler/IDiscreteLinearEquationAssembler.h"
 
 #include "IElementWiseTransientLinearEQSLocalAssembler.h"
@@ -34,7 +34,7 @@ public:
     /// @param u0
     /// @param u1
     /// @param a
-    ElementWiseTransientLinearEQSAssembler(const TimeStep* time, const std::vector<DiscreteLib::DiscreteVector<double>*>* u0, const std::vector<DiscreteLib::DiscreteVector<double>*>* u1, IElementWiseTransientLinearEQSLocalAssembler* a)
+    ElementWiseTransientLinearEQSAssembler(const TimeStep* time, const std::vector<GlobalVector*>* u0, const std::vector<GlobalVector*>* u1, IElementWiseTransientLinearEQSLocalAssembler* a)
         : _transient_e_assembler(a), _timestep(time), _u0(u0), _u1(u1)
     { };
 
@@ -50,8 +50,8 @@ public:
 private:
     IElementWiseTransientLinearEQSLocalAssembler* _transient_e_assembler;
     const TimeStep* _timestep;
-    const std::vector<DiscreteLib::DiscreteVector<double>*>* _u0;
-    const std::vector<DiscreteLib::DiscreteVector<double>*>* _u1;
+    const std::vector<GlobalVector*>* _u0;
+    const std::vector<GlobalVector*>* _u1;
 };
 
 

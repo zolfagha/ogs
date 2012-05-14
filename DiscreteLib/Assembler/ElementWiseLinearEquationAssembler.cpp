@@ -3,14 +3,10 @@
 
 #include <vector>
 
-#include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
-#include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
-
 #include "MeshLib/Core/IMesh.h"
 
-#include "DiscreteLib/Core/DataType.h"
+#include "DiscreteLib/Core/LocalDataType.h"
 #include "DiscreteLib/EquationId/DofEquationIdTable.h"
-#include "IElemenetWiseLinearEquationLocalAssembler.h"
 
 
 namespace DiscreteLib
