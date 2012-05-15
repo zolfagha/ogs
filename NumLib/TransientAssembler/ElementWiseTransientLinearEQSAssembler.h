@@ -34,8 +34,9 @@ public:
     /// @param u0
     /// @param u1
     /// @param a
-    ElementWiseTransientLinearEQSAssembler(const TimeStep* time, const std::vector<GlobalVector*>* u0, const std::vector<GlobalVector*>* u1, IElementWiseTransientLinearEQSLocalAssembler* a)
-        : _transient_e_assembler(a), _timestep(time), _u0(u0), _u1(u1)
+    //ElementWiseTransientLinearEQSAssembler(const TimeStep* time, const std::vector<GlobalVector*>* u0, const std::vector<GlobalVector*>* u1, IElementWiseTransientLinearEQSLocalAssembler* a)
+    ElementWiseTransientLinearEQSAssembler(const TimeStep* time, const GlobalVector* u0, const GlobalVector* u1, IElementWiseTransientLinearEQSLocalAssembler* a)
+        : _transient_e_assembler(a), _timestep(time), _vec_u0(u0), _vec_u1(u1)
     { };
 
 
@@ -50,8 +51,10 @@ public:
 private:
     IElementWiseTransientLinearEQSLocalAssembler* _transient_e_assembler;
     const TimeStep* _timestep;
-    const std::vector<GlobalVector*>* _u0;
-    const std::vector<GlobalVector*>* _u1;
+    const GlobalVector* _vec_u0;
+    const GlobalVector* _vec_u1;
+    //const std::vector<GlobalVector*>* _vec_u0;
+    //const std::vector<GlobalVector*>* _vec_u1;
 };
 
 

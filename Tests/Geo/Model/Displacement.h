@@ -9,6 +9,7 @@
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
 #include "FemLib/Function/FemFunction.h"
+#include "SolutionLib/FemProblem/FemEquation.h"
 #include "SolutionLib/FemProblem/FemIVBVProblem.h"
 #include "SolutionLib/Solution/SingleStepFEM.h"
 
@@ -27,13 +28,14 @@ using namespace DiscreteLib;
 namespace Geo
 {
 
-#if 0
-typedef FemIVBVProblem
-		<
-			Geo::FemLinearElasticLinearLocalAssembler,
-			Geo::FemLinearElasticResidualLocalAssembler,
-			Geo::FemLinearElasticJacobianLocalAssembler
-		> FemLinearElasticProblem;
+typedef TemplateFemEquation<
+		Geo::FemLinearElasticLinearLocalAssembler,
+		Geo::FemLinearElasticResidualLocalAssembler,
+		Geo::FemLinearElasticJacobianLocalAssembler
+		>
+		FemLinearElasticEquation;
+
+typedef FemIVBVProblem< FemLinearElasticEquation > FemLinearElasticProblem;
 
 
 
@@ -42,7 +44,7 @@ template <
 	>
 class FunctionDisplacement : public TemplateTransientMonolithicSystem
 {
-    enum Out { Displacement=0 };
+    enum Out { u_x=0, u_y=1 };
 public:
     typedef SingleStepFEM
     		<
@@ -52,7 +54,7 @@ public:
 
     FunctionDisplacement()
     {
-        TemplateTransientMonolithicSystem::resizeOutputParameter(1);
+        TemplateTransientMonolithicSystem::resizeOutputParameter(2);
     };
 
     void define(DiscreteSystem* dis, FemLinearElasticProblem* problem, Base::Options &option)
@@ -63,13 +65,15 @@ public:
         typename MySolution::LinearSolverType* linear_solver = _sol->getLinearEquationSolver();
         linear_solver->setOption(option);
         _sol->getNonlinearSolver()->setOption(option);
-        this->setOutput(Displacement, problem->getIC(0));
+        this->setOutput(u_x, problem->getVariable(0)->getIC());
+        this->setOutput(u_y, problem->getVariable(1)->getIC());
     }
 
     int solveTimeStep(const TimeStep &time)
     {
         _sol->solveTimeStep(time);
-        setOutput(Displacement, _sol->getCurrentSolution(0));
+        setOutput(u_x, _sol->getCurrentSolution(0));
+        setOutput(u_y, _sol->getCurrentSolution(1));
         return 0;
     }
 
@@ -93,7 +97,6 @@ private:
     DISALLOW_COPY_AND_ASSIGN(FunctionDisplacement);
 };
 
-#endif
 
 } //end
 

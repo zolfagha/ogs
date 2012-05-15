@@ -24,14 +24,15 @@ void ElementWiseTransientLinearEQSAssembler::assembly(MeshLib::IMesh &msh, Discr
         // get dof map
         e->getNodeIDList(e->getMaximumOrder(), ele_node_ids);
         e->getListOfNumberOfNodesForAllOrders(ele_node_size_order);
-        dofManager.mapEqsID(msh.getID(), ele_node_ids, local_dofmap);
-        //dofManager.mapEqsID(ele_node_ids, ele_node_size_order, local_dofmap);
+        dofManager.mapEqsID(msh.getID(), ele_node_ids, local_dofmap, DiscreteLib::DofNumberingType::BY_POINT);
         // previous and current results
-        DiscreteLib::getLocalVector(dofManager, ele_node_ids, ele_node_size_order, *_u1, local_u_n1);
-        DiscreteLib::getLocalVector(dofManager, ele_node_ids, ele_node_size_order, *_u0, local_u_n);
+        DiscreteLib::getLocalVector(local_dofmap, *_vec_u1, local_u_n1);
+        DiscreteLib::getLocalVector(local_dofmap, *_vec_u0, local_u_n);
         // local assembly
         localEQS.create(local_dofmap.size());
         _transient_e_assembler->assembly(time, *e, local_u_n1, local_u_n, localEQS);
+        std::cout << "local A = \n" << *localEQS.getA();
+        std::cout << "local b = \n" << *localEQS.getRHS();
         // update global
         eqs.addAsub(local_dofmap, *localEQS.getA());
         eqs.addRHSsub(local_dofmap, localEQS.getRHS());

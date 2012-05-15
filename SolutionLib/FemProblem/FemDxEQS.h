@@ -12,11 +12,10 @@
 #include "FemNeumannBC.h"
 
 #include "FemVariable.h"
+#include "SolutionLib/DataType.h"
 
 namespace SolutionLib
 {
-
-typedef DiscreteLib::IDiscreteVector<double> MyFemVector;
 
 /**
  * \brief Template class for transient linear FEM functions
@@ -45,7 +44,7 @@ public:
 	virtual ~TemplateTransientDxFEMFunction() {};
 
 	///
-	NumLib::TemplateFunction<MyFemVector,MyFemVector>* clone() const
+	NumLib::TemplateFunction<SolutionVector,SolutionVector>* clone() const
 	{
     	return new TemplateTransientDxFEMFunction<
     				T_LOCAL_JACOBIAN_ASSEMBLER
@@ -53,7 +52,7 @@ public:
 	}
 
     /// reset property
-    void reset(const NumLib::TimeStep* t, MyFemVector* u_n0)
+    void reset(const NumLib::TimeStep* t, SolutionVector* u_n0)
     {
     	this->_t_n1 = const_cast<NumLib::TimeStep*>(t);
     	this->_u_n0 = u_n0;
@@ -63,11 +62,11 @@ public:
     /// @param u_n1	current solution
     /// @param r 	residual
     /// @param du	increment
-    void eval(const MyFemVector &u_n1, const MyFemVector &r, MyFemVector &du)
+    void eval(const SolutionVector &u_n1, const SolutionVector &r, SolutionVector &du)
     {
     	// input, output
         const NumLib::TimeStep &t_n1 = *this->_t_n1;
-        MyFemVector* u_n = this->_u_n0;
+        SolutionVector* u_n = this->_u_n0;
 
         // setup BC1
         for (size_t i=0; i<_list_var.size(); i++) {
@@ -81,10 +80,10 @@ public:
         }
 
         //TODO temporally
-        std::vector<MyFemVector*> vec_un;
-        vec_un.push_back(const_cast<MyFemVector*>(u_n));
-        std::vector<MyFemVector*> vec_un1;
-        vec_un1.push_back(const_cast<MyFemVector*>(&u_n1));
+        std::vector<SolutionVector*> vec_un;
+        vec_un.push_back(const_cast<SolutionVector*>(u_n));
+        std::vector<SolutionVector*> vec_un1;
+        vec_un1.push_back(const_cast<SolutionVector*>(&u_n1));
 
 		// assembly
         _linear_eqs->initialize();
@@ -104,7 +103,7 @@ private:
     UserLocalJacobianAssembler *_local_assembler;
     DiscreteLib::IDiscreteLinearEquation* _linear_eqs;
     NumLib::TimeStep* _t_n1;
-    MyFemVector* _u_n0;
+    SolutionVector* _u_n0;
     std::vector<FemVariable*> _list_var;
 };
 

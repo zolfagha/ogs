@@ -10,11 +10,10 @@
 #include "FemLib/Function/FemFunction.h"
 
 #include "FemVariable.h"
+#include "SolutionLib/DataType.h"
 
 namespace SolutionLib
 {
-
-typedef DiscreteLib::IDiscreteVector<double> MyFemVector;
 
 /**
  * \brief Template class for FEM residual functions
@@ -25,7 +24,7 @@ template <
     class T_LOCAL_RESIDUAL_ASSEMBLER
     >
 class TemplateTransientResidualFEMFunction
-	: public NumLib::TemplateFunction<MyFemVector, MyFemVector>
+	: public NumLib::TemplateFunction<SolutionVector, SolutionVector>
 {
 public:
     typedef T_LOCAL_RESIDUAL_ASSEMBLER UserLocalResidualAssembler;
@@ -43,7 +42,7 @@ public:
 	virtual ~TemplateTransientResidualFEMFunction() {};
 
 	///
-	NumLib::TemplateFunction<MyFemVector,MyFemVector>* clone() const
+	NumLib::TemplateFunction<SolutionVector,SolutionVector>* clone() const
 	{
     	return new TemplateTransientResidualFEMFunction
     				<
@@ -52,7 +51,7 @@ public:
 	}
 
     /// reset property
-    void reset(const NumLib::TimeStep* t, MyFemVector* u_n0, MyFemVector* st)
+    void reset(const NumLib::TimeStep* t, SolutionVector* u_n0, SolutionVector* st)
     {
         this->_t_n1 = const_cast<NumLib::TimeStep*>(t);
         this->_u_n0 = u_n0;
@@ -62,17 +61,17 @@ public:
     /// evaluate residual
     /// @param u_n1	current results
     /// @param r residual
-    void eval(const MyFemVector &u_n1, MyFemVector &r)
+    void eval(const SolutionVector &u_n1, SolutionVector &r)
     {
     	// input, output
         const NumLib::TimeStep &t_n1 = *this->_t_n1;
-        MyFemVector *u_n = this->_u_n0;
+        SolutionVector *u_n = this->_u_n0;
 
         //TODO temporally
-        std::vector<MyFemVector*> vec_un;
-        vec_un.push_back(const_cast<MyFemVector*>(u_n));
-        std::vector<MyFemVector*> vec_un1;
-        vec_un1.push_back(const_cast<MyFemVector*>(&u_n1));
+        std::vector<SolutionVector*> vec_un;
+        vec_un.push_back(const_cast<SolutionVector*>(u_n));
+        std::vector<SolutionVector*> vec_un1;
+        vec_un1.push_back(const_cast<SolutionVector*>(&u_n1));
 
 		// assembly
         NumLib::ElementWiseTransientResidualAssembler assembler(&t_n1, &vec_un, &vec_un1, _local_assembler);
@@ -88,8 +87,8 @@ private:
     UserLocalResidualAssembler *_local_assembler;
     DiscreteLib::DofEquationIdTable* _dofManager;
     NumLib::TimeStep* _t_n1;
-    MyFemVector* _u_n0;
-    MyFemVector* _st;
+    SolutionVector* _u_n0;
+    SolutionVector* _st;
     std::vector<FemVariable*> _list_var;
     MeshLib::IMesh* _msh;
 };
