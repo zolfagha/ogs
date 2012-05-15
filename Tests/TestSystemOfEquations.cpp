@@ -212,6 +212,7 @@ TEST(Math, SystemOfEqs_M1)
     defineProblem1(sysEqs);
     //initial value
     MyCouplingEQS::ArrayType vec0(1);
+    vec0 *= .0;
     std::vector<MyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
     // grouping variables
     std::vector<std::vector<Variable*> > list_active_vars;
@@ -252,6 +253,7 @@ TEST(Math, SystemOfEqs_P2)
 	defineProblem1(sysEqs);
     //initial value
     MyCouplingEQS::ArrayType vec0(1);
+    vec0 *= .0;
     std::vector<MyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
     //coupling parameter
     MyConvergenceCheck4Array checker;
@@ -296,6 +298,7 @@ TEST(Math, SystemOfEqs_P3)
     defineProblem1(sysEqs);
     //initial value
     MyCouplingEQS::ArrayType vec0(1);
+    vec0 *= .0;
     std::vector<MyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
     //coupling parameter
     MyConvergenceCheck4Array checker;
@@ -350,6 +353,7 @@ TEST(Math, SystemOfEqs_AutoM3)
     defineProblem1(sysEqs);
     //initial value
     MyCouplingEQS::ArrayType vec0(1);
+    vec0 *= .0;
     std::vector<MyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
 
     Base::Options* option = defineCouplingM3();
@@ -385,6 +389,7 @@ TEST(Math, SystemOfEqs_AutoP1_M2M1)
     defineProblem1(sysEqs);
     //initial value
     MyCouplingEQS::ArrayType vec0(1);
+    vec0 *= .0;
     std::vector<MyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
 
     Base::Options* option = defineCouplingP1_M2M1();
@@ -420,6 +425,7 @@ TEST(Math, SystemOfEqs_AutoP1_3M1)
     defineProblem1(sysEqs);
     //initial value
     MyCouplingEQS::ArrayType vec0(1);
+    vec0 *= .0;
     std::vector<MyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
 
     Base::Options* option = defineCouplingP1_3M1();
@@ -455,6 +461,7 @@ TEST(Math, SystemOfEqs_AutoP1_P2M1)
     defineProblem1(sysEqs);
     //initial value
     MyCouplingEQS::ArrayType vec0(1);
+    vec0 *= .0;
     std::vector<MyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
 
     Base::Options* option = defineCouplingP1_P2M1();

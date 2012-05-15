@@ -11,7 +11,7 @@
 
 int main(int argc, char *argv[])
 {
-#if 1
+#if 0
     argc = 2;
     //argv[1] = "--gtest_filter=Math.Nonlinear*";
     //argv[1] = "--gtest_filter=Num.Discrete*:FEM.*";
@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     //argv[1] = "--gtest_filter=Coupling.*";
     argv[1] = "--gtest_filter=Math.SystemOfEqs*";
     //argv[1] = "--gtest_filter=FEM.*";
-    argv[1] = "--gtest_filter=Solution.CouplingF*";
+    //argv[1] = "--gtest_filter=Solution.CouplingF*";
     //argv[1] = "--gtest_filter=*";
 #endif
     ::testing::InitGoogleTest(&argc, argv);
