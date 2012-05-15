@@ -57,6 +57,7 @@ public:
         }
     }
 
+    /// initialize
     void initialize()
     {
         DofEquationIdTable* dofManager = getDofMapManger();

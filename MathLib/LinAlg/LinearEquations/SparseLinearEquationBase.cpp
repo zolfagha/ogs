@@ -38,7 +38,6 @@ template<typename IDX_TYPE> void AbstractCRSLinearEquation<IDX_TYPE>::solve()
         std::map<size_t,size_t> _map_solved_orgEqs;
 
         //std::cout << "#before\n";
-        ////tmp_A->printMat();
         //this->printout();
         setKnownXi_ReduceSizeOfEQS(tmp_A, org_eqsRHS, org_eqsX, _vec_knownX_id, _vec_knownX_x, _tmp_b, _tmp_x, _map_solved_orgEqs);
         //std::cout << "\n#after\n";
