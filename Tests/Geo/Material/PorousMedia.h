@@ -26,7 +26,7 @@ struct PorousMedia
 	}
 	~PorousMedia()
 	{
-		Base::releaseObject(hydraulic_conductivity, porosity, storage, solidphase);
+		Base::releaseObject(hydraulic_conductivity, porosity, storage);
 	}
 };
 

@@ -20,9 +20,9 @@ inline void calculateLameConstant(const double nv, const double E, double &Lambd
 }
 
 template<class T_MATRIX>
-inline void setElasticConsitutiveTensor(const size_t Dimension, double Lambda, double G, double K, T_MATRIX &D_e)
+inline void setElasticConsitutiveTensor(const size_t Dimension, double Lambda, double G, T_MATRIX &D_e)
 {
-	D_e = 0.0;
+	//D_e *= 0.0;
 	D_e(0,0) = Lambda + 2 * G;
 	D_e(0,1) = Lambda;
 	D_e(0,2) = Lambda;
