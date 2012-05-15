@@ -40,21 +40,21 @@ public:
         row_major_entries.resize(local_dofTable.getTotalNumberOfActiveDoFs());
 
         const size_t n_nodes = topo_node2nodes.getNumberOfNodes();
+        const size_t n_var = local_dofTable.getNumberOfVariables();
         for (size_t i=0; i<n_nodes; i++) {
             const std::set<size_t> connected_nodes = topo_node2nodes.getConnectedNodes(i);
-            for (size_t j=0; j<local_dofTable.getNumberOfVariables(); j++) {
+            for (size_t j=0; j<n_var; j++) {
                 // for each DoF(var,pt)
-                //long row_id = local_dofTable.mapEqsID(j, mesh_id, i);
-                std::set<size_t> &setConnection = row_major_entries[i];
+                std::set<size_t> &setConnection = row_major_entries[i*n_var+j];
                 // add all DoFs defined in this point
-                for (size_t l=0; l<local_dofTable.getNumberOfVariables(); l++) {
-                    long col_id = local_dofTable.mapEqsID(l, mesh_id, i);
+                for (size_t l=0; l<n_var; l++) {
+                    size_t col_id = local_dofTable.mapEqsID(l, mesh_id, i);
                     setConnection.insert(col_id);
                 }
                 // add DoFs defined in connected nodes
                 for (std::set<size_t>::const_iterator it=connected_nodes.begin(); it!=connected_nodes.end(); it++) {
-                    for (size_t l=0; l<local_dofTable.getNumberOfVariables(); l++) {
-                        long col_id = local_dofTable.mapEqsID(l, mesh_id, *it);
+                    for (size_t l=0; l<n_var; l++) {
+                        size_t col_id = local_dofTable.mapEqsID(l, mesh_id, *it);
                         setConnection.insert(col_id);
                     }
                 }
@@ -76,14 +76,14 @@ public:
                 std::set<size_t> &setConnection = row_major_entries[i];
                 // add all DoFs defined in this point
                 for (size_t l=0; l<global_dofTable.getNumberOfVariables(); l++) {
-                    long col_id = global_dofTable.mapEqsID(l, mesh_id, global_i);
+                    size_t col_id = global_dofTable.mapEqsID(l, mesh_id, global_i);
                     setConnection.insert(col_id);
                 }
                 // add DoFs defined in connected nodes
                 for (std::set<size_t>::const_iterator it=connected_nodes.begin(); it!=connected_nodes.end(); it++) {
                     const size_t global_pt_id = pt_mapping.local2global(*it);
                     for (size_t l=0; l<global_dofTable.getNumberOfVariables(); l++) {
-                        long col_id = global_dofTable.mapEqsID(l, mesh_id, global_pt_id);
+                        size_t col_id = global_dofTable.mapEqsID(l, mesh_id, global_pt_id);
                         setConnection.insert(col_id);
                     }
                 }
