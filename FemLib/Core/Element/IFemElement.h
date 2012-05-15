@@ -51,6 +51,9 @@ public:
     /// get evaluated gradient of basis functions \f$ {\nabla}_x \mathbf{N}_e \f$. 
     virtual LocalMatrix* getGradBasisFunction() = 0;
 
+    /// get evaluated determinant of the Jacobian matrix for coordinate transformation
+    virtual double getDetJ() const = 0;
+
     /// make interpolation from nodal values \f$ u^h(\mathbf{x}) = \mathbf{N}_e (\mathbf x) \mathbf{u}_e \f$
     virtual double interpolate(double *pt, double *nodal_values) = 0;
 

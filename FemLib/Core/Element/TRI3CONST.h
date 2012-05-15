@@ -45,6 +45,7 @@ public:
     virtual void getRealCoordinates(double* x_real);
     LocalMatrix* getBasisFunction();
     LocalMatrix* getGradBasisFunction();
+    virtual double getDetJ() const {return 1.0;}
 
 
     /// make interpolation from nodal values
