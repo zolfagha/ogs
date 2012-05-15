@@ -179,17 +179,32 @@ public:
         for (size_t i=0; i<pt_id.size(); i++)
             eqs_id[i] = add->address(pt_id[i]);
     }
-    void mapEqsID(size_t mesh_id, const std::vector<size_t> &pt_id, std::vector<size_t> &eqs_id) const
+    void mapEqsID(size_t mesh_id, const std::vector<size_t> &pt_id, std::vector<size_t> &eqs_id, DofNumberingType::type numbering = DofNumberingType::BY_DOF) const
     {
         if (_map_msh2var.count(mesh_id)==0) return;
 
         const std::vector<size_t> &list_var = _map_msh2var.find(mesh_id)->second;
-        eqs_id.resize(list_var.size()*pt_id.size());
-        for (size_t i=0; i<list_var.size(); i++) {
-            size_t var_id = list_var[i];
-            const IEquationIdStorage* add = getPointEquationIdTable(var_id, mesh_id);
-            for (size_t i=0; i<pt_id.size(); i++)
-                eqs_id[i] = add->address(pt_id[i]);
+        const size_t n_pt = pt_id.size();
+        const size_t n_dof_per_pt = list_var.size();
+        const size_t n_total_dof = n_pt * n_dof_per_pt;
+        eqs_id.resize(n_total_dof);
+
+        if (numbering==DofNumberingType::BY_DOF) {
+            for (size_t i=0; i<list_var.size(); i++) {
+                size_t var_id = list_var[i];
+                const IEquationIdStorage* add = getPointEquationIdTable(var_id, mesh_id);
+                for (size_t j=0; j<pt_id.size(); j++) {
+                    eqs_id[j+i*n_pt] = add->address(pt_id[j]);
+                }
+            }
+        } else {
+            for (size_t i=0; i<list_var.size(); i++) {
+                size_t var_id = list_var[i];
+                const IEquationIdStorage* add = getPointEquationIdTable(var_id, mesh_id);
+                for (size_t j=0; j<pt_id.size(); j++) {
+                    eqs_id[i + j*n_dof_per_pt] = add->address(pt_id[j]);
+                }
+            }
         }
     }
     void mapEqsID(size_t mesh_id, const std::vector<size_t> &pt_id, std::vector<size_t> &eqs_id, std::vector<size_t> &eqs_id_without_ghost) const
