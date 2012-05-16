@@ -478,23 +478,24 @@ TEST(Fem, LinearElastic2D)
 	    op_nl->addOptionAsNum("max_iteration_step", 500);
 
 		MyFunctionDisplacement f_u;
-		f_u.define(&dis, pDe, options);
+		f_u.define(&dis, pDe, &pm, options);
 		f_u.setOutputParameterName(0, "u_x");
 		f_u.setOutputParameterName(1, "u_y");
-		MyFunctionStressStrain f_sigma;
-		f_sigma.setOutputParameterName(0, "strain_xx");
-		//TODO stress
+		f_u.setOutputParameterName(2, "Strain");
+		f_u.setOutputParameterName(3, "Stress");
+//		MyFunctionStressStrain f_sigma;
+//		f_sigma.setOutputParameterName(0, "strain_xx");
 
         FemFunctionConvergenceCheck checker(&dis);
 	    SerialStaggeredMethod method(checker, 1e-5, 100);
 	    AsyncPartitionedSystem apart1;
         apart1.setAlgorithm(method);
-        //TODO stress
-        apart1.resizeOutputParameter(2);
+        apart1.resizeOutputParameter(4);
         apart1.setOutputParameterName(0, "u_x");
         apart1.setOutputParameterName(1, "u_y");
+        apart1.setOutputParameterName(2, "Strain");
+        apart1.setOutputParameterName(3, "Stress");
         apart1.addProblem(f_u);
-        apart1.addProblem(f_sigma);
         apart1.connectParameters();
 
 	    TimeSteppingController timestepping;
@@ -506,17 +507,39 @@ TEST(Fem, LinearElastic2D)
 
 	    const FemNodalFunctionScalar* r_f_ux = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("u_x"));
 	    const FemNodalFunctionScalar* r_f_uy = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("u_y"));
+	    const FEMIntegrationPointFunctionVector* r_f_strain = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("Strain"));
+	    const FEMIntegrationPointFunctionVector* r_f_stress = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("Stress"));
 	    const IDiscreteVector<double>* vec_r_f_ux = r_f_ux->getNodalValues();
 	    const IDiscreteVector<double>* vec_r_f_uy = r_f_uy->getNodalValues();
-	    //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
+	    const FEMIntegrationPointFunctionVector::DiscreteVectorType* vec_strain = r_f_strain->getNodalValues();
+	    const FEMIntegrationPointFunctionVector::DiscreteVectorType* vec_stress = r_f_stress->getNodalValues();
 
-	    r_f_ux->printout();
-	    r_f_uy->printout();
-//
-//	    std::vector<double> expected;
-//	    getGWExpectedHead(expected);
-//
-//	    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*vec_h)[0], vec_h->size());
+//	    r_f_ux->printout();
+//	    r_f_uy->printout();
+//	    r_f_strain->printout();
+//	    r_f_stress->printout();
+
+        const NumLib::LocalVector &strain1 = (*vec_strain)[0][0];
+        const NumLib::LocalVector &stress1 = (*vec_stress)[0][0];
+        double E = solid.Youngs_modulus;
+        double nu = solid.poisson_ratio;
+        double sx = .0; //E/((1.+nu)*(1-2*nu))*((1-nu)*ex+nu*ey);
+        double sy = -1e+6; //E/((1.-nu)*(1-2*nu))*(nu*ex+(1-nu)*ey);
+        double sxy = .0; //0.5*E/(1.+nu)*exy;
+        double ex = (1+nu)/E*((1-nu)*sx-nu*sy);
+        double ey = (1+nu)/E*((1-nu)*sy-nu*sx);
+        double exy = 2*(1+nu)/E*sxy;
+        double sz = nu*E/((1.+nu)*(1-2*nu))*(ex+ey);
+        double epsilon = 1e-6;
+	    ASSERT_NEAR(ex, strain1(0), epsilon);
+        ASSERT_NEAR(ey, strain1(1), epsilon);
+        ASSERT_NEAR(.0, strain1(2), epsilon);
+        ASSERT_NEAR(exy, strain1(3), epsilon);
+        epsilon = 1;
+        ASSERT_NEAR(sx, stress1(0), epsilon);
+        ASSERT_NEAR(sy, stress1(1), epsilon);
+        ASSERT_NEAR(sz, stress1(2), epsilon);
+        ASSERT_NEAR(sxy, stress1(3), epsilon);
 
 	} catch (const char* e) {
 		std::cout << "***Exception caught! " << e << std::endl;

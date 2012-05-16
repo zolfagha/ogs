@@ -31,8 +31,8 @@ void ElementWiseTransientLinearEQSAssembler::assembly(MeshLib::IMesh &msh, Discr
         // local assembly
         localEQS.create(local_dofmap.size());
         _transient_e_assembler->assembly(time, *e, local_u_n1, local_u_n, localEQS);
-        std::cout << "local A = \n" << *localEQS.getA();
-        std::cout << "local b = \n" << *localEQS.getRHS();
+        //std::cout << "local A = \n" << *localEQS.getA();
+        //std::cout << "local b = \n" << *localEQS.getRHS();
         // update global
         eqs.addAsub(local_dofmap, *localEQS.getA());
         eqs.addRHSsub(local_dofmap, localEQS.getRHS());
