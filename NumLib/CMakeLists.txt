@@ -63,7 +63,7 @@ ENDIF (USE_MPI)
 
 target_link_libraries (
 	NumLib
-	Base
+	BaseLib
         NumLib
         MeshLib
 	DiscreteLib

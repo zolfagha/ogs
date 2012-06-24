@@ -129,7 +129,7 @@ public:
     void initialize() {};
     void finalize() {};
 
-    void setOption(const Base::Options &option);
+    void setOption(const BaseLib::Options &option);
 
     void solve();
 };

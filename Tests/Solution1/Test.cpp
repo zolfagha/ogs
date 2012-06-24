@@ -2,7 +2,7 @@
 #include <cmath>
 #include <gtest/gtest.h>
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 
 #include "MathLib/Vector.h"
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
@@ -184,13 +184,13 @@ TEST(Solution, CouplingFem2D)
         TimeStepFunctionConstant tim(.0, 100.0, 10.0);
         pGW->setTimeSteppingFunction(tim);
 	    // options
-	    Base::Options options;
-	    Base::Options* op_lis = options.addSubGroup("Lis");
+	    BaseLib::Options options;
+	    BaseLib::Options* op_lis = options.addSubGroup("Lis");
 	    op_lis->addOption("solver_type", "CG");
 	    op_lis->addOption("precon_type", "NONE");
 	    op_lis->addOptionAsNum("error_tolerance", 1e-10);
 	    op_lis->addOptionAsNum("max_iteration_step", 500);
-	    Base::Options* op_nl = options.addSubGroup("Nonlinear");
+	    BaseLib::Options* op_nl = options.addSubGroup("Nonlinear");
 	    op_nl->addOption("solver_type", "Picard");
 	    op_nl->addOptionAsNum("error_tolerance", 1e-6);
 	    op_nl->addOptionAsNum("max_iteration_step", 500);
@@ -256,8 +256,8 @@ TEST(FEM, line)
         TimeStepFunctionConstant tim(.0, 10.0, 10.0);
         pGW->setTimeSteppingFunction(tim);
         // options
-        Base::Options options;
-        Base::Options* op_lis = options.addSubGroup("Lis");
+        BaseLib::Options options;
+        BaseLib::Options* op_lis = options.addSubGroup("Lis");
         op_lis->addOption("solver_type", "CG");
         op_lis->addOption("precon_type", "NONE");
         op_lis->addOptionAsNum("error_tolerance", 1e-10);
@@ -337,23 +337,23 @@ TEST(Solution, CouplingFem2)
         pGW->setTimeSteppingFunction(tim);
         pMass->setTimeSteppingFunction(tim);
 	    //options
-	    Base::Options optionsGW;
-	    Base::Options* op_lis = optionsGW.addSubGroup("Lis");
+	    BaseLib::Options optionsGW;
+	    BaseLib::Options* op_lis = optionsGW.addSubGroup("Lis");
 	    op_lis->addOption("solver_type", "CG");
 	    op_lis->addOption("precon_type", "NONE");
 	    op_lis->addOptionAsNum("error_tolerance", 1e-10);
 	    op_lis->addOptionAsNum("max_iteration_step", 1000);
-	    Base::Options* op_nl = optionsGW.addSubGroup("Nonlinear");
+	    BaseLib::Options* op_nl = optionsGW.addSubGroup("Nonlinear");
 	    op_nl->addOption("solver_type", "Picard");
 	    op_nl->addOptionAsNum("error_tolerance", 1e-6);
 	    op_nl->addOptionAsNum("max_iteration_step", 500);
-        Base::Options optionsMT;
+        BaseLib::Options optionsMT;
         op_lis = optionsMT.addSubGroup("Lis");
         op_lis->addOption("solver_type", "BiCG");
         op_lis->addOption("precon_type", "NONE");
         op_lis->addOptionAsNum("error_tolerance", 1e-10);
         op_lis->addOptionAsNum("max_iteration_step", 1000);
-	    Base::Options* op_nl2 = optionsMT.addSubGroup("Nonlinear");
+	    BaseLib::Options* op_nl2 = optionsMT.addSubGroup("Nonlinear");
 	    op_nl2->addOption("solver_type", "Picard");
 	    op_nl2->addOptionAsNum("error_tolerance", 1e-6);
 	    op_nl2->addOptionAsNum("max_iteration_step", 500);
@@ -466,13 +466,13 @@ TEST(Fem, LinearElastic2D)
         TimeStepFunctionConstant tim(.0, 10.0, 10.0);
         pDe->setTimeSteppingFunction(tim);
 	    // options
-	    Base::Options options;
-	    Base::Options* op_lis = options.addSubGroup("Lis");
+	    BaseLib::Options options;
+	    BaseLib::Options* op_lis = options.addSubGroup("Lis");
 	    op_lis->addOption("solver_type", "CG");
 	    op_lis->addOption("precon_type", "NONE");
 	    op_lis->addOptionAsNum("error_tolerance", 1e-10);
 	    op_lis->addOptionAsNum("max_iteration_step", 500);
-	    Base::Options* op_nl = options.addSubGroup("Nonlinear");
+	    BaseLib::Options* op_nl = options.addSubGroup("Nonlinear");
 	    op_nl->addOption("solver_type", "Linear");
 	    op_nl->addOptionAsNum("error_tolerance", 1e-6);
 	    op_nl->addOptionAsNum("max_iteration_step", 500);

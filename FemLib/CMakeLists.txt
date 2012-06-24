@@ -58,9 +58,8 @@ IF (PARALLEL_USE_MPI)
 	INCLUDE_DIRECTORIES(${MPI_INCLUDE_PATH})
 ENDIF (PARALLEL_USE_MPI)
 
-target_link_libraries (
-	FemLib
-	Base
+target_link_libraries (FemLib
+	BaseLib
 	MathLib
 	GeoLib
 	MeshLib

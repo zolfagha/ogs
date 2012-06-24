@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "SolutionLib/Problem/FemIVBVProblem.h"
 #include "SolutionLib/Solution/SingleStepFEM.h"
@@ -32,10 +32,10 @@ public:
 
     virtual ~TemplateFemMonolithicSystem()
     {
-        Base::releaseObject(_solution);
+        BaseLib::releaseObject(_solution);
     }
 
-    void define(DiscreteLib::DiscreteSystem* dis, MyProblemType* problem, Base::Options &option)
+    void define(DiscreteLib::DiscreteSystem* dis, MyProblemType* problem, BaseLib::Options &option)
     {
         _solution = new MySolutionType(dis, problem);
         T_LINEAR_SOLVER* linear_solver = _solution->getLinearEquationSolver();

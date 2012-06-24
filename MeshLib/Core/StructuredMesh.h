@@ -4,7 +4,7 @@
 #include <map>
 #include <algorithm>
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 #include "GeoLib/Core/Point.h"
 
 #include "IMesh.h"
@@ -67,7 +67,7 @@ public:
     {
         delete _e;
         delete _nod;
-        Base::releaseObjectsInStdVector(_list_edge_elements);
+        BaseLib::releaseObjectsInStdVector(_list_edge_elements);
     }
 
     void setID(size_t id) {_msh_id = id;};

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 #include "GeoLib/Core/Point.h"
 #include "GeoLib/Core/Polyline.h"
 
@@ -18,8 +18,8 @@ public:
     }
 
     virtual ~Line() {
-        Base::releaseObjectsInStdVector(_pnt_vec);
-        Base::releaseObjectsInStdVector(_poly_vec);
+        BaseLib::releaseObjectsInStdVector(_pnt_vec);
+        BaseLib::releaseObjectsInStdVector(_poly_vec);
     }
 
     Polyline* getPolyline()

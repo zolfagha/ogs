@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
@@ -161,12 +161,12 @@ class GWFemTestSystem : public NumLib::ITransientSystem
 public:
     GWFemTestSystem()
     {
-        Base::zeroObject(_rec, _head, _problem);
+        BaseLib::zeroObject(_rec, _head, _problem);
     }
 
     virtual ~GWFemTestSystem()
     {
-        Base::releaseObject(_rec, _head, _problem);
+        BaseLib::releaseObject(_rec, _head, _problem);
     }
 
     double suggestNext(const TimeStep &time_current)
@@ -191,7 +191,7 @@ public:
     };
 
     //#Define a problem
-    void define(DiscreteSystem &dis, NumLib::ITXFunction &K, Base::Options &option)
+    void define(DiscreteSystem &dis, NumLib::ITXFunction &K, BaseLib::Options &option)
     {
         MeshLib::IMesh *msh = dis.getMesh();
         //size_t nnodes = msh->getNumberOfNodes();
@@ -258,8 +258,8 @@ TEST(Solution, Fem1_Linear)
     // mat
     NumLib::TXFunctionConstant K(1.e-11);
     // options
-    Base::Options options;
-    Base::Options* op_lis = options.addSubGroup("Lis");
+    BaseLib::Options options;
+    BaseLib::Options* op_lis = options.addSubGroup("Lis");
     op_lis->addOption("solver_type", "CG");
     op_lis->addOption("precon_type", "NONE");
     op_lis->addOptionAsNum("error_tolerance", 1e-10);
@@ -281,7 +281,7 @@ TEST(Solution, Fem1_Linear)
 
     ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getNodalValues())[0], h->getNumberOfNodes());
 
-    Base::releaseObject(msh);
+    BaseLib::releaseObject(msh);
 }
 
 TEST(Solution, Fem1_Picard)
@@ -292,13 +292,13 @@ TEST(Solution, Fem1_Picard)
     // mat
     NumLib::TXFunctionConstant K(1.e-11);
     // options
-    Base::Options options;
-    Base::Options* op_lis = options.addSubGroup("Lis");
+    BaseLib::Options options;
+    BaseLib::Options* op_lis = options.addSubGroup("Lis");
     op_lis->addOption("solver_type", "CG");
     op_lis->addOption("precon_type", "NONE");
     op_lis->addOptionAsNum("error_tolerance", 1e-10);
     op_lis->addOptionAsNum("max_iteration_step", 500);
-    Base::Options* op_nl = options.addSubGroup("Nonlinear");
+    BaseLib::Options* op_nl = options.addSubGroup("Nonlinear");
     op_nl->addOption("solver_type", "Picard");
     op_nl->addOptionAsNum("error_tolerance", 1e-6);
     op_nl->addOptionAsNum("max_iteration_step", 500);
@@ -319,7 +319,7 @@ TEST(Solution, Fem1_Picard)
 
     ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getNodalValues())[0], h->getNumberOfNodes());
 
-    Base::releaseObject(msh);
+    BaseLib::releaseObject(msh);
 }
 
 TEST(Solution, Fem1_Newton)
@@ -330,13 +330,13 @@ TEST(Solution, Fem1_Newton)
     // mat
     NumLib::TXFunctionConstant K(1.e-11);
     // options
-    Base::Options options;
-    Base::Options* op_lis = options.addSubGroup("Lis");
+    BaseLib::Options options;
+    BaseLib::Options* op_lis = options.addSubGroup("Lis");
     op_lis->addOption("solver_type", "CG");
     op_lis->addOption("precon_type", "NONE");
     op_lis->addOptionAsNum("error_tolerance", 1e-10);
     op_lis->addOptionAsNum("max_iteration_step", 500);
-    Base::Options* op_nl = options.addSubGroup("Nonlinear");
+    BaseLib::Options* op_nl = options.addSubGroup("Nonlinear");
     op_nl->addOption("solver_type", "Newton");
     op_nl->addOptionAsNum("error_tolerance", 1e-6);
     op_nl->addOptionAsNum("max_iteration_step", 10);
@@ -357,7 +357,7 @@ TEST(Solution, Fem1_Newton)
 
     ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getNodalValues())[0], h->getNumberOfNodes());
 
-    Base::releaseObject(msh);
+    BaseLib::releaseObject(msh);
 }
 
 TEST(Solution, Fem2)
@@ -368,8 +368,8 @@ TEST(Solution, Fem2)
     // mat
     NumLib::TXFunctionConstant K(1.e-11);
     // options
-    Base::Options options;
-    Base::Options* op_lis = options.addSubGroup("Lis");
+    BaseLib::Options options;
+    BaseLib::Options* op_lis = options.addSubGroup("Lis");
     op_lis->addOption("solver_type", "CG");
     op_lis->addOption("precon_type", "NONE");
     op_lis->addOptionAsNum("error_tolerance", 1e-10);
@@ -397,6 +397,6 @@ TEST(Solution, Fem2)
     ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getNodalValues())[0], h->getNumberOfNodes());
 
 
-    Base::releaseObject(msh);
+    BaseLib::releaseObject(msh);
 }
 

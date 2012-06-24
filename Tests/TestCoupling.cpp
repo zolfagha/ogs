@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 #include <vector>
 
-#include "Base/Options.h"
+#include "BaseLib/Options.h"
 #include "NumLib/Function/Function.h"
 #include "NumLib/Coupling/MonolithicProblem.h"
 #include "NumLib/Coupling/PartitionedProblem.h"
@@ -197,11 +197,11 @@ private:
 };
 
 
-Base::Options* defineOption4SteadyCoupling()
+BaseLib::Options* defineOption4SteadyCoupling()
 {
-	Base::Options* options = new Base::Options();
-	Base::Options* coupling = options->addSubGroup("coupling");
-	Base::Options* P2 = coupling->addSubGroup("P");
+	BaseLib::Options* options = new BaseLib::Options();
+	BaseLib::Options* coupling = options->addSubGroup("coupling");
+	BaseLib::Options* P2 = coupling->addSubGroup("P");
 	{
 	//P2->addOption("name", "P2");
 	P2->addOption("algorithm", "Jacobi");
@@ -214,8 +214,8 @@ Base::Options* defineOption4SteadyCoupling()
 	out_var.push_back("c");
 	P2->addOptionAsArray("out", out_var);
 	}
-	Base::Options* P2_sub = P2->addSubGroup("problems");
-	Base::Options* P1 = P2_sub->addSubGroup("P");
+	BaseLib::Options* P2_sub = P2->addSubGroup("problems");
+	BaseLib::Options* P1 = P2_sub->addSubGroup("P");
 	{
 	//P1->addOption("name", "P1");
 	P1->addOption("algorithm", "Gauss");
@@ -230,8 +230,8 @@ Base::Options* defineOption4SteadyCoupling()
 	P1->addOptionAsArray("out", out_var);
 	P1->addOptionAsArray("in", in_var);
 	}
-	Base::Options* P1_sub = P1->addSubGroup("problems");
-	Base::Options* M1 = P1_sub->addSubGroup("M1");
+	BaseLib::Options* P1_sub = P1->addSubGroup("problems");
+	BaseLib::Options* M1 = P1_sub->addSubGroup("M1");
 	{
 	M1->addOption("name", "EQS1");
 	std::vector<std::string> out_var;
@@ -242,7 +242,7 @@ Base::Options* defineOption4SteadyCoupling()
 	M1->addOptionAsArray("out", out_var);
 	M1->addOptionAsArray("in", in_var);
 	}
-	Base::Options* M2 = P1_sub->addSubGroup("M2");
+	BaseLib::Options* M2 = P1_sub->addSubGroup("M2");
 	{
 	M2->addOption("name", "EQS2");
 	std::vector<std::string> out_var;
@@ -253,7 +253,7 @@ Base::Options* defineOption4SteadyCoupling()
 	M2->addOptionAsArray("out", out_var);
 	M2->addOptionAsArray("in", in_var);
 	}
-	Base::Options* M3 = P2_sub->addSubGroup("M3");
+	BaseLib::Options* M3 = P2_sub->addSubGroup("M3");
 	{
 	M3->addOption("name", "EQS3");
 	std::vector<std::string> out_var;
@@ -295,7 +295,7 @@ public:
 
 TEST(Coupling, SteadyCouplingOption)
 {
-	Base::Options* option = defineOption4SteadyCoupling();
+	BaseLib::Options* option = defineOption4SteadyCoupling();
 	MyEQSFactory eqsFac;
 	MyConvergenceCheckerFactory checkFac;
 	CouplingStrucutreBuilder cpl_builder;
@@ -670,11 +670,11 @@ void defineTransientExample1(TransientWeakCouplingEQS1 &eqs1, TransientWeakCoupl
 	part2.connectParameters();
 }
 
-Base::Options* defineOption4TransientCoupling()
+BaseLib::Options* defineOption4TransientCoupling()
 {
-	Base::Options* options = new Base::Options();
-	Base::Options* coupling = options->addSubGroup("coupling");
-	Base::Options* P2 = coupling->addSubGroup("P");
+	BaseLib::Options* options = new BaseLib::Options();
+	BaseLib::Options* coupling = options->addSubGroup("coupling");
+	BaseLib::Options* P2 = coupling->addSubGroup("P");
 	{
 	//P2->addOption("name", "P2");
 	P2->addOption("algorithm", "Parallel");
@@ -687,8 +687,8 @@ Base::Options* defineOption4TransientCoupling()
 	out_var.push_back("c");
 	P2->addOptionAsArray("out", out_var);
 	}
-	Base::Options* P2_sub = P2->addSubGroup("problems");
-	Base::Options* P1 = P2_sub->addSubGroup("P");
+	BaseLib::Options* P2_sub = P2->addSubGroup("problems");
+	BaseLib::Options* P1 = P2_sub->addSubGroup("P");
 	{
 	//P1->addOption("name", "P1");
 	P1->addOption("algorithm", "Serial");
@@ -703,8 +703,8 @@ Base::Options* defineOption4TransientCoupling()
 	P1->addOptionAsArray("out", out_var);
 	P1->addOptionAsArray("in", in_var);
 	}
-	Base::Options* P1_sub = P1->addSubGroup("problems");
-	Base::Options* M1 = P1_sub->addSubGroup("M1");
+	BaseLib::Options* P1_sub = P1->addSubGroup("problems");
+	BaseLib::Options* M1 = P1_sub->addSubGroup("M1");
 	{
 	M1->addOption("name", "EQS1");
 	std::vector<std::string> out_var;
@@ -715,7 +715,7 @@ Base::Options* defineOption4TransientCoupling()
 	M1->addOptionAsArray("out", out_var);
 	M1->addOptionAsArray("in", in_var);
 	}
-	Base::Options* M2 = P1_sub->addSubGroup("M2");
+	BaseLib::Options* M2 = P1_sub->addSubGroup("M2");
 	{
 	M2->addOption("name", "EQS2");
 	std::vector<std::string> out_var;
@@ -726,7 +726,7 @@ Base::Options* defineOption4TransientCoupling()
 	M2->addOptionAsArray("out", out_var);
 	M2->addOptionAsArray("in", in_var);
 	}
-	Base::Options* M3 = P2_sub->addSubGroup("M3");
+	BaseLib::Options* M3 = P2_sub->addSubGroup("M3");
 	{
 	M3->addOption("name", "EQS3");
 	std::vector<std::string> out_var;
@@ -767,7 +767,7 @@ public:
 
 TEST(Coupling, TransientCouplingOption)
 {
-	Base::Options* option = defineOption4TransientCoupling();
+	BaseLib::Options* option = defineOption4TransientCoupling();
 	MyTransientEQSFactory eqsFac(1.0, 1.0, 1.0);
 	MyConvergenceCheckerFactory checkFac;
 	TransientCoulplingStrucutreBuilder cpl_builder;

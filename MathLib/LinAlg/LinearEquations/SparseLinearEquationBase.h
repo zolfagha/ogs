@@ -4,7 +4,7 @@
 #include <vector>
 #include <map>
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 
 #include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
@@ -26,7 +26,7 @@ public:
 
     virtual ~AbstractCRSLinearEquation()
     {
-        Base::releaseObject(_A);
+        BaseLib::releaseObject(_A);
     }
 
     void create(size_t length, RowMajorSparsity *sparsity);

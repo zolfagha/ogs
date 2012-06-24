@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 
 #include "MathLib/LinAlg/Sparse/SparseTableCRS.h"
 
@@ -27,7 +27,7 @@ public:
     virtual ~AbstractMeshBasedDiscreteLinearEquation()
     {
         //Base::releaseObject(_dofManager);
-        Base::releaseObject(_sparsity);
+        BaseLib::releaseObject(_sparsity);
     }
 
     MeshLib::IMesh* getMesh() const

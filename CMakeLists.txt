@@ -9,9 +9,12 @@ cmake_minimum_required(VERSION 2.6)
 project( OGS-6 )
 
 ### CMake includes ###
+INCLUDE(scripts/cmake/Functions.cmake)
 INCLUDE(scripts/cmake/CMakeSetup.cmake)
 INCLUDE(scripts/cmake/CompilerSetup.cmake)
 INCLUDE(scripts/cmake/Find.cmake)
+INCLUDE(scripts/cmake/ProjectSetup.cmake)
+INCLUDE(scripts/cmake/DocumentationSetup.cmake)
 
 ###############
 ### Options ###
@@ -99,12 +102,19 @@ IF((CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC) AND GPROF_PATH)
 	OPTION(OGS_PROFILE "Enables compiling with flags set for profiling with gprof." OFF)
 ENDIF() # GCC AND GPROF_PATH
 
-# Set build directories
-SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
-SET( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib )
+
+# Print CMake variable values
+IF (OGS_CMAKE_DEBUG)
+	INCLUDE(ListAllCMakeVariableValues)
+	list_all_cmake_variable_values()
+ENDIF (OGS_CMAKE_DEBUG)
+
+######################
+### Subdirectories ###
+######################
 
 # Add subdirectories with the projects
-ADD_SUBDIRECTORY( Base )
+ADD_SUBDIRECTORY( BaseLib )
 ADD_SUBDIRECTORY( GeoLib )
 ADD_SUBDIRECTORY( MathLib )
 ADD_SUBDIRECTORY( MeshLib )
@@ -123,24 +133,4 @@ ENDIF(USE_MPI)
 IF (PYTHON_WRAP)
 	ADD_SUBDIRECTORY(ogsPython)
 ENDIF()
-
-IF(DOXYGEN_FOUND)
-	OPTION(DOCS_GENERATE_DIAGRAMS "Use the DOT tool to generate class diagrams." OFF)
-	OPTION(DOCS_GENERATE_CALL_GRAPHS "Generate call dependency graphs." OFF)
-	OPTION(DOCS_GENERATE_COLLABORATION_GRAPHS "Generate collaboration graphs." OFF)
-	IF(DOT_TOOL_PATH AND DOCS_GENERATE_DIAGRAMS)
-		SET(DOT_FOUND "YES" CACHE INTERNAL "")
-	ENDIF() # DOT_TOOL_PATH AND DOCS_GENERATE_DIAGRAMS
-	IF(DOCS_GENERATE_CALL_GRAPHS)
-		SET(DOCS_GENERATE_CALL_GRAPHS_STRING "YES" CACHE INTERNAL "")
-	ENDIF() # DOCS_GENERATE_CALL_GRAPHS
-	IF(DOCS_GENERATE_COLLABORATION_GRAPHS)
-		SET(DOCS_GENERATE_COLLABORATION_GRAPHS_STRING "YES" CACHE INTERNAL "")
-	ENDIF() # DOCS_GENERATE_COLLABORATION_GRAPHS
-	GET_FILENAME_COMPONENT(DOT_TOOL_PATH_ONLY ${DOT_TOOL_PATH} PATH)
-	CONFIGURE_FILE(scripts/doxygen/Doxyfile.in ${PROJECT_BINARY_DIR}/Doxyfile)
-	ADD_CUSTOM_TARGET(doc ${DOXYGEN_EXECUTABLE} ${PROJECT_BINARY_DIR}/Doxyfile
-		WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-		COMMENT "Generating source code documentation with Doxygen." VERBATIM)
-ENDIF() # DOXYGEN_FOUND
 

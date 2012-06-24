@@ -57,7 +57,7 @@ public:
         TemplateTransientMonolithicSystem::resizeOutputParameter(4);
     };
 
-    void define(DiscreteSystem* dis, FemLinearElasticProblem* problem_u, Geo::PorousMedia* pm, Base::Options &option)
+    void define(DiscreteSystem* dis, FemLinearElasticProblem* problem_u, Geo::PorousMedia* pm, BaseLib::Options &option)
     {
     	_dis = dis;
     	_pm = pm;

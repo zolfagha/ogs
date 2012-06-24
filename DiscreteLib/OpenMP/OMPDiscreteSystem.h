@@ -11,7 +11,7 @@ namespace DiscreteLib
 class OMPLocalNodeDecomposedDiscreteSystem : public DiscreteSystem
 {
 public:
-    OMPLocalNodeDecomposedDiscreteSystem(MeshLib::IMesh &local_msh, Base::BidirectionalMap<size_t, size_t> &msh_node_id_mapping, std::set<size_t> &ghost_nodes)
+    OMPLocalNodeDecomposedDiscreteSystem(MeshLib::IMesh &local_msh, BaseLib::BidirectionalMap<size_t, size_t> &msh_node_id_mapping, std::set<size_t> &ghost_nodes)
         : DiscreteSystem(local_msh), _map_global2local_node_id(&msh_node_id_mapping), _ghost_nodes(ghost_nodes), _n_global_nodes(0)
     {
     }
@@ -41,7 +41,7 @@ private:
     DISALLOW_COPY_AND_ASSIGN(OMPLocalNodeDecomposedDiscreteSystem);
 
     // discretization
-    Base::BidirectionalMap<size_t, size_t>* _map_global2local_node_id;
+    BaseLib::BidirectionalMap<size_t, size_t>* _map_global2local_node_id;
     std::set<size_t> _ghost_nodes;
 
     // 
@@ -66,7 +66,7 @@ public:
 
     size_t getGlobalNumberOfNodes() const {return _n_global_nodes; };
 
-    OMPLocalNodeDecomposedDiscreteSystem* createLocal(MeshLib::IMesh &local_msh, Base::BidirectionalMap<size_t, size_t> &msh_node_id_mapping, std::set<size_t> &ghost_nodes)
+    OMPLocalNodeDecomposedDiscreteSystem* createLocal(MeshLib::IMesh &local_msh, BaseLib::BidirectionalMap<size_t, size_t> &msh_node_id_mapping, std::set<size_t> &ghost_nodes)
     {
         OMPLocalNodeDecomposedDiscreteSystem* local = new OMPLocalNodeDecomposedDiscreteSystem(local_msh, msh_node_id_mapping, ghost_nodes);
         _vec_local_dis.push_back(local);
@@ -107,7 +107,7 @@ private:
 
     std::vector<OMPLocalNodeDecomposedDiscreteSystem*> _vec_local_dis;
     // discretization
-    Base::BidirectionalMap<size_t, size_t>* _map_global2local_node_id;
+    BaseLib::BidirectionalMap<size_t, size_t>* _map_global2local_node_id;
     std::set<size_t> _ghost_nodes;
 
     // 

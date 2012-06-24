@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include "Base/Options.h"
+#include "BaseLib/Options.h"
 
 #include "ICoupledProblem.h"
 #include "MonolithicProblem.h"
@@ -20,15 +20,15 @@ class TemplateCouplingStrucutreBuilder
 {
 public:
 	template <class T_EQS_FACTORY, class T_CHECK_FACTORY>
-	T_I* build(const Base::Options *option, T_EQS_FACTORY eqs_fac, T_CHECK_FACTORY check_fack)
+	T_I* build(const BaseLib::Options *option, T_EQS_FACTORY eqs_fac, T_CHECK_FACTORY check_fack)
 	{
-		const Base::Options* op_cpl = option->getSubGroup("coupling");
+		const BaseLib::Options* op_cpl = option->getSubGroup("coupling");
 	    if (op_cpl->hasSubGroup("M")) {
-	        const Base::Options* op_sub = op_cpl->getSubGroup("M");
+	        const BaseLib::Options* op_sub = op_cpl->getSubGroup("M");
 	        T_M *sys = buildMonolithicSystem(op_sub, eqs_fac);
 	        return sys;
 	    } else if (op_cpl->hasSubGroup("P")) {
-	        const Base::Options* op_sub = op_cpl->getSubGroup("P");
+	        const BaseLib::Options* op_sub = op_cpl->getSubGroup("P");
 	        T_P *sys = buildPartitionedSystem(op_sub, eqs_fac, check_fack);
 	        return sys;
 	    }
@@ -37,7 +37,7 @@ public:
 
 private:
 	template <class T_EQS_FACTORY>
-	T_M* buildMonolithicSystem(const Base::Options *option, T_EQS_FACTORY &eqs_fac)
+	T_M* buildMonolithicSystem(const BaseLib::Options *option, T_EQS_FACTORY &eqs_fac)
 	{
 		T_M* eqs = eqs_fac.create(option->getOption("name"));
 		const std::vector<std::string>* in_names = option->getOptionAsArray<std::string>("in");
@@ -56,7 +56,7 @@ private:
 	}
 
 	template <class T_EQS_FACTORY, class T_CHECK_FACTORY>
-	T_P* buildPartitionedSystem(const Base::Options *option, T_EQS_FACTORY &eqs_fac, T_CHECK_FACTORY check_fac)
+	T_P* buildPartitionedSystem(const BaseLib::Options *option, T_EQS_FACTORY &eqs_fac, T_CHECK_FACTORY check_fac)
 	{
 		T_P* part = new T_P();
 		//para
@@ -83,10 +83,10 @@ private:
 //		if (alg!=0) {
 //		}
 		//problems
-		const Base::Options* op_problems = option->getSubGroup("problems");
-		for (Base::Options::const_iterator itr=op_problems->begin(); itr!=op_problems->end(); ++itr) {
+		const BaseLib::Options* op_problems = option->getSubGroup("problems");
+		for (BaseLib::Options::const_iterator itr=op_problems->begin(); itr!=op_problems->end(); ++itr) {
 			std::string str = itr->first;
-			Base::Options* op_sub = static_cast<Base::Options*>(itr->second);
+			BaseLib::Options* op_sub = static_cast<BaseLib::Options*>(itr->second);
 			T_I* sys = 0;
 			if (str.find("M")==0) {
 				sys = buildMonolithicSystem(op_sub, eqs_fac);

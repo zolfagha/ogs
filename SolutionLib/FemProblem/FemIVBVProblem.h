@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 #include "IVBVProblem.h"
 #include "MeshBasedProblem.h"
 #include "TimeSteppingProblem.h"
@@ -40,7 +40,7 @@ public:
     ///
     virtual ~FemIVBVProblem()
     {
-        Base::releaseObjectsInStdVector(_variables);
+        BaseLib::releaseObjectsInStdVector(_variables);
     }
 
     /// get this discrete system

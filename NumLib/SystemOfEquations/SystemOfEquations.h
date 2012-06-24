@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 
 #include "Variable.h"
 #include "Equation.h"
@@ -19,8 +19,8 @@ public:
 
 	virtual ~SystemOfEquations() 
     {
-        Base::releaseObjectsInStdVector(_equations);
-        Base::releaseObjectsInStdVector(_variables);
+        BaseLib::releaseObjectsInStdVector(_equations);
+        BaseLib::releaseObjectsInStdVector(_variables);
     };
 
 	void addEquation(LinearEquation &eq)

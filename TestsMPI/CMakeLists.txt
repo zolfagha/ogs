@@ -12,7 +12,7 @@ ADD_EXECUTABLE( testsMPI
 )
 
 TARGET_LINK_LIBRARIES ( testsMPI
-	Base
+	BaseLib
 	MathLib
 	GeoLib
 	MeshLib

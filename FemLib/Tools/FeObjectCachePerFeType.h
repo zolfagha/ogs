@@ -3,7 +3,7 @@
 
 #include <map>
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 
 #include "FemLib/Core/Element/IFemElement.h"
 #include "FemLib/Core/Element/FemElementFactory.h"
@@ -22,7 +22,7 @@ public:
 
     virtual ~FeObjectCachePerFeType()
     {
-        Base::releaseObjectsInStdMap(_mapFeObj);
+        BaseLib::releaseObjectsInStdMap(_mapFeObj);
     }
 
     IFiniteElement* getFeObject(FiniteElementType::type fe_type);

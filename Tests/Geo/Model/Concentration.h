@@ -50,7 +50,7 @@ public:
         TemplateTransientMonolithicSystem::resizeOutputParameter(1);
     };
 
-    void define(DiscreteLib::DiscreteSystem* dis, MassFemProblem* problem, Base::Options &option)
+    void define(DiscreteLib::DiscreteSystem* dis, MassFemProblem* problem, BaseLib::Options &option)
     {
         //solution algorithm
         _solConc = new SolutionForConc(dis, problem);

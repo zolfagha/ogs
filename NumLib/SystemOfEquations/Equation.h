@@ -4,7 +4,7 @@
 #include <vector>
 #include <valarray>
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 #include "NumLib/DataType.h"
 #include "Variable.h"
 
@@ -65,7 +65,7 @@ struct LinearEquation
 
     virtual ~LinearEquation()
     {
-        Base::releaseObjectsInStdVector(componets);
+        BaseLib::releaseObjectsInStdVector(componets);
     }
 };
 

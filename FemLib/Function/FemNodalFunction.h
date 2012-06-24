@@ -4,7 +4,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 
 #include "MathLib/Vector.h"
 #include "MathLib/LinAlg/VectorNorms.h"
@@ -62,7 +62,7 @@ public:
     ///
     virtual ~TemplateFEMNodalFunction()
     {
-        Base::releaseObject(_feObjects);
+        BaseLib::releaseObject(_feObjects);
     }
 
     ///

@@ -22,7 +22,7 @@ public:
 	MassTransportTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, PorousMedia &pm, Compound &cmp)
 	: _pm(&pm), _cmp(&cmp), _feObjects(&feObjects)
 	{
-        Base::zeroObject(_vel);
+        BaseLib::zeroObject(_vel);
 	};
 
 	virtual ~MassTransportTimeODELocalAssembler() {};
@@ -87,7 +87,7 @@ public:
 	MassTransportJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, PorousMedia &pm, Compound &cmp)
 	: _pm(&pm), _cmp(&cmp), _feObjects(&feObjects)
 	{
-        Base::zeroObject(_vel);
+        BaseLib::zeroObject(_vel);
 	};
 
     void initialize(const NumLib::ITXFunction *vel)

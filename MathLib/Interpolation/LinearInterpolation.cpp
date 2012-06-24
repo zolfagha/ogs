@@ -6,8 +6,8 @@
  */
 
 #include "LinearInterpolation.h"
-#include "Base/binarySearch.h"
-#include "Base/swap.h"
+#include "BaseLib/binarySearch.h"
+#include "BaseLib/swap.h"
 
 #include <iostream>
 

@@ -31,7 +31,7 @@ ADD_EXECUTABLE( tests
 )
 
 TARGET_LINK_LIBRARIES ( tests
-	Base
+	BaseLib
 	MathLib
 	GeoLib
 	MeshLib

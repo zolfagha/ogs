@@ -21,7 +21,7 @@ SWIG_ADD_MODULE( ogsPython python
 	${ogsPython_Files}
 	)
 SWIG_LINK_LIBRARIES(ogsPython
-	Base
+	BaseLib
 	MathLib
 	GeoLib
 	MeshLib

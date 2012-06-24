@@ -55,7 +55,7 @@ public:
         TemplateTransientMonolithicSystem::resizeOutputParameter(1);
     };
 
-    void define(DiscreteSystem* dis, GWFemProblem* problem, Base::Options &option)
+    void define(DiscreteSystem* dis, GWFemProblem* problem, BaseLib::Options &option)
     {
         //MeshLib::IMesh *msh = dis.getMesh();
         //size_t nnodes = msh->getNumberOfNodes();

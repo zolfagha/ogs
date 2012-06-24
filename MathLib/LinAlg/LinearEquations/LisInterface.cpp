@@ -28,9 +28,9 @@ CRSLisSolver::~CRSLisSolver()
     lis_vector_destroy(xx);
 }
 
-void CRSLisSolver::setOption(const Base::Options &option)
+void CRSLisSolver::setOption(const BaseLib::Options &option)
 {
-    const Base::Options *op = option.getSubGroup("Lis");
+    const BaseLib::Options *op = option.getSubGroup("Lis");
     if (op==0) return;
 
     if (op->hasOption("solver_type"))

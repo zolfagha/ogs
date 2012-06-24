@@ -75,7 +75,7 @@ public:
         TemplateTransientMonolithicSystem::resizeOutputParameter(1);
     };
 
-    void define(DiscreteLib::DiscreteSystem* dis, GWFdmProblem* problem, Base::Options &option)
+    void define(DiscreteLib::DiscreteSystem* dis, GWFdmProblem* problem, BaseLib::Options &option)
     {
         //solution algorithm
         _solHead = new SolutionForHead(dis, problem);

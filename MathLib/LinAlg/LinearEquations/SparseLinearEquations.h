@@ -4,7 +4,7 @@
 #include <vector>
 #include <map>
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 
 #include "MathLib/LinAlg/LinearEquations/SparseLinearEquationBase.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
@@ -58,7 +58,7 @@ public:
     void initialize() {};
     void finalize() {};
 
-    void setOption(const Base::Options &option);
+    void setOption(const BaseLib::Options &option);
 
     void setOption(const SpLinearOptions &option)
     {

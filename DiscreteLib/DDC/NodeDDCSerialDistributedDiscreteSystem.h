@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include "Base/CodingTools.h"
-#include "Base/BidirectionalMap.h"
+#include "BaseLib/CodingTools.h"
+#include "BaseLib/BidirectionalMap.h"
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "DiscreteLib/LinearEquation/MeshBasedDiscreteLinearEquation.h"
@@ -47,7 +47,7 @@ public:
 
     virtual ~NodeDDCSerialDistributedLinearEquation() 
     {
-        Base::releaseObjectsInStdVector(_list_local_eq);
+        BaseLib::releaseObjectsInStdVector(_list_local_eq);
     };
 
     /// initialize EQS
@@ -121,7 +121,7 @@ public:
                 for (size_t i_var=0; i_var<n_var; i_var++) {
                     // eqs id
                     const size_t local_row_id = local_dofTable->mapEqsID(i_var, mesh_id, i_pt);
-                    if (local_row_id==Base::index_npos) continue;
+                    if (local_row_id==BaseLib::index_npos) continue;
                     const size_t global_row_id = global_dofManager->mapEqsID(i_var, mesh_id, i_global_pt);
                     // add RHS
                     global_solver->addRHS(global_row_id, local_solver->getRHS(local_row_id));

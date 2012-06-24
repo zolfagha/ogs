@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "Base/BidirectionalMap.h"
+#include "BaseLib/BidirectionalMap.h"
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "DiscreteLib/LinearEquation/MeshBasedDiscreteLinearEquation.h"
@@ -30,7 +30,7 @@ public:
 
     virtual ~NodeDDCSerialSharedLinearEquation() 
     {
-        Base::releaseObjectsInStdVector(_list_local_eq);
+        BaseLib::releaseObjectsInStdVector(_list_local_eq);
     };
 
     /// initialize EQS

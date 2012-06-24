@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "Base/Options.h"
+#include "BaseLib/Options.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "NumLib/Coupling/PartitionedProblem.h"
 #include "NumLib/Coupling/Algorithm/BlockJacobiMethod.h"
@@ -97,11 +97,11 @@ public:
     }
 };
 
-Base::Options* defineCouplingM3()
+BaseLib::Options* defineCouplingM3()
 {
-    Base::Options* options = new Base::Options();
-    Base::Options* coupling = options->addSubGroup("coupling");
-    Base::Options* M1 = coupling->addSubGroup("M1");
+    BaseLib::Options* options = new BaseLib::Options();
+    BaseLib::Options* coupling = options->addSubGroup("coupling");
+    BaseLib::Options* M1 = coupling->addSubGroup("M1");
 	std::vector<std::string> var;
 	var.push_back("p");
 	var.push_back("T");
@@ -111,11 +111,11 @@ Base::Options* defineCouplingM3()
     return options;
 };
 
-Base::Options* defineCouplingP1_M2M1()
+BaseLib::Options* defineCouplingP1_M2M1()
 {
-    Base::Options* options = new Base::Options();
-    Base::Options* coupling = options->addSubGroup("coupling");
-    Base::Options* P1 = coupling->addSubGroup("P");
+    BaseLib::Options* options = new BaseLib::Options();
+    BaseLib::Options* coupling = options->addSubGroup("coupling");
+    BaseLib::Options* P1 = coupling->addSubGroup("P");
     {
         //P1->addOption("name", "P1");
         P1->addOption("algorithm", "Gauss");
@@ -123,9 +123,9 @@ Base::Options* defineCouplingP1_M2M1()
         P1->addOptionAsNum("max_itr", 100);
         P1->addOptionAsNum("epsilon", 1.e-4);
     }
-    Base::Options* P1_sub = P1->addSubGroup("problems");
-    Base::Options* M1 = P1_sub->addSubGroup("M1");
-    Base::Options* M2 = P1_sub->addSubGroup("M2");
+    BaseLib::Options* P1_sub = P1->addSubGroup("problems");
+    BaseLib::Options* M1 = P1_sub->addSubGroup("M1");
+    BaseLib::Options* M2 = P1_sub->addSubGroup("M2");
     std::vector<std::string> var1;
     var1.push_back("p");
     var1.push_back("T");
@@ -137,11 +137,11 @@ Base::Options* defineCouplingP1_M2M1()
     return options;
 };
 
-Base::Options* defineCouplingP1_3M1()
+BaseLib::Options* defineCouplingP1_3M1()
 {
-    Base::Options* options = new Base::Options();
-    Base::Options* coupling = options->addSubGroup("coupling");
-    Base::Options* P1 = coupling->addSubGroup("P");
+    BaseLib::Options* options = new BaseLib::Options();
+    BaseLib::Options* coupling = options->addSubGroup("coupling");
+    BaseLib::Options* P1 = coupling->addSubGroup("P");
     {
         //P1->addOption("name", "P1");
         P1->addOption("algorithm", "Gauss");
@@ -149,10 +149,10 @@ Base::Options* defineCouplingP1_3M1()
         P1->addOptionAsNum("max_itr", 100);
         P1->addOptionAsNum("epsilon", 1.e-4);
     }
-    Base::Options* P1_sub = P1->addSubGroup("problems");
-    Base::Options* M1 = P1_sub->addSubGroup("M1");
-    Base::Options* M2 = P1_sub->addSubGroup("M2");
-    Base::Options* M3 = P1_sub->addSubGroup("M3");
+    BaseLib::Options* P1_sub = P1->addSubGroup("problems");
+    BaseLib::Options* M1 = P1_sub->addSubGroup("M1");
+    BaseLib::Options* M2 = P1_sub->addSubGroup("M2");
+    BaseLib::Options* M3 = P1_sub->addSubGroup("M3");
 
     std::vector<std::string> var1;
     var1.push_back("p");
@@ -167,11 +167,11 @@ Base::Options* defineCouplingP1_3M1()
     return options;
 };
 
-Base::Options* defineCouplingP1_P2M1()
+BaseLib::Options* defineCouplingP1_P2M1()
 {
-    Base::Options* options = new Base::Options();
-    Base::Options* coupling = options->addSubGroup("coupling");
-    Base::Options* P2 = coupling->addSubGroup("P");
+    BaseLib::Options* options = new BaseLib::Options();
+    BaseLib::Options* coupling = options->addSubGroup("coupling");
+    BaseLib::Options* P2 = coupling->addSubGroup("P");
     {
         //P1->addOption("name", "P1");
         P2->addOption("algorithm", "Gauss");
@@ -179,8 +179,8 @@ Base::Options* defineCouplingP1_P2M1()
         P2->addOptionAsNum("max_itr", 100);
         P2->addOptionAsNum("epsilon", 1.e-4);
     }
-    Base::Options* P2_sub = P2->addSubGroup("problems");
-    Base::Options* P1 = P2_sub->addSubGroup("P");
+    BaseLib::Options* P2_sub = P2->addSubGroup("problems");
+    BaseLib::Options* P1 = P2_sub->addSubGroup("P");
     {
         //P1->addOption("name", "P1");
         P1->addOption("algorithm", "Gauss");
@@ -188,10 +188,10 @@ Base::Options* defineCouplingP1_P2M1()
         P1->addOptionAsNum("max_itr", 100);
         P1->addOptionAsNum("epsilon", 1.e-4);
     }
-    Base::Options* P1_sub = P1->addSubGroup("problems");
-    Base::Options* M1 = P1_sub->addSubGroup("M1");
-    Base::Options* M2 = P1_sub->addSubGroup("M2");
-    Base::Options* M3 = P2_sub->addSubGroup("M3");
+    BaseLib::Options* P1_sub = P1->addSubGroup("problems");
+    BaseLib::Options* M1 = P1_sub->addSubGroup("M1");
+    BaseLib::Options* M2 = P1_sub->addSubGroup("M2");
+    BaseLib::Options* M3 = P2_sub->addSubGroup("M3");
 
     std::vector<std::string> var1;
     var1.push_back("p");
@@ -356,7 +356,7 @@ TEST(Math, SystemOfEqs_AutoM3)
     vec0 *= .0;
     std::vector<MyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
 
-    Base::Options* option = defineCouplingM3();
+    BaseLib::Options* option = defineCouplingM3();
     std::vector<MyCouplingEQS*> list_sub_problem;
     CoupledProblemFactory eqs_fac(sysEqs, ini_para, list_sub_problem);
     MyConvergenceChecker4ArrayFactory checker;
@@ -392,7 +392,7 @@ TEST(Math, SystemOfEqs_AutoP1_M2M1)
     vec0 *= .0;
     std::vector<MyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
 
-    Base::Options* option = defineCouplingP1_M2M1();
+    BaseLib::Options* option = defineCouplingP1_M2M1();
     std::vector<MyCouplingEQS*> list_sub_problem;
     CoupledProblemFactory eqs_fac(sysEqs, ini_para, list_sub_problem);
     MyConvergenceChecker4ArrayFactory checker;
@@ -428,7 +428,7 @@ TEST(Math, SystemOfEqs_AutoP1_3M1)
     vec0 *= .0;
     std::vector<MyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
 
-    Base::Options* option = defineCouplingP1_3M1();
+    BaseLib::Options* option = defineCouplingP1_3M1();
     std::vector<MyCouplingEQS*> list_sub_problem;
     CoupledProblemFactory eqs_fac(sysEqs, ini_para, list_sub_problem);
     MyConvergenceChecker4ArrayFactory checker;
@@ -464,7 +464,7 @@ TEST(Math, SystemOfEqs_AutoP1_P2M1)
     vec0 *= .0;
     std::vector<MyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
 
-    Base::Options* option = defineCouplingP1_P2M1();
+    BaseLib::Options* option = defineCouplingP1_P2M1();
     std::vector<MyCouplingEQS*> list_sub_problem;
     CoupledProblemFactory eqs_fac(sysEqs, ini_para, list_sub_problem);
     MyConvergenceChecker4ArrayFactory checker;

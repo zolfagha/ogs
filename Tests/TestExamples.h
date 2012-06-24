@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "Base/BidirectionalMap.h"
+#include "BaseLib/BidirectionalMap.h"
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
@@ -186,7 +186,7 @@ struct DiscreteExample1
         }
     }
 
-    void setLocalDirichletBC(const Base::BidirectionalMap<size_t, size_t> &map_global2localNodeId, std::vector<size_t> &local_dirichlet_bc_id, std::vector<double> &local_dirichlet_bc_value)
+    void setLocalDirichletBC(const BaseLib::BidirectionalMap<size_t, size_t> &map_global2localNodeId, std::vector<size_t> &local_dirichlet_bc_id, std::vector<double> &local_dirichlet_bc_value)
     {
         for (size_t i=0; i<list_dirichlet_bc_id.size(); i++) {
             if (map_global2localNodeId.countInA(list_dirichlet_bc_id[i])>0) {

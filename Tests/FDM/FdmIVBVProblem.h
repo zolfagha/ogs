@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 #include "SolutionLib/FemProblem/MeshBasedProblem.h"
 #include "SolutionLib/FemProblem/TimeSteppingProblem.h"
 #include "FdmFunction.h"
@@ -46,15 +46,15 @@ public:
 //			_residual_assembler(residual_assembly),
 //			_jacobian_assembler(jacobian_assembly)
     {
-        Base::zeroObject(_map_var, _map_ic);
+        BaseLib::zeroObject(_map_var, _map_ic);
     }
 
     ///
     virtual ~FdmIVBVProblem()
     {
-        Base::releaseObject(_map_var, _map_ic);
-        Base::releaseObjectsInStdVector(_map_bc1);
-        Base::releaseObjectsInStdVector(_map_bc2);
+        BaseLib::releaseObject(_map_var, _map_ic);
+        BaseLib::releaseObjectsInStdVector(_map_bc1);
+        BaseLib::releaseObjectsInStdVector(_map_bc2);
     }
 
     /// get the number of variables

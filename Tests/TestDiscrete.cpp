@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include "Base/CodingTools.h"
-#include "Base/BidirectionalMap.h"
+#include "BaseLib/CodingTools.h"
+#include "BaseLib/BidirectionalMap.h"
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
@@ -66,7 +66,7 @@ struct DiscreteExample1
         }
     }
 
-    void setLocalDirichletBC(const Base::BidirectionalMap<size_t, size_t> &map_global2localNodeId, std::vector<size_t> &local_dirichlet_bc_id, std::vector<double> &local_dirichlet_bc_value)
+    void setLocalDirichletBC(const BaseLib::BidirectionalMap<size_t, size_t> &map_global2localNodeId, std::vector<size_t> &local_dirichlet_bc_id, std::vector<double> &local_dirichlet_bc_value)
     {
         for (size_t i=0; i<list_dirichlet_bc_id.size(); i++) {
             if (map_global2localNodeId.countInA(list_dirichlet_bc_id[i])>0) {
@@ -121,7 +121,7 @@ DDCGlobal* setupNDDC2()
         int dom1_ghost_nodes[] = {5, 6, 7, 8};
         std::set<size_t> list_ghost(dom1_ghost_nodes, dom1_ghost_nodes + 4);
         std::vector<size_t> dom1_e(dom1_eles, dom1_eles+4);
-        Base::BidirectionalMap<size_t, size_t> msh_node_id_mapping;
+        BaseLib::BidirectionalMap<size_t, size_t> msh_node_id_mapping;
         MeshGenerator::generateSubMesh(*org_msh, dom1_e, local_msh, msh_node_id_mapping);
         DDCGlobaLocalMappingOffset* mapping = new DDCGlobaLocalMappingOffset(0, local_msh->getNumberOfNodes(), 0);
         DDCSubDomain* dom = new DDCSubDomain(*local_msh, *mapping, &list_ghost);
@@ -134,7 +134,7 @@ DDCGlobal* setupNDDC2()
         int dom1_ghost_nodes[] = {1, 2, 3, 4}; 
         size_t n_ghost = 4;
         std::vector<size_t> dom1_e(dom1_eles, dom1_eles+3);
-        Base::BidirectionalMap<size_t, size_t>* msh_node_id_mapping = new Base::BidirectionalMap<size_t, size_t>();
+        BaseLib::BidirectionalMap<size_t, size_t>* msh_node_id_mapping = new BaseLib::BidirectionalMap<size_t, size_t>();
         MeshGenerator::generateSubMesh(*org_msh, dom1_e, local_msh, *msh_node_id_mapping);
         std::set<size_t> list_ghost;
         for (size_t i=0; i<n_ghost; i++) {

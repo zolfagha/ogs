@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
 #include "GeoLib/Core/Polyline.h"
 #include "GeoLib/Shape/Line.h"
@@ -141,8 +141,8 @@ TEST(Fdm, fdm1)
         TimeStepFunctionConstant tim(.0, 10.0, 10.0);
         pGW->setTimeSteppingFunction(tim);
 	    // options
-	    Base::Options options;
-	    Base::Options* op_lis = options.addSubGroup("Lis");
+	    BaseLib::Options options;
+	    BaseLib::Options* op_lis = options.addSubGroup("Lis");
 	    op_lis->addOption("solver_type", "BiCG");
 	    op_lis->addOption("precon_type", "NONE");
 	    op_lis->addOptionAsNum("error_tolerance", 1e-10);
@@ -207,13 +207,13 @@ TEST(Fdm, fdm_fem1)
         pGW->setTimeSteppingFunction(tim);
         pMass->setTimeSteppingFunction(tim);
 	    // options
-	    Base::Options options;
-	    Base::Options* op_lis = options.addSubGroup("Lis");
+	    BaseLib::Options options;
+	    BaseLib::Options* op_lis = options.addSubGroup("Lis");
 	    op_lis->addOption("solver_type", "BiCG");
 	    op_lis->addOption("precon_type", "NONE");
 	    op_lis->addOptionAsNum("error_tolerance", 1e-10);
 	    op_lis->addOptionAsNum("max_iteration_step", 500);
-        Base::Options optionsMT;
+        BaseLib::Options optionsMT;
         op_lis = optionsMT.addSubGroup("Lis");
         op_lis->addOption("solver_type", "BiCG");
         op_lis->addOption("precon_type", "NONE");

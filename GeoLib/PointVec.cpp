@@ -147,7 +147,7 @@ void PointVec::makePntsUnique (std::vector<GeoLib::Point*>* pnt_vec, std::vector
 	}
 
 	// sort the points
-	Base::Quicksort<GeoLib::Point*> (*pnt_vec, 0, n_pnts_in_file, perm);
+	BaseLib::Quicksort<GeoLib::Point*> (*pnt_vec, 0, n_pnts_in_file, perm);
 
 	// unfortunately quicksort is not stable -
 	// sort identical points by id - to make sorting stable
@@ -190,7 +190,7 @@ void PointVec::makePntsUnique (std::vector<GeoLib::Point*>* pnt_vec, std::vector
 	}
 
 	// reverse permutation
-	Base::Quicksort<GeoLib::Point*> (perm, 0, n_pnts_in_file, *pnt_vec);
+	BaseLib::Quicksort<GeoLib::Point*> (perm, 0, n_pnts_in_file, *pnt_vec);
 
 	// remove the second, third, ... occurrence from vector
 	for (size_t k(0); k<n_pnts_in_file; k++) {

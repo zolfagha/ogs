@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 
 #include "DiscreteLib/Core/IDiscreteResource.h"
 #include "DiscreteLib/Core/IDiscreteLinearEquation.h"
@@ -20,8 +20,8 @@ public:
     DiscreteDataContainer() {};
     virtual ~DiscreteDataContainer()
     {
-        Base::releaseObjectsInStdVector(_vec_vectors);
-        Base::releaseObjectsInStdVector(_vec_linear_sys);
+        BaseLib::releaseObjectsInStdVector(_vec_vectors);
+        BaseLib::releaseObjectsInStdVector(_vec_linear_sys);
     }
 
     size_t addVector(IDiscreteResource* v)

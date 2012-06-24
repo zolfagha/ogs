@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 
 #include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
 #include "MathLib/LinAlg/Sparse/SparseTableCRS.h"

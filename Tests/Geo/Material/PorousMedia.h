@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 
 #include "Solid.h"
 
@@ -22,11 +22,11 @@ struct PorousMedia
 
 	PorousMedia()
 	{
-		Base::zeroObject(hydraulic_conductivity, porosity, storage, solidphase);
+		BaseLib::zeroObject(hydraulic_conductivity, porosity, storage, solidphase);
 	}
 	~PorousMedia()
 	{
-		Base::releaseObject(hydraulic_conductivity, porosity, storage);
+		BaseLib::releaseObject(hydraulic_conductivity, porosity, storage);
 	}
 };
 

@@ -8,7 +8,7 @@
 #ifndef COMPOUND_H_
 #define COMPOUND_H_
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 
 namespace NumLib
 {
@@ -24,11 +24,11 @@ struct Compound
 
 	Compound()
 	{
-		Base::zeroObject(molecular_diffusion);
+		BaseLib::zeroObject(molecular_diffusion);
 	}
 	~Compound()
 	{
-		Base::releaseObject(molecular_diffusion);
+		BaseLib::releaseObject(molecular_diffusion);
 	}
 
 };

@@ -5,7 +5,7 @@
 
 #include "lis.h"
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 #include "MathLib/LinAlg/Sparse/SparseTableCRS.h"
 #include "ILinearEquations.h"
 #include "SparseLinearEquationBase.h"
@@ -133,7 +133,7 @@ public:
     void finalize();
     virtual ~CRSLisSolver();
 
-    void setOption(const Base::Options &option);
+    void setOption(const BaseLib::Options &option);
     void setOption(const LIS_option &option)
     {
         _option = option;

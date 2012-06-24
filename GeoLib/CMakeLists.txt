@@ -23,7 +23,7 @@ include_directories(
 
 target_link_libraries (
 	GeoLib
-	Base
+	BaseLib
 	MathLib
 )
 

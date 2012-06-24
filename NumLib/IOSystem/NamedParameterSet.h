@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <cassert>
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 #include "Parameter.h"
 
 namespace NumLib
@@ -33,7 +33,7 @@ public:
     {
         _list_var_data.clear();
         _list_attributes.clear();
-        Base::releaseObjectsInStdVector(_list_own_data);
+        BaseLib::releaseObjectsInStdVector(_list_own_data);
     }
 
     /// move ownership of memory to another and initialize this

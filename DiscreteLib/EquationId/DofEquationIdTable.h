@@ -6,7 +6,7 @@
 #include <cassert>
 #include <algorithm>
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 
 #include "EquationIdStorage.h"
 #include "SequentialEquationIdStorage.h"
@@ -50,7 +50,7 @@ public:
     virtual ~DofEquationIdTable()
     {
         for (size_t i=0; i<_map_var2dof.size(); i++) {
-            Base::releaseObjectsInStdMap(_map_var2dof[i]);
+            BaseLib::releaseObjectsInStdMap(_map_var2dof[i]);
         }
         _map_var2dof.clear();
     }
@@ -219,15 +219,15 @@ public:
             const IEquationIdStorage* add = getPointEquationIdTable(var_id, mesh_id);
             for (size_t i=0; i<pt_id.size(); i++) {
                 eqs_id[i] = add->address(pt_id[i]);
-                eqs_id_without_ghost[i] = isGhostPoint(mesh_id, pt_id[i]) ? Base::index_npos : eqs_id[i];
+                eqs_id_without_ghost[i] = isGhostPoint(mesh_id, pt_id[i]) ? BaseLib::index_npos : eqs_id[i];
             }
         }
     }
     void mapDoF(size_t eqs_id, size_t &var_id, size_t &mesh_id, size_t &pt_id) const
     {
-        var_id = Base::index_npos;
-        mesh_id = Base::index_npos;
-        pt_id = Base::index_npos;
+        var_id = BaseLib::index_npos;
+        mesh_id = BaseLib::index_npos;
+        pt_id = BaseLib::index_npos;
         for (size_t i=0; i<_map_var2dof.size(); i++) {
             const std::map<size_t, IEquationIdStorage*> &obj = _map_var2dof[i];
             for (std::map<size_t, IEquationIdStorage*>::const_iterator itr=obj.begin(); itr!=obj.end(); ++itr) {

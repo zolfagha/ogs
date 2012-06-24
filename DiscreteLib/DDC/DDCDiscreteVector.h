@@ -124,7 +124,7 @@ public:
     /// destructor
     virtual ~DDCDiscreteVector() 
     {
-        Base::releaseObjectsInStdVector(_local_v);
+        BaseLib::releaseObjectsInStdVector(_local_v);
     };
 
     /// get the size of this vector

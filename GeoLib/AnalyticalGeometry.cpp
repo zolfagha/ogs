@@ -12,8 +12,8 @@
 #include <fstream>
 
 // Base
-#include "Base/swap.h"
-#include "Base/quicksort.h"
+#include "BaseLib/swap.h"
+#include "BaseLib/quicksort.h"
 
 // GEO
 #include "GeoLib/Core/Polyline.h"

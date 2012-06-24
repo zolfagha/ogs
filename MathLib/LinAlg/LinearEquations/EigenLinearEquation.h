@@ -136,7 +136,7 @@ public:
     	os << "not implemented yet." << std::endl;
     }
 
-    void setOption(const Base::Options &/*option*/) {};
+    void setOption(const BaseLib::Options &/*option*/) {};
 
     void solve()
     {

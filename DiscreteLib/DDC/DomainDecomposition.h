@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include "Base/CodingTools.h"
-#include "Base/BidirectionalMap.h"
+#include "BaseLib/CodingTools.h"
+#include "BaseLib/BidirectionalMap.h"
 
 #include "MeshLib/Core/IMesh.h"
 
@@ -73,12 +73,12 @@ private:
 class DDCGlobaLocalMappingAll : public IDDCGlobaLocalMapping
 {
 public:
-    DDCGlobaLocalMappingAll(Base::BidirectionalMap<size_t, size_t> &map) : _map_global_local(&map)
+    DDCGlobaLocalMappingAll(BaseLib::BidirectionalMap<size_t, size_t> &map) : _map_global_local(&map)
     {
     }
     virtual ~DDCGlobaLocalMappingAll()
     {
-        Base::releaseObject(_map_global_local);
+        BaseLib::releaseObject(_map_global_local);
     }
     bool hasGlobal(size_t global_id) 
     {
@@ -93,7 +93,7 @@ public:
         return _map_global_local->mapBtoA(local);
     }
 private:
-    Base::BidirectionalMap<size_t, size_t>* _map_global_local;
+    BaseLib::BidirectionalMap<size_t, size_t>* _map_global_local;
 };
 
 class DDCSubDomain
@@ -108,7 +108,7 @@ public:
     }
     virtual ~DDCSubDomain()
     {
-        Base::releaseObjectsInStdVector(_list_slaves);
+        BaseLib::releaseObjectsInStdVector(_list_slaves);
     }
 
     void setDomainID(size_t i) {_dom_id = i;};
@@ -140,7 +140,7 @@ public:
     };
     virtual ~DDCGlobal()
     {
-        Base::releaseObjectsInStdVector(_list_dom);
+        BaseLib::releaseObjectsInStdVector(_list_dom);
     }
 
     size_t getID() const {return _id;};

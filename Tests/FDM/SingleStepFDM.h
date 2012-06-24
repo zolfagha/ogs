@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 #include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
@@ -81,8 +81,8 @@ public:
         _discrete_system->deleteVector(_vec_n1);
         _discrete_system->deleteVector(_vec_n1_0);
         _discrete_system->deleteVector(_vec_st);
-        Base::releaseObject(_linear_solver);
-        Base::releaseObject(_f_linear);
+        BaseLib::releaseObject(_linear_solver);
+        BaseLib::releaseObject(_f_linear);
     }
 
     /// solve 

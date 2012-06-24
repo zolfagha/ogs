@@ -21,8 +21,8 @@
 #include "GeoLib/AnalyticalGeometry.h"
 
 // Base
-#include "Base/quicksort.h"
-#include "Base/swap.h"
+#include "BaseLib/quicksort.h"
+#include "BaseLib/swap.h"
 
 namespace GeoLib {
 
@@ -268,7 +268,7 @@ void Polygon::ensureCWOrientation ()
 		size_t tmp_n_pnts (n_pnts);
 		tmp_n_pnts++; // include last point of polygon (which is identical to the first)
 		for (size_t k(0); k<tmp_n_pnts/2; k++) {
-			Base::swap (_ply_pnt_ids[k], _ply_pnt_ids[tmp_n_pnts-1-k]);
+			BaseLib::swap (_ply_pnt_ids[k], _ply_pnt_ids[tmp_n_pnts-1-k]);
 		}
 	}
 
@@ -289,7 +289,7 @@ void Polygon::splitPolygonAtIntersection (std::list<Polygon*>::iterator polygon_
 			const_cast<std::vector<Point*>& >(_ply_pnts).push_back (intersection_pnt);
 
 			// split Polygon
-			if (idx0 > idx1) Base::swap (idx0, idx1);
+			if (idx0 > idx1) BaseLib::swap (idx0, idx1);
 
 			GeoLib::Polygon* polygon0 (new GeoLib::Polygon((*polygon_it)->getPointsVec(), false));
 			for (size_t k(0); k<=idx0; k++) polygon0->addPoint ((*polygon_it)->getPointID (k));
@@ -335,7 +335,7 @@ void Polygon::splitPolygonAtPoint (std::list<GeoLib::Polygon*>::iterator polygon
 		perm[k] = k;
 	}
 
-	Base::quicksort (id_vec, 0, n, perm);
+	BaseLib::quicksort (id_vec, 0, n, perm);
 
 	for (size_t k(0); k<n-1; k++) {
 		if (id_vec[k] == id_vec[k+1]) {
@@ -344,7 +344,7 @@ void Polygon::splitPolygonAtPoint (std::list<GeoLib::Polygon*>::iterator polygon
 			delete [] perm;
 			delete [] id_vec;
 
-			if (idx0 > idx1) Base::swap (idx0, idx1);
+			if (idx0 > idx1) BaseLib::swap (idx0, idx1);
 
 			// create two closed polylines
 			GeoLib::Polygon* polygon0 (new GeoLib::Polygon((*polygon_it)->getPointsVec()));

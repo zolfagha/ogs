@@ -3,7 +3,7 @@
 
 #include <map>
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 
 #include "FemLib/Core/Element/IFemElement.h"
 #include "FemLib/Core/Element/FemElementFactory.h"
@@ -24,7 +24,7 @@ public:
     }
     virtual ~FeObjectContainerPerElement()
     {
-        Base::releaseObjectsInStdVector(_vec_fem);
+        BaseLib::releaseObjectsInStdVector(_vec_fem);
     }
 
     void addFiniteElement(size_t i, FiniteElementType::type fe_type)

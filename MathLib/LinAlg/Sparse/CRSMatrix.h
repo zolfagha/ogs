@@ -14,8 +14,8 @@
 #include <cassert>
 
 // Base
-#include "Base/swap.h"
-#include "Base/CodingTools.h"
+#include "BaseLib/swap.h"
+#include "BaseLib/CodingTools.h"
 
 // MathLib
 #include "SparseMatrixBase.h"
@@ -383,9 +383,9 @@ protected:
 		}
 
 		MatrixBase<IDX_TYPE>::_n_rows -= n_rows_cols;
-		Base::swap (row_ptr_new, _row_ptr);
-		Base::swap (col_idx_new, _col_idx);
-		Base::swap (data_new, _data);
+		BaseLib::swap (row_ptr_new, _row_ptr);
+		BaseLib::swap (col_idx_new, _col_idx);
+		BaseLib::swap (data_new, _data);
 
 		delete [] row_ptr_new_tmp;
 		delete [] row_ptr_new;
@@ -436,9 +436,9 @@ protected:
 		}
 
 		MatrixBase<IDX_TYPE>::_n_rows = n_cols;
-		Base::swap(row_ptr_trans, _row_ptr);
-		Base::swap(col_idx_trans, _col_idx);
-		Base::swap(data_trans, _data);
+		BaseLib::swap(row_ptr_trans, _row_ptr);
+		BaseLib::swap(col_idx_trans, _col_idx);
+		BaseLib::swap(data_trans, _data);
 
 		delete[] row_ptr_nnz;
 		delete[] row_ptr_trans;

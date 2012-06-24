@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "Base/Options.h"
+#include "BaseLib/Options.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "DiscreteLib/Core/IDiscreteVector.h"
 #include "NonlinearSolver.h"
@@ -25,12 +25,12 @@ public:
 
 	virtual ~TemplateDiscreteNonlinearSolver()
 	{
-		Base::releaseObject(_solver);
+		BaseLib::releaseObject(_solver);
 	}
 
-    void setOption(const Base::Options &option)
+    void setOption(const BaseLib::Options &option)
     {
-        const Base::Options *op = option.getSubGroup("Nonlinear");
+        const BaseLib::Options *op = option.getSubGroup("Nonlinear");
         if (op==0) return;
 
         if (op->hasOption("solver_type"))

@@ -4,7 +4,7 @@
 #include <vector>
 #include <cstddef>
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 #include "IDiscreteResource.h"
 
 namespace DiscreteLib
@@ -54,7 +54,7 @@ public:
     virtual void addSubvector(std::vector<size_t> pos, T* local_v)
     {
     	for (size_t i=0; i<pos.size(); ++i) {
-            if (pos[i]==Base::index_npos) continue;
+            if (pos[i]==BaseLib::index_npos) continue;
     		(*this)[pos[i]] += local_v[i];
     	}
     }

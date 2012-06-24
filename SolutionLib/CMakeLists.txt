@@ -26,7 +26,7 @@ IF (PARALLEL_USE_MPI)
 ENDIF (PARALLEL_USE_MPI)
 
 target_link_libraries (	SolutionLib
-	Base
+	BaseLib
         MathLib
 	GeoLib
         MeshLib

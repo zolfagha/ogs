@@ -8,8 +8,8 @@
 #include <cassert>
 #include <iostream>
 
-#include "Base/CodingTools.h"
-#include "Base/BidirectionalMap.h"
+#include "BaseLib/CodingTools.h"
+#include "BaseLib/BidirectionalMap.h"
 #include "EquationIdStorage.h"
 
 namespace DiscreteLib
@@ -105,7 +105,7 @@ public:
     }
 
 private:
-    Base::BidirectionalMap<size_t, size_t> _map_pt2eqs;
+    BaseLib::BidirectionalMap<size_t, size_t> _map_pt2eqs;
     std::vector<size_t> _list_pt_id;
     std::set<size_t> _deactive;
 };

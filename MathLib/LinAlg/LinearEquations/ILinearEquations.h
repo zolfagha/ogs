@@ -4,8 +4,8 @@
 #include <iostream>
 #include <vector>
 #include <Eigen>
-#include "Base/Options.h"
-#include "Base/CodingTools.h"
+#include "BaseLib/Options.h"
+#include "BaseLib/CodingTools.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/LinAlg/Sparse/SparseTableCRS.h"
 
@@ -25,7 +25,7 @@ public:
 
     virtual void create(size_t length, RowMajorSparsity *sparsity=0) = 0;
     virtual bool isCreated() const = 0;
-    virtual void setOption(const Base::Options &option) = 0;
+    virtual void setOption(const BaseLib::Options &option) = 0;
     virtual void reset() = 0;
     virtual size_t getDimension() const = 0;
 
@@ -38,10 +38,10 @@ public:
         const size_t n_cols = vec_col_pos.size();
         for (size_t i=0; i<n_rows; i++) {
             const size_t rowId = vec_row_pos[i];
-            if (rowId==Base::index_npos) continue;
+            if (rowId==BaseLib::index_npos) continue;
             for (size_t j=0; j<n_cols; j++) {
                 const size_t colId = vec_col_pos[j];
-                if (colId==Base::index_npos) continue;
+                if (colId==BaseLib::index_npos) continue;
                 addA(rowId, colId, fkt*sub_matrix(i,j));
             }
         }
@@ -59,7 +59,7 @@ public:
     {
         for (size_t i=0; i<vec_row_pos.size(); i++) {
             const size_t rowId = vec_row_pos[i];
-            if (rowId==Base::index_npos) continue;
+            if (rowId==BaseLib::index_npos) continue;
             addRHS(rowId, sub_vector[i]*fkt);
         }
     }

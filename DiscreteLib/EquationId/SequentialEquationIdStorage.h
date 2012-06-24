@@ -6,7 +6,7 @@
 #include <cassert>
 #include <iostream>
 
-#include "Base/CodingTools.h"
+#include "BaseLib/CodingTools.h"
 #include "EquationIdStorage.h"
 
 
@@ -89,14 +89,14 @@ public:
             }
             return loc;
         } else {
-            return Base::index_npos;
+            return BaseLib::index_npos;
         }
     }
 
     size_t key(size_t /*address_id*/) const
     {
         //TODO
-        return Base::index_npos;
+        return BaseLib::index_npos;
     }
 
 private:

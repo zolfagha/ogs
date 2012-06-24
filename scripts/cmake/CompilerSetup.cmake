@@ -1,10 +1,22 @@
 INCLUDE(ResetConfigurations)        # To Debug, Release, RelWithDbgInfo
 INCLUDE(SetDefaultBuildType)
+INCLUDE(DisableCompilerFlag)
 SET_DEFAULT_BUILD_TYPE(Debug)
 INCLUDE(MSVCMultipleProcessCompile) # /MP switch (multi processor) for VS
 
-### GNU C/CXX compiler
+# Set compiler helper variables
+IF (CMAKE_CXX_COMPILER MATCHES ".*clang")
+	SET(COMPILER_IS_CLANG 1)
+ENDIF ()
 IF(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC)
+	SET(COMPILER_IS_GCC 1)
+ENDIF ()
+IF (${CMAKE_C_COMPILER} MATCHES "icc.*$" OR ${CMAKE_CXX_COMPILER} MATCHES "icpc.*$")
+	SET(COMPILER_IS_INTEL)
+ENDIF ()
+
+### GNU C/CXX compiler
+IF(COMPILER_IS_GCC)
 		get_gcc_version(GCC_VERSION)
         IF( NOT CMAKE_BUILD_TYPE STREQUAL "Debug" )
                 MESSAGE(STATUS "Set GCC release flags")
@@ -19,18 +31,16 @@ IF(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC)
         # -g
         SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wall -Wextra -fno-nonansi-builtins")
         ADD_DEFINITIONS( -DGCC )
-ENDIF(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC)
+ENDIF() # COMPILER_IS_GCC
 
 ### Intel compiler
-IF (${CMAKE_C_COMPILER} MATCHES "icc.*$" OR ${CMAKE_CXX_COMPILER} MATCHES "icpc.*$")
+IF (COMPILER_IS_INTEL)
         IF( NOT CMAKE_BUILD_TYPE STREQUAL "Debug" )
                 MESSAGE(STATUS "Set Intel release flags")
                 SET(CMAKE_CXX_FLAGS "-O3 -DNDEBUG")
         ENDIF()
         SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wall")
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -openmp")
-ENDIF(${CMAKE_C_COMPILER} MATCHES "icc.*$" OR ${CMAKE_CXX_COMPILER} MATCHES
-"icpc.*$")
+ENDIF() # COMPILER_IS_INTEL
 
 # Profiling
 IF (OGS_PROFILE)
@@ -39,7 +49,7 @@ IF (OGS_PROFILE)
 	ENDIF()
 	SET(PROFILE_FLAGS "-pg -fno-omit-frame-pointer -O2 -DNDEBUG")
 	# clang compiler does not know the following flags
-	IF(CMAKE_CXX_COMPILER MATCHES "!clang")
+	IF(NOT COMPILER_IS_CLANG)
 		SET(PROFILE_FLAGS "${PROFILE_FLAGS} -fno-inline-functions-called-once -fno-optimize-sibling-calls")
 	ENDIF()
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROFILE_FLAGS}")
@@ -54,10 +64,12 @@ IF (WIN32)
 			-D_CRT_NONSTDC_NO_WARNINGS
 			-D_CRT_XNONSTDC_NO_WARNINGS
 			-D__restrict__=__restrict   # this fixes #5
-			-D_USE_MATH_DEFINES # use M_PI
+			-DNOMINMAX # This fixes compile errors with std::numeric_limits<T>::min() / max()
 		)
 		# Sets warning level 3 and ignores some warnings
 		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /wd4290 /wd4267")
+
+		DisableCompilerFlag(DEBUG /RTC1)
 	# cygwin
 	ELSE (MSVC)
 		MESSAGE (STATUS "Might be GCC under cygwin.")

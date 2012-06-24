@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include "Base/CodingTools.h"
-#include "Base/BidirectionalMap.h"
+#include "BaseLib/CodingTools.h"
+#include "BaseLib/BidirectionalMap.h"
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/LinAlg/LinearEquations/SparseLinearEquations.h"
