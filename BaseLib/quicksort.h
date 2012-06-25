@@ -177,7 +177,8 @@ private:
 			quicksort(perm, p+1, end, array);
 		}
 	}
-
 };
-}
+
+} // end namespace BaseLib
+
 #endif /* QUICKSORT_H_ */
