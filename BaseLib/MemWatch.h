@@ -8,7 +8,7 @@
 #ifndef MEMWATCH_H_
 #define MEMWATCH_H_
 
-#ifndef WIN32
+#if not defined(_WIN32) && not defined (__CYGWIN__)
 
 #include <sys/types.h>
 #include <unistd.h>

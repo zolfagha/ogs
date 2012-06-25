@@ -7,7 +7,7 @@
 
 #include "MemWatch.h"
 
-#ifndef WIN32
+#if not defined(_WIN32) && not defined (__CYGWIN__)
 
 namespace BaseLib {
 
