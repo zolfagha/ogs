@@ -17,6 +17,11 @@ SOURCE_GROUP( Test\\FDM FILES ${Test_FDM_Files} )
 INCLUDE_DIRECTORIES(
 	.
 	..
+	../ogsCore
+        ../ogsGeometry
+        ../ogsMesh
+	../ogsNumerics
+	../extra/Eigen
 )
 
 # Create the executable
@@ -31,14 +36,10 @@ ADD_EXECUTABLE( tests
 )
 
 TARGET_LINK_LIBRARIES ( tests
-	BaseLib
-	MathLib
-	GeoLib
-	MeshLib
-	DiscreteLib
-	#FdmLib
-	FemLib
-	NumLib
+	ogsCore
+	ogsGeometry
+	ogsMesh
+	ogsNumerics
 )
 
 
