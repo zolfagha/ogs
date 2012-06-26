@@ -1,11 +1,11 @@
 # Add subdirectories with the projects
-INCLUDE( MaterialLib/CMakeLists.txt )
+INCLUDE( ProcessLib/CMakeLists.txt )
 
-ADD_LIBRARY( ogsPhysics STATIC 
-	${MaterialLib_Files}
+ADD_LIBRARY( ogsProcess STATIC 
+	${ProcessLib_Files}
 )
 
-SET_TARGET_PROPERTIES(ogsPhysics PROPERTIES LINKER_LANGUAGE CXX)
+SET_TARGET_PROPERTIES(ogsProcess PROPERTIES LINKER_LANGUAGE CXX)
 
 INCLUDE_DIRECTORIES(
         .
@@ -13,6 +13,7 @@ INCLUDE_DIRECTORIES(
         ../ogsGeometry
         ../ogsMesh
         ../ogsNumerics
+        ../ogsPhysics
         ../extra/Eigen
 )
 
