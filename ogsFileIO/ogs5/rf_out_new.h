@@ -9,6 +9,7 @@
 #define rf_out_new_INC
 
 #include <vector>
+#include <string>
 
 class COutput;
 //namespace GEOLIB

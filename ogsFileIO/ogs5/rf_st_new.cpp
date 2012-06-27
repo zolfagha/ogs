@@ -14,6 +14,7 @@
 #include <iostream>
 #include <sstream>
 #include <set>
+#include <cstdlib>
 
 #include "readNonBlankLineFromInputStream.h"
 

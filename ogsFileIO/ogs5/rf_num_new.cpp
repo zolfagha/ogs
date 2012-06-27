@@ -26,6 +26,7 @@
 #include "makros.h"
 // C++ STL
 #include <cfloat>
+#include <cstdlib>
 #include <cmath>
 #include <fstream>
 #include <iostream>

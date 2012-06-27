@@ -13,6 +13,9 @@
 #include <fstream>
 #include <sstream>
 #include <cfloat>
+#include <cstdlib>
+#include <string>
+#include <cstring>
 
 #include "readNonBlankLineFromInputStream.h"
 

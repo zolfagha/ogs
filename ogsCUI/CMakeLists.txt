@@ -9,6 +9,7 @@ SOURCE_GROUP( ogsCUI FILES ${CUI_Files} )
 INCLUDE_DIRECTORIES(
         .
         ../extra
+        ../ogsProcess
 )
 
 

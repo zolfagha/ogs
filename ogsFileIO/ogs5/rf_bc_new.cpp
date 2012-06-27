@@ -12,8 +12,10 @@
 #include <cfloat>
 #include <cmath>
 #include <iostream>
+#include <fstream>
 #include <list>
 #include <sstream>
+#include <string>
 
 #include "makros.h"
 //// FileIO
@@ -175,7 +177,6 @@ std::ios::pos_type CBoundaryCondition::Read(std::ifstream* bc_file,
 			{
 				setProcessDistributionType(FiniteElement::FUNCTION);
 				in.clear();
-				dis_linear_f = new LinearFunctionData(*bc_file);
 			}
 			if (line_string.find("LINEAR") != std::string::npos)
 			{
@@ -300,7 +301,7 @@ std::ios::pos_type CBoundaryCondition::Read(std::ifstream* bc_file,
    01/2004 OK Implementation
 **************************************************************************/
 CBoundaryCondition::CBoundaryCondition() :
-	geo_name (""), _curve_index (-1), dis_linear_f(NULL)
+	geo_name (""), _curve_index (-1)
 {
 	this->setProcessDistributionType(FiniteElement::INVALID_DIS_TYPE);
 	// FCT
@@ -327,10 +328,6 @@ CBoundaryCondition::~CBoundaryCondition()
 	geo_node_number = -1;
 	geo_node_value = 0.0;
 
-	//WW
-	if(dis_linear_f)
-		delete dis_linear_f;
-	dis_linear_f = NULL;
 }
 
 const std::string& CBoundaryCondition::getGeoName () const

@@ -9,6 +9,7 @@
 //#include "Configure.h"
 #include "Output.h"
 
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <sstream>

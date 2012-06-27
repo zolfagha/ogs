@@ -9,6 +9,7 @@
 #define rf_bc_new_INC
 
 #include <vector>
+#include <iostream>
 
 namespace FileIO
 {
@@ -19,7 +20,6 @@ class BoundaryConditionIO;
 #include "DistributionInfo.h" // TF
 //#include "GEOObjects.h"
 //#include "GeoInfo.h"                              // TF
-#include "LinearFunctionData.h" // TF
 #include "ProcessInfo.h"                          // KR
 
 // GEOLib
@@ -162,8 +162,6 @@ private:
 	// FCT
 	std::string fct_name;
 	bool conditional;
-
-	LinearFunctionData* dis_linear_f;   //24.8.2011. WW
 
 	//WW
 	void SurfaceInterpolation(CRFProcess* m_pcs,

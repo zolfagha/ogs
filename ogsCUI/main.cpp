@@ -5,6 +5,8 @@
 #include "logog/include/formatter.hpp"
 #include "tclap/CmdLine.h"
 
+#include "ProcessLib/ProcessBuilder.h"
+
 /**
  * new formatter for logog
  */
@@ -63,6 +65,7 @@ int main ( int argc, char *argv[] )
     // read number of threads
     unsigned n_threads (n_cores_arg.getValue());
 
+    ProcessLib::ProcessBuilder* pcs_builder = ProcessLib::ProcessBuilder::getObject();
 
 
     delete custom_format;

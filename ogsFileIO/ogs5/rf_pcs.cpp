@@ -30,6 +30,7 @@
 #include <set>
 #include <fstream>
 #include <sstream>
+#include <cstdlib>
 
 #include "readNonBlankLineFromInputStream.h"
 
@@ -103,7 +104,7 @@ template <class T> T* resize(T* array, size_t old_size, size_t new_size);
 /* ROCKFLOW - Funktion: GetUncommentedLine
  */
 /* Aufgabe:
-   R�ckgabe ist ist ein string mit dem Zeileninhalt ab dem ersten Nicht-Leerzeichen
+   R���ckgabe ist ist ein string mit dem Zeileninhalt ab dem ersten Nicht-Leerzeichen
    bis zum ersten Auftreten des Kommentartzeichens ";"
    Abgeleitet aus GetLineFromFile1()                                            */
 /* Programmaenderungen:
@@ -114,7 +115,7 @@ std::string GetUncommentedLine(std::string line)
 	std::string zeile = "";
 	int i = 0, j = 0;
 	//----------------------------------------------------------------------
-	i = (int) line.find_first_not_of(" ",0); //Anf�ngliche Leerzeichen �berlesen, i=Position des ersten Nichtleerzeichens im string
+	i = (int) line.find_first_not_of(" ",0); //Anf���ngliche Leerzeichen ���berlesen, i=Position des ersten Nichtleerzeichens im string
 	j = (int) line.find(";",i);           //Nach Kommentarzeichen ; suchen. j = Position des Kommentarzeichens, j=-1 wenn es keines gibt.
 	if((i != -1))
 		zeile = line.substr(i,j - i);  //Ab erstem nicht-Leerzeichen bis Kommentarzeichen rauskopieren in neuen substring, falls Zeile nicht leer ist

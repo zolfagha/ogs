@@ -12,6 +12,7 @@
 #include <iostream>
 #include <sstream>
 #include <cfloat>
+#include <cstdlib>
 
 #include "rf_mfp_new.h"
 #include "readNonBlankLineFromInputStream.h"

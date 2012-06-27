@@ -12,6 +12,7 @@
 #include <fstream>
 #include <sstream>
 #include <cfloat>
+#include <cstdlib>
 // FEM-Makros
 #include "makros.h"
 #include "readNonBlankLineFromInputStream.h"
@@ -114,12 +115,12 @@ std::ios::pos_type GetNextSubKeyword(std::ifstream* file,std::string* line, bool
 			*keyword = true;
 			return position;
 		}
-		//Anf�ngliche Leerzeichen �berlesen, i=Position des ersten Nichtleerzeichens im string
+		//Anf���ngliche Leerzeichen ���berlesen, i=Position des ersten Nichtleerzeichens im string
 		i = (int) line_complete.find_first_not_of(" ",0);
 		j = (int) line_complete.find(";",i); //Nach Kommentarzeichen ; suchen. j = Position des Kommentarzeichens, j=-1 wenn es keines gibt.
 		if(j < 0)
 			j = (int)line_complete.length();
-		//if(j!=i) break;						 //Wenn das erste nicht-leerzeichen ein Kommentarzeichen ist, zeile �berlesen. Sonst ist das eine Datenzeile
+		//if(j!=i) break;						 //Wenn das erste nicht-leerzeichen ein Kommentarzeichen ist, zeile ���berlesen. Sonst ist das eine Datenzeile
 		if(i != -1)
 			*line = line_complete.substr(i,j - i);  //Ab erstem nicht-Leerzeichen bis Kommentarzeichen rauskopieren in neuen substring, falls Zeile nicht leer ist
 	}
