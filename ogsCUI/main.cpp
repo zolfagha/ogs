@@ -2,54 +2,38 @@
 #include <string>
 
 #include "logog/include/logog.hpp"
-#include "logog/include/formatter.hpp"
 #include "tclap/CmdLine.h"
 
 #include "ProcessLib/ProcessBuilder.h"
+#include "ApplicationLib/ProcessList.h"
+#include "FormatterCustom.h"
 
-/**
- * new formatter for logog
- */
-class FormatterCustom : public logog::FormatterGCC
-{
-    virtual TOPIC_FLAGS GetTopicFlags( const logog::Topic &topic )
-    {
-        return ( Formatter::GetTopicFlags( topic ) &
-                 ~( TOPIC_FILE_NAME_FLAG | TOPIC_LINE_NUMBER_FLAG ));
-    }
-};
 
 int main ( int argc, char *argv[] )
 {
+
     LOGOG_INITIALIZE();
 
-    TCLAP::CmdLine cmd("Simple matrix vector multiplication test", ' ', "0.1");
+    TCLAP::CmdLine cmd("ogs6-nw", ' ', "0.1");
 
-    // Define a value argument and add it to the command line.
-    // A value arg defines a flag and a type of value that it expects,
-    // such as "-m matrix".
-    TCLAP::ValueArg<std::string> matrix_arg("m", "matrix", "input matrix file", true, "", "string");
-
-    // Add the argument mesh_arg to the CmdLine object. The CmdLine object
-    // uses this Arg to parse the command line.
+    TCLAP::ValueArg<std::string> matrix_arg("i", "input", "input file", false, "", "string");
     cmd.add( matrix_arg );
 
     TCLAP::ValueArg<unsigned> n_cores_arg("p", "number-cores", "number of cores to use", false, 1, "number");
     cmd.add( n_cores_arg );
 
-    TCLAP::ValueArg<unsigned> n_mults_arg("n", "number-of-multiplications", "number of multiplications to perform", true, 10, "number");
-    cmd.add( n_mults_arg );
-
     TCLAP::ValueArg<std::string> output_arg("o", "output", "output file", false, "", "string");
     cmd.add( output_arg );
 
-    TCLAP::ValueArg<unsigned> verbosity_arg("v", "verbose", "level of verbosity [0 very low information, 1 much information]", false, 0, "string");
+    TCLAP::ValueArg<unsigned> verbosity_arg("v", "verbose", "level of verbosity [0 very low information, 1 much information]", false, 0, "number");
     cmd.add( verbosity_arg );
+
+    TCLAP::ValueArg<unsigned> pcs_arg("m", "modules", "list available modules [0 off, 1 on]", false, 1, "number");
+    cmd.add( pcs_arg );
 
     cmd.parse( argc, argv );
 
     // read the number of multiplication to execute
-    unsigned n_mults (n_mults_arg.getValue());
     std::string fname_mat (matrix_arg.getValue());
 
     FormatterCustom *custom_format (new FormatterCustom);
@@ -65,7 +49,10 @@ int main ( int argc, char *argv[] )
     // read number of threads
     unsigned n_threads (n_cores_arg.getValue());
 
-    ProcessLib::ProcessBuilder* pcs_builder = ProcessLib::ProcessBuilder::getObject();
+    unsigned flag_list_modules (pcs_arg.getValue());
+    if (flag_list_modules!=0) {
+    	ProcessLib::ProcessBuilder::getInstance()->output();
+    }
 
 
     delete custom_format;
