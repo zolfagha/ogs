@@ -4,7 +4,7 @@
 #include "FemLib/Core/Element/IFemElement.h"
 #include "NumLib/TransientAssembler/IElementWiseTimeODELocalAssembler.h"
 #include "NumLib/TransientAssembler/IElementWiseTransientJacobianLocalAssembler.h"
-#include "Tests/Geo/Material/PorousMedia.h"
+#include "MaterialLib/PorousMedia.h"
 
 namespace Geo
 {
@@ -13,13 +13,13 @@ template <class T>
 class GroundwaterFlowTimeODELocalAssembler: public T
 {
 private:
-	PorousMedia* _pm;
+	MaterialLib::PorousMedia* _pm;
 	FemLib::LagrangianFeObjectContainer* _feObjects;
 public:
     typedef NumLib::LocalVector LocalVector;
     typedef NumLib::LocalMatrix LocalMatrix;
 
-	GroundwaterFlowTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, PorousMedia &pm)
+	GroundwaterFlowTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, MaterialLib::PorousMedia &pm)
 	: _pm(&pm), _feObjects(&feObjects)
 	{
 	};
@@ -50,10 +50,10 @@ protected:
 class GroundwaterFlowJacobianLocalAssembler: public NumLib::IElementWiseTransientJacobianLocalAssembler
 {
 private:
-	PorousMedia* _pm;
+	MaterialLib::PorousMedia* _pm;
 	FemLib::LagrangianFeObjectContainer* _feObjects;
 public:
-	GroundwaterFlowJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, PorousMedia &pm)
+	GroundwaterFlowJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, MaterialLib::PorousMedia &pm)
 	: _pm(&pm), _feObjects(&feObjects)
 	{
 	};

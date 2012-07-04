@@ -10,7 +10,7 @@ namespace NumLib
 class ITXFunction;
 }
 
-namespace Geo
+namespace MaterialLib
 {
 
 struct PorousMedia

@@ -1,7 +1,7 @@
 
 #pragma once
 
-namespace Geo
+namespace MaterialLib
 {
 
 struct Solid
