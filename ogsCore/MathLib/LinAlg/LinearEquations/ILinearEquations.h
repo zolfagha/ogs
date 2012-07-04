@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <vector>
-#include <Eigen>
+#include "Eigen"
 #include "BaseLib/Options.h"
 #include "BaseLib/CodingTools.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
