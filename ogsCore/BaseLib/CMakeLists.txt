@@ -1,5 +1,5 @@
 # Source files
-FILE(GLOB BaseLib_Files BaseLib/*.h BaseLib/*.cpp)
+FILE(GLOB BaseLib_Files BaseLib/*.h BaseLib/*.h.in BaseLib/*.cpp)
 
 #SET( BaseLib_Files ${BaseLib_Files} PARENT_SCOPE )
 SOURCE_GROUP( ogsCore\\BaseLib FILES ${BaseLib_Files} )
