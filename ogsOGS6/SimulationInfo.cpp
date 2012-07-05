@@ -1,11 +1,12 @@
 
-#include "SimulatorInfo.h"
+#include "SimulationInfo.h"
 
 #include <cstdio>
 #include <iostream>
 #include "logog/include/logog.hpp"
 #include "Configure.h"
 #include "BuildInfo.h"
+#include "BaseLib/FileTools.h"
 
 namespace ogs6
 {
@@ -32,7 +33,7 @@ void DisplayFill(const char* buf, int len)
 	LOGOG_COUT << _LG("##\n");
 }
 
-void SimulatorInfo::output ( void )
+void SimulationInfo::outputHeader ( void )
 {
 	char buf[128];
 
@@ -61,5 +62,18 @@ void SimulatorInfo::output ( void )
 	LOGOG_COUT << _LG("          ###################################################\n");
 	LOGOG_COUT << _LG("\n\n");
 }
+
+SimulationInfo::SimulationInfo(const std::string project_path)
+{
+	this->setProjectPath(project_path);
+}
+
+
+void SimulationInfo::setProjectPath(const std::string& path)
+{
+	_project_path = path;
+	_project_dir = BaseLib::getFileDirecotryPath(path);
+	_project_name = BaseLib::getFileBaseName(path);
+};
 
 } //end
