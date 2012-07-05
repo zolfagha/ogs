@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "makros.h"
 #include "readNonBlankLineFromInputStream.h"
 
 static std::string GetUncommentedLine(std::string& line)

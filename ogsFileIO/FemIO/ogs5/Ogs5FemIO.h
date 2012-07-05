@@ -16,16 +16,12 @@ class CSolidProperties;
 class CMediumProperties;
 class CNumerics;
 
-
-namespace ogs6
-{
-
-class OGS5Data
+class Ogs5FemIO
 {
 
 public:
-	OGS5Data() {};
-	~OGS5Data();
+	Ogs5FemIO() {};
+	~Ogs5FemIO();
 	void read(const std::string &proj_path);
 
 public:
@@ -42,4 +38,3 @@ public:
 	std::vector<CNumerics*>num_vector;
 };
 
-}

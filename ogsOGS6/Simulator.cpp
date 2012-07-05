@@ -11,10 +11,14 @@
 
 #include "BaseLib/CodingTools.h"
 #include "BaseLib/FileTools.h"
+#include "GeoLib/GEOObjects.h"
 #include "ProcessLib/ProcessBuilder.h"
+#include "GeoIO/Ogs4GeoIO.h"
+#include "MeshIO/Ogs5MeshIO.h"
+#include "FemIO/ogs5/Ogs5FemIO.h"
+
 #include "FormatterCustom.h"
 #include "SimulationInfo.h"
-#include "OGS5Data.h"
 
 namespace ogs6
 {
@@ -139,9 +143,39 @@ int OgsSimulator::execute()
 {
 	if (!_sim_info) return 0;
 
-	OGS5Data ogs5data;
+	//-------------------------------------------------------------------------
+	// Read files
+	//-------------------------------------------------------------------------
+	// fem
+	Ogs5FemIO ogs5data;
 	ogs5data.read(_sim_info->getProjectPath());
 
+	// gli
+	std::string geo_unique_name;
+	std::vector<std::string> geo_errors;
+	GeoLib::GEOObjects geo;
+	Ogs4GeoIO::readGLIFileV4(_sim_info->getProjectPath()+".gli", &geo, geo_unique_name, geo_errors);
+
+	// mesh
+	std::vector<MeshLib::IMesh*> msh_vector;
+	Ogs5MeshIO::readMesh(_sim_info->getProjectPath()+".msh", msh_vector);
+	
+	// ddc
+	
+	//-------------------------------------------------------------------------
+	// Setup simulation
+	//-------------------------------------------------------------------------
+	// - construct mesh
+	// - create pcs
+	// - ddc
+
+	
+	//-------------------------------------------------------------------------
+	// Run simulation
+	//-------------------------------------------------------------------------
+
+	
+	
     return 0;
 }
 

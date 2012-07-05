@@ -1,23 +1,21 @@
 
-#include "OGS5Data.h"
+#include "Ogs5FemIO.h"
 
-#include "ogs5/rf_pcs.h"
-#include "ogs5/rf_mfp_new.h"
-#include "ogs5/rfmat_cp.h"
-#include "ogs5/rf_bc_new.h"
-#include "ogs5/rf_st_new.h"
-#include "ogs5/rf_ic_new.h"
-#include "ogs5/rf_out_new.h"
-#include "ogs5/rf_tim_new.h"
-#include "ogs5/rf_msp_new.h"
-#include "ogs5/rf_mmp_new.h"
-#include "ogs5/rf_num_new.h"
+#include "rf_pcs.h"
+#include "rf_mfp_new.h"
+#include "rfmat_cp.h"
+#include "rf_bc_new.h"
+#include "rf_st_new.h"
+#include "rf_ic_new.h"
+#include "rf_out_new.h"
+#include "rf_tim_new.h"
+#include "rf_msp_new.h"
+#include "rf_mmp_new.h"
+#include "rf_num_new.h"
 
 #include "BaseLib/CodingTools.h"
 
-namespace ogs6
-{
-OGS5Data::~OGS5Data()
+Ogs5FemIO::~Ogs5FemIO()
 {
 	BaseLib::releaseObjectsInStdVector(pcs_vector);
 	BaseLib::releaseObjectsInStdVector(mfp_vector);
@@ -32,7 +30,7 @@ OGS5Data::~OGS5Data()
 	BaseLib::releaseObjectsInStdVector(num_vector);
 }
 
-void OGS5Data::read(const std::string &proj_path)
+void Ogs5FemIO::read(const std::string &proj_path)
 {
 	PCSRead(proj_path, pcs_vector);
 	MFPRead(proj_path, mfp_vector);
@@ -46,9 +44,6 @@ void OGS5Data::read(const std::string &proj_path)
 	TIMRead(proj_path, time_vector);
 	NUMRead(proj_path, num_vector);
 
-	//	std::vector<CFEMesh*> mesh_vec;
-	//	FEMRead(proj_path, mesh_vec, &geo_obj, &unique_name);
-
 //	RCRead(proj_path);
 //	KRRead(proj_path, geo_obj, unique_name);
 //	KRWrite(proj_path);
@@ -60,4 +55,3 @@ void OGS5Data::read(const std::string &proj_path)
 //	CURRead(proj_path);                   //OK
 }
 
-}
