@@ -20,26 +20,8 @@
 #include "makros.h"
 #include "readNonBlankLineFromInputStream.h"
 #include "matrix_class.h"
-//#include "rf_pcs.h"
-//
-//// Time
-//#include "fem_ele_std.h"
-//#include "fem_ele_vec.h"
-//#include "rf_tim_new.h"
-////#include "rf_mmp_new.h"
-//#include "pcs_dm.h"
-//
-//#include "StringTools.h"
-//#include "files0.h"                               // GetLineFromFile1
-//#include "tools.h"                                // GetLineFromFile
 
 using namespace std;
-
-vector<SolidProp::CSolidProperties*> msp_vector;
-vector<string> msp_key_word_vector;               //OK
-
-namespace SolidProp
-{
 
 /**************************************************************************
    FEMLib-Method:
@@ -50,12 +32,12 @@ namespace SolidProp
    01/2005 OK Boolean type
    01/2005 OK Destruct before read
 **************************************************************************/
-bool MSPRead(std::string file_base_name)
+bool MSPRead(const std::string &file_base_name, std::vector<CSolidProperties*> &msp_vector)
 {
 	//----------------------------------------------------------------------
 	//OK  MSPDelete();
 	//----------------------------------------------------------------------
-	SolidProp::CSolidProperties* m_msp = NULL;
+	CSolidProperties* m_msp = NULL;
 	char line[MAX_ZEILE];
 	std::string sub_line;
 	std::string line_string;
@@ -80,7 +62,7 @@ bool MSPRead(std::string file_base_name)
 		// keyword found
 		if(line_string.find("#SOLID_PROPERTIES") != std::string::npos)
 		{
-			m_msp = new SolidProp::CSolidProperties();
+			m_msp = new CSolidProperties();
 			m_msp->file_base_name = file_base_name;
 			position = m_msp->Read(&msp_file);
 			msp_vector.push_back(m_msp);
@@ -596,7 +578,6 @@ std::ios::pos_type CSolidProperties::Read(std::ifstream* msp_file)
 			{
 				Plasticity_type = 2;
 				Size = 23;
-				AllocateMemoryforSYS();
 				/*
 				   Material parameters for Single yield surface model
 				   i: parameter
@@ -842,4 +823,3 @@ CSolidProperties::~CSolidProperties()
 }
 //----------------------------------------------------------------------------
 
-}

@@ -1,6 +1,8 @@
 
 #include "Simulator.h"
 
+#include <iostream>
+
 #include "logog/include/logog.hpp"
 #include "tclap/CmdLine.h"
 #ifdef USE_LIS
@@ -8,9 +10,11 @@
 #endif
 
 #include "BaseLib/CodingTools.h"
+#include "BaseLib/FileTools.h"
 #include "ProcessLib/ProcessBuilder.h"
 #include "FormatterCustom.h"
-#include "SimulatorInfo.h"
+#include "SimulationInfo.h"
+#include "OGS5Data.h"
 
 namespace ogs6
 {
@@ -58,10 +62,9 @@ void ogsExit()
 }
 
 
-Simulator::Simulator(int argc, char* argv[])
+OgsSimulator::OgsSimulator(int argc, char* argv[])
+: _sim_info(NULL)
 {
-	ogsInit(argc, argv);
-
 	try {
 		// Command line parser
 	    TCLAP::CmdLine cmd("ogs6", ' ', "0.1");
@@ -75,7 +78,10 @@ Simulator::Simulator(int argc, char* argv[])
 	    cmd.add( verbosity_arg );
 	    TCLAP::ValueArg<unsigned> pcs_arg("m", "modules", "list available modules [0 off, 1 on]", false, 1, "number");
 	    cmd.add( pcs_arg );
-	    cmd.parse( argc, argv );
+	    cmd.parse( argc, argv ); // process can exit in this function
+
+	    // initialize
+		ogsInit(argc, argv);
 
 	    // get parsed data
 	    if (! output_arg.getValue().empty()) {
@@ -84,8 +90,7 @@ Simulator::Simulator(int argc, char* argv[])
 	        logog_file->SetFormatter( *custom_format );
 	    }
 
-	    SimulatorInfo sim_info;
-	    sim_info.output();
+	    SimulationInfo::outputHeader();
 
 	    unsigned flag_list_modules (pcs_arg.getValue());
 	    if (flag_list_modules!=0) {
@@ -93,10 +98,12 @@ Simulator::Simulator(int argc, char* argv[])
 	    }
 
 	    if (! input_arg.getValue().empty()) {
-	    	std::string project_path = input_arg.getValue();
-
-	    	//check files
-
+	    	std::string proj_path = input_arg.getValue();
+	    	if (checkInputFiles(proj_path)) {
+			    _sim_info = new SimulationInfo(proj_path);
+	    	} else {
+	    		LOGOG_CERR << "Error: Cannot find file " << proj_path << std::endl;
+	    	}
 	    }
 
     } catch (TCLAP::ArgException &e) {
@@ -105,15 +112,39 @@ Simulator::Simulator(int argc, char* argv[])
 
 }
 
-Simulator::~Simulator()
+OgsSimulator::~OgsSimulator()
 {
+	BaseLib::releaseObject(_sim_info);
 	ogsExit();
 }
 
-int Simulator::execute()
+bool OgsSimulator::checkInputFiles(const std::string& proj_path)
 {
+
+	std::string proj_dir_path;
+	std::string proj_name;
+
+	std::string tmpFilename = proj_path;
+	tmpFilename.append(".pcs");
+	if(!BaseLib::IsFileExisting(tmpFilename))
+	{
+		LOGOG_CERR << " Error: Cannot find file " << proj_path << std::endl;
+		return 1;
+	}
+
+	return true;
+}
+
+int OgsSimulator::execute()
+{
+	if (!_sim_info) return 0;
+
+	OGS5Data ogs5data;
+	ogs5data.read(_sim_info->getProjectPath());
 
     return 0;
 }
+
+
 
 } //end ogs6

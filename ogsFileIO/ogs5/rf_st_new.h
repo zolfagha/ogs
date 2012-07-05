@@ -8,102 +8,27 @@
 #ifndef rf_st_new_INC
 #define rf_st_new_INC
 
+#include <string>
 #include <vector>
 #include <iostream>
 
 // FEM
 #include "DistributionInfo.h" // TF
-//#include "GeoInfo.h"                              // TF
-//#include "LinearFunctionData.h" // TF
 #include "ProcessInfo.h"                          // TF
 
-//class CNodeValue;
-//class CGLPolyline;
-//class CGLLine;
-//class Surface;
-//
-//namespace process                                 //WW
-//{
-//class CRFProcessDeformation;
-//};
-//
-//namespace MeshLib
-//{
-//class CFEMesh;
-//class MeshNodesAlongPolyline;
-//}
-
-class SourceTerm;
-
-typedef struct
-{
-	std::vector<double> value_reference;
-	std::vector<double> last_source_value;
-	//double value_store[10][5000];
-	double** value_store;                 //[PCS_NUMBER_MAX*2]First ref no processes(two fields per process..time, value), second ref no values
-} NODE_HISTORY;
 
 class CSourceTerm : public ProcessInfo, public DistributionInfo
 {
 public:
 	CSourceTerm();
-	CSourceTerm(const SourceTerm* st);
 	~CSourceTerm();
 
-	std::ios::pos_type Read(std::ifstream* in,
-//	                        const GEOLIB::GEOObjects & geo_obj,
-	                        const std::string & unique_name);
-	void Write(std::fstream*);
+	std::ios::pos_type Read(std::ifstream* in);
+private:                                          // TF, KR
+	void ReadDistributionType(std::ifstream* st_file);
+	void ReadGeoType(std::ifstream* st_file);
 
-
-	void SetNOD2MSHNOD(std::vector<long> & nodes, std::vector<long> & conditional_nodes);
-
-	/**
-	 * @param nodes
-	 * @param conditional_nodes
-	 */
-	// 09/2010 TF
-	void SetNOD2MSHNOD(const std::vector<size_t>& nodes,
-	                   std::vector<size_t>& conditional_nodes) const;
-
-	double GetNodeLastValue(long n, int idx); // used only once in a global in rf_st_new
-	                                          // used only once in a global in rf_st_new
-	void SetNodePastValue(long n, int idx, int pos, double value);
-	// used only once in a global in rf_st_new
-	void SetNodeLastValue(long n, int idx, double value);
-	double GetNodePastValue(long, int, int); // used only once in a global in rf_st_new
-	                                         // used only once in a global in rf_st_new
-	double GetNodePastValueReference(long n, int idx);
-	// used only in sourcetermgroup
-	void SetSurfaceNodeVectorConditional(std::vector<long> & sfc_nod_vector,
-	                                     std::vector<long> & sfc_nod_vector_cond);
-	// used only once in sourcetermgroup
-
-	void InterpolatePolylineNodeValueVector(
-	        std::vector<double> const & nodes_as_interpol_points,
-	        std::vector<double>& node_values) const;
-
-	void SetNodeValues(const std::vector<long> & nodes, const std::vector<long> & nodes_cond,
-	                   const std::vector<double> & node_values, int ShiftInNodeVector); // used only in sourcetermgroup
-
-	void SetNOD();
-
-	//23.02.2009. WW
-	void DirectAssign(const long ShiftInNodeVector);
-	//03.2010. WW
-	std::string DirectAssign_Precipitation(double current_time);
-
-	double getCoupLeakance () const;
-
-	const std::vector<double>& getDistribution () const { return DistribedBC; }
-
-	/**
-	 * REMOVE CANDIDATE only for compatibility with old GEOLIB version
-	 * @return
-	 */
-	const std::string & getGeoName() const;
-
-	double getGeoNodeValue() const { return geo_node_value; } //KR
+public:
 
 	int CurveIndex;
 	std::vector<int> element_st_vector;
@@ -111,20 +36,6 @@ public:
 	double rill_height;
 	double sorptivity, constant, rainfall, rainfall_duration, moistureDeficit /*1x*/;
 	bool node_averaging, no_surface_water_pressure /*2x*/;
-
-	bool isCoupled () const { return _coupled; }
-	double getNormalDepthSlope () const { return normaldepth_slope; }
-
-	const std::string& getFunctionName () const { return fct_name; }
-	int getFunctionMethod () const { return fct_method; }
-
-	const std::vector<int>& getPointsWithDistribedST () const { return PointsHaveDistribedBC; }
-	const std::vector<double>& getDistribedST() const { return DistribedBC; }
-	bool isAnalytical () const { return analytical; }
-	double GetAnalyticalSolution(long location);
-	size_t getNumberOfTerms () const { return number_of_terms; }
-	void setMaxNumberOfTerms (size_t max_no_terms) { _max_no_terms = max_no_terms; }
-	void setNumberOfAnalyticalSolutions (size_t no_an_sol) { _no_an_sol = no_an_sol; }
 
 	bool channel;
 	double channel_width;
@@ -141,17 +52,8 @@ public:
 	std::string pcs_type_name_cond;
 	std::string pcs_pv_name_cond;
 
-	int getSubDomainIndex () const { return _sub_dom_idx; }
-
 	std::string fname;
 
-private:                                          // TF, KR
-	void ReadDistributionType(std::ifstream* st_file);
-	void ReadGeoType(std::ifstream* st_file,
-	                 const std::string& unique_name);
-
-	void CreateHistoryNodeMemory(NODE_HISTORY* nh);
-	void DeleteHistoryNodeMemory();
 
 	double geo_node_value;
 
@@ -200,48 +102,7 @@ private:                                          // TF, KR
 	double _coup_leakance;
 };
 
-class CSourceTermGroup
-{
-public:
-	CSourceTermGroup()                    //WW
-	{
-	}
-	//WW    std::vector<CNodeValue*>group_vector;
-	/**
-	 * \brief process type for the physical process
-	 * possible values are
-	 * <table>
-	 * <tr><td>LIQUID_FLOW</td> <td>H process (incompressible flow)</td></tr>
-	 * <tr><td>GROUNDWATER_FLOW</td> <td>H process (incompressible flow)</td></tr>
-	 * <tr><td>RIVER_FLOW</td> <td>H process (incompressible flow)</td></tr>
-	 * <tr><td>RICHARDS_FLOW</td> <td>H process (incompressible flow)</td></tr>
-	 * <tr><td>OVERLAND_FLOW</td> <td>process (incompressible flow)</td></tr>
-	 * <tr><td>GAS_FLOW</td> <td>H process (compressible flow)</td></tr>
-	 * <tr><td>TWO_PHASE_FLOW</td> <td>H2 process (incompressible/compressible flow)</td></tr>
-	 * <tr><td>COMPONENTAL_FLOW</td> <td>H2 process (incompressible/compressible flow)</td></tr>
-	 * <tr><td>HEAT_TRANSPORT</td> <td>T process (single/multi-phase flow)</td></tr>
-	 * <tr><td>DEFORMATION</td> <td>M process (single/multi-phase flow)</td></tr>
-	 * <tr><td>MASS_TRANSPORT</td> <td>C process (single/multi-phase flow)</td></tr>
-	 * </table>
-	 */
-	std::string pcs_name;
-	std::string pcs_type_name;            //OK
-	std::string pcs_pv_name;              //OK
-	//WW    std::vector<CSourceTerm*>st_group_vector; //OK
-	//WW double GetConditionalNODValue(int,CSourceTerm*); //OK
-	//WW double GetRiverNODValue(int,CSourceTerm*, long msh_node); //MB
-	//WW double GetCriticalDepthNODValue(int,CSourceTerm*, long msh_node); //MB
-	//WW double GetNormalDepthNODValue(int,CSourceTerm*, long msh_node); //MB JOD
-	//WW Changed from the above
-	//    double GetAnalyticalSolution(CSourceTerm *m_st,long node_number, std::string process);//CMCD
-	// TRANSFER OF DUAL RICHARDS
-	std::string fct_name;                 //YD
-private:
 
-};
-
-extern CSourceTermGroup* STGetGroup(std::string pcs_type_name,std::string pcs_pv_name);
-extern std::list<CSourceTermGroup*> st_group_list;
 
 /**
  * read source term file
@@ -251,21 +112,8 @@ extern std::list<CSourceTermGroup*> st_group_list;
  * @return true if source terms found in file, else false
  */
 bool STRead(const std::string& file_base_name,
-            const std::string& unique_name);
+		 std::vector<CSourceTerm*> &st_vector);
 
-extern void STWrite(std::string);
 #define ST_FILE_EXTENSION ".st"
-//extern void STCreateFromPNT();
-extern std::vector<CSourceTerm*> st_vector;
-extern void STDelete();
-CSourceTerm* STGet(std::string);
-extern void STGroupDelete(std::string pcs_type_name,std::string pcs_pv_name);
-extern void STGroupsDelete(void);                 //Haibing;
-extern size_t aktueller_zeitschritt;
-extern double aktuelle_zeit;
-extern std::vector<std::string>analytical_processes;
-//OK
-extern CSourceTerm* STGet(const std::string&, const std::string&, const std::string&);
-
 
 #endif

@@ -19,67 +19,9 @@
 
 #include "makros.h"
 //// FileIO
-////#include "BoundaryConditionIO.h"
-//#include "GeoIO.h"
 #include "ProcessIO.h"
 #include "readNonBlankLineFromInputStream.h"
-//
-//// GEOLib
-////#include "geo_lib.h"
-////#include "geo_sfc.h"
-//
-//// GEOLIB
-//#include "GEOObjects.h"
-//
-//// MSHLib
-////#include "mshlib.h"
-//// FEMLib
-//extern void remove_white_space(std::string*);
-////#include "problem.h"
-//#include "gs_project.h"
-//#include "tools.h"
-////#include "rf_node.h"
-////#include "rf_pcs.h"
-////#include "rf_fct.h"
-//#include "rfmat_cp.h"
-////#include "geo_ply.h"
-//// MathLib
-//#include "InterpolationAlgorithms/PiecewiseLinearInterpolation.h"
-//#include "mathlib.h"
-//
-//#include "BoundaryCondition.h"
 
-#ifndef _WIN32
-#include <cstdio>
-#include <cstdlib>
-#include <sys/resource.h>
-#include <sys/time.h>
-#include <unistd.h>
-
-double cputime(double x)
-{
-	struct rusage rsrc;
-	double usr, sys;
-
-	if (getrusage(RUSAGE_SELF, &rsrc) == -1)
-	{
-		perror("times");
-		exit(1);
-	}
-
-	usr = rsrc.ru_utime.tv_sec + 1.0e-6 * rsrc.ru_utime.tv_usec;
-	sys = rsrc.ru_stime.tv_sec + 1.0e-6 * rsrc.ru_stime.tv_usec;
-
-	return usr + sys - x;
-}
-#endif
-
-
-//==========================================================================
-std::list<CBoundaryCondition*> bc_list;
-std::vector<std::string> bc_db_head;
-std::list<CBoundaryConditionsGroup*> bc_group_list;
-std::vector<CBoundaryCondition*> bc_db_vector;
 
 /**************************************************************************
    FEMLib-Method:
@@ -90,8 +32,6 @@ std::vector<CBoundaryCondition*> bc_db_vector;
    11/2004 MX stream string
 **************************************************************************/
 std::ios::pos_type CBoundaryCondition::Read(std::ifstream* bc_file,
-//                                            const GEOLIB::GEOObjects& geo_obj,
-                                            const std::string& unique_fname,
                                             bool & valid)
 {
 	std::string line_string;
@@ -330,11 +270,6 @@ CBoundaryCondition::~CBoundaryCondition()
 
 }
 
-const std::string& CBoundaryCondition::getGeoName () const
-{
-	return geo_name;
-}
-
 
 /**************************************************************************
    FEMLib-Method:
@@ -346,8 +281,7 @@ const std::string& CBoundaryCondition::getGeoName () const
    05/2010 TF changes due to new GEOLIB integration, some improvements
 **************************************************************************/
 bool BCRead(std::string const& file_base_name, 
-        //const GEOLIB::GEOObjects& geo_obj,
-            const std::string& unique_name)
+        std::vector<CBoundaryCondition*>& bc_vector)
 {
 	char line[MAX_ZEILE];
 	std::string line_string, bc_file_name;
@@ -370,7 +304,7 @@ bool BCRead(std::string const& file_base_name,
 		line_string = line;
 		if (line_string.find("#STOP") != std::string::npos)
 		{
-			std::cout << "done, read " << bc_list.size()
+			std::cout << "done, read " << bc_vector.size()
 			          << " boundary conditions" << std::endl;
 			return true;
 		}
@@ -378,9 +312,9 @@ bool BCRead(std::string const& file_base_name,
 		{
 			CBoundaryCondition* bc(new CBoundaryCondition());
 			bool valid (true);
-			std::ios::pos_type position = bc->Read(&bc_file, unique_name, valid);
+			std::ios::pos_type position = bc->Read(&bc_file, valid);
 			if (valid)
-				bc_list.push_back(bc);
+				bc_vector.push_back(bc);
 			else
 				delete bc;
 			bc_file.seekg(position, std::ios::beg);
@@ -389,69 +323,4 @@ bool BCRead(std::string const& file_base_name,
 	return true;
 }
 
-///**************************************************************************
-//   FEMLib-Method: BCWrite
-//   Task: master write function
-//   Programing:
-//   02/2004 OK Implementation
-//   last modification:
-//**************************************************************************/
-//
-//void BCWrite(std::string const& base_file_name)
-//{
-//	std::string sub_line;
-//	std::string line_string;
-//
-//	// File handling
-//	std::string bc_file_name (base_file_name + BC_FILE_EXTENSION);
-//	std::fstream bc_file(bc_file_name.data(), std::ios::trunc | std::ios::out);
-//	bc_file.setf(std::ios::scientific, std::ios::floatfield);
-//	bc_file.precision(12);
-//	//OK string tec_file_name = base_file_name + ".tec";
-//	//OK fstream tec_file (tec_file_name.data(),ios::trunc|ios::out);
-//	//OK tec_file.setf(ios::scientific,ios::floatfield);
-//	//OK tec_file.precision(12);
-//	if (!bc_file.good())
-//		return;
-//	bc_file.seekg(0L, std::ios::beg); // rewind?
-//	bc_file <<
-//	"GeoSys-BC: Boundary Conditions ------------------------------------------------\n";
-//	//========================================================================
-//	// BC list
-//	std::list<CBoundaryCondition*>::const_iterator p_bc = bc_list.begin();
-//	while (p_bc != bc_list.end())
-//	{
-//		FileIO::BoundaryConditionIO::write(bc_file, *(*p_bc));
-//		++p_bc;
-//	}
-//	bc_file << "#STOP";
-//	bc_file.close();
-//	//OK tec_file.close();
-//}
-
-/**************************************************************************
-   FEMLib-Method:
-   01/2004 OK Implementation
-   07/2007 OK V2, global function
-**************************************************************************/
-//CBoundaryCondition* BCGet(const std::string &pcs_name, const std::string &geo_type_name,
-//		const std::string &geo_name)
-//{
-//	std::list<CBoundaryCondition*>::const_iterator p_bc = bc_list.begin();
-//	while (p_bc != bc_list.end()) {
-//		if (((*p_bc)->pcs_type_name.compare(pcs_name) == 0)
-//				&& ((*p_bc)->geo_type_name.compare(geo_type_name) == 0)
-//				&& ((*p_bc)->getGeoName().compare(geo_name) == 0))
-//			return *p_bc;
-//		++p_bc;
-//	}
-//	return NULL;
-//}
-
-
-CBoundaryConditionsGroup::CBoundaryConditionsGroup(void)
-{
-	msh_node_number_subst = -1;           //
-	time_dep_bc = -1;
-}
 

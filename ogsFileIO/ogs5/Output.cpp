@@ -5,8 +5,6 @@
  * Implementation of Output class
  */
 
-// ** INCLUDES **
-//#include "Configure.h"
 #include "Output.h"
 
 #include <cstdlib>
@@ -17,26 +15,6 @@
 #include "readNonBlankLineFromInputStream.h"
 #include "makros.h"
 
-//#include "Configure.h"
-//
-//#include "FEMIO/GeoIO.h"
-//#include "GEOObjects.h"
-//#include "StringTools.h"
-//#include "fem_ele_std.h"
-//#include "files0.h"
-//#include "makros.h"
-//#include "mathlib.h"
-//#include "msh_lib.h"
-//#include "problem.h"
-//#include "rf_msp_new.h"
-//#include "rf_pcs.h"
-//#include "rf_pcs.h"
-//#include "rf_random_walk.h"
-//#include "rf_tim_new.h"
-//#include "vtk.h"
-
-extern size_t max_dim;                            //OK411 todo
-
 using namespace std;
 
 COutput::COutput() :
@@ -44,8 +22,6 @@ COutput::COutput() :
 	nSteps(-1), _new_file_opened(false), dat_type_name("TECPLOT")
 {
 	tim_type_name = "TIMES";
-	m_pcs = NULL;
-	vtk = NULL; //NW
 	VARIABLESHARING = false;	//BG
 }
 
@@ -54,20 +30,14 @@ COutput::COutput(size_t id) :
 	nSteps(-1), _new_file_opened(false), dat_type_name("TECPLOT")
 {
 	tim_type_name = "TIMES";
-	vtk = NULL; //NW
 	VARIABLESHARING = false;	//BG
 }
 
 COutput::~COutput()
 {
 	mmp_value_vector.clear();             //OK
-
 }
 
-const std::string& COutput::getGeoName () const
-{
-	return geo_name;
-}
 
 #define KEYWORD '#'
 #define SUBKEYWORD '$'
@@ -107,8 +77,7 @@ bool SubKeyword(const std::string &line)
    06/2010 TF formated, restructured, signature changed, use new GEOLIB data structures
    09/2010 TF signature changed, removed some variables
 **************************************************************************/
-ios::pos_type COutput::Read(std::ifstream& in_str,
-                            const std::string& unique_geo_name)
+ios::pos_type COutput::Read(std::ifstream& in_str)
 {
 	std::string line_string;
 	bool new_keyword = false;

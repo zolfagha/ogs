@@ -11,7 +11,6 @@ ENDIF (CMAKE_USE_PTHREADS_INIT )
 FILE(GLOB CUI_Files *.h *.cpp)
 SOURCE_GROUP( ogsCUI FILES ${CUI_Files} )
 
-#MESSAGE (STATUS "BaseLib files are  ${BaseLib_Files}")
 
 INCLUDE_DIRECTORIES(
         .
@@ -23,6 +22,7 @@ INCLUDE_DIRECTORIES(
         ../ogsNumerics
         ../ogsPhysics
         ../ogsProcess
+        ../ogsFileIO
         ../ogsOGS6
 )
 
@@ -30,6 +30,7 @@ INCLUDE_DIRECTORIES(
 ## Create the library
 ADD_EXECUTABLE( ogs6 ${CUI_Files})
 TARGET_LINK_LIBRARIES( ogs6 
+    ogsFileIO
     ogsProcess
     ogsOGS6
     logog

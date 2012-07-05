@@ -8,7 +8,7 @@ int main ( int argc, char *argv[] )
 	try {
 //		ogs6::ogsInit(argc, argv);
 
-		ogs6::Simulator sim(argc, argv);
+		ogs6::OgsSimulator sim(argc, argv);
 		returncode = sim.execute();
 
 	} catch (char* e) {

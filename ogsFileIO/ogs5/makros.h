@@ -315,14 +315,5 @@
 #define MAX_ZEILE 2048
 /* max. Laenge einer UCD-Zeile; bei Leseproblemen vergroessern */
 
-//enum DIS_TYPES {CONSTANT,LINEAR};
 
-//#include "display.h"
-//#include "memory.h"
-//#include "timer.h"
-
-extern std::string FileName;
-extern std::string FilePath;                      //WW
-
-#define RESET_4410                                // H2_ELE test
 #endif

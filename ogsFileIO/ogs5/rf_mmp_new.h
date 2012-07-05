@@ -26,69 +26,24 @@
 class CMediumProperties
 {
 public:
-private:
-	//WW
-	// Data base
-	void SetMediumPropertiesDefaultsClay(void); //CMCD 9/2004 GeoSys 4
-	void SetMediumPropertiesDefaultsSilt(void); //CMCD 9/2004 GeoSys 4
-	void SetMediumPropertiesDefaultsSand(void); //CMCD 9/2004 GeoSys 4
-	                                            //CMCD 9/2004 GeoSys 4
-	void SetMediumPropertiesDefaultsGravel(void);
-	//CMCD 9/2004 GeoSys 4
-	void SetMediumPropertiesDefaultsCrystalline(void);
-	//CMCD 9/2004 GeoSys 4
-	void SetMediumPropertiesDefaultsBordenAquifer(void);
-	// Porosity
-	//CMCD 9/2004 GeoSys 4
-	double PorosityEffectiveStress(long,double );
-	double PorosityVolumetricFreeSwellingConstantIonicstrength(long,double,double);
-	//MX 1/2005
-	double PorosityEffectiveConstrainedSwelling(long,double,double, double*);
-	//MX 1/2005
-	double PorosityVolumetricFreeSwelling(long,double,double);
-	//MX 1/2005
-	double PorosityEffectiveConstrainedSwellingConstantIonicStrength(long,
-	                                                                 double,
-	                                                                 double,
-	                                                                 double*);
+	// Methods
+	CMediumProperties(void);              // constructor
+	~CMediumProperties(void);             // destructor
+	std::ios::pos_type Read(std::ifstream*);
+
+public:
 	// Permeability
 	// Permeabilty stress corrector WW
 	double* c_coefficient;
 	unsigned geo_dimension;
 	int permeability_stress_mode;
 	//
-	//CMCD 9/2004 GeoSys 4
-	double PermeabilityPressureFunctionMethod1(long,double );
-	//CMCD 9/2004 GeoSys 4
-	double PermeabilityPressureFunctionMethod2(long,double );
-	//CMCD 9/2004 GeoSys 4
-	double PermeabilityPressureFunctionMethod3(long,double );
-	//CMCD 9/2004 GeoSys 4
-	double PermeabilityPressureFunctionMethod4(long,double, double );
-	friend class CMediumPropertiesGroup;
-public:
-	// Methods
-	CMediumProperties(void);              // constructor
-	~CMediumProperties(void);             // destructor
-	CMediumProperties* Get(std::string);
-	CMediumProperties* GetDB(std::string);
-	CMediumProperties* GetByGroupNumber(int);
-	void Set(std::string,std::string,double);
-	void SetDB(std::string,std::string,double);
-	int GetPropertyType(std::string);
-	std::ios::pos_type Read(std::ifstream*);
-	void Write(std::fstream*);
-
 	// Properties
-private:
 	// PCS
 	std::string pcs_type_name;            //YD
-public:
 	std::vector<std::string>pcs_name_vector;
-private:
 	std::vector<std::string> porosity_pcs_name_vector;
 
-public:
 	//GEO
 	std::string geo_name;
 	std::vector<std::string>geo_name_vector; //OK
@@ -182,35 +137,8 @@ public:
 	double foc;                           // organic carbon content
 };
 
-class CMediumPropertiesGroup                      //YD
-{
-public:
-	CMediumPropertiesGroup() {OrigSize = 0; }
-	std::string pcs_name;
-	std::string pcs_type_name;
-	std::vector<CMediumProperties*>mmp_group_vector;
-private:
-	int OrigSize;                         // For excavation simulation.
-};
 
-//YD
-extern std::list<CMediumPropertiesGroup*>mmp_group_list;
-extern void MMPGroupDelete(/*string pcs_type_name*/);
-
-extern std::vector<CMediumProperties*>mmp_vector;
-extern void MATLoadDB(std::string);
-extern std::list<std::string> keywd_list;         //keyword-referenzliste "kw"
-extern void comp_keywd_list(std::string);
-extern void read_keywd_list(void);
-extern std::list<std::string>mat_name_list;
-
-extern void MMPWrite(std::string);
-extern bool MMPRead(std::string);
-extern void MMPWriteTecplot(std::string);
-extern void MMPDelete();
-extern CMediumProperties* MMPGet(const std::string&);
-extern bool MMPExist(std::ifstream* mmp_file);    //OK
-extern bool MMPExist();                           //OK
+extern bool MMPRead(const std::string&, std::vector<CMediumProperties*> &mmp_vector);
 
 #define MMP_FILE_EXTENSION ".mmp"
 #endif

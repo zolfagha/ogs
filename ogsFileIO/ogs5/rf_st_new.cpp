@@ -7,7 +7,6 @@
  **************************************************************************/
 #include "rf_st_new.h"
 
-#include "makros.h"
 // C++ STL
 #include <fstream>
 #include <cfloat>
@@ -16,69 +15,10 @@
 #include <set>
 #include <cstdlib>
 
+#include "makros.h"
 #include "readNonBlankLineFromInputStream.h"
 
-//#include "files0.h"
-//#include "mathlib.h"
-//
-//// GeoSys-GeoLib
-//#include "GEOObjects.h"
-//// GEO
-////#include "GeoType.h"
-//
-//// GeoSys-MshLib
-//#include "fem_ele.h"
-//
-//#include "tools.h"                                //GetLineFromFile
-///* Tools */
-//#ifndef NEW_EQS                                   //WW. 06.11.2008
-//#include "matrix.h"
-//#endif
-//
-//// GeoSys-FEMLib
-////OK_IC #include "rfsousin.h"
-//#include "rf_tim_new.h"
-//
-//// Math
-//#include "matrix_class.h"
-//
-////#include "pcs_dm.h"
-//
-//// FEM
-////#include "problem.h"
-//// For analytical source terms
-//#include "rf_mfp_new.h"
-//#include "rf_node.h"
-//#include "rfmat_cp.h"
-//
-//// Base
-//#include "quicksort.h"
-//
-//// MathLib
-//#include "InterpolationAlgorithms/PiecewiseLinearInterpolation.h"
-//
-//// FileIO
-//#include "FEMIO/GeoIO.h"
-//#include "FEMIO/ProcessIO.h"
-//#include "readNonBlankLineFromInputStream.h"
-//
-//#include "SourceTerm.h"
-//
-//using FiniteElement::CElement;
-//using MeshLib::CElem;
-//using MeshLib::CEdge;
-//using MeshLib::CNode;
-//using Math_Group::vec;
 
-#ifndef GRAVITY_CONSTANT
-#define GRAVITY_CONSTANT 9.81
-#endif
-
-std::vector<CSourceTerm*> st_vector;
-std::list<CSourceTermGroup*> st_group_list;
-std::vector<std::string> analytical_processes;
-std::vector<std::string> analytical_processes_polylines;
-//std::vector<NODE_HISTORY*> node_history_vector;   //CMCD
 /**************************************************************************
  FEMLib-Method:
  Task: ST constructor
@@ -108,7 +48,6 @@ CSourceTerm::CSourceTerm() :
  **************************************************************************/
 CSourceTerm::~CSourceTerm()
 {
-   DeleteHistoryNodeMemory();
    //    dis_file_name.clear();
    node_number_vector.clear();
    node_value_vector.clear();
@@ -135,16 +74,6 @@ CSourceTerm::~CSourceTerm()
 }
 
 
-const std::string& CSourceTerm::getGeoName() const
-{
-   return geo_name;
-}
-
-
-double CSourceTerm::getCoupLeakance () const
-{
-   return _coup_leakance;
-}
 
 
 /**************************************************************************
@@ -160,11 +89,8 @@ double CSourceTerm::getCoupLeakance () const
  04/2006 OK MSH_TYPE
 06/2010 TF modification of the signature, added geo_obj and unique_name
 **************************************************************************/
-std::ios::pos_type CSourceTerm::Read(std::ifstream *st_file,
-		//const GEOLIB::GEOObjects& geo_obj, 
-        const std::string& unique_name)
+std::ios::pos_type CSourceTerm::Read(std::ifstream *st_file)
 {
-   char line[MAX_ZEILE];
    std::string line_string, sub_string;
    bool new_keyword = false;
 
@@ -414,7 +340,6 @@ void CSourceTerm::ReadDistributionType(std::ifstream *st_file)
       in >> resolution;                           //every nth term will be considered
       in >> factor;                               //to convert temperature to energy
       analytical = true;
-      analytical_processes.push_back(convertPrimaryVariableToString (getProcessPrimaryVariable()));
       //		if (geo_type_name.compare("POLYLINE") == 0)
       //if (this->getGeoType() == GEOLIB::POLYLINE)
       //   analytical_processes_polylines.push_back(geo_name);
@@ -481,7 +406,6 @@ void CSourceTerm::ReadDistributionType(std::ifstream *st_file)
    {
       dis_type_name = "DIRECT";
       in >> fname;
-      fname = FilePath+fname;
       in.clear();
    }
 
@@ -490,35 +414,6 @@ void CSourceTerm::ReadDistributionType(std::ifstream *st_file)
    {
       dis_type_name = "PRECIPITATION";
       in >> fname;
-      fname = FilePath+fname;
-      std::ifstream ins(fname.c_str());
-      if(!ins.good())
-      {
-         std::cout<<"Could not find file "<<fname<<std::endl;
-         exit(0);
-      }
-      double timess;
-      GIS_shape_head = new double[6];             // 07.06.2010. WW
-      for(int i=0; i<6; i++)
-      {
-         getline(ins, aline);
-         ss.str(aline);
-         ss>> aline >> GIS_shape_head[i];
-         ss.clear();
-
-      }
-      while(!ins.eof())
-      {
-         getline(ins, aline);
-         if(aline.find("#STOP")!=std::string::npos)
-            break;
-         ss.str(aline);
-         ss>> timess >> aline;
-         precip_times.push_back(timess);
-         precip_files.push_back(aline);
-
-         ss.clear();
-      }
       in.clear();
    }
 }
@@ -531,9 +426,7 @@ void CSourceTerm::ReadDistributionType(std::ifstream *st_file)
  11/2007 JOD Implementation
  06/2010 TF modification of the signature, added geo_obj and unique_name
  **************************************************************************/
-void CSourceTerm::ReadGeoType(std::ifstream *st_file,
-//const GEOLIB::GEOObjects& geo_obj, 
-const std::string& unique_name)
+void CSourceTerm::ReadGeoType(std::ifstream *st_file)
 {
 //   FileIO::GeoIO::readGeoInfo(this, *st_file, geo_name, geo_obj, unique_name);
 
@@ -557,8 +450,7 @@ const std::string& unique_name)
  06/2010 TF modification of the signature, added geo_obj and unique_name
  **************************************************************************/
 bool STRead(const std::string &file_base_name,
-//const GEOLIB::GEOObjects& geo_obj, 
-const std::string& unique_name)
+		std::vector<CSourceTerm*> &st_vector)
 {
    char line[MAX_ZEILE];
    std::string line_string, st_file_name;
@@ -583,26 +475,6 @@ const std::string& unique_name)
                                                   //Code included to make dynamic memory for analytical solution
       if (line_string.find("#STOP") != std::string::npos)
       {
-         size_t no_source_terms(st_vector.size());
-         size_t no_an_sol = 0, number_of_terms = 0;
-                                                  //Need to find the memory size limits for the anal. solution.
-         for (size_t i = 0; i < no_source_terms; i++)
-         {
-            if (st_vector[i]->isAnalytical())
-            {
-               no_an_sol++;
-               number_of_terms = std::max(st_vector[i]->getNumberOfTerms(), number_of_terms);
-            }
-         }
-         if (no_an_sol > 0)
-         {
-            for (size_t i = 0; i < no_source_terms; i++)
-            {
-               st_vector[i]->setNumberOfAnalyticalSolutions (no_an_sol);
-               st_vector[i]->setMaxNumberOfTerms (number_of_terms);
-            }
-         }
-
          std::cout << "done, read " << st_vector.size() << " source terms" << std::endl;
          return true;
       }
@@ -612,7 +484,7 @@ const std::string& unique_name)
       {
          CSourceTerm *st(new CSourceTerm());
          std::ios::pos_type pos (st_file.tellg());
-         position = st->Read(&st_file, unique_name);
+         position = st->Read(&st_file);
          if (pos != position)
          {
             st_vector.push_back(st);

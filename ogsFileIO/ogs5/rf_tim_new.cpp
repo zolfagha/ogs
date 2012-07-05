@@ -17,25 +17,6 @@
 #include "makros.h"
 #include "readNonBlankLineFromInputStream.h"
 
-//// GeoSys-GeoLib
-//#include "files0.h"
-//// GeoSys-FEMLib
-////#include "rf_pcs.h"
-//#include "Output.h"
-//#include "fem_ele_std.h"
-//#include "mathlib.h"
-//#include "rf_mmp_new.h"
-//// kg44 not found #include "elements.h"
-//#include "rfmat_cp.h"
-//#include "tools.h"
-//WW #include "elements.h" //set functions for stability criteria
-// ToDo
-double aktuelle_zeit;
-size_t aktueller_zeitschritt = 0;
-double dt = 0.0;
-int rwpt_numsplits = -1;                          //JT 2010
-//==========================================================================
-std::vector<CTimeDiscretization*>time_vector;
 /**************************************************************************
    FEMLib-Method:
    Task: OBJ constructor
@@ -524,7 +505,7 @@ std::ios::pos_type CTimeDiscretization::Read(std::ifstream* tim_file)
    01/2005 OK Boolean type
    01/2005 OK Destruct before read
 **************************************************************************/
-bool TIMRead(std::string file_base_name)
+bool TIMRead(const std::string& file_base_name, std::vector<CTimeDiscretization*> &time_vector)
 {
 	//----------------------------------------------------------------------
 	//OK  TIMDelete();
@@ -558,18 +539,6 @@ bool TIMRead(std::string file_base_name)
 			position = m_tim->Read(&tim_file);
 			m_tim->time_current = m_tim->time_start;
 			//----------------------------------------------------------------------
-			if(m_tim->Write_tim_discrete) //YD Write out Time Steps & Iterations
-			{
-				std::string m_file_name = file_base_name + "_TimeDiscrete.txt";
-				m_tim->tim_discrete = new std::fstream(
-				        m_file_name.c_str(),std::ios::trunc | std::ios::out);
-				std::fstream* tim_dis =  m_tim->tim_discrete;
-				*tim_dis << " No. Time  Tim-Disc  Iter" << std::endl;
-				if (!m_tim->tim_discrete->good())
-					std::cout <<
-					"Warning : Time-Discrete files are not found" << std::endl;
-			}
-			//----------------------------------------------------------------------
 			time_vector.push_back(m_tim);
 			tim_file.seekg(position,std::ios::beg);
 		}                         // keyword found
@@ -577,39 +546,4 @@ bool TIMRead(std::string file_base_name)
 	return true;
 }
 
-/**************************************************************************
-   FEMLib-Method:
-   Task: master write function
-   01/2005 OK Implementation
-   06/2009 OK Write only existing data
-**************************************************************************/
-void TIMWrite(std::string base_file_name)
-{
-	//----------------------------------------------------------------------
-	if((int)time_vector.size() < 1)
-		return;
-	//----------------------------------------------------------------------
-	CTimeDiscretization* m_tim = NULL;
-	std::string sub_line;
-	std::string line_string;
-	//========================================================================
-	// File handling
-	std::string tim_file_name = base_file_name + TIM_FILE_EXTENSION;
-	std::fstream tim_file (tim_file_name.data(),std::ios::trunc | std::ios::out);
-	tim_file.setf(std::ios::scientific,std::ios::floatfield);
-	tim_file.precision(12);
-	if (!tim_file.good())
-		return;
-	tim_file.seekg(0L,std::ios::beg);
-	//========================================================================
-	// OUT vector
-	tim_file << "GeoSys-TIM: ------------------------------------------------\n";
-	for(int i = 0; i < (int)time_vector.size(); i++)
-	{
-		m_tim = time_vector[i];
-		m_tim->Write(&tim_file);
-	}
-	tim_file << "#STOP";
-	tim_file.close();
-}
 

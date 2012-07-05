@@ -5,21 +5,6 @@
    11/2004 OK Implementation
    last modified:
 **************************************************************************/
-// There is a name conflict between stdio.h and the MPI C++ binding
-// with respect to the names SEEK_SET, SEEK_CUR, and SEEK_END.  MPI
-// wants these in the MPI namespace, but stdio.h will #define these
-// to integer values.  #undef'ing these can cause obscure problems
-// with other include files (such as iostream), so we instead use
-// #error to indicate a fatal error.  Users can either #undef
-// the names before including mpi.h or include mpi.h *before* stdio.h
-// or iostream.
-#ifdef USE_MPI                                    //WW
-#include "mpi.h"
-#include "par_ddc.h"
-//#undef SEEK_SET
-//#undef SEEK_END
-//#undef SEEK_CUR
-#endif
 
 #include "rf_num_new.h"
 
@@ -33,57 +18,12 @@
 #include <sstream>
 #include <list>
 #include <string>
-#include "readNonBlankLineFromInputStream.h"
+
+#include "ogs5FileTools.h"
+
 using namespace std;
-//// FEM-Makros
-//#include "files0.h"
-//#include "makros.h"
-//extern ios::pos_type GetNextSubKeyword(ifstream* file,string* line, bool* keyword);
-//// GeoSys-GeoLib
-//// GeoSys-FEMLib
-//#ifndef NEW_EQS                                   //WW. 06.11.2008
-//#include "matrix.h"
-//#endif
-//#include "StringTools.h"
-//#include "mathlib.h"
-//#include "rf_pcs.h"
-//#include "tools.h"
-//// GeoSys-MSHLib
 
-extern size_t max_dim;                            //OK411 todo
 
-//==========================================================================
-vector<CNumerics*>num_vector;
-
-std::ios::pos_type GetNextSubKeyword(std::ifstream* file,std::string* line, bool* keyword)
-{
-    char buffer[MAX_ZEILE];
-    std::ios::pos_type position;
-    position = file->tellg();
-    *keyword = false;
-    std::string line_complete;
-    int i,j;
-    // Look for next subkeyword
-    while(!(line_complete.find("$") != std::string::npos) && (!file->eof()))
-    {
-        file->getline(buffer,MAX_ZEILE);
-        line_complete = buffer;
-        if(line_complete.find("#") != std::string::npos)
-        {
-            *keyword = true;
-            return position;
-        }
-        //Anf�ngliche Leerzeichen �berlesen, i=Position des ersten Nichtleerzeichens im string
-        i = (int) line_complete.find_first_not_of(" ",0);
-        j = (int) line_complete.find(";",i); //Nach Kommentarzeichen ; suchen. j = Position des Kommentarzeichens, j=-1 wenn es keines gibt.
-        if(j < 0)
-            j = (int)line_complete.length();
-        //if(j!=i) break;						 //Wenn das erste nicht-leerzeichen ein Kommentarzeichen ist, zeile �berlesen. Sonst ist das eine Datenzeile
-        if(i != -1)
-            *line = line_complete.substr(i,j - i);  //Ab erstem nicht-Leerzeichen bis Kommentarzeichen rauskopieren in neuen substring, falls Zeile nicht leer ist
-    }
-    return position;
-}
 
 /**************************************************************************
    FEMLib-Method:
@@ -188,7 +128,7 @@ CNumerics::~CNumerics(void)
    Programing:
    11/2004 OK Implementation
 **************************************************************************/
-bool NUMRead(string file_base_name)
+bool NUMRead(const std::string &file_base_name, std::vector<CNumerics*> &num_vector)
 {
 	//----------------------------------------------------------------------
 	//OK  NUMDelete();
@@ -227,8 +167,7 @@ bool NUMRead(string file_base_name)
 			position = m_num->Read(&num_file);
 			num_vector.push_back(m_num);
 			num_file.seekg(position,ios::beg);
-			m_num->NumConfigure(overall_coupling_exists);					  // JT2012
-		}                         // keyword found
+		}
 	}                                     // eof
 	return true;
 }

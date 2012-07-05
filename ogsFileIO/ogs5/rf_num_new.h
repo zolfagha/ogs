@@ -21,12 +21,15 @@
 //----------------------------------------------------------------
 class CNumerics
 {
-private:
+public:
+	CNumerics(std::string);
+	~CNumerics(void);
+	std::ios::pos_type Read(std::ifstream*);
+public:
 	// cf. Computational Geomachanics pp.62 WW
 	double* DynamicDamping;
 	/// For GMRES solver. 30.06.2010. WW
 	long m_cols;
-public:
 	// method
 	std::string method_name;              //OK
 	// PCS
@@ -86,40 +89,8 @@ public:
 	double lag_min_weight;
 	int lag_use_matrix;
 	int lag_vel_method;
-	//
-	// Configure
-	void NumConfigure(bool overall_coupling_exists); //JT2012
-	//
-	// Dynamics
-	bool CheckDynamic();
-	double GetDynamicDamping_beta1 () const {return DynamicDamping[0]; }
-	double GetDynamicDamping_beta2 () const {return DynamicDamping[1]; }
-	double GetDynamicDamping_bbeta () const {return DynamicDamping[2]; }
-	//
-	/// For GMRES. WW
-	long Get_m() const {return m_cols; }
-	CNumerics(std::string);
-	~CNumerics(void);
-	std::ios::pos_type Read(std::ifstream*);
-	void Write(std::fstream*);
 };
 
-extern std::vector<CNumerics*>num_vector;
-extern bool NUMRead(std::string);
-extern void NUMWrite(std::string);
-extern void NUMDelete();
-extern CNumerics* NUMGet(std::string);
+extern bool NUMRead(const std::string&, std::vector<CNumerics*> &num_vector);
 
-
-
-//////////////////////////////////////////////////////////////////////////
-// NUM
-//////////////////////////////////////////////////////////////////////////
-extern double GetNumericalTimeCollocation(char* name);
-extern int GetNumericsGaussPoints(int element_dimension);
-extern double NUMCalcIterationError(double* new_iteration,
-                                    double* old_iteration,
-                                    double* reference,
-                                    long length,
-                                    int method);
 #endif

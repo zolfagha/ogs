@@ -5,6 +5,8 @@
    08/2004 OK Implementation
    last modified:
 **************************************************************************/
+#include "rf_mfp_new.h"
+
 #include "makros.h"
 // C++ STL
 //#include <math.h>
@@ -14,39 +16,21 @@
 #include <cfloat>
 #include <cstdlib>
 
-#include "rf_mfp_new.h"
-#include "readNonBlankLineFromInputStream.h"
+#include "ogs5FileTools.h"
 
-//// FEM-Makros
-////#include "mathlib.h"
-//#include "eos.h"                                  //NB
-//// GeoSys-GeoLib
-//#include "files0.h"
-//// GeoSys-FEMLib
-//#include "fem_ele_std.h"
-////
-////#include "rf_mmp_new.h"
-//extern double InterpolValue(long number,int ndx,double r,double s,double t);
-////#include "rf_pcs.h"
-//#include "rfmat_cp.h"
-//extern double GetCurveValue(int,int,double,int*);
-//#include "tools.h"                                //GetLineFromFile
 //
 using namespace std;
 
 /* Umrechnungen SI - Amerikanisches System */
 //WW #include "steam67.h"
-#define PSI2PA 6895.
-#define PA2PSI 1.4503263234227701232777374909355e-4
-#define GAS_CONSTANT    8314.41
-#define COMP_MOL_MASS_AIR    28.96
-#define COMP_MOL_MASS_WATER  18.016
-#define GAS_CONSTANT_V  461.5                     //WW
-#define T_KILVIN_ZERO  273.15                     //AKS
-double gravity_constant = 9.81;                   //TEST for FEBEX OK 9.81;
+//#define PSI2PA 6895.
+//#define PA2PSI 1.4503263234227701232777374909355e-4
+//#define GAS_CONSTANT    8314.41
+//#define COMP_MOL_MASS_AIR    28.96
+//#define COMP_MOL_MASS_WATER  18.016
+//#define GAS_CONSTANT_V  461.5                     //WW
+//#define T_KILVIN_ZERO  273.15                     //AKS
 
-//==========================================================================
-std::vector<CFluidProperties*>mfp_vector;
 
 /**************************************************************************
    FEMLib-Method:
@@ -54,46 +38,42 @@ std::vector<CFluidProperties*>mfp_vector;
    Programing:
    08/2004 OK Implementation
 **************************************************************************/
-CFluidProperties::CFluidProperties() :
-	name ("WATER")
+CFluidProperties::CFluidProperties()
+//: name ("WATER")
 {
-	phase = 0;
-	// Density
-	density_model = 1;
-	rho_0 = 1000.;
-	drho_dp = 0.;
-	drho_dT = 0.;
-	drho_dC = 0.;
-	// Viscosity
-	viscosity_model = 1;
-	my_0 = 1e-3;
-	dmy_dp = 0.;
-	dmy_dT = 0.;
-	dmy_dC = 0.;
-	// Thermal properties
-	heat_capacity_model = 1;
-	specific_heat_capacity = 4680.;       //CMCD we should give this as SHC not HC GeoSys 4 9/2004
-	heat_conductivity_model = 1;
-	heat_conductivity = 0.6;
-	// Electrical properties
-	// Chemical properties
-	diffusion_model = 1;
-	diffusion = 2.13e-6;
-	// State variables
-	p_0 = 101325.;
-	T_0 = 293.;
-	C_0 = 0.;
-	Z = 1.;
-	cal_gravity = true;
-	// Data
-	mode = 0;                             // Gauss point values
-	Fem_Ele_Std = NULL;
-	// WW
-	molar_mass = COMP_MOL_MASS_AIR;
-
-#ifdef MFP_TEST //WW
-	scatter_data = NULL;
-#endif
+//	phase = 0;
+//	// Density
+//	density_model = 1;
+//	rho_0 = 1000.;
+//	drho_dp = 0.;
+//	drho_dT = 0.;
+//	drho_dC = 0.;
+//	// Viscosity
+//	viscosity_model = 1;
+//	my_0 = 1e-3;
+//	dmy_dp = 0.;
+//	dmy_dT = 0.;
+//	dmy_dC = 0.;
+//	// Thermal properties
+//	heat_capacity_model = 1;
+//	specific_heat_capacity = 4680.;       //CMCD we should give this as SHC not HC GeoSys 4 9/2004
+//	heat_conductivity_model = 1;
+//	heat_conductivity = 0.6;
+//	// Electrical properties
+//	// Chemical properties
+//	diffusion_model = 1;
+//	diffusion = 2.13e-6;
+//	// State variables
+//	p_0 = 101325.;
+//	T_0 = 293.;
+//	C_0 = 0.;
+//	Z = 1.;
+//	cal_gravity = true;
+//	// Data
+//	mode = 0;                             // Gauss point values
+//	Fem_Ele_Std = NULL;
+//	// WW
+//	molar_mass = COMP_MOL_MASS_AIR;
 }
 
 /**************************************************************************
@@ -104,14 +84,9 @@ CFluidProperties::CFluidProperties() :
 **************************************************************************/
 CFluidProperties::~CFluidProperties(void)
 {
-	for (int i = 0; i < (int)component_vector.size(); i++ )
-		component_vector[i] = NULL;
-	component_vector.clear();
-
-#ifdef MFP_TEST
-	if(scatter_data) //WW
-		delete scatter_data;
-#endif
+//	for (int i = 0; i < (int)component_vector.size(); i++ )
+//		component_vector[i] = NULL;
+//	component_vector.clear();
 }
 
 /**************************************************************************
@@ -123,6 +98,8 @@ CFluidProperties::~CFluidProperties(void)
 **************************************************************************/
 std::ios::pos_type CFluidProperties::Read(std::ifstream* mfp_file)
 {
+
+
 	std::string sub_line;
 	std::string line_string;
 	std::string delimiter(" ");
@@ -165,8 +142,6 @@ std::ios::pos_type CFluidProperties::Read(std::ifstream* mfp_file)
 		{
             in.str(readNonBlankLineFromInputStream(*mfp_file));
 			in >> fluid_name; //sub_line
-			therm_prop (fluid_name); //NB 4.9.05 (getting thermophysical constants of specified substance)
-			//TODO: add choosing of property functions in input file (NB)
 			in.clear();
 			continue;
 		}
@@ -479,15 +454,6 @@ std::ios::pos_type CFluidProperties::Read(std::ifstream* mfp_file)
 			in.clear();
 			continue;
 		}
-		//....................................................................
-		// CMCD outer space version
-		if(line_string.find("$GRAVITY") != string::npos)
-		{
-            in.str(readNonBlankLineFromInputStream(*mfp_file));
-			in >> gravity_constant;
-			in.clear();
-			continue;
-		}
 	}
 	return position;
 }
@@ -500,7 +466,7 @@ std::ios::pos_type CFluidProperties::Read(std::ifstream* mfp_file)
    01/2005 OK Boolean type
    01/2005 OK Destruct before read
 **************************************************************************/
-bool MFPRead(std::string file_base_name)
+bool MFPRead(const std::string &file_base_name, std::vector<CFluidProperties*> &mfp_vector)
 {
 	//----------------------------------------------------------------------
 	//OK  MFPDelete();
@@ -566,89 +532,5 @@ bool MFPRead(std::string file_base_name)
 	return true;
 }
 
-/**************************************************************************
-   FEMLib-Method:
-   Task: write function
-   Programing:
-   11/2004 SB Implementation
-   last modification:
-**************************************************************************/
-void CFluidProperties::Write(std::ofstream* mfp_file) const
-{
-	//KEYWORD
-	*mfp_file << "#FLUID_PROPERTIES" << std::endl;
-	*mfp_file << " $FLUID_TYPE" << std::endl;
-	*mfp_file << "  " << name << std::endl;
-	*mfp_file << " $DAT_TYPE" << std::endl;
-	*mfp_file << "  " << name << std::endl;
-	*mfp_file << " $DENSITY" << std::endl;
-	// TF 11/2011 - _rho_fct_name is used only here and in the read-method
-//	if(density_model == 0)
-//		*mfp_file << "  " << density_model << " " << _rho_fct_name << std::endl;
-	if(density_model == 1)
-		*mfp_file << "  " << density_model << " " << rho_0 << std::endl;
-	//todo
-	*mfp_file << " $VISCOSITY" << endl;
-	// TF 11/2011 - used only in read- and write-method
-//	if(viscosity_model == 0)
-//		*mfp_file << "  " << viscosity_model << " " << _my_fct_name << std::endl;
-	if(viscosity_model == 1)
-		*mfp_file << "  " << viscosity_model << " " << my_0 << std::endl;
-	//todo
-	*mfp_file << " $SPECIFIC_HEAT_CAPACITY" << endl;
-	// TF 11/2011 - used only in read- and write-method
-//	if(heat_capacity_model == 0)
-//		*mfp_file << "  " << heat_capacity_model << " " << heat_capacity_fct_name <<
-//		std::endl;
-	if(heat_capacity_model == 1)
-		*mfp_file << "  " << heat_capacity_model << " " << specific_heat_capacity <<
-		std::endl;
-	*mfp_file << " $SPECIFIC_HEAT_CONDUCTIVITY" << endl;
-	// TF 11/2011 - used only in read- and write-method
-//	if(heat_conductivity_model == 0)
-//		*mfp_file << "  " << heat_conductivity_model << " " <<
-//		heat_conductivity_fct_name << std::endl;
-	if(heat_conductivity_model == 1)
-		*mfp_file << "  " << heat_conductivity_model << " " << heat_conductivity <<
-		std::endl;
-	//--------------------------------------------------------------------
-}
 
-/**************************************************************************
-   FEMLib-Method:
-   Task: Master write function
-   Programing:
-   08/2004 OK Implementation
-   last modification:
-**************************************************************************/
-void MFPWrite(std::string base_file_name)
-{
-	CFluidProperties* m_mfp = NULL;
-	string sub_line;
-	string line_string;
-	ofstream mfp_file;
-	//========================================================================
-	// File handling
-	std::string mfp_file_name = base_file_name + MFP_FILE_EXTENSION;
-	mfp_file.open(mfp_file_name.data(),std::ios::trunc | std::ios::out);
-	mfp_file.setf(std::ios::scientific,std::ios::floatfield);
-	mfp_file.precision(12);
-	if (!mfp_file.good())
-		return;
-	//  mfp_file.seekg(0L,ios::beg);
-	//========================================================================
-	mfp_file << "GeoSys-MFP: Material Fluid Properties -------------" << std::endl;
-	//========================================================================
-	// OUT vector
-	int mfp_vector_size = (int)mfp_vector.size();
-	int i;
-	for(i = 0; i < mfp_vector_size; i++)
-	{
-		m_mfp = mfp_vector[i];
-		m_mfp->Write(&mfp_file);
-	}
-	mfp_file << "#STOP";
-	mfp_file.close();
-	//  delete mfp_file;
-}
 

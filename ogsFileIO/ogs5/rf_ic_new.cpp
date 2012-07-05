@@ -7,36 +7,20 @@
    last modified
 **************************************************************************/
 
-//#include "gs_project.h"
-#include "makros.h"
+#include "rf_ic_new.h"
+
 // C++ STL
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <list>
+
+#include "makros.h"
+
+#include "ogs5FileTools.h"
+
 using namespace std;
-// FEM-Makros
-//#include "files0.h"
-//#include "files0.h"
-//#include "mathlib.h"
-// Base
-//#include "StringTools.h"
-// GEOLIB
-//#include "GEOObjects.h"
-// MSHLib
-//#include "msh_lib.h"
-// FEMLib
-#include "rf_ic_new.h"
-//#include "rf_node.h"
-//#include "rf_pcs.h"
-//#include "rfmat_cp.h"
 
-//#include "InitialCondition.h"
-#include "readNonBlankLineFromInputStream.h"
-
-//==========================================================================
-vector<CInitialConditionGroup*>ic_group_vector;
-vector<CInitialCondition*>ic_vector;
 
 /**************************************************************************
    FEMLib-Method:
@@ -86,8 +70,7 @@ CInitialCondition::~CInitialCondition(void)
    05/2010 TF reformated, restructured, signature changed, use new GEOLIB data structures
 **************************************************************************/
 bool ICRead(const std::string& file_base_name,
-            //const GEOLIB::GEOObjects& geo_obj, 
-            const std::string& unique_name)
+            std::vector<CInitialCondition*> &ic_vector)
 {
 	// File handling
 	std::string ic_file_name = file_base_name + IC_FILE_EXTENSION;
@@ -116,7 +99,7 @@ bool ICRead(const std::string& file_base_name,
 		{
 			CInitialCondition* ic = new CInitialCondition();
 			std::ios::pos_type pos (ic_file.tellg());
-			position = ic->Read(&ic_file, unique_name);
+			position = ic->Read(&ic_file);
 			if (pos != position)
 				ic_vector.push_back(ic);
 			else
@@ -146,9 +129,7 @@ bool ICRead(const std::string& file_base_name,
    07/2006 WW Read data by expression
    06/2010 TF changed signature to use the new GEOLIB data structures
 **************************************************************************/
-ios::pos_type CInitialCondition::Read(std::ifstream* ic_file,
-                                      //const GEOLIB::GEOObjects& geo_obj,
-                                      const std::string& unique_geo_name)
+ios::pos_type CInitialCondition::Read(std::ifstream* ic_file)
 {
 	string line_string;
 	std::stringstream in;
@@ -225,7 +206,6 @@ ios::pos_type CInitialCondition::Read(std::ifstream* ic_file,
 			else if (this->getProcessDistributionType() == FiniteElement::DIRECT)
 			{
 				in >> fname;
-				fname = FilePath + fname;
 			}
 			in.clear();
 			continue;

@@ -15,7 +15,7 @@ namespace BaseLib {
 /**
  * Returns true if given file exists. From http://www.techbytes.ca/techbyte103.html
  */
-static bool IsFileExisting(std::string strFilename)
+static bool IsFileExisting(const std::string &strFilename)
 {
 	struct stat stFileInfo;
 	bool blnReturn;
@@ -42,6 +42,39 @@ static bool IsFileExisting(std::string strFilename)
 	}
 
 	return(blnReturn);
+}
+
+
+static std::string getFileDirecotryPath(const std::string &file_path)
+{
+	size_t indexChWin, indexChLinux;
+	indexChWin = indexChLinux = 0;
+	indexChWin = file_path.find_last_of('\\');
+	indexChLinux = file_path.find_last_of('/');
+	//
+	std::string dir_path;
+	if(indexChWin != std::string::npos)
+		dir_path = file_path.substr(0,indexChWin) + "\\";
+	else if(indexChLinux != std::string::npos)
+		dir_path = file_path.substr(0,indexChLinux) + "/";
+
+	return dir_path;
+}
+
+static std::string getFileBaseName(const std::string &file_path)
+{
+	size_t indexChWin, indexChLinux;
+	indexChWin = indexChLinux = 0;
+	indexChWin = file_path.find_last_of('\\');
+	indexChLinux = file_path.find_last_of('/');
+	//
+	std::string dir_path;
+	if(indexChWin != std::string::npos)
+		dir_path = file_path.substr(indexChWin, file_path.length());
+	else if(indexChLinux != std::string::npos)
+		dir_path = file_path.substr(indexChLinux, file_path.length());
+
+	return dir_path;
 }
 
 } // end namespace BaseLib

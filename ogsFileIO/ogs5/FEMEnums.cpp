@@ -104,35 +104,6 @@ std::string convertProcessTypeToString ( ProcessType pcs_type )
 	return "INVALID_PROCESS";
 }
 
-bool isFlowProcess (ProcessType pcs_type)
-{
-	if (   pcs_type == LIQUID_FLOW || pcs_type == FLUID_FLOW 
-		|| pcs_type == RICHARDS_FLOW || pcs_type == GROUNDWATER_FLOW
-		|| pcs_type == PS_GLOBAL || pcs_type == MULTI_PHASE_FLOW
-		|| pcs_type == DEFORMATION_FLOW || pcs_type == DEFORMATION_H2
-	    || pcs_type == TWO_PHASE_FLOW || pcs_type == OVERLAND_FLOW 
-	    || pcs_type == AIR_FLOW || pcs_type == PTC_FLOW)
-		return true;
-	return false;
-}
-
-bool isMultiFlowProcess (ProcessType pcs_type)
-{
-	if (pcs_type == PS_GLOBAL || 
-		pcs_type == MULTI_PHASE_FLOW ||
-		pcs_type == TWO_PHASE_FLOW ||
-		pcs_type == DEFORMATION_H2)
-		return true;
-	return false;
-}
-
-bool isDeformationProcess (ProcessType pcs_type)
-{
-	if (pcs_type == DEFORMATION || pcs_type == DEFORMATION_H2 ||
-	    pcs_type == DEFORMATION_FLOW || pcs_type == DEFORMATION_DYNAMIC)
-		return true;
-	return false;
-}
 
 const std::list<std::string> getAllProcessNames()
 {
