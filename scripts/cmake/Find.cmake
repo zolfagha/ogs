@@ -2,6 +2,14 @@
 ### Find tools     ###
 ######################
 
+## Unix tools ##
+# Date
+FIND_PROGRAM(DATE_TOOL_PATH date PATHS ${MSYSGIT_BIN_DIR})
+# Grep
+FIND_PROGRAM(GREP_TOOL_PATH grep PATHS ${MSYSGIT_BIN_DIR})
+# Unzip
+FIND_PROGRAM(UNZIP_TOOL_PATH unzip PATHS ${MSYSGIT_BIN_DIR})
+
 # Find dot tool from graphviz
 FIND_PROGRAM(DOT_TOOL_PATH dot DOC "Dot tool from graphviz")
 
@@ -15,6 +23,14 @@ FIND_PACKAGE(cppcheck)
 
 ## gtest ##
 FIND_PACKAGE (GTest)
+
+# Find Git
+FIND_PACKAGE(Git)
+
+# msysGit on Windows
+IF(WIN32 AND GIT_FOUND)
+    FIND_PACKAGE(MsysGit)
+ENDIF() # WIN32 AND GIT_FOUND
 
 ######################
 ### Find libraries ###

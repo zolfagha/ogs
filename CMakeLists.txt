@@ -28,7 +28,21 @@ OPTION(USE_LIS "Use LIS" OFF)
 OPTION(USE_BLAS_LAPACK "Use BLAS&LAPACK" OFF)
 OPTION(USE_PETSC "Use PETSc libs for parallel computing" OFF)
 OPTION(PYTHON_WRAP "Provide Python interface" OFF)
+OPTION(OGS_BUILD_INFO "Should build information be generated" ON)
 
+###########################################################################
+### OGS version information. Adjust these if you release a new version. ###
+###########################################################################
+SET (OGS_VERSION_MAJOR 0)
+SET (OGS_VERSION_MINOR 1)
+SET (OGS_VERSION_PATCH 0)
+SET (OGS_RELEASE_PERSONS "NW")
+SET (OGS_VERSION "${OGS_VERSION_MAJOR}.${OGS_VERSION_MINOR}.${OGS_VERSION_PATCH}(${OGS_RELEASE_PERSONS})")
+# should we use ISO dates: 2010-12-31 ?
+SET (OGS_DATE "05.07.2012")
+
+
+###########################################################################
 IF(USE_OPENMP)
 	FIND_PACKAGE( OpenMP REQUIRED )
 	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
@@ -122,6 +136,7 @@ ADD_SUBDIRECTORY( ogsNumerics )
 ADD_SUBDIRECTORY( ogsPhysics )
 ADD_SUBDIRECTORY( ogsProcess )
 ADD_SUBDIRECTORY( ogsFileIO )
+ADD_SUBDIRECTORY( ogsOGS6 )
 ADD_SUBDIRECTORY( ogsCUI )
 ADD_SUBDIRECTORY( extra )
 IF (GTEST_FOUND)
@@ -135,3 +150,6 @@ IF (PYTHON_WRAP)
 	ADD_SUBDIRECTORY(ogsPythonUI)
 ENDIF()
 
+# Create Configure.h
+CONFIGURE_FILE (ogsCore/BaseLib/Configure.h.in ${PROJECT_BINARY_DIR}/ogsCore/BaseLib/Configure.h)
+CONFIGURE_FILE (ogsCore/BaseLib/BuildInfo.h.in ${PROJECT_BINARY_DIR}/ogsCore/BaseLib/BuildInfo.h)

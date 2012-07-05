@@ -15,3 +15,34 @@ ENDIF() # NOT DEFINED OGS_LOG_LEVEL
 
 # Enable Visual Studio project folder grouping
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
+
+# Collect build information such as revision/commit and timestamp
+IF (OGS_BUILD_INFO)
+	IF(GIT_FOUND)
+	    MESSAGE (STATUS "GIT_FOUND")
+	    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake/cmake/")
+        include(GetGitRevisionDescription)
+        get_git_head_revision(GIT_REFSPEC GIT_COMMIT_INFO)
+
+		# Get git commit
+#		EXECUTE_PROCESS(
+#			COMMAND ${GIT_EXECUTABLE} "log" "--name-status" "HEAD^..HEAD"
+#			COMMAND ${GREP_TOOL_PATH} "-m" "1" "commit"
+#			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+#			OUTPUT_VARIABLE GIT_COMMIT_INFO
+#			OUTPUT_STRIP_TRAILING_WHITESPACE
+#		)
+        MESSAGE (STATUS "GIT_EXECUTABLE: ${GIT_EXECUTABLE}")
+        MESSAGE (STATUS "GREP_TOOL_PATH: ${GREP_TOOL_PATH}")
+        MESSAGE (STATUS "GIT_COMMIT_INFO: ${GIT_COMMIT_INFO}")
+	ENDIF() # GIT_FOUND
+
+	EXECUTE_PROCESS(
+		COMMAND ${DATE_TOOL_PATH} "+%Y-%m-%d" # %H:%M:%S"
+		OUTPUT_VARIABLE BUILD_TIMESTAMP
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+ENDIF () # OGS_BUILD_INFO
+
+# This is for Configure.h which is generated later
+INCLUDE_DIRECTORIES( ${PROJECT_BINARY_DIR}/ogsCore/BaseLib )
