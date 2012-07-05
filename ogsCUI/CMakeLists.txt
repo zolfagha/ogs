@@ -9,8 +9,6 @@ ENDIF (CMAKE_USE_PTHREADS_INIT )
 
 # Source files
 FILE(GLOB CUI_Files *.h *.cpp)
-
-#SET( BaseLib_Files ${BaseLib_Files} PARENT_SCOPE )
 SOURCE_GROUP( ogsCUI FILES ${CUI_Files} )
 
 #MESSAGE (STATUS "BaseLib files are  ${BaseLib_Files}")
@@ -25,16 +23,47 @@ INCLUDE_DIRECTORIES(
         ../ogsNumerics
         ../ogsPhysics
         ../ogsProcess
+        ../ogsOGS6
 )
 
 
 ## Create the library
 ADD_EXECUTABLE( ogs6 ${CUI_Files})
-TARGET_LINK_LIBRARIES(ogs6 
+TARGET_LINK_LIBRARIES( ogs6 
     ogsProcess
+    ogsOGS6
     logog
     ${CMAKE_THREAD_LIBS_INIT}
     )
+
+IF(USE_LIS)
+    INCLUDE_DIRECTORIES( ${LIS_INCLUDE_DIR} )
+ENDIF(USE_LIS)
+
+IF (USE_LIS)
+    TARGET_LINK_LIBRARIES( ogs6 ${LIS_LIBRARIES} )
+ENDIF (USE_LIS)
+
+IF (USE_BLAS_LAPACK)
+    TARGET_LINK_LIBRARIES( ogs6 ${BLAS_LIBRARIES} )
+    TARGET_LINK_LIBRARIES( ogs6 ${LAPACK_LIBRARIES} )
+ENDIF (USE_BLAS_LAPACK)
+
+IF(USE_PETSC)
+        TARGET_LINK_LIBRARIES( ogs6  ${PETSC_LIBRARIES} )
+    IF (MSVC)
+        SET_TARGET_PROPERTIES(ogs6 PROPERTIES
+                LINK_FLAGS "
+            /NODEFAULTLIB:\"libcmt.lib\"
+                ")
+    ENDIF(MSVC)
+ENDIF(USE_PETSC)
+
+IF (USE_MPI)
+    INCLUDE_DIRECTORIES(${MPI_INCLUDE_PATH})
+        TARGET_LINK_LIBRARIES( ogs6 ${MPI_C_LIBRARIES} )
+ENDIF (USE_MPI)
+
 
 SET_TARGET_PROPERTIES(ogs6 PROPERTIES LINKER_LANGUAGE CXX)
 
