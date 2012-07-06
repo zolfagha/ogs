@@ -23,7 +23,7 @@ INCLUDE_DIRECTORIES(
         ../ogsPhysics
         ../ogsProcess
         ../ogsFileIO
-        ../ogsOGS6
+        ../ogsSimulator
 )
 
 
@@ -32,7 +32,7 @@ ADD_EXECUTABLE( ogs6 ${CUI_Files})
 TARGET_LINK_LIBRARIES( ogs6 
     ogsFileIO
     ogsProcess
-    ogsOGS6
+    ogsSimulator
     logog
     ${CMAKE_THREAD_LIBS_INIT}
     )

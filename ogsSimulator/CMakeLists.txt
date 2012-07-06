@@ -3,7 +3,7 @@
 FILE(GLOB Simulator_Files *.h *.cpp)
 
 #SET( BaseLib_Files ${BaseLib_Files} PARENT_SCOPE )
-SOURCE_GROUP( ogsOGS6 FILES ${Simulator_Files} )
+SOURCE_GROUP( ogsSimulator FILES ${Simulator_Files} )
 
 INCLUDE_DIRECTORIES(
         .
@@ -17,13 +17,13 @@ INCLUDE_DIRECTORIES(
         ../extra/Eigen
 )
 
-ADD_LIBRARY( ogsOGS6 STATIC 
+ADD_LIBRARY( ogsSimulator STATIC 
 	${Simulator_Files}
 )
 
-target_link_libraries( ogsOGS6
+target_link_libraries( ogsSimulator
     ogsFileIO
 )
 
-SET_TARGET_PROPERTIES(ogsOGS6 PROPERTIES LINKER_LANGUAGE CXX)
+SET_TARGET_PROPERTIES(ogsSimulator PROPERTIES LINKER_LANGUAGE CXX)
 
