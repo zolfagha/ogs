@@ -6,4 +6,5 @@
 // * This file should be called in body files (e.g. cpp)
 //------------------------------------------------------------------------------
 #include "FemGroundwaterFlow/Head.h"
+#include "FemGroundwaterFlow/ElementVelocity.h"
 

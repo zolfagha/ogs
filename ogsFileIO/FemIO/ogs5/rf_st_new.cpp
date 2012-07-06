@@ -16,8 +16,11 @@
 #include <cstdlib>
 
 #include "makros.h"
+#include "ProcessIO.h"
 #include "readNonBlankLineFromInputStream.h"
 
+namespace ogs5
+{
 
 /**************************************************************************
  FEMLib-Method:
@@ -115,13 +118,8 @@ std::ios::pos_type CSourceTerm::Read(std::ifstream *st_file)
                                                   // subkeyword found
       if (line_string.find("$PCS_TYPE") != std::string::npos)
       {
-    	  //FileIO::ProcessIO::readProcessInfo (*st_file, _pcs_type);
-          in.str (readNonBlankLineFromInputStream (*st_file));
-         std::string tmp;
-         in >> tmp;
-         //setProcessType (convertProcessType (tmp));
-         in.clear();
-         continue;
+    	  FileIO::ProcessIO::readProcessInfo (*st_file, _pcs_type);
+          continue;
       }
 
                                                   // subkeyword found
@@ -129,29 +127,8 @@ std::ios::pos_type CSourceTerm::Read(std::ifstream *st_file)
       {
     	  in.str (readNonBlankLineFromInputStream (*st_file));
 //         in.str(readNonBlankLineFromInputStream(*st_file));
-         std::string tmp;
-         in >> tmp;
+         in >> primaryvariable_name;
 
-         if ( this->getProcessType() == FiniteElement::MASS_TRANSPORT )
-         {
-             // HS set the pointer to MCP based on component name.
-             // first do a check whether this name is existing and unique.
-             //if ( cp_name_2_idx.count( tmp ) == 1 )
-             //{
-             //    setProcess(cp_vec[cp_name_2_idx[tmp]]->getProcess() );
-             //    setProcessPrimaryVariable( FiniteElement::CONCENTRATION );
-             //}
-             //else
-             //{
-             //    DisplayErrorMsg("Error: In reading ST file, the input component names are not found in MCP file!!!");
-             //    exit(1);
-             //}
-         }
-         else
-         {
-             //setProcess( PCSGet( this->getProcessType() ) );
-             //setProcessPrimaryVariable (FiniteElement::convertPrimaryVariable (tmp));
-         }
          in.clear();
          continue;
       }
@@ -180,7 +157,9 @@ std::ios::pos_type CSourceTerm::Read(std::ifstream *st_file)
 
       if (line_string.find("$GEO_TYPE") != std::string::npos)
       {
-         //ReadGeoType(st_file, geo_obj, unique_name);
+          in.str(readNonBlankLineFromInputStream(*st_file));
+          in >> geo_type_name >> geo_name;
+          in.clear();
          continue;
       }
 
@@ -503,4 +482,4 @@ bool STRead(const std::string &file_base_name,
    return true;
 }
 
-
+}

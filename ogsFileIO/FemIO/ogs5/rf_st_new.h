@@ -16,6 +16,8 @@
 #include "DistributionInfo.h" // TF
 #include "ProcessInfo.h"                          // TF
 
+namespace ogs5
+{
 
 class CSourceTerm : public ProcessInfo, public DistributionInfo
 {
@@ -29,6 +31,9 @@ private:                                          // TF, KR
 	void ReadGeoType(std::ifstream* st_file);
 
 public:
+	std::string primaryvariable_name;
+	std::string geo_name; // TF 05/2010
+	std::string geo_type_name;
 
 	int CurveIndex;
 	std::vector<int> element_st_vector;
@@ -98,7 +103,6 @@ public:
 	std::vector<double> precip_times;
 	std::vector<std::string> precip_files;
 
-	std::string geo_name;
 	double _coup_leakance;
 };
 
@@ -115,5 +119,7 @@ bool STRead(const std::string& file_base_name,
 		 std::vector<CSourceTerm*> &st_vector);
 
 #define ST_FILE_EXTENSION ".st"
+
+}
 
 #endif

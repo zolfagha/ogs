@@ -7,6 +7,9 @@
 
 #include "DistributionInfo.h"
 
+namespace ogs5
+{
+
 DistributionInfo::DistributionInfo(FiniteElement::DistributionType dt) :
 	_dis_type (dt)
 {}
@@ -24,3 +27,6 @@ FiniteElement::DistributionType DistributionInfo::getProcessDistributionType () 
 {
 	return _dis_type;
 }
+
+}
+

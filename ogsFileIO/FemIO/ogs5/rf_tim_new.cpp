@@ -17,6 +17,9 @@
 #include "makros.h"
 #include "readNonBlankLineFromInputStream.h"
 
+namespace ogs5
+{
+
 /**************************************************************************
    FEMLib-Method:
    Task: OBJ constructor
@@ -546,4 +549,4 @@ bool TIMRead(const std::string& file_base_name, std::vector<CTimeDiscretization*
 	return true;
 }
 
-
+}

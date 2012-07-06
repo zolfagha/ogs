@@ -20,6 +20,8 @@ using namespace std;
 #include "makros.h"
 #include "Output.h"
 
+namespace ogs5
+{
 
 
 /**************************************************************************
@@ -73,4 +75,4 @@ bool OUTRead(const std::string& file_base_name,
 	return true;
 }
 
-
+}

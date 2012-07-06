@@ -38,7 +38,7 @@ class FemNeumannBC : public IFemNeumannBC //: IFemBC, public MathLib::TemplateSp
 {
 public:
     /// 
-    FemNeumannBC(MeshLib::IMesh *msh, FemLib::LagrangianFeObjectContainer* feObjects, GeoLib::GeoObject *geo, NumLib::ITXFunction *func)
+    FemNeumannBC(MeshLib::IMesh *msh, FemLib::LagrangianFeObjectContainer* feObjects, const GeoLib::GeoObject *geo, NumLib::ITXFunction *func)
     {
         _msh = msh;
         _feObjects = feObjects;
@@ -102,7 +102,7 @@ private:
     // node id, var id, value
     MeshLib::IMesh* _msh;
     FemLib::LagrangianFeObjectContainer* _feObjects;
-    GeoLib::GeoObject *_geo;
+    const GeoLib::GeoObject *_geo;
     NumLib::ITXFunction *_bc_func;
     std::vector<size_t> _vec_nodes;
     std::vector<double> _vec_values;

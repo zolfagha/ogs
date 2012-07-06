@@ -9,6 +9,9 @@
 
 #define PCS_FILE_EXTENSION ".pcs"
 
+namespace ogs5
+{
+
 /**
  * class manages the physical processes
  */
@@ -76,5 +79,7 @@ public:
 
 bool PCSRead(const std::string&, std::vector<CRFProcess*> &pcs_vector);
 
+
+}
 
 #endif

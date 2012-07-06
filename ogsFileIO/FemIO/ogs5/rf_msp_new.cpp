@@ -19,9 +19,12 @@
 // FEM-Makros
 #include "makros.h"
 #include "readNonBlankLineFromInputStream.h"
-#include "matrix_class.h"
 
 using namespace std;
+
+namespace ogs5
+{
+using namespace Math_Group;
 
 /**************************************************************************
    FEMLib-Method:
@@ -820,6 +823,7 @@ CSolidProperties::~CSolidProperties()
 	rhs_l = NULL;
 	x_l = NULL;
 	Li = NULL;
+}
 }
 //----------------------------------------------------------------------------
 

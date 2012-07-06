@@ -26,6 +26,9 @@
 
 using namespace std;
 
+namespace ogs5
+{
+
 /*========================================================================*/
 /* Component Properties                                                  */
 /*========================================================================*/
@@ -683,4 +686,5 @@ int CompProperties::GetNumberIsothermValuesCompProperties(int isotherm)
 	}                                     /* switch */
 
 	return n;
+}
 }

@@ -17,7 +17,7 @@ public:
         BaseLib::releaseObject(_tim);
     }
 
-	/// set  a time steppting function
+	/// set  a time stepping function
 	void setTimeSteppingFunction(NumLib::ITimeStepFunction &f)
 	{
 		_tim = f.clone();

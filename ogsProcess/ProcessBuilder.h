@@ -11,11 +11,11 @@ namespace NumLib
 class TemplateTransientMonolithicSystem;
 }
 
-
 namespace ProcessLib
 {
 
 typedef NumLib::TemplateTransientMonolithicSystem Process;
+class ProcessBuilder;
 
 //================================================================================
 // Copy and modify from gtest-internal.h
@@ -59,11 +59,12 @@ public:
 
 #define OGS_PROCESS(pcs_name, pcs_classname)\
 ProcessLib::ProcessInfo* const pcs_classname::_pcs_info =\
-   ProcessLib::ProcessBuilder::getInstance()->registerProcess(\
+		ProcessLib::ProcessBuilder::getInstance()->registerProcess(\
         #pcs_name,\
         new ProcessLib::ProcessFactoryImpl<pcs_classname >);\
 
 //================================================================================
+
 
 /**
  * Singleton class

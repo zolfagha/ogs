@@ -14,6 +14,9 @@
 // FEM
 #include "FEMEnums.h"
 
+namespace ogs5
+{
+
 namespace FileIO
 {
 /**
@@ -36,6 +39,7 @@ public:
 	 */
 	static bool readProcessInfo (std::istream& in_str, FiniteElement::ProcessType& pcs_type);
 };
+}
 }
 
 #endif /* PROCESSIO_H_ */

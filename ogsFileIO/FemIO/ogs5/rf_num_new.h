@@ -18,6 +18,9 @@
 #include <string>
 #include <vector>
 
+namespace ogs5
+{
+
 //----------------------------------------------------------------
 class CNumerics
 {
@@ -93,4 +96,5 @@ public:
 
 extern bool NUMRead(const std::string&, std::vector<CNumerics*> &num_vector);
 
+}
 #endif

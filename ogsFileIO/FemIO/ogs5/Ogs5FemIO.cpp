@@ -1,21 +1,14 @@
 
 #include "Ogs5FemIO.h"
 
-#include "rf_pcs.h"
-#include "rf_mfp_new.h"
-#include "rfmat_cp.h"
-#include "rf_bc_new.h"
-#include "rf_st_new.h"
-#include "rf_ic_new.h"
-#include "rf_out_new.h"
-#include "rf_tim_new.h"
-#include "rf_msp_new.h"
-#include "rf_mmp_new.h"
-#include "rf_num_new.h"
+
 
 #include "BaseLib/CodingTools.h"
 
-Ogs5FemIO::~Ogs5FemIO()
+namespace ogs5
+{
+
+Ogs5FemData::~Ogs5FemData()
 {
 	BaseLib::releaseObjectsInStdVector(pcs_vector);
 	BaseLib::releaseObjectsInStdVector(mfp_vector);
@@ -30,7 +23,7 @@ Ogs5FemIO::~Ogs5FemIO()
 	BaseLib::releaseObjectsInStdVector(num_vector);
 }
 
-void Ogs5FemIO::read(const std::string &proj_path)
+void Ogs5FemData::read(const std::string &proj_path)
 {
 	PCSRead(proj_path, pcs_vector);
 	MFPRead(proj_path, mfp_vector);
@@ -55,3 +48,4 @@ void Ogs5FemIO::read(const std::string &proj_path)
 //	CURRead(proj_path);                   //OK
 }
 
+}

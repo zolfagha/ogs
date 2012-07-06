@@ -11,6 +11,9 @@
 // FEM
 #include "FEMEnums.h"
 
+namespace ogs5
+{
+
 class DistributionInfo
 {
 public:
@@ -35,5 +38,6 @@ private:
 	 */
 	FiniteElement::DistributionType _dis_type;
 };
+}
 
 #endif                                            /* DISTRIBUTIONINFO_H_ */

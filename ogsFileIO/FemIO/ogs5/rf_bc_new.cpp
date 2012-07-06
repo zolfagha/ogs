@@ -22,6 +22,8 @@
 #include "ProcessIO.h"
 #include "readNonBlankLineFromInputStream.h"
 
+namespace ogs5
+{
 
 /**************************************************************************
    FEMLib-Method:
@@ -65,8 +67,7 @@ std::ios::pos_type CBoundaryCondition::Read(std::ifstream* bc_file,
 		if (line_string.find("$PRIMARY_VARIABLE") != std::string::npos)
 		{
 			in.str(readNonBlankLineFromInputStream(*bc_file));
-			std::string tmp;
-			in >> tmp;    // _pcs_pv_name;
+			in >> primaryvariable_name;    // _pcs_pv_name;
 			in.clear();
 		}
 
@@ -85,8 +86,7 @@ std::ios::pos_type CBoundaryCondition::Read(std::ifstream* bc_file,
 			//	valid = false;
         {
             in.str(readNonBlankLineFromInputStream(*bc_file));
-            std::string tmp;
-            in >> tmp;    // _pcs_pv_name;
+            in >> geo_type_name >> geo_name;
             in.clear();
         }
 
@@ -323,4 +323,4 @@ bool BCRead(std::string const& file_base_name,
 	return true;
 }
 
-
+}

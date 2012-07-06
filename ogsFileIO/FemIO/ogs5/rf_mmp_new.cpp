@@ -22,6 +22,8 @@
 
 using namespace std;
 
+namespace ogs5
+{
 
 void ScreenMessage(const char* message)
 {
@@ -1586,3 +1588,4 @@ std::ios::pos_type CMediumProperties::Read(std::ifstream* mmp_file)
 	return position;
 }
 
+}

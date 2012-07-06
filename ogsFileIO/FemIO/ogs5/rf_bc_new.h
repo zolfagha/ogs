@@ -11,15 +11,18 @@
 #include <vector>
 #include <iostream>
 
-namespace FileIO
-{
-class BoundaryConditionIO;
-}
 
 #include "DistributionInfo.h" // TF
 #include "ProcessInfo.h"                          // KR
 
 
+namespace ogs5
+{
+
+namespace FileIO
+{
+class BoundaryConditionIO;
+}
 
 
 class CBoundaryCondition :
@@ -58,6 +61,7 @@ public:
 	 */
 	std::string geo_name; // TF 05/2010
 	std::string geo_type_name;
+	std::string primaryvariable_name;
 
 	std::string fname; //27.02.2009. WW
 	int _curve_index; // Time function index
@@ -98,5 +102,6 @@ public:
 
 bool BCRead (std::string const& file_base_name,
 		std::vector<CBoundaryCondition*> &bc_vector);
+}
 
 #endif

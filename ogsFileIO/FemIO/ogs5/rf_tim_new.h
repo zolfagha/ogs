@@ -16,6 +16,9 @@
 //#include <vector>
 #include "makros.h" // JT2012
 
+namespace ogs5
+{
+
 //----------------------------------------------------------------
 class CTimeDiscretization
 {
@@ -93,5 +96,7 @@ public:
 
 extern bool TIMRead(const std::string&, std::vector<CTimeDiscretization*> &time_vector);
 #define TIM_FILE_EXTENSION ".tim"
+
+}
 
 #endif

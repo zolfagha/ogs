@@ -8,6 +8,9 @@
 #include "ProcessInfo.h"
 #include "rf_pcs.h"
 
+namespace ogs5
+{
+
 ProcessInfo::ProcessInfo() :
 	_pcs_type (FiniteElement::INVALID_PROCESS), _pcs_pv (FiniteElement::INVALID_PV), _pcs (NULL)
 {}
@@ -48,3 +51,4 @@ CRFProcess* ProcessInfo::getProcess () const
 
 ProcessInfo::~ProcessInfo()
 {}
+}

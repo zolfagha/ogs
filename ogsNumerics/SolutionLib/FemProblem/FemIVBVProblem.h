@@ -9,7 +9,7 @@
 #include "TimeSteppingProblem.h"
 #include "LocalAssemblerProblem.h"
 
-#include "FemVariable.h"
+#include "AbstractFemIVBVProblem.h"
 
 namespace SolutionLib
 {
@@ -26,41 +26,21 @@ template
 	<
 	class T_FEM_EQUATION
 	>
-class FemIVBVProblem : public TimeSteppingProblem
+class FemIVBVProblem : public AbstractFemIVBVProblem
 {
 public:
 	typedef T_FEM_EQUATION EquationType;
 
 	///
-    FemIVBVProblem(	DiscreteLib::DiscreteSystem* dis)
-        : _discrete_system(dis), _eqs(0)
+    explicit FemIVBVProblem(	DiscreteLib::DiscreteSystem* dis)
+        : AbstractFemIVBVProblem(dis), _eqs(0)
     {
     }
 
     ///
     virtual ~FemIVBVProblem()
     {
-        BaseLib::releaseObjectsInStdVector(_variables);
     }
-
-    /// get this discrete system
-    DiscreteLib::DiscreteSystem* getDiscreteSystem() {return _discrete_system;};
-
-    /// get the mesh
-    MeshLib::IMesh* getMesh() {return _discrete_system->getMesh();};
-
-    /// create FE approximation field
-    FemVariable* addVariable(const std::string name)
-    {
-    	_variables.push_back(new FemVariable(_variables.size(), name));
-        return _variables.back();
-    }
-
-    /// get a variable
-    FemVariable* getVariable(size_t i) const { return _variables[i]; }
-
-    /// get the number of variables
-    size_t getNumberOfVariables() const { return _variables.size(); }
 
     /// set an equation
     void setEquation(EquationType* eqs) {_eqs = eqs;};
@@ -72,9 +52,7 @@ private:
     DISALLOW_COPY_AND_ASSIGN(FemIVBVProblem);
 
 private:
-    DiscreteLib::DiscreteSystem* _discrete_system;
     EquationType* _eqs;
-    std::vector<FemVariable*> _variables;
 };
 
 } //end

@@ -11,6 +11,9 @@
 #include <vector>
 #include <string>
 
+namespace ogs5
+{
+
 class COutput;
 
 /**
@@ -24,5 +27,7 @@ bool OUTRead(const std::string& file_base_name,
 		 std::vector<COutput*> &out_vector);
 
 #define OUT_FILE_EXTENSION ".out"
+
+}
 
 #endif

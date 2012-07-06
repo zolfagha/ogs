@@ -12,6 +12,9 @@
 #include <iostream>
 #include <vector>
 
+namespace ogs5
+{
+
 class COutput : public ProcessInfo, public DistributionInfo
 {
 public:
@@ -88,4 +91,6 @@ private:
 	// PCON values
 	std::vector<std::string> _pcon_value_vector;
 };
+
+}
 #endif // OUTPUT_H

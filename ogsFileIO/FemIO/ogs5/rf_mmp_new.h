@@ -22,6 +22,8 @@
 
 // PCSLib
 //#include "rf_pcs.h"
+namespace ogs5
+{
 
 class CMediumProperties
 {
@@ -67,7 +69,7 @@ public:
 	double flowlinearity_model_values[10];
 	int storage_model;                    // storativity
 	double storage_model_values[10];
-	double storage;
+	//double storage;
 	int conductivity_model;
 	double conductivity;
 	int unconfined_flow_group;
@@ -141,4 +143,7 @@ public:
 extern bool MMPRead(const std::string&, std::vector<CMediumProperties*> &mmp_vector);
 
 #define MMP_FILE_EXTENSION ".mmp"
+
+}
+
 #endif

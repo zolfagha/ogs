@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+namespace ogs5
+{
 
 class CFluidProperties
 {
@@ -93,5 +95,6 @@ public:
 
 bool MFPRead(const std::string&, std::vector<CFluidProperties*>&);
 #define MFP_FILE_EXTENSION ".mfp"
+}
 
 #endif

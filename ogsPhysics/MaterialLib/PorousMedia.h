@@ -3,7 +3,6 @@
 
 #include "BaseLib/CodingTools.h"
 
-#include "Solid.h"
 
 namespace NumLib
 {
@@ -16,17 +15,28 @@ namespace MaterialLib
 struct PorousMedia
 {
 	NumLib::ITXFunction* hydraulic_conductivity;
+	NumLib::ITXFunction* permeability;
 	NumLib::ITXFunction* porosity;
 	NumLib::ITXFunction* storage;
-	Solid* solidphase;
 
 	PorousMedia()
 	{
-		BaseLib::zeroObject(hydraulic_conductivity, porosity, storage, solidphase);
+		BaseLib::zeroObject(
+				hydraulic_conductivity,
+				permeability,
+				porosity,
+				storage
+				);
 	}
+
 	~PorousMedia()
 	{
-		BaseLib::releaseObject(hydraulic_conductivity, porosity, storage);
+		BaseLib::releaseObject(
+				hydraulic_conductivity,
+				permeability,
+				porosity,
+				storage
+				);
 	}
 };
 

@@ -20,6 +20,7 @@ public:
     virtual ~AbstractTimeStepFunction() {};
     double getBeginning() const {return _t0;};
     double getEnd() const {return _tn;};
+    void setEnd(double t) {_tn = t;};
     void accept()
     {
         _t_previous = _t_next;
@@ -31,6 +32,7 @@ public:
         _t_next = suggestNext(t_current);
         return _t_next;
     }
+    size_t getStep() const {return _steps;};
 
 protected:
     virtual double suggestNext(double t_current) = 0;

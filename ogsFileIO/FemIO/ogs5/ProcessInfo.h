@@ -10,6 +10,9 @@
 
 // FEM
 #include "FEMEnums.h"
+
+namespace ogs5
+{
 class CRFProcess;
 
 /**
@@ -91,4 +94,5 @@ protected:
 	 */
 	CRFProcess* _pcs;
 };
+}
 #endif                                            /* PROCESSINFO_H_ */

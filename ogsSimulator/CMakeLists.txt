@@ -22,7 +22,11 @@ ADD_LIBRARY( ogsSimulator STATIC
 )
 
 target_link_libraries( ogsSimulator
+    ogsGeometry
+    ogsMesh
+    ogsNumerics
     ogsFileIO
+    ogsProcess
 )
 
 SET_TARGET_PROPERTIES(ogsSimulator PROPERTIES LINKER_LANGUAGE CXX)

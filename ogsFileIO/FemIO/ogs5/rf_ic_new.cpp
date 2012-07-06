@@ -21,6 +21,8 @@
 
 using namespace std;
 
+namespace ogs5
+{
 
 /**************************************************************************
    FEMLib-Method:
@@ -252,4 +254,4 @@ ios::pos_type CInitialCondition::Read(std::ifstream* ic_file)
 	}                                     // Schleife ueber alle Phasen bzw. Komponenten
 	return position;
 }
-
+}

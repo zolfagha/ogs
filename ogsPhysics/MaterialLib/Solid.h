@@ -1,15 +1,38 @@
 
 #pragma once
 
+#include "BaseLib/CodingTools.h"
+#include "NumLib/Function/TXFunction.h"
+
 namespace MaterialLib
 {
 
 struct Solid
 {
-	double density;
-	double thermal_expansion;
-	double poisson_ratio;
-	double Youngs_modulus;
+	NumLib::ITXFunction* density;
+	NumLib::ITXFunction* thermal_expansion;
+	NumLib::ITXFunction* poisson_ratio;
+	NumLib::ITXFunction* Youngs_modulus;
+
+
+	Solid()
+	{
+		BaseLib::zeroObject(
+				density,
+				thermal_expansion,
+				poisson_ratio,
+				Youngs_modulus
+				);
+	}
+	~Solid()
+	{
+		BaseLib::releaseObject(
+				density,
+				thermal_expansion,
+				poisson_ratio,
+				Youngs_modulus
+				);
+	}
 };
 
 inline void calculateLameConstant(const double nv, const double E, double &Lambda, double &G, double &K)

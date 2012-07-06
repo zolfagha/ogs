@@ -12,13 +12,14 @@
 #include "BaseLib/CodingTools.h"
 #include "BaseLib/FileTools.h"
 #include "GeoLib/GEOObjects.h"
-#include "ProcessLib/ProcessBuilder.h"
 #include "GeoIO/Ogs4GeoIO.h"
 #include "MeshIO/Ogs5MeshIO.h"
 #include "FemIO/ogs5/Ogs5FemIO.h"
 
+#include "ProcessBuilder.h"
 #include "FormatterCustom.h"
 #include "SimulationInfo.h"
+#include "Ogs5ToOgs6.h"
 
 namespace ogs6
 {
@@ -147,8 +148,8 @@ int OgsSimulator::execute()
 	// Read files
 	//-------------------------------------------------------------------------
 	// fem
-	Ogs5FemIO ogs5data;
-	ogs5data.read(_sim_info->getProjectPath());
+	ogs5::Ogs5FemData ogs5femdata;
+	ogs5femdata.read(_sim_info->getProjectPath());
 
 	// gli
 	std::string geo_unique_name;
@@ -159,15 +160,23 @@ int OgsSimulator::execute()
 	// mesh
 	std::vector<MeshLib::IMesh*> msh_vector;
 	Ogs5MeshIO::readMesh(_sim_info->getProjectPath()+".msh", msh_vector);
-	
+	if (msh_vector.size()==0) {
+		LOGOG_CERR << " Error: Cannot find mesh " << _sim_info->getProjectPath()+".msh" << std::endl;
+		return -1;
+	}
+
 	// ddc
 	
 	//-------------------------------------------------------------------------
 	// Setup simulation
 	//-------------------------------------------------------------------------
-	// - construct mesh
+	MeshLib::IMesh* msh = msh_vector[0];
+    DiscreteLib::DiscreteSystem dis(*msh);
 	// - create pcs
+	Ogs5ToOgs6::convert(ogs5femdata, geo, geo_unique_name, dis);
 	// - ddc
+
+
 
 	
 	//-------------------------------------------------------------------------

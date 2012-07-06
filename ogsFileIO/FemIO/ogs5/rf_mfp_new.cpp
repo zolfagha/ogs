@@ -21,6 +21,9 @@
 //
 using namespace std;
 
+namespace ogs5
+{
+
 /* Umrechnungen SI - Amerikanisches System */
 //WW #include "steam67.h"
 //#define PSI2PA 6895.
@@ -532,5 +535,5 @@ bool MFPRead(const std::string &file_base_name, std::vector<CFluidProperties*> &
 	return true;
 }
 
-
+}
 

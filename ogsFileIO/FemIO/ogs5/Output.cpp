@@ -17,6 +17,9 @@
 
 using namespace std;
 
+namespace ogs5
+{
+
 COutput::COutput() :
 	ProcessInfo(), _id(0), out_amplifier(0.0),
 	nSteps(-1), _new_file_opened(false), dat_type_name("TECPLOT")
@@ -379,3 +382,4 @@ ios::pos_type COutput::Read(std::ifstream& in_str)
 	return position;
 }
 
+}

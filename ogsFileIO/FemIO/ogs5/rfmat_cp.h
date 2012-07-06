@@ -20,6 +20,9 @@
 
 #define CP_FILE_EXTENSION ".mcp"                  /* File extension for component properties input file */
 
+namespace ogs5
+{
+
 /*************************************************************************
 
    Class ComponentProperties
@@ -86,4 +89,7 @@ private:
 };
 
 extern bool CPRead(const std::string &file_base_name, std::vector<CompProperties*> &cp_vec);
+
+}
+
 #endif

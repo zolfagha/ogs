@@ -9,6 +9,9 @@
 #include <cstdlib>
 #include <iostream>
 
+namespace ogs5
+{
+
 namespace FiniteElement
 {
 ProcessType convertProcessType ( const std::string& pcs_type_string )
@@ -392,3 +395,4 @@ ErrorMethod convertErrorMethod(const std::string& error_method_string)
 }
 
 } // end namespace FiniteElement
+}

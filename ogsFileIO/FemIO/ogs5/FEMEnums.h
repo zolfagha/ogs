@@ -11,6 +11,9 @@
 #include <string>
 #include <list>
 
+namespace ogs5
+{
+
 namespace FiniteElement
 {
 /** \brief Types of physical processes supported by OpenGeoSys.
@@ -231,4 +234,5 @@ ErrorMethod convertErrorMethod ( const std::string& error_method_string );
 
 } // end namespace FiniteElement
 
+}
 #endif                                            //FEMENUMS_H

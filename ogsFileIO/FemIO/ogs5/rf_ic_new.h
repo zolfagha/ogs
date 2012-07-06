@@ -19,6 +19,9 @@
 #include "DistributionInfo.h"                     // TF
 #include "ProcessInfo.h"                          // KR
 
+namespace ogs5
+{
+
 /**
  * class for handling initial conditions
  */
@@ -52,5 +55,6 @@ public:
 
 
 bool ICRead(const std::string& file_base_name, std::vector<CInitialCondition*> &ic_vector);
+}
 
 #endif

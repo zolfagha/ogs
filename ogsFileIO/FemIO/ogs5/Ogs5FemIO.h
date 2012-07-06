@@ -4,24 +4,27 @@
 #include <string>
 #include <vector>
 
-class CRFProcess;
-class CFluidProperties;
-class CompProperties;
-class CBoundaryCondition;
-class CSourceTerm;
-class CInitialCondition;
-class COutput;
-class CTimeDiscretization;
-class CSolidProperties;
-class CMediumProperties;
-class CNumerics;
+#include "rf_pcs.h"
+#include "rf_mfp_new.h"
+#include "rfmat_cp.h"
+#include "rf_bc_new.h"
+#include "rf_st_new.h"
+#include "rf_ic_new.h"
+#include "rf_out_new.h"
+#include "rf_tim_new.h"
+#include "rf_msp_new.h"
+#include "rf_mmp_new.h"
+#include "rf_num_new.h"
 
-class Ogs5FemIO
+namespace ogs5
+{
+
+class Ogs5FemData
 {
 
 public:
-	Ogs5FemIO() {};
-	~Ogs5FemIO();
+	Ogs5FemData() {};
+	~Ogs5FemData();
 	void read(const std::string &proj_path);
 
 public:
@@ -38,3 +41,4 @@ public:
 	std::vector<CNumerics*>num_vector;
 };
 
+}

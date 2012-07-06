@@ -21,7 +21,7 @@ class FemDirichletBC
 {
 public:
     ///
-    FemDirichletBC(MeshLib::IMesh* msh, GeoLib::GeoObject* geo, NumLib::ITXFunction* bc_func)
+    FemDirichletBC(MeshLib::IMesh* msh, const GeoLib::GeoObject* geo, NumLib::ITXFunction* bc_func)
     {
         _msh = msh;
         _geo = geo;
@@ -52,7 +52,7 @@ public:
 
 private:
     MeshLib::IMesh* _msh;
-    GeoLib::GeoObject* _geo;
+    const GeoLib::GeoObject* _geo;
     NumLib::ITXFunction* _bc_func;
     std::vector<size_t> _vec_nodes;
     std::vector<double> _vec_values;

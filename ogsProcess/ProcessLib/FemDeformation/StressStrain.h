@@ -16,17 +16,17 @@ using namespace NumLib;
 namespace Geo
 {
 
-class FunctionVelocity
+class FunctionStressStrain
 	: public NumLib::TemplateTransientMonolithicSystem
 {
-    enum In { Head=0 };
-    enum Out { Velocity=0 };
+    enum In { u_x=0, u_y=1 };
+    enum Out { strain_xx=0, strain_yy=1, strain_zz=2, strain_xy=3, stress_xx=4, stress_yy=5, stress_xy=6};
 public:
 
-    FunctionVelocity() 
+    FunctionStressStrain()
     {
-        TemplateTransientMonolithicSystem::resizeInputParameter(1);
-        TemplateTransientMonolithicSystem::resizeOutputParameter(1);
+        TemplateTransientMonolithicSystem::resizeInputParameter(2);
+        TemplateTransientMonolithicSystem::resizeOutputParameter(7);
     };
 
     void define(DiscreteLib::DiscreteSystem &dis, PorousMedia &pm)
@@ -39,6 +39,7 @@ public:
 
     int solveTimeStep(const TimeStep &/*time*/)
     {
+#if 0
         const MeshLib::IMesh *msh = _dis->getMesh();
         FemLib::FemNodalFunctionScalar *head = (FemLib::FemNodalFunctionScalar*)getInput(Head);
         FemLib::FEMIntegrationPointFunctionVector *vel = _vel;;
@@ -90,6 +91,7 @@ public:
             }
         }
         setOutput(Velocity, vel);
+#endif
         return 0;
     }
 
@@ -110,11 +112,12 @@ public:
     };
 
 private:
+    DISALLOW_COPY_AND_ASSIGN(FunctionStressStrain);
+
+private:
     DiscreteLib::DiscreteSystem* _dis;
     FemLib::FEMIntegrationPointFunctionVector* _vel;
     NumLib::ITXFunction* _K;
-
-    DISALLOW_COPY_AND_ASSIGN(FunctionVelocity);
 };
 
 }

@@ -12,6 +12,9 @@
 #include "ProcessIO.h"
 #include "readNonBlankLineFromInputStream.h"
 
+namespace ogs5
+{
+
 namespace FileIO
 {
 bool ProcessIO::readProcessInfo (std::istream& in_str, FiniteElement::ProcessType& pcs_type)
@@ -24,5 +27,6 @@ bool ProcessIO::readProcessInfo (std::istream& in_str, FiniteElement::ProcessTyp
 		return false;
 	else
 		return true;
+}
 }
 }

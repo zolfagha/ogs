@@ -21,16 +21,19 @@ INCLUDE_DIRECTORIES(
         ../ogsMesh
         ../ogsNumerics
         ../ogsPhysics
+        ../ogsSimulator
         ../ogsProcess
         ../ogsFileIO
-        ../ogsSimulator
 )
 
 
 ## Create the library
 ADD_EXECUTABLE( ogs6 ${CUI_Files})
 TARGET_LINK_LIBRARIES( ogs6 
-    ogsFileIO
+#    ogsGeometry
+#    ogsMesh
+ #   ogsNumerics
+#    ogsFileIO
     ogsProcess
     ogsSimulator
     logog

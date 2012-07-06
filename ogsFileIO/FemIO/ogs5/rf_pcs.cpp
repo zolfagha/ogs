@@ -16,6 +16,8 @@
 
 using namespace std;
 
+namespace ogs5
+{
 
 /**************************************************************************
    FEMLib-Method:
@@ -377,4 +379,4 @@ std::ios::pos_type CRFProcess::Read(std::ifstream* pcs_file)
 	//----------------------------------------------------------------------
 	return position;
 }
-
+}

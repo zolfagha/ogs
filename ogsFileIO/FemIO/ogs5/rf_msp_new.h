@@ -16,11 +16,11 @@
 
 #define MSP_FILE_EXTENSION ".msp"
 
-namespace Math_Group
-{class Matrix;
-}
+#include "matrix_class.h"
 
-    using Math_Group::Matrix;
+namespace ogs5
+{
+
 /*---------------------------------------------------------------*/
 class CSolidProperties
 {
@@ -37,7 +37,7 @@ public:
 	int Youngs_mode;
 	int excavation;                       //12.2009. WW
 	bool excavated;                       //12.2009. To be ..... WW
-	Matrix* data_Youngs;
+	Math_Group::Matrix* data_Youngs;
 	double ThermalExpansion;
 	//
 	double s_tol;                         //16.06.2008 WW
@@ -46,13 +46,13 @@ public:
 	int bishop_model;                     //05.2011 WX
 	double bishop_model_value;            //05.2011 WX
 	double grav_const;                    //WW
-	Matrix* data_Density;
+	Math_Group::Matrix* data_Density;
 	//
-	Matrix* data_Capacity;
-	Matrix* data_Conductivity;
+	Math_Group::Matrix* data_Capacity;
+	Math_Group::Matrix* data_Conductivity;
 	//
-	Matrix* data_Plasticity;
-	Matrix* data_Creep;
+	Math_Group::Matrix* data_Plasticity;
+	Math_Group::Matrix* data_Creep;
 	//
 	int Density_mode;
 	//
@@ -83,17 +83,17 @@ public:
 	double K;                             // Bulk modulus
 
 	// Rotation matrices and their transpose: UJG 25.11.2009
-	Matrix* Crotm;                        // If this is needed by permaebility calculation, we keep it. Otherwise remove it. (To do, UJG/WW)
-	Matrix* D_tran;
+	Math_Group::Matrix* Crotm;                        // If this is needed by permaebility calculation, we keep it. Otherwise remove it. (To do, UJG/WW)
+	Math_Group::Matrix* D_tran;
 
 	// Plasticity
 	double dl2;
 	// 2. Single yield surface
-	Matrix* d2G_dSdS;
-	Matrix* d2G_dSdM;
-	Matrix* LocalJacobi;                  // To store local Jacobi matrix
-	Matrix* inv_Jac;                      // To store the inverse of the  Jacobi matrix
-	Matrix* sumA_Matrix;
+	Math_Group::Matrix* d2G_dSdS;
+	Math_Group::Matrix* d2G_dSdM;
+	Math_Group::Matrix* LocalJacobi;                  // To store local Jacobi matrix
+	Math_Group::Matrix* inv_Jac;                      // To store the inverse of the  Jacobi matrix
+	Math_Group::Matrix* sumA_Matrix;
 	double* rhs_l;                        // To store local unknowns of 15
 	double* x_l;                          // To store local unknowns of 15
 	int* Li;
@@ -106,7 +106,7 @@ public:
 	double* D_dGds;
 	double* dFtds;                        //WX: 08.2010
 	double* dGtds;                        //WX: 08.2010
-	Matrix* ConstitutiveMatrix;           //WX: 08.2010
+	Math_Group::Matrix* ConstitutiveMatrix;           //WX: 08.2010
 	// Thermal properties
 	int thermal_conductivity_tensor_type;
 	int thermal_conductivity_tensor_dim;
@@ -147,5 +147,6 @@ public:
 };
 
 extern bool MSPRead(const std::string &file_base_name, std::vector<CSolidProperties*> &msp_vector);
+}
 
 #endif
