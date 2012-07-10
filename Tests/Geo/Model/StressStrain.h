@@ -17,7 +17,7 @@ namespace Geo
 {
 
 class FunctionStressStrain
-	: public NumLib::TemplateTransientMonolithicSystem
+	: public NumLib::AbstractTransientMonolithicSystem
 {
     enum In { u_x=0, u_y=1 };
     enum Out { strain_xx=0, strain_yy=1, strain_zz=2, strain_xy=3, stress_xx=4, stress_yy=5, stress_xy=6};
@@ -25,8 +25,8 @@ public:
 
     FunctionStressStrain()
     {
-        TemplateTransientMonolithicSystem::resizeInputParameter(2);
-        TemplateTransientMonolithicSystem::resizeOutputParameter(7);
+        AbstractTransientMonolithicSystem::resizeInputParameter(2);
+        AbstractTransientMonolithicSystem::resizeOutputParameter(7);
     };
 
     void define(DiscreteLib::DiscreteSystem &dis, PorousMedia &pm)

@@ -1,24 +1,25 @@
 
 #pragma once
 
+#include "BaseLib/Options.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
-#include "SolutionLib/Solution/SingleStepFEM.h"
+#include "SolutionLib/Solution/AbstractTimeSteppingAlgorithm.h"
+#include "Process.h"
 
-namespace SolutionLib
+namespace ProcessLib
 {
 
 template <
 	size_t N_IN_PARAMETER,
 	size_t N_OUT_PARAMETER
 	>
-class AbstractTransientFemFunction
-: public NumLib::AbstractTransientMonolithicSystem
+class TemplateTransientProcess : public Process
 {
 public:
-    AbstractTransientFemFunction()
+	TemplateTransientProcess()
     {
-        AbstractTransientMonolithicSystem::resizeInputParameter(N_IN_PARAMETER);
-        AbstractTransientMonolithicSystem::resizeOutputParameter(N_OUT_PARAMETER);
+		AbstractTransientMonolithicSystem::resizeInputParameter(N_IN_PARAMETER);
+		AbstractTransientMonolithicSystem::resizeOutputParameter(N_OUT_PARAMETER);
     }
 
     int solveTimeStep(const NumLib::TimeStep &time)
@@ -38,8 +39,9 @@ public:
     };
 
 protected:
-    virtual AbstractTimeSteppingAlgorithm* getSolution() = 0;
+    virtual SolutionLib::AbstractTimeSteppingAlgorithm* getSolution() = 0;
     virtual void updateOutput() = 0;
 };
 
 }
+

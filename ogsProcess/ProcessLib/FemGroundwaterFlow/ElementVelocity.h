@@ -10,6 +10,7 @@
 #include "SolutionLib/FemProblem/AbstractTimeIndependentFemFunction.h"
 
 #include "ProcessBuilder.h"
+#include "TemplateTimeIndependentProcess.h"
 
 namespace Geo
 {
@@ -18,7 +19,7 @@ namespace Geo
 // Function definition
 //--------------------------------------------------------------------------------------------------
 class FunctionElementVelocity
-	: public SolutionLib::AbstractTimeIndependentFemFunction<1,1>
+	: public ProcessLib::TemplateTimeIndependentProcess<1,1> //SolutionLib::AbstractTimeIndependentFemFunction<1,1>
 {
     enum In { Head=0 };
     enum Out { Velocity=0 };
@@ -32,12 +33,19 @@ public:
     virtual ~FunctionElementVelocity() {};
 
 
-    void define(DiscreteLib::DiscreteSystem &dis, MaterialLib::PorousMedia &pm)
+    virtual void initialize(const BaseLib::Options &op)
     {
-    	_dis = &dis;
-    	_K = pm.hydraulic_conductivity;
-        _vel = new FemLib::FEMIntegrationPointFunctionVector(dis);
+    	DiscreteLib::DiscreteSystem* dis;
+    	MaterialLib::PorousMedia* pm;
+    	_dis = dis;
+    	_K = pm->hydraulic_conductivity;
+        _vel = new FemLib::FEMIntegrationPointFunctionVector(*dis);
         //this->setOutput(Velocity, _vel);
+    }
+
+    virtual void finalize()
+    {
+
     }
 
     int solveTimeStep(const NumLib::TimeStep &/*time*/)

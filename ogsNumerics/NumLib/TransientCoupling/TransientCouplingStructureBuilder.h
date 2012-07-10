@@ -15,7 +15,7 @@ namespace NumLib
 typedef class NumLib::TemplateCouplingStrucutreBuilder
 	<
 	ITransientCoupledSystem,
-	TemplateTransientMonolithicSystem,
+	AbstractTransientMonolithicSystem,
 	AsyncPartitionedSystem,
 	NumLib::TransientPartitionedAlgorithmFactory
 	> TransientCoulplingStrucutreBuilder;

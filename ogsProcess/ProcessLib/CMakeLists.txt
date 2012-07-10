@@ -38,4 +38,3 @@ FOREACH(dir ${List_subdir})
 	SOURCE_GROUP( ogsProcess\\ProcessLib\\${dir} FILES ${TempProcessLib_Files} )
 	LIST(APPEND ProcessLib_Files ${TempProcessLib_Files}) 
 ENDFOREACH()
-

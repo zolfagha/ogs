@@ -60,7 +60,7 @@ typedef FdmLib::FdmIVBVProblem
 template <
 	class T_LINEAR_SOLVER
 	>
-class FunctionHead : public NumLib::TemplateTransientMonolithicSystem
+class FunctionHead : public NumLib::AbstractTransientMonolithicSystem
 {
     enum Out { Head=0 };
 public:
@@ -72,7 +72,7 @@ public:
 
     FunctionHead()
     {
-        TemplateTransientMonolithicSystem::resizeOutputParameter(1);
+        AbstractTransientMonolithicSystem::resizeOutputParameter(1);
     };
 
     void define(DiscreteLib::DiscreteSystem* dis, GWFdmProblem* problem, BaseLib::Options &option)
@@ -113,7 +113,7 @@ private:
 };
 
 class FunctionFdmVelocity
-	: public NumLib::TemplateTransientMonolithicSystem
+	: public NumLib::AbstractTransientMonolithicSystem
 {
     enum In { Head=0 };
     enum Out { Velocity=0 };
@@ -121,8 +121,8 @@ public:
 
     FunctionFdmVelocity()
     {
-        TemplateTransientMonolithicSystem::resizeInputParameter(1);
-        TemplateTransientMonolithicSystem::resizeOutputParameter(1);
+        AbstractTransientMonolithicSystem::resizeInputParameter(1);
+        AbstractTransientMonolithicSystem::resizeOutputParameter(1);
     };
 
     void define(DiscreteLib::DiscreteSystem &dis, Geo::PorousMedia &pm)

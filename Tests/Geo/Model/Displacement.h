@@ -42,7 +42,7 @@ typedef FemIVBVProblem< FemLinearElasticEquation > FemLinearElasticProblem;
 template <
 	class T_LINEAR_SOLVER
 	>
-class FunctionDisplacement : public TemplateTransientMonolithicSystem
+class FunctionDisplacement : public AbstractTransientMonolithicSystem
 {
     enum Out { u_x=0, u_y=1, Strain=2, Stress=3 };
 public:
@@ -54,7 +54,7 @@ public:
 
     FunctionDisplacement()
     {
-        TemplateTransientMonolithicSystem::resizeOutputParameter(4);
+        AbstractTransientMonolithicSystem::resizeOutputParameter(4);
     };
 
     void define(DiscreteSystem* dis, FemLinearElasticProblem* problem_u, Geo::PorousMedia* pm, BaseLib::Options &option)

@@ -1,20 +1,22 @@
 
 #pragma once
 
+#include "BaseLib/Options.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
+#include "Process.h"
 
-namespace SolutionLib
+namespace ProcessLib
 {
 
 template <
 	size_t N_IN_PARAMETER,
 	size_t N_OUT_PARAMETER
 	>
-class AbstractTimeIndependentFemFunction
-: public NumLib::AbstractTransientMonolithicSystem
+class TemplateTimeIndependentProcess
+: public Process
 {
 public:
-	AbstractTimeIndependentFemFunction()
+	TemplateTimeIndependentProcess()
     {
         AbstractTransientMonolithicSystem::resizeInputParameter(N_IN_PARAMETER);
         AbstractTransientMonolithicSystem::resizeOutputParameter(N_OUT_PARAMETER);
@@ -27,5 +29,5 @@ public:
     virtual void accept(const NumLib::TimeStep &/*time*/) {};
 
 };
-
 }
+

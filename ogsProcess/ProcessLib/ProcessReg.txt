@@ -1,0 +1,3 @@
+
+OGS_ADD_PROCESS(GROUNDWATER_FLOW, FunctionHead);
+OGS_ADD_PROCESS(ELEMENT_VELOCITY, Geo::FunctionElementVelocity);

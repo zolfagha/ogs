@@ -32,7 +32,7 @@ typedef FemIVBVProblem< MassFemEquation > MassFemProblem;
 template <
 	class T_LINEAR_SOLVER
 	>
-class FunctionConcentration : public NumLib::TemplateTransientMonolithicSystem
+class FunctionConcentration : public NumLib::AbstractTransientMonolithicSystem
 {
     enum In { Velocity=0 };
     enum Out { Concentration = 0 };
@@ -46,8 +46,8 @@ public:
 
     FunctionConcentration() 
     {
-        TemplateTransientMonolithicSystem::resizeInputParameter(1);
-        TemplateTransientMonolithicSystem::resizeOutputParameter(1);
+        AbstractTransientMonolithicSystem::resizeInputParameter(1);
+        AbstractTransientMonolithicSystem::resizeOutputParameter(1);
     };
 
     void define(DiscreteLib::DiscreteSystem* dis, MassFemProblem* problem, BaseLib::Options &option)

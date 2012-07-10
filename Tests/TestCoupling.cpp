@@ -497,7 +497,7 @@ TEST(Coupling, SteadyCouplingSeidel)
 // 3a + 5b + .2c = 13.6*t
 // .5a + .3b + 3c = 10.1*t
 // A. a=t, b=2*t, c=3*t
-class TransientWeakCouplingEQS1 : public TemplateTransientMonolithicSystem
+class TransientWeakCouplingEQS1 : public AbstractTransientMonolithicSystem
 {
     double _dt;
     enum In {b=0, c=1};
@@ -543,7 +543,7 @@ public:
     void accept(const TimeStep &/*time*/) {};
 };
 
-class TransientWeakCouplingEQS2 :  public TemplateTransientMonolithicSystem
+class TransientWeakCouplingEQS2 :  public AbstractTransientMonolithicSystem
 {
     double _dt;
     enum In {a=0, c=1};
@@ -590,7 +590,7 @@ public:
     void accept(const TimeStep &/*time*/) {};
 };
 
-class TransientWeakCouplingEQS3 : public TemplateTransientMonolithicSystem
+class TransientWeakCouplingEQS3 : public AbstractTransientMonolithicSystem
 {
     double _dt;
     enum In {a=0, b=1};
@@ -752,7 +752,7 @@ public:
 		_dt3 = dt3;
 	};
 
-	TemplateTransientMonolithicSystem* create(const std::string &eqs_name)
+	AbstractTransientMonolithicSystem* create(const std::string &eqs_name)
 	{
 		if (eqs_name.compare("EQS1")==0) {
 			return new TransientWeakCouplingEQS1(_dt1);

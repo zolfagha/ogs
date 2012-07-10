@@ -40,7 +40,7 @@ typedef FemIVBVProblem< GWFemEquation > GWFemProblem;
 template <
 	class T_LINEAR_SOLVER
 	>
-class FunctionHead : public TemplateTransientMonolithicSystem
+class FunctionHead : public AbstractTransientMonolithicSystem
 {
     enum Out { Head=0 };
 public:
@@ -52,7 +52,7 @@ public:
 
     FunctionHead() 
     {
-        TemplateTransientMonolithicSystem::resizeOutputParameter(1);
+        AbstractTransientMonolithicSystem::resizeOutputParameter(1);
     };
 
     void define(DiscreteSystem* dis, GWFemProblem* problem, BaseLib::Options &option)
