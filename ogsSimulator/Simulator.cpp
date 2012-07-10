@@ -20,6 +20,7 @@
 #include "FormatterCustom.h"
 #include "SimulationInfo.h"
 #include "Ogs5ToOgs6.h"
+#include "SimulationProperties.h"
 
 namespace ogs6
 {
@@ -130,13 +131,13 @@ bool OgsSimulator::checkInputFiles(const std::string& proj_path)
 	std::string proj_name;
 
 	std::string tmpFilename = proj_path;
-	tmpFilename.append(".pcs");
+	tmpFilename.append(".xml");
 	if(!BaseLib::IsFileExisting(tmpFilename))
 	{
 		LOGOG_CERR << " Error: Cannot find file " << proj_path << std::endl;
 		return 1;
 	}
-
+	
 	return true;
 }
 
@@ -147,6 +148,9 @@ int OgsSimulator::execute()
 	//-------------------------------------------------------------------------
 	// Read files
 	//-------------------------------------------------------------------------
+	BaseLib::Options op;
+	readSimulationProperties(_sim_info->getProjectPath()+".xml", op);
+
 	// fem
 	ogs5::Ogs5FemData ogs5femdata;
 	ogs5femdata.read(_sim_info->getProjectPath());
