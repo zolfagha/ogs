@@ -15,6 +15,7 @@ INCLUDE_DIRECTORIES(
         ../ogsFileIO
         ../ogsProcess
         ../extra/Eigen
+        ../extra/tinyxml2
 )
 
 ADD_LIBRARY( ogsSimulator STATIC 
@@ -27,6 +28,7 @@ target_link_libraries( ogsSimulator
     ogsNumerics
     ogsFileIO
     ogsProcess
+    tinyxml2
 )
 
 SET_TARGET_PROPERTIES(ogsSimulator PROPERTIES LINKER_LANGUAGE CXX)

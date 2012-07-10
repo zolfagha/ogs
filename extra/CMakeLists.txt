@@ -1,5 +1,6 @@
 # Add logog subdirectory and group its targets in a Visual Studio folder
 ADD_SUBDIRECTORY(logog)
+ADD_SUBDIRECTORY(tinyxml2)
 SET_PROPERTY(TARGET Continuous PROPERTY FOLDER "logog")
 SET_PROPERTY(TARGET logog PROPERTY FOLDER "logog")
 IF (DOXYGEN_FOUND)
