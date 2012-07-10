@@ -36,6 +36,6 @@ FOREACH(dir ${List_subdir})
     ENDIF()
 	FILE(GLOB TempProcessLib_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ProcessLib/${dir}/*.h ProcessLib/${dir}/*.cpp)
 	SOURCE_GROUP( ogsProcess\\ProcessLib\\${dir} FILES ${TempProcessLib_Files} )
-	LIST(APPEND ProcessLib ${TempProcessLib_Files}) 
+	LIST(APPEND ProcessLib_Files ${TempProcessLib_Files}) 
 ENDFOREACH()
 
