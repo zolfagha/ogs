@@ -11,8 +11,8 @@
 
 #include "GWTimeODELocalAssembler.h"
 #include "GWJacobianLocalAssembler.h"
-#include "ProcessBuilder.h"
-#include "TemplateTransientProcess.h"
+//#include "ProcessBuilder.h"
+#include "ProcessLib/TemplateTransientProcess.h"
 
 //namespace Geo
 //{
@@ -82,8 +82,8 @@ private:
     FemLib::LagrangianFeObjectContainer* _feObjects;
 
 
-public:
-    static ProcessLib::ProcessInfo* const _pcs_info;
+//public:
+//    static ProcessLib::ProcessInfo* const _pcs_info;
 };
 
 

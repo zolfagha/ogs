@@ -9,8 +9,8 @@
 #include "MaterialLib/PorousMedia.h"
 #include "SolutionLib/FemProblem/AbstractTimeIndependentFemFunction.h"
 
-#include "ProcessBuilder.h"
-#include "TemplateTimeIndependentProcess.h"
+//#include "ProcessBuilder.h"
+#include "ProcessLib/TemplateTimeIndependentProcess.h"
 
 namespace Geo
 {
@@ -117,12 +117,12 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(FunctionElementVelocity);
 
-public:
-    static ProcessLib::ProcessInfo* const _pcs_info;
+//public:
+//    static ProcessLib::ProcessInfo* const _pcs_info;
 };
 
 
 
 }
 
-OGS_PROCESS(ELEMENT_VELOCITY, Geo::FunctionElementVelocity);
+//OGS_PROCESS(ELEMENT_VELOCITY, Geo::FunctionElementVelocity);

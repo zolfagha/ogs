@@ -31,7 +31,7 @@ xml
 
  */
 
-bool readSimulationProperties(const std::string &xml_file, BaseLib::Options &properties)
+inline bool readSimulationProperties(const std::string &xml_file, BaseLib::Options &properties)
 {
 	tinyxml2::XMLDocument doc;
 	int ret = doc.LoadFile(xml_file.c_str());

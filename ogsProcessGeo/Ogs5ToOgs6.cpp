@@ -8,7 +8,7 @@
 #include "SolutionLib/FemProblem/FemDirichletBC.h"
 #include "SolutionLib/FemProblem/FemNeumannBC.h"
 #include "SolutionLib/FemProblem/AbstractFemIVBVProblem.h"
-#include "ProcessBuilder.h"
+#include "GeoProcessBuilder.h"
 
 using namespace ogs5;
 
@@ -192,7 +192,7 @@ void convert(const Ogs5FemData &ogs5fem, const GeoLib::GEOObjects &geo, const st
 	{
 		CRFProcess* rfpcs = ogs5fem.pcs_vector[i];
 		std::string pcs_name = FiniteElement::convertProcessTypeToString(rfpcs->getProcessType());
-		ProcessLib::Process* pcs6 = ProcessLib::ProcessBuilder::getInstance()->create(pcs_name);
+		ProcessLib::Process* pcs6 = GeoProcessBuilder::getInstance()->create(pcs_name);
 		list_pcs.push_back(pcs6);
 
 		if (pcs_name.find("GROUNDWATER_FLOW")!=std::string::npos) {

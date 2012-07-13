@@ -19,23 +19,14 @@ namespace ProcessLib
 /**
  * Singleton class
  */
-class ProcessBuilder
+class AbstractProcessBuilder
 {
-public:
-	/// get a global instance
-	static ProcessBuilder* getInstance();
-private:
-    static ProcessBuilder* _obj;
 
-private:
+protected:
 //#define PROCRSS_REGISTER
-#ifdef PROCRSS_REGISTER
-    ProcessBuilder() {};
-#else
-    ProcessBuilder();
-#endif
+    AbstractProcessBuilder() {};
 public:
-	virtual ~ProcessBuilder() {};
+	virtual ~AbstractProcessBuilder() {};
 
 	ProcessInfo* registerProcess(const std::string &pcs_name, ProcessFactoryBase* pcs_buid);
 
@@ -73,7 +64,7 @@ int link_##pcs_name = class_##pcs_name;
 #define OGS_DEF_PROCESS(pcs_name, pcs_classname)
 #define OGS_LINK_PROCESS(pcs_name, pcs_classname)
 #define OGS_ADD_PROCESS(pcs_name, pcs_classname)\
-		registerProcess(#pcs_name, new ProcessFactoryImpl<pcs_classname>);
+		registerProcess(#pcs_name, new ProcessLib::ProcessFactoryImpl<pcs_classname>);
 
 #endif
 

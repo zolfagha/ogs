@@ -1,11 +1,7 @@
 # Add subdirectories with the projects
 INCLUDE( ProcessLib/CMakeLists.txt )
 
-FILE(GLOB Util_Files *.h *.cpp)
-SOURCE_GROUP( ogsProcess FILES ${Util_Files} )
-
 ADD_LIBRARY( ogsProcess STATIC 
-    ${Util_Files}
 	${ProcessLib_Files}
 )
 
@@ -18,5 +14,6 @@ INCLUDE_DIRECTORIES(
         ../ogsMesh
         ../ogsNumerics
         ../ogsPhysics
+        ../ogsFileIO
         ../extra/Eigen
 )

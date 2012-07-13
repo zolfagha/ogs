@@ -2,6 +2,7 @@
 #include <iostream>
 #include <exception>
 #include "ogs6.h"
+#include "GeoProcessBuilder.h"
 
 int main ( int argc, char *argv[] )
 {
@@ -9,7 +10,7 @@ int main ( int argc, char *argv[] )
 	try {
 //		ogs6::ogsInit(argc, argv);
 
-		ogs6::OgsSimulator sim(argc, argv);
+		ogs6::OgsSimulator<GeoProcessBuilder> sim(argc, argv);
 		returncode = sim.execute();
 
 	} catch (char* e) {

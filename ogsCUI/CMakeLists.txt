@@ -16,6 +16,7 @@ INCLUDE_DIRECTORIES(
         .
         ../extra
         ../extra/Eigen
+        ../extra/tinyxml2
         ../ogsCore
         ../ogsGeometry
         ../ogsMesh
@@ -24,6 +25,7 @@ INCLUDE_DIRECTORIES(
         ../ogsSimulator
         ../ogsProcess
         ../ogsFileIO
+        ../ogsProcessGeo
 )
 
 
@@ -31,10 +33,11 @@ INCLUDE_DIRECTORIES(
 ADD_EXECUTABLE( ogs6 ${CUI_Files})
 TARGET_LINK_LIBRARIES( ogs6 
 #    ogsGeometry
-#    ogsMesh
+    ogsMesh
  #   ogsNumerics
 #    ogsFileIO
     ogsProcess
+    ogsProcessGeo
     ogsSimulator
     logog
     ${CMAKE_THREAD_LIBS_INIT}

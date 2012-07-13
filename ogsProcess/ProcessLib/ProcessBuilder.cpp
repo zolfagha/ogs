@@ -7,15 +7,7 @@
 namespace ProcessLib
 {
 
-ProcessBuilder* ProcessBuilder::_obj = 0;
-
-ProcessBuilder* ProcessBuilder::getInstance()
-{
-	if (_obj==0) _obj = new ProcessBuilder();
-	return _obj;
-}
-
-ProcessInfo* ProcessBuilder::registerProcess(const std::string &pcs_name, ProcessFactoryBase* pcs_buid)
+ProcessInfo* AbstractProcessBuilder::registerProcess(const std::string &pcs_name, ProcessFactoryBase* pcs_buid)
 {
 	this->_map_pcs_name2new[pcs_name] = pcs_buid;
 	ProcessInfo* pcs_info = new ProcessInfo();
@@ -23,12 +15,12 @@ ProcessInfo* ProcessBuilder::registerProcess(const std::string &pcs_name, Proces
 	return pcs_info;
 }
 
-bool ProcessBuilder::hasRegisterd(const std::string &pcs_name) const
+bool AbstractProcessBuilder::hasRegisterd(const std::string &pcs_name) const
 {
 	return _map_pcs_name2new.count(pcs_name)>0;
 }
 
-Process* ProcessBuilder::create(const std::string &pcs_name) const
+Process* AbstractProcessBuilder::create(const std::string &pcs_name) const
 {
 	if (!hasRegisterd(pcs_name)) return 0;
 
@@ -36,7 +28,7 @@ Process* ProcessBuilder::create(const std::string &pcs_name) const
 	return itr->second->createProcess();
 }
 
-void ProcessBuilder::output() const
+void AbstractProcessBuilder::output() const
 {
 	std::map<std::string, ProcessFactoryBase*>::const_iterator itr;
     LOGOG_COUT << _LG("List of available modules") << std::endl;

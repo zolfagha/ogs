@@ -31,6 +31,6 @@ void FunctionHead::initialize(const BaseLib::Options &option)
     this->setOutput(Head, _problem->getVariable(0)->getIC());
 }
 
-OGS_PROCESS(GROUNDWATER_FLOW, FunctionHead);
+//OGS_PROCESS(GROUNDWATER_FLOW, FunctionHead);
 
 //}
