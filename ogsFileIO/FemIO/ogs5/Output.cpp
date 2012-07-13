@@ -214,11 +214,8 @@ ios::pos_type COutput::Read(std::ifstream& in_str)
 		//subkeyword found
 		if (line_string.find("$GEO_TYPE") != string::npos)
 		{
-			//FileIO::GeoIO::readGeoInfo (this,
-			//                            in_str,
-			//                            geo_name,
-			//                            geo_obj,
-			//                            unique_geo_name);
+			in_str >> geo_type >> geo_name;
+			in_str.ignore(MAX_ZEILE, '\n');
 			continue;
 		}
 

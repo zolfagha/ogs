@@ -38,9 +38,6 @@ public:
 
     bool VARIABLESHARING;						 // Coordinates of each node as well as connection list is stored only for the first time step; BG: 05/2011 
 
-private:
-	friend void OUTData(double, int step, bool force_output);
-
 	std::vector<std::string> _nod_value_vector;
     std::vector<std::string> _alias_nod_value_vector;
 	// MAT values
@@ -72,6 +69,7 @@ private:
 	 * the id of the geometric object as string REMOVE CANDIDATE
 	 */
 	std::string geo_name;                 // TF 05/2010
+	std::string geo_type;
 
 	// File status
 	bool _new_file_opened;                //WW
