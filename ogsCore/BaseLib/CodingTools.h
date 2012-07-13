@@ -31,7 +31,7 @@ template <typename T>
 static void releaseObjectsInStdMap(T &object) 
 {
     if (object.size()>0) {
-        for (typename T::iterator itr=object.begin(); itr!=object.end(); itr++)
+        for (typename T::iterator itr=object.begin(); itr!=object.end(); ++itr)
             if (itr->second!=0) delete itr->second;
         object.clear();
     }
