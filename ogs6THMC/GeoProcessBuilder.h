@@ -1,17 +1,23 @@
 
 #pragma once
 
-#include "ProcessLib/ProcessBuilder.h"
+#include "ProcessLib/AbstractProcessBuilder.h"
 
+/**
+ * \brief Process builder for OGS6
+ *
+ * This class follows singleton pattern.
+ */
 class GeoProcessBuilder: public ProcessLib::AbstractProcessBuilder
 {
 public:
-	/// get a global instance
 	static ProcessLib::AbstractProcessBuilder* getInstance();
 private:
     static ProcessLib::AbstractProcessBuilder* _obj;
 
 public:
-	GeoProcessBuilder();
 	virtual ~GeoProcessBuilder() {};
+
+private:
+	GeoProcessBuilder();
 };

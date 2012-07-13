@@ -15,27 +15,31 @@
 namespace ProcessLib
 {
 
-
 /**
- * Singleton class
+ * \brief Abstract class for any process builder.
+ *
+ * Any subclass should follow singleton pattern.
  */
 class AbstractProcessBuilder
 {
-
-protected:
-//#define PROCRSS_REGISTER
-    AbstractProcessBuilder() {};
 public:
 	virtual ~AbstractProcessBuilder() {};
 
+	/// register a process to this builder
 	ProcessInfo* registerProcess(const std::string &pcs_name, ProcessFactoryBase* pcs_buid);
 
+	/// check if a process has been already registered
 	bool hasRegisterd(const std::string &pcs_name) const;
 
+	/// create the new instance of a specified process
+	/// @return return 0 if a process is not found
 	Process* create(const std::string &pcs_name) const;
 
+	/// list available processes to standard IO
 	void output() const;
 
+protected:
+    AbstractProcessBuilder() {}; // only called by sub classes
 
 private:
 	std::map<std::string, ProcessFactoryBase*> _map_pcs_name2new;
@@ -43,6 +47,7 @@ private:
 
 } //end
 
+//#define PROCRSS_REGISTER
 #ifdef PROCRSS_REGISTER
 
 #define OGS_PROCESS(pcs_name, pcs_classname)\

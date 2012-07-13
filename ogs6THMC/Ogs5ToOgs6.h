@@ -6,6 +6,7 @@
 #include "MaterialLib/PorousMedia.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "GeoLib/GEOObjects.h"
+#include "Ogs6FemData.h"
 
 namespace ogs6
 {
@@ -17,7 +18,7 @@ void convertSolidProperty(const ogs5::CSolidProperties &msp, MaterialLib::Solid 
 
 void convertPorousMediumProperty(const ogs5::CMediumProperties &mmp, MaterialLib::PorousMedia &pm);
 
-void convert(const ogs5::Ogs5FemData &ogs5fem, const GeoLib::GEOObjects &geo, const std::string &unique_geo_name, const DiscreteLib::DiscreteSystem &dis);
+void convert(const ogs5::Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options &option);
 
 };
 } //end

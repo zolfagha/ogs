@@ -9,7 +9,7 @@ ENDIF (CMAKE_USE_PTHREADS_INIT )
 
 # Source files
 FILE(GLOB CUI_Files *.h *.cpp)
-SOURCE_GROUP( ogsCUI FILES ${CUI_Files} )
+SOURCE_GROUP( ogs6CUI FILES ${CUI_Files} )
 
 
 INCLUDE_DIRECTORIES(
@@ -22,10 +22,9 @@ INCLUDE_DIRECTORIES(
         ../ogsMesh
         ../ogsNumerics
         ../ogsPhysics
-        ../ogsSimulator
         ../ogsProcess
         ../ogsFileIO
-        ../ogsProcessGeo
+        ../ogs6THMC
 )
 
 
@@ -37,8 +36,7 @@ TARGET_LINK_LIBRARIES( ogs6
  #   ogsNumerics
 #    ogsFileIO
     ogsProcess
-    ogsProcessGeo
-    ogsSimulator
+    ogs6THMC
     logog
     ${CMAKE_THREAD_LIBS_INIT}
     )

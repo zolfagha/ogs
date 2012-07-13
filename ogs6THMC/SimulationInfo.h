@@ -13,6 +13,9 @@
 namespace ogs6
 {
 
+/**
+ * \brief Simulation information
+ */
 class SimulationInfo
 {
 public:

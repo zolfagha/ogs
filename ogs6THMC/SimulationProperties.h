@@ -7,9 +7,8 @@
 #include "tinyxml2.h"
 
 #include "BaseLib/Options.h"
+#include "Ogs5ToOgs6.h"
 
-namespace ogs6
-{
 
 /*
 
@@ -81,5 +80,39 @@ inline bool readSimulationProperties(const std::string &xml_file, BaseLib::Optio
 	
 	return true;
 }
- 
-} 
+
+#if 0
+//inline void readOgs5(const std::string &input_path)
+inline int readOgs5(SimulationInfo &sim_info)
+{
+	// fem
+	ogs5::Ogs5FemData ogs5femdata;
+	ogs5femdata.read(sim_info.getProjectPath());
+
+	// gli
+	std::string geo_unique_name;
+	std::vector<std::string> geo_errors;
+	GeoLib::GEOObjects geo;
+	Ogs4GeoIO::readGLIFileV4(sim_info.getProjectPath()+".gli", &geo, geo_unique_name, geo_errors);
+
+	// mesh
+	std::vector<MeshLib::IMesh*> msh_vector;
+	Ogs5MeshIO::readMesh(sim_info.getProjectPath()+".msh", msh_vector);
+	if (msh_vector.size()==0) {
+		LOGOG_CERR << " Error: Cannot find mesh " << sim_info.getProjectPath()+".msh" << std::endl;
+		return -1;
+	}
+
+	// ddc
+
+	//-------------------------------------------------------------------------
+	// Setup simulation
+	//-------------------------------------------------------------------------
+	MeshLib::IMesh* msh = msh_vector[0];
+    DiscreteLib::DiscreteSystem dis(*msh);
+	// - create pcs
+	Ogs5ToOgs6::convert(ogs5femdata, geo, geo_unique_name, dis);
+	// - ddc
+}
+#endif
+

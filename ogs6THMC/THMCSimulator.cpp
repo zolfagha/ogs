@@ -1,17 +1,15 @@
 
-#pragma once
+#include "THMCSimulator.h"
 
-#include <string>
-#include <iostream>
-
-#include "logog/include/logog.hpp"
-#include "tclap/CmdLine.h"
+#ifdef USE_LIS
+#include "lis.h"
+#endif
 
 #include "BaseLib/CodingTools.h"
 #include "BaseLib/FileTools.h"
-#include "FormatterCustom.h"
 #include "SimulationInfo.h"
 #include "SimulationProperties.h"
+#include "Ogs6FemData.h"
 
 namespace ogs6
 {
@@ -19,43 +17,44 @@ namespace ogs6
 ////////////////////////////////////////////////////////////////////////////////
 // Variables
 ////////////////////////////////////////////////////////////////////////////////
-static FormatterCustom *custom_format;
 static logog::Cout *logogCout;
 static logog::LogFile *logog_file;
-
-static bool isOgsInitCalled;
-static bool isOgsExitCalled;
-
-//typedef GeoProcessBuilder ProcessBuilder;
+static FormatterCustom *custom_format;
+static bool isOgsInitCalled = false;
+static bool isOgsExitCalled = false;
 ////////////////////////////////////////////////////////////////////////////////
 
-void ogsInit(int argc, char* argv[]);
-
-void ogsExit();
-
-//class SimulationInfo;
-
-template <class T_PCS_BUILDER>
-class OgsSimulator
+void ogsInit(int argc, char* argv[])
 {
-public:
-	typedef T_PCS_BUILDER ProcessBuilder;
+	if (isOgsInitCalled) return;
+	isOgsInitCalled = true;
 
-	OgsSimulator(int argc, char* argv[]);
-	~OgsSimulator();
+    LOGOG_INITIALIZE();
+    custom_format = new FormatterCustom();
+    logogCout = new logog::Cout();
+    logogCout->SetFormatter(*custom_format);
+    logog_file = NULL;
 
-	int execute();
+#ifdef USE_LIS
+    lis_initialize(&argc, &argv);
+#endif
+}
 
-private:
-	bool checkInputFiles(const std::string& proj_path);
+void ogsExit()
+{
+	if (isOgsExitCalled) return;
+	isOgsExitCalled = true;
 
-private:
-	SimulationInfo* _sim_info;
+#ifdef USE_LIS
+    lis_finalize();
+#endif
 
-};
+	LOGOG_COUT << "exit ogs6." << std::endl;
+    BaseLib::releaseObject(custom_format, logogCout, logog_file);
+    LOGOG_SHUTDOWN();
+}
 
-template <class T>
-OgsSimulator<T>::OgsSimulator(int argc, char* argv[])
+THMCSimulator::THMCSimulator(int argc, char* argv[])
 : _sim_info(NULL)
 {
 	try {
@@ -105,73 +104,53 @@ OgsSimulator<T>::OgsSimulator(int argc, char* argv[])
 
 }
 
-template <class T>
-OgsSimulator<T>::~OgsSimulator()
+THMCSimulator::~THMCSimulator()
 {
 	BaseLib::releaseObject(_sim_info);
 	ogsExit();
 }
 
-template <class T>
-bool OgsSimulator<T>::checkInputFiles(const std::string& proj_path)
+bool THMCSimulator::checkInputFiles(const std::string& proj_path)
 {
 
 	std::string proj_dir_path;
 	std::string proj_name;
 
 	std::string tmpFilename = proj_path;
-	tmpFilename.append(".xml");
+	tmpFilename.append(".pcs");
 	if(!BaseLib::IsFileExisting(tmpFilename))
 	{
-		LOGOG_CERR << " Error: Cannot find file " << proj_path << std::endl;
+		LOGOG_CERR << " Error: Cannot find a PCS file - " << tmpFilename << std::endl;
 		return 1;
 	}
 
 	return true;
 }
 
-template <class T>
-int OgsSimulator<T>::execute()
+int THMCSimulator::execute()
 {
 	if (!_sim_info) return 0;
+
+	BaseLib::Options op;
 
 	//-------------------------------------------------------------------------
 	// Read files
 	//-------------------------------------------------------------------------
-	BaseLib::Options op;
-#if 0
-	readSimulationProperties(_sim_info->getProjectPath()+".xml", op);
+	Ogs6FemData ogs6fem;
+	const std::string proj_path = _sim_info->getProjectPath();
 
 	// fem
 	ogs5::Ogs5FemData ogs5femdata;
-	ogs5femdata.read(_sim_info->getProjectPath());
-
-	// gli
-	std::string geo_unique_name;
-	std::vector<std::string> geo_errors;
-	GeoLib::GEOObjects geo;
-	Ogs4GeoIO::readGLIFileV4(_sim_info->getProjectPath()+".gli", &geo, geo_unique_name, geo_errors);
-
-	// mesh
-	std::vector<MeshLib::IMesh*> msh_vector;
-	Ogs5MeshIO::readMesh(_sim_info->getProjectPath()+".msh", msh_vector);
-	if (msh_vector.size()==0) {
-		LOGOG_CERR << " Error: Cannot find mesh " << _sim_info->getProjectPath()+".msh" << std::endl;
-		return -1;
-	}
+	ogs5femdata.read(proj_path);
 
 	// ddc
 
 	//-------------------------------------------------------------------------
 	// Setup simulation
 	//-------------------------------------------------------------------------
-	MeshLib::IMesh* msh = msh_vector[0];
-    DiscreteLib::DiscreteSystem dis(*msh);
 	// - create pcs
-	Ogs5ToOgs6::convert(ogs5femdata, geo, geo_unique_name, dis);
+	Ogs5ToOgs6::convert(ogs5femdata, ogs6fem, op);
 	// - ddc
-
-#endif
 
 
 	//-------------------------------------------------------------------------
