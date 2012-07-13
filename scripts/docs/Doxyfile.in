@@ -573,15 +573,16 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = ${CMAKE_SOURCE_DIR}/BaseLib \
-                         ${CMAKE_SOURCE_DIR}/MathLib \
-                         ${CMAKE_SOURCE_DIR}/GeoLib \
-                         ${CMAKE_SOURCE_DIR}/MeshLib \
-                         ${CMAKE_SOURCE_DIR}/FemLib \
-                         ${CMAKE_SOURCE_DIR}/FdmLib \
-                         ${CMAKE_SOURCE_DIR}/NumLib \
-                         ${CMAKE_SOURCE_DIR}/MaterialLib \
-                         ${CMAKE_SOURCE_DIR}/ModelLib
+INPUT                  = ${CMAKE_SOURCE_DIR}/ogsCore \
+                         ${CMAKE_SOURCE_DIR}/ogsCUI \
+                         ${CMAKE_SOURCE_DIR}/ogsFileIO \
+                         ${CMAKE_SOURCE_DIR}/ogsGeometry \
+                         ${CMAKE_SOURCE_DIR}/ogsMesh \
+                         ${CMAKE_SOURCE_DIR}/ogsNumerics \
+                         ${CMAKE_SOURCE_DIR}/ogsPhysics \
+                         ${CMAKE_SOURCE_DIR}/ogsProcess \
+                         ${CMAKE_SOURCE_DIR}/ogsProcessGeo \
+                         ${CMAKE_SOURCE_DIR}/ogsSimulator
 
 # This tag can be used to specify the character encoding of the source files 
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is 
