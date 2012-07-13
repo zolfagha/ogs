@@ -169,8 +169,7 @@ ios::pos_type CInitialCondition::Read(std::ifstream* ic_file)
 		if (line_string.find("$PRIMARY_VARIABLE") != string::npos)
 		{
 			in.str(readNonBlankLineFromInputStream(*ic_file));
-			std::string tmp;
-			in >> tmp;    // pcs_pv_name;
+			in >> primaryvariable_name;    // pcs_pv_name;
 			in.clear();
 			continue;
 		}
@@ -217,7 +216,6 @@ ios::pos_type CInitialCondition::Read(std::ifstream* ic_file)
 		if (line_string.find("$GEO_TYPE") != string::npos)
 		{
             in.str(readNonBlankLineFromInputStream(*ic_file));
-			std::string geo_type_name;
 			in >> geo_type_name;
 			if (geo_type_name.find("POINT") != string::npos)
 			{

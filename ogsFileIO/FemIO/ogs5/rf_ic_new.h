@@ -44,6 +44,9 @@ public:
 	std::vector<double> subdom_ic;        //WW
 	std::string fname;                    //17.11.2009. PCH
 
+	std::string primaryvariable_name;
+
+	std::string geo_type_name;
 	std::string geo_name;                 // TF 05/2010
 	double geo_node_value;              //KR
 
