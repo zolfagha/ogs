@@ -6,7 +6,7 @@
 
 #include "MeshLib/Core/IMesh.h"
 
-namespace Ogs5MeshIO
+namespace MeshIoOgs5
 {
 void readMesh(std::string const& fileName, std::vector<MeshLib::IMesh*> &vec_mesh);
 void writeMesh(MeshLib::IMesh const * mesh, std::string const& fileName);

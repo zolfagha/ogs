@@ -4,7 +4,7 @@
 #include "logog/include/logog.hpp"
 
 #include "GeoIO/Ogs4GeoIO.h"
-#include "MeshIO/Ogs5MeshIO.h"
+#include "MeshIO/MeshIoOgs5.h"
 
 
 #include "BaseLib/CodingTools.h"
@@ -54,7 +54,7 @@ bool Ogs5FemData::read(const std::string &proj_path)
 	}
 
 	// mesh
-	Ogs5MeshIO::readMesh(proj_path+".msh", list_mesh);
+	MeshIoOgs5::readMesh(proj_path+".msh", list_mesh);
 	if (list_mesh.size()==0) {
 		LOGOG_CERR << " Error: Cannot find mesh - " << proj_path+".msh" << std::endl;
 		return false;

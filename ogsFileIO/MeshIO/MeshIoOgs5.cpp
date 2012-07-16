@@ -1,11 +1,11 @@
 
-#include "Ogs5MeshIO.h"
+#include "MeshIoOgs5.h"
 
 #include "MeshLib/Core/UnstructuredMesh.h"
 #include "MeshLib/Core/ElementFactory.h"
 
 
-namespace Ogs5MeshIO
+namespace MeshIoOgs5
 {
 
 const std::string convertElementType2String(const MeshLib::ElementShape::type t)
