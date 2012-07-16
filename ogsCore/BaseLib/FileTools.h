@@ -8,10 +8,13 @@
 #ifndef FILETOOLS_H
 #define FILETOOLS_H
 
-// ** INCLUDES **
+#include <string>
+#include <fstream>
+
 #include <sys/stat.h>
 
-namespace BaseLib {
+namespace BaseLib
+{
 /**
  * Returns true if given file exists. From http://www.techbytes.ca/techbyte103.html
  */
@@ -92,6 +95,13 @@ static std::string getFileNameFromPath(const std::string &str, bool with_extensi
 	std::string::size_type end  = file.find_last_of('.');
 	return file.substr(0,end);
 }
+
+template <typename T> void write_value_binary(std::fstream &fin, T val)
+{
+	fin.write((const char*)&val, sizeof(T));
+}
+
 } // end namespace BaseLib
+
 
 #endif // FILETOOLS_H
