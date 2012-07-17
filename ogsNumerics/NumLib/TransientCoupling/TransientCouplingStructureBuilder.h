@@ -12,12 +12,12 @@
 namespace NumLib
 {
 
-typedef class NumLib::TemplateCouplingStrucutreBuilder
+typedef class TemplateCouplingStrucutreBuilder
 	<
 	ITransientCoupledSystem,
 	AbstractTransientMonolithicSystem,
 	AsyncPartitionedSystem,
-	NumLib::TransientPartitionedAlgorithmFactory
+	TransientPartitionedAlgorithmFactory
 	> TransientCoulplingStrucutreBuilder;
 
 } //end
