@@ -112,12 +112,10 @@ THMCSimulator::~THMCSimulator()
 
 bool THMCSimulator::checkInputFiles(const std::string& proj_path)
 {
-
-	std::string proj_dir_path;
-	std::string proj_name;
-
+	// meanwhile OGS5 files are default
 	std::string tmpFilename = proj_path;
 	tmpFilename.append(".pcs");
+
 	if(!BaseLib::IsFileExisting(tmpFilename))
 	{
 		LOGOG_CERR << " Error: Cannot find a PCS file - " << tmpFilename << std::endl;
@@ -145,12 +143,15 @@ int THMCSimulator::execute()
 
 	// ddc
 
+	// ogs6
+	Ogs5ToOgs6::convert(ogs5femdata, ogs6fem, op);
+
 	//-------------------------------------------------------------------------
 	// Setup simulation
 	//-------------------------------------------------------------------------
-	// - create pcs
-	Ogs5ToOgs6::convert(ogs5femdata, ogs6fem, op);
-	// - ddc
+	for (size_t i=0; i<ogs6fem.list_pcs.size(); i++) {
+		ogs6fem.list_pcs[i]->initialize(op);
+	}
 
 
 	//-------------------------------------------------------------------------
