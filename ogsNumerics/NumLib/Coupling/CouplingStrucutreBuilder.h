@@ -18,9 +18,13 @@ namespace NumLib
 template <class T_I, class T_M, class T_P, class T_ALGORITHM>
 class TemplateCouplingStrucutreBuilder
 {
+	std::vector<T_M*> _vec_m;
+	std::vector<std::string> _vec_m_name;
 public:
+	TemplateCouplingStrucutreBuilder() {};
+
 	template <class T_EQS_FACTORY, class T_CHECK_FACTORY>
-	T_I* build(const BaseLib::Options *option, T_EQS_FACTORY eqs_fac, T_CHECK_FACTORY check_fack)
+	T_I* build(const BaseLib::Options *option, T_EQS_FACTORY &eqs_fac, T_CHECK_FACTORY &check_fack)
 	{
 		const BaseLib::Options* op_cpl = option->getSubGroup("coupling");
 	    if (op_cpl->hasSubGroup("M")) {
@@ -35,11 +39,22 @@ public:
 	    return 0;
 	}
 
+	std::vector<T_M*>& getListOfMonolithicSystem()
+	{
+		return _vec_m;
+	}
+
+	std::vector<std::string>& getListOfMonolithicSystemName()
+	{
+		return _vec_m_name;
+	}
+
 private:
 	template <class T_EQS_FACTORY>
 	T_M* buildMonolithicSystem(const BaseLib::Options *option, T_EQS_FACTORY &eqs_fac)
 	{
-		T_M* eqs = eqs_fac.create(option->getOption("name"));
+		std::string eqs_name = option->getOption("name");
+		T_M* eqs = eqs_fac.create(eqs_name);
 		const std::vector<std::string>* in_names = option->getOptionAsArray<std::string>("in");
 		const std::vector<std::string>* out_names = option->getOptionAsArray<std::string>("out");
 		if (in_names!=0) {
@@ -52,6 +67,8 @@ private:
 				eqs->setOutputParameterName(i, (*out_names)[i]);
 			}
 		}
+		_vec_m.push_back(eqs);
+		_vec_m_name.push_back(eqs_name);
 		return eqs;
 	}
 
