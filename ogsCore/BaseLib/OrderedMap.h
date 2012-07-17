@@ -39,6 +39,11 @@ public:
 		_vec.clear();
 	}
 
+    T_VAL& operator[] (size_t idx)
+    {
+        return _map[_vec[idx]];
+    }
+
 private:
 	std::map<T_KEY, T_VAL> _map;
 	std::vector<T_KEY> _vec;
