@@ -4,19 +4,34 @@
 #include <fstream>
 
 #include "BaseLib/FileTools.h"
+#include "MeshLib/Core/CoordinateSystem.h"
+#include "MeshLib/Core/MeshGeometricProperties.h"
 
-using namespace std;
 using namespace MeshLib;
 
 const std::string INDEX_STR = "  ";
+const std::string velocity_name[3][4] =
+{
+	{
+		"VELOCITY_X1", "VELOCITY_Y1", "VELOCITY_Z1", "NODAL_VELOCITY1"
+	}
+	,
+	{
+		"VELOCITY_X2", "VELOCITY_Y2", "VELOCITY_Z2", "NODAL_VELOCITY2"
+	}
+	,
+	{
+		"VELOCITY1_X", "VELOCITY1_Y", "VELOCITY1_Z", "GL_NODAL_VELOCITY1"
+	}
+};
 
 OutputIoVtu::OutputIoVtu(bool binary_mode)
 : MeshIoVtu(binary_mode)
 {
 }
 
-bool OutputIoVtu::WriteXMLUnstructuredGrid(const std::string &vtkfile,
-                                    MeshLib::IMesh &msh)
+bool OutputIoVtu::Write(const std::string &vtkfile,
+                                    MeshLib::IMesh &msh, std::vector<NodalValue> &nodal_values, std::vector<ElementalValue> &elemental_values)
 {
 	//-------------------------------------------------------------------------
 	//# Setup file stream
@@ -44,7 +59,7 @@ bool OutputIoVtu::WriteXMLUnstructuredGrid(const std::string &vtkfile,
 	//-------------------------------------------------------------------------
 	long offset = 0;
 
-	string str_format;
+	std::string str_format;
 	if (!useBinary)
 		str_format = "ascii";
 	else
@@ -62,7 +77,7 @@ bool OutputIoVtu::WriteXMLUnstructuredGrid(const std::string &vtkfile,
 	//  fin << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\" compressor=\"vtkZLibDataCompressor\">"  << endl;
 
 	//# Unstructured Grid information
-	fin << "  <UnstructuredGrid>" << endl;
+	fin << "  <UnstructuredGrid>" << std::endl;
 	fin << "    <Piece NumberOfPoints=\"" << msh.getNumberOfNodes() <<
 	"\" NumberOfCells=\"" << msh.getNumberOfElements() << "\">" << std::endl;
 	//....................................................................
@@ -71,10 +86,10 @@ bool OutputIoVtu::WriteXMLUnstructuredGrid(const std::string &vtkfile,
 	WriteDataArrayHeader(fin, type_Double, "", 3, str_format, offset);
 	WriteMeshNodes(fin, data_out, msh, offset);
 	WriteDataArrayFooter(fin);
-	fin << "      </Points>" << endl;
+	fin << "      </Points>" << std::endl;
 	//....................................................................
 	// Elements
-	fin << "      <Cells>" << endl;
+	fin << "      <Cells>" << std::endl;
 	//connectivity
 	WriteDataArrayHeader(fin, type_Long, "connectivity", 0, str_format, offset);
 	long sum_ele_components = 0;
@@ -88,20 +103,28 @@ bool OutputIoVtu::WriteXMLUnstructuredGrid(const std::string &vtkfile,
 	WriteDataArrayHeader(fin, type_UChar, "types", 0, str_format, offset);
 	WriteMeshElementType(fin, data_out, msh, offset);
 	WriteDataArrayFooter(fin);
-	fin << "      </Cells>" << endl;
+	fin << "      </Cells>" << std::endl;
+	//....................................................................
+	// Nodal values
+	if (nodal_values.size() > 0)
+		fin << "      <PointData Scalars=\"" << nodal_values[0].first << "\">" << std::endl;
+	else
+		fin << "      <PointData Scalars=\"scalars\">" << std::endl;
+	WriteNodalValue(fin, data_out, nodal_values, msh, offset);
+	fin << "      </PointData>" << std::endl;
 	//....................................................................
 	// Element values
-	fin << "      <CellData>" << endl;
-	WriteElementGroupID(fin, data_out, msh, offset);
-	fin << "      </CellData>" << endl;
-	fin << "    </Piece>" << endl;
-	fin << "  </UnstructuredGrid>" << endl;
+	fin << "      <CellData>" << std::endl;
+	WriteElementValue(fin, data_out, elemental_values, msh, offset);
+	fin << "      </CellData>" << std::endl;
+	fin << "    </Piece>" << std::endl;
+	fin << "  </UnstructuredGrid>" << std::endl;
 
 	//======================================================================
 	// Raw data (for binary mode)
 	if (useBinary)
 	{
-		fin << "  <AppendedData encoding=\"raw\">" << endl;
+		fin << "  <AppendedData encoding=\"raw\">" << std::endl;
 		fin << "    _";
 
 		//Node
@@ -114,15 +137,15 @@ bool OutputIoVtu::WriteXMLUnstructuredGrid(const std::string &vtkfile,
 		//type
 		this->WriteMeshElementType(fin, true, msh, offset);
 		// Nodal values
-		//this->WriteNodalValue(fin, true, out, msh, offset);
+		this->WriteNodalValue(fin, true, nodal_values, msh, offset);
 		// Elemental values
-		this->WriteElementGroupID(fin, true,  msh, offset);
+		this->WriteElementValue(fin, true, elemental_values, msh, offset);
 
-		fin << endl;
-		fin << "  </AppendedData>" << endl;
+		fin << std::endl;
+		fin << "  </AppendedData>" << std::endl;
 	}
 
-	fin << "</VTKFile>" << endl;
+	fin << "</VTKFile>" << std::endl;
 	fin.close();
 
 	return true;
@@ -136,7 +159,7 @@ bool OutputIoVtu::WriteNodalValue(std::fstream &fin,
 {
 	std::vector<int> NodeIndex(nod_values.size());
 
- 	string str_format;
+	std::string str_format;
 	if (!this->useBinary)
 		str_format = "ascii";
 	else
@@ -150,14 +173,14 @@ bool OutputIoVtu::WriteNodalValue(std::fstream &fin,
 	//Nodal values
 	for (int i = 0; i < (int) nod_values.size(); i++)
 	{
-        const string &var_name = nod_values[i].first;
+        const std::string &var_name = nod_values[i].first;
 		//is velocity
-		if (var_name.find("VELOCITY") != string::npos)
+		if (var_name.find("VELOCITY") != std::string::npos)
 		{
 			outNodeVelocity = true;
 			continue;
 		}
-        if (var_name.find("DISPLACEMENT") != string::npos)
+        if (var_name.find("DISPLACEMENT") != std::string::npos)
         {
             outNodeDisplacement = true;
             continue;
@@ -182,7 +205,7 @@ bool OutputIoVtu::WriteNodalValue(std::fstream &fin,
                 }
             }
             if (!useBinary) {
-                fin << endl;
+                fin << std::endl;
             }
 		}
 		else
@@ -193,37 +216,30 @@ bool OutputIoVtu::WriteNodalValue(std::fstream &fin,
 			WriteDataArrayFooter(fin);
 	}
 
+#if 0
 	// Nodal velocities
 	if (outNodeVelocity)
 	{
 		unsigned int velocity_id = 0;
-		for (int i = 0; i < (int) out->_nod_value_vector.size(); i++)
+		for (int i = 0; i < (int) nod_values.size(); i++)
 		{
-            const string &internal_val_name = out->_nod_value_vector[i];
+            const string &internal_val_name = nod_values[i].first;
 //            const string &external_val_name = out->_alias_nod_value_vector[i];
 			if (internal_val_name.find("VELOCITY_X1") != string::npos)
 			{
-				if (out->m_pcs == NULL)
-					m_pcs = PCSGet(internal_val_name, true);
 				velocity_id = 0;
 			}
 			else if (internal_val_name.find("VELOCITY_X2")
 			         != string::npos)
 			{
-				if (out->m_pcs == NULL)
-					m_pcs = PCSGet(internal_val_name, true);
 				velocity_id = 1;
 			}
 			else if (internal_val_name.find("VELOCITY1_X")
 			         != string::npos)
 			{
-				if (out->m_pcs == NULL)
-					m_pcs = PCSGet(internal_val_name, true);
 				velocity_id = 2;
 			}
 			else
-				continue;
-			if (!m_pcs)
 				continue;
 
 			if (!useBinary || !output_data)
@@ -236,7 +252,7 @@ bool OutputIoVtu::WriteNodalValue(std::fstream &fin,
 			if (output_data)
 			{
 				int ix, iy, iz;
-				ix = m_pcs->GetNodeValueIndex(velocity_name[velocity_id][0],true); // JT: Fix. Need latest value.
+				ix = nod_values[i].second(velocity_name[velocity_id][0],true); // JT: Fix. Need latest value.
 				iy = m_pcs->GetNodeValueIndex(velocity_name[velocity_id][1],true);
 				iz = m_pcs->GetNodeValueIndex(velocity_name[velocity_id][2],true);
 				if (!useBinary)
@@ -288,85 +304,17 @@ bool OutputIoVtu::WriteNodalValue(std::fstream &fin,
 					}
 				}
 			}
-			else
+			else {
 				offset += msh.getNumberOfNodes() * 3 * sizeof( double) +
 				          SIZE_OF_BLOCK_LENGTH_TAG;
+			}
 
 			if (!useBinary || !output_data)
 				WriteDataArrayFooter(fin);
 		}
 	}
+#endif
 
-    //Displacement
-    if (outNodeDisplacement)
-    {
-//        unsigned int disp_id = 0;
-        for (int i = 0; i < (int)out->_nod_value_vector.size(); i++)
-        {
-            const string &internal_val_name = out->_nod_value_vector[i];
-//            const string &external_val_name = out->_alias_nod_value_vector[i];
-            if (internal_val_name.find("DISPLACEMENT_X1") != string::npos)
-            {
-                if (out->m_pcs == NULL)
-                    m_pcs = PCSGet(internal_val_name,true);
-//                disp_id = 0;
-            }
-            else
-                continue;
-            if(!m_pcs)
-                continue;
-
-            if (!useBinary || !output_data)
-                WriteDataArrayHeader(fin, this->type_Double, "DISPLACEMENT", 3, str_format, offset);
-            if (output_data)
-            {
-                int var_id[3] = {};
-                var_id[0] = m_pcs->GetNodeValueIndex("DISPLACEMENT_X1");
-                var_id[1] = m_pcs->GetNodeValueIndex("DISPLACEMENT_Y1");
-                var_id[2] = -1;
-                if (is3D) {
-                    var_id[2] = m_pcs->GetNodeValueIndex("DISPLACEMENT_Z1");
-                } else if (isXZplane) {
-                    var_id[1] = -1;
-                    var_id[2] = m_pcs->GetNodeValueIndex("DISPLACEMENT_Y1");
-                }
-                //
-                if (!useBinary) {
-                    fin << "          ";
-                } else {
-                	BaseLib::write_value_binary<unsigned int>(fin, sizeof(double)*msh.getNumberOfNodes()*3);
-                }
-                double u[3] = {};
-                for(size_t j = 0l; j < msh.getNumberOfNodes(); j++)
-                {
-                    for (size_t k=0; k<3; k++) {
-                        if (var_id[k]<0)
-                            u[k] = .0;
-                        else
-                            u[k] =  m_pcs->GetNodeValue(msh->nod_vector[j]->GetIndex(), var_id[k]);
-                    }
-
-                    if (!useBinary) {
-                        for (size_t k=0; k<3; k++)
-                            fin << u[k] << " ";
-                    } else {
-                        for (size_t k=0; k<3; k++)
-                            BaseLib::write_value_binary(fin, u[k]);
-                    }
-                }
-                if (!useBinary) {
-                    fin << endl;
-                } else {
-                    BaseLib::write_value_binary<unsigned int>(fin, sizeof(double)*msh.getNumberOfNodes()*3);
-                }
-            }
-            else
-                offset += msh.getNumberOfNodes() * 3 * sizeof(double) +
-                SIZE_OF_BLOCK_LENGTH_TAG;
-            if (!useBinary || !output_data)
-                WriteDataArrayFooter(fin);
-        }
-    }
 
     return true;
 }
@@ -377,15 +325,11 @@ bool OutputIoVtu::WriteElementValue(std::fstream &fin,
                              IMesh &msh,
                              long &offset)
 {
-	std::vector<int> ele_value_index_vector(out->getElementValueVector().size());
-	if (ele_value_index_vector.size() > 0) // GetELEValuesIndexVector() should check this!
-		out->GetELEValuesIndexVector(ele_value_index_vector);
-	CRFProcess* m_pcs = NULL;
-	MeshLib::CElem* ele = NULL;
+	std::vector<int> ele_value_index_vector(ele_values.size());
 
-    bool isXZplane = (msh->GetCoordinateFlag()==22);
+    bool isXZplane = (msh.getGeometricProperty()->getCoordinateSystem()->getType() == MeshLib::CoordinateSystemType::XZ);
 
-	string str_format;
+    std::string str_format;
 	if (!this->useBinary)
 		str_format = "ascii";
 	else
@@ -396,228 +340,39 @@ bool OutputIoVtu::WriteElementValue(std::fstream &fin,
 	//Element values
 	for (int i = 0; i < (int) ele_value_index_vector.size(); i++)
 	{
-		if (out->getElementValueVector()[i].find("VELOCITY") != string::npos)
+		if (ele_values[i].first.find("VELOCITY") != std::string::npos)
 		{
 			outEleVelocity = true;
 			continue;
 		}
-		m_pcs = out->GetPCS_ELE(out->getElementValueVector()[i]);
 
 		if (!useBinary || !output_data)
 			WriteDataArrayHeader(fin, this->type_Double,
-			                     out->getElementValueVector()[i], 0, str_format, offset);
+					ele_values[i].first, 0, str_format, offset);
 		if (output_data)
 		{
 			if (!useBinary)
 			{
 				fin << "          ";
-				for (long j = 0; j < (long) msh->ele_vector.size(); j++)
-					fin << m_pcs->GetElementValue(j, ele_value_index_vector[i])
-					    << " ";
-				fin << endl;
+				for (long j = 0; j < (long) msh.getNumberOfElements(); j++)
+					fin << ele_values[i].second[j] << " ";
+				fin << std::endl;
 			}
 			else
 			{
 				BaseLib::write_value_binary<unsigned int> (fin, sizeof(double)
-				                                  * (long) msh->ele_vector.size()); //OK411
-				for (long j = 0; j < (long) msh->ele_vector.size(); j++)
-					BaseLib::write_value_binary(fin, m_pcs->GetElementValue(j,
-					                                               ele_value_index_vector
-					                                               [i]));
+				                                  * (long)  msh.getNumberOfElements());
+				for (long j = 0; j < (long) msh.getNumberOfElements(); j++)
+					BaseLib::write_value_binary(fin, ele_values[i].second[j]);
 			}
 		}
 		else
-			offset += (long) msh->ele_vector.size() * sizeof(double)
+			offset += (long) msh.getNumberOfElements() * sizeof(double)
 			          + SIZE_OF_BLOCK_LENGTH_TAG;  //OK411
 		if (!useBinary || !output_data)
 			WriteDataArrayFooter(fin);
 	}
 
-	//Element velocity
-	if (outEleVelocity)
-	{
-		if (!useBinary || !output_data)
-			WriteDataArrayHeader(fin, this->type_Double, "ELEMENT_VELOCITY", 3,
-			                     str_format, offset);
-		if (output_data)
-		{
-			if (!useBinary)
-			{
-				fin << "          ";
-				static double ele_vel[3] = { 0.0, 0.0, 0.0 };
-				for (long i = 0; i < (long) msh->ele_vector.size(); i++)
-				{
-					ele_gp_value[i]->getIPvalue_vec(0, ele_vel);
-					fin << ele_vel[0] << " ";
-                    if (!isXZplane) {
-                        fin << ele_vel[1] << " ";
-                        fin << ele_vel[2] << " ";
-                    } else {
-                        fin << ele_vel[2] << " ";
-                        fin << ele_vel[1] << " ";
-                    }
-				}
-				fin << endl;
-			}
-			else
-			{
-				static double ele_vel[3] = { 0.0, 0.0, 0.0 };
-				BaseLib::write_value_binary<unsigned int> (fin, sizeof(double) * 3 *
-				                                  (long )msh->ele_vector.size()); //OK411
-				for(long i = 0; i < (long)msh->ele_vector.size(); i++)
-				{
-					ele_gp_value[i]->getIPvalue_vec(0, ele_vel);
-                    BaseLib::write_value_binary(fin, ele_vel[0]);
-                    if (!isXZplane) {
-                        BaseLib::write_value_binary(fin, ele_vel[1]);
-                        BaseLib::write_value_binary(fin, ele_vel[2]);
-                    } else {
-                        BaseLib::write_value_binary(fin, ele_vel[2]);
-                        BaseLib::write_value_binary(fin, ele_vel[1]);
-                    }
-				}
-			}
-		}
-		else
-			//OK411
-			offset += (long)msh->ele_vector.size() * sizeof(double) * 3 +
-			          SIZE_OF_BLOCK_LENGTH_TAG;
-		if (!useBinary || !output_data)
-			WriteDataArrayFooter(fin);
-
-		//    if(out->pcs_type_name.compare("FLUID_MOMENTUM")==0)
-		if(out->getProcessType () == FiniteElement::FLUID_MOMENTUM)
-		{
-			if (!useBinary || !output_data)
-				WriteDataArrayHeader(fin,
-				                     this->type_Double,
-				                     "GLOBAL_VELOCITY",
-				                     3,
-				                     str_format,
-				                     offset);
-			if (output_data)
-			{
-				CRFProcess* pch_pcs = PCSGet("FLUID_MOMENTUM");
-				if (!this->useBinary)
-				{
-					fin << "          ";
-					for(long i = 0; i < (long)msh->ele_vector.size(); i++)
-					{
-						fin << pch_pcs->GetElementValue(
-						        i,
-						        pch_pcs->
-						        GetElementValueIndex("VELOCITY1_X") +
-						        1) << " ";
-                        if (!isXZplane) {
-                            fin << pch_pcs->GetElementValue(
-                                i,
-                                pch_pcs->
-                                GetElementValueIndex("VELOCITY1_Y") +
-                                1) << " ";
-                            fin << pch_pcs->GetElementValue(
-                                i,
-                                pch_pcs->
-                                GetElementValueIndex("VELOCITY1_Z") +
-                                1) << " ";
-                        } else {
-                            fin << pch_pcs->GetElementValue(
-                                i,
-                                pch_pcs->
-                                GetElementValueIndex("VELOCITY1_Z") +
-                                1) << " ";
-                            fin << pch_pcs->GetElementValue(
-                                i,
-                                pch_pcs->
-                                GetElementValueIndex("VELOCITY1_Y") +
-                                1) << " ";
-                        }
-					}
-					fin << endl;
-				}
-				else
-				{
-					//OK411
-					BaseLib::write_value_binary<unsigned int>(fin, sizeof(double) * 3 *
-					                                 (long)msh->ele_vector.size());
-					for(long i = 0; i < (long)msh->ele_vector.size(); i++)
-					{
-						BaseLib::write_value_binary(fin,
-						                   pch_pcs->GetElementValue(i,
-						                                            pch_pcs
-						                                            ->
-						                                            GetElementValueIndex(
-						                                                    "VELOCITY1_X")
-						                                            + 1));
-                        if (!isXZplane) {
-                            BaseLib::write_value_binary(fin,
-                                pch_pcs->GetElementValue(i,
-                                pch_pcs
-                                ->
-                                GetElementValueIndex(
-                                "VELOCITY1_Y")
-                                + 1));
-                            BaseLib::write_value_binary(fin,
-                                pch_pcs->GetElementValue(i,
-                                pch_pcs
-                                ->
-                                GetElementValueIndex(
-                                "VELOCITY1_Z")
-                                + 1));
-                        } else {
-                            BaseLib::write_value_binary(fin,
-                                pch_pcs->GetElementValue(i,
-                                pch_pcs
-                                ->
-                                GetElementValueIndex(
-                                "VELOCITY1_Z")
-                                + 1));
-                        }
-					}
-				}
-			}
-			else
-				//OK411
-				offset += (long)msh->ele_vector.size() * sizeof(double) * 3 +
-				          SIZE_OF_BLOCK_LENGTH_TAG;
-			if (!useBinary || !output_data)
-				WriteDataArrayFooter(fin);
-		}
-	}
-	//Material information
-	if(mmp_vector.size() > 1)
-	{
-		if (!useBinary || !output_data)
-			WriteDataArrayHeader(fin, this->type_Int, "MatGroup", 0, str_format, offset);
-		if (output_data)
-		{
-			if (!this->useBinary)
-			{
-				fin << "          ";
-				for(long i = 0; i < (long)msh->ele_vector.size(); i++)
-				{
-					ele = msh->ele_vector[i];
-					fin << ele->GetPatchIndex() << " ";
-				}
-				fin << endl;
-			}
-			else
-			{
-				//OK411
-				BaseLib::write_value_binary<unsigned int>(
-				        fin,
-				        sizeof(int) *
-				        (long)msh->ele_vector.size());
-				for (long i = 0; i < (long)msh->ele_vector.size(); i++)
-					BaseLib::write_value_binary(fin, msh->ele_vector[i]->GetPatchIndex());
-			}
-		}
-		else
-			//OK411
-			offset += (long)msh->ele_vector.size() * sizeof(int) +
-			          SIZE_OF_BLOCK_LENGTH_TAG;
-		if (!useBinary || !output_data)
-			WriteDataArrayFooter(fin);
-	}
 	return true;
 }
 

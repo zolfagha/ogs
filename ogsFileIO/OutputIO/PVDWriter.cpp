@@ -1,16 +1,14 @@
 
-#include "PVD.h"
+#include "PVDWriter.h"
 
 #include <fstream>
 
-using namespace std;
-
 const std::string INDEX_STR = "  ";
 
-bool PVDFileIO::InitializePVD(const string &file_base_name)
+bool PVDWriter::InitializePVD(const std::string &file_base_name)
 {
 	//PVD
-	this->vec_dataset.clear();
+	this->pvd_data.vec_dataset.clear();
 	this->pvd_file_name = file_base_name;
 	this->pvd_file_name += ".pvd";
 //	//VTK
@@ -36,7 +34,7 @@ bool PVDFileIO::InitializePVD(const string &file_base_name)
 	return true;
 }
 
-bool PVDFileIO::WriteHeaderOfPVD(std::fstream &fin)
+bool PVDWriter::WriteHeaderOfPVD(std::fstream &fin)
 {
 	fin << "<?xml version=\"1.0\"?>" << std::endl;
 	fin <<
@@ -46,32 +44,32 @@ bool PVDFileIO::WriteHeaderOfPVD(std::fstream &fin)
 	return true;
 }
 
-bool PVDFileIO::WriteEndOfPVD(std::fstream &fin)
+bool PVDWriter::WriteEndOfPVD(std::fstream &fin)
 {
 	fin << INDEX_STR << "</Collection>" << std::endl;
 	fin << "</VTKFile>" << std::endl;
 	return true;
 }
 
-bool PVDFileIO::WriteDatasetOfPVD(std::fstream &fin, double timestep, const std::string &vtkfile)
+bool PVDWriter::WriteDatasetOfPVD(std::fstream &fin, double timestep, const std::string &vtkfile)
 {
-	fin.setf(ios::scientific,std::ios::floatfield);
+	fin.setf(std::ios::scientific,std::ios::floatfield);
 	fin.precision(12);
 	fin << INDEX_STR << INDEX_STR << "<DataSet timestep=\"" << timestep <<
 	"\" group=\"\" part=\"0\" file=\"" << vtkfile << "\"/>" << std::endl;
 	return true;
 }
 
-bool PVDFileIO::UpdatePVD(const string &pvdfile, const vector<VTK_Info> &vec_vtk)
+bool PVDWriter::UpdatePVD(const std::string &pvdfile, const PVDData &pvd_data)
 {
-	fstream fin(pvdfile.data(), ios::out);
+	std::fstream fin(pvdfile.data(), std::ios::out);
 	if (!fin.good())
 		return false;
 
-	PVDFileIO::WriteHeaderOfPVD(fin);
-	for (int i = 0; i < (int)vec_vtk.size(); i++)
-		PVDFileIO::WriteDatasetOfPVD(fin, vec_vtk[i].timestep, vec_vtk[i].vtk_file);
-	PVDFileIO::WriteEndOfPVD(fin);
+	PVDWriter::WriteHeaderOfPVD(fin);
+	for (int i = 0; i < (int)pvd_data.vec_dataset.size(); i++)
+		PVDWriter::WriteDatasetOfPVD(fin, pvd_data.vec_dataset[i].timestep, pvd_data.vec_dataset[i].vtk_file);
+	PVDWriter::WriteEndOfPVD(fin);
 
 	fin.close();
 

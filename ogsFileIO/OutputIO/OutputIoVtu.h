@@ -18,12 +18,12 @@ public:
 
 public:
 	bool Write(const std::string &vtkfile,
-	                              MeshLib::IMesh &msh, NodalValue &nodal, ElementalValue &elemental);
+	                              MeshLib::IMesh &msh, std::vector<NodalValue> &nodal, std::vector<ElementalValue> &elemental);
 
 protected:
 	inline bool WriteNodalValue(std::fstream &fin,
 	                            bool output_data,
-	                            std::vector<NodalScalarValue> &nodal,
+	                            std::vector<NodalValue> &nodal,
 	                            MeshLib::IMesh &m_msh,
 	                            long &offset);
 	inline bool WriteElementValue(std::fstream &fin,

@@ -34,27 +34,28 @@ protected:
 
 	bool WriteDataArrayFooter(std::fstream &fin);
 
-	inline bool WriteMeshNodes(std::fstream &fin,
+	bool WriteMeshNodes(std::fstream &fin,
 	                           bool output_data,
 	                           MeshLib::IMesh& m_msh,
 	                           long &offset);
 
-	inline bool WriteMeshElementConnectivity(std::fstream &fin,
+	bool WriteMeshElementConnectivity(std::fstream &fin,
 	                                         bool output_data,
 	                                         MeshLib::IMesh& m_msh,
 	                                         long &offset,
 	                                         long &sum_ele_components);
-	inline bool WriteMeshElementOffset(std::fstream &fin,
+
+	bool WriteMeshElementOffset(std::fstream &fin,
 	                                   bool output_data,
 	                                   MeshLib::IMesh& m_msh,
 	                                   long &offset);
 
-	inline bool WriteMeshElementType(std::fstream &fin,
+	bool WriteMeshElementType(std::fstream &fin,
 	                                 bool output_data,
 	                                 MeshLib::IMesh& m_msh,
 	                                 long &offset);
 
-	inline bool WriteElementGroupID(std::fstream &fin,
+	bool WriteElementGroupID(std::fstream &fin,
 	                              bool output_data,
 	                              MeshLib::IMesh& m_msh,
 	                              long &offset);

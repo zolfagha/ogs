@@ -4,23 +4,20 @@
 #include <string>
 #include <vector>
 
-typedef struct
-{
-	double timestep;
-	std::string vtk_file;
-} VTK_Info;
 
-class PVDFileIO
+#include "PVDData.h"
+
+class PVDWriter
 {
 public:
-	std::vector<VTK_Info> vec_dataset;
+	PVDData pvd_data;
 	std::string pvd_file_name;
 	std::string pvd_vtk_file_name_base;
     std::string pvd_vtk_file_path_base;
 
 public:
-    PVDFileIO(void){}
-	virtual ~PVDFileIO(void){}
+    PVDWriter(void){}
+	virtual ~PVDWriter(void){}
 
 protected:
 	bool WriteHeaderOfPVD(std::fstream &fin);
@@ -29,6 +26,6 @@ protected:
 
 public:
 	bool InitializePVD(const std::string &file_base_namepcs_type_name);
-	bool UpdatePVD(const std::string &pvdfile, const std::vector<VTK_Info> &vec_vtk);
+	bool UpdatePVD(const std::string &pvdfile, const PVDData &pvd_data);
 
 };
