@@ -31,6 +31,7 @@ INCLUDE_DIRECTORIES(
 ## Create the library
 ADD_EXECUTABLE( ogs6 ${CUI_Files})
 TARGET_LINK_LIBRARIES( ogs6 
+    ogsCore
 #    ogsGeometry
     ogsMesh
  #   ogsNumerics

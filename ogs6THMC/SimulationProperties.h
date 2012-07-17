@@ -81,6 +81,8 @@ inline bool readSimulationProperties(const std::string &xml_file, BaseLib::Optio
 	return true;
 }
 
+
+
 #if 0
 //inline void readOgs5(const std::string &input_path)
 inline int readOgs5(SimulationInfo &sim_info)

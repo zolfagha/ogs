@@ -1,3 +1,14 @@
+/**
+ * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.com)
+ *            Distributed under a Modified BSD License.
+ *              See accompanying file LICENSE.txt or
+ *              http://www.opengeosys.com/LICENSE.txt
+ *
+ *
+ * \file THMCSimulator.h
+ *
+ * Created on 2012-07-17 by Norihiro Watanabe
+ */
 
 #pragma once
 
@@ -13,6 +24,11 @@
 #include "SimulationInfo.h"
 #include "FormatterCustom.h"
 #include "GeoProcessBuilder.h"
+
+namespace NumLib
+{
+class ITransientCoupledSystem;
+}
 
 namespace ogs6
 {
@@ -49,6 +65,7 @@ private:
 
 private:
 	SimulationInfo* _sim_info;
+	NumLib::ITransientCoupledSystem* _cpl_system;
 };
 
 

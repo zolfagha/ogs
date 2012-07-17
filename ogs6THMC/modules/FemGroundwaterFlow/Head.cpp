@@ -1,14 +1,14 @@
 
 #include "Head.h"
 
-
+#include "Ogs6FemData.h"
 
 //namespace Geo
 //{
 
 void FunctionHead::initialize(const BaseLib::Options &option)
 {
-	const BaseLib::Options* op = option.getSubGroup("GROUNDWATER_FLOW");
+	const BaseLib::Options* op = option.getSubGroup("ProcessData")->getSubGroup("GROUNDWATER_FLOW");
 	std::string msh_key = op->getOption("Mesh");
 	std::string mat_key = op->getOption("Material");
 

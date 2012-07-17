@@ -1,15 +1,37 @@
+/**
+ * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.com)
+ *            Distributed under a Modified BSD License.
+ *              See accompanying file LICENSE.txt or
+ *              http://www.opengeosys.com/LICENSE.txt
+ *
+ *
+ * \file THMCSimulator.cpp
+ *
+ * Created on 2012-07-17 by Norihiro Watanabe
+ */
 
 #include "THMCSimulator.h"
 
+// external library
 #ifdef USE_LIS
 #include "lis.h"
 #endif
 
+// internal library
 #include "BaseLib/CodingTools.h"
+#include "BaseLib/Options.h"
+#include "BaseLib/OptionsXMLReader.h"
 #include "BaseLib/FileTools.h"
+#include "NumLib/TransientCoupling/TransientCouplingStructureBuilder.h"
+#include "NumLib/TimeStepping/TimeSteppingController.h"
+#include "FemIO/ogs5/Ogs5FemIO.h"
+
+// this module
 #include "SimulationInfo.h"
-#include "SimulationProperties.h"
 #include "Ogs6FemData.h"
+#include "Ogs5ToOgs6.h"
+#include "MyConvergenceCheckerFactory.h"
+
 
 namespace ogs6
 {
@@ -55,7 +77,7 @@ void ogsExit()
 }
 
 THMCSimulator::THMCSimulator(int argc, char* argv[])
-: _sim_info(NULL)
+: _sim_info(NULL), _cpl_system(NULL)
 {
 	try {
 		// Command line parser
@@ -106,19 +128,21 @@ THMCSimulator::THMCSimulator(int argc, char* argv[])
 
 THMCSimulator::~THMCSimulator()
 {
-	BaseLib::releaseObject(_sim_info);
+	BaseLib::releaseObject(_sim_info, _cpl_system);
 	ogsExit();
 }
 
 bool THMCSimulator::checkInputFiles(const std::string& proj_path)
 {
 	// meanwhile OGS5 files are default
-	std::string tmpFilename = proj_path;
-	tmpFilename.append(".pcs");
-
-	if(!BaseLib::IsFileExisting(tmpFilename))
+	if(!BaseLib::IsFileExisting(proj_path+".pcs"))
 	{
-		LOGOG_CERR << " Error: Cannot find a PCS file - " << tmpFilename << std::endl;
+		LOGOG_CERR << " Error: Cannot find a PCS file - " << proj_path << std::endl;
+		return 1;
+	}
+	if(!BaseLib::IsFileExisting(proj_path+ ".prop"))
+	{
+		LOGOG_CERR << " Error: Cannot find a PCS file - " << proj_path << std::endl;
 		return 1;
 	}
 
@@ -130,34 +154,74 @@ int THMCSimulator::execute()
 	if (!_sim_info) return 0;
 
 	BaseLib::Options op;
+	Ogs6FemData* ogs6fem = Ogs6FemData::getInstance();
+	const std::string proj_path = _sim_info->getProjectPath();
 
 	//-------------------------------------------------------------------------
 	// Read files
 	//-------------------------------------------------------------------------
-	Ogs6FemData ogs6fem;
-	const std::string proj_path = _sim_info->getProjectPath();
-
-	// fem
+	LOGOG_CERR << "Reading input files..." << std::endl;
+	// ogs5fem
 	ogs5::Ogs5FemData ogs5femdata;
 	ogs5femdata.read(proj_path);
+	Ogs5ToOgs6::convert(ogs5femdata, *ogs6fem, op);
+
+	// coupling
+	BaseLib::addXMLtoOptions(proj_path+".prop", op);
 
 	// ddc
-
-	// ogs6
-	Ogs5ToOgs6::convert(ogs5femdata, ogs6fem, op);
 
 	//-------------------------------------------------------------------------
 	// Setup simulation
 	//-------------------------------------------------------------------------
-	for (size_t i=0; i<ogs6fem.list_pcs.size(); i++) {
-		ogs6fem.list_pcs[i]->initialize(op);
+	LOGOG_CERR << "Setting up simulation..." << std::endl;
+
+	// construct coupling system
+	MyConvergenceCheckerFactory checkFac;
+	NumLib::TransientCoulplingStrucutreBuilder cpl_builder;
+	if (_cpl_system!=NULL) delete _cpl_system;
+	_cpl_system = cpl_builder.build(&op, *GeoProcessBuilder::getInstance(), checkFac);
+	if (!_cpl_system->check()) {
+		LOGOG_CERR << " Error while checking coupled system " << std::endl;
+		return 0;
 	}
 
+	// list up monolithic processes
+	std::vector<NumLib::AbstractTransientMonolithicSystem*> &list_mono_system = cpl_builder.getListOfMonolithicSystem();
+	std::vector<std::string> &list_mono_system_name = cpl_builder.getListOfMonolithicSystemName();
+	for (size_t i=0; i<list_mono_system.size(); i++) {
+		std::string &pcs_name = list_mono_system_name[i];
+		ProcessLib::Process* pcs = list_mono_system[i];
+		ogs6fem->list_pcs.insert(pcs_name, pcs);
+		const BaseLib::Options* opPCS = op.getSubGroup("ProcessData")->getSubGroup(pcs_name);
+		if (opPCS!=NULL) {
+			pcs->initialize(*opPCS);
+		} else {
+			LOGOG_CERR << " Error: Cannot find Configuration for Process - " << pcs_name << std::endl;
+			return 0;
+		}
+	}
+
+
+    NumLib::TimeSteppingController timestepping;
+    timestepping.addTransientSystem(*_cpl_system);
+
+    double t_start = std::numeric_limits<double>::max();
+    double t_end = std::numeric_limits<double>::min();
+
+    for (size_t i=0; i<ogs6fem->list_tim.size(); i++) {
+    	t_start = std::min(t_start, ogs6fem->list_tim[i]->getBeginning());
+    	t_end = std::max(t_start, ogs6fem->list_tim[i]->getEnd());
+    }
 
 	//-------------------------------------------------------------------------
 	// Run simulation
 	//-------------------------------------------------------------------------
+	LOGOG_CERR << "Start simulation...  start=" << t_start << ", end=" << t_end << std::endl;
+    timestepping.setBeginning(t_start);
+    timestepping.solve(t_end);
 
+	LOGOG_CERR << "Finish simulation..." << std::endl;
 
 
     return 0;

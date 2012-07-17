@@ -213,12 +213,12 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 	{
 		CRFProcess* rfpcs = ogs5fem.pcs_vector[i];
 		std::string pcs_name = FiniteElement::convertProcessTypeToString(rfpcs->getProcessType());
-		ProcessLib::Process* pcs6 = GeoProcessBuilder::getInstance()->create(pcs_name);
-		if (pcs6==0) {
-			LOGOG_CERR << " Error: Process not found - " << pcs_name << std::endl;
-			continue;
-		}
-		ogs6fem.list_pcs.insert(pcs_name, pcs6);
+//		ProcessLib::Process* pcs6 = GeoProcessBuilder::getInstance()->create(pcs_name);
+//		if (pcs6==0) {
+//			LOGOG_CERR << " Error: Process not found - " << pcs_name << std::endl;
+//			continue;
+//		}
+//		ogs6fem.list_pcs.insert(pcs_name, pcs6);
 
 		BaseLib::Options* optPcs = optPcsData->addSubGroup(pcs_name);
 

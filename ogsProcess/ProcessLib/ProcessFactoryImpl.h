@@ -1,13 +1,11 @@
 
 #pragma once
 
+#include "Process.h"
 #include "ProcessFactoryBase.h"
 
 namespace ProcessLib
 {
-
-// forward declaration
-class Process;
 
 /**
  * \brief This class provides implementation of TeastFactoryBase interface.

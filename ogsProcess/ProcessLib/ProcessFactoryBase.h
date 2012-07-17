@@ -2,12 +2,11 @@
 #pragma once
 
 #include "BaseLib/CodingTools.h"
+#include "Process.h"
+
 
 namespace ProcessLib
 {
-
-// forward declaration
-class Process;
 
 /**
  * \brief Defines the abstract factory interface that creates instances

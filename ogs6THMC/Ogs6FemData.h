@@ -7,6 +7,8 @@
 #include "BaseLib/OrderedMap.h"
 #include "NumLib/Function/TXFunction.h"
 #include "NumLib/TimeStepping/TimeStepFunction.h"
+#include "MaterialLib/PorousMedia.h"
+#include "MaterialLib/Solid.h"
 #include "MaterialLib/Fluid.h"
 #include "SolutionLib/FemProblem/FemDirichletBC.h"
 #include "SolutionLib/FemProblem/FemNeumannBC.h"
@@ -15,6 +17,14 @@
 
 class Ogs6FemData
 {
+public:
+	static Ogs6FemData* getInstance();
+private:
+    static Ogs6FemData* _obj;
+
+private:
+	Ogs6FemData(): geo(NULL) {};
+
 public:
 	//material data
 	std::vector<MaterialLib::PorousMedia*> list_pm;
