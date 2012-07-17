@@ -7,11 +7,11 @@
 
 struct PVDData
 {
-	struct
+	struct VTK_Info
 	{
 		double timestep;
 		std::string vtk_file;
-	} VTK_Info;
+	};
 
 	std::vector<VTK_Info> vec_dataset;
 };
