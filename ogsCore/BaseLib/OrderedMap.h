@@ -39,9 +39,9 @@ public:
 		_vec.clear();
 	}
 
-    T_VAL& operator[] (size_t idx)
+	iterator operator[] (size_t idx)
     {
-        return _map[_vec[idx]];
+        return _map.find(_vec[idx]);
     }
 
 private:
