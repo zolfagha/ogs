@@ -176,6 +176,4 @@ inline std::string Options::getDummy<std::string>() const
 	return _dummy;
 };
 
-
-
 }

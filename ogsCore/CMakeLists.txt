@@ -23,5 +23,6 @@ SET_TARGET_PROPERTIES(ogsCore PROPERTIES LINKER_LANGUAGE CXX)
 INCLUDE_DIRECTORIES(
         .
         ../extra/Eigen
+        ../extra/tinyxml2
 )
 
