@@ -178,6 +178,9 @@ public:
      */
     void mergeGeometries (std::vector<std::string> const & names, std::string &merged_geo_name);
 
+    /// Returns geometric object with the given name
+    const GeoObject* searchGeoByName(const std::string &unique_geo_name, const std::string &geo_type_name, const std::string &geo_name) const;
+
     /** constructor */
     GEOObjects();
     /** destructor */

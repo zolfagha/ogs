@@ -385,5 +385,76 @@ void GEOObjects::mergeGeometries (std::vector<std::string> const & geo_names, st
     this->addSurfaceVec (merged_sfcs, merged_geo_name);
 }
 
+const GeoObject* GEOObjects::searchGeoByName(const std::string &unique_geo_name, const std::string &geo_type_name, const std::string &geo_name) const
+{
+    if (geo_type_name.find("POINT") != std::string::npos)
+    {
+        const GeoLib::PointVec* pnt_vec(getPointVecObj(unique_geo_name));
+        if (pnt_vec)
+        {
+            const GeoLib::Point* pnt(pnt_vec->getElementByName(geo_name));
+            if (pnt == NULL)
+            {
+                std::cerr << "ERROR in GeoIO::readGeoInfo: point name \""
+                          << geo_name << "\" not found!" << std::endl;
+                return NULL;
+            }
+            return pnt;
+        }
+
+        std::cerr << "Error in GeoIO::readGeoInfo: point vector not found!" <<std::endl;
+        return 0;
+    }
+
+    else if (geo_type_name.find("POLYLINE") != std::string::npos)
+    {
+        const GeoLib::PolylineVec* ply_vec = getPolylineVecObj(unique_geo_name);
+        if (ply_vec)
+        {
+            const GeoLib::Polyline* ply(ply_vec->getElementByName(geo_name));
+            if (ply == NULL)
+            {
+                std::cerr << "error in GeoIO::readGeoInfo: polyline name \""
+                          << geo_name << "\" not found!" << std::endl;
+                return NULL;
+            }
+            return ply;
+        }
+
+        std::cerr << "Error in GeoIO::readGeoInfo: polyline vector not found!" <<std::endl;
+        return NULL;
+    }
+
+    else if (geo_type_name.find("SURFACE") != std::string::npos)
+    {
+    GeoLib::SurfaceVec const* sfc_vec (getSurfaceVecObj(unique_geo_name));
+        if (sfc_vec)
+        {
+            const GeoLib::Surface* sfc(sfc_vec->getElementByName(geo_name));
+            if (sfc == NULL)
+            {
+                std::cerr << "Error in GeoIO::readGeoInfo: surface name \""
+                          << geo_name << "\" not found!" << std::endl;
+                return NULL;
+            }
+            return sfc;
+        }
+
+        std::cerr << "Error in GeoIO::readGeoInfo: surface vector not found!" <<std::endl;
+        return NULL;
+    }
+
+    else if (geo_type_name.find("VOLUME") != std::string::npos)
+    {
+        return NULL;
+    }
+
+    else if (geo_type_name.find("DOMAIN") != std::string::npos)
+    {
+        return NULL;
+    }
+
+    return NULL;
+}
 
 } // namespace
