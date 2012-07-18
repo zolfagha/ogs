@@ -1,3 +1,10 @@
+## pthread ##
+SET ( CMAKE_THREAD_PREFER_PTHREAD On )
+FIND_PACKAGE( Threads )
+IF ( CMAKE_USE_PTHREADS_INIT )
+        SET (HAVE_PTHREADS TRUE)
+        MESSAGE (STATUS "pthread library found." )
+ENDIF (CMAKE_USE_PTHREADS_INIT )
 
 FILE(GLOB Test_Files *.h *.cpp)
 SOURCE_GROUP( Test FILES ${Test_Files} )
@@ -40,6 +47,7 @@ TARGET_LINK_LIBRARIES ( tests
 	ogsGeometry
 	ogsMesh
 	ogsNumerics
+    ${CMAKE_THREAD_LIBS_INIT}
 )
 
 
