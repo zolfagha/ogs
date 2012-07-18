@@ -24,6 +24,8 @@ class ITXFunction : public IClonable
 {
 public:
     typedef LocalMatrix DataType;
+    
+    ///
     virtual ~ITXFunction() {};
 
     /// evaluate this function at the given position and return vector data
