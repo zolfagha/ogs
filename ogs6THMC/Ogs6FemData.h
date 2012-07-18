@@ -41,6 +41,10 @@ public:
     BaseLib::OrderedMap<std::string, ProcessLib::Process*> list_pcs;
     //discrete system
     std::vector<DiscreteLib::DiscreteSystem*> list_dis_sys;
+    //
+    std::string project_name;
+    std::string project_dir;
+    std::string output_dir;
 
     ~Ogs6FemData()
     {
