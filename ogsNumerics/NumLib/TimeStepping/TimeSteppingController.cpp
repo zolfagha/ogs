@@ -30,7 +30,7 @@ size_t TimeSteppingController::solve(double time_end)
         }
         TimeStep t_n1(time_current, time_next);
         std::cout << "\n#############################################################" << std::endl;
-        std::cout << "Time step " << t_n1.getTimeStepID() << ": t=" << time_next <<  "s, dt=" << t_n1.getTimeStepSize() << "s " << std::endl  << std::endl;
+        std::cout << "Time step " << t_n1.getTimeStepCount() << ": t=" << time_next <<  "s, dt=" << t_n1.getTimeStepSize() << "s " << std::endl  << std::endl;
         bool isAccepted = (_root_subsystems->solveTimeStep(t_n1)==0);
         if (isAccepted) {
             _root_subsystems->accept(time_next);
@@ -39,7 +39,7 @@ size_t TimeSteppingController::solve(double time_end)
         std::cout << "#############################################################\n" << std::endl;
     }
 
-    return time_current.getTimeStepID();
+    return time_current.getTimeStepCount();
 }
 
 }
