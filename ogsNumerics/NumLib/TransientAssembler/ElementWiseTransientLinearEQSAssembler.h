@@ -42,10 +42,10 @@ public:
 
     /// Conduct the element by element assembly procedure
     ///
-    /// @param msh 				Mesh
-    /// @param dofManager 		Dof map manager
-    /// @param list_dofId 		List of Dof IDs used in this problem
-    /// @param eqs 				Linear equation solver
+    /// @param msh                 Mesh
+    /// @param dofManager         Dof map manager
+    /// @param list_dofId         List of Dof IDs used in this problem
+    /// @param eqs                 Linear equation solver
     void assembly(MeshLib::IMesh &msh, DiscreteLib::DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs);
 
 private:

@@ -17,13 +17,13 @@ namespace BaseLib {
 class CPUTime
 {
 public:
-	virtual void start();
+    virtual void start();
     virtual void stop();
     virtual double elapsed();
-	~CPUTime() {};
+    ~CPUTime() {};
 private:
-	clock_t _start;
-	clock_t _stop;
+    clock_t _start;
+    clock_t _stop;
 };
 
 } // end namespace BaseLib

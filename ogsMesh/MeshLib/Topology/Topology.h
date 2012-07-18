@@ -45,7 +45,7 @@ private:
 class ITopologyNode2Nodes
 {
 public:
-	virtual ~ITopologyNode2Nodes() {};
+    virtual ~ITopologyNode2Nodes() {};
 
     virtual const std::set<size_t>& getConnectedNodes(size_t node_id) const = 0;
     virtual size_t getNumberOfNodes() const = 0;

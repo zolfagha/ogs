@@ -20,16 +20,16 @@ namespace Geo
 
 struct Compound
 {
-	NumLib::ITXFunction* molecular_diffusion;
+    NumLib::ITXFunction* molecular_diffusion;
 
-	Compound()
-	{
-		BaseLib::zeroObject(molecular_diffusion);
-	}
-	~Compound()
-	{
-		BaseLib::releaseObject(molecular_diffusion);
-	}
+    Compound()
+    {
+        BaseLib::zeroObject(molecular_diffusion);
+    }
+    ~Compound()
+    {
+        BaseLib::releaseObject(molecular_diffusion);
+    }
 
 };
 

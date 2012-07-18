@@ -8,9 +8,9 @@ namespace SolutionLib
 {
 
 template <
-	size_t N_IN_PARAMETER,
-	size_t N_OUT_PARAMETER
-	>
+    size_t N_IN_PARAMETER,
+    size_t N_OUT_PARAMETER
+    >
 class AbstractTransientFemFunction
 : public NumLib::AbstractTransientMonolithicSystem
 {
@@ -23,7 +23,7 @@ public:
 
     int solveTimeStep(const NumLib::TimeStep &time)
     {
-    	getSolution()->solveTimeStep(time);
+        getSolution()->solveTimeStep(time);
         updateOutput();
         return 0;
     }
@@ -34,7 +34,7 @@ public:
 
     void accept(const NumLib::TimeStep &time)
     {
-    	getSolution()->accept(time);
+        getSolution()->accept(time);
     };
 
 protected:

@@ -27,35 +27,35 @@
 
 class FemFunctionConvergenceCheck : public IConvergenceCheck
 {
-	FemLib::NormOfFemNodalFunction<double> _norm;
+    FemLib::NormOfFemNodalFunction<double> _norm;
 public:
-	explicit FemFunctionConvergenceCheck(DiscreteLib::DiscreteSystem *dis) : _norm(dis)
-	{
+    explicit FemFunctionConvergenceCheck(DiscreteLib::DiscreteSystem *dis) : _norm(dis)
+    {
 
-	}
+    }
 
-	bool isConverged(UnnamedParameterSet& vars_prev, UnnamedParameterSet& vars_current, double eps, double &v_diff)
-	{
-	    for (size_t i=0; i<vars_prev.size(); i++) {
+    bool isConverged(UnnamedParameterSet& vars_prev, UnnamedParameterSet& vars_current, double eps, double &v_diff)
+    {
+        for (size_t i=0; i<vars_prev.size(); i++) {
 #if 1
-	    	if (vars_prev.getName(i).compare("h")==0 || vars_prev.getName(i).compare("c")==0) {
-		        const FemNodalFunctionScalar* f_fem_prev = vars_prev.get<FemNodalFunctionScalar>(i);
-		        const FemNodalFunctionScalar* f_fem_cur = vars_current.get<FemNodalFunctionScalar>(i);
-	    		//v_diff = f_fem_cur->norm_diff(*f_fem_prev);
-	    		v_diff = _norm(*f_fem_prev, *f_fem_cur);
-	    	} else if (vars_prev.getName(i).compare("v")==0) {
-	    		const FEMIntegrationPointFunctionVector* f_fem_prev = vars_prev.get<FEMIntegrationPointFunctionVector>(i);
-	    		const FEMIntegrationPointFunctionVector* f_fem_cur = vars_current.get<FEMIntegrationPointFunctionVector>(i);
-	    		//v_diff = f_fem_cur->norm_diff(*f_fem_prev);
-	    		v_diff = _norm(*f_fem_prev, *f_fem_cur);
-	    	}
+            if (vars_prev.getName(i).compare("h")==0 || vars_prev.getName(i).compare("c")==0) {
+                const FemNodalFunctionScalar* f_fem_prev = vars_prev.get<FemNodalFunctionScalar>(i);
+                const FemNodalFunctionScalar* f_fem_cur = vars_current.get<FemNodalFunctionScalar>(i);
+                //v_diff = f_fem_cur->norm_diff(*f_fem_prev);
+                v_diff = _norm(*f_fem_prev, *f_fem_cur);
+            } else if (vars_prev.getName(i).compare("v")==0) {
+                const FEMIntegrationPointFunctionVector* f_fem_prev = vars_prev.get<FEMIntegrationPointFunctionVector>(i);
+                const FEMIntegrationPointFunctionVector* f_fem_cur = vars_current.get<FEMIntegrationPointFunctionVector>(i);
+                //v_diff = f_fem_cur->norm_diff(*f_fem_prev);
+                v_diff = _norm(*f_fem_prev, *f_fem_cur);
+            }
 #endif
-	        if (v_diff>eps) {
-	            return false;
-	        }
-	    }
-	    return true;
-	}
+            if (v_diff>eps) {
+                return false;
+            }
+        }
+        return true;
+    }
 };
 
 Geo::GWFemProblem* createGWProblem(DiscreteSystem &dis, Geo::PorousMedia &pm)
@@ -173,39 +173,39 @@ typedef Geo::FunctionStressStrain MyFunctionStressStrain;
 
 TEST(Solution, CouplingFem2D)
 {
-	try {
-	    MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
-	    Rectangle* _rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
-	    Geo::PorousMedia pm;
-	    pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
-	    pm.porosity = new NumLib::TXFunctionConstant(0.2);
-	    DiscreteSystem dis(*msh);
-	    Geo::GWFemProblem* pGW = defineGWProblem(dis, *_rec, pm);
+    try {
+        MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
+        Rectangle* _rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
+        Geo::PorousMedia pm;
+        pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
+        pm.porosity = new NumLib::TXFunctionConstant(0.2);
+        DiscreteSystem dis(*msh);
+        Geo::GWFemProblem* pGW = defineGWProblem(dis, *_rec, pm);
         TimeStepFunctionConstant tim(.0, 100.0, 10.0);
         pGW->setTimeSteppingFunction(tim);
-	    // options
-	    BaseLib::Options options;
-	    BaseLib::Options* op_lis = options.addSubGroup("Lis");
-	    op_lis->addOption("solver_type", "CG");
-	    op_lis->addOption("precon_type", "NONE");
-	    op_lis->addOptionAsNum("error_tolerance", 1e-10);
-	    op_lis->addOptionAsNum("max_iteration_step", 500);
-	    BaseLib::Options* op_nl = options.addSubGroup("Nonlinear");
-	    op_nl->addOption("solver_type", "Picard");
-	    op_nl->addOptionAsNum("error_tolerance", 1e-6);
-	    op_nl->addOptionAsNum("max_iteration_step", 500);
+        // options
+        BaseLib::Options options;
+        BaseLib::Options* op_lis = options.addSubGroup("Lis");
+        op_lis->addOption("solver_type", "CG");
+        op_lis->addOption("precon_type", "NONE");
+        op_lis->addOptionAsNum("error_tolerance", 1e-10);
+        op_lis->addOptionAsNum("max_iteration_step", 500);
+        BaseLib::Options* op_nl = options.addSubGroup("Nonlinear");
+        op_nl->addOption("solver_type", "Picard");
+        op_nl->addOptionAsNum("error_tolerance", 1e-6);
+        op_nl->addOptionAsNum("max_iteration_step", 500);
 
-		MyFunctionHead f_head;
-		f_head.define(&dis, pGW, options);
+        MyFunctionHead f_head;
+        f_head.define(&dis, pGW, options);
         f_head.setOutputParameterName(0, "h");
-		MyFunctionVelocity f_vel;
-		f_vel.define(dis, pm);
+        MyFunctionVelocity f_vel;
+        f_vel.define(dis, pm);
         f_vel.setInputParameterName(0, "h");
         f_vel.setOutputParameterName(0, "v");
 
         FemFunctionConvergenceCheck checker(&dis);
-	    SerialStaggeredMethod method(checker, 1e-5, 100);
-	    AsyncPartitionedSystem apart1;
+        SerialStaggeredMethod method(checker, 1e-5, 100);
+        AsyncPartitionedSystem apart1;
         apart1.setAlgorithm(method);
         apart1.resizeOutputParameter(2);
         apart1.setOutputParameterName(0, "h");
@@ -214,29 +214,29 @@ TEST(Solution, CouplingFem2D)
         apart1.addProblem(f_vel);
         apart1.connectParameters();
 
-	    TimeSteppingController timestepping;
-	    timestepping.addTransientSystem(apart1);
+        TimeSteppingController timestepping;
+        timestepping.addTransientSystem(apart1);
 
-	    //const double epsilon = 1.e-3;
-	    timestepping.setBeginning(.0);
-	    timestepping.solve(1.0);
+        //const double epsilon = 1.e-3;
+        timestepping.setBeginning(.0);
+        timestepping.solve(1.0);
 
-	    const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
-	    const FEMIntegrationPointFunctionVector* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
-	    const IDiscreteVector<double>* vec_h = r_f_head->getNodalValues();
-	    //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
+        const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
+        const FEMIntegrationPointFunctionVector* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
+        const IDiscreteVector<double>* vec_h = r_f_head->getNodalValues();
+        //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
 
-	    r_f_head->printout();
-	    r_f_v->printout();
+        r_f_head->printout();
+        r_f_v->printout();
 
-	    std::vector<double> expected;
-	    getGWExpectedHead(expected);
+        std::vector<double> expected;
+        getGWExpectedHead(expected);
 
-	    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*vec_h)[0], vec_h->size());
+        ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*vec_h)[0], vec_h->size());
 
-	} catch (const char* e) {
-		std::cout << "***Exception caught! " << e << std::endl;
-	}
+    } catch (const char* e) {
+        std::cout << "***Exception caught! " << e << std::endl;
+    }
 
 }
 
@@ -249,8 +249,8 @@ TEST(FEM, line)
         MeshLib::IMesh *msh = MeshGenerator::generateLineMesh(len, div, .0, .0, .0);
         GeoLib::Line* line = new GeoLib::Line(Point(0.0, 0.0, 0.0),  Point(2.0, 0.0, 0.0));
         Geo::PorousMedia pm;
-	    pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
-	    pm.porosity = new NumLib::TXFunctionConstant(0.2);
+        pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
+        pm.porosity = new NumLib::TXFunctionConstant(0.2);
         DiscreteSystem dis(*msh);
         Geo::GWFemProblem* pGW = defineGWProblem1D(dis, *line, pm);
         TimeStepFunctionConstant tim(.0, 10.0, 10.0);
@@ -317,63 +317,63 @@ TEST(FEM, line)
 
 TEST(Solution, CouplingFem2)
 {
-	try {
+    try {
         //space
-	    MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 20, .0, .0, .0);
-	    Rectangle* _rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
+        MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 20, .0, .0, .0);
+        Rectangle* _rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
         //time
         //TimeStepFunctionConstant tim(.0, 1e+3, 1e+3);
         TimeStepFunctionConstant tim(.0, 1e+4, 1e+3);
         //material
-	    Geo::PorousMedia pm;
-	    pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
-	    pm.porosity = new NumLib::TXFunctionConstant(1.0);
-	    Geo::Compound tracer;
-	    tracer.molecular_diffusion = new NumLib::TXFunctionConstant(1.e-6);
+        Geo::PorousMedia pm;
+        pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
+        pm.porosity = new NumLib::TXFunctionConstant(1.0);
+        Geo::Compound tracer;
+        tracer.molecular_diffusion = new NumLib::TXFunctionConstant(1.e-6);
         //problems
-	    DiscreteSystem dis(*msh);
-	    Geo::GWFemProblem* pGW = defineGWProblem(dis, *_rec, pm);
-	    Geo::MassFemProblem* pMass = defineMassTransportProblem(dis, *_rec, pm, tracer);
+        DiscreteSystem dis(*msh);
+        Geo::GWFemProblem* pGW = defineGWProblem(dis, *_rec, pm);
+        Geo::MassFemProblem* pMass = defineMassTransportProblem(dis, *_rec, pm, tracer);
         pGW->setTimeSteppingFunction(tim);
         pMass->setTimeSteppingFunction(tim);
-	    //options
-	    BaseLib::Options optionsGW;
-	    BaseLib::Options* op_lis = optionsGW.addSubGroup("Lis");
-	    op_lis->addOption("solver_type", "CG");
-	    op_lis->addOption("precon_type", "NONE");
-	    op_lis->addOptionAsNum("error_tolerance", 1e-10);
-	    op_lis->addOptionAsNum("max_iteration_step", 1000);
-	    BaseLib::Options* op_nl = optionsGW.addSubGroup("Nonlinear");
-	    op_nl->addOption("solver_type", "Picard");
-	    op_nl->addOptionAsNum("error_tolerance", 1e-6);
-	    op_nl->addOptionAsNum("max_iteration_step", 500);
+        //options
+        BaseLib::Options optionsGW;
+        BaseLib::Options* op_lis = optionsGW.addSubGroup("Lis");
+        op_lis->addOption("solver_type", "CG");
+        op_lis->addOption("precon_type", "NONE");
+        op_lis->addOptionAsNum("error_tolerance", 1e-10);
+        op_lis->addOptionAsNum("max_iteration_step", 1000);
+        BaseLib::Options* op_nl = optionsGW.addSubGroup("Nonlinear");
+        op_nl->addOption("solver_type", "Picard");
+        op_nl->addOptionAsNum("error_tolerance", 1e-6);
+        op_nl->addOptionAsNum("max_iteration_step", 500);
         BaseLib::Options optionsMT;
         op_lis = optionsMT.addSubGroup("Lis");
         op_lis->addOption("solver_type", "BiCG");
         op_lis->addOption("precon_type", "NONE");
         op_lis->addOptionAsNum("error_tolerance", 1e-10);
         op_lis->addOptionAsNum("max_iteration_step", 1000);
-	    BaseLib::Options* op_nl2 = optionsMT.addSubGroup("Nonlinear");
-	    op_nl2->addOption("solver_type", "Picard");
-	    op_nl2->addOptionAsNum("error_tolerance", 1e-6);
-	    op_nl2->addOptionAsNum("max_iteration_step", 500);
+        BaseLib::Options* op_nl2 = optionsMT.addSubGroup("Nonlinear");
+        op_nl2->addOption("solver_type", "Picard");
+        op_nl2->addOptionAsNum("error_tolerance", 1e-6);
+        op_nl2->addOptionAsNum("max_iteration_step", 500);
         // unknowns
-		MyFunctionHead f_head;
-		f_head.define(&dis, pGW, optionsGW);
+        MyFunctionHead f_head;
+        f_head.define(&dis, pGW, optionsGW);
         f_head.setOutputParameterName(0, "h");
-		MyFunctionVelocity f_vel;
-		f_vel.define(dis, pm);
+        MyFunctionVelocity f_vel;
+        f_vel.define(dis, pm);
         f_vel.setInputParameterName(0, "h");
         f_vel.setOutputParameterName(0, "v");
-		MyFunctionConcentration f_c;
-		f_c.define(&dis, pMass, optionsMT);
+        MyFunctionConcentration f_c;
+        f_c.define(&dis, pMass, optionsMT);
         f_c.setInputParameterName(0, "v");
         f_c.setOutputParameterName(0, "c");
 
 
         FemFunctionConvergenceCheck checker(&dis);
         SerialStaggeredMethod method(checker, 1e-5, 100);
-	    AsyncPartitionedSystem apart1;
+        AsyncPartitionedSystem apart1;
         apart1.setAlgorithm(method);
         apart1.resizeOutputParameter(3);
         apart1.setOutputParameterName(0, "h");
@@ -384,42 +384,42 @@ TEST(Solution, CouplingFem2)
         apart1.addProblem(f_c);
         apart1.connectParameters();
 
-	    TimeSteppingController timestepping;
-	    timestepping.addTransientSystem(apart1);
+        TimeSteppingController timestepping;
+        timestepping.addTransientSystem(apart1);
 
-	    //const double epsilon = 1.e-3;
-	    timestepping.setBeginning(.0);
-	    timestepping.solve(tim.getEnd());
+        //const double epsilon = 1.e-3;
+        timestepping.setBeginning(.0);
+        timestepping.solve(tim.getEnd());
 
-	    const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
-	    const FEMIntegrationPointFunctionVector* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
-	    const FemNodalFunctionScalar* r_f_c = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("c"));
-	    const IDiscreteVector<double>* vec_h = r_f_head->getNodalValues();
-	    //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
-	    const IDiscreteVector<double>* vec_c = r_f_c->getNodalValues();
+        const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
+        const FEMIntegrationPointFunctionVector* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
+        const FemNodalFunctionScalar* r_f_c = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("c"));
+        const IDiscreteVector<double>* vec_h = r_f_head->getNodalValues();
+        //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
+        const IDiscreteVector<double>* vec_c = r_f_c->getNodalValues();
 
-	    //r_f_head->printout();
-	    //r_f_v->printout();
+        //r_f_head->printout();
+        //r_f_v->printout();
 //#undef OUTPUT_C
 #define OUTPUT_C
 #ifdef OUTPUT_C
         r_f_c->printout();
 #endif
-	    std::vector<double> expectedHead(21);
-    	const double p_left = 2.e+6;
-    	const double p_right = .0;
-    	const double x_len = 2.0;
+        std::vector<double> expectedHead(21);
+        const double p_left = 2.e+6;
+        const double p_right = .0;
+        const double x_len = 2.0;
 #ifdef OUTPUT_C
         std::cout << std::endl << "expected p=";
 #endif
         for (size_t i=0; i<expectedHead.size(); i++) {
-        	double x = i*0.1;
-        	expectedHead[i] = (p_right-p_left) / x_len * x + p_left;
+            double x = i*0.1;
+            expectedHead[i] = (p_right-p_left) / x_len * x + p_left;
 #ifdef OUTPUT_C
             std::cout << expectedHead[i] << " ";
 #endif
         }
-//	    getGWExpectedHead(expectedHead);
+//        getGWExpectedHead(expectedHead);
         ASSERT_DOUBLE_ARRAY_EQ(&expectedHead[0], &(*vec_h)[0], expectedHead.size(), 1e-5);
 
 
@@ -438,57 +438,57 @@ TEST(Solution, CouplingFem2)
 #ifdef OUTPUT_C
         std::cout << std::endl;
 #endif
-	    ASSERT_DOUBLE_ARRAY_EQ(&expectedC[0], &(*vec_c)[0], expectedC.size(), 5e-2);
+        ASSERT_DOUBLE_ARRAY_EQ(&expectedC[0], &(*vec_c)[0], expectedC.size(), 5e-2);
 
 
-	} catch (const char* e) {
-		std::cout << "***Exception caught! " << e << std::endl;
-	}
+    } catch (const char* e) {
+        std::cout << "***Exception caught! " << e << std::endl;
+    }
 
 }
 
 #if 1
 TEST(Fem, LinearElastic2D)
 {
-	try {
-	    MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
-	    Rectangle* _rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
-	    Geo::PorousMedia pm;
-	    pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
-	    pm.porosity = new NumLib::TXFunctionConstant(0.2);
+    try {
+        MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
+        Rectangle* _rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
+        Geo::PorousMedia pm;
+        pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
+        pm.porosity = new NumLib::TXFunctionConstant(0.2);
         Geo::Solid solid;
         solid.density = 3e+3;
         solid.poisson_ratio = 0.2;
         solid.Youngs_modulus = 10e+9;
         pm.solidphase = &solid;
-	    DiscreteSystem dis(*msh);
-	    Geo::FemLinearElasticProblem* pDe = defineLinearElasticProblem(dis, *_rec, pm);
+        DiscreteSystem dis(*msh);
+        Geo::FemLinearElasticProblem* pDe = defineLinearElasticProblem(dis, *_rec, pm);
         TimeStepFunctionConstant tim(.0, 10.0, 10.0);
         pDe->setTimeSteppingFunction(tim);
-	    // options
-	    BaseLib::Options options;
-	    BaseLib::Options* op_lis = options.addSubGroup("Lis");
-	    op_lis->addOption("solver_type", "CG");
-	    op_lis->addOption("precon_type", "NONE");
-	    op_lis->addOptionAsNum("error_tolerance", 1e-10);
-	    op_lis->addOptionAsNum("max_iteration_step", 500);
-	    BaseLib::Options* op_nl = options.addSubGroup("Nonlinear");
-	    op_nl->addOption("solver_type", "Linear");
-	    op_nl->addOptionAsNum("error_tolerance", 1e-6);
-	    op_nl->addOptionAsNum("max_iteration_step", 500);
+        // options
+        BaseLib::Options options;
+        BaseLib::Options* op_lis = options.addSubGroup("Lis");
+        op_lis->addOption("solver_type", "CG");
+        op_lis->addOption("precon_type", "NONE");
+        op_lis->addOptionAsNum("error_tolerance", 1e-10);
+        op_lis->addOptionAsNum("max_iteration_step", 500);
+        BaseLib::Options* op_nl = options.addSubGroup("Nonlinear");
+        op_nl->addOption("solver_type", "Linear");
+        op_nl->addOptionAsNum("error_tolerance", 1e-6);
+        op_nl->addOptionAsNum("max_iteration_step", 500);
 
-		MyFunctionDisplacement f_u;
-		f_u.define(&dis, pDe, &pm, options);
-		f_u.setOutputParameterName(0, "u_x");
-		f_u.setOutputParameterName(1, "u_y");
-		f_u.setOutputParameterName(2, "Strain");
-		f_u.setOutputParameterName(3, "Stress");
-//		MyFunctionStressStrain f_sigma;
-//		f_sigma.setOutputParameterName(0, "strain_xx");
+        MyFunctionDisplacement f_u;
+        f_u.define(&dis, pDe, &pm, options);
+        f_u.setOutputParameterName(0, "u_x");
+        f_u.setOutputParameterName(1, "u_y");
+        f_u.setOutputParameterName(2, "Strain");
+        f_u.setOutputParameterName(3, "Stress");
+//        MyFunctionStressStrain f_sigma;
+//        f_sigma.setOutputParameterName(0, "strain_xx");
 
         FemFunctionConvergenceCheck checker(&dis);
-	    SerialStaggeredMethod method(checker, 1e-5, 100);
-	    AsyncPartitionedSystem apart1;
+        SerialStaggeredMethod method(checker, 1e-5, 100);
+        AsyncPartitionedSystem apart1;
         apart1.setAlgorithm(method);
         apart1.resizeOutputParameter(4);
         apart1.setOutputParameterName(0, "u_x");
@@ -498,26 +498,26 @@ TEST(Fem, LinearElastic2D)
         apart1.addProblem(f_u);
         apart1.connectParameters();
 
-	    TimeSteppingController timestepping;
-	    timestepping.addTransientSystem(apart1);
+        TimeSteppingController timestepping;
+        timestepping.addTransientSystem(apart1);
 
-	    //const double epsilon = 1.e-3;
-	    timestepping.setBeginning(.0);
-	    timestepping.solve(1.0);
+        //const double epsilon = 1.e-3;
+        timestepping.setBeginning(.0);
+        timestepping.solve(1.0);
 
-	    const FemNodalFunctionScalar* r_f_ux = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("u_x"));
-	    const FemNodalFunctionScalar* r_f_uy = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("u_y"));
-	    const FEMIntegrationPointFunctionVector* r_f_strain = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("Strain"));
-	    const FEMIntegrationPointFunctionVector* r_f_stress = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("Stress"));
-	    const IDiscreteVector<double>* vec_r_f_ux = r_f_ux->getNodalValues();
-	    const IDiscreteVector<double>* vec_r_f_uy = r_f_uy->getNodalValues();
-	    const FEMIntegrationPointFunctionVector::DiscreteVectorType* vec_strain = r_f_strain->getNodalValues();
-	    const FEMIntegrationPointFunctionVector::DiscreteVectorType* vec_stress = r_f_stress->getNodalValues();
+        const FemNodalFunctionScalar* r_f_ux = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("u_x"));
+        const FemNodalFunctionScalar* r_f_uy = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("u_y"));
+        const FEMIntegrationPointFunctionVector* r_f_strain = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("Strain"));
+        const FEMIntegrationPointFunctionVector* r_f_stress = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("Stress"));
+        const IDiscreteVector<double>* vec_r_f_ux = r_f_ux->getNodalValues();
+        const IDiscreteVector<double>* vec_r_f_uy = r_f_uy->getNodalValues();
+        const FEMIntegrationPointFunctionVector::DiscreteVectorType* vec_strain = r_f_strain->getNodalValues();
+        const FEMIntegrationPointFunctionVector::DiscreteVectorType* vec_stress = r_f_stress->getNodalValues();
 
-//	    r_f_ux->printout();
-//	    r_f_uy->printout();
-//	    r_f_strain->printout();
-//	    r_f_stress->printout();
+//        r_f_ux->printout();
+//        r_f_uy->printout();
+//        r_f_strain->printout();
+//        r_f_stress->printout();
 
         const NumLib::LocalVector &strain1 = (*vec_strain)[0][0];
         const NumLib::LocalVector &stress1 = (*vec_stress)[0][0];
@@ -531,7 +531,7 @@ TEST(Fem, LinearElastic2D)
         double exy = 2*(1+nu)/E*sxy;
         double sz = nu*E/((1.+nu)*(1-2*nu))*(ex+ey);
         double epsilon = 1e-6;
-	    ASSERT_NEAR(ex, strain1(0), epsilon);
+        ASSERT_NEAR(ex, strain1(0), epsilon);
         ASSERT_NEAR(ey, strain1(1), epsilon);
         ASSERT_NEAR(.0, strain1(2), epsilon);
         ASSERT_NEAR(exy, strain1(3), epsilon);
@@ -541,9 +541,9 @@ TEST(Fem, LinearElastic2D)
         ASSERT_NEAR(sz, stress1(2), epsilon);
         ASSERT_NEAR(sxy, stress1(3), epsilon);
 
-	} catch (const char* e) {
-		std::cout << "***Exception caught! " << e << std::endl;
-	}
+    } catch (const char* e) {
+        std::cout << "***Exception caught! " << e << std::endl;
+    }
 
 }
 #endif

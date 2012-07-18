@@ -32,13 +32,13 @@ namespace ogs5
 **************************************************************************/
 CInitialCondition::CInitialCondition() 
 {
-	//  geo_type_name = "DOMAIN";
-	this->setProcessDistributionType(FiniteElement::CONSTANT);
-	// HS: not needed, removed.
-	// m_node = new CNodeValue();
-	// m_node->node_value = 0.0;
-	SubNumber = 0;
-	this->setProcess(NULL);               //OK
+    //  geo_type_name = "DOMAIN";
+    this->setProcessDistributionType(FiniteElement::CONSTANT);
+    // HS: not needed, removed.
+    // m_node = new CNodeValue();
+    // m_node->node_value = 0.0;
+    SubNumber = 0;
+    this->setProcess(NULL);               //OK
 
 }
 
@@ -74,47 +74,47 @@ CInitialCondition::~CInitialCondition(void)
 bool ICRead(const std::string& file_base_name,
             std::vector<CInitialCondition*> &ic_vector)
 {
-	// File handling
-	std::string ic_file_name = file_base_name + IC_FILE_EXTENSION;
-	std::ifstream ic_file(ic_file_name.data(), std::ios::in);
-	if (!ic_file.good())
-	{
-		std::cout << "WARNING: ICRead: No initial conditions !" << std::endl;
-		return false;
-	}
+    // File handling
+    std::string ic_file_name = file_base_name + IC_FILE_EXTENSION;
+    std::ifstream ic_file(ic_file_name.data(), std::ios::in);
+    if (!ic_file.good())
+    {
+        std::cout << "WARNING: ICRead: No initial conditions !" << std::endl;
+        return false;
+    }
 
-	char line[MAX_ZEILE];
-	std::string line_string;
-	std::ios::pos_type position;
+    char line[MAX_ZEILE];
+    std::string line_string;
+    std::ios::pos_type position;
 
-	// Keyword loop
-	std::cout << "ICRead" << std::endl;
-	while (!ic_file.eof())
-	{
-		ic_file.getline(line, MAX_ZEILE);
-		line_string = line;
-		if (line_string.find("#STOP") != string::npos)
-			return true;
+    // Keyword loop
+    std::cout << "ICRead" << std::endl;
+    while (!ic_file.eof())
+    {
+        ic_file.getline(line, MAX_ZEILE);
+        line_string = line;
+        if (line_string.find("#STOP") != string::npos)
+            return true;
 
-		// keyword found
-		if (line_string.find("#INITIAL_CONDITION") != std::string::npos)
-		{
-			CInitialCondition* ic = new CInitialCondition();
-			std::ios::pos_type pos (ic_file.tellg());
-			position = ic->Read(&ic_file);
-			if (pos != position)
-				ic_vector.push_back(ic);
-			else
-			{
-				std::cerr <<
-				"WARNING: in ICRead: could not read initial condition" << std::endl;
-				delete ic;
-			}
-			ic = NULL;
-			ic_file.seekg(position, ios::beg);
-		}                         // keyword found
-	}                                     // eof
-	return true;
+        // keyword found
+        if (line_string.find("#INITIAL_CONDITION") != std::string::npos)
+        {
+            CInitialCondition* ic = new CInitialCondition();
+            std::ios::pos_type pos (ic_file.tellg());
+            position = ic->Read(&ic_file);
+            if (pos != position)
+                ic_vector.push_back(ic);
+            else
+            {
+                std::cerr <<
+                "WARNING: in ICRead: could not read initial condition" << std::endl;
+                delete ic;
+            }
+            ic = NULL;
+            ic_file.seekg(position, ios::beg);
+        }                         // keyword found
+    }                                     // eof
+    return true;
 }
 
 
@@ -133,123 +133,123 @@ bool ICRead(const std::string& file_base_name,
 **************************************************************************/
 ios::pos_type CInitialCondition::Read(std::ifstream* ic_file)
 {
-	string line_string;
-	std::stringstream in;
-	ios::pos_type position;
+    string line_string;
+    std::stringstream in;
+    ios::pos_type position;
 
-	bool new_keyword = false;
-	int ibuf (0);
-	double d_buf (0.0);
+    bool new_keyword = false;
+    int ibuf (0);
+    double d_buf (0.0);
 
-	// read loop
-	while (!new_keyword)
-	{
-		position = ic_file->tellg();
-		line_string = readNonBlankLineFromInputStream(*ic_file);
-		if (line_string.size() < 1)
-			break;
-		if (line_string.find("#") != string::npos)
-		{
-			new_keyword = true;
-			break;
-		}
-		//....................................................................
-		// subkeyword found
-		if (line_string.find("$PCS_TYPE") != string::npos)
-		{
-			in.str(readNonBlankLineFromInputStream(*ic_file));
-			std::string tmp;
-			in >> tmp;    // pcs_type_name;
-			this->setProcessType(FiniteElement::convertProcessType(tmp));
-			in.clear();
-			continue;
-		}
-		//....................................................................
-		// subkeyword found
-		if (line_string.find("$PRIMARY_VARIABLE") != string::npos)
-		{
-			in.str(readNonBlankLineFromInputStream(*ic_file));
-			in >> primaryvariable_name;    // pcs_pv_name;
-			in.clear();
-			continue;
-		}
-		//....................................................................
-		// subkeyword found
-		if (line_string.find("$COMP_NAME") != string::npos)
-		{
+    // read loop
+    while (!new_keyword)
+    {
+        position = ic_file->tellg();
+        line_string = readNonBlankLineFromInputStream(*ic_file);
+        if (line_string.size() < 1)
+            break;
+        if (line_string.find("#") != string::npos)
+        {
+            new_keyword = true;
+            break;
+        }
+        //....................................................................
+        // subkeyword found
+        if (line_string.find("$PCS_TYPE") != string::npos)
+        {
             in.str(readNonBlankLineFromInputStream(*ic_file));
-			std::string tmp;
-			in >> tmp;
-			in.clear();
-			continue;
-		}
-		//....................................................................
-		// subkeyword found
-		if (line_string.find("$DIS_TYPE") != string::npos)
-		{
+            std::string tmp;
+            in >> tmp;    // pcs_type_name;
+            this->setProcessType(FiniteElement::convertProcessType(tmp));
+            in.clear();
+            continue;
+        }
+        //....................................................................
+        // subkeyword found
+        if (line_string.find("$PRIMARY_VARIABLE") != string::npos)
+        {
             in.str(readNonBlankLineFromInputStream(*ic_file));
-			std::string tmp;
-			in >> tmp;    // dis_type_name;
-			this->setProcessDistributionType(FiniteElement::convertDisType(tmp));
+            in >> primaryvariable_name;    // pcs_pv_name;
+            in.clear();
+            continue;
+        }
+        //....................................................................
+        // subkeyword found
+        if (line_string.find("$COMP_NAME") != string::npos)
+        {
+            in.str(readNonBlankLineFromInputStream(*ic_file));
+            std::string tmp;
+            in >> tmp;
+            in.clear();
+            continue;
+        }
+        //....................................................................
+        // subkeyword found
+        if (line_string.find("$DIS_TYPE") != string::npos)
+        {
+            in.str(readNonBlankLineFromInputStream(*ic_file));
+            std::string tmp;
+            in >> tmp;    // dis_type_name;
+            this->setProcessDistributionType(FiniteElement::convertDisType(tmp));
 
-			if (this->getProcessDistributionType() == FiniteElement::CONSTANT)
-				//KR CNodeValue* m_node = new CNodeValue();
-				//KR node_value_vector.push_back(m_node);
-				in >> geo_node_value;
-			else if (this->getProcessDistributionType() == FiniteElement::GRADIENT)
-			{
-				in >> gradient_ref_depth; //CMCD
-				in >> gradient_ref_depth_value; //CMCD
-				in >> gradient_ref_depth_gradient; //CMCD
-			}
-			else if (this->getProcessDistributionType() == FiniteElement::RESTART)
-				in >> rfr_file_name;
-			else if (this->getProcessDistributionType() == FiniteElement::DIRECT)
-			{
-				in >> fname;
-			}
-			in.clear();
-			continue;
-		}
-		//....................................................................
-		//subkeyword found
-		if (line_string.find("$GEO_TYPE") != string::npos)
-		{
+            if (this->getProcessDistributionType() == FiniteElement::CONSTANT)
+                //KR CNodeValue* m_node = new CNodeValue();
+                //KR node_value_vector.push_back(m_node);
+                in >> geo_node_value;
+            else if (this->getProcessDistributionType() == FiniteElement::GRADIENT)
+            {
+                in >> gradient_ref_depth; //CMCD
+                in >> gradient_ref_depth_value; //CMCD
+                in >> gradient_ref_depth_gradient; //CMCD
+            }
+            else if (this->getProcessDistributionType() == FiniteElement::RESTART)
+                in >> rfr_file_name;
+            else if (this->getProcessDistributionType() == FiniteElement::DIRECT)
+            {
+                in >> fname;
+            }
+            in.clear();
+            continue;
+        }
+        //....................................................................
+        //subkeyword found
+        if (line_string.find("$GEO_TYPE") != string::npos)
+        {
             in.str(readNonBlankLineFromInputStream(*ic_file));
-			in >> geo_type_name;
-			if (geo_type_name.find("POINT") != string::npos)
-			{
-				in >> geo_name;
-				in.clear();
-				geo_name = ""; // REMOVE CANDIDATE
-			}
-			if (geo_type_name.find("POLYLINE") != string::npos)
-			{
-				in >> geo_name;
-			}
-			if (geo_type_name.find("SURFACE") != string::npos)
-			{
-				in >> geo_name;
-			}
-			//if (geo_type_name.find("VOLUME") != string::npos)
-			if (geo_type_name.find("DOMAIN") != string::npos)
-			{
-				//  Give initial condition by patches of domain. WW
-				if (geo_type_name.find("SUB") != string::npos)
-				{
-					*ic_file >> SubNumber;
-					for (size_t i = 0; i < SubNumber; i++)
-					{
-						*ic_file >> ibuf >> d_buf;
-						subdom_index.push_back(ibuf);
-						subdom_ic.push_back(d_buf);
-					}
-				}
-			}
-			in.clear();
-			continue;
-		}
-	}                                     // Schleife ueber alle Phasen bzw. Komponenten
-	return position;
+            in >> geo_type_name;
+            if (geo_type_name.find("POINT") != string::npos)
+            {
+                in >> geo_name;
+                in.clear();
+                geo_name = ""; // REMOVE CANDIDATE
+            }
+            if (geo_type_name.find("POLYLINE") != string::npos)
+            {
+                in >> geo_name;
+            }
+            if (geo_type_name.find("SURFACE") != string::npos)
+            {
+                in >> geo_name;
+            }
+            //if (geo_type_name.find("VOLUME") != string::npos)
+            if (geo_type_name.find("DOMAIN") != string::npos)
+            {
+                //  Give initial condition by patches of domain. WW
+                if (geo_type_name.find("SUB") != string::npos)
+                {
+                    *ic_file >> SubNumber;
+                    for (size_t i = 0; i < SubNumber; i++)
+                    {
+                        *ic_file >> ibuf >> d_buf;
+                        subdom_index.push_back(ibuf);
+                        subdom_ic.push_back(d_buf);
+                    }
+                }
+            }
+            in.clear();
+            continue;
+        }
+    }                                     // Schleife ueber alle Phasen bzw. Komponenten
+    return position;
 }
 }

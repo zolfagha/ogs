@@ -29,28 +29,28 @@ namespace Geo
 {
 
 typedef TemplateFemEquation<
-		Geo::FemLinearElasticLinearLocalAssembler,
-		Geo::FemLinearElasticResidualLocalAssembler,
-		Geo::FemLinearElasticJacobianLocalAssembler
-		>
-		FemLinearElasticEquation;
+        Geo::FemLinearElasticLinearLocalAssembler,
+        Geo::FemLinearElasticResidualLocalAssembler,
+        Geo::FemLinearElasticJacobianLocalAssembler
+        >
+        FemLinearElasticEquation;
 
 typedef FemIVBVProblem< FemLinearElasticEquation > FemLinearElasticProblem;
 
 
 
 template <
-	class T_LINEAR_SOLVER
-	>
+    class T_LINEAR_SOLVER
+    >
 class FunctionDisplacement : public TemplateTransientMonolithicSystem
 {
     enum Out { u_x=0, u_y=1, Strain=2, Stress=3 };
 public:
     typedef SingleStepFEM
-    		<
-    			FemLinearElasticProblem,
-    			T_LINEAR_SOLVER
-    		> MySolution;
+            <
+                FemLinearElasticProblem,
+                T_LINEAR_SOLVER
+            > MySolution;
 
     FunctionDisplacement()
     {
@@ -59,8 +59,8 @@ public:
 
     void define(DiscreteSystem* dis, FemLinearElasticProblem* problem_u, Geo::PorousMedia* pm, BaseLib::Options &option)
     {
-    	_dis = dis;
-    	_pm = pm;
+        _dis = dis;
+        _pm = pm;
         //solution algorithm
         _sol_u = new MySolution(dis, problem_u);
         //_solHead->getTimeODEAssembler()->setTheta(1.0);
@@ -83,12 +83,12 @@ public:
         FemLib::FEMIntegrationPointFunctionVector* stress = _stress;
         FemLib::LagrangianFeObjectContainer* feObjects = ux->getFeObjectContainer();
 
-		const size_t dim = msh->getDimension();
-		const size_t n_strain_components = (dim==2 ? 4 : 6);
-		Solid *solidphase = _pm->solidphase;
+        const size_t dim = msh->getDimension();
+        const size_t n_strain_components = (dim==2 ? 4 : 6);
+        Solid *solidphase = _pm->solidphase;
 
         // set D
-		NumLib::LocalMatrix matD = NumLib::LocalMatrix::Zero(n_strain_components, n_strain_components);
+        NumLib::LocalMatrix matD = NumLib::LocalMatrix::Zero(n_strain_components, n_strain_components);
         //matD *= .0;
         double nv = solidphase->poisson_ratio;
         double E = solidphase->Youngs_modulus;
@@ -99,9 +99,9 @@ public:
         //calculate strain, stress
         for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++)
         {
-        	// element setup
+            // element setup
             MeshLib::IElement* e = msh->getElemenet(i_e);
-    		const size_t nnodes = e->getNumberOfNodes();
+            const size_t nnodes = e->getNumberOfNodes();
             FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
             FemLib::IFemNumericalIntegration *integral = fe->getIntegrationMethod();
             const size_t n_gp = integral->getNumberOfSamplingPoints();
@@ -111,14 +111,14 @@ public:
             // local u
             NumLib::LocalVector local_u(dim*nnodes);
             for (size_t j=0; j<nnodes; j++) {
-            	const size_t node_id = e->getNodeID(j);
-				local_u[j*dim] = ux->getValue(node_id);
-				local_u[j*dim+1] = uy->getValue(node_id);
+                const size_t node_id = e->getNodeID(j);
+                local_u[j*dim] = ux->getValue(node_id);
+                local_u[j*dim+1] = uy->getValue(node_id);
             }
 
             // for each integration points
             NumLib::LocalMatrix matB(n_strain_components, nnodes*dim);
-    		NumLib::LocalMatrix matN(dim, nnodes*dim);
+            NumLib::LocalMatrix matN(dim, nnodes*dim);
             double r[3] = {};
             double x[3] = {};
             for (size_t ip=0; ip<n_gp; ip++) {

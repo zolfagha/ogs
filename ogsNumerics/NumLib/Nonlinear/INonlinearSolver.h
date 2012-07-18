@@ -13,16 +13,16 @@ namespace NumLib
 class INonlinearSolver
 {
 public:
-	typedef DiscreteLib::IDiscreteVector<double> VectorType;
+    typedef DiscreteLib::IDiscreteVector<double> VectorType;
 
-	virtual ~INonlinearSolver() {};
+    virtual ~INonlinearSolver() {};
 
-	virtual void solve(const VectorType &x_0, VectorType &x_new) = 0;
+    virtual void solve(const VectorType &x_0, VectorType &x_new) = 0;
 
-	NonlinerSolverOption& getOption() {return _option;};
-	void setOption(const NonlinerSolverOption &option) {_option = option;};
+    NonlinerSolverOption& getOption() {return _option;};
+    void setOption(const NonlinerSolverOption &option) {_option = option;};
 protected:
-	NonlinerSolverOption _option;
+    NonlinerSolverOption _option;
 };
 
 } //end

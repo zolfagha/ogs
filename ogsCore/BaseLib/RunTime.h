@@ -23,17 +23,17 @@ namespace BaseLib {
 class RunTime : public TimeMeasurementBase
 {
 public:
-	virtual void start();
-	virtual void stop();
-	virtual double elapsed();
-	~RunTime() {};
+    virtual void start();
+    virtual void stop();
+    virtual double elapsed();
+    ~RunTime() {};
 private:
 #ifndef _WIN32
-	timeval _start;
-	timeval _stop;
+    timeval _start;
+    timeval _stop;
 #else
-	unsigned long _start;
-	unsigned long _stop;
+    unsigned long _start;
+    unsigned long _stop;
 #endif
 };
 

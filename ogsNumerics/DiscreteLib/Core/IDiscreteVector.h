@@ -35,13 +35,13 @@ public:
     }
     virtual void operator+= (const IDiscreteVector<T>& v)
     {
-    	for (size_t i=getRangeBegin(); i<getRangeEnd(); i++)
-    		(*this)[i] += v[i];
+        for (size_t i=getRangeBegin(); i<getRangeEnd(); i++)
+            (*this)[i] += v[i];
     }
     virtual void operator-= (const IDiscreteVector<T>& v)
     {
-    	for (size_t i=getRangeBegin(); i<getRangeEnd(); i++)
-    		(*this)[i] -= v[i];
+        for (size_t i=getRangeBegin(); i<getRangeEnd(); i++)
+            (*this)[i] -= v[i];
     }
 
     virtual IDiscreteVector<T>& operator= (T v)
@@ -53,10 +53,10 @@ public:
 
     virtual void addSubvector(std::vector<size_t> pos, T* local_v)
     {
-    	for (size_t i=0; i<pos.size(); ++i) {
+        for (size_t i=0; i<pos.size(); ++i) {
             if (pos[i]==BaseLib::index_npos) continue;
-    		(*this)[pos[i]] += local_v[i];
-    	}
+            (*this)[pos[i]] += local_v[i];
+        }
     }
 
     //virtual typename std::vector<T>::iterator begin() = 0;

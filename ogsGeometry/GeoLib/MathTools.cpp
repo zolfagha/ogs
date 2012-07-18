@@ -7,13 +7,13 @@ namespace GeoLib
 
 double sqrNrm2 (const GeoLib::Point* p0)
 {
-	return MathLib::scpr (p0->getData(), p0->getData(), 3);
+    return MathLib::scpr (p0->getData(), p0->getData(), 3);
 }
 
 double sqrDist (const GeoLib::Point* p0, const GeoLib::Point* p1)
 {
-	const double v[3] = {(*p1)[0] - (*p0)[0], (*p1)[1] - (*p0)[1], (*p1)[2] - (*p0)[2]};
-	return MathLib::scpr (v, v, 3);
+    const double v[3] = {(*p1)[0] - (*p0)[0], (*p1)[1] - (*p0)[1], (*p1)[2] - (*p0)[2]};
+    return MathLib::scpr (v, v, 3);
 }
 
 bool checkDistance(GeoLib::Point const &p0, GeoLib::Point const &p1, double squaredDistance)

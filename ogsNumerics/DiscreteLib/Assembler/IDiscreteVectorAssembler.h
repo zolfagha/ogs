@@ -20,9 +20,9 @@ template <class T>
 class IDiscreteVectorAssembler
 {
 public:
-	typedef IDiscreteVector<T> VectorType;
+    typedef IDiscreteVector<T> VectorType;
 
-	virtual ~IDiscreteVectorAssembler() {};
+    virtual ~IDiscreteVectorAssembler() {};
 
     /// Conduct the element by element assembly procedure
     ///

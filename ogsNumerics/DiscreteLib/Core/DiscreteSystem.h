@@ -46,17 +46,17 @@ public:
     /// @tparam T_LINEAR_EQUATION
     /// @tparam T_LINEAR_SOLVER
     /// @tparam T_SPARSITY_BUILDER
-    /// @param linear_solver 		Linear solver
-    /// @param dofManager			Equation index table
-	template <template <class, class> class T_LINEAR_EQUATION, class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
-	IDiscreteLinearEquation* createLinearEquation(T_LINEAR_SOLVER &linear_solver, DofEquationIdTable &dofManager)
-	{
-		IDiscreteLinearEquation *eq = new T_LINEAR_EQUATION<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_msh, linear_solver, dofManager);
-		_data.addLinearEquation(eq);
-		return eq;
-	}
+    /// @param linear_solver         Linear solver
+    /// @param dofManager            Equation index table
+    template <template <class, class> class T_LINEAR_EQUATION, class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
+    IDiscreteLinearEquation* createLinearEquation(T_LINEAR_SOLVER &linear_solver, DofEquationIdTable &dofManager)
+    {
+        IDiscreteLinearEquation *eq = new T_LINEAR_EQUATION<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_msh, linear_solver, dofManager);
+        _data.addLinearEquation(eq);
+        return eq;
+    }
 
-	/// delete this linear equation object
+    /// delete this linear equation object
     void deleteLinearEquation(IDiscreteLinearEquation* eqs)
     {
         if (eqs!=0) {
@@ -65,26 +65,26 @@ public:
         }
     }
 
-	/// create a new vector
-	/// @param n	vector length
-	/// @return vector object
+    /// create a new vector
+    /// @param n    vector length
+    /// @return vector object
     template<class T_VECTOR>
     T_VECTOR* createVector(const size_t n)
     {
-    	T_VECTOR* v = new T_VECTOR(n);
+        T_VECTOR* v = new T_VECTOR(n);
         _data.addVector(v);
         return v;
     };
 
-	/// delete this vector object
-	/// @param n	vector length
-	/// @return vector object
+    /// delete this vector object
+    /// @param n    vector length
+    /// @return vector object
     void deleteVector(IDiscreteResource* v)
     {
-    	if (v!=0) {
+        if (v!=0) {
             _data.eraseVector(v);
             delete v;
-    	}
+        }
     };
 
 private:

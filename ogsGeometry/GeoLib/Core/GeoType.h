@@ -17,13 +17,13 @@ namespace GeoLib {
  */
 
 enum GEOTYPE {
-	INVALID = 0,
-	POINT,     //!< POINT
-	POLYLINE,  //!< POLYLINE
-	SURFACE,   //!< SURFACE
-	VOLUME,    //!< VOLUME
-	GEODOMAIN, //!< GEODOMAIN
-	COLUMN     //!< COLUMN. //WW/JOD 
+    INVALID = 0,
+    POINT,     //!< POINT
+    POLYLINE,  //!< POLYLINE
+    SURFACE,   //!< SURFACE
+    VOLUME,    //!< VOLUME
+    GEODOMAIN, //!< GEODOMAIN
+    COLUMN     //!< COLUMN. //WW/JOD 
 };
 
 GEOTYPE convertGeoType (const std::string& geo_type_str);

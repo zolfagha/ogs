@@ -22,8 +22,8 @@ template <typename T_BASE>
 class IOSystem : public T_BASE
 {
 public:
-	IOSystem() {};
-	virtual ~IOSystem() {};
+    IOSystem() {};
+    virtual ~IOSystem() {};
 
     /// get the number of input parameters
     virtual size_t getNumberOfInputParameters() const { return _in_parameters.size(); };
@@ -31,7 +31,7 @@ public:
     /// set input parameter
     virtual void setInput(size_t i, const Parameter* val)
     {
-    	_in_parameters[i] = val;
+        _in_parameters[i] = val;
     }
 
     /// get the number of output parameters
@@ -40,7 +40,7 @@ public:
     /// get output parameter
     virtual const Parameter* getOutput(size_t i) const
     {
-    	return _out_parameters[i];
+        return _out_parameters[i];
     }
 
     // original functions in this class
@@ -55,13 +55,13 @@ protected:
     /// register input parameter
     void resizeInputParameter(size_t n)
     {
-    	_in_parameters.resize(n, 0);
+        _in_parameters.resize(n, 0);
     }
 
     /// register output parameter
     void resizeOutputParameter(size_t n)
     {
-    	_out_parameters.resize(n, 0);
+        _out_parameters.resize(n, 0);
     }
 
     /// get input parameter
@@ -80,7 +80,7 @@ protected:
     /// set output parameter
     void setOutput(size_t i, const Parameter* val)
     {
-    	_out_parameters[i] = val;
+        _out_parameters[i] = val;
     }
 
 private:

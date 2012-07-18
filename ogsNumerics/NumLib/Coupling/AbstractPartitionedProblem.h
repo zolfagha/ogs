@@ -18,11 +18,11 @@ template <class T_PROBLEM>
 class AbstractPartitionedProblem : public NamedDynamicIOSystem<T_PROBLEM>
 {
 public:
-	typedef size_t InternalID;
-	typedef NamedDynamicIOSystem<T_PROBLEM> BaseClass;
+    typedef size_t InternalID;
+    typedef NamedDynamicIOSystem<T_PROBLEM> BaseClass;
 
     ///
-	AbstractPartitionedProblem() {};
+    AbstractPartitionedProblem() {};
 
     ///
     virtual ~AbstractPartitionedProblem() {};
@@ -77,7 +77,7 @@ public:
     /// add parameter without giving reference
     virtual void addInputParameter(const std::string& key)
     {
-    	InternalID n = NamedDynamicIOSystem<T_PROBLEM>::registerInputParameter(key);
+        InternalID n = NamedDynamicIOSystem<T_PROBLEM>::registerInputParameter(key);
         _map._map_paraId2subproblem.push_back(std::make_pair<T_PROBLEM*,size_t>(0, 0));
         return n;
     }
@@ -90,9 +90,9 @@ public:
     InternalID addOutputParameter(size_t key, T_PROBLEM &sub_problem, ExternalKey para_key_in_sub_problem)
     {
 
-    	InternalID var_id = NamedDynamicIOSystem<T_PROBLEM>::registerOutputParameter(key);
+        InternalID var_id = NamedDynamicIOSystem<T_PROBLEM>::registerOutputParameter(key);
         // set reference
-    	const InternalID para_id = sub_problem.getOutputParameterID(para_key_in_sub_problem);
+        const InternalID para_id = sub_problem.getOutputParameterID(para_key_in_sub_problem);
         const Parameter* v = sub_problem.getOutput(para_id);
         NamedDynamicIOSystem<T_PROBLEM>::setOutput(var_id, v);
         // make a link between this and sub-problem variable
@@ -121,53 +121,53 @@ public:
 
     void connectParameters()
     {
-    	if (!BaseClass::isValid()) return;
+        if (!BaseClass::isValid()) return;
 
-    	const size_t n_in_para = this->getNumberOfInputParameters();
-    	const size_t n_out_para = this->getNumberOfOutputParameters();
-    	const size_t n_sub_prob = this->getNumberOfSubProblems();
+        const size_t n_in_para = this->getNumberOfInputParameters();
+        const size_t n_out_para = this->getNumberOfOutputParameters();
+        const size_t n_sub_prob = this->getNumberOfSubProblems();
 
         _map._map_paraId2subproblem.resize(n_in_para+n_out_para);
 
-    	// find origin of output
-    	for (size_t i=0; i<n_out_para; i++) {
-    		const std::string &p_name = BaseClass::getOutputParameterName(i);
-    		const int this_var_id = BaseClass::getOutputParameterID(p_name);
+        // find origin of output
+        for (size_t i=0; i<n_out_para; i++) {
+            const std::string &p_name = BaseClass::getOutputParameterName(i);
+            const int this_var_id = BaseClass::getOutputParameterID(p_name);
             const size_t internal_id = BaseClass::getInternalIDFromOutputID(this_var_id);
-    		for (size_t j=0; j<n_sub_prob; j++) {
-    			T_PROBLEM* sub_pr = _list_subproblems[j];
-    			if (sub_pr->hasOutputParameter(p_name)) {
-    				size_t para_id = sub_pr->getOutputParameterID(p_name);
-    		        const Parameter* v = sub_pr->getOutput(para_id);
-    		        BaseClass::setOutput(this_var_id, v);
-    		        // make a link between this and sub-problem variable
-    		        ParameterProblemMappingTable::PairSysVarId parObj = std::make_pair(sub_pr, para_id);
-    		        _map._map_paraId2subproblem[internal_id] = parObj;
-    				break;
-    			}
-    		}
-    	}
+            for (size_t j=0; j<n_sub_prob; j++) {
+                T_PROBLEM* sub_pr = _list_subproblems[j];
+                if (sub_pr->hasOutputParameter(p_name)) {
+                    size_t para_id = sub_pr->getOutputParameterID(p_name);
+                    const Parameter* v = sub_pr->getOutput(para_id);
+                    BaseClass::setOutput(this_var_id, v);
+                    // make a link between this and sub-problem variable
+                    ParameterProblemMappingTable::PairSysVarId parObj = std::make_pair(sub_pr, para_id);
+                    _map._map_paraId2subproblem[internal_id] = parObj;
+                    break;
+                }
+            }
+        }
 
-    	// connect input of each sub problems
-		for (size_t i=0; i<n_sub_prob; i++) {
-			T_PROBLEM* sub_pr = _list_subproblems[i];
-			size_t n_sub_in_para = sub_pr->getNumberOfInputParameters();
-    		for (size_t j=0; j<n_sub_in_para; j++) {
-        		const std::string &p_name = sub_pr->getInputParameterName(j);
-        		size_t this_para_id = 0;
-        		if (BaseClass::hasInputParameter(p_name)) {
-        			this_para_id = BaseClass::getInputParameterID(p_name);
+        // connect input of each sub problems
+        for (size_t i=0; i<n_sub_prob; i++) {
+            T_PROBLEM* sub_pr = _list_subproblems[i];
+            size_t n_sub_in_para = sub_pr->getNumberOfInputParameters();
+            for (size_t j=0; j<n_sub_in_para; j++) {
+                const std::string &p_name = sub_pr->getInputParameterName(j);
+                size_t this_para_id = 0;
+                if (BaseClass::hasInputParameter(p_name)) {
+                    this_para_id = BaseClass::getInputParameterID(p_name);
                     this_para_id = BaseClass::getInternalIDFromInputID(this_para_id);
-        		} else if (BaseClass::hasOutputParameter(p_name)) {
-        			int out_p_id = BaseClass::getOutputParameterID(p_name);
+                } else if (BaseClass::hasOutputParameter(p_name)) {
+                    int out_p_id = BaseClass::getOutputParameterID(p_name);
                     this_para_id = BaseClass::getInternalIDFromOutputID(out_p_id);
-        		} else {
+                } else {
                     // parameter not found
                     continue;
                 }
                 _map._list_subproblem_input_source[i].push_back(std::make_pair(j, this_para_id));
-    		}
-		}
+            }
+        }
     }
 
 #if 0
@@ -180,13 +180,13 @@ public:
     {
         int subproblem_id = find(subproblem);
         if (subproblem_id>=0) {
-        	InternalID this_para_id = 0;
-        	if (BaseClass::hasInputParameter(key)) {
-        		this_para_id = BaseClass::getInputParameterID(key);
-        	} else {
-        		this_para_id = BaseClass::getOutputParameterID(key);
-        	}
-        	InternalID sub_para_id = subproblem.getInputParameterID(para_key_in_sub_problem);
+            InternalID this_para_id = 0;
+            if (BaseClass::hasInputParameter(key)) {
+                this_para_id = BaseClass::getInputParameterID(key);
+            } else {
+                this_para_id = BaseClass::getOutputParameterID(key);
+            }
+            InternalID sub_para_id = subproblem.getInputParameterID(para_key_in_sub_problem);
             _map._list_subproblem_input_source[subproblem_id].push_back(std::make_pair(sub_para_id, this_para_id));
         }
     }

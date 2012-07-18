@@ -15,8 +15,8 @@ namespace MathLib {
  */
 class LinearSolver {
 public:
-	LinearSolver() {};
-	virtual ~LinearSolver() {};
+    LinearSolver() {};
+    virtual ~LinearSolver() {};
 };
 
 }

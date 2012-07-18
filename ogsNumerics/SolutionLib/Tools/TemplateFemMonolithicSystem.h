@@ -11,18 +11,18 @@ namespace SolutionLib
 {
 
 template <
-	class T_FEM_IVBV_PROBLEM,
-	class T_LINEAR_SOLVER
-	>
+    class T_FEM_IVBV_PROBLEM,
+    class T_LINEAR_SOLVER
+    >
 class TemplateFemMonolithicSystem : public NumLib::TemplateTransientMonolithicSystem
 {
 public:
     typedef T_FEM_IVBV_PROBLEM MyProblemType;
     typedef SingleStepFEM
-    		<
-    			MyProblemType,
-    			T_LINEAR_SOLVER
-    		> MySolutionType;
+            <
+                MyProblemType,
+                T_LINEAR_SOLVER
+            > MySolutionType;
 
     TemplateFemMonolithicSystem(size_t n_in, size_t n_out) : _solution(0)
     {
@@ -52,7 +52,7 @@ public:
 
     double suggestNext(const NumLib::TimeStep &time_current)
     {
-    	return _solution->suggestNext(time_current);
+        return _solution->suggestNext(time_current);
     }
 
     bool isAwake(const NumLib::TimeStep &time) { return _solution->isAwake(time);  }

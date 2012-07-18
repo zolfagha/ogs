@@ -149,7 +149,7 @@ public:
     {
         const size_t n = v.size();
         for (size_t i=0; i<n; i++) {
-        	_sheared_eqs->addRHS(i, v[i]*fkt);
+            _sheared_eqs->addRHS(i, v[i]*fkt);
         }
     }
 

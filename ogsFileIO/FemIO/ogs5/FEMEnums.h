@@ -23,38 +23,38 @@ namespace FiniteElement
  */
 enum ProcessType
 {
-	INVALID_PROCESS = 0,                  //!< INVALID_PROCESS
-	AIR_FLOW,                             //!< AIR_FLOW
-	/// M process, single/multi-phase flow
-	DEFORMATION,                          //!< DEFORMATION
-	DEFORMATION_DYNAMIC,                  //!< ...
-	/// C process, single/multi-phase flow
-	DEFORMATION_FLOW,                     //!< DEFORMATION_FLOW
-	/// H2M monolithic
-	DEFORMATION_H2,                        //!< DEFORMATION_H2
-	FLUID_FLOW,
-	FLUID_MOMENTUM,                       // BC only
-	FLUX,
-	/// H process, incompressible flow
-	GROUNDWATER_FLOW,                     //!< GROUNDWATER_FLOW
-	/// T process, single/multi-phase flow
-	HEAT_TRANSPORT,                       //!< HEAT_TRANSPORT
-	/// H process, incompressible flow
-	LIQUID_FLOW,                          //!< LIQUID_FLOW
-	MASS_TRANSPORT,                       //!< MASS_TRANSPORT
-	MULTI_PHASE_FLOW,                     //!< MULTI_PHASE_FLOW
-	NO_PCS,                               //!< NO_PCS
-	/// H process, incompressible flow
-	OVERLAND_FLOW,                        //!< OVERLAND_FLOW
-	PS_GLOBAL,                            //!< PS_GLOBAL
-	PTC_FLOW,                             // Fluid flow coupled with heat transport
-	RANDOM_WALK,                          //!< RANDOM_WALK
-	/// H process, incompressible flow
-	RICHARDS_FLOW,                        //!< RICHARDS_FLOW
-	/// H2 process, compressible flow
-	TWO_PHASE_FLOW,                       //!< TWO_PHASE_FLOW
-	// make sure that this is always the last entry (important for iterating over the enum entries)!
-	PROCESS_END
+    INVALID_PROCESS = 0,                  //!< INVALID_PROCESS
+    AIR_FLOW,                             //!< AIR_FLOW
+    /// M process, single/multi-phase flow
+    DEFORMATION,                          //!< DEFORMATION
+    DEFORMATION_DYNAMIC,                  //!< ...
+    /// C process, single/multi-phase flow
+    DEFORMATION_FLOW,                     //!< DEFORMATION_FLOW
+    /// H2M monolithic
+    DEFORMATION_H2,                        //!< DEFORMATION_H2
+    FLUID_FLOW,
+    FLUID_MOMENTUM,                       // BC only
+    FLUX,
+    /// H process, incompressible flow
+    GROUNDWATER_FLOW,                     //!< GROUNDWATER_FLOW
+    /// T process, single/multi-phase flow
+    HEAT_TRANSPORT,                       //!< HEAT_TRANSPORT
+    /// H process, incompressible flow
+    LIQUID_FLOW,                          //!< LIQUID_FLOW
+    MASS_TRANSPORT,                       //!< MASS_TRANSPORT
+    MULTI_PHASE_FLOW,                     //!< MULTI_PHASE_FLOW
+    NO_PCS,                               //!< NO_PCS
+    /// H process, incompressible flow
+    OVERLAND_FLOW,                        //!< OVERLAND_FLOW
+    PS_GLOBAL,                            //!< PS_GLOBAL
+    PTC_FLOW,                             // Fluid flow coupled with heat transport
+    RANDOM_WALK,                          //!< RANDOM_WALK
+    /// H process, incompressible flow
+    RICHARDS_FLOW,                        //!< RICHARDS_FLOW
+    /// H2 process, compressible flow
+    TWO_PHASE_FLOW,                       //!< TWO_PHASE_FLOW
+    // make sure that this is always the last entry (important for iterating over the enum entries)!
+    PROCESS_END
 };
 
 /**
@@ -100,49 +100,49 @@ const std::list<std::string> getAllProcessNames();
  */
 enum PrimaryVariable
 {
-	INVALID_PV  = 0,                      //!< INVALID_PV
-	ACCELERATION_X1,                      //!< ACCELERATION_X1
-	ACCELERATION_Y1,                      //!< ACCELERATION_Y1
-	ACCELERATION_Z1,                      //!< ACCELERATION_Z1
-	/// Mass transport
-	CONCENTRATION,                        //!< CONCENTRATION
-	/// Deformation
-	DISPLACEMENT_X,                       //!< DISPLACEMENT_X
-	/// Deformation
-	DISPLACEMENT_Y,                       //!< DISPLACEMENT_Y
-	/// Deformation
-	DISPLACEMENT_Z,                       //!< DISPLACEMENT_Z
-	EXCAVATION,                           // ST
-	HEAD,                                 //!< HEAD
-	/// Flow (phase)
-	PRESSURE,                             //!< PRESSURE
-	PRESSURE2,                            //!< PRESSURE2
-	PRESSURE_RATE1,                       // OUT
-	SATURATION,                           //!< SATURATION
-	SATURATION2,                          //!< SATURATION2
-	STRAIN_XX,                            // Output
-	STRAIN_XY,                            // Output
-	STRAIN_XZ,                            // Output
-	STRAIN_YY,                            // Output
-	STRAIN_YZ,                            // Output
-	STRAIN_ZZ,                            // Output
-	STRAIN_PLS,                           // Output
-	STRESS_XX,                            // IC
-	STRESS_XY,                            // IC
-	STRESS_XZ,                            // IC
-	STRESS_YY,                            // IC
-	STRESS_YZ,                            // IC
-	STRESS_ZZ,                            // IC
-	/// Heat transport
-	TEMPERATURE,                          //!< TEMPERATURE
-	VELOCITY_DM_X,                        //!< VELOCITY_DM_X
-	VELOCITY_DM_Y,                        //!< VELOCITY_DM_Y
-	VELOCITY_DM_Z,                        //!< VELOCITY_DM_Z
-	VELOCITY1_X,
-	VELOCITY1_Y,
-	VELOCITY1_Z,
-	// make sure that this is always the last entry (important for iterating over the enum entries)!
-	PV_END
+    INVALID_PV  = 0,                      //!< INVALID_PV
+    ACCELERATION_X1,                      //!< ACCELERATION_X1
+    ACCELERATION_Y1,                      //!< ACCELERATION_Y1
+    ACCELERATION_Z1,                      //!< ACCELERATION_Z1
+    /// Mass transport
+    CONCENTRATION,                        //!< CONCENTRATION
+    /// Deformation
+    DISPLACEMENT_X,                       //!< DISPLACEMENT_X
+    /// Deformation
+    DISPLACEMENT_Y,                       //!< DISPLACEMENT_Y
+    /// Deformation
+    DISPLACEMENT_Z,                       //!< DISPLACEMENT_Z
+    EXCAVATION,                           // ST
+    HEAD,                                 //!< HEAD
+    /// Flow (phase)
+    PRESSURE,                             //!< PRESSURE
+    PRESSURE2,                            //!< PRESSURE2
+    PRESSURE_RATE1,                       // OUT
+    SATURATION,                           //!< SATURATION
+    SATURATION2,                          //!< SATURATION2
+    STRAIN_XX,                            // Output
+    STRAIN_XY,                            // Output
+    STRAIN_XZ,                            // Output
+    STRAIN_YY,                            // Output
+    STRAIN_YZ,                            // Output
+    STRAIN_ZZ,                            // Output
+    STRAIN_PLS,                           // Output
+    STRESS_XX,                            // IC
+    STRESS_XY,                            // IC
+    STRESS_XZ,                            // IC
+    STRESS_YY,                            // IC
+    STRESS_YZ,                            // IC
+    STRESS_ZZ,                            // IC
+    /// Heat transport
+    TEMPERATURE,                          //!< TEMPERATURE
+    VELOCITY_DM_X,                        //!< VELOCITY_DM_X
+    VELOCITY_DM_Y,                        //!< VELOCITY_DM_Y
+    VELOCITY_DM_Z,                        //!< VELOCITY_DM_Z
+    VELOCITY1_X,
+    VELOCITY1_Y,
+    VELOCITY1_Z,
+    // make sure that this is always the last entry (important for iterating over the enum entries)!
+    PV_END
 };
 
 /**
@@ -165,27 +165,27 @@ const std::list<std::string> getAllPrimaryVariableNames();
 
 enum DistributionType
 {
-	INVALID_DIS_TYPE = 0,
-	ANALYTICAL,                           // ST
-	AVERAGE,
-	CONSTANT,                             // IC, BC, ST
-	CONSTANT_GEO,
-	CONSTANT_NEUMANN,                     // ST
-	CRITICALDEPTH,                        // ST
-	DIRECT,
-	FUNCTION,
-	GRADIENT,                             // IC
-	GREEN_AMPT,                           // ST
-	RESTART,                              // IC
-	LINEAR,                               // BC, ST
-	LINEAR_NEUMANN,                       // ST
-	NORMALDEPTH,                          // ST
-	POINT,                                // BC
-	PRECIPITATION,
-	SYSTEM_DEPENDENT,                     // ST
-	// Sort of Neumann BC //WW
-	// make sure that this is always the last entry (important for iterating over the enum entries)!
-	DIS_END
+    INVALID_DIS_TYPE = 0,
+    ANALYTICAL,                           // ST
+    AVERAGE,
+    CONSTANT,                             // IC, BC, ST
+    CONSTANT_GEO,
+    CONSTANT_NEUMANN,                     // ST
+    CRITICALDEPTH,                        // ST
+    DIRECT,
+    FUNCTION,
+    GRADIENT,                             // IC
+    GREEN_AMPT,                           // ST
+    RESTART,                              // IC
+    LINEAR,                               // BC, ST
+    LINEAR_NEUMANN,                       // ST
+    NORMALDEPTH,                          // ST
+    POINT,                                // BC
+    PRECIPITATION,
+    SYSTEM_DEPENDENT,                     // ST
+    // Sort of Neumann BC //WW
+    // make sure that this is always the last entry (important for iterating over the enum entries)!
+    DIS_END
 };
 
 /**
@@ -209,20 +209,20 @@ const std::list<std::string> getAllDistributionNames();
  * If you change this enum, make sure you apply the changes to
  * the functions convertErrorMethod(), convertErrorMethodToString()
    Non-Linear and Coupling options (see also CRFProcess::CalcIterationNODError()): 
-   --> LMAX:	max(|x1-x0|)  -- Infinity norm: Local max error (across all elements) of solution vector delta (absolute error). Tolerance required for each primary variable.
-   --> ENORM:	|x1-x0|       -- Euclidian norm: Norm of the solution vector delta (absolute error). Norm taken over entire solution vector (all primary variables) and checked against a single tolerance.
-   --> EVNORM:	|x1-x0|       -- Euclidian varient norm: Norm of the solution vector delta (absolute error). Norm taken over solution vector of each primary variable, checked againes a tolerence specific to each variable.
-   --> ERNORM:	|(x1-x0)/x0)| -- Euclidian Relative norm: Norm of the solution vector delta divided by the norm of the solution vector. A single tolerance applied to all primary variables.
-   --> BNORM:	              -- OGS classic treatment of newton methods. ENORM error tolerance plus RHS ("B") control. (note: other error methods (i.e. ENORM) will also work well for NEWTON scheme)
+   --> LMAX:    max(|x1-x0|)  -- Infinity norm: Local max error (across all elements) of solution vector delta (absolute error). Tolerance required for each primary variable.
+   --> ENORM:    |x1-x0|       -- Euclidian norm: Norm of the solution vector delta (absolute error). Norm taken over entire solution vector (all primary variables) and checked against a single tolerance.
+   --> EVNORM:    |x1-x0|       -- Euclidian varient norm: Norm of the solution vector delta (absolute error). Norm taken over solution vector of each primary variable, checked againes a tolerence specific to each variable.
+   --> ERNORM:    |(x1-x0)/x0)| -- Euclidian Relative norm: Norm of the solution vector delta divided by the norm of the solution vector. A single tolerance applied to all primary variables.
+   --> BNORM:                  -- OGS classic treatment of newton methods. ENORM error tolerance plus RHS ("B") control. (note: other error methods (i.e. ENORM) will also work well for NEWTON scheme)
  */
 enum ErrorMethod
 {
-	INVALID_ERROR_METHOD = 0,   
-	LMAX,
-	ENORM, 
-	EVNORM,	
-	ERNORM,
-	BNORM
+    INVALID_ERROR_METHOD = 0,   
+    LMAX,
+    ENORM, 
+    EVNORM,    
+    ERNORM,
+    BNORM
 };
 
 /**

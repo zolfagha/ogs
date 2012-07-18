@@ -17,7 +17,7 @@ class IPartitionedAlgorithm
 {
 public:
 
-	virtual ~IPartitionedAlgorithm() {};
+    virtual ~IPartitionedAlgorithm() {};
 
     virtual void setConvergenceCheck(IConvergenceCheck &checker) = 0;
 

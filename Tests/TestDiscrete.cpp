@@ -80,7 +80,7 @@ struct DiscreteExample1
 
     class TestElementAssembler : public DiscreteLib::IElemenetWiseLinearEquationLocalAssembler
     {
-    	DiscreteLib::LocalMatrix _m;
+        DiscreteLib::LocalMatrix _m;
     public:
         TestElementAssembler()
         {

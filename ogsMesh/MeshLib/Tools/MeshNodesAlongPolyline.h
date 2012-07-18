@@ -26,18 +26,18 @@ namespace MeshLib
 class MeshNodesAlongPolyline
 {
 public:
-	MeshNodesAlongPolyline(GeoLib::Polyline const* const ply, IMesh const* mesh);
-	const std::vector<size_t>& getNodeIDs () const;
-	const GeoLib::Polyline* getPolyline () const;
-	size_t getNumberOfLinearNodes () const;
-	std::vector<double> const & getDistOfProjNodeFromPlyStart() const;
+    MeshNodesAlongPolyline(GeoLib::Polyline const* const ply, IMesh const* mesh);
+    const std::vector<size_t>& getNodeIDs () const;
+    const GeoLib::Polyline* getPolyline () const;
+    size_t getNumberOfLinearNodes () const;
+    std::vector<double> const & getDistOfProjNodeFromPlyStart() const;
 
 private:
-	const GeoLib::Polyline* _ply;
-	const IMesh* _mesh;
-	size_t _linear_nodes;
-	std::vector<size_t> _msh_node_ids;
-	std::vector<double> _dist_of_proj_node_from_ply_start;
+    const GeoLib::Polyline* _ply;
+    const IMesh* _mesh;
+    size_t _linear_nodes;
+    std::vector<size_t> _msh_node_ids;
+    std::vector<double> _dist_of_proj_node_from_ply_start;
 };
 }
 

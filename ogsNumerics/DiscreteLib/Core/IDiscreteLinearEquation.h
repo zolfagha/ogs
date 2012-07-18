@@ -18,9 +18,9 @@ class IDiscreteLinearEquationAssembler;
 class IDiscreteLinearEquation : public IDiscreteResource
 {
 public:
-	typedef IDiscreteVector<double> GlobalVectorType;
+    typedef IDiscreteVector<double> GlobalVectorType;
 
-	virtual ~IDiscreteLinearEquation() {};
+    virtual ~IDiscreteLinearEquation() {};
     /// 
     virtual void initialize() = 0;
     /// construct 

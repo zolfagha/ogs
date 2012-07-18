@@ -41,7 +41,7 @@ public:
     /// construct the linear equation
     void construct(IDiscreteLinearEquationAssembler& assemler)
     {
-    	DofEquationIdTable* dofManager = getDofMapManger();
+        DofEquationIdTable* dofManager = getDofMapManger();
         assert(dofManager->getNumberOfVariables()>0);
 
         if (_do_create_eqs) {

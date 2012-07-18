@@ -8,8 +8,8 @@ ProcessLib::AbstractProcessBuilder* GeoProcessBuilder::_obj = 0;
 
 ProcessLib::AbstractProcessBuilder* GeoProcessBuilder::getInstance()
 {
-	if (_obj==0) _obj = new GeoProcessBuilder();
-	return _obj;
+    if (_obj==0) _obj = new GeoProcessBuilder();
+    return _obj;
 }
 
 

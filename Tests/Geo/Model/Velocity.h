@@ -17,7 +17,7 @@ namespace Geo
 {
 
 class FunctionVelocity
-	: public NumLib::AbstractTransientMonolithicSystem
+    : public NumLib::AbstractTransientMonolithicSystem
 {
     enum In { Head=0 };
     enum Out { Velocity=0 };
@@ -31,8 +31,8 @@ public:
 
     void define(DiscreteLib::DiscreteSystem &dis, PorousMedia &pm)
     {
-    	_dis = &dis;
-    	_K = pm.hydraulic_conductivity;
+        _dis = &dis;
+        _K = pm.hydraulic_conductivity;
         _vel = new FemLib::FEMIntegrationPointFunctionVector(dis);
         //this->setOutput(Velocity, _vel);
     }

@@ -15,8 +15,8 @@ namespace MathLib {
 class DirectLinearSolver : public MathLib::LinearSolver
 {
 public:
-	DirectLinearSolver() {};
-	virtual ~DirectLinearSolver() {};
+    DirectLinearSolver() {};
+    virtual ~DirectLinearSolver() {};
 };
 
 }

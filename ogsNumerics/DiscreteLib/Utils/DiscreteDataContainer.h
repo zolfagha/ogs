@@ -33,10 +33,10 @@ public:
 
     void eraseVector(IDiscreteResource* v)
     {
-    	const size_t i = v->getObjectID();
-    	if (_vec_vectors.size() > i) {
-    		_vec_vectors[i] = 0;
-    	}
+        const size_t i = v->getObjectID();
+        if (_vec_vectors.size() > i) {
+            _vec_vectors[i] = 0;
+        }
     }
 
     size_t getNumberOfVectors() const {return _vec_vectors.size();};
@@ -55,10 +55,10 @@ public:
 
     void eraseLinearEquation(IDiscreteLinearEquation* eq)
     {
-    	const size_t i = eq->getObjectID();
-    	if (_vec_linear_sys.size() > i) {
-    		_vec_linear_sys[i] = 0;
-    	}
+        const size_t i = eq->getObjectID();
+        if (_vec_linear_sys.size() > i) {
+            _vec_linear_sys[i] = 0;
+        }
     }
 
     size_t getNumberOfLinearEquations() const {return _vec_linear_sys.size();};

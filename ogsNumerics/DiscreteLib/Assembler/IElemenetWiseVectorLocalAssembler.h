@@ -18,9 +18,9 @@ template <class T>
 class IElemenetWiseVectorLocalAssembler
 {
 public:
-	typedef std::valarray<T> LocalVectorType;
+    typedef std::valarray<T> LocalVectorType;
 
-	virtual ~IElemenetWiseVectorLocalAssembler() {};
+    virtual ~IElemenetWiseVectorLocalAssembler() {};
 
     /// assemble a local linear equation for the given element
     virtual void assembly(const MeshLib::IElement &e, LocalVectorType &eqs) = 0;

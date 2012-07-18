@@ -19,13 +19,13 @@ namespace NumLib
 class NamedParameterSet
 {
 public:
-	///
-	NamedParameterSet() {};
+    ///
+    NamedParameterSet() {};
 
     ///
     virtual ~NamedParameterSet()
     {
-    	clear();
+        clear();
     }
 
     /// reset data

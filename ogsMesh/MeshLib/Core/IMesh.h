@@ -25,7 +25,7 @@ class MeshGeometricProperty;
 class IMesh
 {
 public:
-	virtual ~IMesh() {};
+    virtual ~IMesh() {};
 
     virtual void setID(size_t id) = 0;
     virtual size_t getID() const = 0;
@@ -68,7 +68,7 @@ public:
 class IMixedOrderMesh : public IMesh
 {
 public:
-	virtual ~IMixedOrderMesh() {};
+    virtual ~IMixedOrderMesh() {};
     //#
     virtual size_t getMaxiumOrder() const = 0;
     virtual void setCurrentOrder(size_t order) = 0;

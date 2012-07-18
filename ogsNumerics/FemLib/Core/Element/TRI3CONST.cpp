@@ -120,7 +120,7 @@ double TRI3CONST::interpolate(double *x, double *nodal_values)
 ///// compute an matrix M = Int{dW^T F dN} dV
 //void TRI3CONST::integrateDWxDN( MathLib::SpatialFunctionScalar *f, LocalMatrix &mat)
 //{
-//	double v;
+//    double v;
 //    f->eval(0, v);
 //    mat(0,0) = b[0]*b[0] + c[0]*c[0];
 //    mat(0,1) = b[0]*b[1] + c[0]*c[1];
@@ -138,7 +138,7 @@ double TRI3CONST::interpolate(double *x, double *nodal_values)
 /// compute an matrix M = Int{W^T F N} dV
 void TRI3CONST::integrateWxN(size_t igp, double v, LocalMatrix &mat)
 {
-	assert(igp==0);
+    assert(igp==0);
 
     mat(0,0) = 1.0;
     mat(0,1) = 0.5;
@@ -156,7 +156,7 @@ void TRI3CONST::integrateWxN(size_t igp, double v, LocalMatrix &mat)
 /// compute an matrix M = Int{W^T F dN} dV
 void TRI3CONST::integrateWxDN(size_t igp, LocalMatrix &v, LocalMatrix &mat)
 {
-	assert(igp==0);
+    assert(igp==0);
 
     for (int i=0; i<3; i++)
         for (int j=0; j<3; j++)
@@ -167,7 +167,7 @@ void TRI3CONST::integrateWxDN(size_t igp, LocalMatrix &v, LocalMatrix &mat)
 /// compute an matrix M = Int{dW^T F dN} dV
 void TRI3CONST::integrateDWxDN(size_t igp, LocalMatrix &v, LocalMatrix &mat)
 {
-	assert(igp==0);
+    assert(igp==0);
 
     mat(0,0) = b[0]*b[0] + c[0]*c[0];
     mat(0,1) = b[0]*b[1] + c[0]*c[1];
@@ -185,7 +185,7 @@ void TRI3CONST::integrateDWxDN(size_t igp, LocalMatrix &v, LocalMatrix &mat)
 void TRI3CONST::extrapolate(const std::vector<LocalVector> &gp_values, std::vector<LocalVector> &nodal_values)
 {
     // gp_values are all same
-	LocalVector v = gp_values[0];
+    LocalVector v = gp_values[0];
     for (size_t i=0; i<nodal_values.size(); i++) {
         nodal_values[i] = v;
     }

@@ -26,10 +26,10 @@ class Variable
 class IVBVProblem
 {
 public:
-	///
-	virtual ~IVBVProblem() {};
+    ///
+    virtual ~IVBVProblem() {};
 
-	/// get the number of variables
+    /// get the number of variables
     virtual size_t getNumberOfVariables() const = 0;
 
 

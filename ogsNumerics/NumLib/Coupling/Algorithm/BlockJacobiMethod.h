@@ -12,7 +12,7 @@ namespace NumLib
 class BlockJacobiMethod : public AbstractIterativePartitionedMethod
 {
 public:
-	BlockJacobiMethod() {};
+    BlockJacobiMethod() {};
 
     BlockJacobiMethod(double epsilon, size_t max_count) : AbstractIterativePartitionedMethod(epsilon, max_count)
     {
@@ -29,7 +29,7 @@ protected:
 //    void BlockJacobiMethod::doPostAfterSolveAll( UnnamedParameterSet &parameter_table, const ParameterProblemMappingTable &mapping )
     {
         // set current state to shared variables
-    	AbstractIterativePartitionedMethod::updateParameterTable(mapping, isFixed(), parameter_table);
+        AbstractIterativePartitionedMethod::updateParameterTable(mapping, isFixed(), parameter_table);
     }
 
     bool isFixed() const {return false;};

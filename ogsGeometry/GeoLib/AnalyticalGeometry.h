@@ -22,9 +22,9 @@ namespace GeoLib {
 namespace GeoLib {
 
 enum Orientation {
-	CW = 1,
-	CCW = 2,
-	COLLINEAR = 3
+    CW = 1,
+    CCW = 2,
+    COLLINEAR = 3
 };
 
 /**
@@ -33,8 +33,8 @@ enum Orientation {
  * \returns CW (clockwise), CCW (counterclockwise) or COLLINEAR (points are on a line)
  */
 Orientation getOrientation (const double& p0_x, const double& p0_y,
-	const double& p1_x, const double& p1_y,
-	const double& p2_x, const double& p2_y);
+    const double& p1_x, const double& p1_y,
+    const double& p2_x, const double& p2_y);
 
 /**
  * wrapper for getOrientation ()
@@ -59,7 +59,7 @@ void getNewellPlane (const std::vector<GeoLib::Point*>& pnts, Vector &plane_norm
 void rotatePointsToXY(Vector &plane_normal, std::vector<GeoLib::Point*> &pnts);
 
 bool isPointInTriangle (const GeoLib::Point* p,
-		const GeoLib::Point* a, const GeoLib::Point* b, const GeoLib::Point* c);
+        const GeoLib::Point* a, const GeoLib::Point* b, const GeoLib::Point* c);
 
 /**
  * test for intersections of the line segments of the Polyline
@@ -83,7 +83,7 @@ bool lineSegmentsIntersect (const GeoLib::Polyline* ply, size_t &idx0, size_t &i
  * @return true, if the line segments intersect, else false
  */
 bool lineSegmentIntersect (const GeoLib::Point& a, const GeoLib::Point& b,
-		const GeoLib::Point& c, const GeoLib::Point& d, GeoLib::Point& s);
+        const GeoLib::Point& c, const GeoLib::Point& d, GeoLib::Point& s);
 
 } // end namespace MathLib
 

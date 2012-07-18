@@ -11,23 +11,19 @@
 
 #include "GWTimeODELocalAssembler.h"
 #include "GWJacobianLocalAssembler.h"
-//#include "ProcessBuilder.h"
 #include "ProcessLib/TemplateTransientProcess.h"
-
-//namespace Geo
-//{
 
 //--------------------------------------------------------------------------------------------------
 // Equation definition
 //--------------------------------------------------------------------------------------------------
 typedef SolutionLib::TemplateFemEquation <
-		Geo::GroundwaterFlowTimeODELocalAssembler<
-			NumLib::ElementWiseTimeEulerEQSLocalAssembler>,
-		Geo::GroundwaterFlowTimeODELocalAssembler<
-			NumLib::ElementWiseTimeEulerResidualLocalAssembler>,
-		Geo::GroundwaterFlowJacobianLocalAssembler
-		>
-		GWFemEquation;
+        Geo::GroundwaterFlowTimeODELocalAssembler<
+            NumLib::ElementWiseTimeEulerEQSLocalAssembler>,
+        Geo::GroundwaterFlowTimeODELocalAssembler<
+            NumLib::ElementWiseTimeEulerResidualLocalAssembler>,
+        Geo::GroundwaterFlowJacobianLocalAssembler
+        >
+        GWFemEquation;
 
 
 //--------------------------------------------------------------------------------------------------
@@ -46,10 +42,10 @@ class FunctionHead
     enum Out { Head=0 };
 public:
     typedef SolutionLib::SingleStepFEM
-    		<
-    			GWFemProblem,
-    			MathLib::CRSLisSolver
-    		> MySolutionType;
+            <
+                GWFemProblem,
+                MathLib::CRSLisSolver
+            > MySolutionType;
 
     FunctionHead() 
     : _problem(0), _solution(0), _feObjects(0)
@@ -58,7 +54,7 @@ public:
 
     virtual ~FunctionHead()
     {
-    	BaseLib::releaseObject(_problem, _solution, _feObjects);
+        BaseLib::releaseObject(_problem, _solution, _feObjects);
     }
 
     virtual void initialize(const BaseLib::Options &option);
@@ -87,7 +83,5 @@ private:
 };
 
 
-
-//} //end
 
 

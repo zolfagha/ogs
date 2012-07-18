@@ -25,19 +25,19 @@ typedef DiscreteLib::IDiscreteVector<double> MyFemVector;
  * \tparam T_LINEAR_SOLVER
  */
 template <
-	class T_USER_FEM_PROBLEM,
+    class T_USER_FEM_PROBLEM,
     class T_LOCAL_ASSEMBLER
     >
 class TemplateTransientLinearFDMFunction
-	: public NumLib::TemplateFunction<MyFemVector, MyFemVector>
+    : public NumLib::TemplateFunction<MyFemVector, MyFemVector>
 {
 public:
     typedef T_USER_FEM_PROBLEM UserFemProblem;
     typedef T_LOCAL_ASSEMBLER UserLocalAssembler;
 
     /// constructor
-    /// @param problem		Fem problem
-    /// @param linear_eqs	Discrete linear equation
+    /// @param problem        Fem problem
+    /// @param linear_eqs    Discrete linear equation
     TemplateTransientLinearFDMFunction(UserFemProblem* problem, UserLocalAssembler* asssembler, DiscreteLib::IDiscreteLinearEquation* linear_eqs)
         : _problem(problem), _local_assembler(asssembler),  _linear_eqs(linear_eqs),
           _t_n1(0), _u_n0(0)
@@ -45,30 +45,30 @@ public:
     };
 
     ///
-	virtual ~TemplateTransientLinearFDMFunction() {};
+    virtual ~TemplateTransientLinearFDMFunction() {};
 
-	///
-	NumLib::TemplateFunction<MyFemVector,MyFemVector>* clone() const
-	{
-    	return new TemplateTransientLinearFDMFunction<
-    				T_USER_FEM_PROBLEM,
-    				T_LOCAL_ASSEMBLER
-    				>(_problem, _local_assembler, _linear_eqs);
-	}
+    ///
+    NumLib::TemplateFunction<MyFemVector,MyFemVector>* clone() const
+    {
+        return new TemplateTransientLinearFDMFunction<
+                    T_USER_FEM_PROBLEM,
+                    T_LOCAL_ASSEMBLER
+                    >(_problem, _local_assembler, _linear_eqs);
+    }
 
     /// reset property
     void reset(const NumLib::TimeStep* t, MyFemVector* u_n0)
     {
-    	this->_t_n1 = const_cast<NumLib::TimeStep*>(t);
-    	this->_u_n0 = u_n0;
+        this->_t_n1 = const_cast<NumLib::TimeStep*>(t);
+        this->_u_n0 = u_n0;
     };
 
     /// solve linear equations discretized with FEM
-    /// @param u0	initial guess
+    /// @param u0    initial guess
     /// @param u_n1 new results
     void eval(const MyFemVector &/*u0*/, MyFemVector &u_n1)
     {
-    	// input, output
+        // input, output
         const NumLib::TimeStep &t_n1 = *this->_t_n1;
         MyFemVector* u_n = this->_u_n0;
 
@@ -91,7 +91,7 @@ public:
         std::vector<MyFemVector*> vec_un1;
         vec_un1.push_back(const_cast<MyFemVector*>(&u_n1));
 
-		// assembly
+        // assembly
         _linear_eqs->initialize();
         StencilWiseTransientLinearEQSAssembler assembler(&t_n1, &vec_un, &vec_un1, _local_assembler);
         _linear_eqs->construct(assembler);
@@ -103,8 +103,8 @@ public:
             _linear_eqs->addRHS(varid, bc2->getListOfBCNodes(), bc2->getListOfBCValues(), -1.0);
         }
 
-		// solve
-		_linear_eqs->solve();
+        // solve
+        _linear_eqs->solve();
         _linear_eqs->getX(u_n1);
     }
 

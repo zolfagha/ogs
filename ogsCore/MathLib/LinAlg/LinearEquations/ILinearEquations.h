@@ -18,10 +18,10 @@ namespace MathLib
 class ILinearEquations
 {
 public:
-	typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> LocalMatrix;
-	typedef Eigen::VectorXd LocalVector;
+    typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> LocalMatrix;
+    typedef Eigen::VectorXd LocalVector;
 
-	virtual ~ILinearEquations() {};
+    virtual ~ILinearEquations() {};
 
     virtual void create(size_t length, RowMajorSparsity *sparsity=0) = 0;
     virtual bool isCreated() const = 0;

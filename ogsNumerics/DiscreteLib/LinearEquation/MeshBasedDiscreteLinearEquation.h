@@ -104,7 +104,7 @@ public:
     {
         const size_t n = v.size();
         for (size_t i=0; i<n; i++) {
-			_eqs->addRHS(i, v[i]*fkt);
+            _eqs->addRHS(i, v[i]*fkt);
         }
     }
 

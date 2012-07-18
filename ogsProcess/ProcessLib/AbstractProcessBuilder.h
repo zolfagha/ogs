@@ -23,26 +23,26 @@ namespace ProcessLib
 class AbstractProcessBuilder
 {
 public:
-	virtual ~AbstractProcessBuilder() {};
+    virtual ~AbstractProcessBuilder() {};
 
-	/// register a process to this builder
-	ProcessInfo* registerProcess(const std::string &pcs_name, ProcessFactoryBase* pcs_buid);
+    /// register a process to this builder
+    ProcessInfo* registerProcess(const std::string &pcs_name, ProcessFactoryBase* pcs_buid);
 
-	/// check if a process has been already registered
-	bool hasRegisterd(const std::string &pcs_name) const;
+    /// check if a process has been already registered
+    bool hasRegisterd(const std::string &pcs_name) const;
 
-	/// create the new instance of a specified process
-	/// @return return 0 if a process is not found
-	Process* create(const std::string &pcs_name) const;
+    /// create the new instance of a specified process
+    /// @return return 0 if a process is not found
+    Process* create(const std::string &pcs_name) const;
 
-	/// list available processes to standard IO
-	void output() const;
+    /// list available processes to standard IO
+    void output() const;
 
 protected:
     AbstractProcessBuilder() {}; // only called by sub classes
 
 private:
-	std::map<std::string, ProcessFactoryBase*> _map_pcs_name2new;
+    std::map<std::string, ProcessFactoryBase*> _map_pcs_name2new;
 };
 
 } //end
@@ -52,7 +52,7 @@ private:
 
 #define OGS_PROCESS(pcs_name, pcs_classname)\
 ProcessLib::ProcessInfo* const pcs_classname::_pcs_info =\
-		ProcessLib::ProcessBuilder::getInstance()->registerProcess(\
+        ProcessLib::ProcessBuilder::getInstance()->registerProcess(\
         #pcs_name,\
         new ProcessLib::ProcessFactoryImpl<pcs_classname >);
 
@@ -69,7 +69,7 @@ int link_##pcs_name = class_##pcs_name;
 #define OGS_DEF_PROCESS(pcs_name, pcs_classname)
 #define OGS_LINK_PROCESS(pcs_name, pcs_classname)
 #define OGS_ADD_PROCESS(pcs_name, pcs_classname)\
-		registerProcess(#pcs_name, new ProcessLib::ProcessFactoryImpl<pcs_classname>);
+        registerProcess(#pcs_name, new ProcessLib::ProcessFactoryImpl<pcs_classname>);
 
 #endif
 

@@ -12,7 +12,7 @@ namespace NumLib
 class BlockGaussSeidelMethod : public AbstractIterativePartitionedMethod
 {
 public:
-	BlockGaussSeidelMethod() {};
+    BlockGaussSeidelMethod() {};
     ///
     BlockGaussSeidelMethod(double epsilon, size_t max_count) : AbstractIterativePartitionedMethod(epsilon, max_count)
     {
@@ -30,7 +30,7 @@ protected:
 //    void BlockGaussSeidelMethod::doPostAfterSolve( ICoupledSystem & problem, UnnamedParameterSet& parameter_table, const ParameterProblemMappingTable &mapping )
     {
         // update shared variables
-    	AbstractIterativePartitionedMethod::updateParameterTable(problem, mapping, isFixed(), parameter_table);
+        AbstractIterativePartitionedMethod::updateParameterTable(problem, mapping, isFixed(), parameter_table);
     }
 };
 

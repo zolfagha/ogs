@@ -3,34 +3,38 @@
 
 #include "Ogs6FemData.h"
 
-//namespace Geo
-//{
 
 void FunctionHead::initialize(const BaseLib::Options &option)
 {
-	const BaseLib::Options* op = option.getSubGroup("ProcessData")->getSubGroup("GROUNDWATER_FLOW");
-	std::string msh_key = op->getOption("Mesh");
-	std::string mat_key = op->getOption("Material");
+    Ogs6FemData* femData = Ogs6FemData::getInstance();
 
-	DiscreteLib::DiscreteSystem* dis = 0;
-	MaterialLib::PorousMedia *pm = 0;
+    //const BaseLib::Options* op = option.getSubGroup("ProcessData")->getSubGroup("GROUNDWATER_FLOW");
+    size_t msh_id = option.getOption<size_t>("MeshID");
+    size_t time_id = option.getOption<size_t>("TimeGroupID");
 
-    _feObjects = new FemLib::LagrangianFeObjectContainer(*dis->getMesh());
-    GWFemEquation::LinearAssemblerType* linear_assembler = new GWFemEquation::LinearAssemblerType(*_feObjects, *pm);
-    GWFemEquation::ResidualAssemblerType* r_assembler = new GWFemEquation::ResidualAssemblerType(*_feObjects, *pm);
-    GWFemEquation::JacobianAssemblerType* j_eqs = new GWFemEquation::JacobianAssemblerType(*_feObjects, *pm);
+    NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
+
+    //mesh and FE objects
+    DiscreteLib::DiscreteSystem* dis = femData->list_dis_sys[msh_id];
+    MeshLib::IMesh* msh = dis->getMesh();
+    _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
+
+    // equations
+    GWFemEquation::LinearAssemblerType* linear_assembler = new GWFemEquation::LinearAssemblerType(*_feObjects);
+    GWFemEquation::ResidualAssemblerType* r_assembler = new GWFemEquation::ResidualAssemblerType(*_feObjects);
+    GWFemEquation::JacobianAssemblerType* j_eqs = new GWFemEquation::JacobianAssemblerType(*_feObjects);
     GWFemEquation* eqs = new  GWFemEquation(linear_assembler, r_assembler, j_eqs);
-    GWFemProblem* _problem = new GWFemProblem(dis);
+
+    // set up problem
+    _problem = new GWFemProblem(dis);
     _problem->setEquation(eqs);
-	_solution = new MySolutionType(dis, _problem);
-    //_solHead->getTimeODEAssembler()->setTheta(1.0);
-	MySolutionType::LinearSolverType* linear_solver = _solution->getLinearEquationSolver();
+    _problem->setTimeSteppingFunction(*tim);
+
+    // set up solution
+    _solution = new MySolutionType(dis, _problem);
+    MySolutionType::LinearSolverType* linear_solver = _solution->getLinearEquationSolver();
     linear_solver->setOption(option);
     _solution->getNonlinearSolver()->setOption(option);
 
     this->setOutput(Head, _problem->getVariable(0)->getIC());
 }
-
-//OGS_PROCESS(GROUNDWATER_FLOW, FunctionHead);
-
-//}

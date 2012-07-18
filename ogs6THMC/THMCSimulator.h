@@ -51,21 +51,21 @@ void ogsExit();
 class THMCSimulator
 {
 public:
-	typedef GeoProcessBuilder ProcessBuilder;
+    typedef GeoProcessBuilder ProcessBuilder;
 
-	THMCSimulator(int argc, char* argv[]);
+    THMCSimulator(int argc, char* argv[]);
 
-	~THMCSimulator();
+    ~THMCSimulator();
 
-	///
-	int execute();
-
-private:
-	bool checkInputFiles(const std::string& proj_path);
+    ///
+    int execute();
 
 private:
-	SimulationInfo* _sim_info;
-	NumLib::ITransientCoupledSystem* _cpl_system;
+    bool checkInputFiles(const std::string& proj_path);
+
+private:
+    SimulationInfo* _sim_info;
+    NumLib::ITransientCoupledSystem* _cpl_system;
 };
 
 

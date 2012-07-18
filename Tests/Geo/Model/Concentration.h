@@ -20,18 +20,18 @@ namespace Geo
 {
 
 typedef TemplateFemEquation<
-		Geo::MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler>,
-		Geo::MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler>,
-		Geo::MassTransportJacobianLocalAssembler
-		>
-		MassFemEquation;
+        Geo::MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler>,
+        Geo::MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler>,
+        Geo::MassTransportJacobianLocalAssembler
+        >
+        MassFemEquation;
 
 typedef FemIVBVProblem< MassFemEquation > MassFemProblem;
 
 
 template <
-	class T_LINEAR_SOLVER
-	>
+    class T_LINEAR_SOLVER
+    >
 class FunctionConcentration : public NumLib::AbstractTransientMonolithicSystem
 {
     enum In { Velocity=0 };
@@ -39,10 +39,10 @@ class FunctionConcentration : public NumLib::AbstractTransientMonolithicSystem
 
 public:
     typedef SolutionLib::SingleStepFEM
-    		<
-    			MassFemProblem,
-    			T_LINEAR_SOLVER
-    		> SolutionForConc;
+            <
+                MassFemProblem,
+                T_LINEAR_SOLVER
+            > SolutionForConc;
 
     FunctionConcentration() 
     {
@@ -84,7 +84,7 @@ public:
 
     void accept(const NumLib::TimeStep &time)
     {
-    	_solConc->accept(time);
+        _solConc->accept(time);
 
         //std::cout << "Concentration=" << std::endl;
         //_solConc->getCurrentSolution(0)->printout();

@@ -10,7 +10,7 @@ namespace DiscreteLib
 class IEquationIdStorage
 {
 public:
-	virtual ~IEquationIdStorage() {};
+    virtual ~IEquationIdStorage() {};
     virtual bool hasKey(size_t pt_id) const = 0;
     virtual bool hasValue(size_t eqs_id) const = 0;
     virtual void key_range(size_t &i_start, size_t &i_end) const = 0;

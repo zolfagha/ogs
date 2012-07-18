@@ -23,7 +23,7 @@ int my_rank = 0;
 //#########################################################
 void initialize(int argc, char *argv[])
 {
-	//MPI_Init(&argc, &argv);
+    //MPI_Init(&argc, &argv);
     LisSolver::initialize(argc, argv);
 
 #ifdef USE_MPI
@@ -204,7 +204,7 @@ int testLIS(int argc, char *argv[])
 //#########################################################
 int main(int argc, char *argv[])
 {
-	std::cout << "main->start!" << std::endl;
+    std::cout << "main->start!" << std::endl;
     initialize(argc, argv);
     //testLISSystem(argc, argv);
     testLISVector(argc, argv);

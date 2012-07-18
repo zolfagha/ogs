@@ -17,7 +17,7 @@ class IC2FEM
 {
 public:
     ///
-	IC2FEM(const MeshLib::IMesh &msh, const NumLib::ITXFunction &ic_func, std::vector<size_t> &vec_nodes, std::vector<double> &vec_values);
+    IC2FEM(const MeshLib::IMesh &msh, const NumLib::ITXFunction &ic_func, std::vector<size_t> &vec_nodes, std::vector<double> &vec_values);
 };
 
 

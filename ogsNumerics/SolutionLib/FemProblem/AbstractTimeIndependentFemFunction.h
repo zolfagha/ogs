@@ -7,14 +7,14 @@ namespace SolutionLib
 {
 
 template <
-	size_t N_IN_PARAMETER,
-	size_t N_OUT_PARAMETER
-	>
+    size_t N_IN_PARAMETER,
+    size_t N_OUT_PARAMETER
+    >
 class AbstractTimeIndependentFemFunction
 : public NumLib::AbstractTransientMonolithicSystem
 {
 public:
-	AbstractTimeIndependentFemFunction()
+    AbstractTimeIndependentFemFunction()
     {
         AbstractTransientMonolithicSystem::resizeInputParameter(N_IN_PARAMETER);
         AbstractTransientMonolithicSystem::resizeOutputParameter(N_OUT_PARAMETER);

@@ -26,14 +26,14 @@ public:
     OMPGlobalDiscreteVector<T>* createVector(const size_t &n) 
     {
         OMPGlobalDiscreteVector<T>* v = new OMPGlobalDiscreteVector<T>(0, n);
-	DiscreteSystem::_data.addVector(v);
+    DiscreteSystem::_data.addVector(v);
         return v;
     };
 
     template<typename T>
     OMPGlobalDiscreteVector<T>* getVector(const size_t &i) 
     {
-    	return (OMPGlobalDiscreteVector<T>*)DiscreteSystem::_data.getLinearEquation(i);
+        return (OMPGlobalDiscreteVector<T>*)DiscreteSystem::_data.getLinearEquation(i);
     };
 
 
@@ -80,9 +80,9 @@ public:
     template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
     IDiscreteLinearEquation* createLinearEquation(T_LINEAR_SOLVER &linear_solver, DofEquationIdTable &dofManager)
     {
-	
-	TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>* eq = new TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_msh, linear_solver, dofManager);
-	DiscreteSystem::_data.addLinearEquation(eq);
+    
+    TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>* eq = new TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_msh, linear_solver, dofManager);
+    DiscreteSystem::_data.addLinearEquation(eq);
         //return _vec_linear_sys.size()-1;
         return eq;
     }

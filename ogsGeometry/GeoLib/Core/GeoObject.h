@@ -31,8 +31,8 @@ struct GeoObjType
 
 class GeoObject {
 public:
-	GeoObject() {};
-	virtual ~GeoObject() {};
+    GeoObject() {};
+    virtual ~GeoObject() {};
 
     virtual GeoObjType::type getGeoType() const = 0;
 };

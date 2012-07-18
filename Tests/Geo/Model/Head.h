@@ -27,28 +27,28 @@ namespace Geo
 {
 
 typedef TemplateFemEquation<
-		Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerEQSLocalAssembler>,
-		Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerResidualLocalAssembler>,
-		Geo::GroundwaterFlowJacobianLocalAssembler
-		>
-		GWFemEquation;
+        Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerEQSLocalAssembler>,
+        Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerResidualLocalAssembler>,
+        Geo::GroundwaterFlowJacobianLocalAssembler
+        >
+        GWFemEquation;
 
 typedef FemIVBVProblem< GWFemEquation > GWFemProblem;
 
 
 
 template <
-	class T_LINEAR_SOLVER
-	>
+    class T_LINEAR_SOLVER
+    >
 class FunctionHead : public AbstractTransientMonolithicSystem
 {
     enum Out { Head=0 };
 public:
     typedef SingleStepFEM
-    		<
-    			GWFemProblem,
-    			T_LINEAR_SOLVER
-    		> SolutionForHead;
+            <
+                GWFemProblem,
+                T_LINEAR_SOLVER
+            > SolutionForHead;
 
     FunctionHead() 
     {

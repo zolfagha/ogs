@@ -12,15 +12,15 @@ namespace NumLib
 template <class F_LINEAR>
 class Linear : public INonlinearSolver
 {
-	F_LINEAR* _linear_f;
+    F_LINEAR* _linear_f;
 public:
-	explicit Linear(F_LINEAR* linear_f) : _linear_f(linear_f) {};
-	virtual ~Linear() {};
+    explicit Linear(F_LINEAR* linear_f) : _linear_f(linear_f) {};
+    virtual ~Linear() {};
 
-	virtual void solve(const VectorType &x_0, VectorType &x_new)
-	{
-		_linear_f->eval(x_0, x_new);
-	}
+    virtual void solve(const VectorType &x_0, VectorType &x_new)
+    {
+        _linear_f->eval(x_0, x_new);
+    }
 };
 
 } //end

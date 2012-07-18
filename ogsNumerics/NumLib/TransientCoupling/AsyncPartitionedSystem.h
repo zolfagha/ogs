@@ -18,8 +18,8 @@ namespace NumLib
 class AsyncPartitionedSystem : public NumLib::AbstractPartitionedProblem<ITransientCoupledSystem>
 {
 public:
-	typedef size_t InternalID;
-	typedef size_t ExternalKey;
+    typedef size_t InternalID;
+    typedef size_t ExternalKey;
 
     AsyncPartitionedSystem() : _algorithm(0)
     {
@@ -29,14 +29,14 @@ public:
 
     virtual void setAlgorithm(NumLib::ITransientPartitionedAlgorithm &algo)
     {
-    	_algorithm = &algo;
+        _algorithm = &algo;
     }
 
-	double suggestNext(const TimeStep &time_current);
-	
-	int solveTimeStep(const TimeStep &time);
-	
-	bool isAwake(const TimeStep &time);
+    double suggestNext(const TimeStep &time_current);
+    
+    int solveTimeStep(const TimeStep &time);
+    
+    bool isAwake(const TimeStep &time);
 
     void accept(const TimeStep &time);
 
@@ -45,7 +45,7 @@ public:
 private:
     NumLib::ITransientPartitionedAlgorithm *_algorithm;
     std::vector<TimeStep> _list_synchronize_time;
-	
+    
     NumLib::UnnamedParameterSet _vars_t_n;
 };
 

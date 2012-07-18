@@ -23,16 +23,16 @@ namespace SolutionLib
  *- BC
  */
 template
-	<
-	class T_FEM_EQUATION
-	>
+    <
+    class T_FEM_EQUATION
+    >
 class FemIVBVProblem : public AbstractFemIVBVProblem
 {
 public:
-	typedef T_FEM_EQUATION EquationType;
+    typedef T_FEM_EQUATION EquationType;
 
-	///
-    explicit FemIVBVProblem(	DiscreteLib::DiscreteSystem* dis)
+    ///
+    explicit FemIVBVProblem(    DiscreteLib::DiscreteSystem* dis)
         : AbstractFemIVBVProblem(dis), _eqs(0)
     {
     }

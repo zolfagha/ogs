@@ -29,17 +29,17 @@ public:
     /// @param u0
     /// @param u1
     /// @param a
-	ElementWiseTransientDxEQSAssembler(const TimeStep* time, const std::vector<GlobalVector*>* u0, const std::vector<GlobalVector*>* u1, IElementWiseTransientJacobianLocalAssembler* a)
+    ElementWiseTransientDxEQSAssembler(const TimeStep* time, const std::vector<GlobalVector*>* u0, const std::vector<GlobalVector*>* u1, IElementWiseTransientJacobianLocalAssembler* a)
         : _transient_e_assembler(a), _timestep(time), _u0(u0), _u1(u1)
     { };
 
 
     /// Conduct the element by element assembly procedure
     ///
-    /// @param msh 				Mesh
-    /// @param dofManager 		Dof map manager
-    /// @param list_dofId 		List of Dof IDs used in this problem
-    /// @param J 				Jacobian matrix
+    /// @param msh                 Mesh
+    /// @param dofManager         Dof map manager
+    /// @param list_dofId         List of Dof IDs used in this problem
+    /// @param J                 Jacobian matrix
     virtual void assembly( MeshLib::IMesh &msh, DiscreteLib::DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs)
     {
         const TimeStep &time = *_timestep;

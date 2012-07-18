@@ -16,9 +16,9 @@ namespace SolutionLib
 class MeshBasedProblem
 {
 public:
-	///
+    ///
     explicit MeshBasedProblem(MeshLib::IMesh* msh) : _msh(msh)
-	{};
+    {};
 
     ///
     virtual ~MeshBasedProblem() {}

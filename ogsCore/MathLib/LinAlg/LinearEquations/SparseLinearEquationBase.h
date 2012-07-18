@@ -19,9 +19,9 @@ template<typename IDX_TYPE>
 class AbstractCRSLinearEquation : public ILinearEquations
 {
 public:
-	typedef CRSMatrix<double, IDX_TYPE> MatrixType;
+    typedef CRSMatrix<double, IDX_TYPE> MatrixType;
     typedef std::vector<double> VectorType;
-	
+    
     AbstractCRSLinearEquation() : _A(0) {};
 
     virtual ~AbstractCRSLinearEquation()

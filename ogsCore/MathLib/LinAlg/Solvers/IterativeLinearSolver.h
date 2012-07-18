@@ -14,8 +14,8 @@ namespace MathLib {
 
 class IterativeLinearSolver: public MathLib::LinearSolver {
 public:
-	IterativeLinearSolver() {};
-	virtual ~IterativeLinearSolver() {};
+    IterativeLinearSolver() {};
+    virtual ~IterativeLinearSolver() {};
 };
 
 }

@@ -21,30 +21,30 @@ namespace FdmLib
  *- BC
  */
 template <
-	class T_LOCAL_ASSEMBLER_LINEAR
-//	class T_LOCAL_ASSEMBLER_RESIDUAL,
-//	class T_LOCAL_ASSEMBLER_JACOBIAN
-	>
+    class T_LOCAL_ASSEMBLER_LINEAR
+//    class T_LOCAL_ASSEMBLER_RESIDUAL,
+//    class T_LOCAL_ASSEMBLER_JACOBIAN
+    >
 class FdmIVBVProblem
 : public SolutionLib::MeshBasedProblem,
   public SolutionLib::TimeSteppingProblem
 {
 public:
-	typedef T_LOCAL_ASSEMBLER_LINEAR LinearAssemblerType;
-//	typedef T_LOCAL_ASSEMBLER_RESIDUAL ResidualAssemblerType;
-//	typedef T_LOCAL_ASSEMBLER_JACOBIAN JacobianAssemblerType;
+    typedef T_LOCAL_ASSEMBLER_LINEAR LinearAssemblerType;
+//    typedef T_LOCAL_ASSEMBLER_RESIDUAL ResidualAssemblerType;
+//    typedef T_LOCAL_ASSEMBLER_JACOBIAN JacobianAssemblerType;
 
-	///
-	FdmIVBVProblem(	DiscreteLib::DiscreteSystem &dis,
-    				LinearAssemblerType *linear_assembly
-//    				ResidualAssemblerType *residual_assembly,
-//    				JacobianAssemblerType *jacobian_assembly
-    				)
+    ///
+    FdmIVBVProblem(    DiscreteLib::DiscreteSystem &dis,
+                    LinearAssemblerType *linear_assembly
+//                    ResidualAssemblerType *residual_assembly,
+//                    JacobianAssemblerType *jacobian_assembly
+                    )
         : MeshBasedProblem(dis.getMesh()),
-          	_discrete_system(&dis),
-			_linear_assembler(linear_assembly)
-//			_residual_assembler(residual_assembly),
-//			_jacobian_assembler(jacobian_assembly)
+              _discrete_system(&dis),
+            _linear_assembler(linear_assembly)
+//            _residual_assembler(residual_assembly),
+//            _jacobian_assembler(jacobian_assembly)
     {
         BaseLib::zeroObject(_map_var, _map_ic);
     }

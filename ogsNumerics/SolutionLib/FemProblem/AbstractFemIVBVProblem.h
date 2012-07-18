@@ -14,8 +14,8 @@ namespace SolutionLib
 class AbstractFemIVBVProblem : public TimeSteppingProblem
 {
 public:
-	///
-	explicit AbstractFemIVBVProblem(	DiscreteLib::DiscreteSystem* dis)
+    ///
+    explicit AbstractFemIVBVProblem(    DiscreteLib::DiscreteSystem* dis)
         : _discrete_system(dis)
     {
     }
@@ -35,7 +35,7 @@ public:
     /// create FE approximation field
     FemVariable* addVariable(const std::string name)
     {
-    	_variables.push_back(new FemVariable(_variables.size(), name));
+        _variables.push_back(new FemVariable(_variables.size(), name));
         return _variables.back();
     }
 

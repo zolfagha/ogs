@@ -13,12 +13,12 @@ namespace NumLib
 class ITransientSystem
 {
 public:
-	virtual ~ITransientSystem() {};
+    virtual ~ITransientSystem() {};
 
-	/// initialize
-	virtual void initialize(const BaseLib::Options &op) {};
-	/// finalize
-	virtual void finalize() {};
+    /// initialize
+    virtual void initialize(const BaseLib::Options &op) {};
+    /// finalize
+    virtual void finalize() {};
 
     virtual double suggestNext(const TimeStep &time_current) = 0;
     virtual bool isAwake(const TimeStep &time) = 0;

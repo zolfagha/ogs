@@ -25,7 +25,7 @@ namespace FemLib
 class IFiniteElement
 {
 public:
-	virtual ~IFiniteElement() {};
+    virtual ~IFiniteElement() {};
 
     /// setup object for given mesh elements
     virtual void configure(MeshLib::IElement &e ) = 0;

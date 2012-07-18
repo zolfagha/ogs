@@ -16,21 +16,21 @@ template<typename Tvalue>
 class TemplateFDMFunction : public NumLib::ITXFunction
 {
 public:
-    /// @param msh 		Mesh
-	TemplateFDMFunction(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh, Tvalue v0)
+    /// @param msh         Mesh
+    TemplateFDMFunction(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh, Tvalue v0)
     {
         initialize(dis, msh);
         resetNodalValues(v0);
     }
 
     /// @param msh Mesh
-	TemplateFDMFunction(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh)
+    TemplateFDMFunction(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh)
     {
         initialize(dis, msh);
     }
 
     /// @param org source object for copying
-	TemplateFDMFunction(const TemplateFDMFunction<Tvalue> &org)
+    TemplateFDMFunction(const TemplateFDMFunction<Tvalue> &org)
     {
         assign(org);
     }
@@ -51,7 +51,7 @@ public:
     /// @return MathLib::IFunction*
     TemplateFDMFunction<Tvalue>* clone() const
     {
-    	TemplateFDMFunction<Tvalue> *obj = new TemplateFDMFunction<Tvalue>(*this);
+        TemplateFDMFunction<Tvalue> *obj = new TemplateFDMFunction<Tvalue>(*this);
         return obj;
     };
 
@@ -92,15 +92,15 @@ public:
     /// set nodal values
     void setNodalValues( Tvalue* x, size_t i_start, size_t n )
     {
-    	for (size_t i=0; i<n; ++i)
-    		(*_nodal_values)[i+i_start] = x[i];
+        for (size_t i=0; i<n; ++i)
+            (*_nodal_values)[i+i_start] = x[i];
         //std::copy(x, x+getNumberOfNodes(), _nodal_values->begin());
     }
 
     /// set nodal values
     void setNodalValues( const DiscreteLib::IDiscreteVector<Tvalue> &x )
     {
-    	*_nodal_values = x;
+        *_nodal_values = x;
     }
 
     /// reset nodal values with the given value
@@ -111,26 +111,26 @@ public:
 
 //    double norm_diff(const TemplateFDMFunction<Tvalue> &ref) const
 //    {
-//    	const size_t n = _nodal_values->size();
-//    	if (n!=ref._nodal_values->size()) {
-//    		std::cout << "***Warning in TemplateFEMIntegrationPointFunction::norm_diff(): size of two vectors is not same." << std::endl;
-//    		return .0;
-//    	}
+//        const size_t n = _nodal_values->size();
+//        if (n!=ref._nodal_values->size()) {
+//            std::cout << "***Warning in TemplateFEMIntegrationPointFunction::norm_diff(): size of two vectors is not same." << std::endl;
+//            return .0;
+//        }
 //
-//		const DiscreteLib::DiscreteVector<double>* vec_prev = ref.getNodalValues();
-//		const DiscreteLib::DiscreteVector<double>* vec_cur = this->getNodalValues();
-//		DiscreteLib::DiscreteVector<double> vec_diff(vec_prev->size());
-//		vec_diff = *vec_cur;
-//		vec_diff -= *vec_prev;
-//		return MathLib::norm_max(vec_diff, vec_diff.size());
+//        const DiscreteLib::DiscreteVector<double>* vec_prev = ref.getNodalValues();
+//        const DiscreteLib::DiscreteVector<double>* vec_cur = this->getNodalValues();
+//        DiscreteLib::DiscreteVector<double> vec_diff(vec_prev->size());
+//        vec_diff = *vec_cur;
+//        vec_diff -= *vec_prev;
+//        return MathLib::norm_max(vec_diff, vec_diff.size());
 //    }
 
     void printout() const
     {
-    	std::cout << "nodal_values = ";
-    	for (size_t i=_nodal_values->getRangeBegin(); i<_nodal_values->getRangeEnd(); ++i)
-    		std::cout << (*_nodal_values)[i] << " ";
-    	std::cout << std::endl;
+        std::cout << "nodal_values = ";
+        for (size_t i=_nodal_values->getRangeBegin(); i<_nodal_values->getRangeEnd(); ++i)
+            std::cout << (*_nodal_values)[i] << " ";
+        std::cout << std::endl;
     }
 private:
     /// initialize
@@ -147,7 +147,7 @@ private:
     {
         initialize(*org._discrete_system, *org._msh);
         for (size_t i=org._nodal_values->getRangeBegin(); i<org._nodal_values->getRangeEnd(); ++i)
-        	(*_nodal_values)[i] = (*org._nodal_values)[i];
+            (*_nodal_values)[i] = (*org._nodal_values)[i];
         //std::copy(org._nodal_values->begin(), org._nodal_values->end(), _nodal_values->begin());
     }
 
@@ -164,26 +164,26 @@ typedef TemplateFDMFunction<double> FdmFunctionScalar;
 class FdmCellVectorFunction : public NumLib::ITXFunction
 {
 public:
-	explicit FdmCellVectorFunction(size_t n)
+    explicit FdmCellVectorFunction(size_t n)
     {
-		_vec.resize(n);
+        _vec.resize(n);
     };
-	virtual ~FdmCellVectorFunction() {};
+    virtual ~FdmCellVectorFunction() {};
 
-	virtual FdmCellVectorFunction* clone() const
+    virtual FdmCellVectorFunction* clone() const
     {
-		FdmCellVectorFunction *obj = new FdmCellVectorFunction(_vec.size());
+        FdmCellVectorFunction *obj = new FdmCellVectorFunction(_vec.size());
         return obj;
     };
 
     virtual void eval(const NumLib::TXPosition x, NumLib::ITXFunction::DataType &val) const
     {
-    	val = _vec[0];
+        val = _vec[0];
     }
 
     void setValue(size_t i, NumLib::LocalVector &v)
     {
-    	_vec[i] = v;
+        _vec[i] = v;
     }
 
     void printout() const

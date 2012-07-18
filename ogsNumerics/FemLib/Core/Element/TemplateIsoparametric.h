@@ -46,7 +46,7 @@ public:
     /// initialize object for given mesh elements
     virtual void configure( MeshLib::IElement &e )
     {
-    	TemplateFeBase<T_FETYPE, N_VARIABLES>::setElement(e);
+        TemplateFeBase<T_FETYPE, N_VARIABLES>::setElement(e);
         const MeshLib::IMesh* msh = TemplateFeBase<T_FETYPE, N_VARIABLES>::getMesh();
         if (e.getMappedCoordinates()==0) {
             MeshLib::IElementCoordinatesMapping *ele_map = 0;
@@ -71,25 +71,25 @@ public:
     /// compute real coordinates from the given position in reference coordinates
     virtual void getRealCoordinates(double* x_real)
     {
-    	assert(_is_basis_computed);
-    	_mapping->mapToPhysicalCoordinates(_mapping->getProperties(), x_real);
+        assert(_is_basis_computed);
+        _mapping->mapToPhysicalCoordinates(_mapping->getProperties(), x_real);
     }
 
     virtual LocalMatrix* getBasisFunction()
     {
-    	assert(_is_basis_computed);
+        assert(_is_basis_computed);
         return _mapping->getProperties()->shape_r;
     }
 
     virtual LocalMatrix* getGradBasisFunction()
     {
-    	assert(_is_basis_computed);
+        assert(_is_basis_computed);
         return _mapping->getProperties()->dshape_dx;
     }
 
     virtual double getDetJ() const
     {
-    	assert(_is_basis_computed);
+        assert(_is_basis_computed);
         return _mapping->getProperties()->det_jacobian;
     }
 
@@ -115,7 +115,7 @@ public:
 //            _mapping->mapToPhysicalCoordinates(_mapping->getProperties(), ox);
 //            double fac = 1.0;
 //            if (f!=0) {
-//            	double v;
+//                double v;
 //                f->eval(ox, v);
 //                fac *= v;
 //            }
@@ -150,7 +150,7 @@ public:
 //            _mapping->mapToPhysicalCoordinates(coord_prop,  ox);
 //            double fac = 1.0;
 //            if (f!=0) {
-//            	double v;
+//                double v;
 //                f->eval(ox, v);
 //                fac *= v;
 //            }
@@ -161,7 +161,7 @@ public:
     /// compute an matrix M = Int{W^T F N} dV
     virtual void integrateWxN(size_t igp, double f, LocalMatrix &mat)
     {
-    	assert(_is_basis_computed);
+        assert(_is_basis_computed);
         const CoordinateMappingProperty *coord_prop = _mapping->getProperties();
         LocalMatrix *basis = coord_prop->shape_r;
         LocalMatrix *test = coord_prop->shape_r;
@@ -173,7 +173,7 @@ public:
     /// compute an matrix M = Int{W^T F dN} dV
     virtual void integrateWxDN(size_t igp, LocalMatrix &f, LocalMatrix &mat)
     {
-    	assert(_is_basis_computed);
+        assert(_is_basis_computed);
         const CoordinateMappingProperty *coord_prop = _mapping->getProperties();
         LocalMatrix *dbasis = coord_prop->dshape_dx;
         LocalMatrix *test = coord_prop->shape_r;
@@ -188,7 +188,7 @@ public:
     /// compute an matrix M = Int{dW^T F dN} dV
     virtual void integrateDWxDN(size_t igp, LocalMatrix &f, LocalMatrix &mat)
     {
-    	assert(_is_basis_computed);
+        assert(_is_basis_computed);
         const CoordinateMappingProperty *coord_prop = _mapping->getProperties();
         LocalMatrix *dbasis = coord_prop->dshape_dx;
         LocalMatrix *dtest = coord_prop->dshape_dx;

@@ -24,15 +24,15 @@ namespace FdmLib
 /**
  * \brief Solution algorithm for linear transient problems using FEM with single time stepping method
  *
- * @tparam T_USER_FEM_PROBLEM  	FEM problem class
- * @tparam T_LINEAR_SOLVER     	Linear equation solver class
+ * @tparam T_USER_FEM_PROBLEM      FEM problem class
+ * @tparam T_LINEAR_SOLVER         Linear equation solver class
  */
 template <
-	class T_USER_PROBLEM,
-	class T_LINEAR_SOLVER
+    class T_USER_PROBLEM,
+    class T_LINEAR_SOLVER
     >
 class SingleStepFDM
-	: public SolutionLib::AbstractTimeSteppingAlgorithm
+    : public SolutionLib::AbstractTimeSteppingAlgorithm
 {
 public:
     typedef T_USER_PROBLEM UserFemProblem;
@@ -48,7 +48,7 @@ public:
         : AbstractTimeSteppingAlgorithm(*problem->getTimeSteppingFunction()), 
           _problem(problem), _discrete_system(dis)
     {
-    	//this->caterogorizeGridPoint();
+        //this->caterogorizeGridPoint();
 
         const size_t n_var = problem->getNumberOfVariables();
         // create dof map
@@ -88,7 +88,7 @@ public:
     /// solve 
     int solveTimeStep(const NumLib::TimeStep &t_n1)
     {
-    	// time step
+        // time step
         double dt = t_n1.getTime() - AbstractTimeSteppingAlgorithm::getTimeStepFunction()->getPrevious();
         NumLib::TimeStep this_t_n1;
         this_t_n1.assign(t_n1);
@@ -111,8 +111,8 @@ public:
         std::vector<size_t> list_st_eqs_id;
         std::vector<double> list_st_val;
         for (size_t i=0; i<_problem->getNumberOfNeumannBC(); i++) {
-        	FdmLib::FdmNeumannBC<double, double> *bc2 = _problem->getFdmNeumannBC(i);
-        	bc2->setup();
+            FdmLib::FdmNeumannBC<double, double> *bc2 = _problem->getFdmNeumannBC(i);
+            bc2->setup();
             std::vector<size_t> &list_bc_nodes = bc2->getListOfBCNodes();
             std::vector<double> &list_bc_values = bc2->getListOfBCValues();
 
@@ -122,7 +122,7 @@ public:
         }
         (*_vec_st) = .0;
         for (size_t i=0; i<list_st_eqs_id.size(); i++) {
-        	(*_vec_st)[list_st_eqs_id[i]] = list_st_val[i];
+            (*_vec_st)[list_st_eqs_id[i]] = list_st_val[i];
         }
 
         // setup functions
@@ -131,8 +131,8 @@ public:
         // initial guess
         *_vec_n1_0 = *_vec_n0;
         for (size_t i=0; i<list_bc1_eqs_id.size(); i++) {
-			(*_vec_n1_0)[list_bc1_eqs_id[i]] = list_bc1_val[i];
-		}
+            (*_vec_n1_0)[list_bc1_eqs_id[i]] = list_bc1_val[i];
+        }
         
         // solve
         _f_linear->eval(*_vec_n1_0, *_vec_n1);

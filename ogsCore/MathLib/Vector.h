@@ -105,12 +105,12 @@ public:
 
     bool operator<(const TemplateVectorX<T> &ref) const
     {
-    	return this->magnitude() < ref.magnitude();
+        return this->magnitude() < ref.magnitude();
     }
 
     T magnitude() const
     {
-    	T m = 0;
+        T m = 0;
         for (size_t i = 0; i < _data.size(); i++)
             m += _data[i]*_data[i];
         return std::sqrt(m);
@@ -275,12 +275,12 @@ public:
 
     bool operator<(const TemplateVector<T,2> &ref) const
     {
-    	return this->magnitude() < ref.magnitude();
+        return this->magnitude() < ref.magnitude();
     }
 
     T magnitude() const
     {
-    	T m = 0;
+        T m = 0;
         for (size_t i = 0; i < 2; i++)
             m += _data[i]*_data[i];
         return std::sqrt(m);
@@ -333,10 +333,10 @@ namespace std
 
 //inline MathLib::TemplateVectorX<double> abs(const MathLib::TemplateVectorX<double> &v)
 //{
-//	MathLib::TemplateVectorX<double> r(v.size());
-//	for (size_t i=0; i<v.size(); i++)
-//		r[i] = std::abs(v[i]);
-//	return r;
+//    MathLib::TemplateVectorX<double> r(v.size());
+//    for (size_t i=0; i<v.size(); i++)
+//        r[i] = std::abs(v[i]);
+//    return r;
 //}
 
 template <typename T>
@@ -351,37 +351,37 @@ inline MathLib::TemplateVectorX<T> abs(const MathLib::TemplateVectorX<T> &v)
 
 inline MathLib::TemplateVector<double,2> abs(const MathLib::TemplateVector<double,2> &v)
 {
-	MathLib::TemplateVector<double,2> r;
-	for (size_t i=0; i<2; i++)
-		r[i] = std::abs(v[i]);
-	return r;
+    MathLib::TemplateVector<double,2> r;
+    for (size_t i=0; i<2; i++)
+        r[i] = std::abs(v[i]);
+    return r;
 }
 
 inline double max(double arg0, const MathLib::TemplateVector<double,2> &arg1)
 {
-	double r = arg0;
-	for (size_t i=0; i<2; i++)
-		r = std::max(r, arg1[i]);
-	return r;
+    double r = arg0;
+    for (size_t i=0; i<2; i++)
+        r = std::max(r, arg1[i]);
+    return r;
 }
 
 //template <typename T>
 //inline double max(double arg0, const MathLib::TemplateVectorX<T> &arg1)
 //{
-//	double r = arg0;
-//	for (size_t i=0; i<arg1.size(); i++)
-//		r = std::max(r, arg1[i]);
-//	return r;
+//    double r = arg0;
+//    for (size_t i=0; i<arg1.size(); i++)
+//        r = std::max(r, arg1[i]);
+//    return r;
 //}
 
 inline double max(double arg0, const MathLib::TemplateVectorX<Eigen::VectorXd> &arg1)
 {
-	double r = arg0;
-	for (size_t i=0; i<arg1.size(); i++) {
-		r = std::max(r, arg1[i].maxCoeff());
-	}
+    double r = arg0;
+    for (size_t i=0; i<arg1.size(); i++) {
+        r = std::max(r, arg1[i].maxCoeff());
+    }
 
-	return r;
+    return r;
 }
 
 } //end std

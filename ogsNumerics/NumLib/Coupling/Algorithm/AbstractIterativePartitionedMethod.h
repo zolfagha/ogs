@@ -21,7 +21,7 @@ namespace NumLib
 class AbstractIterativePartitionedMethod : public IPartitionedAlgorithm
 {
 public:
-	///
+    ///
     AbstractIterativePartitionedMethod() : _max_itr(100), _epsilon(1e-3), _convergence_check(0) {}
     ///
     AbstractIterativePartitionedMethod(double epsilon, size_t max_count) : _max_itr(max_count), _epsilon(epsilon), _convergence_check(0) {}
@@ -45,15 +45,15 @@ public:
     //template <class T_CONVERGENCE_CHECK>
     //int AbstractIterativePartitionedMethod<T_CONVERGENCE_CHECK>::solve (
     int solve (
-    		const std::vector<ICoupledSystem*> &list_coupled_problems,
-    		UnnamedParameterSet &parameter_table,
-    		const ParameterProblemMappingTable &mapping
-    		)
+            const std::vector<ICoupledSystem*> &list_coupled_problems,
+            UnnamedParameterSet &parameter_table,
+            const ParameterProblemMappingTable &mapping
+            )
     {
-    	if (_convergence_check==0) {
-    		std::cout << "***Error: No convergence checker is specified in AbstractIterativePartitionedMethod::solve()" << std::endl;
-    		return -1;
-    	}
+        if (_convergence_check==0) {
+            std::cout << "***Error: No convergence checker is specified in AbstractIterativePartitionedMethod::solve()" << std::endl;
+            return -1;
+        }
         const size_t n_subproblems = list_coupled_problems.size();
 
         // initialize variables
@@ -72,7 +72,7 @@ public:
             // compute each solution
             size_t count_calculated = 0;
             for (size_t i=0; i<n_subproblems; i++) {
-            	ICoupledSystem *problem = list_coupled_problems[i];
+                ICoupledSystem *problem = list_coupled_problems[i];
                 const std::vector<ParameterProblemMappingTable::PairInputVar> &problem_parameters = mapping._list_subproblem_input_source[i];
 
                 // calculate all anyway in the 1st iteration
@@ -92,11 +92,11 @@ public:
 
             if (n_subproblems>1) {
                 // check convergence
-            	if (_convergence_check!=0) {
-                	//T_CONVERGENCE_CHECK check;
-            		//is_converged = check.isConverged(prev_parameter_table, parameter_table, getEpsilon(), v_diff);
+                if (_convergence_check!=0) {
+                    //T_CONVERGENCE_CHECK check;
+                    //is_converged = check.isConverged(prev_parameter_table, parameter_table, getEpsilon(), v_diff);
                     is_converged = _convergence_check->isConverged(prev_parameter_table, parameter_table, getEpsilon(), v_diff);
-            	}
+                }
                 std::cout.setf(std::ios_base::scientific, std::ios_base::floatfield);
                 std::cout.precision(3);
                 std::cout << v_diff << " ";
@@ -127,11 +127,11 @@ protected:
     {
         const size_t n_parameters = parameter_table.size();
         for (size_t i=0; i<n_parameters; i++) {
-        	const ParameterProblemMappingTable::PairSysVarId &sysvarid = mapping._map_paraId2subproblem[i];
+            const ParameterProblemMappingTable::PairSysVarId &sysvarid = mapping._map_paraId2subproblem[i];
             const ICoupledSystem *solution = sysvarid.first;
             if (solution!=0) {
-            	//if (is_fixed)
-            	//	parameter_table.setFixed(i, true);
+                //if (is_fixed)
+                //    parameter_table.setFixed(i, true);
                 parameter_table.set(i, *solution->getOutput(sysvarid.second));
             }
         }
@@ -145,8 +145,8 @@ protected:
             const ParameterProblemMappingTable::PairSysVarId &v = mapping._map_paraId2subproblem[i];
             const ICoupledSystem *tmp_problem = v.first;
             if (tmp_problem==&src_problem) {
-            	if (is_fixed)
-            		parameter_table.setFixed(i, true);
+                if (is_fixed)
+                    parameter_table.setFixed(i, true);
                 parameter_table.set(i, *src_problem.getOutput(v.second));
             }
         }

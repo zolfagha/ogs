@@ -135,11 +135,11 @@ void LisMPILinearEquation::solve()
 
     err = lis_solve(_A,_b,_x,solver); CHKERR(err);
 
-    int	iter,iter_double,iter_quad;
-    double			times,itimes,ptimes,p_c_times,p_i_times;
-    LIS_REAL		resid;
-    int				nsol;
-    char			solvername[128];
+    int    iter,iter_double,iter_quad;
+    double            times,itimes,ptimes,p_c_times,p_i_times;
+    LIS_REAL        resid;
+    int                nsol;
+    char            solvername[128];
     lis_solver_get_itersex(solver,&iter,&iter_double,&iter_quad);
     lis_solver_get_timeex(solver,&times,&itimes,&ptimes,&p_c_times,&p_i_times);
     lis_solver_get_residualnorm(solver,&resid);

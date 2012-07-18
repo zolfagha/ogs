@@ -10,65 +10,65 @@
 class FdmGw1DLocalAssembler: public FdmLib::IStencilWiseTransientLinearEQSLocalAssembler
 {
 private:
-	Geo::PorousMedia* _pm;
-	double _h;
-	double _h2;
+    Geo::PorousMedia* _pm;
+    double _h;
+    double _h2;
 public:
-	FdmGw1DLocalAssembler(double h, Geo::PorousMedia &pm)
-	: _pm(&pm), _h(h), _h2(h*h)
-	{
-	};
+    FdmGw1DLocalAssembler(double h, Geo::PorousMedia &pm)
+    : _pm(&pm), _h(h), _h2(h*h)
+    {
+    };
 
     virtual void assembly(const NumLib::TimeStep &time,  FdmLib::IStencil &s, const LocalVectorType &local_u_n1, const LocalVectorType &local_u_n, LocalEquationType &eqs)
     {
-    	const double dt = time.getTimeStepSize();
-    	const size_t center_point_id = s.getCentralNodeID();
-    	//double storage = .0;
-    	//_pm->storage->eval(0, storage);
-		double k = .0;
-    	_pm->hydraulic_conductivity->eval(0, k);
+        const double dt = time.getTimeStepSize();
+        const size_t center_point_id = s.getCentralNodeID();
+        //double storage = .0;
+        //_pm->storage->eval(0, storage);
+        double k = .0;
+        _pm->hydraulic_conductivity->eval(0, k);
 
-    	if (center_point_id==0) {
+        if (center_point_id==0) {
             eqs.addA(0, 0, k/_h);
             const std::vector<size_t> &neighbor_points = s.getSurroundingNodes();
             for(size_t i=0; i<neighbor_points.size(); i++)
             {
                 eqs.addA(0, i+1, -k/_h);
             }
-    	} else if (center_point_id == 20) {
+        } else if (center_point_id == 20) {
 //            eqs.addA(0, 0, 1.0);
-    	} else {
-        	eqs.addA(0, 0, 2.0*k/_h2);
-    		const std::vector<size_t> &neighbor_points = s.getSurroundingNodes();
+        } else {
+            eqs.addA(0, 0, 2.0*k/_h2);
+            const std::vector<size_t> &neighbor_points = s.getSurroundingNodes();
 
             for(size_t i=0; i<neighbor_points.size(); i++)
             {
-    		  eqs.addA(0, i+1, -k/_h2);
+              eqs.addA(0, i+1, -k/_h2);
             }
-    	}
+        }
 
     }
 };
 
 typedef FdmLib::FdmIVBVProblem
-		<
-		FdmGw1DLocalAssembler
-		> GWFdmProblem;
+        <
+        FdmGw1DLocalAssembler
+        > GWFdmProblem;
 
 
 
 template <
-	class T_LINEAR_SOLVER
-	>
+    class T_LINEAR_SOLVER
+    >
 class FunctionHead : public NumLib::AbstractTransientMonolithicSystem
 {
     enum Out { Head=0 };
 public:
     typedef FdmLib::SingleStepFDM
-    		<
-    			GWFdmProblem,
-    			T_LINEAR_SOLVER
-    		> SolutionForHead;
+            <
+                GWFdmProblem,
+                T_LINEAR_SOLVER
+            > SolutionForHead;
 
     FunctionHead()
     {
@@ -113,7 +113,7 @@ private:
 };
 
 class FunctionFdmVelocity
-	: public NumLib::AbstractTransientMonolithicSystem
+    : public NumLib::AbstractTransientMonolithicSystem
 {
     enum In { Head=0 };
     enum Out { Velocity=0 };
@@ -127,8 +127,8 @@ public:
 
     void define(DiscreteLib::DiscreteSystem &dis, Geo::PorousMedia &pm)
     {
-    	_dis = &dis;
-    	_K = pm.hydraulic_conductivity;
+        _dis = &dis;
+        _K = pm.hydraulic_conductivity;
         _vel = new FdmLib::FdmCellVectorFunction(dis.getMesh()->getNumberOfElements());
         //this->setOutput(Velocity, _vel);
     }

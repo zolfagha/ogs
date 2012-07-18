@@ -35,9 +35,9 @@ std::string replaceString(const std::string &searchString, const std::string &re
  */
 template<typename T> std::string number2str(T d)
 {
-	std::stringstream out;
-	out << d;
-	return out.str();
+    std::stringstream out;
+    out << d;
+    return out.str();
 }
 
 /**
@@ -48,10 +48,10 @@ template<typename T> std::string number2str(T d)
  */
 template<typename T> T str2number (const std::string &str)
 {
-	std::stringstream strs (str, std::stringstream::in | std::stringstream::out);
-	T v;
-	strs >> v;
-	return v;
+    std::stringstream strs (str, std::stringstream::in | std::stringstream::out);
+    T v;
+    strs >> v;
+    return v;
 }
 
 /**

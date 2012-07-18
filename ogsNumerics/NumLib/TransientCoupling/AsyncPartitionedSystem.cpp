@@ -10,18 +10,18 @@ double AsyncPartitionedSystem::suggestNext(const TimeStep &time_current)
     double t;
     t = std::numeric_limits<double>::max();
     for (size_t i=0; i<_list_subproblems.size(); i++) {
-    	ITransientCoupledSystem *solution = _list_subproblems[i];
+        ITransientCoupledSystem *solution = _list_subproblems[i];
         double suggest = solution->suggestNext(time_current);
         if (suggest>.0)
             t = std::min(t, suggest);
     }
-	return t;
+    return t;
 }
 
 void AsyncPartitionedSystem::getActiveProblems(const TimeStep &time, std::vector<NumLib::ICoupledSystem*> &list_active_problems)
 {
     for (size_t i=0; i<_list_subproblems.size(); i++) {
-    	ITransientCoupledSystem *solution = _list_subproblems[i];
+        ITransientCoupledSystem *solution = _list_subproblems[i];
         if (solution->isAwake(time)) {
             list_active_problems.push_back(solution);
         }
@@ -45,7 +45,7 @@ int AsyncPartitionedSystem::solveTimeStep(const TimeStep &time)
     if (list_active_problems.size()>0) {
         // solve
         for (size_t i=0; i<list_active_problems.size(); i++) {
-        	ITransientCoupledSystem *solution = (ITransientCoupledSystem*)list_active_problems[i];
+            ITransientCoupledSystem *solution = (ITransientCoupledSystem*)list_active_problems[i];
             solution->setCurrentTime(time);
         }
         // set parameter state
@@ -57,7 +57,7 @@ int AsyncPartitionedSystem::solveTimeStep(const TimeStep &time)
             const NumLib::ICoupledSystem *tmp_problem = v.first;
             bool is_active = (std::find(list_active_problems.begin(), list_active_problems.end(), tmp_problem)!=list_active_problems.end());
             if (!is_active) {
-            	vars_t_n1->setFixed(i, true);
+                vars_t_n1->setFixed(i, true);
             }
         }
 
@@ -69,7 +69,7 @@ int AsyncPartitionedSystem::solveTimeStep(const TimeStep &time)
 
             // restore parameter state
             for (size_t i=0; i<n_vars; i++) {
-            	vars_t_n1->setFixed(i, list_org_state[i]);
+                vars_t_n1->setFixed(i, list_org_state[i]);
             }
 
     }
@@ -81,7 +81,7 @@ int AsyncPartitionedSystem::solveTimeStep(const TimeStep &time)
 bool AsyncPartitionedSystem::isAwake(const TimeStep &time)
 {
     for (size_t i=0; i<_list_subproblems.size(); i++) {
-    	ITransientCoupledSystem *solution = _list_subproblems[i];
+        ITransientCoupledSystem *solution = _list_subproblems[i];
         if (solution->isAwake(time))
             return true;
     }
@@ -91,7 +91,7 @@ bool AsyncPartitionedSystem::isAwake(const TimeStep &time)
 void AsyncPartitionedSystem::accept(const TimeStep &time)
 {
     for (size_t i=0; i<_list_subproblems.size(); i++) {
-    	ITransientCoupledSystem *solution = _list_subproblems[i];
+        ITransientCoupledSystem *solution = _list_subproblems[i];
         solution->accept(time);
     }
 }
@@ -162,7 +162,7 @@ void AsyncPartitionedSystem::accept(const TimeStep &time)
 //    // set reference
 //    const NumLib::Parameter* v = sub_problem.getOutput(para_id_in_sub_problem);
 //    if (v!=0)
-//    	setOutput(var_id, v);
+//        setOutput(var_id, v);
 //    // make a link between this and sub-problem variable
 //    _map._map_paraId2subproblem.push_back(std::make_pair(&sub_problem, para_id_in_sub_problem));
 //    // update a list of sub-problems

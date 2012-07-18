@@ -9,14 +9,14 @@ namespace ProcessLib
 {
 
 template <
-	size_t N_IN_PARAMETER,
-	size_t N_OUT_PARAMETER
-	>
+    size_t N_IN_PARAMETER,
+    size_t N_OUT_PARAMETER
+    >
 class TemplateTimeIndependentProcess
 : public Process
 {
 public:
-	TemplateTimeIndependentProcess()
+    TemplateTimeIndependentProcess()
     {
         AbstractTransientMonolithicSystem::resizeInputParameter(N_IN_PARAMETER);
         AbstractTransientMonolithicSystem::resizeOutputParameter(N_OUT_PARAMETER);

@@ -110,7 +110,7 @@ public:
 
     void printout(std::ostream &os=std::cout) const
     {
-    	os << "not implemented yet." << std::endl;
+        os << "not implemented yet." << std::endl;
     }
 
 private:

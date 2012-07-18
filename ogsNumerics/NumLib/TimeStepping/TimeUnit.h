@@ -23,21 +23,21 @@ struct TimeUnit
         {
         case TimeUnit::Minute:
             fac = 60.0;
-        	break;
+            break;
         case TimeUnit::Hour:
             fac = 3600.0;
-        	break;
+            break;
         case TimeUnit::Day:
             fac = 86400.;
-        	break;
+            break;
         case TimeUnit::Week:
             fac = 86400.*7.0;
-        	break;
+            break;
         case TimeUnit::Year:
             fac = 86400.*365.0;
-        	break;
+            break;
         default:
-        	break;
+            break;
         }
         return v*fac;
     }

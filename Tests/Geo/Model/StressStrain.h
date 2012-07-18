@@ -17,7 +17,7 @@ namespace Geo
 {
 
 class FunctionStressStrain
-	: public NumLib::AbstractTransientMonolithicSystem
+    : public NumLib::AbstractTransientMonolithicSystem
 {
     enum In { u_x=0, u_y=1 };
     enum Out { strain_xx=0, strain_yy=1, strain_zz=2, strain_xy=3, stress_xx=4, stress_yy=5, stress_xy=6};
@@ -31,8 +31,8 @@ public:
 
     void define(DiscreteLib::DiscreteSystem &dis, PorousMedia &pm)
     {
-    	_dis = &dis;
-    	_K = pm.hydraulic_conductivity;
+        _dis = &dis;
+        _K = pm.hydraulic_conductivity;
         _vel = new FemLib::FEMIntegrationPointFunctionVector(dis);
         //this->setOutput(Velocity, _vel);
     }

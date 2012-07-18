@@ -16,7 +16,7 @@ namespace BaseLib
 class IOptionNode 
 {
 public:
-	virtual ~IOptionNode() {};
+    virtual ~IOptionNode() {};
     virtual bool isValue() const = 0;
 };
 
@@ -118,7 +118,7 @@ public:
     template<typename T>
     inline T getDummy() const
     {
-    	return 0;
+        return 0;
     };
 
     /// get value as number
@@ -145,7 +145,7 @@ public:
 
     const std::string getOption(const std::string &key) const
     {
-    	return getOption<std::string>(key);
+        return getOption<std::string>(key);
     }
 
     /// add new option
@@ -173,7 +173,7 @@ public:
 template<>
 inline std::string Options::getDummy<std::string>() const
 {
-	return _dummy;
+    return _dummy;
 };
 
 }

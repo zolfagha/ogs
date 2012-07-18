@@ -27,23 +27,23 @@ class TimeStep;
 class ElementWiseTransientResidualAssembler : public DiscreteLib::IDiscreteVectorAssembler<double>
 {
 public:
-	typedef DiscreteLib::IDiscreteVectorAssembler<double>::VectorType GlobalVectorType;
+    typedef DiscreteLib::IDiscreteVectorAssembler<double>::VectorType GlobalVectorType;
 
     /// @param time
     /// @param u0
     /// @param u1
     /// @param a
-	ElementWiseTransientResidualAssembler(const TimeStep* time, const std::vector<GlobalVectorType*>* u0, const std::vector<GlobalVectorType*>* u1, IElementWiseTransientResidualLocalAssembler* a)
+    ElementWiseTransientResidualAssembler(const TimeStep* time, const std::vector<GlobalVectorType*>* u0, const std::vector<GlobalVectorType*>* u1, IElementWiseTransientResidualLocalAssembler* a)
         : _transient_e_assembler(a), _timestep(time), _u0(u0), _u1(u1)
     { };
 
 
     /// Conduct the element by element assembly procedure
     ///
-    /// @param msh 				Mesh
-    /// @param dofManager 		Dof map manager
-    /// @param list_dofId 		List of Dof IDs used in this problem
-    /// @param r 				Residual
+    /// @param msh                 Mesh
+    /// @param dofManager         Dof map manager
+    /// @param list_dofId         List of Dof IDs used in this problem
+    /// @param r                 Residual
     virtual void assembly( const MeshLib::IMesh &msh, const DiscreteLib::DofEquationIdTable &dofManager, GlobalVectorType &r);
 
 private:

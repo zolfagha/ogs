@@ -28,32 +28,32 @@ namespace ogs5
 class CInitialCondition : public ProcessInfo, public DistributionInfo
 {
 public:
-	CInitialCondition();
-	~CInitialCondition();
+    CInitialCondition();
+    ~CInitialCondition();
 
-	/**
-	 * read initial condition from stream
-	 * @param in input stream from file
-	 * @return the new position in the stream after reading
-	 */
-	std::ios::pos_type Read(std::ifstream* in);
+    /**
+     * read initial condition from stream
+     * @param in input stream from file
+     * @return the new position in the stream after reading
+     */
+    std::ios::pos_type Read(std::ifstream* in);
 
 public:
-	size_t SubNumber;                     //WW
-	std::vector<int> subdom_index;        //WW
-	std::vector<double> subdom_ic;        //WW
-	std::string fname;                    //17.11.2009. PCH
+    size_t SubNumber;                     //WW
+    std::vector<int> subdom_index;        //WW
+    std::vector<double> subdom_ic;        //WW
+    std::string fname;                    //17.11.2009. PCH
 
-	std::string primaryvariable_name;
+    std::string primaryvariable_name;
 
-	std::string geo_type_name;
-	std::string geo_name;                 // TF 05/2010
-	double geo_node_value;              //KR
+    std::string geo_type_name;
+    std::string geo_name;                 // TF 05/2010
+    double geo_node_value;              //KR
 
-	double gradient_ref_depth;
-	double gradient_ref_depth_value;
-	double gradient_ref_depth_gradient;
-	std::string rfr_file_name;            //OK
+    double gradient_ref_depth;
+    double gradient_ref_depth_value;
+    double gradient_ref_depth_gradient;
+    std::string rfr_file_name;            //OK
 };
 
 

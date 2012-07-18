@@ -26,25 +26,25 @@ class Ogs5FemData
 {
 
 public:
-	Ogs5FemData() {};
-	~Ogs5FemData();
-	bool read(const std::string &proj_path);
+    Ogs5FemData() {};
+    ~Ogs5FemData();
+    bool read(const std::string &proj_path);
 
 public:
-	std::vector<CRFProcess*> pcs_vector;
-	std::vector<CFluidProperties*> mfp_vector;
-	std::vector<CompProperties*> cp_vector;
-	std::vector<CBoundaryCondition*> bc_vector;
-	std::vector<CSourceTerm*> st_vector;
-	std::vector<CInitialCondition*> ic_vector;
-	std::vector<COutput*> out_vector;
-	std::vector<CTimeDiscretization*> time_vector;
-	std::vector<CSolidProperties*> msp_vector;
-	std::vector<CMediumProperties*> mmp_vector;
-	std::vector<CNumerics*>num_vector;
-	GeoLib::GEOObjects* geo_obj;
-	std::string geo_unique_name;
-	std::vector<MeshLib::IMesh*> list_mesh;
+    std::vector<CRFProcess*> pcs_vector;
+    std::vector<CFluidProperties*> mfp_vector;
+    std::vector<CompProperties*> cp_vector;
+    std::vector<CBoundaryCondition*> bc_vector;
+    std::vector<CSourceTerm*> st_vector;
+    std::vector<CInitialCondition*> ic_vector;
+    std::vector<COutput*> out_vector;
+    std::vector<CTimeDiscretization*> time_vector;
+    std::vector<CSolidProperties*> msp_vector;
+    std::vector<CMediumProperties*> mmp_vector;
+    std::vector<CNumerics*>num_vector;
+    GeoLib::GEOObjects* geo_obj;
+    std::string geo_unique_name;
+    std::vector<MeshLib::IMesh*> list_mesh;
 };
 
 }

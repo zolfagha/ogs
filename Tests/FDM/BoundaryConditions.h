@@ -70,7 +70,7 @@ public:
 
 //    NumLib::TemplateSpatialFunction<Tval>* clone() const
 //    {
-//    	FdmDirichletBC<Tval> *f = new FdmDirichletBC<Tval>(_var, _geo, _is_transient, _bc_func);
+//        FdmDirichletBC<Tval> *f = new FdmDirichletBC<Tval>(_var, _geo, _is_transient, _bc_func);
 //        return f;
 //    }
 
@@ -93,7 +93,7 @@ class FdmNeumannBC //: IFdmBC, public NumLib::TemplateSpatialFunction<Tflux>
 {
 public:
     ///
-	FdmNeumannBC(TemplateFDMFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, NumLib::ITXFunction *func)
+    FdmNeumannBC(TemplateFDMFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, NumLib::ITXFunction *func)
     {
         _var = var;
         _geo = geo;
@@ -177,7 +177,7 @@ public:
 //
 //    NumLib::TemplateSpatialFunction<Tflux>* clone() const
 //    {
-//    	FdmNeumannBC<Tval, Tflux> *f = new FdmNeumannBC<Tval, Tflux>(_var, _geo, _is_transient, _bc_func);
+//        FdmNeumannBC<Tval, Tflux> *f = new FdmNeumannBC<Tval, Tflux>(_var, _geo, _is_transient, _bc_func);
 //        return f;
 //    }
 

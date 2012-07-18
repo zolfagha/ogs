@@ -11,7 +11,7 @@ namespace ogs5
 {
 
 DistributionInfo::DistributionInfo(FiniteElement::DistributionType dt) :
-	_dis_type (dt)
+    _dis_type (dt)
 {}
 
 DistributionInfo::~DistributionInfo()
@@ -20,12 +20,12 @@ DistributionInfo::~DistributionInfo()
 void DistributionInfo::setProcessDistributionType (FiniteElement::DistributionType dis_type)
 
 {
-	_dis_type = dis_type;
+    _dis_type = dis_type;
 }
 
 FiniteElement::DistributionType DistributionInfo::getProcessDistributionType () const
 {
-	return _dis_type;
+    return _dis_type;
 }
 
 }

@@ -17,66 +17,66 @@ using namespace NumLib;
 
 void defineProblem1(SystemOfEquations &sysEqs)
 {
-	// 2a + 2b + .3c = 6.9
-	// 3a + 5b + .2c = 13.6
-	// .5a + .3b + 3c = 10.1
-	// A. a=1, b=2, c=3
-	std::vector<LocalMatrix* > vecCp(3);
-	for (size_t i=0; i<3; i++) vecCp[i] = new LocalMatrix(1,1);
-	LocalVector* Fp = new LocalVector(1);
-	(*vecCp[0])(0,0) = 2;
-	(*vecCp[1])(0,0) = 2;
-	(*vecCp[2])(0,0) = .3;
-	(*Fp)[0] = 6.9;
-	std::vector<LocalMatrix* > vecCT(3);
-	for (size_t i=0; i<3; i++) vecCT[i] = new LocalMatrix(1,1);
-	LocalVector* FT = new LocalVector(1);
-	(*vecCT[0])(0,0) = 3;
-	(*vecCT[1])(0,0) = 5;
-	(*vecCT[2])(0,0) = .2;
-	(*FT)[0] = 13.6;
-	std::vector<LocalMatrix* > vecCc(3);
-	for (size_t i=0; i<3; i++) vecCc[i] = new LocalMatrix(1,1);
-	LocalVector* Fc = new LocalVector(1);
-	(*vecCc[0])(0,0) = .5;
-	(*vecCc[1])(0,0) = .3;
-	(*vecCc[2])(0,0) = 3;
-	(*Fc)[0] = 10.1;
+    // 2a + 2b + .3c = 6.9
+    // 3a + 5b + .2c = 13.6
+    // .5a + .3b + 3c = 10.1
+    // A. a=1, b=2, c=3
+    std::vector<LocalMatrix* > vecCp(3);
+    for (size_t i=0; i<3; i++) vecCp[i] = new LocalMatrix(1,1);
+    LocalVector* Fp = new LocalVector(1);
+    (*vecCp[0])(0,0) = 2;
+    (*vecCp[1])(0,0) = 2;
+    (*vecCp[2])(0,0) = .3;
+    (*Fp)[0] = 6.9;
+    std::vector<LocalMatrix* > vecCT(3);
+    for (size_t i=0; i<3; i++) vecCT[i] = new LocalMatrix(1,1);
+    LocalVector* FT = new LocalVector(1);
+    (*vecCT[0])(0,0) = 3;
+    (*vecCT[1])(0,0) = 5;
+    (*vecCT[2])(0,0) = .2;
+    (*FT)[0] = 13.6;
+    std::vector<LocalMatrix* > vecCc(3);
+    for (size_t i=0; i<3; i++) vecCc[i] = new LocalMatrix(1,1);
+    LocalVector* Fc = new LocalVector(1);
+    (*vecCc[0])(0,0) = .5;
+    (*vecCc[1])(0,0) = .3;
+    (*vecCc[2])(0,0) = 3;
+    (*Fc)[0] = 10.1;
 
-	Variable *p = new Variable(0, 1, "p");
-	Variable *T = new Variable(1, 1, "T");
-	Variable *c = new Variable(2, 1, "c");
-	LinearComponent *comp_pp = new LinearComponent(vecCp[0], Fp);
-	LinearComponent *comp_pT = new LinearComponent(vecCp[1]);
-	LinearComponent *comp_pc = new LinearComponent(vecCp[2]);
-	LinearComponent *comp_Tp = new LinearComponent(vecCT[0]);
-	LinearComponent *comp_TT = new LinearComponent(vecCT[1], FT);
-	LinearComponent *comp_Tc = new LinearComponent(vecCT[2]);
-	LinearComponent *comp_cp = new LinearComponent(vecCc[0]);
-	LinearComponent *comp_cT = new LinearComponent(vecCc[1]);
-	LinearComponent *comp_cc = new LinearComponent(vecCc[2], Fc);
+    Variable *p = new Variable(0, 1, "p");
+    Variable *T = new Variable(1, 1, "T");
+    Variable *c = new Variable(2, 1, "c");
+    LinearComponent *comp_pp = new LinearComponent(vecCp[0], Fp);
+    LinearComponent *comp_pT = new LinearComponent(vecCp[1]);
+    LinearComponent *comp_pc = new LinearComponent(vecCp[2]);
+    LinearComponent *comp_Tp = new LinearComponent(vecCT[0]);
+    LinearComponent *comp_TT = new LinearComponent(vecCT[1], FT);
+    LinearComponent *comp_Tc = new LinearComponent(vecCT[2]);
+    LinearComponent *comp_cp = new LinearComponent(vecCc[0]);
+    LinearComponent *comp_cT = new LinearComponent(vecCc[1]);
+    LinearComponent *comp_cc = new LinearComponent(vecCc[2], Fc);
 
-	LinearEquation *odeFlow = new LinearEquation;
-	odeFlow->addVariable(*p, *comp_pp, true);
-	odeFlow->addVariable(*T, *comp_pT);
-	odeFlow->addVariable(*c, *comp_pc);
+    LinearEquation *odeFlow = new LinearEquation;
+    odeFlow->addVariable(*p, *comp_pp, true);
+    odeFlow->addVariable(*T, *comp_pT);
+    odeFlow->addVariable(*c, *comp_pc);
 
-	LinearEquation* odeTransport = new LinearEquation;
-	odeTransport->addVariable(*p, *comp_Tp);
-	odeTransport->addVariable(*T, *comp_TT, true);
-	odeTransport->addVariable(*c, *comp_Tc);
+    LinearEquation* odeTransport = new LinearEquation;
+    odeTransport->addVariable(*p, *comp_Tp);
+    odeTransport->addVariable(*T, *comp_TT, true);
+    odeTransport->addVariable(*c, *comp_Tc);
 
-	LinearEquation* odeTransport2 = new LinearEquation;
-	odeTransport2->addVariable(*p, *comp_cp);
-	odeTransport2->addVariable(*T, *comp_cT);
-	odeTransport2->addVariable(*c, *comp_cc, true);
+    LinearEquation* odeTransport2 = new LinearEquation;
+    odeTransport2->addVariable(*p, *comp_cp);
+    odeTransport2->addVariable(*T, *comp_cT);
+    odeTransport2->addVariable(*c, *comp_cc, true);
 
-	sysEqs.addEquation(*odeFlow);
-	sysEqs.addEquation(*odeTransport);
-	sysEqs.addEquation(*odeTransport2);
+    sysEqs.addEquation(*odeFlow);
+    sysEqs.addEquation(*odeTransport);
+    sysEqs.addEquation(*odeTransport2);
 
-	ASSERT_EQ(3, sysEqs.getNumberOfVariables());
-	ASSERT_EQ(3, sysEqs.getNumberOfEquations());
+    ASSERT_EQ(3, sysEqs.getNumberOfVariables());
+    ASSERT_EQ(3, sysEqs.getNumberOfEquations());
 
 }
 
@@ -102,10 +102,10 @@ BaseLib::Options* defineCouplingM3()
     BaseLib::Options* options = new BaseLib::Options();
     BaseLib::Options* coupling = options->addSubGroup("coupling");
     BaseLib::Options* M1 = coupling->addSubGroup("M1");
-	std::vector<std::string> var;
-	var.push_back("p");
-	var.push_back("T");
-	var.push_back("c");
+    std::vector<std::string> var;
+    var.push_back("p");
+    var.push_back("T");
+    var.push_back("c");
     M1->addOptionAsArray("variable", var);
 
     return options;
@@ -249,8 +249,8 @@ TEST(Math, SystemOfEqs_M1)
 
 TEST(Math, SystemOfEqs_P2)
 {
-	SystemOfEquations sysEqs;
-	defineProblem1(sysEqs);
+    SystemOfEquations sysEqs;
+    defineProblem1(sysEqs);
     //initial value
     MyCouplingEQS::ArrayType vec0(1);
     vec0 *= .0;
@@ -261,14 +261,14 @@ TEST(Math, SystemOfEqs_P2)
     // grouping variables
     std::vector<std::vector<Variable*> > list_active_vars;
     list_active_vars.resize(2);
-	list_active_vars[0].push_back(sysEqs.getVariable(0));
-	list_active_vars[0].push_back(sysEqs.getVariable(1));
-	list_active_vars[1].push_back(sysEqs.getVariable(2));
+    list_active_vars[0].push_back(sysEqs.getVariable(0));
+    list_active_vars[0].push_back(sysEqs.getVariable(1));
+    list_active_vars[1].push_back(sysEqs.getVariable(2));
     std::vector<IPartitionedAlgorithm* > list_part_alg;
     list_part_alg.push_back(&method);
 
     // create coupling structure
-	CoupledProblemConstructor probgen;
+    CoupledProblemConstructor probgen;
     std::vector<MyCouplingEQS*> list_sub_problem;
     ICoupledSystem *part1 = probgen.build(sysEqs, list_active_vars, list_part_alg, list_sub_problem);
     // configure
@@ -340,10 +340,10 @@ TEST(Math, SystemOfEqs_P3)
 class MyConvergenceChecker4ArrayFactory
 {
 public:
-	IConvergenceCheck* create(const std::string &)
-	{
-		return new MyConvergenceCheck4Array();
-	};
+    IConvergenceCheck* create(const std::string &)
+    {
+        return new MyConvergenceCheck4Array();
+    };
 };
 
 

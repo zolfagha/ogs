@@ -10,7 +10,7 @@ namespace NumLib
 class INamedIO
 {
 public:
-	virtual ~INamedIO() {};
+    virtual ~INamedIO() {};
 
     virtual void setInputParameterName(size_t i, const std::string& key) = 0;
 

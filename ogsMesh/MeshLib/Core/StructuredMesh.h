@@ -51,7 +51,7 @@ public:
         for (size_t i=0; i<dim; i++)
             _length[i] = len[i];
         for (size_t i=0; i<dim; i++)
-        	_number_of_elements_per_dimension[i] = division[i];
+            _number_of_elements_per_dimension[i] = division[i];
         for (size_t i=0; i<dim; i++)
             _spacing[i] = _length[i] / division[i];
 

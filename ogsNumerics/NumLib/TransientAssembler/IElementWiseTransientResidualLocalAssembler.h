@@ -24,11 +24,11 @@ public:
     virtual ~IElementWiseTransientResidualLocalAssembler() {};
 
     /// assemble a local residual for the given element
-    /// @param time			time step
-    /// @param e			element
-    /// @param local_u_n1	guess of current time step value
-    /// @param local_u_n	previous time step value
-    /// @param local_r		local residual
+    /// @param time            time step
+    /// @param e            element
+    /// @param local_u_n1    guess of current time step value
+    /// @param local_u_n    previous time step value
+    /// @param local_r        local residual
     virtual void assembly(const TimeStep &time,  MeshLib::IElement &e, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalVector &local_r) = 0;
 };
 

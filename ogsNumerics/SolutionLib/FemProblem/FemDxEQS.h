@@ -26,14 +26,14 @@ template <
     class T_LOCAL_JACOBIAN_ASSEMBLER
     >
 class TemplateTransientDxFEMFunction
-	//: public MathLib::TemplateFunction<MyFemVector, MyFemVector>
+    //: public MathLib::TemplateFunction<MyFemVector, MyFemVector>
 {
 public:
     typedef T_LOCAL_JACOBIAN_ASSEMBLER UserLocalJacobianAssembler;
 
     /// constructor
-    /// @param problem		Fem problem
-    /// @param linear_eqs	Discrete linear equation
+    /// @param problem        Fem problem
+    /// @param linear_eqs    Discrete linear equation
     TemplateTransientDxFEMFunction(std::vector<FemVariable*> &list_var, UserLocalJacobianAssembler* asssembler, DiscreteLib::IDiscreteLinearEquation* linear_eqs)
         : _local_assembler(asssembler),  _linear_eqs(linear_eqs),
           _t_n1(0), _u_n0(0), _list_var(list_var)
@@ -41,36 +41,36 @@ public:
     };
 
     ///
-	virtual ~TemplateTransientDxFEMFunction() {};
+    virtual ~TemplateTransientDxFEMFunction() {};
 
-	///
-	NumLib::TemplateFunction<SolutionVector,SolutionVector>* clone() const
-	{
-    	return new TemplateTransientDxFEMFunction<
-    				T_LOCAL_JACOBIAN_ASSEMBLER
-    				>(_list_var, _local_assembler, _linear_eqs);
-	}
+    ///
+    NumLib::TemplateFunction<SolutionVector,SolutionVector>* clone() const
+    {
+        return new TemplateTransientDxFEMFunction<
+                    T_LOCAL_JACOBIAN_ASSEMBLER
+                    >(_list_var, _local_assembler, _linear_eqs);
+    }
 
     /// reset property
     void reset(const NumLib::TimeStep* t, SolutionVector* u_n0)
     {
-    	this->_t_n1 = const_cast<NumLib::TimeStep*>(t);
-    	this->_u_n0 = u_n0;
+        this->_t_n1 = const_cast<NumLib::TimeStep*>(t);
+        this->_u_n0 = u_n0;
     };
 
     /// solve Newton-Raphson equations
-    /// @param u_n1	current solution
-    /// @param r 	residual
-    /// @param du	increment
+    /// @param u_n1    current solution
+    /// @param r     residual
+    /// @param du    increment
     void eval(const SolutionVector &u_n1, const SolutionVector &r, SolutionVector &du)
     {
-    	// input, output
+        // input, output
         const NumLib::TimeStep &t_n1 = *this->_t_n1;
         SolutionVector* u_n = this->_u_n0;
 
         // setup BC1
         for (size_t i=0; i<_list_var.size(); i++) {
-        	FemVariable* var = _list_var[i];
+            FemVariable* var = _list_var[i];
             for (size_t j=0; j<var->getNumberOfDirichletBC(); j++) {
                 FemDirichletBC* bc1 = var->getDirichletBC(j);
                 bc1->setup();
@@ -85,7 +85,7 @@ public:
         std::vector<SolutionVector*> vec_un1;
         vec_un1.push_back(const_cast<SolutionVector*>(&u_n1));
 
-		// assembly
+        // assembly
         _linear_eqs->initialize();
         NumLib::ElementWiseTransientDxEQSAssembler assembler(&t_n1, &vec_un, &vec_un1, _local_assembler);
         _linear_eqs->construct(assembler);
@@ -93,8 +93,8 @@ public:
         // set residual
         _linear_eqs->addRHS(r, -1.0);
 
-		// solve
-		_linear_eqs->solve();
+        // solve
+        _linear_eqs->solve();
         _linear_eqs->getX(du);
     }
 

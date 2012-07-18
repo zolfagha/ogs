@@ -27,10 +27,10 @@ namespace MathLib {
 template<class T> inline
 double scpr(const T* v0, const T* v1, size_t n)
 {
-	long double res(0.0);
-	for (size_t k(0); k<n; k++)
-		res += v0[k] * v1[k];
-	return (double) res;
+    long double res(0.0);
+    for (size_t k(0); k<n; k++)
+        res += v0[k] * v1[k];
+    return (double) res;
 }
 
 #ifdef _OPENMP
@@ -64,7 +64,7 @@ void normalizeVector(double* u, size_t n);
  * \returns the distance between p and the orthogonal projection of p
  */
 double calcProjPntToLineAndDists(const double p[3], const double a[3],
-		const double b[3], double &lambda, double &d0);
+        const double b[3], double &lambda, double &d0);
 
 
 /** squared dist between double arrays p0 and p1 (size of arrays is 3) */
@@ -92,12 +92,12 @@ double getAngle (const double p0[3], const double p1[3], const double p2[3]);
 template <typename T> inline
 T fastpow (T base, size_t exp)
 {
-	T result (base);
-	if (exp == 0) result = static_cast<T>(1);
-	for (size_t k(1); k<exp; k++) {
-		result *= base;
-	}
-	return result;
+    T result (base);
+    if (exp == 0) result = static_cast<T>(1);
+    for (size_t k(1); k<exp; k++) {
+        result *= base;
+    }
+    return result;
 }
 
 /**

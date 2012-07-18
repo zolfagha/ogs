@@ -34,7 +34,7 @@ public:
 
     virtual TemplateFunction<Tpos,Tval>* clone() const
     {
-    	return new FunctionConstant(_v);
+        return new FunctionConstant(_v);
     }
 private:
     Tval _v;

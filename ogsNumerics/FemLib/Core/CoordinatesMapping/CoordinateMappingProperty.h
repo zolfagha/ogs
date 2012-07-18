@@ -14,13 +14,13 @@ struct CoordinateMappingProperty
     ///// mapping locations in computed coordinates
     //double r[3];
     /// shape function N(r)
-	LocalMatrix *shape_r;
+    LocalMatrix *shape_r;
     /// gradient of shape functions, dN(r)/dr
-	LocalMatrix *dshape_dr;
+    LocalMatrix *dshape_dr;
     /// gradient of shape functions, dN(r)/dx
-	LocalMatrix *dshape_dx;
+    LocalMatrix *dshape_dx;
     /// Jacobian matrix, J=dx/dr
-	LocalMatrix *jacobian_dxdr;
+    LocalMatrix *jacobian_dxdr;
     /// determinant of the Jacobian
     double det_jacobian;
     /// inverse of the Jacobian

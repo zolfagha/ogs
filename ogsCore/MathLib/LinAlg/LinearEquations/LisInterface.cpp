@@ -105,8 +105,8 @@ void CRSLisSolver::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)
     ierr = lis_solver_get_residualnorm(solver, &resid);
     printf("\t iteration: %d/%ld\n", iter, _option.ls_max_iterations);
     printf("\t residuals: %e\n", resid);
-    //	lis_vector_print(xx);
-    //	lis_vector_print(bb);
+    //    lis_vector_print(xx);
+    //    lis_vector_print(bb);
 
     // Update the solution (answer) into the x vector
     #pragma omp parallel for

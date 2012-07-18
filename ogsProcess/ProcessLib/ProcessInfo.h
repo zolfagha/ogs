@@ -12,7 +12,7 @@ namespace ProcessLib
 class ProcessInfo
 {
 public:
-	~ProcessInfo() {};
+    ~ProcessInfo() {};
 
     const char* getName() const { return _name.c_str(); }
 

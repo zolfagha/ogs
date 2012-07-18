@@ -119,7 +119,7 @@ TEST(FEM, ExtrapolateAverage1)
 class MyFunction : public NumLib::ITXFunction
 {
 public:
-	virtual ~MyFunction() {};
+    virtual ~MyFunction() {};
     virtual void eval(const double* x, double &v) const
     {
         if (x[0]<1.0) v = 1e-11;

@@ -15,10 +15,10 @@ template <typename T_BASE>
 class DynamicIOSystem : public T_BASE
 {
 public:
-	typedef size_t InternalID;
+    typedef size_t InternalID;
 
-	DynamicIOSystem() {};
-	virtual ~DynamicIOSystem() {};
+    DynamicIOSystem() {};
+    virtual ~DynamicIOSystem() {};
 
     /// get the number of input parameters
     virtual size_t getNumberOfInputParameters() const { return _list_input_para_id.size(); };
@@ -32,7 +32,7 @@ public:
     /// get output parameter
     virtual const Parameter* getOutput(InternalID parameter_id) const
     {
-    	return _shared_parameters.get(getInternalIDFromOutputID(parameter_id));
+        return _shared_parameters.get(getInternalIDFromOutputID(parameter_id));
     }
 
     // original functions in this class
@@ -45,40 +45,40 @@ public:
 
     void resizeInputParameter(size_t n)
     {
-    	for (size_t i=0; i<n; i++)
-    		registerInputParameter(i);
+        for (size_t i=0; i<n; i++)
+            registerInputParameter(i);
     }
 
     void resizeOutputParameter(size_t n)
     {
-    	for (size_t i=0; i<n; i++)
-    		registerOutputParameter(i);
+        for (size_t i=0; i<n; i++)
+            registerOutputParameter(i);
     }
 
     /// register parameter
     InternalID registerInputParameter(size_t key)
     {
-    	if (_shared_parameters.contain(key)) {
-    		std::cout << "***Error: the given key already exist." << std::endl;
-    		return _shared_parameters.find(key);
-    	}
-    	InternalID id = 0;
-		id = _shared_parameters.add(key, true);
-		_list_input_para_id.push_back(id);
-    	return id;
+        if (_shared_parameters.contain(key)) {
+            std::cout << "***Error: the given key already exist." << std::endl;
+            return _shared_parameters.find(key);
+        }
+        InternalID id = 0;
+        id = _shared_parameters.add(key, true);
+        _list_input_para_id.push_back(id);
+        return id;
     }
 
     InternalID registerOutputParameter(size_t key)
     {
         size_t out_key = create_output_key(key);
-    	if (_shared_parameters.contain(out_key)) {
-    		std::cout << "***Error: the given key already exist." << std::endl;
-    		return _shared_parameters.find(out_key);
-    	}
-    	InternalID id = 0;
-		id = _shared_parameters.add(out_key);
-		_list_output_para_id.push_back(id);
-    	return id;
+        if (_shared_parameters.contain(out_key)) {
+            std::cout << "***Error: the given key already exist." << std::endl;
+            return _shared_parameters.find(out_key);
+        }
+        InternalID id = 0;
+        id = _shared_parameters.add(out_key);
+        _list_output_para_id.push_back(id);
+        return id;
     }
 
     inline size_t getInternalIDFromOutputID(size_t i) const {return _list_output_para_id[i];}; //TODO
@@ -103,7 +103,7 @@ protected:
     /// set output parameter
     void setOutput(InternalID parameter_id, const Parameter* val)
     {
-    	_shared_parameters.set(getInternalIDFromOutputID(parameter_id), *val);
+        _shared_parameters.set(getInternalIDFromOutputID(parameter_id), *val);
     }
 
     /// get parameter set
@@ -127,11 +127,11 @@ template <typename T_BASE>
 class SystemWithSharedParameters : public T_BASE
 {
 public:
-	typedef size_t InternalID;
-	typedef size_t ExternalKey;
+    typedef size_t InternalID;
+    typedef size_t ExternalKey;
 
-	SystemWithSharedParameters() {};
-	virtual ~SystemWithSharedParameters() {};
+    SystemWithSharedParameters() {};
+    virtual ~SystemWithSharedParameters() {};
 
     /// get the number of input parameters
     virtual size_t getNumberOfInputParameters() const { return _list_input_para_id.size(); };
@@ -157,7 +157,7 @@ public:
     /// get output parameter
     virtual const Parameter* getOutput(InternalID parameter_id) const
     {
-    	return _shared_parameters.get(parameter_id);
+        return _shared_parameters.get(parameter_id);
     }
 
     // original functions in this class
@@ -171,26 +171,26 @@ public:
     /// register parameter
     InternalID registerInputParameter(ExternalKey key)
     {
-    	if (_shared_parameters.contain(key)) {
-    		std::cout << "***Error: the given key already exist." << std::endl;
-    		return _shared_parameters.find(key);
-    	}
-    	InternalID id = 0;
-		id = _shared_parameters.add(key, true);
-		_list_input_para_id.push_back(id);
-    	return id;
+        if (_shared_parameters.contain(key)) {
+            std::cout << "***Error: the given key already exist." << std::endl;
+            return _shared_parameters.find(key);
+        }
+        InternalID id = 0;
+        id = _shared_parameters.add(key, true);
+        _list_input_para_id.push_back(id);
+        return id;
     }
 
     InternalID registerOutputParameter(ExternalKey key)
     {
-    	if (_shared_parameters.contain(key)) {
-    		std::cout << "***Error: the given key already exist." << std::endl;
-    		return _shared_parameters.find(key);
-    	}
-    	InternalID id = 0;
-		id = _shared_parameters.add(key);
-		_list_output_para_id.push_back(id);
-    	return id;
+        if (_shared_parameters.contain(key)) {
+            std::cout << "***Error: the given key already exist." << std::endl;
+            return _shared_parameters.find(key);
+        }
+        InternalID id = 0;
+        id = _shared_parameters.add(key);
+        _list_output_para_id.push_back(id);
+        return id;
     }
 
 protected:
@@ -210,7 +210,7 @@ protected:
     /// set output parameter
     void setOutput(InternalID parameter_id, const Parameter* val)
     {
-    	_shared_parameters.set(parameter_id, *val);
+        _shared_parameters.set(parameter_id, *val);
     }
 
     /// get parameter set

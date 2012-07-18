@@ -86,14 +86,14 @@ public:
             localK *= .0;
             FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
             for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
-            	q->getSamplingPoint(j, gp_x);
-            	fe->computeBasisFunctions(gp_x);
+                q->getSamplingPoint(j, gp_x);
+                fe->computeBasisFunctions(gp_x);
                 fe->getRealCoordinates(real_x);
-            	double k = .0;
-            	gw._K->eval(real_x, k);
+                double k = .0;
+                gw._K->eval(real_x, k);
                 NumLib::LocalMatrix mat_k(1,1);
                 mat_k(0,0) = k;
-            	fe->integrateDWxDN(j, mat_k, localK);
+                fe->integrateDWxDN(j, mat_k, localK);
             }
             e->getNodeIDList(e_node_id_list);
             eqs.addAsub(e_node_id_list, localK);
@@ -103,7 +103,7 @@ public:
 
         //apply BC
         for (size_t i=0; i<gw.vec_bc2_nodes.size(); i++) {
-			globalRHS[gw.vec_bc2_nodes[i]] -= gw.vec_bc2_vals[i];
+            globalRHS[gw.vec_bc2_nodes[i]] -= gw.vec_bc2_vals[i];
         }
         //outputLinearEQS(globalA, globalRHS);
         FemLib::DiagonalizeMethod diag;

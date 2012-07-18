@@ -11,17 +11,17 @@ namespace BaseLib {
 
 void CPUTime::start()
 {
-	_start = clock();
+    _start = clock();
 }
 
 void CPUTime::stop()
 {
-	_stop = clock();
+    _stop = clock();
 }
 
 double CPUTime::elapsed()
 {
-	return (_stop-_start)/(double)(CLOCKS_PER_SEC);
+    return (_stop-_start)/(double)(CLOCKS_PER_SEC);
 }
 
 } // end namespace BaseLib

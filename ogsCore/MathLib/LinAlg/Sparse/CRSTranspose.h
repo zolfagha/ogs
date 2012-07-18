@@ -9,7 +9,7 @@
 #define CRSTRANSPOSE_H_
 
 void CS_transp(unsigned n, unsigned *iA, unsigned* jA, double* A,
-				unsigned *iB, unsigned *jB, double* B)
+                unsigned *iB, unsigned *jB, double* B)
 {
   unsigned nnz = iA[n];
   unsigned *inz(new unsigned[n]);

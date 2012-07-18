@@ -8,21 +8,21 @@
 
 static std::string GetUncommentedLine(std::string& line)
 {
-	std::string zeile = "";
-	int i = 0, j = 0;
-	//----------------------------------------------------------------------
-	i = (int) line.find_first_not_of(" ",0); //Anf���ngliche Leerzeichen ���berlesen, i=Position des ersten Nichtleerzeichens im string
-	j = (int) line.find(";",i);           //Nach Kommentarzeichen ; suchen. j = Position des Kommentarzeichens, j=-1 wenn es keines gibt.
-	if((i != -1))
-		zeile = line.substr(i,j - i);  //Ab erstem nicht-Leerzeichen bis Kommentarzeichen rauskopieren in neuen substring, falls Zeile nicht leer ist
-	i = (int) zeile.find_last_not_of(" "); // Suche nach dem letzten Zeichen, dass kein Leerzeichen ist
-	if(i >= 0)
-	{
-		line = zeile.substr(0,i + 1); // Leerzeichen am Ende rausschneiden
-		zeile = line;
-	}
+    std::string zeile = "";
+    int i = 0, j = 0;
+    //----------------------------------------------------------------------
+    i = (int) line.find_first_not_of(" ",0); //Anf���ngliche Leerzeichen ���berlesen, i=Position des ersten Nichtleerzeichens im string
+    j = (int) line.find(";",i);           //Nach Kommentarzeichen ; suchen. j = Position des Kommentarzeichens, j=-1 wenn es keines gibt.
+    if((i != -1))
+        zeile = line.substr(i,j - i);  //Ab erstem nicht-Leerzeichen bis Kommentarzeichen rauskopieren in neuen substring, falls Zeile nicht leer ist
+    i = (int) zeile.find_last_not_of(" "); // Suche nach dem letzten Zeichen, dass kein Leerzeichen ist
+    if(i >= 0)
+    {
+        line = zeile.substr(0,i + 1); // Leerzeichen am Ende rausschneiden
+        zeile = line;
+    }
 
-	return zeile;
+    return zeile;
 }
 
 static std::ios::pos_type GetNextSubKeyword(std::ifstream* file,std::string* line, bool* keyword)

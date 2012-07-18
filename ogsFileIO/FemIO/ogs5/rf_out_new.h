@@ -24,7 +24,7 @@ class COutput;
  * @return true if file reading was successful, else false
  */
 bool OUTRead(const std::string& file_base_name,
-		 std::vector<COutput*> &out_vector);
+         std::vector<COutput*> &out_vector);
 
 #define OUT_FILE_EXTENSION ".out"
 

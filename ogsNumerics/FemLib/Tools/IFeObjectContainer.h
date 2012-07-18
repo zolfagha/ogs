@@ -12,7 +12,7 @@ namespace FemLib
 class IFeObjectContainer
 {
 public:
-	virtual ~IFeObjectContainer() {};
+    virtual ~IFeObjectContainer() {};
     /// get a finite element object for the given mesh element
     virtual IFiniteElement* getFeObject(const MeshLib::IElement &e) = 0;
 };

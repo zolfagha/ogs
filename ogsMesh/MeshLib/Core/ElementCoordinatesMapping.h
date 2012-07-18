@@ -22,7 +22,7 @@ namespace MeshLib
 class IElementCoordinatesMapping
 {
 public:
-	virtual ~IElementCoordinatesMapping() {};
+    virtual ~IElementCoordinatesMapping() {};
     /// get mapped coordinates of nodes
     virtual GeoLib::Point* getNodePoint(size_t node_id) = 0;
 };
@@ -38,7 +38,7 @@ public:
         _msh = &msh;
         _e = &e;
     };
-	virtual ~EleMapInvariant() {};
+    virtual ~EleMapInvariant() {};
 
     GeoLib::Point* getNodePoint(size_t local_id) 
     {

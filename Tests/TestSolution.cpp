@@ -61,12 +61,12 @@ protected:
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
         for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
-        	q->getSamplingPoint(j, gp_x);
+            q->getSamplingPoint(j, gp_x);
             fe->computeBasisFunctions(gp_x);
             fe->getRealCoordinates(real_x);
-        	LocalMatrixType k;
-        	_matK->eval(real_x, k);
-        	fe->integrateDWxDN(j, k, localK);
+            LocalMatrixType k;
+            _matK->eval(real_x, k);
+            fe->integrateDWxDN(j, k, localK);
         }
     }
 private:
@@ -77,7 +77,7 @@ private:
 class GWJacobianAssembler : public NumLib::IElementWiseTransientJacobianLocalAssembler
 {
 private:
-	NumLib::ITXFunction* _matK;
+    NumLib::ITXFunction* _matK;
     FemLib::LagrangianFeObjectContainer* _feObjects;
     typedef NumLib::LocalMatrix LocalMatrixType;
     typedef NumLib::LocalVector LocalVectorType;
@@ -88,11 +88,11 @@ public:
     };
 
     /// assemble a local Jacobian matrix for the given element
-    /// @param time			time step
-    /// @param e			element
-    /// @param local_u_n1	guess of current time step value
-    /// @param local_u_n	previous time step value
-    /// @param local_J		local Jacobian
+    /// @param time            time step
+    /// @param e            element
+    /// @param local_u_n1    guess of current time step value
+    /// @param local_u_n    previous time step value
+    /// @param local_J        local Jacobian
     virtual void assembly(const TimeStep &/*time*/,  MeshLib::IElement &e, const LocalVectorType &local_u_n1, const LocalVectorType &/*local_u_n*/, LocalMatrixType &local_J)
     {
         IFiniteElement* fe = _feObjects->getFeObject(e);
@@ -109,12 +109,12 @@ public:
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
         for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
-        	q->getSamplingPoint(j, gp_x);
+            q->getSamplingPoint(j, gp_x);
             fe->computeBasisFunctions(gp_x);
             fe->getRealCoordinates(real_x);
-        	NumLib::LocalMatrix k;
-        	_matK->eval(real_x, k);
-        	fe->integrateDWxDN(j, k, localK);
+            NumLib::LocalMatrix k;
+            _matK->eval(real_x, k);
+            fe->integrateDWxDN(j, k, localK);
         }
 
         //localR = (1/dt * localM + theta * localK) * localX - (1/dt * localM + (1-theta) * localK) * localX0 - localF;
@@ -128,16 +128,16 @@ public:
 };
 
 template <
-	class T_LINEAR_SOLVER
-	>
+    class T_LINEAR_SOLVER
+    >
 class GWFemTestSystem : public NumLib::ITransientSystem
 {
-	typedef TemplateFemEquation
+    typedef TemplateFemEquation
             <
-            	GWTimeODEAssembler<ElementWiseTimeEulerEQSLocalAssembler>,
-            	GWTimeODEAssembler<ElementWiseTimeEulerResidualLocalAssembler>,
-    			GWJacobianAssembler
-    		> GWFemEquation;
+                GWTimeODEAssembler<ElementWiseTimeEulerEQSLocalAssembler>,
+                GWTimeODEAssembler<ElementWiseTimeEulerResidualLocalAssembler>,
+                GWJacobianAssembler
+            > GWFemEquation;
 
     typedef FemIVBVProblem<GWFemEquation> GWFemProblem;
 
@@ -153,10 +153,10 @@ class GWFemTestSystem : public NumLib::ITransientSystem
             > MyNonlinearFunction;
 
     typedef SingleStepFEM
-    		<
-    			GWFemProblem,
-    			T_LINEAR_SOLVER
-    		> SolutionForHead;
+            <
+                GWFemProblem,
+                T_LINEAR_SOLVER
+            > SolutionForHead;
 
 public:
     GWFemTestSystem()

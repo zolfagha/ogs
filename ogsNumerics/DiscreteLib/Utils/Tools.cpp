@@ -32,11 +32,11 @@ void getLocalVector2(const DofEquationIdTable &dofManager, const std::vector<siz
 /// create a subset of vector u corresponding to the given vector index
 void getLocalVector(const DofEquationIdTable &dofManager, const std::vector<size_t> &list_vec_entry_id, const std::vector<size_t> &list_vec_size_for_order, const std::vector<IDiscreteVector<double>*> &list_multiple_u, LocalVector &local_u)
 {
-	std::vector<double> temp_v;
-	getLocalVector2(dofManager, list_vec_entry_id, list_vec_size_for_order, list_multiple_u, temp_v);
-	local_u.resize(temp_v.size());
-	for (size_t i=0; i<temp_v.size(); i++)
-		local_u[i] = temp_v[i];
+    std::vector<double> temp_v;
+    getLocalVector2(dofManager, list_vec_entry_id, list_vec_size_for_order, list_multiple_u, temp_v);
+    local_u.resize(temp_v.size());
+    for (size_t i=0; i<temp_v.size(); i++)
+        local_u[i] = temp_v[i];
 }
 
 void getLocalVector(const std::vector<size_t> &list_vec_entry_id, const IDiscreteVector<double> &global_u, LocalVector &local_u)
@@ -49,18 +49,18 @@ void getLocalVector(const std::vector<size_t> &list_vec_entry_id, const IDiscret
 
 void setGlobalVector(const DofEquationIdTable &dofManager, size_t var_id, size_t mesh_id, const IDiscreteVector<double> &u, IDiscreteVector<double> &global_vec)
 {
-	for (size_t i=u.getRangeBegin(); i<u.getRangeEnd(); i++) {
-		size_t eqs_id = dofManager.mapEqsID(var_id, mesh_id, i);
-		global_vec[eqs_id] = u[i];
-	}
+    for (size_t i=u.getRangeBegin(); i<u.getRangeEnd(); i++) {
+        size_t eqs_id = dofManager.mapEqsID(var_id, mesh_id, i);
+        global_vec[eqs_id] = u[i];
+    }
 }
 
 void setLocalVector(const DofEquationIdTable &dofManager, size_t var_id, size_t mesh_id, const IDiscreteVector<double> &global_vec, IDiscreteVector<double> &u)
 {
-	for (size_t i=u.getRangeBegin(); i<u.getRangeEnd(); i++) {
-		size_t eqs_id = dofManager.mapEqsID(var_id, mesh_id, i);
-		u[i] = global_vec[eqs_id];
-	}
+    for (size_t i=u.getRangeBegin(); i<u.getRangeEnd(); i++) {
+        size_t eqs_id = dofManager.mapEqsID(var_id, mesh_id, i);
+        u[i] = global_vec[eqs_id];
+    }
 }
 
 void convertToEqsValues(const DiscreteLib::DofEquationIdTable &eqs_map, size_t var_id, size_t msh_id, const std::vector<size_t> &list_node_id, const std::vector<double> &list_node_values, std::vector<size_t> &list_eqs_id, std::vector<double> &list_eqs_val)

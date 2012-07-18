@@ -21,8 +21,8 @@ namespace NumLib
 class PartitionedProblem : public AbstractPartitionedProblem<ICoupledSystem>
 {
 public:
-	typedef size_t InternalID;
-	typedef size_t ExternalKey;
+    typedef size_t InternalID;
+    typedef size_t ExternalKey;
 
     /// 
     PartitionedProblem() : _algorithm(0)
@@ -35,7 +35,7 @@ public:
     ///
     virtual void setAlgorithm(IPartitionedAlgorithm &algo)
     {
-    	_algorithm = &algo;
+        _algorithm = &algo;
     }
 
     /// solve this system

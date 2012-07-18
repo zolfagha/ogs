@@ -17,7 +17,7 @@ template<typename T>
 class DiscreteVector : public IDiscreteVector<T>
 {
 protected:
-	friend class DiscreteSystem;
+    friend class DiscreteSystem;
     DiscreteVector() {};
     explicit DiscreteVector(size_t n) : _data(n) {};
 

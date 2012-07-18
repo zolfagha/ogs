@@ -15,11 +15,11 @@ class TimeSteppingController
 {
 public:
     /// set the starting time
-	void setBeginning(double time_begin);
+    void setBeginning(double time_begin);
     /// add transient system
-	void addTransientSystem(ITransientSystem &sys);
-	/// solve systems until the given time
-	size_t solve(double time_end);
+    void addTransientSystem(ITransientSystem &sys);
+    /// solve systems until the given time
+    size_t solve(double time_end);
 
 private:
     double _time_begin;

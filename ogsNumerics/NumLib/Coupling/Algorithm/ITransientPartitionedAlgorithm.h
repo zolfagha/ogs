@@ -15,7 +15,7 @@ struct ParameterProblemMappingTable;
 class ITransientPartitionedAlgorithm
 {
 public:
-	virtual ~ITransientPartitionedAlgorithm() {};
+    virtual ~ITransientPartitionedAlgorithm() {};
 
     /// solve coupled problems
     /// @param subproblems    a list of subproblems

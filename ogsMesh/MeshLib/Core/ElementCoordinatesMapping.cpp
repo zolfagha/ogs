@@ -132,9 +132,9 @@ void EleMapLocalCoordinates::getRotationMatrixToOriginal(const IElement &ele, co
 
     } else if (e->getDimension()==2) {
         // x"_vec
-        //			xx[0] = nodes[1]->X() - nodes[0]->X();
-        //			xx[1] = nodes[1]->Y() - nodes[0]->Y();
-        //			xx[2] = nodes[1]->Z() - nodes[0]->Z();
+        //            xx[0] = nodes[1]->X() - nodes[0]->X();
+        //            xx[1] = nodes[1]->Y() - nodes[0]->Y();
+        //            xx[2] = nodes[1]->Z() - nodes[0]->Z();
         double const* const pnt0(vec_pt[0].getData());
         double const* const pnt1(vec_pt[1].getData());
         xx[0] = pnt1[0] - pnt0[0];
@@ -142,9 +142,9 @@ void EleMapLocalCoordinates::getRotationMatrixToOriginal(const IElement &ele, co
         xx[2] = pnt1[2] - pnt0[2];
         MathLib::normalizeVector(xx, 3);
         // a vector on the plane
-        //			yy[0] = nodes[2]->X() - nodes[1]->X();
-        //			yy[1] = nodes[2]->Y() - nodes[1]->Y();
-        //			yy[2] = nodes[2]->Z() - nodes[1]->Z();
+        //            yy[0] = nodes[2]->X() - nodes[1]->X();
+        //            yy[1] = nodes[2]->Y() - nodes[1]->Y();
+        //            yy[2] = nodes[2]->Z() - nodes[1]->Z();
         double const* const pnt2(vec_pt[2].getData());
         yy[0] = pnt2[0] - pnt1[0];
         yy[1] = pnt2[1] - pnt1[1];

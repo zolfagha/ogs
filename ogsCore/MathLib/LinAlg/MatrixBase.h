@@ -16,50 +16,50 @@ namespace MathLib {
 template <typename IDX_TYPE>
 class MatrixBase {
 public:
-	/**
-	 * Constructor for initialization of the number of rows and columns
-	 * @param nrows number of rows
-	 * @param ncols number of columns
-	 * @return
-	 */
-	MatrixBase(IDX_TYPE nrows=0, IDX_TYPE ncols=0) :
-		_n_rows(nrows), _n_cols(ncols)
-	{}
+    /**
+     * Constructor for initialization of the number of rows and columns
+     * @param nrows number of rows
+     * @param ncols number of columns
+     * @return
+     */
+    MatrixBase(IDX_TYPE nrows=0, IDX_TYPE ncols=0) :
+        _n_rows(nrows), _n_cols(ncols)
+    {}
 
-	/**
-	 * copy constructor.
-	 * @param original the object that is copied
-	 * @return
-	 */
-	MatrixBase (MatrixBase const& original) :
-		_n_rows (original._n_rows), _n_cols (original._n_cols)
-	{}
+    /**
+     * copy constructor.
+     * @param original the object that is copied
+     * @return
+     */
+    MatrixBase (MatrixBase const& original) :
+        _n_rows (original._n_rows), _n_cols (original._n_cols)
+    {}
 
-	/**
-	 * destructor of the class.
-	 * @return
-	 */
-	virtual ~MatrixBase() {};
-	/**
-	 * get the number of rows
-	 * @return the number of rows
-	 */
-	IDX_TYPE getNRows () const { return _n_rows; }
-	/**
-	 * get the number of columns
-	 * @return the number of columns
-	 */
-	IDX_TYPE getNCols () const { return _n_cols; }
+    /**
+     * destructor of the class.
+     * @return
+     */
+    virtual ~MatrixBase() {};
+    /**
+     * get the number of rows
+     * @return the number of rows
+     */
+    IDX_TYPE getNRows () const { return _n_rows; }
+    /**
+     * get the number of columns
+     * @return the number of columns
+     */
+    IDX_TYPE getNCols () const { return _n_cols; }
 
 protected:
-	/**
-	 * the number of rows
-	 */
-	IDX_TYPE _n_rows;
-	/**
-	 * the number of columns
-	 */
-	IDX_TYPE _n_cols;
+    /**
+     * the number of rows
+     */
+    IDX_TYPE _n_rows;
+    /**
+     * the number of columns
+     */
+    IDX_TYPE _n_cols;
 };
 
 }

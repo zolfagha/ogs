@@ -24,102 +24,102 @@ namespace Math_Group
 class Matrix
 {
 public:
-	Matrix(size_t rows, size_t cols = 1);
-	Matrix();
-	explicit Matrix(const Matrix& m);
-	//
-	void resize(size_t rows, size_t cols = 1);
-	//
-	virtual ~Matrix();
-	void ReleaseMemory();                 //06.2010. WW
+    Matrix(size_t rows, size_t cols = 1);
+    Matrix();
+    explicit Matrix(const Matrix& m);
+    //
+    void resize(size_t rows, size_t cols = 1);
+    //
+    virtual ~Matrix();
+    void ReleaseMemory();                 //06.2010. WW
 
-	// Operators
-	virtual void operator= (double a);
-	virtual void operator*= (double a);
-	virtual void operator/= (double a);
-	virtual void operator+= (double a);
-	void operator= (const Matrix& m);
-	void operator+= (const Matrix& m);
-	void operator-= (const Matrix& m);
+    // Operators
+    virtual void operator= (double a);
+    virtual void operator*= (double a);
+    virtual void operator/= (double a);
+    virtual void operator+= (double a);
+    void operator= (const Matrix& m);
+    void operator+= (const Matrix& m);
+    void operator-= (const Matrix& m);
 
-	void GetTranspose(Matrix& m);
+    void GetTranspose(Matrix& m);
 
-	// vec_result = This*vec. vec_result must be initialized
-	void multi(const double* vec, double* vec_result, double fac = 1.0);
-	// m_result = this*m. m_result must be initialized
-	void multi(const Matrix& m, Matrix& m_result, double fac = 1.0);
-	// m_result = this*m1*m2. m_result must be initialized
-	void multi(const Matrix& m1, const Matrix& m2, Matrix& m_result);
+    // vec_result = This*vec. vec_result must be initialized
+    void multi(const double* vec, double* vec_result, double fac = 1.0);
+    // m_result = this*m. m_result must be initialized
+    void multi(const Matrix& m, Matrix& m_result, double fac = 1.0);
+    // m_result = this*m1*m2. m_result must be initialized
+    void multi(const Matrix& m1, const Matrix& m2, Matrix& m_result);
 
-	// Access to members
-	virtual double& operator() (size_t i, size_t j = 0) const;
-	void LimitSize(size_t nRows, size_t nCols = 1);
+    // Access to members
+    virtual double& operator() (size_t i, size_t j = 0) const;
+    void LimitSize(size_t nRows, size_t nCols = 1);
 
-	size_t Rows() const {return nrows; }
-	size_t Cols() const {return ncols; }
-	size_t Size() const {return size; }
+    size_t Rows() const {return nrows; }
+    size_t Cols() const {return ncols; }
+    size_t Size() const {return size; }
 
-	// Print
-	void Write(std::ostream& os = std::cout);
-	void Write_BIN(std::fstream& os);
-	void Read_BIN(std::fstream& is);
+    // Print
+    void Write(std::ostream& os = std::cout);
+    void Write_BIN(std::fstream& os);
+    void Read_BIN(std::fstream& is);
 protected:
-	size_t nrows, nrows0;
-	size_t ncols, ncols0;
-	size_t size;
-	double* data;
-	bool Sym;
+    size_t nrows, nrows0;
+    size_t ncols, ncols0;
+    size_t size;
+    double* data;
+    bool Sym;
 };
 
 // Symmetrical matrix. 12-01-2005. WW
 class SymMatrix : public Matrix
 {
 public:
-	SymMatrix(size_t dim);
-	SymMatrix();
-	explicit SymMatrix(const SymMatrix& m);
+    SymMatrix(size_t dim);
+    SymMatrix();
+    explicit SymMatrix(const SymMatrix& m);
 
-	void resize(size_t dim);
-	~SymMatrix() {}
+    void resize(size_t dim);
+    ~SymMatrix() {}
 
-	// Operators
-	void operator= (double a);
-	void operator*= (double a);
-	void operator+= (double a);
-	void operator= (const SymMatrix& m);
-	void operator+= (const SymMatrix& m);
-	void operator-= (const SymMatrix& m);
-	void LimitSize(size_t dim);
+    // Operators
+    void operator= (double a);
+    void operator*= (double a);
+    void operator+= (double a);
+    void operator= (const SymMatrix& m);
+    void operator+= (const SymMatrix& m);
+    void operator-= (const SymMatrix& m);
+    void LimitSize(size_t dim);
 
-	// Access to members
-	double& operator() (size_t i, size_t j) const;
+    // Access to members
+    double& operator() (size_t i, size_t j) const;
 };
 
 class DiagonalMatrix : public Matrix
 {
 private:
-	mutable double dummy_zero;
+    mutable double dummy_zero;
 public:
-	DiagonalMatrix(size_t dim);
-	DiagonalMatrix();
-	explicit DiagonalMatrix(const DiagonalMatrix& m);
+    DiagonalMatrix(size_t dim);
+    DiagonalMatrix();
+    explicit DiagonalMatrix(const DiagonalMatrix& m);
 
-	void resize(size_t dim);
+    void resize(size_t dim);
 
-	~DiagonalMatrix() {}
+    ~DiagonalMatrix() {}
 
-	// Operators
-	void operator = (double a);
-	void operator *= (double a);
-	void operator += (double a);
-	void operator = (const DiagonalMatrix& m);
-	void operator += (const DiagonalMatrix& m);
-	void operator -= (const DiagonalMatrix& m);
-	void LimitSize(size_t dim);
+    // Operators
+    void operator = (double a);
+    void operator *= (double a);
+    void operator += (double a);
+    void operator = (const DiagonalMatrix& m);
+    void operator += (const DiagonalMatrix& m);
+    void operator -= (const DiagonalMatrix& m);
+    void LimitSize(size_t dim);
 
-	// Access to members
-	double& operator() (size_t i, size_t j) const;
-	double& operator() (size_t i) const;
+    // Access to members
+    double& operator() (size_t i, size_t j) const;
+    double& operator() (size_t i) const;
 };
 
 typedef Matrix Vec;

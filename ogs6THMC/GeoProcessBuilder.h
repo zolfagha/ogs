@@ -11,13 +11,13 @@
 class GeoProcessBuilder: public ProcessLib::AbstractProcessBuilder
 {
 public:
-	static ProcessLib::AbstractProcessBuilder* getInstance();
+    static ProcessLib::AbstractProcessBuilder* getInstance();
 private:
     static ProcessLib::AbstractProcessBuilder* _obj;
 
 public:
-	virtual ~GeoProcessBuilder() {};
+    virtual ~GeoProcessBuilder() {};
 
 private:
-	GeoProcessBuilder();
+    GeoProcessBuilder();
 };

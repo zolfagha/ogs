@@ -9,7 +9,7 @@ class ElemenetFactory
 public:
   static IElement* createNewElement(const ElementShape::type t)
   {
-    if (t == ElementShape::LINE)	return new Line();
+    if (t == ElementShape::LINE)    return new Line();
     else if (t == ElementShape::QUAD) return new Quadrirateral();
     else if (t == ElementShape::HEXAHEDRON) return new Hexahedron();
     else if (t == ElementShape::TRIANGLE) return new Triangle();

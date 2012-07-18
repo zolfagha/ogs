@@ -26,15 +26,15 @@ namespace SolutionLib
 /**
  * \brief Solution algorithm for linear transient problems using FEM with single time stepping method
  *
- * @tparam T_USER_FEM_PROBLEM  	FEM problem class
- * @tparam T_LINEAR_SOLVER     	Linear equation solver class
+ * @tparam T_USER_FEM_PROBLEM      FEM problem class
+ * @tparam T_LINEAR_SOLVER         Linear equation solver class
  */
 template <
-	class T_USER_FEM_PROBLEM,
-	class T_LINEAR_SOLVER
+    class T_USER_FEM_PROBLEM,
+    class T_LINEAR_SOLVER
     >
 class SingleStepFEM
-	: public AbstractTimeSteppingAlgorithm
+    : public AbstractTimeSteppingAlgorithm
 {
 public:
     typedef T_USER_FEM_PROBLEM UserFemProblem;
@@ -59,7 +59,7 @@ public:
 
         // create dof map
         for (size_t i=0; i<n_var; i++) {
-        	size_t n_dof_per_var = msh->getNumberOfNodes();
+            size_t n_dof_per_var = msh->getNumberOfNodes();
             _dofManager.addVariableDoFs(msh->getID(), 0, n_dof_per_var);
         }
         _dofManager.construct(DiscreteLib::DofNumberingType::BY_POINT);
@@ -68,7 +68,7 @@ public:
         // initialize vectors for each variable
         _vec_u_n1.resize(n_var, 0);
         for (size_t i=0; i<n_var; i++) {
-        	_vec_u_n1[i] = problem->getVariable(i)->getIC()->clone();
+            _vec_u_n1[i] = problem->getVariable(i)->getIC()->clone();
         }
 
         // initialize vectors for solution, ST
@@ -79,8 +79,8 @@ public:
 
         // copy values of each variable to one solution vector
         for (size_t i=0; i<n_var; i++) {
-        	SolutionVector* vec_var = problem->getVariable(i)->getIC()->getNodalValues();
-        	DiscreteLib::setGlobalVector(_dofManager, i, msh->getID(), *vec_var, *_x_n1);
+            SolutionVector* vec_var = problem->getVariable(i)->getIC()->getNodalValues();
+            DiscreteLib::setGlobalVector(_dofManager, i, msh->getID(), *vec_var, *_x_n1);
         }
 
         // create linear equation systems
@@ -116,7 +116,7 @@ public:
     /// solve 
     int solveTimeStep(const NumLib::TimeStep &t_n1)
     {
-    	// time step
+        // time step
         double dt = t_n1.getTime() - AbstractTimeSteppingAlgorithm::getTimeStepFunction()->getPrevious();
         NumLib::TimeStep this_t_n1;
         this_t_n1.assign(t_n1);
@@ -130,7 +130,7 @@ public:
         for (size_t i_var=0; i_var<n_var; i_var++) {
             FemVariable* var = _problem->getVariable(i_var);
             for (size_t i=0; i<var->getNumberOfDirichletBC(); i++) {
-            	SolutionLib::FemDirichletBC *bc1 = var->getDirichletBC(i);
+                SolutionLib::FemDirichletBC *bc1 = var->getDirichletBC(i);
                 bc1->setup();
                 std::vector<size_t> &list_bc_nodes = bc1->getListOfBCNodes();
                 std::vector<double> &list_bc_values = bc1->getListOfBCValues();
@@ -144,8 +144,8 @@ public:
         for (size_t i_var=0; i_var<n_var; i_var++) {
             FemVariable* var = _problem->getVariable(i_var);
             for (size_t i=0; i<var->getNumberOfNeumannBC(); i++) {
-            	SolutionLib::IFemNeumannBC *bc2 = var->getNeumannBC(i);
-            	bc2->setup();
+                SolutionLib::IFemNeumannBC *bc2 = var->getNeumannBC(i);
+                bc2->setup();
                 std::vector<size_t> &list_bc_nodes = bc2->getListOfBCNodes();
                 std::vector<double> &list_bc_values = bc2->getListOfBCValues();
 
@@ -155,7 +155,7 @@ public:
         }
         (*_x_st) = .0;
         for (size_t i=0; i<list_st_eqs_id.size(); i++) {
-        	(*_x_st)[list_st_eqs_id[i]] = list_st_val[i];
+            (*_x_st)[list_st_eqs_id[i]] = list_st_val[i];
         }
 
         // setup functions
@@ -166,16 +166,16 @@ public:
         // initial guess
         *_x_n1_0 = *_x_n0;
         for (size_t i=0; i<list_bc1_eqs_id.size(); i++) {
-			(*_x_n1_0)[list_bc1_eqs_id[i]] = list_bc1_val[i];
-		}
+            (*_x_n1_0)[list_bc1_eqs_id[i]] = list_bc1_val[i];
+        }
         
         // solve
         _f_nonlinear->solve(*_x_n1_0, *_x_n1);
 
         // distribute solution vector to local vector for each variable
         for (size_t i=0; i<n_var; i++) {
-        	//SolutionVector* vec_var = _problem->getVariable(i)->getIC()->getNodalValues();
-        	DiscreteLib::setLocalVector(_dofManager, i, msh_id, *_x_n1, *_vec_u_n1[i]->getNodalValues());
+            //SolutionVector* vec_var = _problem->getVariable(i)->getIC()->getNodalValues();
+            DiscreteLib::setLocalVector(_dofManager, i, msh_id, *_x_n1, *_vec_u_n1[i]->getNodalValues());
         }
 
         return 0;

@@ -23,7 +23,7 @@ class NeumannBC2FEM
 {
 public:
     /// 
-	NeumannBC2FEM(const MeshLib::IMesh &msh, LagrangianFeObjectContainer &feObjects, const GeoLib::GeoObject &_geo, const NumLib::ITXFunction &_bc_func, std::vector<size_t> &_vec_nodes, std::vector<double> &_vec_values)
+    NeumannBC2FEM(const MeshLib::IMesh &msh, LagrangianFeObjectContainer &feObjects, const GeoLib::GeoObject &_geo, const NumLib::ITXFunction &_bc_func, std::vector<size_t> &_vec_nodes, std::vector<double> &_vec_values)
     {
         // pickup nodes on geo
         MeshLib::findNodesOnGeometry(&msh, &_geo, &_vec_nodes);
@@ -65,7 +65,7 @@ public:
                 for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
                     q->getSamplingPoint(j, x_ref);
                     fe_edge->computeBasisFunctions(x_ref);
-                	fe_edge->integrateWxN(j, 1., M);
+                    fe_edge->integrateWxN(j, 1., M);
                 }
                 result = M * nodal_val;
                 //M.axpy(1.0, &nodal_val[0], 0.0, &result[0]);

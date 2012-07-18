@@ -98,8 +98,8 @@ public:
 
 
     void CreateEQS();
-	void InitialEQS(size_t problem_id);
-	void CalcElementMatrices();
+    void InitialEQS(size_t problem_id);
+    void CalcElementMatrices();
 
     Linear_EQS* getEQS(bool quad)
     {
@@ -110,43 +110,43 @@ public:
     }
 
 #if defined(USE_MPI)                           //WW
-	// long MaxDim() const {return max_dimen;}   //WW
-	void ReleaseMemory();
-	//WW
-	void FillBorderNodeConnectDom(std::vector<int> allnodes_doms);
-	long BSize() const                    //WW
-	{
-		return n_bc;
-	}
-	//WW
-	void ConfigEQS(CNumerics* m_num, const long n, bool quad = false);
-	//WW
-	double Dot_Interior(const double* localr0,  const double* localr1 = NULL);
-	//WW
-	void Global2Local(const double* global_x, double* local_x, const long n );
-	//WW
-	void Local2Global(const double* local_x, double* global_x, const long n );
-	//WW
-	void Global2Border(const double* x, double* local_x, const long n);
-	//WW
-	void Border2Global(const double* local_x, double* x, const long n);
-	//WW
-	void Local2Border(const double* local_x, double* border_x);
-	//WW
-	void Border2Local(const double* border_x, double* local_x);
-	//
-	double Dot_Border_Vec(const double* vec_x, const double* vec_y);
-	//
-	//WW
-	void CatInnerX(double* global_x, const double* local_x, const long n);
-	//WW
-	void PrintEQS_CPUtime(std::ostream &os = std::cout);
+    // long MaxDim() const {return max_dimen;}   //WW
+    void ReleaseMemory();
+    //WW
+    void FillBorderNodeConnectDom(std::vector<int> allnodes_doms);
+    long BSize() const                    //WW
+    {
+        return n_bc;
+    }
+    //WW
+    void ConfigEQS(CNumerics* m_num, const long n, bool quad = false);
+    //WW
+    double Dot_Interior(const double* localr0,  const double* localr1 = NULL);
+    //WW
+    void Global2Local(const double* global_x, double* local_x, const long n );
+    //WW
+    void Local2Global(const double* local_x, double* global_x, const long n );
+    //WW
+    void Global2Border(const double* x, double* local_x, const long n);
+    //WW
+    void Border2Global(const double* local_x, double* x, const long n);
+    //WW
+    void Local2Border(const double* local_x, double* border_x);
+    //WW
+    void Border2Local(const double* border_x, double* local_x);
+    //
+    double Dot_Border_Vec(const double* vec_x, const double* vec_y);
+    //
+    //WW
+    void CatInnerX(double* global_x, const double* local_x, const long n);
+    //WW
+    void PrintEQS_CPUtime(std::ostream &os = std::cout);
 
 #if defined(NEW_BREDUCE)
-	void ReduceBorderV(double* local_x);
+    void ReduceBorderV(double* local_x);
 #endif
-	//
-	//
+    //
+    //
     long T_border_nodes_size() const { return t_border_nodes_size; }
     void T_border_nodes_size(long val) { t_border_nodes_size = val; }
     long T_border_nodes_sizeH() const { return t_border_nodes_sizeH; }

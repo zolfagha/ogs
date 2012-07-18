@@ -67,14 +67,14 @@ public:
 
 //    void addA(std::vector<size_t> &rowId, std::vector<size_t> &colId, MatrixType &m)
 //    {
-//    	for (size_t i=0; i<rowId.size(); i++)
-//        	for (size_t j=0; j<colId.size(); j++)
-//        		_A(rowId[i], colId[j]) += m(i,j);
+//        for (size_t i=0; i<rowId.size(); i++)
+//            for (size_t j=0; j<colId.size(); j++)
+//                _A(rowId[i], colId[j]) += m(i,j);
 //    }
 //
 //    void addA(std::vector<size_t> &pos, MatrixType &m)
 //    {
-//    	addA(pos, pos, m);
+//        addA(pos, pos, m);
 //    }
 
     double getRHS(size_t rowId)
@@ -133,14 +133,14 @@ public:
 
     void printout(std::ostream &os=std::cout) const
     {
-    	os << "not implemented yet." << std::endl;
+        os << "not implemented yet." << std::endl;
     }
 
     void setOption(const BaseLib::Options &/*option*/) {};
 
     void solve()
     {
-    	_x = _A.colPivHouseholderQr().solve(_b);
+        _x = _A.colPivHouseholderQr().solve(_b);
     }
 
 private:

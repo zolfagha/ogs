@@ -33,12 +33,12 @@ public:
 
     Point* getPoint1()
     {
-    	return _pnt_vec[0];
+        return _pnt_vec[0];
     }
 
     Point* getPoint2()
     {
-    	return _pnt_vec[1];
+        return _pnt_vec[1];
     }
 
 private:

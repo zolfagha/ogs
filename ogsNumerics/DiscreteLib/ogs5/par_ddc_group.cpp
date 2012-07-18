@@ -14,16 +14,16 @@ namespace OGS5
 
 void CPARDomainGroup::countDoms2Nodes(bool quad)
 {
-	//Average of nodal Neumann BCs contributed by nodes from different domains
-	const size_t nsize = _msh->getNumberOfNodes();
-	_node_connected_doms.resize(nsize, 0);
+    //Average of nodal Neumann BCs contributed by nodes from different domains
+    const size_t nsize = _msh->getNumberOfNodes();
+    _node_connected_doms.resize(nsize, 0);
 
     std::vector<bool> nod_mark(nsize, false);
     std::vector<bool> ele_mark(_msh->getNumberOfElements(), false);
-	for (size_t i=0; i<_dom_vector.size(); i++) {
-		CPARDomain* m_dom = _dom_vector[i];
-		for (size_t j=0; j<m_dom->getNumberOfElements(); j++) {
-			MeshLib::IElement* elem = _msh->getElemenet(m_dom->getElementId(j));
+    for (size_t i=0; i<_dom_vector.size(); i++) {
+        CPARDomain* m_dom = _dom_vector[i];
+        for (size_t j=0; j<m_dom->getNumberOfElements(); j++) {
+            MeshLib::IElement* elem = _msh->getElemenet(m_dom->getElementId(j));
             if (!ele_mark[elem->getID()]) continue;
             for(size_t k=0; k<elem->getNumberOfNodes(quad); k++) {
                 size_t n_index = elem->getNodeID(k);
@@ -32,17 +32,17 @@ void CPARDomainGroup::countDoms2Nodes(bool quad)
                     nod_mark[n_index] = true;
                 }
             }
-		}
-	}
-	
-	for (size_t j=0; j<_msh->getNumberOfElements(); j++) {
-		MeshLib::IElement* elem = _msh->getElemenet(j);
-		if(ele_mark[j]) {
-			for (size_t k=0; k<elem->getNumberOfNodes(quad); k++) {
-                nod_mark[elem->getNodeID(k)] = true;
-			}
         }
-	}
+    }
+    
+    for (size_t j=0; j<_msh->getNumberOfElements(); j++) {
+        MeshLib::IElement* elem = _msh->getElemenet(j);
+        if(ele_mark[j]) {
+            for (size_t k=0; k<elem->getNumberOfNodes(quad); k++) {
+                nod_mark[elem->getNodeID(k)] = true;
+            }
+        }
+    }
 }
 
 /**************************************************************************
@@ -58,98 +58,98 @@ void CPARDomainGroup::countDoms2Nodes(bool quad)
 
 void CPARDomainGroup::setup()
 {
-	const size_t no_domains = _dom_vector.size();
-	if(no_domains == 0) return;
+    const size_t no_domains = _dom_vector.size();
+    if(no_domains == 0) return;
 
-	CPARDomain* m_dom = NULL;
-	size_t i;
+    CPARDomain* m_dom = NULL;
+    size_t i;
 
-	// For find nodes connected to node WW
-	long j;
-	long nsize = _msh->getNumberOfNodes();
-	//node_connected_doms.resize(nsize);
-	for(j = 0; j < nsize; j++)
-		_node_connected_doms[j] = 0;
-	for(i = 0; i < _dom_vector.size(); i++)
-	{
-		m_dom = _dom_vector[i];
-		for(j = 0; j < (long)m_dom->getTotalNumberOfDomainNodes(); j++)
-			_node_connected_doms[m_dom->getGlobalNodeID(j)] += 1;
-	}
-	//
-	// Find nodes of all neighbors of each node. // WW
-	// Local topology. WW
-	cout << "  Find nodes on borders" << endl;
-	findNodesOnInterface(use_quad);
-	cout << "  Find the connected nodes for each node" << endl;
+    // For find nodes connected to node WW
+    long j;
+    long nsize = _msh->getNumberOfNodes();
+    //node_connected_doms.resize(nsize);
+    for(j = 0; j < nsize; j++)
+        _node_connected_doms[j] = 0;
+    for(i = 0; i < _dom_vector.size(); i++)
+    {
+        m_dom = _dom_vector[i];
+        for(j = 0; j < (long)m_dom->getTotalNumberOfDomainNodes(); j++)
+            _node_connected_doms[m_dom->getGlobalNodeID(j)] += 1;
+    }
+    //
+    // Find nodes of all neighbors of each node. // WW
+    // Local topology. WW
+    cout << "  Find nodes on borders" << endl;
+    findNodesOnInterface(use_quad);
+    cout << "  Find the connected nodes for each node" << endl;
 #ifndef USE_MPI                                //WW
-	for(i = 0; i < no_domains; i++)
-	{
+    for(i = 0; i < no_domains; i++)
+    {
 #else
-	i = myrank;                           //WW
+    i = myrank;                           //WW
 #endif
-		m_dom = _dom_vector[i];
-		m_dom->NodeConnectedNodes();
+        m_dom = _dom_vector[i];
+        m_dom->NodeConnectedNodes();
 #ifndef USE_MPI                             //WW
-	}
+    }
 #endif
-	//----------------------------------------------------------------------
-	// Create domain EQS
-	cout << "  Create domain EQS" << endl;
+    //----------------------------------------------------------------------
+    // Create domain EQS
+    cout << "  Create domain EQS" << endl;
 #ifdef USE_MPI
     i = myrank;
 #else
-	for(i = 0; i < no_domains; i++)
-	{
+    for(i = 0; i < no_domains; i++)
+    {
 #endif
-		m_dom = _dom_vector[i];
-		cout << "    Domain:" << m_dom->getID() << endl;
-		m_dom->CreateEQS();
-		//
+        m_dom = _dom_vector[i];
+        cout << "    Domain:" << m_dom->getID() << endl;
+        m_dom->CreateEQS();
+        //
 #ifndef USE_MPI
-	}
+    }
 #endif
-		//----------------------------------------------------------------------
+        //----------------------------------------------------------------------
 }
 
 void CPARDomainGroup::findNodesOnInterface(bool quadr)
 {
-	const size_t nnodes_gl = _msh->getNumberOfTotalNodes(); 
-	const size_t nnodes_l = _msh->getNumberOfNodes();	//
-	
+    const size_t nnodes_gl = _msh->getNumberOfTotalNodes(); 
+    const size_t nnodes_l = _msh->getNumberOfNodes();    //
+    
 #if defined(USE_MPI)
-	long overlapped_entry_size = 0;
+    long overlapped_entry_size = 0;
 #endif
     // Map BC entry-->global node array
     vector<long> list_bndNodeId;
     vector<long> map_glNode2bndNodeId(nnodes_gl);
-	for (size_t i=0; i<nnodes_gl; i++) {
-		if (_node_connected_doms[i] > 1) {
-			map_glNode2bndNodeId[i] = (long)list_bndNodeId.size();
-			list_bndNodeId.push_back(i);
+    for (size_t i=0; i<nnodes_gl; i++) {
+        if (_node_connected_doms[i] > 1) {
+            map_glNode2bndNodeId[i] = (long)list_bndNodeId.size();
+            list_bndNodeId.push_back(i);
 #ifdef USE_MPI
-			if (i < _msh->getNumberOfNodes(0))
-				overlapped_entry_size = (long)list_bndNodeId.size();
+            if (i < _msh->getNumberOfNodes(0))
+                overlapped_entry_size = (long)list_bndNodeId.size();
 #endif
-		} else {
-			map_glNode2bndNodeId[i] = -1;
+        } else {
+            map_glNode2bndNodeId[i] = -1;
         }
-	}
-	
+    }
+    
 #if defined(USE_MPI)
-	// Total border nodes
-	CPARDomain*m_dom = _dom_vector[myrank];
-	m_dom->T_border_nodes_size(overlapped_entry_size);
-	m_dom->T_border_nodes_sizeH((long)list_bndNodeId.size());
-	m_dom->T_border_nodes(new long[list_bndNodeId.size()]);
-	for(size_t i = 0; i < list_bndNodeId.size(); i++)
-		m_dom->T_border_nodes(i, list_bndNodeId[i]);
+    // Total border nodes
+    CPARDomain*m_dom = _dom_vector[myrank];
+    m_dom->T_border_nodes_size(overlapped_entry_size);
+    m_dom->T_border_nodes_sizeH((long)list_bndNodeId.size());
+    m_dom->T_border_nodes(new long[list_bndNodeId.size()]);
+    for(size_t i = 0; i < list_bndNodeId.size(); i++)
+        m_dom->T_border_nodes(i, list_bndNodeId[i]);
 #endif
 
-	// Sort
+    // Sort
 #ifndef USE_MPI
-	for (size_t k=0; k<_dom_vector.size(); k++) {
-		int myrank = (int) k;
+    for (size_t k=0; k<_dom_vector.size(); k++) {
+        int myrank = (int) k;
         CPARDomain* m_dom = _dom_vector[myrank];
 #endif
         setupDomain(m_dom, map_glNode2bndNodeId, quadr);
@@ -416,47 +416,47 @@ void CPARDomainGroup::SetBoundaryConditionSubDomain()
     std::vector<long> st_local_index_in_dom;
     std::vector<long> rank_st_node_value_in_dom;
 
-	int k;
-	long i,j;
-	CPARDomain* m_dom = NULL;
-	//
-	for(k = 0; k < (int)_dom_vector.size(); k++)
-	{
-		m_dom = _dom_vector[k];
-		// BC
-		for(i = 0; i < (long)bc_node_value.size(); i++)
-		{
-			m_bc_nv = bc_node_value[i];
-			for(j = 0; j < (long)m_dom->getTotalNumberOfDomainNodes(); j++)
-				if(m_bc_nv->geo_node_number == m_dom->getGlobalNodeID(j))
-				{
-					bc_node_value_in_dom.push_back(i);
-					bc_local_index_in_dom.push_back(j);
-					break;
-				}
-		}
-		rank_bc_node_value_in_dom.push_back((long)bc_node_value_in_dom.size());
-		// ST
-		for(i = 0; i < (long)st_node_value.size(); i++)
-		{
-			m_st_nv = st_node_value[i];
+    int k;
+    long i,j;
+    CPARDomain* m_dom = NULL;
+    //
+    for(k = 0; k < (int)_dom_vector.size(); k++)
+    {
+        m_dom = _dom_vector[k];
+        // BC
+        for(i = 0; i < (long)bc_node_value.size(); i++)
+        {
+            m_bc_nv = bc_node_value[i];
             for(j = 0; j < (long)m_dom->getTotalNumberOfDomainNodes(); j++)
-				if(m_st_nv->geo_node_number == m_dom->getGlobalNodeID(j))
-				{
-					st_node_value_in_dom.push_back(i);
-					st_local_index_in_dom.push_back(j);
-					break;
-				}
-		}
-		rank_st_node_value_in_dom.push_back((long)st_node_value_in_dom.size());
-	}
-	long Size = (long)st_node_value.size();
-	long l_index;
-	for(i = 0; i < Size; i++)
-	{
-		l_index = st_node_value[i]->geo_node_number;
-		st_node_value[i]->node_value /= (double)_node_connected_doms[l_index];
-	}
+                if(m_bc_nv->geo_node_number == m_dom->getGlobalNodeID(j))
+                {
+                    bc_node_value_in_dom.push_back(i);
+                    bc_local_index_in_dom.push_back(j);
+                    break;
+                }
+        }
+        rank_bc_node_value_in_dom.push_back((long)bc_node_value_in_dom.size());
+        // ST
+        for(i = 0; i < (long)st_node_value.size(); i++)
+        {
+            m_st_nv = st_node_value[i];
+            for(j = 0; j < (long)m_dom->getTotalNumberOfDomainNodes(); j++)
+                if(m_st_nv->geo_node_number == m_dom->getGlobalNodeID(j))
+                {
+                    st_node_value_in_dom.push_back(i);
+                    st_local_index_in_dom.push_back(j);
+                    break;
+                }
+        }
+        rank_st_node_value_in_dom.push_back((long)st_node_value_in_dom.size());
+    }
+    long Size = (long)st_node_value.size();
+    long l_index;
+    for(i = 0; i < Size; i++)
+    {
+        l_index = st_node_value[i]->geo_node_number;
+        st_node_value[i]->node_value /= (double)_node_connected_doms[l_index];
+    }
 }
 
 } //end

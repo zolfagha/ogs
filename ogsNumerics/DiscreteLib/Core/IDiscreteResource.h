@@ -12,7 +12,7 @@ namespace DiscreteLib
 class IDiscreteResource
 {
 public:
-	IDiscreteResource() : _obj_id(0) {};
+    IDiscreteResource() : _obj_id(0) {};
     virtual ~IDiscreteResource() {};
     size_t getObjectID() const {return _obj_id;};
     void setObjectID(size_t i) {_obj_id = i;};

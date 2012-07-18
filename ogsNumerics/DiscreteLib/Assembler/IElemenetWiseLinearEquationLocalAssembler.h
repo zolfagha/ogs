@@ -22,7 +22,7 @@ namespace DiscreteLib
 class IElemenetWiseLinearEquationLocalAssembler
 {
 public:
-	virtual ~IElemenetWiseLinearEquationLocalAssembler() {};
+    virtual ~IElemenetWiseLinearEquationLocalAssembler() {};
 
     /// assemble a local linear equation for the given element
     virtual void assembly(MeshLib::IElement &e, LocalEquation &eqs) = 0;

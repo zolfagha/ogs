@@ -23,22 +23,22 @@ typedef NumLib::FunctionConstant<double,double> MyFunction;
 class MyConvergenceCheck : public IConvergenceCheck
 {
 public:
-	virtual ~MyConvergenceCheck() {};
+    virtual ~MyConvergenceCheck() {};
 
-	virtual bool isConverged(UnnamedParameterSet& vars_prev, UnnamedParameterSet& vars_current, double eps, double &v_diff)
-	{
-	    for (size_t i=0; i<vars_prev.size(); i++) {
-	        double v_prev = .0;
-	        vars_prev.get<MyFunction>(i)->eval(v_prev);
-	        double v_cur = .0;
-	        vars_current.get<MyFunction>(i)->eval(v_cur);
-	        v_diff = std::abs(v_cur - v_prev);
-	        if (v_diff>eps) {
-	            return false;
-	        }
-	    }
-	    return true;
-	}
+    virtual bool isConverged(UnnamedParameterSet& vars_prev, UnnamedParameterSet& vars_current, double eps, double &v_diff)
+    {
+        for (size_t i=0; i<vars_prev.size(); i++) {
+            double v_prev = .0;
+            vars_prev.get<MyFunction>(i)->eval(v_prev);
+            double v_cur = .0;
+            vars_current.get<MyFunction>(i)->eval(v_cur);
+            v_diff = std::abs(v_cur - v_prev);
+            if (v_diff>eps) {
+                return false;
+            }
+        }
+        return true;
+    }
 };
 
 #if 0
@@ -124,20 +124,20 @@ private:
 // A. a=1, b=2, c=3
 class WeakCouplingEQS1 : public TemplateSteadyMonolithicSystem
 {
-	enum In {b=0, c=1};
-	enum Out {a=0};
+    enum In {b=0, c=1};
+    enum Out {a=0};
 public:
     WeakCouplingEQS1() 
     {
-    	resizeInputParameter(2);
-    	resizeOutputParameter(1);
+        resizeInputParameter(2);
+        resizeOutputParameter(1);
 
         setOutput(a, new FunctionConstant<double,double>(.0));
     }
 
     int solve()
     {
-    	double vb, vc;
+        double vb, vc;
         getInput<MyFunction>(b)->eval(vb);
         getInput<MyFunction>(c)->eval(vc);
         double va = 1./2.*(6.9 - 2.*vb - 0.3*vc);
@@ -148,20 +148,20 @@ public:
 
 class WeakCouplingEQS2 :  public TemplateSteadyMonolithicSystem
 {
-	enum In {a=0, c=1};
-	enum Out {b=0};
+    enum In {a=0, c=1};
+    enum Out {b=0};
 public:
 
     WeakCouplingEQS2() 
     {
-    	resizeInputParameter(2);
-    	resizeOutputParameter(1);
+        resizeInputParameter(2);
+        resizeOutputParameter(1);
         setOutput(b, new FunctionConstant<double,double>(.0));
     }
 
     int solve()
     {
-    	double va, vc;
+        double va, vc;
         getInput<MyFunction>(a)->eval(va);
         getInput<MyFunction>(c)->eval(vc);
         double vb = 1./5.*(13.6-3*va-0.2*vc);
@@ -172,20 +172,20 @@ public:
 
 class WeakCouplingEQS3 : public TemplateSteadyMonolithicSystem
 {
-	enum In {a=0, b=1};
-	enum Out {c=0};
+    enum In {a=0, b=1};
+    enum Out {c=0};
 public:
 
     WeakCouplingEQS3() 
     {
-    	resizeInputParameter(2);
-    	resizeOutputParameter(1);
+        resizeInputParameter(2);
+        resizeOutputParameter(1);
         setOutput(c, new FunctionConstant<double,double>(.0));
     }
 
     int solve()
     {
-    	double va, vb;
+        double va, vb;
         getInput<MyFunction>(a)->eval(va);
         getInput<MyFunction>(b)->eval(vb);
         double vc = 1./3.*(10.1-0.5*va-0.3*vb);
@@ -199,108 +199,108 @@ private:
 
 BaseLib::Options* defineOption4SteadyCoupling()
 {
-	BaseLib::Options* options = new BaseLib::Options();
-	BaseLib::Options* coupling = options->addSubGroup("coupling");
-	BaseLib::Options* P2 = coupling->addSubGroup("P");
-	{
-	//P2->addOption("name", "P2");
-	P2->addOption("algorithm", "Jacobi");
-	P2->addOption("convergence", "MyConvergenceCheck");
-	P2->addOptionAsNum("max_itr", 100);
-	P2->addOptionAsNum("epsilon", 1.e-4);
-	std::vector<std::string> out_var;
-	out_var.push_back("a");
-	out_var.push_back("b");
-	out_var.push_back("c");
-	P2->addOptionAsArray("out", out_var);
-	}
-	BaseLib::Options* P2_sub = P2->addSubGroup("problems");
-	BaseLib::Options* P1 = P2_sub->addSubGroup("P");
-	{
-	//P1->addOption("name", "P1");
-	P1->addOption("algorithm", "Gauss");
-	P1->addOption("convergence", "MyConvergenceCheck");
-	P1->addOptionAsNum("max_itr", 100);
-	P1->addOptionAsNum("epsilon", 1.e-4);
-	std::vector<std::string> out_var;
-	out_var.push_back("a");
-	out_var.push_back("b");
-	std::vector<std::string> in_var;
-	in_var.push_back("c");
-	P1->addOptionAsArray("out", out_var);
-	P1->addOptionAsArray("in", in_var);
-	}
-	BaseLib::Options* P1_sub = P1->addSubGroup("problems");
-	BaseLib::Options* M1 = P1_sub->addSubGroup("M1");
-	{
-	M1->addOption("name", "EQS1");
-	std::vector<std::string> out_var;
-	out_var.push_back("a");
-	std::vector<std::string> in_var;
-	in_var.push_back("b");
-	in_var.push_back("c");
-	M1->addOptionAsArray("out", out_var);
-	M1->addOptionAsArray("in", in_var);
-	}
-	BaseLib::Options* M2 = P1_sub->addSubGroup("M2");
-	{
-	M2->addOption("name", "EQS2");
-	std::vector<std::string> out_var;
-	out_var.push_back("b");
-	std::vector<std::string> in_var;
-	in_var.push_back("a");
-	in_var.push_back("c");
-	M2->addOptionAsArray("out", out_var);
-	M2->addOptionAsArray("in", in_var);
-	}
-	BaseLib::Options* M3 = P2_sub->addSubGroup("M3");
-	{
-	M3->addOption("name", "EQS3");
-	std::vector<std::string> out_var;
-	out_var.push_back("c");
-	std::vector<std::string> in_var;
-	in_var.push_back("a");
-	in_var.push_back("b");
-	M3->addOptionAsArray("out", out_var);
-	M3->addOptionAsArray("in", in_var);
-	}
+    BaseLib::Options* options = new BaseLib::Options();
+    BaseLib::Options* coupling = options->addSubGroup("coupling");
+    BaseLib::Options* P2 = coupling->addSubGroup("P");
+    {
+    //P2->addOption("name", "P2");
+    P2->addOption("algorithm", "Jacobi");
+    P2->addOption("convergence", "MyConvergenceCheck");
+    P2->addOptionAsNum("max_itr", 100);
+    P2->addOptionAsNum("epsilon", 1.e-4);
+    std::vector<std::string> out_var;
+    out_var.push_back("a");
+    out_var.push_back("b");
+    out_var.push_back("c");
+    P2->addOptionAsArray("out", out_var);
+    }
+    BaseLib::Options* P2_sub = P2->addSubGroup("problems");
+    BaseLib::Options* P1 = P2_sub->addSubGroup("P");
+    {
+    //P1->addOption("name", "P1");
+    P1->addOption("algorithm", "Gauss");
+    P1->addOption("convergence", "MyConvergenceCheck");
+    P1->addOptionAsNum("max_itr", 100);
+    P1->addOptionAsNum("epsilon", 1.e-4);
+    std::vector<std::string> out_var;
+    out_var.push_back("a");
+    out_var.push_back("b");
+    std::vector<std::string> in_var;
+    in_var.push_back("c");
+    P1->addOptionAsArray("out", out_var);
+    P1->addOptionAsArray("in", in_var);
+    }
+    BaseLib::Options* P1_sub = P1->addSubGroup("problems");
+    BaseLib::Options* M1 = P1_sub->addSubGroup("M1");
+    {
+    M1->addOption("name", "EQS1");
+    std::vector<std::string> out_var;
+    out_var.push_back("a");
+    std::vector<std::string> in_var;
+    in_var.push_back("b");
+    in_var.push_back("c");
+    M1->addOptionAsArray("out", out_var);
+    M1->addOptionAsArray("in", in_var);
+    }
+    BaseLib::Options* M2 = P1_sub->addSubGroup("M2");
+    {
+    M2->addOption("name", "EQS2");
+    std::vector<std::string> out_var;
+    out_var.push_back("b");
+    std::vector<std::string> in_var;
+    in_var.push_back("a");
+    in_var.push_back("c");
+    M2->addOptionAsArray("out", out_var);
+    M2->addOptionAsArray("in", in_var);
+    }
+    BaseLib::Options* M3 = P2_sub->addSubGroup("M3");
+    {
+    M3->addOption("name", "EQS3");
+    std::vector<std::string> out_var;
+    out_var.push_back("c");
+    std::vector<std::string> in_var;
+    in_var.push_back("a");
+    in_var.push_back("b");
+    M3->addOptionAsArray("out", out_var);
+    M3->addOptionAsArray("in", in_var);
+    }
 
-	return options;
+    return options;
 };
 
 class MyEQSFactory
 {
 public:
-	TemplateSteadyMonolithicSystem* create(const std::string &eqs_name)
-	{
-		if (eqs_name.compare("EQS1")==0) {
-			return new WeakCouplingEQS1();
-		} else if (eqs_name.compare("EQS2")==0) {
-				return new WeakCouplingEQS2();
-		} else if (eqs_name.compare("EQS3")==0) {
-			return new WeakCouplingEQS3();
-		}
-		return 0;
-	};
+    TemplateSteadyMonolithicSystem* create(const std::string &eqs_name)
+    {
+        if (eqs_name.compare("EQS1")==0) {
+            return new WeakCouplingEQS1();
+        } else if (eqs_name.compare("EQS2")==0) {
+                return new WeakCouplingEQS2();
+        } else if (eqs_name.compare("EQS3")==0) {
+            return new WeakCouplingEQS3();
+        }
+        return 0;
+    };
 };
 
 class MyConvergenceCheckerFactory
 {
 public:
-	IConvergenceCheck* create(const std::string &)
-	{
-		return new MyConvergenceCheck();
-	};
+    IConvergenceCheck* create(const std::string &)
+    {
+        return new MyConvergenceCheck();
+    };
 };
 
 TEST(Coupling, SteadyCouplingOption)
 {
-	BaseLib::Options* option = defineOption4SteadyCoupling();
-	MyEQSFactory eqsFac;
-	MyConvergenceCheckerFactory checkFac;
-	CouplingStrucutreBuilder cpl_builder;
-	ICoupledSystem *coupled_sys = cpl_builder.build(option, eqsFac, checkFac);
-	ASSERT_TRUE(coupled_sys->check());
+    BaseLib::Options* option = defineOption4SteadyCoupling();
+    MyEQSFactory eqsFac;
+    MyConvergenceCheckerFactory checkFac;
+    CouplingStrucutreBuilder cpl_builder;
+    ICoupledSystem *coupled_sys = cpl_builder.build(option, eqsFac, checkFac);
+    ASSERT_TRUE(coupled_sys->check());
     coupled_sys->solve();
 
     const double epsilon = 1.e-3;
@@ -333,12 +333,12 @@ TEST(Coupling, SteadyCouplingCheck1)
     ASSERT_TRUE(eqs2.isValid());
     ASSERT_TRUE(eqs3.isValid());
 
-	BlockJacobiMethod method(1.e-4, 100);
-	MyConvergenceCheck checker;
-	method.setConvergenceCheck(checker);
+    BlockJacobiMethod method(1.e-4, 100);
+    MyConvergenceCheck checker;
+    method.setConvergenceCheck(checker);
     {
         // correct
-    	//BlockJacobiMethod<MyConvergenceCheck> method(1.e-4, 100);
+        //BlockJacobiMethod<MyConvergenceCheck> method(1.e-4, 100);
         PartitionedProblem part1;
         part1.setAlgorithm(method);
         part1.resizeInputParameter(1);
@@ -420,25 +420,25 @@ void defineSteadyExample1(WeakCouplingEQS1 &eqs1, WeakCouplingEQS2 &eqs2, WeakCo
     eqs3.setInputParameterName(0,"a");
     eqs3.setInputParameterName(1,"b");
 
-	part1.setAlgorithm(algorithm1);
-	part1.resizeInputParameter(1);
-	part1.resizeOutputParameter(2);
-	part1.setOutputParameterName(0, "a");
-	part1.setOutputParameterName(1, "b");
-	part1.setInputParameterName(0, "c");
-	part1.addProblem(eqs1);
-	part1.addProblem(eqs2);
-	part1.connectParameters();
+    part1.setAlgorithm(algorithm1);
+    part1.resizeInputParameter(1);
+    part1.resizeOutputParameter(2);
+    part1.setOutputParameterName(0, "a");
+    part1.setOutputParameterName(1, "b");
+    part1.setInputParameterName(0, "c");
+    part1.addProblem(eqs1);
+    part1.addProblem(eqs2);
+    part1.connectParameters();
 
-	part2.setAlgorithm(algorithm2);
-	part2.resizeInputParameter(0);
-	part2.resizeOutputParameter(3);
-	part2.setOutputParameterName(0, "a");
-	part2.setOutputParameterName(1, "b");
-	part2.setOutputParameterName(2, "c");
-	part2.addProblem(part1);
-	part2.addProblem(eqs3);
-	part2.connectParameters();
+    part2.setAlgorithm(algorithm2);
+    part2.resizeInputParameter(0);
+    part2.resizeOutputParameter(3);
+    part2.setOutputParameterName(0, "a");
+    part2.setOutputParameterName(1, "b");
+    part2.setOutputParameterName(2, "c");
+    part2.addProblem(part1);
+    part2.addProblem(eqs3);
+    part2.connectParameters();
 }
 
 TEST(Coupling, SteadyCouplingJacobi)
@@ -446,14 +446,14 @@ TEST(Coupling, SteadyCouplingJacobi)
     WeakCouplingEQS1 eqs1;
     WeakCouplingEQS2 eqs2;
     WeakCouplingEQS3 eqs3;
-	PartitionedProblem part1;
-	PartitionedProblem part2;
+    PartitionedProblem part1;
+    PartitionedProblem part2;
 
-	MyConvergenceCheck checker;
-	BlockJacobiMethod method(checker, 1.e-4, 100);
+    MyConvergenceCheck checker;
+    BlockJacobiMethod method(checker, 1.e-4, 100);
 
-	defineSteadyExample1(eqs1, eqs2, eqs3, part1, part2, method, method);
-	ASSERT_TRUE(part2.check());
+    defineSteadyExample1(eqs1, eqs2, eqs3, part1, part2, method, method);
+    ASSERT_TRUE(part2.check());
 
     part2.solve();
 
@@ -472,13 +472,13 @@ TEST(Coupling, SteadyCouplingSeidel)
     WeakCouplingEQS1 eqs1;
     WeakCouplingEQS2 eqs2;
     WeakCouplingEQS3 eqs3;
-	PartitionedProblem part1;
-	PartitionedProblem part2;
+    PartitionedProblem part1;
+    PartitionedProblem part2;
 
-	MyConvergenceCheck checker;
+    MyConvergenceCheck checker;
     BlockGaussSeidelMethod method(checker, 1.e-5, 100);
 
-	defineSteadyExample1(eqs1, eqs2, eqs3, part1, part2, method, method);
+    defineSteadyExample1(eqs1, eqs2, eqs3, part1, part2, method, method);
 
     ASSERT_TRUE(part2.check());
     part2.solve();
@@ -517,8 +517,8 @@ public:
 
     void reset()
     {
-    	resizeInputParameter(2);
-    	resizeOutputParameter(1);
+        resizeInputParameter(2);
+        resizeOutputParameter(1);
         setOutput(a, new FunctionConstant<double,double>(.0));
     }
 
@@ -564,8 +564,8 @@ public:
 
     void reset()
     {
-    	resizeInputParameter(2);
-    	resizeOutputParameter(1);
+        resizeInputParameter(2);
+        resizeOutputParameter(1);
         setOutput(b, new FunctionConstant<double,double>(.0));
     }
 
@@ -611,8 +611,8 @@ public:
 
     void reset()
     {
-    	resizeInputParameter(2);
-    	resizeOutputParameter(1);
+        resizeInputParameter(2);
+        resizeOutputParameter(1);
         setOutput(c, new FunctionConstant<double,double>(.0));
     }
 
@@ -649,130 +649,130 @@ void defineTransientExample1(TransientWeakCouplingEQS1 &eqs1, TransientWeakCoupl
     eqs3.setInputParameterName(0,"a");
     eqs3.setInputParameterName(1,"b");
 
-	part1.setAlgorithm(algorithm1);
-	part1.resizeInputParameter(1);
-	part1.resizeOutputParameter(2);
-	part1.setOutputParameterName(0, "a");
-	part1.setOutputParameterName(1, "b");
-	part1.setInputParameterName(0, "c");
-	part1.addProblem(eqs1);
-	part1.addProblem(eqs2);
-	part1.connectParameters();
+    part1.setAlgorithm(algorithm1);
+    part1.resizeInputParameter(1);
+    part1.resizeOutputParameter(2);
+    part1.setOutputParameterName(0, "a");
+    part1.setOutputParameterName(1, "b");
+    part1.setInputParameterName(0, "c");
+    part1.addProblem(eqs1);
+    part1.addProblem(eqs2);
+    part1.connectParameters();
 
-	part2.setAlgorithm(algorithm2);
-	part2.resizeInputParameter(0);
-	part2.resizeOutputParameter(3);
-	part2.setOutputParameterName(0, "a");
-	part2.setOutputParameterName(1, "b");
-	part2.setOutputParameterName(2, "c");
-	part2.addProblem(part1);
-	part2.addProblem(eqs3);
-	part2.connectParameters();
+    part2.setAlgorithm(algorithm2);
+    part2.resizeInputParameter(0);
+    part2.resizeOutputParameter(3);
+    part2.setOutputParameterName(0, "a");
+    part2.setOutputParameterName(1, "b");
+    part2.setOutputParameterName(2, "c");
+    part2.addProblem(part1);
+    part2.addProblem(eqs3);
+    part2.connectParameters();
 }
 
 BaseLib::Options* defineOption4TransientCoupling()
 {
-	BaseLib::Options* options = new BaseLib::Options();
-	BaseLib::Options* coupling = options->addSubGroup("coupling");
-	BaseLib::Options* P2 = coupling->addSubGroup("P");
-	{
-	//P2->addOption("name", "P2");
-	P2->addOption("algorithm", "Parallel");
-	P2->addOption("convergence", "MyConvergenceCheck");
-	P2->addOptionAsNum("max_itr", 100);
-	P2->addOptionAsNum("epsilon", 1.e-4);
-	std::vector<std::string> out_var;
-	out_var.push_back("a");
-	out_var.push_back("b");
-	out_var.push_back("c");
-	P2->addOptionAsArray("out", out_var);
-	}
-	BaseLib::Options* P2_sub = P2->addSubGroup("problems");
-	BaseLib::Options* P1 = P2_sub->addSubGroup("P");
-	{
-	//P1->addOption("name", "P1");
-	P1->addOption("algorithm", "Serial");
-	P1->addOption("convergence", "MyConvergenceCheck");
-	P1->addOptionAsNum("max_itr", 100);
-	P1->addOptionAsNum("epsilon", 1.e-4);
-	std::vector<std::string> out_var;
-	out_var.push_back("a");
-	out_var.push_back("b");
-	std::vector<std::string> in_var;
-	in_var.push_back("c");
-	P1->addOptionAsArray("out", out_var);
-	P1->addOptionAsArray("in", in_var);
-	}
-	BaseLib::Options* P1_sub = P1->addSubGroup("problems");
-	BaseLib::Options* M1 = P1_sub->addSubGroup("M1");
-	{
-	M1->addOption("name", "EQS1");
-	std::vector<std::string> out_var;
-	out_var.push_back("a");
-	std::vector<std::string> in_var;
-	in_var.push_back("b");
-	in_var.push_back("c");
-	M1->addOptionAsArray("out", out_var);
-	M1->addOptionAsArray("in", in_var);
-	}
-	BaseLib::Options* M2 = P1_sub->addSubGroup("M2");
-	{
-	M2->addOption("name", "EQS2");
-	std::vector<std::string> out_var;
-	out_var.push_back("b");
-	std::vector<std::string> in_var;
-	in_var.push_back("a");
-	in_var.push_back("c");
-	M2->addOptionAsArray("out", out_var);
-	M2->addOptionAsArray("in", in_var);
-	}
-	BaseLib::Options* M3 = P2_sub->addSubGroup("M3");
-	{
-	M3->addOption("name", "EQS3");
-	std::vector<std::string> out_var;
-	out_var.push_back("c");
-	std::vector<std::string> in_var;
-	in_var.push_back("a");
-	in_var.push_back("b");
-	M3->addOptionAsArray("out", out_var);
-	M3->addOptionAsArray("in", in_var);
-	}
+    BaseLib::Options* options = new BaseLib::Options();
+    BaseLib::Options* coupling = options->addSubGroup("coupling");
+    BaseLib::Options* P2 = coupling->addSubGroup("P");
+    {
+    //P2->addOption("name", "P2");
+    P2->addOption("algorithm", "Parallel");
+    P2->addOption("convergence", "MyConvergenceCheck");
+    P2->addOptionAsNum("max_itr", 100);
+    P2->addOptionAsNum("epsilon", 1.e-4);
+    std::vector<std::string> out_var;
+    out_var.push_back("a");
+    out_var.push_back("b");
+    out_var.push_back("c");
+    P2->addOptionAsArray("out", out_var);
+    }
+    BaseLib::Options* P2_sub = P2->addSubGroup("problems");
+    BaseLib::Options* P1 = P2_sub->addSubGroup("P");
+    {
+    //P1->addOption("name", "P1");
+    P1->addOption("algorithm", "Serial");
+    P1->addOption("convergence", "MyConvergenceCheck");
+    P1->addOptionAsNum("max_itr", 100);
+    P1->addOptionAsNum("epsilon", 1.e-4);
+    std::vector<std::string> out_var;
+    out_var.push_back("a");
+    out_var.push_back("b");
+    std::vector<std::string> in_var;
+    in_var.push_back("c");
+    P1->addOptionAsArray("out", out_var);
+    P1->addOptionAsArray("in", in_var);
+    }
+    BaseLib::Options* P1_sub = P1->addSubGroup("problems");
+    BaseLib::Options* M1 = P1_sub->addSubGroup("M1");
+    {
+    M1->addOption("name", "EQS1");
+    std::vector<std::string> out_var;
+    out_var.push_back("a");
+    std::vector<std::string> in_var;
+    in_var.push_back("b");
+    in_var.push_back("c");
+    M1->addOptionAsArray("out", out_var);
+    M1->addOptionAsArray("in", in_var);
+    }
+    BaseLib::Options* M2 = P1_sub->addSubGroup("M2");
+    {
+    M2->addOption("name", "EQS2");
+    std::vector<std::string> out_var;
+    out_var.push_back("b");
+    std::vector<std::string> in_var;
+    in_var.push_back("a");
+    in_var.push_back("c");
+    M2->addOptionAsArray("out", out_var);
+    M2->addOptionAsArray("in", in_var);
+    }
+    BaseLib::Options* M3 = P2_sub->addSubGroup("M3");
+    {
+    M3->addOption("name", "EQS3");
+    std::vector<std::string> out_var;
+    out_var.push_back("c");
+    std::vector<std::string> in_var;
+    in_var.push_back("a");
+    in_var.push_back("b");
+    M3->addOptionAsArray("out", out_var);
+    M3->addOptionAsArray("in", in_var);
+    }
 
-	return options;
+    return options;
 };
 
 class MyTransientEQSFactory
 {
-	double _dt1, _dt2, _dt3;
+    double _dt1, _dt2, _dt3;
 public:
-	MyTransientEQSFactory(double dt1, double dt2, double dt3)
-	{
-		_dt1 = dt1;
-		_dt2 = dt2;
-		_dt3 = dt3;
-	};
+    MyTransientEQSFactory(double dt1, double dt2, double dt3)
+    {
+        _dt1 = dt1;
+        _dt2 = dt2;
+        _dt3 = dt3;
+    };
 
-	AbstractTransientMonolithicSystem* create(const std::string &eqs_name)
-	{
-		if (eqs_name.compare("EQS1")==0) {
-			return new TransientWeakCouplingEQS1(_dt1);
-		} else if (eqs_name.compare("EQS2")==0) {
-				return new TransientWeakCouplingEQS2(_dt2);
-		} else if (eqs_name.compare("EQS3")==0) {
-			return new TransientWeakCouplingEQS3(_dt3);
-		}
-		return 0;
-	};
+    AbstractTransientMonolithicSystem* create(const std::string &eqs_name)
+    {
+        if (eqs_name.compare("EQS1")==0) {
+            return new TransientWeakCouplingEQS1(_dt1);
+        } else if (eqs_name.compare("EQS2")==0) {
+                return new TransientWeakCouplingEQS2(_dt2);
+        } else if (eqs_name.compare("EQS3")==0) {
+            return new TransientWeakCouplingEQS3(_dt3);
+        }
+        return 0;
+    };
 };
 
 TEST(Coupling, TransientCouplingOption)
 {
-	BaseLib::Options* option = defineOption4TransientCoupling();
-	MyTransientEQSFactory eqsFac(1.0, 1.0, 1.0);
-	MyConvergenceCheckerFactory checkFac;
-	TransientCoulplingStrucutreBuilder cpl_builder;
-	ITransientCoupledSystem *coupled_sys = cpl_builder.build(option, eqsFac, checkFac);
-	ASSERT_TRUE(coupled_sys->check());
+    BaseLib::Options* option = defineOption4TransientCoupling();
+    MyTransientEQSFactory eqsFac(1.0, 1.0, 1.0);
+    MyConvergenceCheckerFactory checkFac;
+    TransientCoulplingStrucutreBuilder cpl_builder;
+    ITransientCoupledSystem *coupled_sys = cpl_builder.build(option, eqsFac, checkFac);
+    ASSERT_TRUE(coupled_sys->check());
 
     const double epsilon = 1.e-3;
     TimeSteppingController timestepping;

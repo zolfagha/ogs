@@ -29,12 +29,12 @@ namespace ogs5
  01/2004 OK Implementation
  **************************************************************************/
 CSourceTerm::CSourceTerm() :
-	ProcessInfo(), _coupled (false), _sub_dom_idx(-1), GIS_shape_head(NULL)
+    ProcessInfo(), _coupled (false), _sub_dom_idx(-1), GIS_shape_head(NULL)
                                                   // 07.06.2010, 03.2010. WW
 {
    CurveIndex = -1;
    //KR critical_depth = false;
-   //	COUPLING_SWITCH = false;
+   //    COUPLING_SWITCH = false;
    geo_node_value = 0.0;
    nodes = NULL;                                  //OK
    analytical = false;                            //CMCD
@@ -118,14 +118,14 @@ std::ios::pos_type CSourceTerm::Read(std::ifstream *st_file)
                                                   // subkeyword found
       if (line_string.find("$PCS_TYPE") != std::string::npos)
       {
-    	  FileIO::ProcessIO::readProcessInfo (*st_file, _pcs_type);
+          FileIO::ProcessIO::readProcessInfo (*st_file, _pcs_type);
           continue;
       }
 
                                                   // subkeyword found
       if (line_string.find("$PRIMARY_VARIABLE") != std::string::npos)
       {
-    	  in.str (readNonBlankLineFromInputStream (*st_file));
+          in.str (readNonBlankLineFromInputStream (*st_file));
 //         in.str(readNonBlankLineFromInputStream(*st_file));
          in >> primaryvariable_name;
 
@@ -135,7 +135,7 @@ std::ios::pos_type CSourceTerm::Read(std::ifstream *st_file)
 
       if (line_string.find("$COMP_NAME") != std::string::npos)
       {
-    	  in.str(readNonBlankLineFromInputStream (*st_file));
+          in.str(readNonBlankLineFromInputStream (*st_file));
 //         in.str(readNonBlankLineFromInputStream(*st_file));
          std::string tmp;
          in >> tmp;
@@ -218,14 +218,14 @@ std::ios::pos_type CSourceTerm::Read(std::ifstream *st_file)
          in >> tim_type_name;
          if (tim_type_name.find("CURVE") != std::string::npos)
          {
-        	 //				dis_type = 0;
+             //                dis_type = 0;
             in >> CurveIndex;
          }
          in.clear();
          continue;
       }
 
-  	  //defines if time dependent source terms are use as piecewise constant or linear interpolated; BG 05/2011
+        //defines if time dependent source terms are use as piecewise constant or linear interpolated; BG 05/2011
       if (line_string.find("$TIME_INTERPOLATION") != std::string::npos)
       {
          in.str(readNonBlankLineFromInputStream(*st_file));
@@ -306,7 +306,7 @@ void CSourceTerm::ReadDistributionType(std::ifstream *st_file)
       in.clear();
    }
 
-   //	if (dis_type_name.find("ANALYTICAL") != std::string::npos) {
+   //    if (dis_type_name.find("ANALYTICAL") != std::string::npos) {
    if (this->getProcessDistributionType() == FiniteElement::ANALYTICAL)
    {
       in >> analytical_material_group;            //Which material group is it being applied to
@@ -319,18 +319,18 @@ void CSourceTerm::ReadDistributionType(std::ifstream *st_file)
       in >> resolution;                           //every nth term will be considered
       in >> factor;                               //to convert temperature to energy
       analytical = true;
-      //		if (geo_type_name.compare("POLYLINE") == 0)
+      //        if (geo_type_name.compare("POLYLINE") == 0)
       //if (this->getGeoType() == GEOLIB::POLYLINE)
       //   analytical_processes_polylines.push_back(geo_name);
       in.clear();
    }
 
-	// If a linear function is given. 25.08.2011. WW
-	if (getProcessDistributionType() == FiniteElement::FUNCTION)
-	{
-	  in.clear();
-	  //dis_linear_f = new LinearFunctionData(*st_file);
-	}
+    // If a linear function is given. 25.08.2011. WW
+    if (getProcessDistributionType() == FiniteElement::FUNCTION)
+    {
+      in.clear();
+      //dis_linear_f = new LinearFunctionData(*st_file);
+    }
 
    if (this->getProcessDistributionType() == FiniteElement::LINEAR || this->getProcessDistributionType() == FiniteElement::LINEAR_NEUMANN)
    {
@@ -357,7 +357,7 @@ void CSourceTerm::ReadDistributionType(std::ifstream *st_file)
       in.str(readNonBlankLineFromInputStream(*st_file));
       in >> rill_height;
       in.clear();
-      //		dis_type = 6;
+      //        dis_type = 6;
    }
 
    if (this->getProcessDistributionType() == FiniteElement::NORMALDEPTH)
@@ -429,7 +429,7 @@ void CSourceTerm::ReadGeoType(std::ifstream *st_file)
  06/2010 TF modification of the signature, added geo_obj and unique_name
  **************************************************************************/
 bool STRead(const std::string &file_base_name,
-		std::vector<CSourceTerm*> &st_vector)
+        std::vector<CSourceTerm*> &st_vector)
 {
    char line[MAX_ZEILE];
    std::string line_string, st_file_name;

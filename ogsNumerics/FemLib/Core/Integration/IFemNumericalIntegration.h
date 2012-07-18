@@ -12,7 +12,7 @@ namespace FemLib
 class IFemNumericalIntegration
 {
 public:
-	virtual ~IFemNumericalIntegration() {};
+    virtual ~IFemNumericalIntegration() {};
     virtual void initialize(MeshLib::IElement &e, size_t n_sampl_level) = 0;
     virtual size_t getNumberOfSamplingPoints() const = 0;
     virtual void getSamplingPoint(size_t igp, double *) const = 0;

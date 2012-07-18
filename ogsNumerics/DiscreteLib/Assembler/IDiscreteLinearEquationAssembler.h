@@ -23,9 +23,9 @@ class DofEquationIdTable;
 class IDiscreteLinearEquationAssembler
 {
 public:
-	typedef DiscreteLib::IDiscreteVector<double> GlobalVector;
+    typedef DiscreteLib::IDiscreteVector<double> GlobalVector;
 
-	virtual ~IDiscreteLinearEquationAssembler() {};
+    virtual ~IDiscreteLinearEquationAssembler() {};
 
     /// assembly
     virtual void assembly( MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs) = 0;

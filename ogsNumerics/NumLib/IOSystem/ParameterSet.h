@@ -19,8 +19,8 @@ namespace NumLib
 class UnnamedParameterSet
 {
 public:
-	///
-	UnnamedParameterSet() {};
+    ///
+    UnnamedParameterSet() {};
 
     ///
     virtual ~UnnamedParameterSet() { clear(); }
@@ -137,8 +137,8 @@ public:
 private:
     struct ParameterAttribute
     {
-    	size_t key;
-    	std::string name;
+        size_t key;
+        std::string name;
         bool is_fxied;
         bool is_updated;
         ParameterAttribute() : key(0), is_fxied(false), is_updated(false) {};

@@ -185,7 +185,7 @@ public:
     {
         const size_t n = v.size();
         for (size_t i=0; i<n; i++) {
-        	_global_linear_solver->addRHS(i, v[i]*fkt);
+            _global_linear_solver->addRHS(i, v[i]*fkt);
         }
     }
 

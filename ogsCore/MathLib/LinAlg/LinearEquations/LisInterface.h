@@ -97,32 +97,32 @@ struct LIS_option
     }
     SolverType getSolverType(const std::string &str)
     {
-    	if (str.compare("CG")==0)
-    		return CG;
-    	if (str.compare("BiCG")==0)
-    		return BiCG;
-    	if (str.compare("CGS")==0)
-    		return CGS;
-    	if (str.compare("BiCGSTAB")==0)
-    		return BiCGSTAB;
-    	if (str.compare("BiCGSTABl")==0)
-    		return BiCGSTABl;
-    	if (str.compare("GPBiCG")==0)
-    		return GPBiCG;
-    	if (str.compare("TFQMR")==0)
-    		return TFQMR;
-    	if (str.compare("Orthomin")==0)
-    		return Orthomin;
+        if (str.compare("CG")==0)
+            return CG;
+        if (str.compare("BiCG")==0)
+            return BiCG;
+        if (str.compare("CGS")==0)
+            return CGS;
+        if (str.compare("BiCGSTAB")==0)
+            return BiCGSTAB;
+        if (str.compare("BiCGSTABl")==0)
+            return BiCGSTABl;
+        if (str.compare("GPBiCG")==0)
+            return GPBiCG;
+        if (str.compare("TFQMR")==0)
+            return TFQMR;
+        if (str.compare("Orthomin")==0)
+            return Orthomin;
 
-    	return INVALID;
+        return INVALID;
     }
     PreconType getPreconType(const std::string &str)
     {
-    	RETURN_ENUM_IF_SAME_STRING(NONE, str);
-       	RETURN_ENUM_IF_SAME_STRING(Jacobi, str);
-       	RETURN_ENUM_IF_SAME_STRING(ILU, str);
+        RETURN_ENUM_IF_SAME_STRING(NONE, str);
+           RETURN_ENUM_IF_SAME_STRING(Jacobi, str);
+           RETURN_ENUM_IF_SAME_STRING(ILU, str);
 
-    	return NONE;
+        return NONE;
     }
 };
 
