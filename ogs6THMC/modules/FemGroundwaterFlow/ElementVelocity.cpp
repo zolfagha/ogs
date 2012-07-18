@@ -2,6 +2,7 @@
 #include "ElementVelocity.h"
 
 #include "MathLib/Vector.h"
+#include "Ogs6FemData.h"
 
 namespace Geo
 {
