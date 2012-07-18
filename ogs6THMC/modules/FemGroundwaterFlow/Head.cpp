@@ -1,17 +1,16 @@
 
 #include "Head.h"
 
+#include "FemLib/Function/FemNodalFunction.h"
+#include "NumLib/Function/TXFunctionBuilder.h"
 #include "Ogs6FemData.h"
-
+#include "Output.h"
 
 void FunctionHead::initialize(const BaseLib::Options &option)
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-
-    //const BaseLib::Options* op = option.getSubGroup("ProcessData")->getSubGroup("GROUNDWATER_FLOW");
     size_t msh_id = option.getOption<size_t>("MeshID");
     size_t time_id = option.getOption<size_t>("TimeGroupID");
-
     NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
 
     //mesh and FE objects
@@ -29,6 +28,38 @@ void FunctionHead::initialize(const BaseLib::Options &option)
     _problem = new GWFemProblem(dis);
     _problem->setEquation(eqs);
     _problem->setTimeSteppingFunction(*tim);
+    // set up variable
+    SolutionLib::FemVariable* head = _problem->addVariable("head");
+    // IC
+    NumLib::TXFunctionBuilder f_builder;
+    FemLib::FemNodalFunctionScalar* h0 = new FemLib::FemNodalFunctionScalar(*dis, FemLib::PolynomialOrder::Linear, 0);
+    head->setIC(h0);
+    // BC
+    const BaseLib::Options* opBCList = option.getSubGroup("BCList");
+    for (const BaseLib::Options* opBC = opBCList->getFirstSubGroup("BC"); opBC!=0; opBC = opBCList->getNextSubGroup())
+    {
+        std::string geo_type = opBC->getOption("GeometryType");
+        std::string geo_name = opBC->getOption("GeometryName");
+        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
+        std::string dis_name = opBC->getOption("DistributionType");
+        double dis_v = opBC->getOption<double>("DistributionValue");
+        NumLib::ITXFunction* f_bc =  f_builder.create(dis_name, dis_v);
+        head->addDirichletBC(new SolutionLib::FemDirichletBC(msh, geo_obj, f_bc));
+    }
+
+    // ST
+    const BaseLib::Options* opSTList = option.getSubGroup("STList");
+    for (const BaseLib::Options* opST = opSTList->getFirstSubGroup("ST"); opST!=0; opST = opSTList->getNextSubGroup())
+    {
+        std::string geo_type = opST->getOption("GeometryType");
+        std::string geo_name = opST->getOption("GeometryName");
+        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
+        std::string dis_name = opST->getOption("DistributionType");
+        double dis_v = opST->getOption<double>("DistributionValue");
+
+        NumLib::ITXFunction* f_st =  f_builder.create(dis_name, dis_v);
+        head->addNeumannBC(new SolutionLib::FemNeumannBC(msh, _feObjects, geo_obj, f_st));
+    }
 
     // set up solution
     _solution = new MySolutionType(dis, _problem);
@@ -36,5 +67,45 @@ void FunctionHead::initialize(const BaseLib::Options &option)
     linear_solver->setOption(option);
     _solution->getNonlinearSolver()->setOption(option);
 
-    this->setOutput(Head, _problem->getVariable(0)->getIC());
+    // setup output
+    OutputBuilder outBuilder;
+    OutputTimingBuilder outTimBuilder;
+    const BaseLib::Options* opOutList = option.getSubGroup("OutputList");
+    for (const BaseLib::Options* op = opOutList->getFirstSubGroup("Output"); op!=0; op = opOutList->getNextSubGroup())
+    {
+        std::string data_type = op->getOption("DataType");
+        IOutput* out = outBuilder.create(data_type);
+        out->setOutputPath(femData->output_dir, femData->project_name);
+
+        std::string time_type = op->getOption("TimeType");
+        size_t out_steps = op->getOption<size_t>("TimeSteps");
+        out->setOutputTiming(outTimBuilder.create(time_type, out_steps));
+
+        const std::vector<std::string>* var_name = op->getOptionAsArray<std::string>("Variables");
+        out->addVariable(*var_name);
+
+        std::string geo_type = op->getOption("GeometryType");
+        std::string geo_name = op->getOption("GeometryName");
+        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
+        out->setGeometry(geo_obj);
+
+        _list_output.push_back(out);
+    }
+
+    // initial output parameter
+    this->setOutput(Head, head->getIC());
+}
+
+void FunctionHead::updateOutput(const NumLib::TimeStep &time)
+{
+    setOutput(Head, _solution->getCurrentSolution(0));
+
+    std::map<std::string, NumLib::ITXFunction*> mapVar;
+    mapVar["Head"] = _solution->getCurrentSolution(0);
+
+    for (size_t i=0; i<_list_output.size(); i++) {
+        if (_list_output[i]->isActive(time)) {
+            _list_output[i]->write(time, mapVar);
+        }
+    }
 }
