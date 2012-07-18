@@ -1,18 +1,24 @@
 #Source files grouped by a directory
+
 FILE(GLOB NumLib_Files 
 	NumLib/*.h NumLib/*.cpp)
 SOURCE_GROUP( ogsNumerics\\NumLib FILES ${NumLib_Files} )
+
+#TimeStepping/
 FILE(GLOB NumLib_TimeStepping_Files 
 	NumLib/TimeStepping/*.h NumLib/TimeStepping/*.cpp)
 SOURCE_GROUP( ogsNumerics\\NumLib\\TimeStepping FILES ${NumLib_TimeStepping_Files} )
+#TransientCoupling/
 FILE(GLOB NumLib_TransientCoupling_Files 
 	NumLib/TransientCoupling/*.h NumLib/TransientCoupling/*.cpp)
 SOURCE_GROUP( ogsNumerics\\NumLib\\TransientCoupling FILES ${NumLib_TransientCoupling_Files} )
-FILE(GLOB NumLib_FileIO_Files NumLib/FileIO/*.h NumLib/FileIO/*.cpp)
-SOURCE_GROUP( ogsNumerics\\NumLib\\FileIO FILES ${NumLib_FileIO_Files} )
-FILE(GLOB NumLib_TransientAssembler_Files NumLib/TransientAssembler/*.h NumLib/TransientAssembler/*.cpp)
+#TransientAssembler/
+FILE(GLOB NumLib_TransientAssembler_Files 
+    NumLib/TransientAssembler/*.h NumLib/TransientAssembler/*.cpp)
 SOURCE_GROUP( ogsNumerics\\NumLib\\TransientAssembler FILES ${NumLib_TransientAssembler_Files} )
-FILE(GLOB NumLib_Nonlinear_Files NumLib/Nonlinear/*.h NumLib/Nonlinear/*.cpp)
+#Nonlinear/
+FILE(GLOB NumLib_Nonlinear_Files 
+    NumLib/Nonlinear/*.h NumLib/Nonlinear/*.cpp)
 SOURCE_GROUP( ogsNumerics\\NumLib\\Nonlinear FILES ${NumLib_Nonlinear_Files} )
 #Function/
 FILE(GLOB NumLib_Function_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
@@ -44,7 +50,6 @@ SOURCE_GROUP( ogsNumerics\\NumLib\\SystemOfEquations FILES ${NumLib_SystemOfEqua
 LIST(APPEND NumLib_Files
 #	${NumLib_Core_Files} 
     ${NumLib_Nonlinear_Files} 
-    ${NumLib_FileIO_Files} 
 	${NumLib_TimeStepping_Files} 
     ${NumLib_TransientCoupling_Files} 
 	${NumLib_TransientAssembler_Files} 
