@@ -25,7 +25,7 @@ public:
     int solveTimeStep(const NumLib::TimeStep &time)
     {
         getSolution()->solveTimeStep(time);
-        updateOutput();
+        updateOutput(time);
         return 0;
     }
 
@@ -40,7 +40,7 @@ public:
 
 protected:
     virtual SolutionLib::AbstractTimeSteppingAlgorithm* getSolution() = 0;
-    virtual void updateOutput() = 0;
+    virtual void updateOutput(const NumLib::TimeStep &time) = 0;
 };
 
 }
