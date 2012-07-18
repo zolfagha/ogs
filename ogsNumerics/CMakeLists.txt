@@ -28,3 +28,8 @@ INCLUDE_DIRECTORIES(
         ../extra/Eigen
 )
 
+target_link_libraries( ogsNumerics
+    ogsCore
+    ogsGeometry
+    ogsMesh
+)

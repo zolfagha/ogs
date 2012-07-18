@@ -48,7 +48,6 @@ SOURCE_GROUP( ogsNumerics\\NumLib\\SystemOfEquations FILES ${NumLib_SystemOfEqua
 
 #
 LIST(APPEND NumLib_Files
-#	${NumLib_Core_Files} 
     ${NumLib_Nonlinear_Files} 
 	${NumLib_TimeStepping_Files} 
     ${NumLib_TransientCoupling_Files} 
