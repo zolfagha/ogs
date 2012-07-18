@@ -29,7 +29,7 @@ IF(COMPILER_IS_GCC)
 				ENDIF()
         ENDIF()
         # -g
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wall -Wextra -fno-nonansi-builtins")
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wall -Wextra -fno-nonansi-builtins -std=gnu++0x")
         ADD_DEFINITIONS( -DGCC )
 ENDIF() # COMPILER_IS_GCC
 
