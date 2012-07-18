@@ -12,7 +12,7 @@
 #include "GWTimeODELocalAssembler.h"
 #include "GWJacobianLocalAssembler.h"
 #include "ProcessLib/TemplateTransientProcess.h"
-#include "Output.h"
+#include "OutputIO/IOutput.h"
 
 //--------------------------------------------------------------------------------------------------
 // Equation definition

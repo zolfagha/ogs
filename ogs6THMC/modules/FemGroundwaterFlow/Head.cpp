@@ -3,8 +3,9 @@
 
 #include "FemLib/Function/FemNodalFunction.h"
 #include "NumLib/Function/TXFunctionBuilder.h"
+#include "OutputIO/OutputBuilder.h"
+#include "OutputIO/OutputTimingBuilder.h"
 #include "Ogs6FemData.h"
-#include "Output.h"
 
 void FunctionHead::initialize(const BaseLib::Options &option)
 {
@@ -100,12 +101,28 @@ void FunctionHead::updateOutput(const NumLib::TimeStep &time)
 {
     setOutput(Head, _solution->getCurrentSolution(0));
 
-    std::map<std::string, NumLib::ITXFunction*> mapVar;
-    mapVar["Head"] = _solution->getCurrentSolution(0);
-
+    bool doOutput = false;
     for (size_t i=0; i<_list_output.size(); i++) {
         if (_list_output[i]->isActive(time)) {
-            _list_output[i]->write(time, mapVar);
+            doOutput = true;
+            break;
         }
     }
+    
+    if (doOutput) {
+        OutputVariableInfo var;
+        var.name = "Head";
+        var.value = _solution->getCurrentSolution(0);
+        var.object_type = OutputObjectType::Node;
+        
+        std::vector<OutputVariableInfo> var_list;
+        var_list.push_back(var);
+        
+        for (size_t i=0; i<_list_output.size(); i++) {
+            if (_list_output[i]->isActive(time)) {
+                _list_output[i]->write(time, *_problem->getMesh(), var_list);
+            }
+        }
+    }
+
 }
