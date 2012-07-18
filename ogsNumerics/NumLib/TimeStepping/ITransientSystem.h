@@ -16,7 +16,7 @@ public:
     virtual ~ITransientSystem() {};
 
     /// initialize
-    virtual void initialize(const BaseLib::Options &op) {};
+    virtual void initialize(const BaseLib::Options &/*op*/) {};
     /// finalize
     virtual void finalize() {};
 
