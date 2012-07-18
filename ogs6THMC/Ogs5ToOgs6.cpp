@@ -77,77 +77,7 @@ void convertPorousMediumProperty(const CMediumProperties &mmp, MaterialLib::Poro
     }
 }
 
-const GeoLib::GeoObject* searchGeoByName(const GeoLib::GEOObjects &geo_obj, const std::string &unique_geo_name, const std::string &geo_type_name, const std::string &geo_name)
-{
-    if (geo_type_name.find("POINT") != std::string::npos)
-    {
-        const GeoLib::PointVec* pnt_vec(geo_obj.getPointVecObj(unique_geo_name));
-        if (pnt_vec)
-        {
-            const GeoLib::Point* pnt(pnt_vec->getElementByName(geo_name));
-            if (pnt == NULL)
-            {
-                std::cerr << "ERROR in GeoIO::readGeoInfo: point name \""
-                          << geo_name << "\" not found!" << std::endl;
-                exit(1);
-            }
-            return pnt;
-        }
 
-        std::cerr << "Error in GeoIO::readGeoInfo: point vector not found!" <<std::endl;
-        exit(1);
-    }
-
-    else if (geo_type_name.find("POLYLINE") != std::string::npos)
-    {
-        const GeoLib::PolylineVec* ply_vec = geo_obj.getPolylineVecObj(unique_geo_name);
-        if (ply_vec)
-        {
-            const GeoLib::Polyline* ply(ply_vec->getElementByName(geo_name));
-            if (ply == NULL)
-            {
-                std::cerr << "error in GeoIO::readGeoInfo: polyline name \""
-                          << geo_name << "\" not found!" << std::endl;
-                exit(1);
-            }
-            return ply;
-        }
-
-        std::cerr << "Error in GeoIO::readGeoInfo: polyline vector not found!" <<std::endl;
-        exit(1);
-    }
-
-    else if (geo_type_name.find("SURFACE") != std::string::npos)
-    {
-    GeoLib::SurfaceVec const* sfc_vec (geo_obj.getSurfaceVecObj(unique_geo_name));
-        if (sfc_vec)
-        {
-            const GeoLib::Surface* sfc(sfc_vec->getElementByName(geo_name));
-            if (sfc == NULL)
-            {
-                std::cerr << "Error in GeoIO::readGeoInfo: surface name \""
-                          << geo_name << "\" not found!" << std::endl;
-                exit(1);
-            }
-            return sfc;
-        }
-
-        std::cerr << "Error in GeoIO::readGeoInfo: surface vector not found!" <<std::endl;
-        exit(1);
-    }
-
-    else if (geo_type_name.find("VOLUME") != std::string::npos)
-    {
-        return NULL;
-    }
-
-    else if (geo_type_name.find("DOMAIN") != std::string::npos)
-    {
-        return NULL;
-    }
-
-    return NULL;
-}
 
 
 void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options &option)
@@ -303,20 +233,23 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         }
 
         // OUT
-        BaseLib::Options* optOut = optPcs->addSubGroup("Output");
+        BaseLib::Options* optOut = optPcs->addSubGroup("OutputList");
         for (size_t i=0; i<ogs5fem.out_vector.size(); i++)
         {
             COutput* rfout = ogs5fem.out_vector[i];
             std::string out_pcs_name = FiniteElement::convertProcessTypeToString(rfout->getProcessType());
             if (out_pcs_name.compare(pcs_name)==0) {
-                optOut->addOption("DataType", rfout->dat_type_name);
-                optOut->addOption("GeometryType", rfout->geo_type);
-                optOut->addOption("GeometryName", rfout->geo_name);
-                optOut->addOptionAsNum("TimeSteps", rfout->nSteps);
-                optOut->addOptionAsArray("NodalValues", rfout->_nod_value_vector);
-                optOut->addOptionAsArray("ElementValues", rfout->_ele_value_vector);
-                optOut->addOptionAsArray("MMPValues", rfout->mmp_value_vector);
-                optOut->addOptionAsArray("MFPValues", rfout->mfp_value_vector);
+                BaseLib::Options* opt = optOut->addSubGroup("Output");
+                opt->addOption("DataType", rfout->dat_type_name);
+                opt->addOption("GeometryType", rfout->geo_type);
+                opt->addOption("GeometryName", rfout->geo_name);
+                opt->addOption("TimeType", rfout->tim_type_name);
+                opt->addOptionAsNum("TimeSteps", rfout->nSteps);
+                std::vector<std::string> values(rfout->_nod_value_vector);
+                values.insert(values.end(), rfout->_ele_value_vector.begin(), rfout->_ele_value_vector.end());
+                opt->addOptionAsArray("Variables", values);
+                opt->addOptionAsArray("MMPValues", rfout->mmp_value_vector);
+                opt->addOptionAsArray("MFPValues", rfout->mfp_value_vector);
             }
         }
 
