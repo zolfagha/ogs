@@ -65,7 +65,7 @@ void convertSolidProperty(const CSolidProperties &msp, MaterialLib::Solid &solid
 void convertPorousMediumProperty(const CMediumProperties &mmp, MaterialLib::PorousMedia &pm)
 {
     if (mmp.permeability_model==1) {
-        pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(mmp.permeability);
+        pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(mmp.permeability_tensor[0]);
     }
 
     if (mmp.porosity_model==1) {
@@ -98,19 +98,23 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         convertFluidProperty(*mfp, *fluid);
     }
 
-    // MMP, MSP
-    const size_t n_mat = ogs5fem.mmp_vector.size();
-    for (size_t i=0; i<n_mat; i++)
+    // MSP
+    for (size_t i=0; i<ogs5fem.msp_vector.size(); i++)
     {
         CSolidProperties* msp = ogs5fem.msp_vector[i];
-        CMediumProperties* mmp = ogs5fem.mmp_vector[i];
 
         MaterialLib::Solid* solid = new MaterialLib::Solid();
         ogs6fem.list_solid.push_back(solid);
-        MaterialLib::PorousMedia* pm = new MaterialLib::PorousMedia();
-        ogs6fem.list_pm.push_back(pm);
 
         convertSolidProperty(*msp, *solid);
+    }
+
+    // MMP
+    for (size_t i=0; i<ogs5fem.mmp_vector.size(); i++)
+    {
+        CMediumProperties* mmp = ogs5fem.mmp_vector[i];
+        MaterialLib::PorousMedia* pm = new MaterialLib::PorousMedia();
+        ogs6fem.list_pm.push_back(pm);
         convertPorousMediumProperty(*mmp, *pm);
     }
 
@@ -204,7 +208,15 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
                 optSt->addOption("Variable", rfst->primaryvariable_name);
                 optSt->addOption("GeometryType", rfst->geo_type_name);
                 optSt->addOption("GeometryName", rfst->geo_name);
-                optSt->addOption("DistributionType", FiniteElement::convertDisTypeToString(rfst->getProcessDistributionType()));
+                std::string ogs5distype = FiniteElement::convertDisTypeToString(rfst->getProcessDistributionType());
+                std::string ogs6distype = ogs5distype;
+                if (ogs5distype.find("_NEUMANN")!=std::string::npos) {
+                    optSt->addOption("STType", "NEUMANN");
+                    ogs6distype = BaseLib::replaceString("_NEUMANN", "", ogs6distype);
+                } else {
+                    optSt->addOption("STType", "SOURCESINK");
+                }
+                optSt->addOption("DistributionType", ogs6distype);
                 optSt->addOptionAsNum("DistributionValue", rfst->geo_node_value);
             }
         }
