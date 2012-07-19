@@ -13,18 +13,9 @@
 #pragma once
 
 #include <string>
-#include <iostream>
-
-#include "logog/include/logog.hpp"
-#include "tclap/CmdLine.h"
-
-#include "BaseLib/CodingTools.h"
-#include "BaseLib/FileTools.h"
-#include "BaseLib/Options.h"
-#include "SimulationInfo.h"
-#include "FormatterCustom.h"
 #include "GeoProcessBuilder.h"
 
+// forward declaration
 namespace NumLib
 {
 class ITransientCoupledSystem;
@@ -32,6 +23,9 @@ class ITransientCoupledSystem;
 
 namespace ogs6
 {
+
+// forward declaration
+class SimulationInfo;
 
 /**
  * \brief initialize OGS
@@ -53,11 +47,20 @@ class THMCSimulator
 public:
     typedef GeoProcessBuilder ProcessBuilder;
 
+    /**
+     *
+     * @param argc
+     * @param argv
+     */
     THMCSimulator(int argc, char* argv[]);
 
+    ///
     ~THMCSimulator();
 
-    ///
+    /**
+     *
+     * @return error code
+     */
     int execute();
 
 private:
@@ -67,9 +70,5 @@ private:
     SimulationInfo* _sim_info;
     NumLib::ITransientCoupledSystem* _cpl_system;
 };
-
-
-
-
 
 } //end ogs6

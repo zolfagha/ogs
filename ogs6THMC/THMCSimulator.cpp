@@ -12,13 +12,18 @@
 
 #include "THMCSimulator.h"
 
+#include <iostream>
+
 // external library
+#include "logog/include/logog.hpp"
+#include "tclap/CmdLine.h"
 #ifdef USE_LIS
 #include "lis.h"
 #endif
 
 // internal library
 #include "BaseLib/CodingTools.h"
+#include "BaseLib/FileTools.h"
 #include "BaseLib/Options.h"
 #include "BaseLib/OptionsXMLReader.h"
 #include "BaseLib/FileTools.h"
@@ -28,6 +33,7 @@
 
 // this module
 #include "SimulationInfo.h"
+#include "FormatterCustom.h"
 #include "Ogs6FemData.h"
 #include "Ogs5ToOgs6.h"
 #include "MyConvergenceCheckerFactory.h"
