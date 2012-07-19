@@ -83,6 +83,7 @@ bool PCSRead(const std::string& file_base_name, std::vector<CRFProcess*> &pcs_ve
 }
 
 CRFProcess::CRFProcess()
+: mesh_id(0), timegroup_id(0)
 {
 
 }
