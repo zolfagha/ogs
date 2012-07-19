@@ -83,15 +83,16 @@ public:
     /// get the mesh
     const MeshLib::IMesh* getMesh() const { return _msh; }
 
+    DiscreteLib::DiscreteSystem* getDiscreteSystem() const {return _discrete_system;};
+
     ///
     size_t getNumberOfNodes() const {return _nodal_values->size();};
 
 
     /// evaluate this function at the given point
-    void eval(const NumLib::TXPosition &/*pt*/, Tvalue &v)
+    virtual void eval(const NumLib::TXPosition x, Tvalue &v) const
     {
-        throw "eval() is not implemented yet.";
-        v = (*_nodal_values)[0];
+        v = (*_nodal_values)[x.getId()];
     };
 
     /// get nodal value
