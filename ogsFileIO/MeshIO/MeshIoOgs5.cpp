@@ -3,7 +3,7 @@
 
 #include "MeshLib/Core/UnstructuredMesh.h"
 #include "MeshLib/Core/ElementFactory.h"
-
+#include "MeshLib/Tools/Tools.h"
 
 namespace MeshIoOgs5
 {
@@ -110,6 +110,8 @@ void readMesh(std::string const& fileName, std::vector<MeshLib::IMesh*> &vec_mes
           msh->addElement(newElem);
         }
       }
+
+      MeshLib::calculateMeshGeometricProperties(*msh);
     }
     
     if_file.close();
