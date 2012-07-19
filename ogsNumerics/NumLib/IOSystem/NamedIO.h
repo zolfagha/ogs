@@ -7,6 +7,8 @@
 #include <cassert>
 #include <iostream>
 
+#include "logog/include/logog.hpp"
+
 #include "BaseLib/CodingTools.h"
 #include "INamedIO.h"
 
@@ -35,11 +37,11 @@ public:
     virtual bool isValid() const
     {
         if (T_BASE::getNumberOfInputParameters()!=_in_para_names.size()) {
-            std::cout << "***Error: the number of input parameter names is not equal to that of values." << std::endl;
+            ERR("***Error: the number of input parameter names is not equal to that of values.");
             return false;
         }
         if (T_BASE::getNumberOfOutputParameters()!=_out_para_names.size()) {
-            std::cout << "***Error: the number of output parameter names is not equal to that of values." << std::endl;
+            ERR("***Error: the number of output parameter names is not equal to that of values.");
             return false;
         }
         return true;
