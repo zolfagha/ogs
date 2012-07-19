@@ -55,11 +55,21 @@ void FunctionHead::initialize(const BaseLib::Options &option)
         std::string geo_type = opST->getOption("GeometryType");
         std::string geo_name = opST->getOption("GeometryName");
         const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
+        std::string st_type = opST->getOption("STType");
         std::string dis_name = opST->getOption("DistributionType");
         double dis_v = opST->getOption<double>("DistributionValue");
-
         NumLib::ITXFunction* f_st =  f_builder.create(dis_name, dis_v);
-        head->addNeumannBC(new SolutionLib::FemNeumannBC(msh, _feObjects, geo_obj, f_st));
+        if (f_st!=NULL) {
+            SolutionLib::IFemNeumannBC *femSt = 0;
+            if (st_type.compare("NEUMANN")==0) {
+                femSt = new SolutionLib::FemNeumannBC(msh, _feObjects, geo_obj, f_st);
+            } else if (st_type.compare("SOURCESINK")==0) {
+                femSt = new SolutionLib::FemSourceTerm(msh, geo_obj, f_st);
+            }
+            head->addNeumannBC(femSt);
+        } else {
+            WARN("Ditribution type %s is specified but not found. Ignore this ST.", dis_name.c_str());
+        }
     }
 
     // set up solution
@@ -111,7 +121,7 @@ void FunctionHead::updateOutput(const NumLib::TimeStep &time)
     
     if (doOutput) {
         OutputVariableInfo var;
-        var.name = "Head";
+        var.name = "HEAD";
         var.value = _solution->getCurrentSolution(0);
         var.object_type = OutputObjectType::Node;
         

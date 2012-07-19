@@ -106,6 +106,7 @@ THMCSimulator::THMCSimulator(int argc, char* argv[])
         // get parsed data
         if (! output_arg.getValue().empty()) {
             if (!logog_file) delete logog_file;
+            BaseLib::truncateFile(output_arg.getValue());
             logog_file = new logog::LogFile(output_arg.getValue().c_str());
             logog_file->SetFormatter( *custom_format );
         }
@@ -118,11 +119,11 @@ THMCSimulator::THMCSimulator(int argc, char* argv[])
         }
 
         if (! input_arg.getValue().empty()) {
-            std::string proj_path = input_arg.getValue();
+            const std::string proj_path = input_arg.getValue();
             if (checkInputFiles(proj_path)) {
                 _sim_info = new SimulationInfo(proj_path);
             } else {
-                LOGOG_CERR << "Error: Cannot find file " << proj_path << std::endl;
+                ERR("Cannot find a project - %s", proj_path.c_str());
             }
         }
 
@@ -143,13 +144,13 @@ bool THMCSimulator::checkInputFiles(const std::string& proj_path)
     // meanwhile OGS5 files are default
     if(!BaseLib::IsFileExisting(proj_path+".pcs"))
     {
-        LOGOG_CERR << " Error: Cannot find a PCS file - " << proj_path << std::endl;
-        return 1;
+        ERR("Cannot find a PCS file - %s.pcs", proj_path.c_str());
+        return false;
     }
     if(!BaseLib::IsFileExisting(proj_path+ ".prop"))
     {
-        LOGOG_CERR << " Error: Cannot find a PCS file - " << proj_path << std::endl;
-        return 1;
+        ERR("Cannot find a property file - %s.prop", proj_path.c_str());
+        return false;
     }
 
     return true;
@@ -162,11 +163,13 @@ int THMCSimulator::execute()
     BaseLib::Options op;
     Ogs6FemData* ogs6fem = Ogs6FemData::getInstance();
     const std::string proj_path = _sim_info->getProjectPath();
+    ogs6fem->project_name = _sim_info->getProjectName();
+    ogs6fem->output_dir = _sim_info->getProjectDirPath();
 
     //-------------------------------------------------------------------------
     // Read files
     //-------------------------------------------------------------------------
-    LOGOG_CERR << "Reading input files..." << std::endl;
+    INFO("Reading input files...");
     // ogs5fem
     ogs5::Ogs5FemData ogs5femdata;
     ogs5femdata.read(proj_path);
@@ -180,15 +183,16 @@ int THMCSimulator::execute()
     //-------------------------------------------------------------------------
     // Setup simulation
     //-------------------------------------------------------------------------
-    LOGOG_CERR << "Setting up simulation..." << std::endl;
+    INFO("Setting up simulation...");
 
     // construct coupling system
     MyConvergenceCheckerFactory checkFac;
     NumLib::TransientCoulplingStrucutreBuilder cpl_builder;
     if (_cpl_system!=NULL) delete _cpl_system;
     _cpl_system = cpl_builder.build(&op, *GeoProcessBuilder::getInstance(), checkFac);
+
     if (!_cpl_system->check()) {
-        LOGOG_CERR << " Error while checking coupled system " << std::endl;
+        ERR("Error while checking coupled system");
         return 0;
     }
 
@@ -203,11 +207,10 @@ int THMCSimulator::execute()
         if (opPCS!=NULL) {
             pcs->initialize(*opPCS);
         } else {
-            LOGOG_CERR << " Error: Cannot find Configuration for Process - " << pcs_name << std::endl;
-            return 0;
+            pcs->initialize(op);
+//            ERR("Cannot find Configuration for Process - %s", pcs_name.c_str());
         }
     }
-
 
     NumLib::TimeSteppingController timestepping;
     timestepping.addTransientSystem(*_cpl_system);
@@ -217,17 +220,17 @@ int THMCSimulator::execute()
 
     for (size_t i=0; i<ogs6fem->list_tim.size(); i++) {
         t_start = std::min(t_start, ogs6fem->list_tim[i]->getBeginning());
-        t_end = std::max(t_start, ogs6fem->list_tim[i]->getEnd());
+        t_end = std::max(t_end, ogs6fem->list_tim[i]->getEnd());
     }
 
     //-------------------------------------------------------------------------
     // Run simulation
     //-------------------------------------------------------------------------
-    LOGOG_CERR << "Start simulation...  start=" << t_start << ", end=" << t_end << std::endl;
+    INFO("Start simulation...  start=%d, end=%d", t_start, t_end);
     timestepping.setBeginning(t_start);
     timestepping.solve(t_end);
 
-    LOGOG_CERR << "Finish simulation..." << std::endl;
+    INFO("Finish simulation...");
 
 
     return 0;
