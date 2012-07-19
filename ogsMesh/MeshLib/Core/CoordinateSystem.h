@@ -12,6 +12,7 @@ struct CoordinateSystemType
         Z = 12,
         XY = 21,
         XZ = 22,
+        YZ = 23,
         XYZ = 32,
         INVALID = -1
     };
