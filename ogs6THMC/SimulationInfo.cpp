@@ -21,34 +21,35 @@ void SimulationInfo::outputHeader ( void )
 //
 //    const int len = 47;
 
-    LOGOG_COUT << std::endl;
-    LOGOG_COUT << _LG("          ###################################################\n");
-    LOGOG_COUT << _LG("          ##                                               ##\n");
-    LOGOG_COUT << _LG("          ##              OpenGeoSys-Project 6             ##\n");
+    INFO("");
+    INFO("          ###################################################");
+    INFO("          ##                                               ##");
+    INFO("          ##              OpenGeoSys-Project 6             ##");
 #ifdef USE_LIS
-    LOGOG_COUT << _LG("          ## ") << _LG(BaseLib::bothPadding("powered by LIS",45)) << _LG(" ##\n");
+    INFO("          ## %s ##", BaseLib::bothPadding("powered by LIS",45).c_str());
 #endif
-    LOGOG_COUT << _LG("          ##                                               ##\n");
-    LOGOG_COUT << _LG("          ##   Contributors                                ##\n");
-    LOGOG_COUT << _LG("          ##   * Helmholtz Centre for Environmental        ##\n");
-    LOGOG_COUT << _LG("          ##     Research - UFZ                            ##\n");
-    LOGOG_COUT << _LG("          ##   * TU Dresden                                ##\n");
-    LOGOG_COUT << _LG("          ##   * University of Kiel                        ##\n");
-    LOGOG_COUT << _LG("          ##   * University of Edinburgh                   ##\n");
-    LOGOG_COUT << _LG("          ##   * University of Tuebingen (ZAG)             ##\n");
-    LOGOG_COUT << _LG("          ##   * Federal Institute for Geosciences         ##\n");
-    LOGOG_COUT << _LG("          ##     and Natural Resources (BGR)               ##\n");
-    LOGOG_COUT << _LG("          ##   * Helmholtz Centre Potsdam GFZ              ##\n");
-    LOGOG_COUT << _LG("          ##     German Research Centre for Geosciences    ##\n");
-    LOGOG_COUT << _LG("          ##                                               ##\n");
-    LOGOG_COUT << _LG("          ##   Program version                             ##\n");
-    LOGOG_COUT << _LG("          ##   * Version: ") << _LG(BaseLib::rightPadding(OGS_VERSION, 32)) << " ##\n";
-    LOGOG_COUT << _LG("          ##   * Date   : ") << _LG(BaseLib::rightPadding(OGS_DATE, 32)) << " ##\n";
-    LOGOG_COUT << _LG("          ##   * Rev.   : ") << _LG(BaseLib::rightPadding(" ", 32)) << " ##\n";
-    LOGOG_COUT << _LG("          ##     ") << _LG(BaseLib::rightPadding(GIT_COMMIT_INFO, 41)) << " ##\n";
-    LOGOG_COUT << _LG("          ##                                               ##\n");
-    LOGOG_COUT << _LG("          ###################################################\n");
-    LOGOG_COUT << _LG("\n\n");
+    INFO("          ##                                               ##");
+    INFO("          ##   Contributors                                ##");
+    INFO("          ##   * Helmholtz Centre for Environmental        ##");
+    INFO("          ##     Research - UFZ                            ##");
+    INFO("          ##   * TU Dresden                                ##");
+    INFO("          ##   * University of Kiel                        ##");
+    INFO("          ##   * University of Edinburgh                   ##");
+    INFO("          ##   * University of Tuebingen (ZAG)             ##");
+    INFO("          ##   * Federal Institute for Geosciences         ##");
+    INFO("          ##     and Natural Resources (BGR)               ##");
+    INFO("          ##   * Helmholtz Centre Potsdam GFZ              ##");
+    INFO("          ##     German Research Centre for Geosciences    ##");
+    INFO("          ##                                               ##");
+    INFO("          ##   Program version                             ##");
+    INFO("          ##   * Version: %s ##", BaseLib::rightPadding(OGS_VERSION, 32).c_str());
+    INFO("          ##   * Date   : %s ##", BaseLib::rightPadding(OGS_DATE, 32).c_str());
+    INFO("          ##   * Rev.   :                                  ##");
+    INFO("          ##     %s ##", BaseLib::rightPadding(GIT_COMMIT_INFO, 41).c_str());
+    INFO("          ##                                               ##");
+    INFO("          ###################################################");
+    INFO("");
+    INFO("");
 }
 
 SimulationInfo::SimulationInfo(const std::string &project_path)
