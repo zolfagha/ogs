@@ -48,6 +48,13 @@ public:
 
     virtual GeoObjType::type getGeoType() const {return GeoObjType::POINT;};
 
+    inline TemplatePoint<T> operator- (const TemplatePoint<T> &p) const
+    {
+
+        TemplatePoint<T> pt_diff(_x[0]-p._x[0], _x[1]-p._x[1], _x[2]-p._x[2]);
+        return pt_diff;
+    }
+
     /** check if the given object equals to this. */
     inline bool operator== (const TemplatePoint<T> &p) const;
 /*
