@@ -47,4 +47,7 @@ void createEdgeElements(IMesh * msh);
 /// generate higher order mesh
 void generateHigherOrderUnstrucuredMesh(UnstructuredMesh &msh, size_t order);
 
+/// calculate geometric properties of an unstructured mesh
+void calculateMeshGeometricProperties(UnstructuredMesh &msh);
+
 }// end namespace

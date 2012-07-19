@@ -239,4 +239,50 @@ void generateHigherOrderUnstrucuredMesh(UnstructuredMesh &msh, size_t order)
     }
 }
 
+MeshLib::CoordinateSystemType::type getCoordinateSystemFromBoundingBox(const GeoLib::AxisAlignedBoundingBox &bbox)
+{
+    GeoLib::Point pt_diff = bbox.getMaxPoint() - bbox.getMinPoint();
+    MeshLib::CoordinateSystemType::type coords;
+    bool hasX = fabs(pt_diff[0]);
+    bool hasY = fabs(pt_diff[1]);
+    bool hasZ = fabs(pt_diff[2]);
+
+    if (hasX) {
+        if (hasY) {
+            if (hasZ) {
+                coords = CoordinateSystemType::XYZ;
+            } else {
+                coords = CoordinateSystemType::XY;
+            }
+        } else if (hasZ) {
+            coords = CoordinateSystemType::XZ;
+        } else {
+            coords = CoordinateSystemType::X;
+        }
+    } else if (hasY) {
+        if (hasZ) {
+            coords = CoordinateSystemType::YZ;
+        } else {
+            coords = CoordinateSystemType::Y;
+        }
+    } else if (hasZ) {
+        coords = CoordinateSystemType::Z;
+    } else {
+        coords = CoordinateSystemType::INVALID;
+    }
+
+    return coords;
+}
+
+void calculateMeshGeometricProperties(UnstructuredMesh &msh)
+{
+    MeshGeometricProperty* geo_prop = msh.getGeometricProperty();
+    double tol = std::numeric_limits<double>::epsilon();
+
+    // coordinate systems
+    geo_prop->setCoordinateSystem(getCoordinateSystemFromBoundingBox(geo_prop->getBoundingBox()));
+
+    // 
+}
+
 } // end namespace

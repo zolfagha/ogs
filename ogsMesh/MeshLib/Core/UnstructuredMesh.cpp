@@ -19,6 +19,9 @@ size_t UnstructuredMesh::addNode( GeoLib::Point &x, size_t order )
     size_t new_node_id = _list_nodes.size();
     this->_list_nodes.push_back(new Node(new_node_id, x));
     this->_map_order_nnodes[order]++;
+
+    this->_geo_prop.getBoundingBox().update(x);
+
     return  new_node_id;
 }
 
@@ -31,6 +34,7 @@ size_t UnstructuredMesh::setNodeCoordinates( size_t node_id, GeoLib::Point &x )
     } else {
         new_node_id = addNode(x);
     }
+    this->_geo_prop.getBoundingBox().update(x);
     return new_node_id;
 };
 

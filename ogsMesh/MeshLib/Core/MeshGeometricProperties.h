@@ -3,8 +3,8 @@
 
 #include <limits>
 
+#include "GeoLib/AxisAlignedBoundingBox.h"
 #include "CoordinateSystem.h"
-
 
 namespace MeshLib
 {
@@ -35,15 +35,20 @@ public:
         _coord.setType(coord);
     }
 
-    void getBoundingBox() const
+    const GeoLib::AxisAlignedBoundingBox& getBoundingBox() const
     {
-
+        return _aabox;
     }
 
+    GeoLib::AxisAlignedBoundingBox& getBoundingBox()
+    {
+        return _aabox;
+    }
 
 private:
     double _min_edge_len;
     CoordinateSystem _coord;
+    GeoLib::AxisAlignedBoundingBox _aabox;
 };
 
 }// end namespace
