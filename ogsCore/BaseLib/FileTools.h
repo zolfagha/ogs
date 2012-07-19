@@ -101,6 +101,13 @@ template <typename T> void write_value_binary(std::fstream &fin, T val)
     fin.write((const char*)&val, sizeof(T));
 }
 
+static void truncateFile(const std::string &filename)
+{
+    std::ofstream ofs;
+    ofs.open(filename.c_str(), std::ios_base::trunc);
+    ofs.close();
+}
+
 } // end namespace BaseLib
 
 
