@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "FemLib/Function/FemNorm.h"
 #include "NumLib/Coupling/Algorithm/IConvergenceCheck.h"
 #include "NumLib/Function/FunctionConstant.h"
 
@@ -29,11 +30,56 @@ public:
     }
 };
 
+class FemFunctionConvergenceCheck : public NumLib::IConvergenceCheck
+{
+    //FemLib::NormOfFemNodalFunction<double> _norm;
+public:
+    //explicit FemFunctionConvergenceCheck(DiscreteLib::DiscreteSystem *dis) : _norm(dis)
+    //{
+
+    //}
+    FemFunctionConvergenceCheck()
+    {
+
+    }
+
+    bool isConverged(NumLib::UnnamedParameterSet& vars_prev, NumLib::UnnamedParameterSet& vars_current, double eps, double &v_diff)
+    {
+
+        for (size_t i=0; i<vars_prev.size(); i++) {
+#if 1
+            if (vars_prev.getName(i).compare("h")==0 || vars_prev.getName(i).compare("c")==0) {
+                const FemLib::FemNodalFunctionScalar* f_fem_prev = vars_prev.get<FemLib::FemNodalFunctionScalar>(i);
+                const FemLib::FemNodalFunctionScalar* f_fem_cur = vars_current.get<FemLib::FemNodalFunctionScalar>(i);
+                //v_diff = f_fem_cur->norm_diff(*f_fem_prev);
+                FemLib::NormOfFemNodalFunction<double> _norm(f_fem_cur->getDiscreteSystem());
+                v_diff = _norm(*f_fem_prev, *f_fem_cur);
+            } else if (vars_prev.getName(i).compare("v")==0) {
+                const FemLib::FEMIntegrationPointFunctionVector* f_fem_prev = vars_prev.get<FemLib::FEMIntegrationPointFunctionVector>(i);
+                const FemLib::FEMIntegrationPointFunctionVector* f_fem_cur = vars_current.get<FemLib::FEMIntegrationPointFunctionVector>(i);
+                //v_diff = f_fem_cur->norm_diff(*f_fem_prev);
+                FemLib::NormOfFemNodalFunction<double> _norm(f_fem_cur->getDiscreteSystem());
+                v_diff = _norm(*f_fem_prev, *f_fem_cur);
+            }
+#endif
+            if (v_diff>eps) {
+                return false;
+            }
+        }
+        return true;
+    }
+};
+
 class MyConvergenceCheckerFactory
 {
 public:
-    NumLib::IConvergenceCheck* create(const std::string &)
+    NumLib::IConvergenceCheck* create(const std::string &name)
     {
-        return new MyConvergenceCheck();
+        if (name.compare("MyConvergenceCheck")==0) {
+            return new MyConvergenceCheck();
+        } else if (name.compare("FemFunctionConvergenceCheck")==0) {
+            return new FemFunctionConvergenceCheck();
+        }
+        return NULL;
     };
 };
