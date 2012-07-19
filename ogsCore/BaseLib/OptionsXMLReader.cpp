@@ -9,14 +9,21 @@ namespace BaseLib
 
 void addXMLtoOptions(tinyxml2::XMLElement* e_root, BaseLib::Options &properties)
 {
-    BaseLib::Options* optRoot = properties.addSubGroup(e_root->GetText());
+    BaseLib::Options* optRoot = properties.addSubGroup(e_root->Name());
 
-    for (tinyxml2::XMLElement* e=e_root->FirstChildElement(); e!=0; e=e_root->NextSiblingElement())
+    // attributes
+    for (const tinyxml2::XMLAttribute* att = e_root->FirstAttribute(); att != 0; att = att->Next())
+    {
+        optRoot->addOption(att->Name(), att->Value());
+    }
+
+    // element
+    for (tinyxml2::XMLElement* e=e_root->FirstChildElement(); e!=0; e=e->NextSiblingElement())
     {
         if (e->FirstChildElement()!=0) {
-            addXMLtoOptions(e, properties);
+            addXMLtoOptions(e, *optRoot);
         } else {
-            properties.addOption(e->GetText(), e->Value());
+            optRoot->addOption(e->Name(), e->GetText());
         }
     }
 }
