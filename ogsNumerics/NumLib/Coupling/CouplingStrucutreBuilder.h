@@ -55,16 +55,22 @@ private:
     {
         std::string eqs_name = option->getOption("name");
         T_M* eqs = eqs_fac.create(eqs_name);
-        const std::vector<std::string>* in_names = option->getOptionAsArray<std::string>("in");
-        const std::vector<std::string>* out_names = option->getOptionAsArray<std::string>("out");
-        if (in_names!=0) {
-            for (size_t i=0; i<in_names->size(); i++) {
-                eqs->setInputParameterName(i, (*in_names)[i]);
+        if (option->hasOption("in")) {
+            std::vector<std::string> in_names;
+            for (std::string in_name = option->getFirstOption<std::string>("in"); in_name != ""; in_name = option->getNextOption<std::string>()) {
+                in_names.push_back(in_name);
+            }
+            for (size_t i=0; i<in_names.size(); i++) {
+                eqs->setInputParameterName(i, in_names[i]);
             }
         }
-        if (out_names!=0) {
-            for (size_t i=0; i<out_names->size(); i++) {
-                eqs->setOutputParameterName(i, (*out_names)[i]);
+        if (option->hasOption("out")) {
+            std::vector<std::string> out_names;
+            for (std::string out_name = option->getFirstOption<std::string>("out"); out_name != ""; out_name = option->getNextOption<std::string>()) {
+                out_names.push_back(out_name);
+            }
+            for (size_t i=0; i<out_names.size(); i++) {
+                eqs->setOutputParameterName(i, out_names[i]);
             }
         }
         _vec_m.push_back(eqs);
@@ -77,23 +83,29 @@ private:
     {
         T_P* part = new T_P();
         //para
-        const std::vector<std::string>* in_names = option->getOptionAsArray<std::string>("in");
-        const std::vector<std::string>* out_names = option->getOptionAsArray<std::string>("out");
-        if (in_names!=0) {
-            part->resizeInputParameter(in_names->size());
-            for (size_t i=0; i<in_names->size(); i++) {
-                part->setInputParameterName(i, (*in_names)[i]);
+        if (option->hasOption("in")) {
+            std::vector<std::string> in_names;
+            for (std::string in_name = option->getFirstOption<std::string>("in"); in_name != ""; in_name = option->getNextOption<std::string>()) {
+                in_names.push_back(in_name);
+            }
+            part->resizeInputParameter(in_names.size());
+            for (size_t i=0; i<in_names.size(); i++) {
+                part->setInputParameterName(i, in_names[i]);
             }
         }
-        if (out_names!=0) {
-            part->resizeOutputParameter(out_names->size());
-            for (size_t i=0; i<out_names->size(); i++) {
-                part->setOutputParameterName(i, (*out_names)[i]);
+        if (option->hasOption("out")) {
+            std::vector<std::string> out_names;
+            for (std::string out_name = option->getFirstOption<std::string>("out"); out_name != ""; out_name = option->getNextOption<std::string>()) {
+                out_names.push_back(out_name);
+            }
+            part->resizeOutputParameter(out_names.size());
+            for (size_t i=0; i<out_names.size(); i++) {
+                part->setOutputParameterName(i, out_names[i]);
             }
         }
         //alg
-        size_t max_itr = option->getOption<size_t>("max_itr");
-        double epsilon = option->getOption<double>("epsilon");
+        size_t max_itr = option->getOptionAsNum<size_t>("max_itr");
+        double epsilon = option->getOptionAsNum<double>("epsilon");
         IConvergenceCheck* checker = check_fac.create(option->getOption("convergence"));
         part->setAlgorithm(*T_ALGORITHM::create(option->getOption("algorithm"), checker, max_itr, epsilon));
 //        IPartitionedAlgorithm* alg = T_ALGORITHM::create(option->getOption("algorithm"), checker, max_itr, epsilon);
@@ -105,7 +117,7 @@ private:
             std::string str = itr->first;
             BaseLib::Options* op_sub = static_cast<BaseLib::Options*>(itr->second);
             T_I* sys = 0;
-            if (str.find("M")==0) {
+            if (str.compare("M")==0) {
                 sys = buildMonolithicSystem(op_sub, eqs_fac);
             } else if (str.compare("P")==0) {
                 sys = buildPartitionedSystem(op_sub, eqs_fac, check_fac);
