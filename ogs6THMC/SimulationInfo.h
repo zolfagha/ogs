@@ -20,11 +20,11 @@ class SimulationInfo
 {
 public:
     SimulationInfo();
-    explicit SimulationInfo(const std::string project_path);
+    explicit SimulationInfo(const std::string &project_path);
 
     static void outputHeader();
 
-    void setProjectPath(const std::string& path);
+    void setProjectPath(const std::string &path);
     std::string getProjectPath() const {return _project_path;};
     std::string getProjectDirPath() const {return _project_dir;};
     std::string getProjectName() const {return _project_name;};
