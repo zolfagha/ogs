@@ -31,11 +31,12 @@ Process* AbstractProcessBuilder::create(const std::string &pcs_name) const
 void AbstractProcessBuilder::output() const
 {
     std::map<std::string, ProcessFactoryBase*>::const_iterator itr;
-    LOGOG_COUT << _LG("List of available modules") << std::endl;
+    INFO("List of available modules");
     for (itr=this->_map_pcs_name2new.begin(); itr!=_map_pcs_name2new.end(); ++itr) {
-        LOGOG_COUT << "* " << itr->first << std::endl;
+        INFO("* %s", itr->first.c_str());
     }
-    LOGOG_COUT << std::endl << std::endl;
+    INFO("");
+    INFO("");
 }
 
 } //end
