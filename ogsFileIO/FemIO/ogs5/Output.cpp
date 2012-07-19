@@ -214,7 +214,9 @@ ios::pos_type COutput::Read(std::ifstream& in_str)
         //subkeyword found
         if (line_string.find("$GEO_TYPE") != string::npos)
         {
-            in_str >> geo_type >> geo_name;
+            in_str >> geo_type;
+            if (geo_type.find("DOMAIN")==std::string::npos)
+                in_str >> geo_name;
             in_str.ignore(MAX_ZEILE, '\n');
             continue;
         }
