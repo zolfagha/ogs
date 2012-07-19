@@ -4,6 +4,8 @@
 #include <vector>
 #include <iostream>
 
+#include "logog/include/logog.hpp"
+
 #include "NumLib/IOSystem/ParameterSet.h"
 #include "NumLib/IOSystem/NamedIOSystem.h"
 
@@ -62,7 +64,7 @@ public:
             int n_diff = it-list_diff.begin();
             if (n_diff > 0) {
                 for (int k=0; k<n_diff; k++) {
-                    std::cout << "*** Error: Inconsistent parameter found in subproblem " << i << " and param " << list_diff[k] << std::endl;
+                    ERR("*** Error: Inconsistent parameter found in subproblem %d and param %d", i, list_diff[k]);
                 }
 
                 flag = false;
