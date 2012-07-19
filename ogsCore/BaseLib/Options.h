@@ -50,6 +50,8 @@ private:
     const std::string _dummy;
     mutable const_pair_of_iterator _subgroup_range;
     mutable DictionaryType::const_iterator _subgroup_itr;
+    mutable const_pair_of_iterator _leaf_range;
+    mutable DictionaryType::const_iterator _leaf_itr;
 
     // return dummy
     template<typename T>
@@ -154,11 +156,24 @@ public:
     const T getOption(const std::string &key) const
     {
         DictionaryType::const_iterator itr = _dictionary.find(key);
-        if (itr==_dictionary.end() || !itr->second->isValue())
+        if (itr==_dictionary.end() || !itr->second->isValue()) {
             return getDummy<T>();
-        else
+        } else {
             return static_cast<OptionLeaf<T>*>(itr->second)->getValue();
+        }
 //        return Base::str2number<T>(getOption(key));
+    }
+
+    template<typename T>
+    const T getOptionAsNum(const std::string &key) const
+    {
+        DictionaryType::const_iterator itr = _dictionary.find(key);
+        if (itr==_dictionary.end() || !itr->second->isValue()) {
+            return getDummy<T>();
+        } else {
+            return BaseLib::str2number<T>(static_cast<OptionLeaf<std::string>*>(itr->second)->getValue());
+        }
+        //        return Base::str2number<T>(getOption(key));
     }
 
     /// get the option value
@@ -170,6 +185,30 @@ public:
             return 0;
         else
             return &static_cast<OptionLeaf<std::vector<T> >*>(itr->second)->getValue();
+    }
+
+    template<typename T>
+    const T getFirstOption(const std::string &key) const
+    {
+        _leaf_range = _dictionary.equal_range(key);
+        _leaf_itr = _leaf_range.first;
+        if (_leaf_itr == _leaf_range.second || !_leaf_itr->second->isValue())
+            return getDummy<T>();
+        else
+            return static_cast<OptionLeaf<T>*>(_leaf_itr->second)->getValue();
+    }
+
+    template<typename T>
+    const T getNextOption() const
+    {
+        if (_leaf_itr == _leaf_range.second)
+            return getDummy<T>();
+        ++_leaf_itr;
+
+        if (_leaf_itr == _leaf_range.second || !_leaf_itr->second->isValue())
+            return getDummy<T>();
+        else
+            return static_cast<OptionLeaf<T>*>(_leaf_itr->second)->getValue();
     }
 
     /// get the option value
