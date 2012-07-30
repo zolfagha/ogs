@@ -36,7 +36,7 @@ public:
             fun.eval(x_old, x_new);
             dx = x_new;
             dx -= x_old;
-            printout(i, x_new, dx);
+            //printout(i, x_new, dx);
             if (convergence->check(0, &dx, &x_new)) {
                 converged = true;
                 break;
