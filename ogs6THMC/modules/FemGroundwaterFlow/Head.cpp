@@ -75,8 +75,9 @@ void FunctionHead::initialize(const BaseLib::Options &option)
     // set up solution
     _solution = new MySolutionType(dis, _problem);
     MySolutionType::LinearSolverType* linear_solver = _solution->getLinearEquationSolver();
-    linear_solver->setOption(option);
-    _solution->getNonlinearSolver()->setOption(option);
+    const BaseLib::Options* optNum = option.getSubGroup("Numerics");
+    linear_solver->setOption(*optNum);
+    _solution->getNonlinearSolver()->setOption(*optNum);
 
     // setup output
     OutputBuilder outBuilder;
