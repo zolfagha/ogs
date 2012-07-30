@@ -76,6 +76,7 @@ public:
             for (size_t j=0; j<var->getNumberOfDirichletBC(); j++) {
                 FemDirichletBC* bc1 = var->getDirichletBC(j);
                 bc1->setup();
+                std::vector<double> bc_value_for_dx(bc1->getListOfBCNodes().size(), .0);
                 var_bc_id.insert(var_bc_id.end(), bc1->getListOfBCNodes().begin(), bc1->getListOfBCNodes().end());
                 var_bc_val.insert(var_bc_val.end(), bc_value_for_dx.begin(), bc_value_for_dx.end());
             }
