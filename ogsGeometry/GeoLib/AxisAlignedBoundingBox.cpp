@@ -16,7 +16,7 @@ AxisAlignedBoundingBox::AxisAlignedBoundingBox ()
 {
     for (std::size_t k(0); k<3; k++) {
         _min_pnt[k] = std::numeric_limits<double>::max();
-        _max_pnt[k] = std::numeric_limits<double>::min();
+        _max_pnt[k] = -1 * std::numeric_limits<double>::max();
     }
 }
 
