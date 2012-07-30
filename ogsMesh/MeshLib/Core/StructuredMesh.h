@@ -173,6 +173,11 @@ public:
         }
         return 0;
     }
+
+    virtual void constructGeometricProperty()
+    {
+    }
+
 };
 
 template<> void StructuredMesh<ElementShape::QUAD>::construct();

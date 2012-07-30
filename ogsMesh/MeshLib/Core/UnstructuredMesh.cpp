@@ -3,6 +3,7 @@
 
 #include "BaseLib/CodingTools.h"
 
+#include "MeshLib/Tools/Tools.h"
 
 namespace MeshLib
 {
@@ -72,10 +73,16 @@ size_t UnstructuredMesh::getNumberOfEdges() const {
     return _list_edge_elements.size();
 }
 
-IElement* UnstructuredMesh::getEdgeElement(size_t edge_id) {
+IElement* UnstructuredMesh::getEdgeElement(size_t edge_id) 
+{
     if (edge_id<_list_edge_elements.size())
         return _list_edge_elements[edge_id];
     return 0;
+}
+
+void UnstructuredMesh::constructGeometricProperty()
+{
+    MeshLib::calculateMeshGeometricProperties(*this);
 }
 
 } // end namespace

@@ -159,6 +159,10 @@ public:
     void addEdgeElement(IElement *e);
     size_t getNumberOfEdges() const;
     IElement* getEdgeElement(size_t edge_id);
+
+    /// construct geometric data of this mesh
+    virtual void constructGeometricProperty();
+
 };
 
 }

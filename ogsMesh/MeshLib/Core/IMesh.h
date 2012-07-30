@@ -62,6 +62,9 @@ public:
     virtual void addEdgeElement(IElement*) = 0;
     virtual size_t getNumberOfEdges() const = 0;
     virtual IElement* getEdgeElement(size_t edge_id) = 0;
+
+    /// construct geometric data of this mesh
+    virtual void constructGeometricProperty() = 0;
 };
 
 
