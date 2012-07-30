@@ -111,7 +111,6 @@ void readMesh(std::string const& fileName, std::vector<MeshLib::IMesh*> &vec_mes
         }
       }
 
-      MeshLib::calculateMeshGeometricProperties(*msh);
     }
     
     if_file.close();
