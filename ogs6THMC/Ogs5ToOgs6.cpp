@@ -77,7 +77,49 @@ void convertPorousMediumProperty(const CMediumProperties &mmp, MaterialLib::Poro
     }
 }
 
+std::string convertLinearSolverType(int ls_method)
+{
+    std::string ls_sol_type = "";
+    switch (ls_method) {
+    case 1:
+        ls_sol_type = "GAUSS";
+        break;
+    case 2:
+        ls_sol_type = "BICGSTAB";
+        break;
+    case 3:
+        ls_sol_type = "BICG";
+        break;
+    case 5:
+        ls_sol_type = "CG";
+        break;
+    case 805:
+        ls_sol_type = "PARDISO";
+        break;
+    default:
+        break;
+    } 
+    return ls_sol_type;
+}
 
+std::string convertLinearSolverPreconType(int ls_precon)
+{
+    std::string str = "";
+    switch (ls_precon) {
+    case 0:
+        str = "NONE";
+        break;
+    case 1:
+        str = "JACOBI";
+        break;
+    case 100:
+        str = "ILU";
+        break;
+    default:
+        break;
+    } 
+    return str;
+}
 
 
 void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options &option)
@@ -227,20 +269,26 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         {
             CNumerics* rfnum = ogs5fem.num_vector[i];
             if (rfnum->pcs_type_name.compare(pcs_name)==0) {
-                BaseLib::Options* opt = optNum->addSubGroup("LinearSolver");
-                opt->addOptionAsNum("SolverType", rfnum->ls_method);
-                opt->addOptionAsNum("PreconType", rfnum->ls_precond);
-                opt->addOptionAsNum("ErrorType", rfnum->ls_error_method);
-                opt->addOptionAsNum("ErrorTolerance", rfnum->ls_error_tolerance);
-                opt->addOptionAsNum("MaxIteration", rfnum->ls_max_iterations);
-                opt = optNum->addSubGroup("NonlinearSolver");
-                opt->addOption("SolverType", rfnum->nls_method_name);
-                opt->addOptionAsNum("ErrorType", rfnum->nls_error_method);
-                opt->addOptionAsNum("ErrorTolerance", rfnum->nls_error_tolerance);
-                opt->addOptionAsNum("MaxIteration", rfnum->nls_max_iterations);
+                // linear solver
+                BaseLib::Options* optLS = optNum->addSubGroup("LinearSolver");
+                optLS->addOption("solver_type", convertLinearSolverType(rfnum->ls_method));
+                optLS->addOption("precon_type", convertLinearSolverPreconType(rfnum->ls_precond));
+                //optLS->addOption("error_type", "NONE");
+                optLS->addOptionAsNum("error_tolerance", rfnum->ls_error_tolerance);
+                optLS->addOptionAsNum("max_iteration_step", rfnum->ls_max_iterations);
+
+                // nonlinear solver
+                BaseLib::Options* optNS = optNum->addSubGroup("NonlinearSolver");
+                optNS->addOption("solver_type", rfnum->nls_method_name);
+                optNS->addOptionAsNum("error_type", rfnum->nls_error_method);
+                optNS->addOptionAsNum("error_tolerance", rfnum->nls_error_tolerance);
+                optNS->addOptionAsNum("max_iteration_step", rfnum->nls_max_iterations);
+
+                // other stuff
                 optNum->addOptionAsNum("TimeTheta", rfnum->ls_theta);
                 optNum->addOptionAsNum("GaussPoint", rfnum->ele_gauss_points);
                 optNum->addOptionAsNum("FEM_FCT", rfnum->fct_method);
+
             }
         }
 
