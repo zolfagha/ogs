@@ -26,7 +26,7 @@ void PVDOutput::write(  const NumLib::TimeStep &current_time,
     }
     
     // write VTU file
-    std::string vtk_file_name = getOutputDir()+"//"+getOutputBaseName() + "_";
+    std::string vtk_file_name = getOutputDir()+"\\"+getOutputBaseName() + "_";
     vtk_file_name += BaseLib::number2str<size_t>(current_time.getTimeStepCount()) + ".vtu";
     VtuWriter vtuWriter(false);
     vtuWriter.write(vtk_file_name, msh, node_values, ele_values);
@@ -34,7 +34,7 @@ void PVDOutput::write(  const NumLib::TimeStep &current_time,
     // update PVD file
     if (_pvd==NULL) {
         _pvd = new PVDWriter();
-        std::string pvd_name = getOutputDir()+"//"+getOutputBaseName() + ".pvd";
+        std::string pvd_name = getOutputDir()+"\\"+getOutputBaseName() + ".pvd";
         _pvd->initialize(pvd_name);
     }
     
