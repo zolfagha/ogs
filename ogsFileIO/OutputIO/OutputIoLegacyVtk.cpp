@@ -1,7 +1,7 @@
 
-#include "OutputIOLegacyVtk.h"
+#include "OutputIoLegacyVtk.h"
 
-#include "MeshIO/MeshIOLegacyVtk.h"
+#include "MeshIO/MeshIoLegacyVtk.h"
 
 using namespace MeshLib;
 
