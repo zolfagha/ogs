@@ -12,9 +12,9 @@ struct NonlinerSolverOption
 {
     enum SolverType
     {
-        Linear,
-        Picard,
-        Newton,
+        LINEAR,
+        PICARD,
+        NEWTON,
         INVALID
     };
 
@@ -24,16 +24,16 @@ struct NonlinerSolverOption
 
     NonlinerSolverOption()
     {
-        solver_type = Linear;
+        solver_type = LINEAR;
         error_tolerance = 1.e-6;
         max_iteration = 500;
     }
 
     SolverType getSolverType(const std::string &str)
     {
-        RETURN_ENUM_IF_SAME_STRING(Linear, str);
-        RETURN_ENUM_IF_SAME_STRING(Picard, str);
-        RETURN_ENUM_IF_SAME_STRING(Newton, str);
+        RETURN_ENUM_IF_SAME_STRING(LINEAR, str);
+        RETURN_ENUM_IF_SAME_STRING(PICARD, str);
+        RETURN_ENUM_IF_SAME_STRING(NEWTON, str);
 
         return INVALID;
     }
