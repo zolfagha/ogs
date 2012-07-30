@@ -185,7 +185,16 @@ int THMCSimulator::execute()
     //-------------------------------------------------------------------------
     INFO("Setting up simulation...");
 
+    // construct mesh
+    INFO("->Constructing meshes... %d mesh loaded", ogs6fem->list_dis_sys.size());
+    for (size_t i=0; i<ogs6fem->list_dis_sys.size(); i++) {
+        MeshLib::IMesh* msh = ogs6fem->list_dis_sys[i]->getMesh();
+        msh->constructGeometricProperty();
+        INFO("-->mesh id %d: dim=%d, nodes=%d, elements=%d", i, msh->getDimension(), msh->getNumberOfNodes(), msh->getNumberOfElements());
+    }
+
     // construct coupling system
+    INFO("->Generating coulpling system...");
     MyConvergenceCheckerFactory checkFac;
     NumLib::TransientCoulplingStrucutreBuilder cpl_builder;
     if (_cpl_system!=NULL) delete _cpl_system;
@@ -197,6 +206,7 @@ int THMCSimulator::execute()
     }
 
     // list up monolithic processes
+    INFO("->Initializing all processes...");
     std::vector<NumLib::AbstractTransientMonolithicSystem*> &list_mono_system = cpl_builder.getListOfMonolithicSystem();
     std::vector<std::string> &list_mono_system_name = cpl_builder.getListOfMonolithicSystemName();
     for (size_t i=0; i<list_mono_system.size(); i++) {
@@ -212,11 +222,12 @@ int THMCSimulator::execute()
         }
     }
 
+    INFO("->Setting time steppting...");
     NumLib::TimeSteppingController timestepping;
     timestepping.addTransientSystem(*_cpl_system);
 
     double t_start = std::numeric_limits<double>::max();
-    double t_end = std::numeric_limits<double>::min();
+    double t_end = -1 * std::numeric_limits<double>::max();
 
     for (size_t i=0; i<ogs6fem->list_tim.size(); i++) {
         t_start = std::min(t_start, ogs6fem->list_tim[i]->getBeginning());
