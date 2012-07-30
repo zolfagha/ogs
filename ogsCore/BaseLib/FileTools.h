@@ -47,7 +47,9 @@ static bool IsFileExisting(const std::string &strFilename)
     return(blnReturn);
 }
 
-
+/**
+ * \brief return a directory path
+ */
 static std::string getFileDirecotryPath(const std::string &file_path)
 {
     size_t indexChWin, indexChLinux;
@@ -57,13 +59,16 @@ static std::string getFileDirecotryPath(const std::string &file_path)
     //
     std::string dir_path;
     if(indexChWin != std::string::npos)
-        dir_path = file_path.substr(0,indexChWin) + "\\";
+        dir_path = file_path.substr(0,indexChWin); // + "\\";
     else if(indexChLinux != std::string::npos)
-        dir_path = file_path.substr(0,indexChLinux) + "/";
+        dir_path = file_path.substr(0,indexChLinux); // + "/";
 
     return dir_path;
 }
 
+/**
+ * \brief return a file base name
+ */
 static std::string getFileBaseName(const std::string &file_path)
 {
     size_t indexChWin, indexChLinux;
@@ -73,9 +78,9 @@ static std::string getFileBaseName(const std::string &file_path)
     //
     std::string dir_path;
     if(indexChWin != std::string::npos)
-        dir_path = file_path.substr(indexChWin, file_path.length());
+        dir_path = file_path.substr(indexChWin+1, file_path.length());
     else if(indexChLinux != std::string::npos)
-        dir_path = file_path.substr(indexChLinux, file_path.length());
+        dir_path = file_path.substr(indexChLinux+1, file_path.length());
 
     return dir_path;
 }
