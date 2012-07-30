@@ -33,9 +33,9 @@ void findNodesOnPoint(IMesh const* msh, GeoLib::Point const* point, std::vector<
 void findNodesOnGeometry(IMesh const* msh, GeoLib::GeoObject const* obj, std::vector<size_t> *vec_nodes)
 {
     switch (obj->getGeoType()) {
-    case GeoLib::GeoObjType::POINT:
-        findNodesOnPoint(msh, static_cast<GeoLib::Point const*>(obj), vec_nodes);
-        break;
+        case GeoLib::GeoObjType::POINT:
+            findNodesOnPoint(msh, static_cast<GeoLib::Point const*>(obj), vec_nodes);
+            break;
         case GeoLib::GeoObjType::POLYLINE:
             findNodesOnPolyline(msh, static_cast<GeoLib::Polyline const*>(obj), vec_nodes);
             break;
@@ -283,6 +283,10 @@ void calculateMeshGeometricProperties(UnstructuredMesh &msh)
     geo_prop->setCoordinateSystem(getCoordinateSystemFromBoundingBox(geo_prop->getBoundingBox()));
 
     // 
+    GeoLib::Point pt_diff = geo_prop->getBoundingBox().getMaxPoint() - geo_prop->getBoundingBox().getMinPoint(); 
+    double max_len = std::max(pt_diff[0], pt_diff[1]);
+    max_len = std::max(max_len, pt_diff[2]);
+    geo_prop->setMinEdgeLength(max_len * 1e-5);
 }
 
 } // end namespace
