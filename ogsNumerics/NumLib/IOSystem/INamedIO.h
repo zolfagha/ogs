@@ -7,19 +7,28 @@
 namespace NumLib
 {
 
+/**
+ * \brief Interface of in/out systems with named keys
+ */
 class INamedIO
 {
 public:
+    ///
     virtual ~INamedIO() {};
 
+    ///
     virtual void setInputParameterName(size_t i, const std::string& key) = 0;
 
+    ///
     virtual void setOutputParameterName(size_t i, const std::string& key) = 0;
 
+    ///
     virtual bool isValid() const = 0;
 
+    ///
     virtual bool hasInputParameter(const std::string& key) const = 0;
 
+    ///
     virtual bool hasOutputParameter(const std::string& key) const = 0;
 
     /// get the name of parameter with the given name

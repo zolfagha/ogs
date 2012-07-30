@@ -43,6 +43,7 @@ public:
         return (time.getTime()==_tim->getNext(time.getTime()));
     }
 
+    ///
     virtual void accept(const NumLib::TimeStep &)
     {
         _tim->accept();
