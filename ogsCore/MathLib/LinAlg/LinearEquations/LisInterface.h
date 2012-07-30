@@ -85,7 +85,7 @@ struct LIS_option
     enum PreconType
     {
         NONE = 0,
-        Jacobi = 1,
+        JACOBI = 1,
         ILU = 2
     };
     LIS_option()
@@ -99,11 +99,11 @@ struct LIS_option
     {
         if (str.compare("CG")==0)
             return CG;
-        if (str.compare("BiCG")==0)
+        if (str.compare("BICG")==0)
             return BiCG;
         if (str.compare("CGS")==0)
             return CGS;
-        if (str.compare("BiCGSTAB")==0)
+        if (str.compare("BICGSTAB")==0)
             return BiCGSTAB;
         if (str.compare("BiCGSTABl")==0)
             return BiCGSTABl;
@@ -119,8 +119,8 @@ struct LIS_option
     PreconType getPreconType(const std::string &str)
     {
         RETURN_ENUM_IF_SAME_STRING(NONE, str);
-           RETURN_ENUM_IF_SAME_STRING(Jacobi, str);
-           RETURN_ENUM_IF_SAME_STRING(ILU, str);
+        RETURN_ENUM_IF_SAME_STRING(JACOBI, str);
+        RETURN_ENUM_IF_SAME_STRING(ILU, str);
 
         return NONE;
     }

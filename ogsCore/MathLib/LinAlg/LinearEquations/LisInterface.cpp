@@ -30,8 +30,10 @@ CRSLisSolver::~CRSLisSolver()
 
 void CRSLisSolver::setOption(const BaseLib::Options &option)
 {
-    const BaseLib::Options *op = option.getSubGroup("Lis");
-    if (op==0) return;
+    const BaseLib::Options *op = option.getSubGroup("LinearSolver");
+    if (op==0) {
+        return;
+    }
 
     if (op->hasOption("solver_type"))
         _option.ls_method = _option.getSolverType(op->getOption("solver_type"));
