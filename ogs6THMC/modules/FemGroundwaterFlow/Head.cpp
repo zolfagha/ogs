@@ -108,10 +108,14 @@ void FunctionHead::initialize(const BaseLib::Options &option)
     this->setOutput(Head, head->getIC());
 }
 
-void FunctionHead::updateOutput(const NumLib::TimeStep &time)
+void FunctionHead::updateOutputParameter(const NumLib::TimeStep &time)
 {
     setOutput(Head, _solution->getCurrentSolution(0));
 
+}
+
+void FunctionHead::output(const NumLib::TimeStep &time) 
+{
     bool doOutput = false;
     for (size_t i=0; i<_list_output.size(); i++) {
         if (_list_output[i]->isActive(time)) {
@@ -119,16 +123,16 @@ void FunctionHead::updateOutput(const NumLib::TimeStep &time)
             break;
         }
     }
-    
+
     if (doOutput) {
         OutputVariableInfo var;
         var.name = "HEAD";
         var.value = _solution->getCurrentSolution(0);
         var.object_type = OutputObjectType::Node;
-        
+
         std::vector<OutputVariableInfo> var_list;
         var_list.push_back(var);
-        
+
         for (size_t i=0; i<_list_output.size(); i++) {
             if (_list_output[i]->isActive(time)) {
                 _list_output[i]->write(time, *_problem->getMesh(), var_list);
@@ -136,4 +140,4 @@ void FunctionHead::updateOutput(const NumLib::TimeStep &time)
         }
     }
 
-}
+};

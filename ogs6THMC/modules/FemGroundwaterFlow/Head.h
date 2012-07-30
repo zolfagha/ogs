@@ -69,9 +69,12 @@ public:
 
 
 protected:
-    virtual void updateOutput(const NumLib::TimeStep &time);
+    virtual void updateOutputParameter(const NumLib::TimeStep &time);
 
     virtual MySolutionType* getSolution() {return _solution;};
+
+    virtual void output(const NumLib::TimeStep &time);
+
 
 private:
     DISALLOW_COPY_AND_ASSIGN(FunctionHead);
