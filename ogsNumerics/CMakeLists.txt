@@ -26,6 +26,7 @@ INCLUDE_DIRECTORIES(
         ../ogsGeometry
         ../ogsMesh
         ../extra/Eigen
+        ../extra
 )
 
 target_link_libraries( ogsNumerics
