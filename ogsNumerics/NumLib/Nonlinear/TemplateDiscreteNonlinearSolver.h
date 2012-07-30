@@ -30,7 +30,7 @@ public:
 
     void setOption(const BaseLib::Options &option)
     {
-        const BaseLib::Options *op = option.getSubGroup("Nonlinear");
+        const BaseLib::Options *op = option.getSubGroup("NonlinearSolver");
         if (op==0) return;
 
         if (op->hasOption("solver_type"))
@@ -60,13 +60,13 @@ private:
         INonlinearSolver* solver = 0;
         switch (type)
         {
-        case NonlinerSolverOption::Linear:
+        case NonlinerSolverOption::LINEAR:
             solver = new Linear<F_LINEAR>(_f_l);
             break;
-        case NonlinerSolverOption::Picard:
+        case NonlinerSolverOption::PICARD:
             solver = new Picard<F_LINEAR>(_dis_sys, _f_l);
             break;
-        case NonlinerSolverOption::Newton:
+        case NonlinerSolverOption::NEWTON:
             solver = new NewtonRaphson<F_R, F_DX>(_dis_sys, _f_r, _f_dx);
             break;
         default:
