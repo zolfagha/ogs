@@ -77,7 +77,7 @@ void ogsExit()
     lis_finalize();
 #endif
 
-    LOGOG_COUT << "exit ogs6." << std::endl;
+    INFO("exit ogs6.");
     BaseLib::releaseObject(custom_format, logogCout, logog_file);
     LOGOG_SHUTDOWN();
 }
@@ -224,7 +224,7 @@ int THMCSimulator::execute()
 
     INFO("->Setting time steppting...");
     NumLib::TimeSteppingController timestepping;
-    timestepping.addTransientSystem(*_cpl_system);
+    timestepping.setTransientSystem(*_cpl_system);
 
     double t_start = std::numeric_limits<double>::max();
     double t_end = -1 * std::numeric_limits<double>::max();
