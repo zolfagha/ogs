@@ -71,12 +71,15 @@ public:
         // setup BC1
         for (size_t i=0; i<_list_var.size(); i++) {
             FemVariable* var = _list_var[i];
+            std::vector<size_t> var_bc_id;
+            std::vector<double> var_bc_val;
             for (size_t j=0; j<var->getNumberOfDirichletBC(); j++) {
                 FemDirichletBC* bc1 = var->getDirichletBC(j);
                 bc1->setup();
-                std::vector<double> bc_value_for_dx(bc1->getListOfBCNodes().size(), .0);
-                _linear_eqs->setPrescribedDoF(i, bc1->getListOfBCNodes(), bc1->getListOfBCValues());
+                var_bc_id.insert(var_bc_id.end(), bc1->getListOfBCNodes().begin(), bc1->getListOfBCNodes().end());
+                var_bc_val.insert(var_bc_val.end(), bc_value_for_dx.begin(), bc_value_for_dx.end());
             }
+            _linear_eqs->setPrescribedDoF(i, var_bc_id, var_bc_val);
         }
 
         //TODO temporally
