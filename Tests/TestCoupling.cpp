@@ -776,7 +776,7 @@ TEST(Coupling, TransientCouplingOption)
 
     const double epsilon = 1.e-3;
     TimeSteppingController timestepping;
-    timestepping.addTransientSystem(*coupled_sys);
+    timestepping.setTransientSystem(*coupled_sys);
 
     timestepping.setBeginning(.0);
     timestepping.solve(1.0);
@@ -811,7 +811,7 @@ TEST(Coupling, TransientCouplingParallelStaggered1)
     defineTransientExample1(eqs1, eqs2, eqs3, part1, part2, method, method);
 
     TimeSteppingController timestepping;
-    timestepping.addTransientSystem(part2);
+    timestepping.setTransientSystem(part2);
 
     const double epsilon = 1.e-3;
     timestepping.setBeginning(.0);
@@ -846,7 +846,7 @@ TEST(Coupling, TransientCouplingParallelStaggered2)
     defineTransientExample1(eqs1, eqs2, eqs3, part1, part2, method, method);
 
     TimeSteppingController timestepping;
-    timestepping.addTransientSystem(part2);
+    timestepping.setTransientSystem(part2);
 
     const double epsilon = 1.e-3;
     timestepping.setBeginning(.0);
@@ -906,7 +906,7 @@ TEST(Coupling, TransientCouplingParallelStaggered3)
     defineTransientExample1(eqs1, eqs2, eqs3, part1, part2, method, method);
 
     TimeSteppingController timestepping;
-    timestepping.addTransientSystem(part2);
+    timestepping.setTransientSystem(part2);
 
     const double epsilon = 1.e-3;
     timestepping.setBeginning(.0);
@@ -977,7 +977,7 @@ TEST(Coupling, TransientCouplingSerialStaggered1)
     defineTransientExample1(eqs1, eqs2, eqs3, part1, part2, method, method);
 
     TimeSteppingController timestepping;
-    timestepping.addTransientSystem(part2);
+    timestepping.setTransientSystem(part2);
 
     const double epsilon = 1.e-3;
     timestepping.setBeginning(.0);
@@ -1037,7 +1037,7 @@ TEST(Coupling, TransientCouplingSerialStaggered2)
     defineTransientExample1(eqs1, eqs2, eqs3, part1, part2, method, method);
 
     TimeSteppingController timestepping;
-    timestepping.addTransientSystem(part2);
+    timestepping.setTransientSystem(part2);
 
     const double epsilon = 1.e-3;
     timestepping.setBeginning(.0);

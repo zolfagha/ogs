@@ -153,7 +153,7 @@ TEST(Fdm, fdm1)
         f_head.setOutputParameterName(0, "h");
 
         TimeSteppingController timestepping;
-        timestepping.addTransientSystem(f_head);
+        timestepping.setTransientSystem(f_head);
 
         //const double epsilon = 1.e-3;
         timestepping.setBeginning(.0);
@@ -246,7 +246,7 @@ TEST(Fdm, fdm_fem1)
         apart1.connectParameters();
 
         TimeSteppingController timestepping;
-        timestepping.addTransientSystem(apart1);
+        timestepping.setTransientSystem(apart1);
 
         //const double epsilon = 1.e-3;
         timestepping.setBeginning(.0);

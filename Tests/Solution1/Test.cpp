@@ -73,7 +73,7 @@ Geo::GWFemProblem* createGWProblem(DiscreteSystem &dis, Geo::PorousMedia &pm)
 }
 
 
-Geo::GWFemProblem* defineGWProblem(DiscreteSystem &dis, Rectangle &_rec, Geo::PorousMedia &pm)
+Geo::GWFemProblem* defineGWProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec, Geo::PorousMedia &pm)
 {
     Geo::GWFemProblem* _problem = createGWProblem(dis, pm);
     // var
@@ -82,8 +82,8 @@ Geo::GWFemProblem* defineGWProblem(DiscreteSystem &dis, Rectangle &_rec, Geo::Po
     FemNodalFunctionScalar* h0 = new FemNodalFunctionScalar(dis, PolynomialOrder::Linear, 0);
     head->setIC(h0);
     //BC
-    Polyline* poly_left = _rec.getLeft();
-    Polyline* poly_right = _rec.getRight();
+    GeoLib::Polyline* poly_left = _rec.getLeft();
+    GeoLib::Polyline* poly_right = _rec.getRight();
     head->addDirichletBC(new FemDirichletBC(dis.getMesh(), poly_right, new NumLib::TXFunctionConstant(.0)));
     head->addNeumannBC(new FemNeumannBC(dis.getMesh(), h0->getFeObjectContainer(), poly_left, new NumLib::TXFunctionConstant(-1e-5)));
 
@@ -105,7 +105,7 @@ Geo::GWFemProblem* defineGWProblem1D(DiscreteSystem &dis, GeoLib::Line &line, Ge
     return _problem;
 }
 
-Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, Rectangle &_rec, Geo::PorousMedia &pm, Geo::Compound &comp)
+Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec, Geo::PorousMedia &pm, Geo::Compound &comp)
 {
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
@@ -122,13 +122,13 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, Rectangle &
     FemNodalFunctionScalar* c0 = new FemNodalFunctionScalar(dis, PolynomialOrder::Linear, 0);
     c->setIC(c0);
     //BC
-    Polyline* poly_left = _rec.getLeft();
+    GeoLib::Polyline* poly_left = _rec.getLeft();
     c->addDirichletBC(new FemDirichletBC(dis.getMesh(), poly_left, new NumLib::TXFunctionConstant(1.0)));
 
     return _problem;
 }
 
-Geo::FemLinearElasticProblem* defineLinearElasticProblem(DiscreteSystem &dis, Rectangle &_rec, Geo::PorousMedia &pm)
+Geo::FemLinearElasticProblem* defineLinearElasticProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec, Geo::PorousMedia &pm)
 {
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
@@ -147,7 +147,7 @@ Geo::FemLinearElasticProblem* defineLinearElasticProblem(DiscreteSystem &dis, Re
     u_x->setIC(u0);
     u_y->setIC(u0);
     //BC
-    Polyline* poly_bottom = _rec.getBottom();
+    GeoLib::Polyline* poly_bottom = _rec.getBottom();
     u_y->addDirichletBC(new FemDirichletBC(dis.getMesh(), poly_bottom, new NumLib::TXFunctionConstant(.0)));
     u_y->addNeumannBC(new SolutionLib::FemNeumannBC(dis.getMesh(), _feObjects, _rec.getTop(), new NumLib::TXFunctionConstant((-1e+6)*(-1.))));
 
@@ -175,7 +175,7 @@ TEST(Solution, CouplingFem2D)
 {
     try {
         MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
-        Rectangle* _rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
+        GeoLib::Rectangle* _rec = new GeoLib::Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
         Geo::PorousMedia pm;
         pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
         pm.porosity = new NumLib::TXFunctionConstant(0.2);
@@ -215,7 +215,7 @@ TEST(Solution, CouplingFem2D)
         apart1.connectParameters();
 
         TimeSteppingController timestepping;
-        timestepping.addTransientSystem(apart1);
+        timestepping.setTransientSystem(apart1);
 
         //const double epsilon = 1.e-3;
         timestepping.setBeginning(.0);
@@ -283,7 +283,7 @@ TEST(FEM, line)
         apart1.connectParameters();
 
         TimeSteppingController timestepping;
-        timestepping.addTransientSystem(apart1);
+        timestepping.setTransientSystem(apart1);
 
         //const double epsilon = 1.e-3;
         timestepping.setBeginning(.0);
@@ -320,7 +320,7 @@ TEST(Solution, CouplingFem2)
     try {
         //space
         MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 20, .0, .0, .0);
-        Rectangle* _rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
+        GeoLib::Rectangle* _rec = new GeoLib::Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
         //time
         //TimeStepFunctionConstant tim(.0, 1e+3, 1e+3);
         TimeStepFunctionConstant tim(.0, 1e+4, 1e+3);
@@ -385,7 +385,7 @@ TEST(Solution, CouplingFem2)
         apart1.connectParameters();
 
         TimeSteppingController timestepping;
-        timestepping.addTransientSystem(apart1);
+        timestepping.setTransientSystem(apart1);
 
         //const double epsilon = 1.e-3;
         timestepping.setBeginning(.0);
@@ -452,7 +452,7 @@ TEST(Fem, LinearElastic2D)
 {
     try {
         MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
-        Rectangle* _rec = new Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
+        GeoLib::Rectangle* _rec = new GeoLib::Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
         Geo::PorousMedia pm;
         pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
         pm.porosity = new NumLib::TXFunctionConstant(0.2);
@@ -499,7 +499,7 @@ TEST(Fem, LinearElastic2D)
         apart1.connectParameters();
 
         TimeSteppingController timestepping;
-        timestepping.addTransientSystem(apart1);
+        timestepping.setTransientSystem(apart1);
 
         //const double epsilon = 1.e-3;
         timestepping.setBeginning(.0);

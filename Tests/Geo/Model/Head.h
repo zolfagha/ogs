@@ -90,7 +90,7 @@ public:
 private:
     GWFemProblem* _problem;
     SolutionForHead* _solHead;
-    Rectangle *_rec;
+    GeoLib::Rectangle *_rec;
     //FemNodalFunctionScalar *_head;
     LagrangianFeObjectContainer* _feObjects;
 

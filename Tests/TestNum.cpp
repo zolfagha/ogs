@@ -65,7 +65,7 @@ TEST(Num, TimeStepping1)
 
     // pass it to discretization systems
     TimeSteppingController timeStepping;
-    timeStepping.addTransientSystem(problem);
+    timeStepping.setTransientSystem(problem);
     // start time stepping
     timeStepping.setBeginning(.0);
     size_t n_steps = timeStepping.solve(100.);

@@ -47,6 +47,7 @@ TARGET_LINK_LIBRARIES ( tests
 	ogsGeometry
 	ogsMesh
 	ogsNumerics
+	logog
     ${CMAKE_THREAD_LIBS_INIT}
 )
 

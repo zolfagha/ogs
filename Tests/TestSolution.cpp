@@ -380,7 +380,7 @@ TEST(Solution, Fem2)
 
     // start time stepping
     TimeSteppingController timeStepping;
-    timeStepping.addTransientSystem(gwProblem);
+    timeStepping.setTransientSystem(gwProblem);
     timeStepping.setBeginning(.0);
     timeStepping.solve(30.);
 
