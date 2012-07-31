@@ -24,7 +24,7 @@ class NewtonRaphson : public INonlinearSolver
 
     typedef DiscreteLib::DiscreteVector<double> ImplVector;
 public:
-    explicit NewtonRaphson(DiscreteLib::DiscreteSystem* dis_sys, F_R* f_r, F_DX* f_dx) : _dis_sys(dis_sys), _f_r(f_r), _f_dx(f_dx)
+    NewtonRaphson(DiscreteLib::DiscreteSystem* dis_sys, F_R* f_r, F_DX* f_dx) : _dis_sys(dis_sys), _f_r(f_r), _f_dx(f_dx)
     {
         _r = _dx = 0;
     };
@@ -41,7 +41,7 @@ public:
             _r = _dis_sys->createVector<ImplVector>(x_0.size());
             _dx = _dis_sys->createVector<ImplVector>(x_0.size());
         }
-        MathLib::NRCheckConvergence<VectorType,MathLib::NRErrorAbsResMNormOrRelDxMNorm> check(_option.error_tolerance);
+        MathLib::NRCheckConvergence<VectorType, MathLib::NRErrorAbsResMNormOrRelDxMNorm> check(_option.error_tolerance);
         MathLib::NewtonRaphsonMethod nr;
         nr.solve(*_f_r, *_f_dx, x_0, x_new, *_r, *_dx, _option.max_iteration, &check);
     }
