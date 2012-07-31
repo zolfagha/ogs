@@ -51,7 +51,7 @@ public:
         return *this;
     }
 
-    virtual void addSubvector(std::vector<size_t> pos, T* local_v)
+    virtual void addSubvector(const std::vector<size_t> &pos, T* local_v)
     {
         for (size_t i=0; i<pos.size(); ++i) {
             if (pos[i]==BaseLib::index_npos) continue;
