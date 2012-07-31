@@ -37,7 +37,7 @@
 #include "Ogs6FemData.h"
 #include "Ogs5ToOgs6.h"
 #include "MyConvergenceCheckerFactory.h"
-
+#include "TimeSteppingControllerWithOutput.h"
 
 namespace ogs6
 {
@@ -223,22 +223,25 @@ int THMCSimulator::execute()
     }
 
     INFO("->Setting time steppting...");
-    NumLib::TimeSteppingController timestepping;
+    TimeSteppingControllerWithOutput timestepping(&ogs6fem->outController);
     timestepping.setTransientSystem(*_cpl_system);
 
+    //TODO the following calculation should be done in TimeSteppingController
     double t_start = std::numeric_limits<double>::max();
     double t_end = -1 * std::numeric_limits<double>::max();
-
     for (size_t i=0; i<ogs6fem->list_tim.size(); i++) {
         t_start = std::min(t_start, ogs6fem->list_tim[i]->getBeginning());
         t_end = std::max(t_end, ogs6fem->list_tim[i]->getEnd());
     }
 
+    INFO("Outputting the initial values...");
+    ogs6fem->outController.outputData(NumLib::TimeStep(t_start));
+
     //-------------------------------------------------------------------------
     // Run simulation
     //-------------------------------------------------------------------------
     INFO("Start simulation...  start=%d, end=%d", t_start, t_end);
-    timestepping.setBeginning(t_start);
+    timestepping.setBeginning(t_start); //TODO really need this? start, end is already given in timestep function
     timestepping.solve(t_end);
 
     INFO("Finish simulation...");
