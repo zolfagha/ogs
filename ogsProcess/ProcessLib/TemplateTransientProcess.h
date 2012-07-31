@@ -25,8 +25,8 @@ public:
     ///
     TemplateTransientProcess()
     {
-        AbstractTransientMonolithicSystem::resizeInputParameter(N_IN_PARAMETER);
-        AbstractTransientMonolithicSystem::resizeOutputParameter(N_OUT_PARAMETER);
+        Process::resizeInputParameter(N_IN_PARAMETER);
+        Process::resizeOutputParameter(N_OUT_PARAMETER);
     }
 
     ///
