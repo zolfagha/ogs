@@ -317,8 +317,18 @@ ios::pos_type CNumerics::Read(ifstream* num_file)
             //}
             //setNonLinearErrorMethod(FiniteElement::convertErrorMethod(error_method_name));
             //
-            line >> nls_max_iterations;
-            line >> nls_relaxation;
+            line.str(readNonBlankLineFromInputStream(*num_file));
+            line >> nls_method_name;
+            if (nls_method_name.find("PICARD")!=string::npos) {
+                line >> nls_error_tolerance[0];
+                line >> nls_max_iterations;
+                line >> nls_relaxation;
+            } else if (nls_method_name.find("NEWTON")!=string::npos) {
+                line >> nls_error_tolerance[0];
+                line >> nls_plasticity_local_tolerance;
+                line >> nls_max_iterations;
+                line >> nls_relaxation;
+            }
             line.clear();
             continue;
         }
