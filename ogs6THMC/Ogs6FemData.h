@@ -14,7 +14,13 @@
 #include "SolutionLib/FemProblem/FemNeumannBC.h"
 #include "GeoLib/GEOObjects.h"
 #include "ProcessLib/Process.h"
+#include "OutputController.h"
 
+/**
+ * \brief Fem data storage
+ *
+ * This class follows singleton pattern.
+ */
 class Ogs6FemData
 {
 public:
@@ -41,6 +47,8 @@ public:
     BaseLib::OrderedMap<std::string, ProcessLib::Process*> list_pcs;
     //discrete system
     std::vector<DiscreteLib::DiscreteSystem*> list_dis_sys;
+    //
+    ogs6::OutputController outController;
     //
     std::string project_name;
     std::string project_dir;

@@ -176,7 +176,6 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
     // -------------------------------------------------------------------------
     // Time group
     // -------------------------------------------------------------------------
-    // TIM
     convertTimeStepping(ogs5fem.time_vector, ogs6fem.list_tim);
 
     // -------------------------------------------------------------------------
@@ -281,7 +280,7 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
                 BaseLib::Options* optNS = optNum->addSubGroup("NonlinearSolver");
                 optNS->addOption("solver_type", rfnum->nls_method_name);
                 optNS->addOptionAsNum("error_type", rfnum->nls_error_method);
-                optNS->addOptionAsNum("error_tolerance", rfnum->nls_error_tolerance);
+                optNS->addOptionAsNum("error_tolerance", rfnum->nls_error_tolerance[0]);
                 optNS->addOptionAsNum("max_iteration_step", rfnum->nls_max_iterations);
 
                 // other stuff
@@ -292,26 +291,6 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             }
         }
 
-        // OUT
-        BaseLib::Options* optOut = optPcs->addSubGroup("OutputList");
-        for (size_t i=0; i<ogs5fem.out_vector.size(); i++)
-        {
-            COutput* rfout = ogs5fem.out_vector[i];
-            std::string out_pcs_name = FiniteElement::convertProcessTypeToString(rfout->getProcessType());
-            if (out_pcs_name.compare(pcs_name)==0) {
-                BaseLib::Options* opt = optOut->addSubGroup("Output");
-                opt->addOption("DataType", rfout->dat_type_name);
-                opt->addOption("GeometryType", rfout->geo_type);
-                opt->addOption("GeometryName", rfout->geo_name);
-                opt->addOption("TimeType", rfout->tim_type_name);
-                opt->addOptionAsNum("TimeSteps", rfout->nSteps);
-                std::vector<std::string> values(rfout->_nod_value_vector);
-                values.insert(values.end(), rfout->_ele_value_vector.begin(), rfout->_ele_value_vector.end());
-                opt->addOptionAsArray("Variables", values);
-                opt->addOptionAsArray("MMPValues", rfout->mmp_value_vector);
-                opt->addOptionAsArray("MFPValues", rfout->mfp_value_vector);
-            }
-        }
 
     }
 
@@ -320,6 +299,31 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
     // Coupling
     // -------------------------------------------------------------------------
 
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
+
+    // OUT
+    BaseLib::Options* optOut = option.addSubGroup("OutputList");
+    for (size_t i=0; i<ogs5fem.out_vector.size(); i++)
+    {
+        COutput* rfout = ogs5fem.out_vector[i];
+        //std::string out_pcs_name = FiniteElement::convertProcessTypeToString(rfout->getProcessType());
+
+        BaseLib::Options* opt = optOut->addSubGroup("Output");
+        opt->addOption("DataType", rfout->dat_type_name);
+        opt->addOption("GeometryType", rfout->geo_type);
+        opt->addOption("GeometryName", rfout->geo_name);
+        opt->addOption("TimeType", rfout->tim_type_name);
+        opt->addOptionAsNum("TimeSteps", rfout->nSteps);
+        std::vector<std::string> values(rfout->_nod_value_vector);
+        values.insert(values.end(), rfout->_ele_value_vector.begin(), rfout->_ele_value_vector.end());
+        opt->addOptionAsArray("Variables", values);
+        opt->addOptionAsArray("MMPValues", rfout->mmp_value_vector);
+        opt->addOptionAsArray("MFPValues", rfout->mfp_value_vector);
+    }
+
+    ogs6fem.outController.initialize(option, ogs6fem.output_dir, ogs6fem.project_name, ogs6fem.list_dis_sys, *ogs6fem.geo, ogs6fem.geo_unique_name);
 }
 
 };
