@@ -67,6 +67,25 @@ public:
         const NumLib::TimeStep &t_n1 = *this->_t_n1;
         SolutionVector *u_n = this->_u_n0;
 
+#if 0
+        // setup BC1 for solution increment
+        for (size_t i=0; i<_list_var.size(); i++) {
+            FemVariable* var = _list_var[i];
+            std::vector<size_t> var_bc_id;
+            std::vector<double> var_bc_val;
+            for (size_t j=0; j<var->getNumberOfDirichletBC(); j++) {
+                FemDirichletBC* bc1 = var->getDirichletBC(j);
+                bc1->setup();
+                std::vector<double> bc_value_for_dx(bc1->getListOfBCNodes().size(), .0);
+                for (size_t k=0; k<bc_value_for_dx.size(); k++) {
+                    size_t id = bc1->getListOfBCNodes()[k];
+                    double v =  bc1->getListOfBCValues()[k];
+                    (*u_n)[id] = v; 
+                }
+            }
+        }
+#endif
+
         //TODO temporally
         std::vector<SolutionVector*> vec_un;
         vec_un.push_back(const_cast<SolutionVector*>(u_n));
@@ -81,6 +100,7 @@ public:
         // add source/sink term (i.e. RHS in linear equation)
         if (_st!=0)
             r += *_st;
+
     }
 
 private:

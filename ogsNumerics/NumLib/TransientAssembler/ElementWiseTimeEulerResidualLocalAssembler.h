@@ -3,6 +3,9 @@
 
 #include <cassert>
 
+#include "logog/include/logog.hpp"
+
+
 #include "MeshLib/Core/IElement.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "IElementWiseTransientResidualLocalAssembler.h"
@@ -53,38 +56,34 @@ public:
         // get M,K,F in M du/dt + K = F
         assembleODE(time, e, local_u_n1, local_u_n, M, K, F);
 
-        //std::cout << "M="; M.write(std::cout); std::cout << std::endl;
-        //std::cout << "K="; K.write(std::cout); std::cout << std::endl;
-
         LocalMatrix TMP_M(n_dof, n_dof);
-        LocalMatrix TMP_M2(n_dof, n_dof);
         LocalVector TMP_V(n_dof);
 
         // evaluate r: r = (1/dt M + theta K) * u1 -(1/dt M - (1-theta) K) * u0 - F
         // r = (1/dt M + theta K) * u1
-        TMP_M = M;
-        TMP_M *= 1.0/delta_t;
-        TMP_M2 = TMP_M;
-        TMP_M = K;
-        TMP_M *= _theta;
-        TMP_M2 += TMP_M;
-        TMP_V *= .0;
-        //TMP_M2.axpy(1.0, &((LocalVector)local_u_n1)[0], .0, &TMP_V[0]);
-        TMP_V = TMP_M2 * local_u_n1;
-        local_r += TMP_V;
+        TMP_M = 1.0/delta_t * M + _theta * K;
+        local_r = TMP_M * local_u_n1;
         // r -= (1/dt M - (1-theta) K) u0
-        TMP_M = M;
-        TMP_M *= 1.0/delta_t;
-        TMP_M2 = TMP_M;
-        TMP_M = K;
-        TMP_M *= - (1.-_theta);
-        TMP_M2 += TMP_M;
-        TMP_V *= .0;
-        //TMP_M2.axpy(1.0, &((LocalVector)local_u_n)[0], .0, &TMP_V[0]);
-        TMP_V = TMP_M2 * local_u_n;
-        local_r -= TMP_V;
+        TMP_M = 1.0/delta_t * M - (1.-_theta) * K;
+        local_r.noalias() -= TMP_M * local_u_n;
         // r -= F
-        local_r -= F;
+        local_r.noalias() -= F;
+
+#if 1
+        if (e.getID()<1) {
+            std::cout << "Element: " << e.getID() << std::endl;
+            std::cout << "M=" << M << std::endl;
+            std::cout << "K=" << K << std::endl;
+            std::cout << "u1=" << local_u_n1 << std::endl;
+            std::cout << "u0=" << local_u_n << std::endl;
+            TMP_M = 1.0/delta_t * M + _theta * K;
+            std::cout << "A=" << TMP_M << std::endl;
+            TMP_M = 1.0/delta_t * M - (1.-_theta) * K;
+            std::cout << "B=" << TMP_M << std::endl;
+            std::cout << "r=" << local_r << std::endl;
+        }
+
+#endif
     }
 
 protected:

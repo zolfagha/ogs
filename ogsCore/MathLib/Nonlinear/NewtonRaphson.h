@@ -96,7 +96,7 @@ public:
             f_dx.eval(x_new, r, dx);
             x_new += dx;
             f_residuals.eval(x_new, r);
-            //printout(i, x_new, r, dx);
+            printout(i, x_new, r, dx);
             if (convergence->check(&r, &dx, &x_new)) {
                 converged = true;
                 break;
@@ -144,6 +144,8 @@ private:
     inline void printout(size_t i, T_VALUE &x_new, T_VALUE &r, T_VALUE &dx)
     {
         std::cout << "-> " << i <<": ";
+        std::cout << "r=(";
+        for (size_t i=0; i<dx.size(); i++) std::cout << r[i] << " ";
 #if 0
         std::cout << "-> " << i <<": x=(";
         for (size_t i=0; i<x_new.size(); i++) std::cout << x_new[i] << " ";
