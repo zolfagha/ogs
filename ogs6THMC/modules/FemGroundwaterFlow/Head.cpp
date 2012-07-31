@@ -79,30 +79,12 @@ void FunctionHead::initialize(const BaseLib::Options &option)
     linear_solver->setOption(*optNum);
     _solution->getNonlinearSolver()->setOption(*optNum);
 
-    // setup output
-    OutputBuilder outBuilder;
-    OutputTimingBuilder outTimBuilder;
-    const BaseLib::Options* opOutList = option.getSubGroup("OutputList");
-    for (const BaseLib::Options* op = opOutList->getFirstSubGroup("Output"); op!=0; op = opOutList->getNextSubGroup())
-    {
-        std::string data_type = op->getOption("DataType");
-        IOutput* out = outBuilder.create(data_type);
-        out->setOutputPath(femData->output_dir, femData->project_name);
-
-        std::string time_type = op->getOption("TimeType");
-        size_t out_steps = op->getOption<size_t>("TimeSteps");
-        out->setOutputTiming(outTimBuilder.create(time_type, out_steps));
-
-        const std::vector<std::string>* var_name = op->getOptionAsArray<std::string>("Variables");
-        out->addVariable(*var_name);
-
-        std::string geo_type = op->getOption("GeometryType");
-        std::string geo_name = op->getOption("GeometryName");
-        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
-        out->setGeometry(geo_obj);
-
-        _list_output.push_back(out);
-    }
+    // set initial output
+    OutputVariableInfo var;
+    var.name = "HEAD";
+    var.value = _solution->getCurrentSolution(0);
+    var.object_type = OutputObjectType::Node;
+    femData->outController.setOutput("HEAD", var); 
 
     // initial output parameter
     this->setOutput(Head, head->getIC());
@@ -111,33 +93,15 @@ void FunctionHead::initialize(const BaseLib::Options &option)
 void FunctionHead::updateOutputParameter(const NumLib::TimeStep &time)
 {
     setOutput(Head, _solution->getCurrentSolution(0));
-
 }
 
 void FunctionHead::output(const NumLib::TimeStep &time) 
 {
-    bool doOutput = false;
-    for (size_t i=0; i<_list_output.size(); i++) {
-        if (_list_output[i]->isActive(time)) {
-            doOutput = true;
-            break;
-        }
-    }
-
-    if (doOutput) {
-        OutputVariableInfo var;
-        var.name = "HEAD";
-        var.value = _solution->getCurrentSolution(0);
-        var.object_type = OutputObjectType::Node;
-
-        std::vector<OutputVariableInfo> var_list;
-        var_list.push_back(var);
-
-        for (size_t i=0; i<_list_output.size(); i++) {
-            if (_list_output[i]->isActive(time)) {
-                _list_output[i]->write(time, *_problem->getMesh(), var_list);
-            }
-        }
-    }
-
+    //update data for output
+    Ogs6FemData* femData = Ogs6FemData::getInstance();
+    OutputVariableInfo var;
+    var.name = "HEAD";
+    var.value = _solution->getCurrentSolution(0);
+    var.object_type = OutputObjectType::Node;
+    femData->outController.setOutput("HEAD", var); 
 };

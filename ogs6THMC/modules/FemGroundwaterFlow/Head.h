@@ -18,11 +18,11 @@
 // Equation definition
 //--------------------------------------------------------------------------------------------------
 typedef SolutionLib::TemplateFemEquation <
-        Geo::GroundwaterFlowTimeODELocalAssembler<
+        GroundwaterFlowTimeODELocalAssembler<
             NumLib::ElementWiseTimeEulerEQSLocalAssembler>,
-        Geo::GroundwaterFlowTimeODELocalAssembler<
+        GroundwaterFlowTimeODELocalAssembler<
             NumLib::ElementWiseTimeEulerResidualLocalAssembler>,
-        Geo::GroundwaterFlowJacobianLocalAssembler
+        GroundwaterFlowJacobianLocalAssembler
         >
         GWFemEquation;
 
@@ -58,7 +58,7 @@ public:
     virtual ~FunctionHead()
     {
         BaseLib::releaseObject(_problem, _solution, _feObjects);
-        BaseLib::releaseObjectsInStdVector(_list_output);
+//        BaseLib::releaseObjectsInStdVector(_list_output);
     }
 
     /// initialize this process
@@ -83,7 +83,7 @@ private:
     GWFemProblem* _problem;
     MySolutionType* _solution;
     FemLib::LagrangianFeObjectContainer* _feObjects;
-    std::vector<IOutput*> _list_output;
+    //std::vector<IOutput*> _list_output;
 
 //public:
 //    static ProcessLib::ProcessInfo* const _pcs_info;
