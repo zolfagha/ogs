@@ -7,9 +7,6 @@
 #include "MaterialLib/PorousMedia.h"
 
 
-namespace Geo
-{
-
 class GroundwaterFlowJacobianLocalAssembler
 : public NumLib::IElementWiseTransientJacobianLocalAssembler
 {
@@ -32,4 +29,3 @@ private:
 };
 
 
-} //end
