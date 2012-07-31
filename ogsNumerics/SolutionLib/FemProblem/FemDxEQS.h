@@ -68,7 +68,7 @@ public:
         const NumLib::TimeStep &t_n1 = *this->_t_n1;
         SolutionVector* u_n = this->_u_n0;
 
-        // setup BC1
+        // setup BC1 for solution increment
         for (size_t i=0; i<_list_var.size(); i++) {
             FemVariable* var = _list_var[i];
             std::vector<size_t> var_bc_id;
@@ -77,6 +77,11 @@ public:
                 FemDirichletBC* bc1 = var->getDirichletBC(j);
                 bc1->setup();
                 std::vector<double> bc_value_for_dx(bc1->getListOfBCNodes().size(), .0);
+                for (size_t k=0; k<bc_value_for_dx.size(); k++) {
+                    size_t id = bc1->getListOfBCNodes()[k];
+                    double v =  bc1->getListOfBCValues()[k];
+                    bc_value_for_dx[k] = v - u_n1[id]; // dx = (bc value) - (current value)
+                }
                 var_bc_id.insert(var_bc_id.end(), bc1->getListOfBCNodes().begin(), bc1->getListOfBCNodes().end());
                 var_bc_val.insert(var_bc_val.end(), bc_value_for_dx.begin(), bc_value_for_dx.end());
             }
