@@ -61,7 +61,7 @@ public:
 //    void integrateDWxDN(MathLib::SpatialFunctionScalar *f, LocalMatrix &mat);
 
     /// compute an matrix M = Int{W^T F N} dV
-    virtual void integrateWxN(size_t igp, double f, LocalMatrix &mat);
+    virtual void integrateWxN(size_t igp, LocalMatrix &f, LocalMatrix &mat);
 
     /// compute an matrix M = Int{W^T F dN} dV
     virtual void integrateWxDN(size_t igp, LocalMatrix &f, LocalMatrix &mat);

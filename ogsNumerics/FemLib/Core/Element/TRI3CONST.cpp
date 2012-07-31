@@ -136,7 +136,7 @@ double TRI3CONST::interpolate(double *x, double *nodal_values)
 //}
 
 /// compute an matrix M = Int{W^T F N} dV
-void TRI3CONST::integrateWxN(size_t igp, double v, LocalMatrix &mat)
+void TRI3CONST::integrateWxN(size_t igp, LocalMatrix &v, LocalMatrix &mat)
 {
     assert(igp==0);
 
@@ -146,7 +146,7 @@ void TRI3CONST::integrateWxN(size_t igp, double v, LocalMatrix &mat)
     mat(1,1) = 1.0;
     mat(1,2) = 0.5;
     mat(2,2) = 1.0;
-    mat *= v*A/6.0;
+    mat *= v(0,0)*A/6.0;
     // make symmetric
     for (size_t i=0; i<3; i++)
         for (size_t j=0; j<i; j++)

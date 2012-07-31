@@ -159,15 +159,20 @@ public:
 //    }
 
     /// compute an matrix M = Int{W^T F N} dV
-    virtual void integrateWxN(size_t igp, double f, LocalMatrix &mat)
+    virtual void integrateWxN(size_t igp, LocalMatrix &f, LocalMatrix &mat)
     {
         assert(_is_basis_computed);
         const CoordinateMappingProperty *coord_prop = _mapping->getProperties();
         LocalMatrix *basis = coord_prop->shape_r;
         LocalMatrix *test = coord_prop->shape_r;
-        double fac = f * coord_prop->det_jacobian * _integration->getWeight(igp);
+        double fac = coord_prop->det_jacobian * _integration->getWeight(igp);
         //test->transposeAndMultiply(*basis, mat, fac);
         mat.noalias() += test->transpose() * (*basis) * fac;
+        if (f.rows()==1) {
+            mat.noalias() += test->transpose() * f(0,0) * (*basis) * fac;
+        } else {
+            mat.noalias() += test->transpose() * f * (*basis) * fac;
+        }
     }
 
     /// compute an matrix M = Int{W^T F dN} dV

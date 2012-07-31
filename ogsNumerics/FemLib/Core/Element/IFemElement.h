@@ -58,7 +58,7 @@ public:
     virtual double interpolate(double *pt, double *nodal_values) = 0;
 
     /// compute an matrix M = Int{W^T F N} dV
-    virtual void integrateWxN(size_t igp, double f, LocalMatrix &mat) = 0;
+    virtual void integrateWxN(size_t igp, LocalMatrix &f, LocalMatrix &mat) = 0;
 
     /// compute an matrix M = Int{W^T F dN} dV
     virtual void integrateWxDN(size_t igp, LocalMatrix &f, LocalMatrix &mat) = 0;

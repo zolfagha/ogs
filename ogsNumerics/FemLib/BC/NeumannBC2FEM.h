@@ -62,10 +62,12 @@ public:
                 M *= .0;
                 IFemNumericalIntegration *q = fe_edge->getIntegrationMethod();
                 double x_ref[3];
+                LocalMatrix fac(1,1);
+                fac(0,0) = 1;
                 for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
                     q->getSamplingPoint(j, x_ref);
                     fe_edge->computeBasisFunctions(x_ref);
-                    fe_edge->integrateWxN(j, 1., M);
+                    fe_edge->integrateWxN(j, fac, M);
                 }
                 result = M * nodal_val;
                 //M.axpy(1.0, &nodal_val[0], 0.0, &result[0]);
