@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "logog/include/logog.hpp"
+
 #include "Convergence.h"
 
 namespace MathLib
@@ -30,9 +32,10 @@ public:
         if (convergence==0) convergence = &_default_convergence;
         x_old = x0;
 
+        INFO("Picard iteration started!");
         bool converged = false;
-        std::cout << "Picard iteration started!" << std::endl;
-        for (size_t i=0; i<max_itr_count; i++) {
+        size_t itr_cnt = 0;
+        for (itr_cnt=0; itr_cnt<max_itr_count; itr_cnt++) {
             fun.eval(x_old, x_new);
             dx = x_new;
             dx -= x_old;
@@ -44,8 +47,20 @@ public:
             x_old = x_new;
         }
 
+        INFO("------------------------------------------------------------------");
+        INFO("*** PICARD nonlinear solver computation result");
+        if (max_itr_count==1) {
+            INFO("status    : iteration not required");
+        } else {
+            INFO("status    : %s", (converged ? "converged" : "***ERROR - DID NOT CONVERGE!"));
+        }
+        INFO("iteration : %d/%d", itr_cnt, max_itr_count);
+        INFO("residuals : %f (tolerance=%f)", convergence->getError(), convergence->getTolerance());
+        INFO("------------------------------------------------------------------");
+
+
         if (converged) return 0;
-        std::cout << "->*** Warning: the iterations didn't converge." << std::endl;
+        //std::cout << "->*** Warning: the iterations didn't converge." << std::endl;
 
         return -1; //not converged
     }

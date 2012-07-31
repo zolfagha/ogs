@@ -15,17 +15,24 @@ namespace MathLib
 template<class T_D0, class T_ERROR>
 class NRCheckConvergence
 {
-private:
-    double _err;
-    T_ERROR calc;
 public:
-    NRCheckConvergence() : _err(1.e-6) {};
-    NRCheckConvergence(double err) : _err(err) {};
+    NRCheckConvergence() : _tolerance(1.e-6), _error(.0) {};
+    explicit NRCheckConvergence(double err) : _tolerance(err), _error(.0) {};
+
     bool check(T_D0* r, T_D0* dx, T_D0* x_new)
     {
-        double error = calc.error(r, dx, x_new);
-        return (fabs(error) < _err);
+        _error = calc.error(r, dx, x_new);
+        return (fabs(_error) < _tolerance);
     }
+
+    double getError() const {return _error;};
+
+    double getTolerance() const {return _tolerance;};
+
+private:
+    double _tolerance;
+    double _error;
+    T_ERROR calc;
 };
 
 
