@@ -2,9 +2,11 @@
 #include "AsyncPartitionedSystem.h"
 
 #include <limits>
+#include "logog/include/logog.hpp"
 
 namespace NumLib
 {
+
 double AsyncPartitionedSystem::suggestNext(const TimeStep &time_current)
 {
     double t;
@@ -31,7 +33,7 @@ void AsyncPartitionedSystem::getActiveProblems(const TimeStep &time, std::vector
 int AsyncPartitionedSystem::solveTimeStep(const TimeStep &time)
 {
 
-    std::cout << "->solve partitioned problems" << std::endl;
+    //INFO("Partitioned coupling iteration started!");
 
     // copy previous time step result to current one
     //_vars_t_n.assign(_vars_t_n1);
