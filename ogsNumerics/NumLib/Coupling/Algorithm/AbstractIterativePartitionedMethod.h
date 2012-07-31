@@ -5,6 +5,8 @@
 #include <iostream>
 #include <cmath>
 
+#include "logog/include/logog.hpp"
+
 #include "NumLib/IOSystem/ParameterSet.h"
 #include "NumLib/Coupling/ICoupledProblem.h"
 #include "NumLib/Coupling/ParameterProblemMappingTable.h"
@@ -29,6 +31,7 @@ public:
     ///
     virtual ~AbstractIterativePartitionedMethod() {};
 
+    ///
     void setConvergenceCheck(IConvergenceCheck &checker) {_convergence_check = &checker;};
 
     /// get max. iteration
@@ -51,7 +54,7 @@ public:
             )
     {
         if (_convergence_check==0) {
-            std::cout << "***Error: No convergence checker is specified in AbstractIterativePartitionedMethod::solve()" << std::endl;
+            ERR("***Error: No convergence checker is specified in AbstractIterativePartitionedMethod::solve()");
             return -1;
         }
         const size_t n_subproblems = list_coupled_problems.size();
@@ -97,21 +100,34 @@ public:
                     //is_converged = check.isConverged(prev_parameter_table, parameter_table, getEpsilon(), v_diff);
                     is_converged = _convergence_check->isConverged(prev_parameter_table, parameter_table, getEpsilon(), v_diff);
                 }
-                std::cout.setf(std::ios_base::scientific, std::ios_base::floatfield);
-                std::cout.precision(3);
-                std::cout << v_diff << " ";
+                //std::cout.setf(std::ios_base::scientific, std::ios_base::floatfield);
+                //std::cout.precision(3);
+                //std::cout << v_diff << " ";
             } else {
                 is_converged = true;
             }
             ++i_itr;
         } while (!is_converged && i_itr<max_itr);
-        std::cout << std::endl;
-        std::cout << "iteration count=" << i_itr << ", error=" << v_diff << std::endl;
 
         _itr_count = i_itr;
-        if (i_itr==max_itr) {
-            std::cout << "the iteration reached the maximum count " << max_itr << std::endl;
+
+        if (n_subproblems>1) {
+            INFO("------------------------------------------------------------------");
+            INFO("*** Partitioned coupling solver computation result");
+            INFO("nr. of subproblems : %d", n_subproblems);
+            if (max_itr==1) {
+                INFO("status             : iteration not required");
+            } else {
+                INFO("status             : %s", (is_converged ? "converged" : "***ERROR - DID NOT CONVERGE!"));
+            }
+            INFO("iteration          : %d/%d", i_itr, max_itr);
+            INFO("residuals          : %f (tolerance=%f)", v_diff, getEpsilon());
+            INFO("------------------------------------------------------------------");
         }
+
+        //if (i_itr==max_itr) {
+        //    std::cout << "the iteration reached the maximum count " << max_itr << std::endl;
+        //}
 
         return 0;
     }
