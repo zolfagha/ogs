@@ -21,8 +21,7 @@ public:
         BaseLib::releaseObject(_pvd);
     }
     virtual void write( const NumLib::TimeStep &current_time,
-                        MeshLib::IMesh &msh,
-                        std::vector<OutputVariableInfo> &data);
+                        BaseLib::OrderedMap<std::string, OutputVariableInfo> &data);
 
 private:
     PVDWriter* _pvd;

@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "BaseLib/CodingTools.h"
+#include "BaseLib/OrderedMap.h"
 #include "MeshLib/Core/IMesh.h"
 #include "NumLib/Function/TXFunction.h"
 #include "NumLib/TimeStepping/TimeStep.h"
@@ -88,6 +89,9 @@ public:
     ///
     const GeoLib::GeoObject* getGeometry() const {return _geo_obj;};
 
+    void setMesh(MeshLib::IMesh* msh) {_msh = msh;};
+    MeshLib::IMesh* getMesh() const {return _msh;};
+
     ///
     void setOutputTiming(IOutputTiming* timing) {_output_timing = timing;};
     ///
@@ -95,8 +99,7 @@ public:
 
     ///
     virtual void write( const NumLib::TimeStep &current_time, 
-                        MeshLib::IMesh &msh,
-                        std::vector<OutputVariableInfo> &data) = 0;
+                        BaseLib::OrderedMap<std::string, OutputVariableInfo> &data) = 0;
 
 private:
     std::string _output_dir_path;
@@ -104,5 +107,6 @@ private:
     IOutputTiming* _output_timing;
     std::vector<std::string> _list_var_name;
     const GeoLib::GeoObject* _geo_obj;
+    MeshLib::IMesh* _msh;
 };
 
