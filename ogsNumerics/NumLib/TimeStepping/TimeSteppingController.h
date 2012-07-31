@@ -7,7 +7,6 @@
 namespace NumLib
 {
 
-
 /**
  * \brief Time stepping controller
  */    
@@ -31,6 +30,9 @@ public:
 
     /// solve systems until the given time
     size_t solve(double time_end);
+
+protected:
+    virtual void doSomethingAfterTimeStepAccepted(const TimeStep &/*t_current*/) const {};
 
 private:
     double _time_begin;

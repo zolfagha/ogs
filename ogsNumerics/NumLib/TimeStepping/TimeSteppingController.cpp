@@ -28,6 +28,7 @@ size_t TimeSteppingController::solve(double time_end)
         if (isAccepted) {
             _root_subsystems->accept(time_next);
             time_current.accept(time_next);
+            doSomethingAfterTimeStepAccepted(time_current);
         }
     }
 
