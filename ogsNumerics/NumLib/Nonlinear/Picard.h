@@ -25,6 +25,7 @@ public:
     {
         _x_old = _dx = 0;
     };
+
     virtual ~Picard()
     {
         _dis_sys->deleteVector(_x_old);
@@ -37,9 +38,10 @@ public:
             _x_old = _dis_sys->createVector<ImplVector>(x_0.size());
             _dx = _dis_sys->createVector<ImplVector>(x_0.size());
         }
+
         MathLib::PicardMethod picard;
-        MathLib::NRCheckConvergence<VectorType, MathLib::NRErrorNorm1DX> check(1.e-6);
-        picard.solve(*_linear_f, x_0, x_new, *_x_old, *_dx, 100, &check);
+        MathLib::NRCheckConvergence<VectorType, MathLib::NRErrorNorm1DX> check(getOption().error_tolerance);
+        picard.solve(*_linear_f, x_0, x_new, *_x_old, *_dx, getOption().max_iteration, &check);
     }
 };
 
