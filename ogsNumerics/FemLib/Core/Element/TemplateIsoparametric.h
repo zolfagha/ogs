@@ -166,8 +166,6 @@ public:
         LocalMatrix *basis = coord_prop->shape_r;
         LocalMatrix *test = coord_prop->shape_r;
         double fac = coord_prop->det_jacobian * _integration->getWeight(igp);
-        //test->transposeAndMultiply(*basis, mat, fac);
-        mat.noalias() += test->transpose() * (*basis) * fac;
         if (f.rows()==1) {
             mat.noalias() += test->transpose() * f(0,0) * (*basis) * fac;
         } else {
@@ -198,7 +196,6 @@ public:
         LocalMatrix *dbasis = coord_prop->dshape_dx;
         LocalMatrix *dtest = coord_prop->dshape_dx;
         double fac = coord_prop->det_jacobian * _integration->getWeight(igp);
-//        dtest->transposeAndMultiply(*dbasis, mat, fac);
         if (f.rows()==1) {
             mat.noalias() += dtest->transpose() * f(0,0) * (*dbasis) * fac;
         } else {
