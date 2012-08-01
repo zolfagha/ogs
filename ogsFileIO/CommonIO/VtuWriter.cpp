@@ -40,6 +40,23 @@ bool VtuWriter::write(const std::string &vtkfile,
         fin.precision(12);
     }
 
+    for (size_t i=0; i<nodal_values.size(); i++) {
+        AttributeInfo &attr = nodal_values[i].second;
+        switch (attr.data_type) {
+        case VtuWriter::Char: attr.vtk_data_type = type_UChar; break;
+        case VtuWriter::Int: attr.vtk_data_type = type_Long; break;
+        case VtuWriter::Real: attr.vtk_data_type = type_Double; break;
+        }
+    }
+    for (size_t i=0; i<elemental_values.size(); i++) {
+        AttributeInfo &attr = elemental_values[i].second;
+        switch (attr.data_type) {
+        case VtuWriter::Char: attr.vtk_data_type = type_UChar; break;
+        case VtuWriter::Int: attr.vtk_data_type = type_Long; break;
+        case VtuWriter::Real: attr.vtk_data_type = type_Double; break;
+        }
+    }
+
     //-------------------------------------------------------------------------
     //# Output
     //-------------------------------------------------------------------------
@@ -143,35 +160,37 @@ bool VtuWriter::writePointData(std::fstream &fin,
                            IMesh &msh,
                            long &offset)
 {
-    std::string str_format;
-    if (!this->_useBinary)
-        str_format = "ascii";
-    else
-        str_format = "appended";
-
     //Nodal values
     for (size_t i=0; i<nod_values.size(); i++)
     {
         const std::string &var_name = nod_values[i].first;
+        AttributeInfo &pt_data = nod_values[i].second;
+        unsigned int bin_data_length = getSizeOfVtkDataType(pt_data.data_type)* pt_data.nr_of_components* msh.getNumberOfNodes();
 
         if (!_useBinary || !output_data)
-            writeDataArrayHeader(fin, type_Double, var_name, 0, str_format, offset);
+            writeDataArrayHeader(fin, pt_data.vtk_data_type, var_name, pt_data.nr_of_components, getFormatType(), offset);
 
         if (output_data)
         {
             if (!_useBinary) {
                 fin << "          ";
             } else {
-                BaseLib::write_value_binary<unsigned int> (fin, sizeof(double)* msh.getNumberOfNodes());
+                BaseLib::write_value_binary<unsigned int> (fin, bin_data_length);
             }
+            NumLib::LocalMatrix v;
             for (size_t j = 0; j < msh.getNumberOfNodes(); j++) {
-                
-                double v = .0;
-                nod_values[i].second->eval(NumLib::TXPosition(j, msh.getNodeCoordinatesRef(j)), v);
+                pt_data.f->eval(NumLib::TXPosition(j, msh.getNodeCoordinatesRef(j)), v);
                 if (!_useBinary) {
-                    fin << v << " ";
+                    if (v.array().size()>=(int)pt_data.nr_of_components) {
+                        for (size_t k=0; k<pt_data.nr_of_components; k++)
+                            fin << v.array()(k) << " ";
+                    } else {
+                        for (size_t k=0; k<(int)pt_data.nr_of_components; k++)
+                            fin << 0 << " ";
+                    }
                 } else {
-                    BaseLib::write_value_binary(fin, v);
+                    for (size_t k=0; k<pt_data.nr_of_components; k++)
+                        BaseLib::write_value_binary(fin, v.array()(k));
                 }
             }
             if (!_useBinary) {
@@ -180,8 +199,7 @@ bool VtuWriter::writePointData(std::fstream &fin,
         }
         else
         {
-            offset += msh.getNumberOfNodes() * sizeof(double)
-                      + SIZE_OF_BLOCK_LENGTH_TAG;
+            offset += bin_data_length + SIZE_OF_BLOCK_LENGTH_TAG;
         }
 
         if (!_useBinary || !output_data)
@@ -198,44 +216,53 @@ bool VtuWriter::writeCellData(std::fstream &fin,
                              IMesh &msh,
                              long &offset)
 {
-    std::string str_format;
-    if (!this->_useBinary)
-        str_format = "ascii";
-    else
-        str_format = "appended";
-
     //Element values
     for (int i = 0; i < (int) ele_values.size(); i++)
     {
+        AttributeInfo &pt_data = ele_values[i].second;
+        unsigned int bin_data_length = getSizeOfVtkDataType(pt_data.data_type)* pt_data.nr_of_components* msh.getNumberOfElements();
+
         if (!_useBinary || !output_data)
-            writeDataArrayHeader(fin, this->type_Double,
-                    ele_values[i].first, 0, str_format, offset);
+            writeDataArrayHeader(fin, pt_data.vtk_data_type, pt_data.attribute_name, pt_data.nr_of_components, getFormatType(), offset);
+
         if (output_data)
         {
             if (!_useBinary)
             {
                 fin << "          ";
-                for (long j = 0; j < (long) msh.getNumberOfElements(); j++) {
-                    double v = .0;
-                    ele_values[i].second->eval(NumLib::TXPosition(j), v);
-                    fin << v << " ";
+                NumLib::LocalMatrix v;
+                for (size_t j=0; j<msh.getNumberOfElements(); j++) {
+                    pt_data.f->eval(NumLib::TXPosition(j), v);
+                    if (v.array().size()>=(int)pt_data.nr_of_components) {
+                        for (size_t k=0; k<pt_data.nr_of_components; k++)
+                            fin << v.array()(k) << " ";
+                    } else {
+                        for (size_t k=0; k<pt_data.nr_of_components; k++)
+                            fin << 0 << " ";
+                    }
                 }
                 fin << std::endl;
             }
             else
             {
-                BaseLib::write_value_binary<unsigned int> (fin, sizeof(double)
-                                                  * (long)  msh.getNumberOfElements());
+                BaseLib::write_value_binary<unsigned int> (fin, bin_data_length);
+                NumLib::LocalMatrix v;
                 for (long j = 0; j < (long) msh.getNumberOfElements(); j++) {
-                    double v = .0;
-                    ele_values[i].second->eval(NumLib::TXPosition(j), v);
-                    BaseLib::write_value_binary(fin, v);
+                    pt_data.f->eval(NumLib::TXPosition(j), v);
+                    if (v.array().size()>=(int)pt_data.nr_of_components) {
+                        for (size_t k=0; k<pt_data.nr_of_components; k++)
+                            BaseLib::write_value_binary(fin, v.array()(k));
+                    } else {
+                        for (size_t k=0; k<pt_data.nr_of_components; k++)
+                            BaseLib::write_value_binary<double>(fin, 0);
+                    }
+                   
                 }
             }
+        } else {
+            offset += bin_data_length + SIZE_OF_BLOCK_LENGTH_TAG;
         }
-        else
-            offset += (long) msh.getNumberOfElements() * sizeof(double)
-                      + SIZE_OF_BLOCK_LENGTH_TAG;
+
         if (!_useBinary || !output_data)
             writeDataArrayFooter(fin);
     }
@@ -285,25 +312,25 @@ void VtuWriter::initialize()
     //# Set machine dependent stuff
     //Data type
     if (sizeof(unsigned char) == 1)
-        type_UChar = UInt8;
+        type_UChar = VtuWriter::UInt8;
     else if (sizeof(unsigned char) == 2)
-        type_UChar = UInt16;
+        type_UChar = VtuWriter::UInt16;
     if (sizeof(int) == 4)
-        type_Int = Int32;
+        type_Int = VtuWriter::Int32;
     else if (sizeof(int) == 8)
-        type_Int = Int64;
+        type_Int = VtuWriter::Int64;
     if (sizeof(unsigned int) == 4)
-        type_UInt = UInt32;
+        type_UInt = VtuWriter::UInt32;
     else if (sizeof(unsigned int) == 8)
-        type_UInt = UInt64;
+        type_UInt = VtuWriter::UInt64;
     if (sizeof(long) == 4)
-        type_Long = Int32;
+        type_Long = VtuWriter::Int32;
     else if (sizeof(long) == 8)
-        type_Long = Int64;
+        type_Long = VtuWriter::Int64;
     if (sizeof(double) == 4)
-        type_Double = Float32;
+        type_Double = VtuWriter::Float32;
     else if (sizeof(double) == 8)
-        type_Double = Float64;
+        type_Double = VtuWriter::Float64;
     //
     SIZE_OF_BLOCK_LENGTH_TAG = sizeof(unsigned int);
     //Endian(byte order)
@@ -311,6 +338,18 @@ void VtuWriter::initialize()
     //}
 
     this->_isInitialized = true;
+}
+
+size_t VtuWriter::getSizeOfVtkDataType(DataType data_type) const
+{
+    size_t n = 0;
+    switch (data_type) {
+    case VtuWriter::Char: n = sizeof(unsigned char); break;
+    case VtuWriter::Int: n = sizeof(long); break;
+    case VtuWriter::Real: n = sizeof(double); break;
+    }
+
+    return n;
 }
 
 bool VtuWriter::writeDataArrayHeader(std::fstream &fin,

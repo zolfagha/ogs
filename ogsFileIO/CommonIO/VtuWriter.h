@@ -10,11 +10,28 @@
 class VtuWriter
 {
 public:
+    enum DataType {Char, Int, Real};
     enum VTK_XML_DATA_TYPE { Int8, UInt8, Int16, UInt16, Int32, UInt32, Int64, UInt64, Float32,
                          Float64 };
 
-    typedef std::pair<std::string, NumLib::ITXFunction*> PointData;
-    typedef std::pair<std::string, NumLib::ITXFunction*> CellData;
+    struct AttributeInfo
+    {
+        std::string attribute_name;
+        DataType data_type;
+        size_t nr_of_components;
+        NumLib::ITXFunction* f;
+        VTK_XML_DATA_TYPE vtk_data_type;
+
+        AttributeInfo(const std::string &name, DataType dtype, size_t n_comp, NumLib::ITXFunction* values)
+            : attribute_name(name), data_type(dtype), nr_of_components(n_comp), f(values), vtk_data_type(Float64) 
+        {};
+        AttributeInfo(const std::string &name, size_t n_comp, NumLib::ITXFunction* values)
+            : attribute_name(name), data_type(Real), nr_of_components(n_comp), f(values), vtk_data_type(Float64) 
+        {};
+    };
+
+    typedef std::pair<std::string, AttributeInfo> PointData;
+    typedef std::pair<std::string, AttributeInfo> CellData;
 
     explicit VtuWriter(bool binary_mode);
     virtual ~VtuWriter(void){}
@@ -25,6 +42,14 @@ public:
 
 protected:
     void initialize();
+
+    std::string getFormatType() const 
+    {
+        if (!this->_useBinary) return "ascii";
+        else return "appended";
+    };
+
+    size_t getSizeOfVtkDataType(DataType data_type) const;
 
     unsigned char getVTKCellType(const MeshLib::ElementShape::type ele_type);
 
