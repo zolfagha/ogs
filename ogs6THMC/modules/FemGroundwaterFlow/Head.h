@@ -50,7 +50,7 @@ public:
 
     ///
     FunctionHead() 
-    : _problem(0), _solution(0), _feObjects(0)
+    : TemplateTransientProcess<0,1>("GROUNDWATER_FLOW"), _problem(0), _solution(0), _feObjects(0)
     {
     };
 

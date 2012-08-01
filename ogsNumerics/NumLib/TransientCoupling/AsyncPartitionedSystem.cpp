@@ -33,8 +33,6 @@ void AsyncPartitionedSystem::getActiveProblems(const TimeStep &time, std::vector
 int AsyncPartitionedSystem::solveTimeStep(const TimeStep &time)
 {
 
-    //INFO("Partitioned coupling iteration started!");
-
     // copy previous time step result to current one
     //_vars_t_n.assign(_vars_t_n1);
     NumLib::UnnamedParameterSet *vars_t_n1 = getParameters();
@@ -45,6 +43,8 @@ int AsyncPartitionedSystem::solveTimeStep(const TimeStep &time)
     getActiveProblems(time, list_active_problems);
 
     if (list_active_problems.size()>0) {
+        INFO("Solving a partitioned system with %d active sub problems...", list_active_problems.size());
+
         // solve
         for (size_t i=0; i<list_active_problems.size(); i++) {
             ITransientCoupledSystem *solution = (ITransientCoupledSystem*)list_active_problems[i];

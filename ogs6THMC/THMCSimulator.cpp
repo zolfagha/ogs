@@ -240,11 +240,15 @@ int THMCSimulator::execute()
     //-------------------------------------------------------------------------
     // Run simulation
     //-------------------------------------------------------------------------
-    INFO("Start simulation...  start=%d, end=%d", t_start, t_end);
+    INFO("");
+    INFO("Start this simulation! start=%f, end=%f", t_start, t_end);
+    INFO("");
     timestepping.setBeginning(t_start); //TODO really need this? start, end is already given in timestep function
     timestepping.solve(t_end);
 
-    INFO("Finish simulation...");
+    INFO("");
+    INFO("Finish this simulation!");
+    INFO("");
 
 
     return 0;

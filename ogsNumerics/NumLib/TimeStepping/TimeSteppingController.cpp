@@ -23,7 +23,7 @@ size_t TimeSteppingController::solve(double time_end)
         TimeStep t_n1(time_current, time_next);
         INFO("\n#############################################################");
         INFO("Time step %d: t=%f s, dt=%f s ", t_n1.getTimeStepCount(), time_next, t_n1.getTimeStepSize());
-        INFO("\n#############################################################");
+        INFO("#############################################################");
         bool isAccepted = (_root_subsystems->solveTimeStep(t_n1)==0);
         if (isAccepted) {
             _root_subsystems->accept(time_next);

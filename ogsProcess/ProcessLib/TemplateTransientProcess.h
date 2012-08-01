@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "logog/include/logog.hpp"
+
 #include "BaseLib/Options.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "SolutionLib/Solution/AbstractTimeSteppingAlgorithm.h"
@@ -23,7 +25,8 @@ class TemplateTransientProcess : public Process
 {
 public:
     ///
-    TemplateTransientProcess()
+    explicit TemplateTransientProcess(const std::string &pcs_name) 
+        : _pcs_name(pcs_name)
     {
         Process::resizeInputParameter(N_IN_PARAMETER);
         Process::resizeOutputParameter(N_OUT_PARAMETER);
@@ -35,6 +38,7 @@ public:
     ///
     virtual int solveTimeStep(const NumLib::TimeStep &time)
     {
+        INFO("Solving %s...", _pcs_name.c_str());
         getSolution()->solveTimeStep(time);
         updateOutputParameter(time);
         return 0;
@@ -66,6 +70,9 @@ protected:
     virtual void updateOutputParameter(const NumLib::TimeStep &time) = 0;
     ///
     virtual void output(const NumLib::TimeStep &time) = 0;
+
+private:
+    std::string _pcs_name;
 };
 
 } //end ProcessLib
