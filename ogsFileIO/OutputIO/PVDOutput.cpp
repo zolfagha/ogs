@@ -17,10 +17,16 @@ void PVDOutput::write(  const NumLib::TimeStep &current_time,
     for (BaseLib::OrderedMap<std::string, OutputVariableInfo>::iterator itr = data.begin(); itr!=data.end(); ++itr) {
         if (hasVariable(itr->first)) {
             OutputVariableInfo &var = itr->second;
-            if (var.object_type==OutputObjectType::Node) {
-                node_values.push_back(VtuWriter::PointData(var.name, var.value));
-            } else if (var.object_type==OutputObjectType::Element) {
-                ele_values.push_back(VtuWriter::CellData(var.name, var.value));
+            VtuWriter::AttributeInfo attr(var.name, var.nr_of_components, var.value);
+            switch (var.data_type) {
+                case OutputVariableInfo::Char: attr.data_type = VtuWriter::Char; break;
+                case OutputVariableInfo::Int: attr.data_type = VtuWriter::Int; break;
+                case OutputVariableInfo::Real: attr.data_type = VtuWriter::Real; break;
+            }
+            if (var.object_type==OutputVariableInfo::Node) {
+                node_values.push_back(VtuWriter::PointData(var.name, attr));
+            } else if (var.object_type==OutputVariableInfo::Element) {
+                ele_values.push_back(VtuWriter::CellData(var.name, attr));
             }
         }
     }

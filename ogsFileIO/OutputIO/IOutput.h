@@ -15,24 +15,34 @@
 /**
  * 
  */
-struct OutputObjectType
+struct OutputVariableInfo
 {
-    enum type
+    enum DataType
+    {
+        Char,
+        Int,
+        Real
+    };
+    enum ObjectType
     {
         Node,
         Element
     };
-    
-};
 
-/**
- * 
- */
-struct OutputVariableInfo
-{
     std::string name;
+    ObjectType object_type;
+    DataType data_type;
+    size_t nr_of_components;
     NumLib::ITXFunction* value;
-    OutputObjectType::type object_type;
+
+    OutputVariableInfo() 
+        : name(""), object_type(Node), data_type(Char), nr_of_components(1), value(NULL)
+    {};
+
+    OutputVariableInfo(const std::string &s, ObjectType o, DataType d, size_t n, NumLib::ITXFunction* v) 
+    : name(s), object_type(o), data_type(d), nr_of_components(n), value(v)
+    {
+    };
 };
 
 /**
