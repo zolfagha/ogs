@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "logog/include/logog.hpp"
+
 #include "MathLib/LinAlg/MatrixBase.h"
 #include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
 #include "Convergence.h"
@@ -89,19 +91,34 @@ public:
         r = .0;
         x_new = x0;
 
+        INFO("Newton-Raphson iteration started!");
         bool converged = false;
-        std::cout << "Newton-Raphson iteration started!" << std::endl;
-        f_residuals.eval(x0, r);
-        for (size_t i=0; i<max_itr_count; i++) {
-            f_dx.eval(x_new, r, dx);
-            x_new += dx;
-            f_residuals.eval(x_new, r);
-            printout(i, x_new, r, dx);
-            if (convergence->check(&r, &dx, &x_new)) {
-                converged = true;
-                break;
+        size_t itr_cnt=0;
+        f_residuals.eval(x_new, r);
+        //printout(0, x_new, r, dx);
+        if (!convergence->check(&r, &dx, &x_new)) {
+            for (itr_cnt=0; itr_cnt<max_itr_count; itr_cnt++) {
+                f_dx.eval(x_new, r, dx);
+                x_new += dx;
+                f_residuals.eval(x_new, r);
+                //printout(itr_cnt, x_new, r, dx);
+                if (convergence->check(&r, &dx, &x_new)) {
+                    converged = true;
+                    break;
+                }
             }
         }
+
+        INFO("------------------------------------------------------------------");
+        INFO("*** Newton-Raphson nonlinear solver computation result");
+        if (max_itr_count==1) {
+            INFO("status    : iteration not required");
+        } else {
+            INFO("status    : %s", (converged ? "converged" : "***ERROR - DID NOT CONVERGE!"));
+        }
+        INFO("iteration : %d/%d", itr_cnt, max_itr_count);
+        INFO("residuals : %1.3e (tolerance=%1.3e)", convergence->getError(), convergence->getTolerance());
+        INFO("------------------------------------------------------------------");
 
         if (converged) return 0;
         std::cout << "->*** Warning: the iterations didn't converge." << std::endl;

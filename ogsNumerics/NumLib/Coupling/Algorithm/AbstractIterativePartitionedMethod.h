@@ -121,7 +121,7 @@ public:
                 INFO("status             : %s", (is_converged ? "converged" : "***ERROR - DID NOT CONVERGE!"));
             }
             INFO("iteration          : %d/%d", i_itr, max_itr);
-            INFO("residuals          : %f (tolerance=%f)", v_diff, getEpsilon());
+            INFO("residuals          : %1.3e (tolerance=%1.3e)", v_diff, getEpsilon());
             INFO("------------------------------------------------------------------");
         }
 

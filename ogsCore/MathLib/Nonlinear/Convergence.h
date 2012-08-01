@@ -3,6 +3,9 @@
 
 #include <cmath>
 #include <algorithm>
+
+#include "logog/include/logog.hpp"
+
 #include "MathLib/LinAlg/VectorNorms.h"
 
 
@@ -98,14 +101,12 @@ public:
 private:
     inline double calc(double abs_mnorm_r, double abs_mnorm_x, double abs_mnrom_dx)
     {
-        _itr_count++;
         double rel_mnorm_dx = .0;
         if (abs_mnorm_x!=.0) rel_mnorm_dx = abs_mnrom_dx/abs_mnorm_x;
 
-        std::cout << "-> " << _itr_count <<": ";
-        std::cout << "abs_r=" << abs_mnorm_r;
-        std::cout << ", abs_dx=" << abs_mnrom_dx;
-        std::cout << ", rel_dx=" << rel_mnorm_dx << std::endl;
+        INFO("-> %d: ||r||_inf=%1.3e, ||dx||_inf=%1.3e, ||dx||/||x||=%1.3e", _itr_count, abs_mnorm_r, abs_mnrom_dx, rel_mnorm_dx);
+
+        _itr_count++;
 
         if (abs_mnorm_x == .0) {
             return abs_mnorm_r;

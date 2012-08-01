@@ -69,7 +69,7 @@ public:
         // r -= F
         local_r.noalias() -= F;
 
-#if 1
+#if 0
         if (e.getID()<1) {
             std::cout << "Element: " << e.getID() << std::endl;
             std::cout << "M=" << M << std::endl;

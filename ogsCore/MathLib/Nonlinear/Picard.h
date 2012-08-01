@@ -55,7 +55,7 @@ public:
             INFO("status    : %s", (converged ? "converged" : "***ERROR - DID NOT CONVERGE!"));
         }
         INFO("iteration : %d/%d", itr_cnt, max_itr_count);
-        INFO("residuals : %f (tolerance=%f)", convergence->getError(), convergence->getTolerance());
+        INFO("residuals : %1.3e (tolerance=%1.3e)", convergence->getError(), convergence->getTolerance());
         INFO("------------------------------------------------------------------");
 
 
