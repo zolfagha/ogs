@@ -43,7 +43,7 @@ inline double norm_max(T &v, size_t n)
 {
     double u_max = .0;
     for (size_t i=0; i<n; i++)
-        u_max = std::max(fabs(u_max), v[i]);
+        u_max = std::max(u_max, fabs(v[i]));
     return u_max;
 };
 
