@@ -47,9 +47,18 @@ public:
 
     DiscreteLib::DiscreteSystem* getDiscreteSystem() const {return _discrete_system;};
 
-    void eval(const NumLib::TXPosition /*pt*/, NumLib::ITXFunction::DataType &v) const
+    //virtual void eval(const TXPosition /*x*/, DataType &/*v*/) const {};
+    virtual void eval(const NumLib::TXPosition x, NumLib::ITXFunction::DataType &v) const
     {
-        v = (*_values)[0][0]; //TODO
+        size_t ele_id = x.getId();
+        IntegrationPointVectorType &gp_values = (*_values)[ele_id];
+        if (gp_values.size()==0) return;
+        Tvalue val = gp_values[0]; 
+        val *= .0;
+        for (size_t i=0; i<gp_values.size(); i++)
+            val += gp_values[i];
+        val /= gp_values.size();
+        v = val;
     };
 
     void setIntegrationPointValue( size_t i_e, size_t ip, Tvalue &q )
@@ -127,6 +136,23 @@ private:
         _discrete_system = &dis;
         _values = _discrete_system->createVector<DiscreteVectorType>(dis.getMesh()->getNumberOfElements());
     }
+};
+
+template <> 
+void TemplateFEMIntegrationPointFunction<double>::eval(const NumLib::TXPosition x,  NumLib::ITXFunction::DataType &v) const
+{
+    size_t ele_id = x.getId();
+    IntegrationPointVectorType &gp_values = (*_values)[ele_id];
+    if (gp_values.size()==0) return;
+    double val = gp_values[0]; 
+    val *= .0;
+    for (size_t i=0; i<gp_values.size(); i++)
+        val += gp_values[i];
+    val /= gp_values.size();
+
+    v.resize(1,1);
+    v(0,0) = val;
+    NumLib::ITXFunction::DataType mat(1,1);
 };
 
 //typedef TemplateFEMIntegrationPointFunction<double> FEMIntegrationPointFunctionScalar;

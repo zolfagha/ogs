@@ -90,7 +90,12 @@ public:
 
 
     /// evaluate this function at the given point
-    virtual void eval(const NumLib::TXPosition x, Tvalue &v) const
+    //virtual void eval(const NumLib::TXPosition x, Tvalue &v) const
+    //{
+    //    v = (*_nodal_values)[x.getId()];
+    //};
+
+    virtual void eval(const NumLib::TXPosition x, NumLib::ITXFunction::DataType &v) const
     {
         v = (*_nodal_values)[x.getId()];
     };
@@ -191,6 +196,15 @@ private:
     MeshLib::IMesh* _msh;
     PolynomialOrder::type _order;
     LagrangianFeObjectContainer* _feObjects;
+};
+
+/// evaluate this function at the given point
+template <> 
+void TemplateFEMNodalFunction<double>::eval(const NumLib::TXPosition x,  NumLib::ITXFunction::DataType &v) const
+{
+    NumLib::ITXFunction::DataType val(1,1);
+    val(0,0) = (*_nodal_values)[x.getId()];
+    v = val;
 };
 
 typedef TemplateFEMNodalFunction<double> FemNodalFunctionScalar;
