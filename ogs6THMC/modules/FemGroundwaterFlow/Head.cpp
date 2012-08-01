@@ -58,6 +58,9 @@ void FunctionHead::initialize(const BaseLib::Options &option)
         std::string st_type = opST->getOption("STType");
         std::string dis_name = opST->getOption("DistributionType");
         double dis_v = opST->getOption<double>("DistributionValue");
+        if (st_type.compare("NEUMANN")==0) {
+            dis_v *= -1; // user set inflow as positive sign but internally negative
+        }
         NumLib::ITXFunction* f_st =  f_builder.create(dis_name, dis_v);
         if (f_st!=NULL) {
             SolutionLib::IFemNeumannBC *femSt = 0;
@@ -80,10 +83,7 @@ void FunctionHead::initialize(const BaseLib::Options &option)
     _solution->getNonlinearSolver()->setOption(*optNum);
 
     // set initial output
-    OutputVariableInfo var;
-    var.name = "HEAD";
-    var.value = _solution->getCurrentSolution(0);
-    var.object_type = OutputObjectType::Node;
+    OutputVariableInfo var("HEAD", OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput("HEAD", var); 
 
     // initial output parameter
@@ -99,9 +99,6 @@ void FunctionHead::output(const NumLib::TimeStep &time)
 {
     //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    OutputVariableInfo var;
-    var.name = "HEAD";
-    var.value = _solution->getCurrentSolution(0);
-    var.object_type = OutputObjectType::Node;
+    OutputVariableInfo var("HEAD", OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput("HEAD", var); 
 };
