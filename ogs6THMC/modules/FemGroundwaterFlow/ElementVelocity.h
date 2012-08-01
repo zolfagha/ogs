@@ -35,11 +35,7 @@ public:
 
     int solveTimeStep(const NumLib::TimeStep &/*time*/);
 
-    virtual void accept(const NumLib::TimeStep &/*time*/)
-    {
-        //std::cout << "Velocity=" << std::endl;
-        //_vel->printout();
-    };
+    virtual void accept(const NumLib::TimeStep &/*time*/);
 
 private:
     DiscreteLib::DiscreteSystem* _dis;

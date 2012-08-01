@@ -17,12 +17,29 @@ void FunctionElementVelocity::initialize(const BaseLib::Options &option)
 
     _dis = dis;
     _vel = new FemLib::FEMIntegrationPointFunctionVector(*dis);
-    //this->setOutput(Velocity, _vel);
+    
+    // set initial output
+    OutputVariableInfo var("VELOCITY", OutputVariableInfo::Element, OutputVariableInfo::Real, 3, _vel);
+    femData->outController.setOutput(var.name, var); 
+
+    // initial output parameter
+    this->setOutput(Velocity, _vel);
 }
 
+void FunctionElementVelocity::accept(const NumLib::TimeStep &/*time*/)
+{
+    //std::cout << "Velocity=" << std::endl;
+    //_vel->printout();
+    //update data for output
+    Ogs6FemData* femData = Ogs6FemData::getInstance();
+    OutputVariableInfo var("VELOCITY", OutputVariableInfo::Element, OutputVariableInfo::Real, 3, _vel);
+    femData->outController.setOutput(var.name, var); 
+};
 
 int FunctionElementVelocity::solveTimeStep(const NumLib::TimeStep &/*time*/)
 {
+    INFO("Solving ELEMENT_VELOCITY...");
+
     const MeshLib::IMesh *msh = _dis->getMesh();
     FemLib::FemNodalFunctionScalar *head = (FemLib::FemNodalFunctionScalar*)getInput(Head);
     FemLib::FEMIntegrationPointFunctionVector *vel = _vel;;
@@ -41,20 +58,21 @@ int FunctionElementVelocity::solveTimeStep(const NumLib::TimeStep &/*time*/)
             local_h[j] = head->getValue(e->getNodeID(j));
         // for each integration points
         FemLib::IFemNumericalIntegration *integral = fe->getIntegrationMethod();
-        double r[2] = {};
+        double r[3] = {};
         const size_t n_gp = integral->getNumberOfSamplingPoints();
         vel->setNumberOfIntegationPoints(i_e, n_gp);
         NumLib::LocalVector xi(e->getNumberOfNodes());
         NumLib::LocalVector yi(e->getNumberOfNodes());
+        NumLib::LocalVector zi(e->getNumberOfNodes());
         for (size_t i=0; i<e->getNumberOfNodes(); i++) {
             const GeoLib::Point* pt = msh->getNodeCoordinatesRef(e->getNodeID(i));
             xi[i] = (*pt)[0];
             yi[i] = (*pt)[1];
+            zi[i] = (*pt)[2];
         }
+        NumLib::LocalVector q(3);
         for (size_t ip=0; ip<n_gp; ip++) {
-            NumLib::LocalVector q(2);
-            q[0] = .0;
-            q[1] = .0;
+            q *= .0;
             integral->getSamplingPoint(ip, r);
             fe->computeBasisFunctions(r);
             const NumLib::LocalMatrix* dN = fe->getGradBasisFunction();
@@ -65,14 +83,16 @@ int FunctionElementVelocity::solveTimeStep(const NumLib::TimeStep &/*time*/)
             xx[0] = tmp_v[0];
             tmp_v = (*N) * yi;
             xx[1] = tmp_v[0];
+            tmp_v = (*N) * zi;
+            xx[2] = tmp_v[0];
             NumLib::TXPosition pos(&xx[0]);
 
             NumLib::LocalMatrix k;
             pm->hydraulic_conductivity->eval(pos, k);
             if (k.rows()==1) {
-                q.noalias() = (*dN) * local_h * (-1.0) * k(0,0);
+                q.head(msh->getDimension()) = (*dN) * local_h * (-1.0) * k(0,0);
             } else {
-                q.noalias() = (*dN) * k * local_h * (-1.0);
+                q.head(msh->getDimension()) = (*dN) * k * local_h * (-1.0);
             }
             vel->setIntegrationPointValue(i_e, ip, q);
         }
