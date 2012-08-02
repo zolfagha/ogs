@@ -33,24 +33,26 @@ public:
         FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
         size_t mat_id = e.getGroupID();
         MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];
+        double cmp_mol_diffusion = .0;
+        _cmp->molecular_diffusion->eval(0, cmp_mol_diffusion);
 
         NumLib::LocalMatrix matM(localJ);
         NumLib::LocalMatrix matDiff(localJ);
         NumLib::LocalMatrix matAdv(localJ);
-        NumLib::TXCompositFunction<NumLib::ITXFunction, NumLib::ITXFunction, NumLib::Multiplication> f_diff_poro(*_cmp->molecular_diffusion, *pm->porosity);
 
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
+        NumLib::LocalMatrix poro(1,1);
+        NumLib::LocalMatrix d_poro(1,1);
+        NumLib::ITXFunction::DataType v;
+
         for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
             q->getSamplingPoint(j, gp_x);
             fe->computeBasisFunctions(gp_x);
             fe->getRealCoordinates(real_x);
 
-            NumLib::LocalMatrix poro(1,1);
             pm->porosity->eval(real_x, poro);
-            NumLib::LocalMatrix d_poro(1,1);
-            f_diff_poro.eval(real_x, d_poro);
-            NumLib::ITXFunction::DataType v;
+            d_poro(0,0) = cmp_mol_diffusion * poro(0,0);
             _vel->eval(real_x, v);
 
             fe->integrateWxN(j, poro, matM);

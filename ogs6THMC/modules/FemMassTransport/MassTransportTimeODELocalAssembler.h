@@ -56,7 +56,7 @@ protected:
             q->getSamplingPoint(j, gp_x);
             fe->computeBasisFunctions(gp_x);
             fe->getRealCoordinates(real_x);
-            NumLib::TXPosition gp_pos(e.getID(), real_x);
+            NumLib::TXPosition gp_pos(NumLib::TXPosition::IntegrationPoint, e.getID(), j, real_x);
 
             pm->porosity->eval(gp_pos, poro);
             d_poro(0,0) = cmp_mol_diffusion * poro(0,0);
