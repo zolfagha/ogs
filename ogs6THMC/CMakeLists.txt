@@ -40,6 +40,10 @@ FOREACH(dir ${List_subdir})
     LIST(APPEND ProcessLib_Files ${TempProcessLib_Files}) 
 ENDFOREACH()
 
+FILE(GLOB TempProcessLib_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} modules/*.h modules/*.cpp modules/*.txt)
+SOURCE_GROUP( ogs6THMC\\modules FILES ${TempProcessLib_Files} )
+LIST(APPEND ProcessLib_Files ${TempProcessLib_Files}) 
+
 FILE(GLOB TempProcessLib_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.h *.cpp)
 SOURCE_GROUP( ogs6THMC FILES ${TempProcessLib_Files} )
 LIST(APPEND ProcessLib_Files ${TempProcessLib_Files}) 
