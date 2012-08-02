@@ -92,7 +92,7 @@ THMCSimulator::THMCSimulator(int argc, char* argv[])
         cmd.add( input_arg );
         TCLAP::ValueArg<unsigned> n_cores_arg("p", "number-cores", "number of cores to use", false, 1, "number");
         cmd.add( n_cores_arg );
-        TCLAP::ValueArg<std::string> output_arg("o", "output", "output file", false, "", "string");
+        TCLAP::ValueArg<std::string> output_arg("o", "output", "output directory", false, "", "string");
         cmd.add( output_arg );
         TCLAP::ValueArg<unsigned> verbosity_arg("v", "verbose", "level of verbosity [0 very low information, 1 much information]", false, 0, "number");
         cmd.add( verbosity_arg );
@@ -104,10 +104,13 @@ THMCSimulator::THMCSimulator(int argc, char* argv[])
         ogsInit(argc, argv);
 
         // get parsed data
+        std::string output_dir_path = "";
         if (! output_arg.getValue().empty()) {
             if (!logog_file) delete logog_file;
-            BaseLib::truncateFile(output_arg.getValue());
-            logog_file = new logog::LogFile(output_arg.getValue().c_str());
+            output_dir_path = output_arg.getValue();
+            std::string log_file = output_dir_path + "\\ogs.log";
+            BaseLib::truncateFile(log_file);
+            logog_file = new logog::LogFile(log_file.c_str());
             logog_file->SetFormatter( *custom_format );
         }
 
@@ -121,7 +124,7 @@ THMCSimulator::THMCSimulator(int argc, char* argv[])
         if (! input_arg.getValue().empty()) {
             const std::string proj_path = input_arg.getValue();
             if (checkInputFiles(proj_path)) {
-                _sim_info = new SimulationInfo(proj_path);
+                _sim_info = new SimulationInfo(proj_path, output_dir_path);
             } else {
                 ERR("Cannot find a project - %s", proj_path.c_str());
             }
@@ -164,7 +167,7 @@ int THMCSimulator::execute()
     Ogs6FemData* ogs6fem = Ogs6FemData::getInstance();
     const std::string proj_path = _sim_info->getProjectPath();
     ogs6fem->project_name = _sim_info->getProjectName();
-    ogs6fem->output_dir = _sim_info->getProjectDirPath();
+    ogs6fem->output_dir = _sim_info->getOutputDirPath();
 
     //-------------------------------------------------------------------------
     // Read files
@@ -172,7 +175,7 @@ int THMCSimulator::execute()
     INFO("Reading input files...");
     // ogs5fem
     ogs5::Ogs5FemData ogs5femdata;
-    ogs5femdata.read(proj_path);
+    ogs5::Ogs5FemIO::read(proj_path, ogs5femdata);
     Ogs5ToOgs6::convert(ogs5femdata, *ogs6fem, op);
 
     // coupling
@@ -201,7 +204,7 @@ int THMCSimulator::execute()
     _cpl_system = cpl_builder.build(&op, *GeoProcessBuilder::getInstance(), checkFac);
 
     if (!_cpl_system->check()) {
-        ERR("Error while checking coupled system");
+        ERR("***Error while checking coupled system");
         return 0;
     }
 
@@ -214,11 +217,10 @@ int THMCSimulator::execute()
         ProcessLib::Process* pcs = list_mono_system[i];
         ogs6fem->list_pcs.insert(pcs_name, pcs);
         const BaseLib::Options* opPCS = op.getSubGroup("ProcessData")->getSubGroup(pcs_name);
-        if (opPCS!=NULL) {
-            pcs->initialize(*opPCS);
-        } else {
-            pcs->initialize(op);
-//            ERR("Cannot find Configuration for Process - %s", pcs_name.c_str());
+        bool isPcsReady = pcs->initialize(opPCS!=NULL ? *opPCS : op);
+        if (!isPcsReady) {
+            ERR("***Error while setting up processes");
+            return 0;
         }
     }
 
