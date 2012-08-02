@@ -5,8 +5,7 @@
  *      Author: watanabe
  */
 
-#ifndef COMPOUND_H_
-#define COMPOUND_H_
+#pragma once
 
 #include "BaseLib/CodingTools.h"
 
@@ -20,6 +19,8 @@ namespace MaterialLib
 
 struct Compound
 {
+    std::string name;
+    bool is_mobile;
     NumLib::ITXFunction* molecular_diffusion;
 
     Compound()
@@ -35,4 +36,3 @@ struct Compound
 
 } //end
 
-#endif /* COMPOUND_H_ */
