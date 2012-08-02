@@ -22,7 +22,7 @@ public:
     virtual ~ITransientSystem() {};
 
     /// initialize
-    virtual void initialize(const BaseLib::Options &/*op*/) {};
+    virtual bool initialize(const BaseLib::Options &/*op*/) {return true;};
     /// finalize
     virtual void finalize() {};
 
