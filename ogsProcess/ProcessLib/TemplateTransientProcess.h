@@ -39,6 +39,7 @@ public:
     virtual int solveTimeStep(const NumLib::TimeStep &time)
     {
         INFO("Solving %s...", _pcs_name.c_str());
+        initializeTimeStep(time);
         getSolution()->solveTimeStep(time);
         updateOutputParameter(time);
         return 0;
@@ -66,6 +67,8 @@ public:
 protected:
     ///
     virtual SolutionLib::AbstractTimeSteppingAlgorithm* getSolution() = 0;
+    ///
+    virtual void initializeTimeStep(const NumLib::TimeStep &/*time*/) {};
     ///
     virtual void updateOutputParameter(const NumLib::TimeStep &time) = 0;
     ///
