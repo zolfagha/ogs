@@ -20,34 +20,38 @@ class TemplateFEMIntegrationPointFunction : public NumLib::ITXFunction
 {
 public:
     typedef MathLib::TemplateVectorX<Tvalue> IntegrationPointVectorType;
-    //typedef std::valarray<Tvalue> IntegrationPointVectorType;
     typedef DiscreteLib::DiscreteVector<IntegrationPointVectorType > DiscreteVectorType;
 
-    TemplateFEMIntegrationPointFunction(DiscreteLib::DiscreteSystem &dis)
+    ///
+    explicit TemplateFEMIntegrationPointFunction(DiscreteLib::DiscreteSystem &dis)
     {
         initialize(dis);
     };
 
-    TemplateFEMIntegrationPointFunction(const TemplateFEMIntegrationPointFunction &src)
+    ///
+    explicit TemplateFEMIntegrationPointFunction(const TemplateFEMIntegrationPointFunction &src)
     {
         initialize(*src._discrete_system);
         (*this->_values) = (*src._values);
     };
 
+    ///
     TemplateFEMIntegrationPointFunction<Tvalue>* clone() const
     {
         TemplateFEMIntegrationPointFunction<Tvalue> *obj = new TemplateFEMIntegrationPointFunction<Tvalue>(*this);
         return obj;
     };
 
+    ///
     const MeshLib::IMesh* getMesh() const
     {
         return this->_discrete_system->getMesh();
     }
 
+    ///
     DiscreteLib::DiscreteSystem* getDiscreteSystem() const {return _discrete_system;};
 
-    //virtual void eval(const TXPosition /*x*/, DataType &/*v*/) const {};
+    ///
     virtual void eval(const NumLib::TXPosition x, NumLib::ITXFunction::DataType &v) const
     {
         size_t ele_id = x.getId();
@@ -76,39 +80,6 @@ public:
     {
         return (*_values)[i_e];
     }
-
-//    double norm_diff(const TemplateFEMIntegrationPointFunction<Tvalue> &ref) const
-//    {
-//        const size_t n = _values->size();
-//        if (n!=ref._values->size()) {
-//            std::cout << "***Warning in TemplateFEMIntegrationPointFunction::norm_diff(): size of two vectors is not same." << std::endl;
-//            return .0;
-//        }
-//
-//        double mnorm = .0;
-//        for (size_t i=0; i<n; ++i) {
-//            const IntegrationPointVectorType &val1 = (*_values)[i];
-//            const IntegrationPointVectorType &val2 = (*ref._values)[i];
-//            const size_t n_gp = val1.size();
-//            if (n_gp!=val2.size()) {
-//                std::cout << "***Warning in TemplateFEMIntegrationPointFunction::norm_diff(): size of two vectors is not same." << std::endl;
-//                return .0;
-//            } else if (n_gp==0) {
-//                std::cout << "***Warning in TemplateFEMIntegrationPointFunction::norm_diff(): size of two vectors is zero." << std::endl;
-//                return .0;
-//            }
-//            IntegrationPointVectorType val_diff = val1 - val2;
-//
-////            val_diff = std::abs(val_diff);
-//            double val_diff_max = .0; // val_diff.max
-//            for (size_t j=0; j<val_diff.size(); j++) {
-//                val_diff_max = std::max(val_diff_max, val_diff[j].array().abs().maxCoeff());
-//            }
-//            mnorm = std::max(mnorm, val_diff_max);
-//        }
-//
-//        return mnorm;
-//    }
 
     const DiscreteVectorType* getNodalValues() const
     {
@@ -155,8 +126,6 @@ void TemplateFEMIntegrationPointFunction<double>::eval(const NumLib::TXPosition 
     NumLib::ITXFunction::DataType mat(1,1);
 };
 
-//typedef TemplateFEMIntegrationPointFunction<double> FEMIntegrationPointFunctionScalar;
-//typedef TemplateFEMIntegrationPointFunction<MathLib::Vector2D> FEMIntegrationPointFunctionVector2d;
 typedef TemplateFEMIntegrationPointFunction<LocalVector> FEMIntegrationPointFunctionVector;
 
 } //end
