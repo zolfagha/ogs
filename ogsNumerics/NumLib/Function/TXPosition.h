@@ -1,7 +1,9 @@
 
 #pragma once
 
-#include "GeoLib/Core/Point.h"
+#include <vector>
+
+#include "BaseLib/CodingTools.h"
 
 namespace NumLib
 {
@@ -12,20 +14,36 @@ namespace NumLib
 class TXPosition
 {
 public:
-    TXPosition(double t_, const double* x_) : _t(t_), _x(x_), _id(0) {};
-    TXPosition(const double* x_) : _t(.0), _x(x_), _id(0) {};
-    TXPosition(const GeoLib::Point* p) : _t(.0), _x(p->getData()), _id(0) {};
-    TXPosition(size_t n, const GeoLib::Point* p) : _t(.0), _x(p->getData()), _id(n) {};
-    TXPosition(size_t n) : _t(.0), _x(0), _id(n) {};
+    enum IdObjectType
+    {
+        INVALID,
+        Node,
+        Element,
+        IntegrationPoint
+    };
+
+    explicit TXPosition(const double* x_) : _t(.0), _x(x_) {};
+    TXPosition(double t_, const double* x_) : _t(t_), _x(x_) {};
+    TXPosition(IdObjectType objType, size_t n) : _t(.0), _x(0), _array_id(1, n), _obj_type(objType) {};
+    TXPosition(IdObjectType objType, size_t n, const double* p) : _t(.0), _x(p), _array_id(1, n), _obj_type(objType) {};
+    TXPosition(IdObjectType objType, size_t id1, size_t id2, const double* p) : _t(.0), _x(p), _obj_type(objType) 
+    {
+        _array_id.push_back(id1);
+        _array_id.push_back(id2);
+    };
     
 
     double getTime() const {return _t;};
     const double* getSpace() const {return _x;};
-    size_t getId() const {return _id;};
+    size_t getId(size_t i=0) const {return _array_id.size()<i+1 ? BaseLib::index_npos : _array_id[i];};
+    IdObjectType getIdObjectType() const {return _obj_type;};
+
 private:
     double _t;
     const double* _x;
-    size_t _id;
+    std::vector<size_t> _array_id;
+    IdObjectType _obj_type;
+
 };
 
 

@@ -20,7 +20,7 @@ DirichletBC2FEM::DirichletBC2FEM(const MeshLib::IMesh &msh, const GeoLib::GeoObj
         vec_values.resize(n_bc_nodes);
         for (size_t i=0; i<n_bc_nodes; i++) {
             const GeoLib::Point* x = msh.getNodeCoordinatesRef(vec_nodes[i]);
-            bc_func.eval(x, vec_values[i]);
+            bc_func.eval(x->getData(), vec_values[i]);
         }
     } else {
         std::cout << "Dirichlet B.C. was not found." << std::endl;

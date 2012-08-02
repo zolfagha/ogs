@@ -54,15 +54,33 @@ public:
     ///
     virtual void eval(const NumLib::TXPosition x, NumLib::ITXFunction::DataType &v) const
     {
-        size_t ele_id = x.getId();
-        IntegrationPointVectorType &gp_values = (*_values)[ele_id];
-        if (gp_values.size()==0) return;
-        Tvalue val = gp_values[0]; 
-        val *= .0;
-        for (size_t i=0; i<gp_values.size(); i++)
-            val += gp_values[i];
-        val /= gp_values.size();
-        v = val;
+        switch (x.getIdObjectType()) {
+        case NumLib::TXPosition::IntegrationPoint:
+            {
+                size_t ele_id = x.getId(0);
+                size_t gp_id = x.getId(1);
+                IntegrationPointVectorType &gp_values = (*_values)[ele_id];
+                if (gp_values.size()==0) return;
+                v = gp_values[gp_id]; 
+            }
+            break;
+        case NumLib::TXPosition::Element:
+            {
+                // calculate mean value
+                size_t ele_id = x.getId();
+                IntegrationPointVectorType &gp_values = (*_values)[ele_id];
+                if (gp_values.size()==0) return;
+                Tvalue val = gp_values[0]; 
+                val *= .0;
+                for (size_t i=0; i<gp_values.size(); i++)
+                    val += gp_values[i];
+                val /= gp_values.size();
+                v = val;
+            }
+            break;
+        default:
+            break;
+        }
     };
 
     void setIntegrationPointValue( size_t i_e, size_t ip, Tvalue &q )

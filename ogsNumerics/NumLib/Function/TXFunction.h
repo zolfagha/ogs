@@ -26,6 +26,9 @@ public:
     typedef LocalMatrix DataType;
     
     ///
+    ITXFunction() : _is_const(false), _is_temporally_const(false), _is_spatially_const(false) {};
+
+    ///
     virtual ~ITXFunction() {};
 
     /// evaluate this function at the given position and return vector data
@@ -46,26 +49,37 @@ public:
         v = tmp(0);
     }
 
+    ///
     virtual void eval(const double* x, DataType &v) const
     {
         TXPosition pos(x);
         this->eval(pos, v);
     }
 
+    ///
     virtual void eval(const double* x, double &v) const
     {
         TXPosition pos(x);
         this->eval(pos, v);
     }
 
+    ///
     virtual ITXFunction* clone() const = 0;
 
     ///
-    virtual bool isConst() const {return false;};
+    bool isConst() const {return _is_const;};
+    void isConst(bool b) {_is_const = b;};
     ///
-    virtual bool isTemporallyConst() const {return false;};
+    bool isTemporallyConst() const {return _is_temporally_const;};
+    void isTemporallyConst(bool b) {_is_temporally_const = b;};
     ///
-    virtual bool isSpatiallyConst() const {return false;};
+    bool isSpatiallyConst() const {return _is_spatially_const;};
+    void isSpatiallyConst(bool b) {_is_spatially_const = b;};
+
+private:
+    bool _is_const;
+    bool _is_temporally_const;
+    bool _is_spatially_const;
 };
 
 /**
@@ -74,7 +88,13 @@ public:
 class TXFunctionConstant : public ITXFunction
 {
 public:
-    TXFunctionConstant(double val) : _vec(1,1) { _vec(0,0) = val;};
+    TXFunctionConstant(double val) : _vec(1,1) 
+    {
+        _vec(0,0) = val;
+        ITXFunction::isConst(true);
+        ITXFunction::isTemporallyConst(true);
+        ITXFunction::isSpatiallyConst(true);
+    };
     TXFunctionConstant(const DataType &val) : _vec(val) {};
 
     virtual ~TXFunctionConstant() {};
@@ -85,9 +105,9 @@ public:
 
     virtual TXFunctionConstant* clone() const { return new TXFunctionConstant(_vec); }
 
-    virtual bool isConst() const {return true;};
-    virtual bool isTemporallyConst() const {return true;};
-    virtual bool isSpatiallyConst() const {return true;};
+    //virtual bool isConst() const {return true;};
+    //virtual bool isTemporallyConst() const {return true;};
+    //virtual bool isSpatiallyConst() const {return true;};
 
 private:
     DataType _vec;

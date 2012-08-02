@@ -97,7 +97,15 @@ public:
 
     virtual void eval(const NumLib::TXPosition x, NumLib::ITXFunction::DataType &v) const
     {
-        v = (*_nodal_values)[x.getId()];
+        switch (x.getIdObjectType()) {
+        case NumLib::TXPosition::Node:
+            {
+                v = (*_nodal_values)[x.getId()];
+            }
+            break;
+        default:
+            break;
+        }
     };
 
     /// get nodal value
