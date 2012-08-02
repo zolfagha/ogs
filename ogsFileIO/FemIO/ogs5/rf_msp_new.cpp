@@ -109,7 +109,6 @@ std::ios::pos_type CSolidProperties::Read(std::ifstream* msp_file)
 
         position = msp_file->tellg();
         line_string = readNonBlankLineFromInputStream(*msp_file);
-        line_string = buffer;
         if(line_string.find(hash) != string::npos)
         {
             new_keyword = true;
