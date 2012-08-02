@@ -52,9 +52,14 @@ void SimulationInfo::outputHeader ( void )
     INFO("");
 }
 
-SimulationInfo::SimulationInfo(const std::string &project_path)
+SimulationInfo::SimulationInfo(const std::string &project_path, const std::string &output_dir_path)
 {
     this->setProjectPath(project_path);
+    if (output_dir_path.length()>0) {
+        _output_dir = output_dir_path;
+    } else {
+        _output_dir = _project_dir;
+    }
 }
 
 
