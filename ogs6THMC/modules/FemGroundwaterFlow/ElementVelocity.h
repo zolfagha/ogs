@@ -11,9 +11,6 @@
 
 #include "ProcessLib/TemplateTimeIndependentProcess.h"
 
-namespace Geo
-{
-
 class FunctionElementVelocity
     : public ProcessLib::TemplateTimeIndependentProcess<1,1>
 {
@@ -29,7 +26,7 @@ public:
     virtual ~FunctionElementVelocity() {};
 
 
-    virtual void initialize(const BaseLib::Options &op);
+    virtual bool initialize(const BaseLib::Options &op);
 
     virtual void finalize() {};
 
@@ -47,5 +44,4 @@ private:
 
 
 
-}
 

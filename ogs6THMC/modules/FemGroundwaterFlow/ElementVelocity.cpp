@@ -4,10 +4,7 @@
 #include "MathLib/Vector.h"
 #include "Ogs6FemData.h"
 
-namespace Geo
-{
-
-void FunctionElementVelocity::initialize(const BaseLib::Options &option)
+bool FunctionElementVelocity::initialize(const BaseLib::Options &option)
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
 
@@ -24,6 +21,8 @@ void FunctionElementVelocity::initialize(const BaseLib::Options &option)
 
     // initial output parameter
     this->setOutput(Velocity, _vel);
+
+    return true;
 }
 
 void FunctionElementVelocity::accept(const NumLib::TimeStep &/*time*/)
@@ -99,6 +98,5 @@ int FunctionElementVelocity::solveTimeStep(const NumLib::TimeStep &/*time*/)
     }
     setOutput(Velocity, vel);
     return 0;
-}
 }
 

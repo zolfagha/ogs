@@ -7,7 +7,7 @@
 #include "OutputIO/OutputTimingBuilder.h"
 #include "Ogs6FemData.h"
 
-void FunctionHead::initialize(const BaseLib::Options &option)
+bool FunctionHead::initialize(const BaseLib::Options &option)
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
     size_t msh_id = option.getOption<size_t>("MeshID");
@@ -20,13 +20,13 @@ void FunctionHead::initialize(const BaseLib::Options &option)
     _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
 
     // equations
-    GWFemEquation::LinearAssemblerType* linear_assembler = new GWFemEquation::LinearAssemblerType(*_feObjects);
-    GWFemEquation::ResidualAssemblerType* r_assembler = new GWFemEquation::ResidualAssemblerType(*_feObjects);
-    GWFemEquation::JacobianAssemblerType* j_eqs = new GWFemEquation::JacobianAssemblerType(*_feObjects);
-    GWFemEquation* eqs = new  GWFemEquation(linear_assembler, r_assembler, j_eqs);
+    FemGWEquation::LinearAssemblerType* linear_assembler = new FemGWEquation::LinearAssemblerType(*_feObjects);
+    FemGWEquation::ResidualAssemblerType* r_assembler = new FemGWEquation::ResidualAssemblerType(*_feObjects);
+    FemGWEquation::JacobianAssemblerType* j_eqs = new FemGWEquation::JacobianAssemblerType(*_feObjects);
+    FemGWEquation* eqs = new  FemGWEquation(linear_assembler, r_assembler, j_eqs);
 
     // set up problem
-    _problem = new GWFemProblem(dis);
+    _problem = new FemGWProblem(dis);
     _problem->setEquation(eqs);
     _problem->setTimeSteppingFunction(*tim);
     // set up variable
@@ -71,7 +71,7 @@ void FunctionHead::initialize(const BaseLib::Options &option)
             }
             head->addNeumannBC(femSt);
         } else {
-            WARN("Ditribution type %s is specified but not found. Ignore this ST.", dis_name.c_str());
+            WARN("Distribution type %s is specified but not found. Ignore this ST.", dis_name.c_str());
         }
     }
 
@@ -88,6 +88,8 @@ void FunctionHead::initialize(const BaseLib::Options &option)
 
     // initial output parameter
     this->setOutput(Head, head->getIC());
+
+    return true;
 }
 
 void FunctionHead::updateOutputParameter(const NumLib::TimeStep &time)

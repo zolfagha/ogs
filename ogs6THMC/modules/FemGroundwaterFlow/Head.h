@@ -7,12 +7,10 @@
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
 #include "SolutionLib/FemProblem/FemIVBVProblem.h"
 #include "SolutionLib/FemProblem/AbstractTransientFemFunction.h"
-
+#include "ProcessLib/TemplateTransientProcess.h"
 
 #include "GWTimeODELocalAssembler.h"
 #include "GWJacobianLocalAssembler.h"
-#include "ProcessLib/TemplateTransientProcess.h"
-#include "OutputIO/IOutput.h"
 
 //--------------------------------------------------------------------------------------------------
 // Equation definition
@@ -24,13 +22,13 @@ typedef SolutionLib::TemplateFemEquation <
             NumLib::ElementWiseTimeEulerResidualLocalAssembler>,
         GroundwaterFlowJacobianLocalAssembler
         >
-        GWFemEquation;
+        FemGWEquation;
 
 
 //--------------------------------------------------------------------------------------------------
 // IVBV problem definition
 //--------------------------------------------------------------------------------------------------
-typedef SolutionLib::FemIVBVProblem< GWFemEquation > GWFemProblem;
+typedef SolutionLib::FemIVBVProblem< FemGWEquation > FemGWProblem;
 
 
 
@@ -44,7 +42,7 @@ class FunctionHead
 public:
     typedef SolutionLib::SingleStepFEM
             <
-                GWFemProblem,
+                FemGWProblem,
                 MathLib::CRSLisSolver
             > MySolutionType;
 
@@ -58,11 +56,10 @@ public:
     virtual ~FunctionHead()
     {
         BaseLib::releaseObject(_problem, _solution, _feObjects);
-//        BaseLib::releaseObjectsInStdVector(_list_output);
     }
 
     /// initialize this process
-    virtual void initialize(const BaseLib::Options &option);
+    virtual bool initialize(const BaseLib::Options &option);
 
     /// finalize but nothing to do here
     virtual void finalize() {};
@@ -80,13 +77,9 @@ private:
     DISALLOW_COPY_AND_ASSIGN(FunctionHead);
 
 private:
-    GWFemProblem* _problem;
+    FemGWProblem* _problem;
     MySolutionType* _solution;
     FemLib::LagrangianFeObjectContainer* _feObjects;
-    //std::vector<IOutput*> _list_output;
-
-//public:
-//    static ProcessLib::ProcessInfo* const _pcs_info;
 };
 
 
