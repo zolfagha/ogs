@@ -27,6 +27,7 @@
 #include "BaseLib/Options.h"
 #include "BaseLib/OptionsXMLReader.h"
 #include "BaseLib/FileTools.h"
+#include "BaseLib/RunTime.h"
 #include "NumLib/TransientCoupling/TransientCouplingStructureBuilder.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "FemIO/ogs5/Ogs5FemIO.h"
@@ -172,7 +173,7 @@ int THMCSimulator::execute()
     //-------------------------------------------------------------------------
     // Read files
     //-------------------------------------------------------------------------
-    INFO("Reading input files...");
+    INFO("->Reading input files...");
     // ogs5fem
     ogs5::Ogs5FemData ogs5femdata;
     ogs5::Ogs5FemIO::read(proj_path, ogs5femdata);
@@ -186,14 +187,14 @@ int THMCSimulator::execute()
     //-------------------------------------------------------------------------
     // Setup simulation
     //-------------------------------------------------------------------------
-    INFO("Setting up simulation...");
+    //INFO("Setting up simulation...");
 
     // construct mesh
     INFO("->Constructing meshes... %d mesh loaded", ogs6fem->list_dis_sys.size());
     for (size_t i=0; i<ogs6fem->list_dis_sys.size(); i++) {
         MeshLib::IMesh* msh = ogs6fem->list_dis_sys[i]->getMesh();
         msh->constructGeometricProperty();
-        INFO("-->mesh id %d: dim=%d, nodes=%d, elements=%d", i, msh->getDimension(), msh->getNumberOfNodes(), msh->getNumberOfElements());
+        INFO("->mesh id %d: dim=%d, nodes=%d, elements=%d", i, msh->getDimension(), msh->getNumberOfNodes(), msh->getNumberOfElements());
     }
 
     // construct coupling system
@@ -236,22 +237,29 @@ int THMCSimulator::execute()
         t_end = std::max(t_end, ogs6fem->list_tim[i]->getEnd());
     }
 
-    INFO("Outputting the initial values...");
+    INFO("->Outputting the initial values...");
     ogs6fem->outController.outputData(NumLib::TimeStep(t_start));
 
     //-------------------------------------------------------------------------
     // Run simulation
     //-------------------------------------------------------------------------
-    INFO("");
-    INFO("Start this simulation! start=%f, end=%f", t_start, t_end);
-    INFO("");
+    INFO("->Simulation is ready! start=%f, end=%f", t_start, t_end);
+    BaseLib::RunTime runTime;
+    runTime.start();
+
     timestepping.setBeginning(t_start); //TODO really need this? start, end is already given in timestep function
-    timestepping.solve(t_end);
+    size_t n_timesteps = timestepping.solve(t_end);
+
+    runTime.stop();
 
     INFO("");
-    INFO("Finish this simulation!");
+    INFO("->Simulation is finished.\n");
+    INFO("#############################################################");
+    INFO("*** Summary of this simulation");
+    INFO("total time step : %d", n_timesteps);
+    INFO("elapsed time   : %g sec", runTime.elapsed());
+    INFO("#############################################################");
     INFO("");
-
 
     return 0;
 }

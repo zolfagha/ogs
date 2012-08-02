@@ -11,7 +11,7 @@ namespace NumLib
 size_t TimeSteppingController::solve(double time_end) 
 {
     TimeStep time_current(_time_begin);
-    INFO("\n\n***Start time steps with t0=%d s\n", _time_begin);
+    //INFO("\n\n***Start time steps with t0=%d s\n", _time_begin);
 
     while (time_current.getTime()<time_end) {
         double time_next = _root_subsystems->suggestNext(time_current);

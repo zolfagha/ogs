@@ -68,6 +68,7 @@ INCLUDE_DIRECTORIES(
 )
 
 target_link_libraries( ogs6THMC
+    ogsCore
     ogsGeometry
     ogsMesh
     ogsNumerics
