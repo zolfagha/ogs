@@ -12,51 +12,59 @@
 namespace ogs5
 {
 
-Ogs5FemData::~Ogs5FemData()
+bool Ogs5FemIO::read(const std::string &proj_path, Ogs5FemData &ogs5data)
 {
-    BaseLib::releaseObjectsInStdVector(pcs_vector);
-    BaseLib::releaseObjectsInStdVector(mfp_vector);
-    BaseLib::releaseObjectsInStdVector(msp_vector);
-    BaseLib::releaseObjectsInStdVector(mmp_vector);
-    BaseLib::releaseObjectsInStdVector(cp_vector);
-    BaseLib::releaseObjectsInStdVector(bc_vector);
-    BaseLib::releaseObjectsInStdVector(st_vector);
-    BaseLib::releaseObjectsInStdVector(ic_vector);
-    BaseLib::releaseObjectsInStdVector(out_vector);
-    BaseLib::releaseObjectsInStdVector(time_vector);
-    BaseLib::releaseObjectsInStdVector(num_vector);
-    //geo, msh objects are passed
-}
+    PCSRead(proj_path, ogs5data.pcs_vector);
+    MFPRead(proj_path, ogs5data.mfp_vector);
+    MSPRead(proj_path, ogs5data.msp_vector);
+    MMPRead(proj_path, ogs5data.mmp_vector);
+    CPRead(proj_path, ogs5data.cp_vector);
+    BCRead(proj_path, ogs5data.bc_vector);
+    STRead(proj_path, ogs5data.st_vector);
+    ICRead(proj_path, ogs5data.ic_vector);
+    OUTRead(proj_path, ogs5data.out_vector);
+    TIMRead(proj_path, ogs5data.time_vector);
+    NUMRead(proj_path, ogs5data.num_vector);
 
-bool Ogs5FemData::read(const std::string &proj_path)
-{
-    PCSRead(proj_path, pcs_vector);
-    MFPRead(proj_path, mfp_vector);
-    MSPRead(proj_path, msp_vector);
-    MMPRead(proj_path, mmp_vector);
-    CPRead(proj_path, cp_vector);
-    BCRead(proj_path, bc_vector);
-    STRead(proj_path, st_vector);
-    ICRead(proj_path, ic_vector);
-    OUTRead(proj_path, out_vector);
-    TIMRead(proj_path, time_vector);
-    NUMRead(proj_path, num_vector);
+    // set primary variable name
+    size_t mass_transport_count = 0;
+    for (size_t i=0; i<ogs5data.pcs_vector.size(); i++) {
+        CRFProcess* pcs = ogs5data.pcs_vector[i];
+        switch (pcs->getProcessType()) {
+        case FiniteElement::GROUNDWATER_FLOW:
+            pcs->primary_variable_name = "HEAD";
+            break;
+        case FiniteElement::LIQUID_FLOW:
+            pcs->primary_variable_name = "PRESSURE1";
+            break;
+        case FiniteElement::HEAT_TRANSPORT:
+            pcs->primary_variable_name = "TEMPERATURE1";
+            break;
+        case FiniteElement::MASS_TRANSPORT:
+            pcs->primary_variable_name = ogs5data.cp_vector[mass_transport_count]->compname;
+            mass_transport_count++;
+            break;
+        case FiniteElement::DEFORMATION:
+            pcs->primary_variable_name = "DISPLACEMENT";
+            break;
+        }
+    }
 
     // gli
     std::vector<std::string> geo_errors;
-    this->geo_obj = new GeoLib::GEOObjects();
-    Ogs4GeoIO::readGLIFileV4(proj_path+".gli", this->geo_obj, geo_unique_name, geo_errors);
+    ogs5data.geo_obj = new GeoLib::GEOObjects();
+    Ogs4GeoIO::readGLIFileV4(proj_path+".gli", ogs5data.geo_obj, ogs5data.geo_unique_name, geo_errors);
     if (geo_errors.size()>0) {
-        LOGOG_CERR << " Error when reading GLI" << std::endl;
+        ERR(" Error when reading GLI");
         for (size_t i=0; i<geo_errors.size(); i++)
-            LOGOG_CERR << " -> " << geo_errors[i] << std::endl;
+            ERR(" -> %s", geo_errors[i].c_str());
         return false;
     }
 
     // mesh
-    MeshIoOgs5::readMesh(proj_path+".msh", list_mesh);
-    if (list_mesh.size()==0) {
-        LOGOG_CERR << " Error: Cannot find mesh - " << proj_path+".msh" << std::endl;
+    MeshIoOgs5::readMesh(proj_path+".msh", ogs5data.list_mesh);
+    if (ogs5data.list_mesh.size()==0) {
+        ERR(" Error: Cannot find mesh - %s.msh", proj_path.c_str());
         return false;
     }
 
