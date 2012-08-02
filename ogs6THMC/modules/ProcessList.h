@@ -7,6 +7,7 @@
 //------------------------------------------------------------------------------
 #include "FemGroundwaterFlow/Head.h"
 #include "FemGroundwaterFlow/ElementVelocity.h"
+#include "FemMassTransport/Concentration.h"
 
 
 //#include "ProcessBuilder.h"

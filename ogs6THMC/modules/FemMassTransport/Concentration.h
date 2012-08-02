@@ -2,100 +2,83 @@
 #pragma once
 
 #include "BaseLib/CodingTools.h"
-#include "NumLib/Function/Function.h"
-#include "MathLib/LinAlg/VectorNorms.h"
-#include "FemLib/Function/FemFunction.h"
-#include "NumLib/TimeStepping/TimeSteppingController.h"
-#include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
+#include "MathLib/LinAlg/LinearEquations/LisInterface.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
 #include "SolutionLib/FemProblem/FemIVBVProblem.h"
-#include "SolutionLib/Solution/SingleStepFEM.h"
+#include "SolutionLib/FemProblem/AbstractTransientFemFunction.h"
+#include "ProcessLib/TemplateTransientProcess.h"
+#include "MaterialLib/Compound.h"
 
-#include "Tests/Geo/Equation/FemMassTransport.h"
-#include "Tests/Geo/Material/PorousMedia.h"
-#include "Tests/Geo/Material/Compound.h"
+#include "MassTransportTimeODELocalAssembler.h"
+#include "MassTransportJacobianLocalAssembler.h"
 
-namespace Geo
-{
-
-typedef TemplateFemEquation<
-        Geo::MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler>,
-        Geo::MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler>,
-        Geo::MassTransportJacobianLocalAssembler
+//--------------------------------------------------------------------------------------------------
+// Equation definition
+//--------------------------------------------------------------------------------------------------
+typedef SolutionLib::TemplateFemEquation<
+        MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler>,
+        MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler>,
+        MassTransportJacobianLocalAssembler
         >
-        MassFemEquation;
+        FemMTEquation;
 
-typedef FemIVBVProblem< MassFemEquation > MassFemProblem;
+//--------------------------------------------------------------------------------------------------
+// IVBV problem definition
+//--------------------------------------------------------------------------------------------------
+typedef SolutionLib::FemIVBVProblem< FemMTEquation > FemMTProblem;
 
 
-template <
-    class T_LINEAR_SOLVER
-    >
-class FunctionConcentration : public NumLib::TemplateTransientMonolithicSystem
+//--------------------------------------------------------------------------------------------------
+// Function definition
+//--------------------------------------------------------------------------------------------------
+class FunctionConcentration
+: public ProcessLib::TemplateTransientProcess<1,1>
 {
     enum In { Velocity=0 };
     enum Out { Concentration = 0 };
 
 public:
+    typedef FemMTProblem MyProblemType;
+    typedef MyProblemType::EquationType MyEquationType;
     typedef SolutionLib::SingleStepFEM
             <
-                MassFemProblem,
-                T_LINEAR_SOLVER
-            > SolutionForConc;
+                FemMTProblem,
+                MathLib::CRSLisSolver
+            > MySolutionType;
 
     FunctionConcentration() 
+        : TemplateTransientProcess<1,1>("MASS_TRANSPORT")
     {
-        TemplateTransientMonolithicSystem::resizeInputParameter(1);
-        TemplateTransientMonolithicSystem::resizeOutputParameter(1);
     };
 
-    void define(DiscreteLib::DiscreteSystem* dis, MassFemProblem* problem, BaseLib::Options &option)
+    virtual ~FunctionConcentration()
     {
-        //solution algorithm
-        _solConc = new SolutionForConc(dis, problem);
-        //_solConc->getTimeODEAssembler()->setTheta(1.0);
-        typename SolutionForConc::LinearSolverType* linear_solver = _solConc->getLinearEquationSolver();
-        linear_solver->setOption(option);
-        _solConc->getNonlinearSolver()->setOption(option);
-        this->setOutput(Concentration, problem->getVariable(0)->getIC());
-    }
-
-    int solveTimeStep(const NumLib::TimeStep &time)
-    {
-        //input
-        const NumLib::ITXFunction *vel = this->getInput<NumLib::ITXFunction>(Velocity);
-        _solConc->getProblem()->getEquation()->getLinearAssembler()->initialize(vel);
-        _solConc->getProblem()->getEquation()->getResidualAssembler()->initialize(vel);
-        _solConc->getProblem()->getEquation()->getJacobianAssembler()->initialize(vel);
-
-        // solve
-        _solConc->solveTimeStep(time);
-
-        // output
-        setOutput(Concentration, _solConc->getCurrentSolution(0));
-
-        return 0;
-    }
-
-    double suggestNext(const NumLib::TimeStep &time_current) { return _solConc->suggestNext(time_current); }
-
-    bool isAwake(const NumLib::TimeStep &time) { return _solConc->isAwake(time);  }
-
-    void accept(const NumLib::TimeStep &time)
-    {
-        _solConc->accept(time);
-
-        //std::cout << "Concentration=" << std::endl;
-        //_solConc->getCurrentSolution(0)->printout();
+        BaseLib::releaseObject(_problem, _solution, _feObjects);
     };
+
+    /// initialize this process
+    virtual bool initialize(const BaseLib::Options &option);
+
+    /// finalize but nothing to do here
+    virtual void finalize() {};
+
+protected:
+    virtual void initializeTimeStep(const NumLib::TimeStep &time);
+
+    virtual void updateOutputParameter(const NumLib::TimeStep &time);
+
+    virtual MySolutionType* getSolution() {return _solution;};
+
+    virtual void output(const NumLib::TimeStep &time);
 
 private:
     DISALLOW_COPY_AND_ASSIGN(FunctionConcentration);
 
-    SolutionForConc* _solConc;
-    //FemNodalFunctionScalar *_conc;
+private:
+    MyProblemType* _problem;
+    MySolutionType* _solution;
     FemLib::LagrangianFeObjectContainer* _feObjects;
+    MaterialLib::Compound* _compound;
 };
 
-} //end
