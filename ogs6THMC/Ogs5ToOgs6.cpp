@@ -69,13 +69,24 @@ void convertPorousMediumProperty(const CMediumProperties &mmp, MaterialLib::Poro
     }
 
     if (mmp.porosity_model==1) {
-        pm.porosity = new NumLib::TXFunctionConstant(mmp.porosity);
+        pm.porosity = new NumLib::TXFunctionConstant(mmp.porosity_model_values[0]);
     }
 
     if (mmp.storage_model==1) {
         pm.storage = new NumLib::TXFunctionConstant(mmp.storage_model_values[0]);
     }
 }
+
+void convertCompoundProperty(const CompProperties &mcp, MaterialLib::Compound &new_cp)
+{
+    new_cp.name = mcp.compname;
+    new_cp.is_mobile = (mcp.mobil == 1);
+
+    if (mcp.diffusion_model==1) {
+        new_cp.molecular_diffusion = new NumLib::TXFunctionConstant(mcp.diffusion_model_values[0]);
+    }
+}
+
 
 std::string convertLinearSolverType(int ls_method)
 {
@@ -160,6 +171,15 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         convertPorousMediumProperty(*mmp, *pm);
     }
 
+    // MCP
+    for (size_t i=0; i<ogs5fem.cp_vector.size(); i++)
+    {
+        CompProperties* mcp = ogs5fem.cp_vector[i];
+        MaterialLib::Compound* new_cp = new MaterialLib::Compound();
+        ogs6fem.list_compound.push_back(new_cp);
+        convertCompoundProperty(*mcp, *new_cp);
+    }
+
     // -------------------------------------------------------------------------
     // Geometry
     // -------------------------------------------------------------------------
@@ -187,16 +207,12 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
     // -------------------------------------------------------------------------
     // PCS
     BaseLib::Options* optPcsData = option.addSubGroup("ProcessData");
+    size_t masstransport_counter = 0;
     for (size_t i=0; i<ogs5fem.pcs_vector.size(); i++)
     {
         CRFProcess* rfpcs = ogs5fem.pcs_vector[i];
         std::string pcs_name = FiniteElement::convertProcessTypeToString(rfpcs->getProcessType());
-//        ProcessLib::Process* pcs6 = GeoProcessBuilder::getInstance()->create(pcs_name);
-//        if (pcs6==0) {
-//            LOGOG_CERR << " Error: Process not found - " << pcs_name << std::endl;
-//            continue;
-//        }
-//        ogs6fem.list_pcs.insert(pcs_name, pcs6);
+        std::string var_name = rfpcs->primary_variable_name;
 
         BaseLib::Options* optPcs = optPcsData->addSubGroup(pcs_name);
 
@@ -212,7 +228,7 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         {
             CInitialCondition* rfic = ogs5fem.ic_vector[i];
             std::string bc_pcs_name = FiniteElement::convertProcessTypeToString(rfic->getProcessType());
-            if (bc_pcs_name.compare(pcs_name)==0) {
+            if (bc_pcs_name.compare(pcs_name)==0 && rfic->primaryvariable_name.find(var_name)!=std::string::npos) {
                 BaseLib::Options* optIc = optIcList->addSubGroup("IC");
                 optIc->addOption("Variable", rfic->primaryvariable_name);
                 optIc->addOption("GeometryType", rfic->geo_type_name);
@@ -228,7 +244,7 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         {
             CBoundaryCondition* rfbc = ogs5fem.bc_vector[i];
             std::string bc_pcs_name = FiniteElement::convertProcessTypeToString(rfbc->getProcessType());
-            if (bc_pcs_name.compare(pcs_name)==0) {
+            if (bc_pcs_name.compare(pcs_name)==0 && rfbc->primaryvariable_name.find(var_name)!=std::string::npos) {
                 BaseLib::Options* optBc = optBcList->addSubGroup("BC");
                 optBc->addOption("Variable", rfbc->primaryvariable_name);
                 optBc->addOption("GeometryType", rfbc->geo_type_name);
@@ -244,7 +260,7 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         {
             CSourceTerm* rfst = ogs5fem.st_vector[i];
             std::string st_pcs_name = FiniteElement::convertProcessTypeToString(rfst->getProcessType());
-            if (st_pcs_name.compare(pcs_name)==0) {
+            if (st_pcs_name.compare(pcs_name)==0 && rfst->primaryvariable_name.find(var_name)!=std::string::npos) {
                 BaseLib::Options* optSt = optStList->addSubGroup("ST");
                 optSt->addOption("Variable", rfst->primaryvariable_name);
                 optSt->addOption("GeometryType", rfst->geo_type_name);
@@ -287,10 +303,14 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
                 optNum->addOptionAsNum("TimeTheta", rfnum->ls_theta);
                 optNum->addOptionAsNum("GaussPoint", rfnum->ele_gauss_points);
                 optNum->addOptionAsNum("FEM_FCT", rfnum->fct_method);
-
             }
         }
 
+        // some process specific
+        if (pcs_name.find("MASS_TRANSPORT")!=std::string::npos) {
+            optPcs->addOptionAsNum("CompoundID", masstransport_counter);
+            masstransport_counter++;
+        }
 
     }
 
