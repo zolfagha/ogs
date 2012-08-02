@@ -10,6 +10,7 @@
 #include "MaterialLib/PorousMedia.h"
 #include "MaterialLib/Solid.h"
 #include "MaterialLib/Fluid.h"
+#include "MaterialLib/Compound.h"
 #include "SolutionLib/FemProblem/FemDirichletBC.h"
 #include "SolutionLib/FemProblem/FemNeumannBC.h"
 #include "GeoLib/GEOObjects.h"
@@ -36,6 +37,7 @@ public:
     std::vector<MaterialLib::PorousMedia*> list_pm;
     std::vector<MaterialLib::Solid*> list_solid;
     std::vector<MaterialLib::Fluid*> list_fluid;
+    std::vector<MaterialLib::Compound*> list_compound;
     //geometric data
     std::string geo_unique_name;
     GeoLib::GEOObjects* geo;
