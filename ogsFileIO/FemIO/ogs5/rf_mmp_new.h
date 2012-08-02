@@ -58,7 +58,7 @@ public:
     int porosity_model;                   // porosity
     int porosity_curve;
     double porosity_model_values[15];
-    double porosity;
+    //double porosity;
     double KC_porosity_initial;           // HS 11.2008
     double KC_permeability_initial;       // HS 11.2008
     std::string porosity_file;            //OK/MB
