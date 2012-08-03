@@ -1,3 +1,15 @@
+/**
+ * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.com)
+ *            Distributed under a Modified BSD License.
+ *              See accompanying file LICENSE.txt or
+ *              http://www.opengeosys.com/LICENSE.txt
+ *
+ *
+ * \file matrix_class.h
+ *
+ * Created on 2004-08-22 by Wenqing Wang
+ */
+
 /*========================================================================
    GeoSys - class Matrix, Sparse matrix (Declaration)
    Task:       Matrix object for full matrices.  If the size of matrix is

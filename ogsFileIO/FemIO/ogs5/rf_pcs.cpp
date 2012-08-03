@@ -1,3 +1,15 @@
+/**
+ * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.com)
+ *            Distributed under a Modified BSD License.
+ *              See accompanying file LICENSE.txt or
+ *              http://www.opengeosys.com/LICENSE.txt
+ *
+ *
+ * \file rf_pcs.cpp
+ *
+ * Created on 2004-01-xx by Olaf Kolditz
+ */
+
 #include "rf_pcs.h"
 
 #include "makros.h"

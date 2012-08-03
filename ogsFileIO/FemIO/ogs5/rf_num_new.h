@@ -1,3 +1,15 @@
+/**
+ * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.com)
+ *            Distributed under a Modified BSD License.
+ *              See accompanying file LICENSE.txt or
+ *              http://www.opengeosys.com/LICENSE.txt
+ *
+ *
+ * \file rf_num_new.h
+ *
+ * Created on 2004-11-xx by Olaf Kolditz
+ */
+
 /**************************************************************************
    FEMLib - Object: NUM
    Task: class implementation

@@ -1,8 +1,13 @@
-/*
- * OGSIOVer4.cpp
+/**
+ * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.com)
+ *            Distributed under a Modified BSD License.
+ *              See accompanying file LICENSE.txt or
+ *              http://www.opengeosys.com/LICENSE.txt
  *
- *  Created on: Jan 14, 2010
- *      Author: TF
+ *
+ * \file Ogs4GeoIO.cpp
+ *
+ * Created on 2010-01-14 by Thomas Fischer
  */
 
 #include "Ogs4GeoIO.h"
