@@ -9,7 +9,7 @@
  *
  * Created on 2012-08-03 by Norihiro Watanabe
  */
-s
+
 #include "ElementTopology.h"
 
 #include <vector>
