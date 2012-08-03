@@ -16,14 +16,6 @@
 
 int main ( int argc, char *argv[] )
 {
-    argc = 5;
-    argv = (char**) malloc((argc+1) * sizeof(char *));
-    argv[0] = "ogs6";
-    argv[1] = "-i";
-    argv[2] = "E:\\3.Task\\20120719_ogs6test\\Mass\\q_quad";
-    argv[3] = "-o";
-    argv[4] = "E:\\3.Task\\20120719_ogs6test\\Mass\\ogs6";
-
     int returncode = 0;
     try {
         ogs6::THMCSimulator sim(argc, argv);
