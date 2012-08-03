@@ -1,3 +1,14 @@
+/**
+ * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.com)
+ *            Distributed under a Modified BSD License.
+ *              See accompanying file LICENSE.txt or
+ *              http://www.opengeosys.com/LICENSE.txt
+ *
+ *
+ * \file TemplatePoint.cpp
+ *
+ * Created on 2010-01-28 by Thomas Fischer
+ */
 
 #include "TemplatePoint.h"
 

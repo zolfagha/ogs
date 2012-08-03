@@ -7,8 +7,9 @@
  *
  * \file ProcessInfo.h
  *
- * Created on 2010-09-02 by Thomas Fischer
+ * Created on 2012-08-03 by Norihiro Watanabe
  */
+
 
 #pragma once
 
