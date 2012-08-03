@@ -1,6 +1,13 @@
 /**
+ * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.com)
+ *            Distributed under a Modified BSD License.
+ *              See accompanying file LICENSE.txt or
+ *              http://www.opengeosys.com/LICENSE.txt
+ *
+ *
  * \file FEMEnums.h
- * 31/08/2010 KR inital implementation
+ *
+ * Created on 2010-08-31 by Karsten Rink
  *
  */
 

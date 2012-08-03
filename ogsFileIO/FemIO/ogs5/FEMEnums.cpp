@@ -1,8 +1,13 @@
-/*
- * FEMEnums.cpp
+/**
+ * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.com)
+ *            Distributed under a Modified BSD License.
+ *              See accompanying file LICENSE.txt or
+ *              http://www.opengeosys.com/LICENSE.txt
  *
- *  Created on: Sep 2, 2010
- *      Author: TF
+ *
+ * \file FEMEnums.cpp
+ *
+ * Created on 2010-09-02 by Thomas Fischer
  */
 
 #include "FEMEnums.h"
