@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Utils/Tools.h"
 #include "NumLib/Function/IFunction.h"
 #include "NumLib/TransientAssembler/ElementWiseTransientResidualAssembler.h"
 #include "NumLib/TimeStepping/TimeStep.h"

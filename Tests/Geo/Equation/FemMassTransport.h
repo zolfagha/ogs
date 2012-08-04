@@ -70,7 +70,7 @@ protected:
             NumLib::LocalMatrix mat_poro(1,1);
             mat_poro(0,0) = d_poro;
 
-             fe->integrateWxN(j, poro, localM);
+             fe->integrateWxN(j, mat_poro, localM);
             fe->integrateDWxDN(j, mat_poro, matDiff);
             fe->integrateWxDN(j, v2, matAdv);
         }
@@ -131,7 +131,7 @@ public:
             NumLib::LocalMatrix mat_poro(1,1);
             mat_poro(0,0) = d_poro;
 
-             fe->integrateWxN(j, poro, matM);
+             fe->integrateWxN(j, mat_poro, matM);
             fe->integrateDWxDN(j, mat_poro, matDiff);
             fe->integrateWxDN(j, v, matAdv);
         }

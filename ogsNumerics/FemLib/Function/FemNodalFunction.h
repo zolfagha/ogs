@@ -219,7 +219,7 @@ private:
 
 /// evaluate this function at the given point
 template <> 
-void TemplateFEMNodalFunction<double>::eval(const NumLib::TXPosition x,  NumLib::ITXFunction::DataType &v) const
+inline void TemplateFEMNodalFunction<double>::eval(const NumLib::TXPosition x,  NumLib::ITXFunction::DataType &v) const
 {
     NumLib::ITXFunction::DataType val(1,1);
     val(0,0) = (*_nodal_values)[x.getId()];

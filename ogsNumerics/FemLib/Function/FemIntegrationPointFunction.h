@@ -16,8 +16,12 @@
 #include <cmath>
 
 #include "MathLib/Vector.h"
+#include "MeshLib/Core/IMesh.h"
 #include "FemLib/Core/DataType.h"
+#include "DiscreteLib/Core/DiscreteSystem.h"
 #include "DiscreteLib/Vector/DiscreteVector.h"
+#include "NumLib/Function/TXFunction.h"
+
 
 
 namespace FemLib
@@ -139,7 +143,7 @@ private:
 };
 
 template <> 
-void TemplateFEMIntegrationPointFunction<double>::eval(const NumLib::TXPosition x,  NumLib::ITXFunction::DataType &v) const
+inline void TemplateFEMIntegrationPointFunction<double>::eval(const NumLib::TXPosition x,  NumLib::ITXFunction::DataType &v) const
 {
     size_t ele_id = x.getId();
     IntegrationPointVectorType &gp_values = (*_values)[ele_id];
