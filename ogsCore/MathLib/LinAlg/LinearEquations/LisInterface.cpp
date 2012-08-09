@@ -17,6 +17,7 @@
 #include <omp.h>
 #endif
 
+#include "lis.h"
 
 namespace MathLib
 {

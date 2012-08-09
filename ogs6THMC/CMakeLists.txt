@@ -66,6 +66,13 @@ INCLUDE_DIRECTORIES(
         ../extra/Eigen
         ../extra/tinyxml2
 )
+IF(USE_EXTERNAL_LIS)
+    INCLUDE_DIRECTORIES( ${LIS_INCLUDE_DIR} )
+ELSE()
+	IF (USE_LIS)
+		INCLUDE_DIRECTORIES( ../extra/lis/include )
+	ENDIF()
+ENDIF ()
 
 target_link_libraries( ogs6THMC
     ogsCore
