@@ -26,7 +26,7 @@ void CRSLisSolver::initialize()
 {
     int argc=0;
     char **argv;
-    lis_initialize(&argc, &argv);
+    lis_initialize((LIS_INT*)&argc, &argv);
 }
 
 void CRSLisSolver::finalize()
@@ -92,7 +92,7 @@ void CRSLisSolver::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)
     sprintf(solver_options, "-i %d -p %d %s", _option.ls_method, _option.ls_precond, _option.ls_extra_arg.c_str()); 
     sprintf(tol_option, "-tol %e -maxiter %ld -omp_num_threads %d -initx_zeros 0", _option.ls_error_tolerance, _option.ls_max_iterations, nthreads);
 
-    ierr = lis_matrix_set_crs(A->getNNZ(), (int*)A->getRowPtrArray(), (int*)A->getColIdxArray(), (double*)A->getEntryArray(), AA);
+    ierr = lis_matrix_set_crs(A->getNNZ(), (LIS_INT*)A->getRowPtrArray(), (LIS_INT*)A->getColIdxArray(), (double*)A->getEntryArray(), AA);
     ierr = lis_matrix_assemble(AA);
 
     // Assemble the vector, b, x
@@ -115,7 +115,7 @@ void CRSLisSolver::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)
     ierr = lis_solve(AA, bb, xx, solver);
     int iter = 0;
     double resid = 0.0;
-    ierr = lis_solver_get_iters(solver, &iter);
+    ierr = lis_solver_get_iters(solver, (LIS_INT*)&iter);
     ierr = lis_solver_get_residualnorm(solver, &resid);
     printf("\t iteration: %d/%ld\n", iter, _option.ls_max_iterations);
     printf("\t residuals: %e\n", resid);
@@ -138,7 +138,7 @@ void CRSLisSolver::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)
 void CRSLisSolver::gatherX(std::vector<double> &x)
 {
     int local_n, global_n;
-    lis_vector_get_size(xx, &local_n, &global_n);
+    lis_vector_get_size(xx, (LIS_INT*)&local_n, (LIS_INT*)&global_n);
     x.resize(global_n);
     lis_vector_gather(xx, &x[0]);
 };

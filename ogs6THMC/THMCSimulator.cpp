@@ -65,7 +65,7 @@ void ogsInit(int argc, char* argv[])
     logog_file = NULL;
 
 #ifdef USE_LIS
-    lis_initialize(&argc, &argv);
+    lis_initialize((LIS_INT*)&argc, &argv);
 #endif
 }
 
