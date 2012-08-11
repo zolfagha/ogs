@@ -23,8 +23,9 @@ SET_TARGET_PROPERTIES(ogsNumerics PROPERTIES LINKER_LANGUAGE CXX)
 INCLUDE_DIRECTORIES(
         .
         ../ogsCore
-        ../external/Eigen
         ../external
+        ../external/logog/include
+        ../external/Eigen
 )
 
 target_link_libraries( ogsNumerics

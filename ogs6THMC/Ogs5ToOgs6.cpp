@@ -12,7 +12,7 @@
 
 #include "Ogs5ToOgs6.h"
 
-#include "logog/include/logog.hpp"
+#include "logog.hpp"
 
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "FemLib/Tools/LagrangeFeObjectContainer.h"

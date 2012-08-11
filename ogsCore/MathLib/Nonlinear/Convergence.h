@@ -15,7 +15,7 @@
 #include <cmath>
 #include <algorithm>
 
-#include "logog/include/logog.hpp"
+#include "logog.hpp"
 
 #include "MathLib/LinAlg/VectorNorms.h"
 

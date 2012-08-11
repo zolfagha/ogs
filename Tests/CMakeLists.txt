@@ -27,6 +27,7 @@ INCLUDE_DIRECTORIES(
 	../ogsCore
 	../ogsNumerics
     ../external
+    ../external/logog/include
 	../external/Eigen
 )
 

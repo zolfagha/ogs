@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "logog/include/logog.hpp"
+#include "logog.hpp"
 
 #include "MathLib/LinAlg/MatrixBase.h"
 #include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"

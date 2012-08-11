@@ -15,7 +15,7 @@
 #include <iostream>
 
 // external library
-#include "logog/include/logog.hpp"
+#include "logog.hpp"
 #include "tclap/CmdLine.h"
 #ifdef USE_LIS
 #include "lis.h"

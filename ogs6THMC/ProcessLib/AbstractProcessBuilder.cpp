@@ -14,7 +14,7 @@
 #include "AbstractProcessBuilder.h"
 
 #include <iostream>
-#include "logog/include/logog.hpp"
+#include "logog.hpp"
 
 namespace ProcessLib
 {

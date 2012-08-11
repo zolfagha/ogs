@@ -13,7 +13,7 @@
 
 #include "Concentration.h"
 
-#include "logog/include/logog.hpp"
+#include "logog.hpp"
 
 #include "FemLib/Function/FemNodalFunction.h"
 #include "NumLib/Function/TXFunctionBuilder.h"

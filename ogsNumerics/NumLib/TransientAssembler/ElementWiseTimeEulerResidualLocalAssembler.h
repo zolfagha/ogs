@@ -14,7 +14,7 @@
 
 #include <cassert>
 
-#include "logog/include/logog.hpp"
+#include "logog.hpp"
 
 
 #include "MeshLib/Core/IElement.h"

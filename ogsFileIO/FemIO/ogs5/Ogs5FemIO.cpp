@@ -12,7 +12,7 @@
 
 #include "Ogs5FemIO.h"
 
-#include "logog/include/logog.hpp"
+#include "logog.hpp"
 
 #include "GeoIO/Ogs4GeoIO.h"
 #include "MeshIO/MeshIoOgs5.h"

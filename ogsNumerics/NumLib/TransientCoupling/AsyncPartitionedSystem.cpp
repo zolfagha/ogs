@@ -13,7 +13,7 @@
 #include "AsyncPartitionedSystem.h"
 
 #include <limits>
-#include "logog/include/logog.hpp"
+#include "logog.hpp"
 
 namespace NumLib
 {

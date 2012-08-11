@@ -12,7 +12,7 @@
 
 #include "OptionsXMLReader.h"
 
-#include "logog/include/logog.hpp"
+#include "logog.hpp"
 #include "tinyxml2.h"
 
 namespace BaseLib

@@ -16,7 +16,7 @@
 #include <iostream>
 #include <cmath>
 
-#include "logog/include/logog.hpp"
+#include "logog.hpp"
 
 #include "NumLib/IOSystem/ParameterSet.h"
 #include "NumLib/Coupling/ICoupledProblem.h"

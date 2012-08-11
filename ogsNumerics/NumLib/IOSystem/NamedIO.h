@@ -18,7 +18,7 @@
 #include <cassert>
 #include <iostream>
 
-#include "logog/include/logog.hpp"
+#include "logog.hpp"
 
 #include "BaseLib/CodingTools.h"
 #include "INamedIO.h"

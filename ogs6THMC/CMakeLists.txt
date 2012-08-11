@@ -77,6 +77,7 @@ INCLUDE_DIRECTORIES(
         ../ogsNumerics
         ../ogsFileIO
         ../external
+        ../external/logog/include
         ../external/Eigen
         ../external/tinyxml2
 )

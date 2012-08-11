@@ -15,6 +15,7 @@ SOURCE_GROUP( ogs6CUI FILES ${CUI_Files} )
 INCLUDE_DIRECTORIES(
         .
         ../external
+        ../external/logog/include
         ../external/Eigen
         ../external/tinyxml2
         ../ogsCore

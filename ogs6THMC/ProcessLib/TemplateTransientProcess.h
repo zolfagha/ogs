@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "logog/include/logog.hpp"
+#include "logog.hpp"
 
 #include "BaseLib/Options.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"

@@ -15,7 +15,7 @@
 #include <cstdio>
 #include <iostream>
 
-#include "logog/include/logog.hpp"
+#include "logog.hpp"
 
 #include "BaseLib/FileTools.h"
 #include "BaseLib/StringTools.h"

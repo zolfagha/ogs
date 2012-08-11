@@ -15,7 +15,7 @@
 #include <vector>
 #include <iostream>
 
-#include "logog/include/logog.hpp"
+#include "logog.hpp"
 
 #include "NumLib/IOSystem/ParameterSet.h"
 #include "NumLib/IOSystem/NamedIOSystem.h"
