@@ -55,8 +55,10 @@ void SimulationInfo::outputHeader ( void )
     INFO("          ##   Program version                             ##");
     INFO("          ##   * Version: %s ##", BaseLib::rightPadding(OGS_VERSION, 32).c_str());
     INFO("          ##   * Date   : %s ##", BaseLib::rightPadding(OGS_DATE, 32).c_str());
+#ifdef GIT_COMMIT_INFO
     INFO("          ##   * Rev.   :                                  ##");
     INFO("          ##     %s ##", BaseLib::rightPadding(GIT_COMMIT_INFO, 41).c_str());
+#endif
     INFO("          ##                                               ##");
     INFO("          ###################################################");
     INFO("");
