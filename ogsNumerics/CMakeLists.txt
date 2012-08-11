@@ -23,14 +23,10 @@ SET_TARGET_PROPERTIES(ogsNumerics PROPERTIES LINKER_LANGUAGE CXX)
 INCLUDE_DIRECTORIES(
         .
         ../ogsCore
-        ../ogsGeometry
-        ../ogsMesh
         ../extra/Eigen
         ../extra
 )
 
 target_link_libraries( ogsNumerics
     ogsCore
-    ogsGeometry
-    ogsMesh
 )

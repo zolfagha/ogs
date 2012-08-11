@@ -25,8 +25,6 @@ INCLUDE_DIRECTORIES(
 	.
 	..
 	../ogsCore
-        ../ogsGeometry
-        ../ogsMesh
 	../ogsNumerics
 	../extra/Eigen
 )
@@ -44,8 +42,6 @@ ADD_EXECUTABLE( tests
 
 TARGET_LINK_LIBRARIES ( tests
 	ogsCore
-	ogsGeometry
-	ogsMesh
 	ogsNumerics
 	logog
     ${CMAKE_THREAD_LIBS_INIT}

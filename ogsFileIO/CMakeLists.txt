@@ -18,15 +18,11 @@ include_directories(
 	.
     ../extra/Eigen
 	../ogsCore
-    ../ogsGeometry
-	../ogsMesh
     ../ogsNumerics
 )
 
 target_link_libraries( ogsFileIO
     ogsCore
-    ogsGeometry
-    ogsMesh
     ogsNumerics
 )
 
