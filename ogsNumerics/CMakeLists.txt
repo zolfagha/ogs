@@ -23,8 +23,8 @@ SET_TARGET_PROPERTIES(ogsNumerics PROPERTIES LINKER_LANGUAGE CXX)
 INCLUDE_DIRECTORIES(
         .
         ../ogsCore
-        ../extra/Eigen
-        ../extra
+        ../external/Eigen
+        ../external
 )
 
 target_link_libraries( ogsNumerics

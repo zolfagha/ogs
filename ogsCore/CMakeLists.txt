@@ -19,8 +19,9 @@ SET_TARGET_PROPERTIES(ogsCore PROPERTIES LINKER_LANGUAGE CXX)
 
 INCLUDE_DIRECTORIES(
         .
-        ../extra/Eigen
-        ../extra/tinyxml2
+        ../external
+        ../external/Eigen
+        ../external/tinyxml2
 )
 
 IF(USE_EXTERNAL_LIS)
@@ -28,7 +29,7 @@ IF(USE_EXTERNAL_LIS)
     TARGET_LINK_LIBRARIES( ogsCore ${LIS_LIBRARIES} )
 ELSE()
 	IF (USE_LIS)
-		INCLUDE_DIRECTORIES( ../extra/lis/include )
+		INCLUDE_DIRECTORIES( ../external/lis/include )
 		TARGET_LINK_LIBRARIES( ogsCore lis )
 	ENDIF()
 ENDIF ()

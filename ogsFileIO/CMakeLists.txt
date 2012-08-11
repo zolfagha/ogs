@@ -16,7 +16,8 @@ ADD_LIBRARY(ogsFileIO STATIC
 
 include_directories(
 	.
-    ../extra/Eigen
+    ../external
+    ../external/Eigen
 	../ogsCore
     ../ogsNumerics
 )

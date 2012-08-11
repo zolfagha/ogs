@@ -76,15 +76,16 @@ INCLUDE_DIRECTORIES(
         ../ogsCore
         ../ogsNumerics
         ../ogsFileIO
-        ../extra/Eigen
-        ../extra/tinyxml2
+        ../external
+        ../external/Eigen
+        ../external/tinyxml2
 )
 
 IF(USE_EXTERNAL_LIS)
     INCLUDE_DIRECTORIES( ${LIS_INCLUDE_DIR} )
 ELSE()
 	IF (USE_LIS)
-		INCLUDE_DIRECTORIES( ../extra/lis/include )
+		INCLUDE_DIRECTORIES( ../external/lis/include )
 	ENDIF()
 ENDIF ()
 

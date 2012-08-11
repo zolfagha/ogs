@@ -26,7 +26,8 @@ INCLUDE_DIRECTORIES(
 	..
 	../ogsCore
 	../ogsNumerics
-	../extra/Eigen
+    ../external
+	../external/Eigen
 )
 
 # Create the executable
@@ -60,7 +61,7 @@ IF(USE_EXTERNAL_LIS)
     TARGET_LINK_LIBRARIES( tests ${LIS_LIBRARIES} )
 ELSE()
 	IF (USE_LIS)
-		INCLUDE_DIRECTORIES( ../extra/lis/include )
+		INCLUDE_DIRECTORIES( ../external/lis/include )
 		TARGET_LINK_LIBRARIES( tests lis )
 	ENDIF()
 ENDIF ()

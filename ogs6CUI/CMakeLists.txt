@@ -14,9 +14,9 @@ SOURCE_GROUP( ogs6CUI FILES ${CUI_Files} )
 
 INCLUDE_DIRECTORIES(
         .
-        ../extra
-        ../extra/Eigen
-        ../extra/tinyxml2
+        ../external
+        ../external/Eigen
+        ../external/tinyxml2
         ../ogsCore
         ../ogsNumerics
         ../ogsFileIO
@@ -39,7 +39,7 @@ IF(USE_EXTERNAL_LIS)
     TARGET_LINK_LIBRARIES( ogs6 ${LIS_LIBRARIES} )
 ELSE()
 	IF (USE_LIS)
-		INCLUDE_DIRECTORIES( ../extra/lis/include )
+		INCLUDE_DIRECTORIES( ../external/lis/include )
 		TARGET_LINK_LIBRARIES( ogs6 lis )
 	ENDIF()
 ENDIF ()

@@ -91,10 +91,10 @@ THMCSimulator::THMCSimulator(int argc, char* argv[])
         TCLAP::CmdLine cmd("ogs6", ' ', "0.1");
         TCLAP::ValueArg<std::string> input_arg("i", "input", "input file", false, "", "string");
         cmd.add( input_arg );
-        TCLAP::ValueArg<unsigned> n_cores_arg("p", "number-cores", "number of cores to use", false, 1, "number");
-        cmd.add( n_cores_arg );
-        TCLAP::ValueArg<std::string> output_arg("o", "output", "output directory", false, "", "string");
-        cmd.add( output_arg );
+        TCLAP::ValueArg<std::string> output_dir_arg("o", "output", "output directory", false, "", "string");
+        cmd.add( output_dir_arg );
+        TCLAP::ValueArg<std::string> logfile_arg("l", "log", "log file", false, "", "string");
+        cmd.add( logfile_arg );
         TCLAP::ValueArg<unsigned> verbosity_arg("v", "verbose", "level of verbosity [0 very low information, 1 much information]", false, 0, "number");
         cmd.add( verbosity_arg );
         TCLAP::ValueArg<unsigned> pcs_arg("m", "modules", "list available modules [0 off, 1 on]", false, 1, "number");
@@ -105,21 +105,27 @@ THMCSimulator::THMCSimulator(int argc, char* argv[])
         ogsInit(argc, argv);
 
         // get parsed data
-        std::string output_dir_path = "";
-        if (! output_arg.getValue().empty()) {
+        // log file
+        if (! logfile_arg.getValue().empty()) {
             if (!logog_file) delete logog_file;
-            output_dir_path = output_arg.getValue();
-            std::string log_file = output_dir_path + "\\ogs.log";
+            std::string log_file = logfile_arg.getValue();
             BaseLib::truncateFile(log_file);
             logog_file = new logog::LogFile(log_file.c_str());
             logog_file->SetFormatter( *custom_format );
         }
 
         SimulationInfo::outputHeader();
-
+        
+        // list modules
         unsigned flag_list_modules (pcs_arg.getValue());
         if (flag_list_modules!=0) {
             ProcessBuilder::getInstance()->output();
+        }
+
+        // data output directory
+        std::string output_dir_path = "";
+        if (! output_dir_arg.getValue().empty()) {
+            output_dir_path = output_dir_arg.getValue();
         }
 
         if (! input_arg.getValue().empty()) {
