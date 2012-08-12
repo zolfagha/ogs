@@ -16,7 +16,7 @@
 
 #include "BaseLib/CodingTools.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
-#include "GeoLib/Core/Point.h"
+#include "GeoLib/Point.h"
 
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Core/IElement.h"

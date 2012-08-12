@@ -10,18 +10,18 @@
  * Created on 2010-02-02 by Thomas Fischer / Karsten Rink
  */
 
-
-// GEOLIB
-#include "GeoLib/Core/Point.h"
-#include "AxisAlignedBoundingBox.h"
+#include <vector>
+#include <string>
+#include <map>
 
 // Base
 #include "BaseLib/quicksort.h"
 #include "BaseLib/binarySearch.h"
 
-#include <vector>
-#include <string>
-#include <map>
+// GEOLIB
+#include "Point.h"
+#include "AxisAlignedBoundingBox.h"
+
 
 #ifndef POINTVEC_H_
 #define POINTVEC_H_

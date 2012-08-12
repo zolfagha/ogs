@@ -16,7 +16,7 @@
 #include <set>
 
 #include "MathLib/Vector.h"
-#include "GeoLib/Core/Point.h"
+#include "GeoLib/Point.h"
 
 #include "INode.h"
 

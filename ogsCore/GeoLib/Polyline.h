@@ -15,7 +15,7 @@
 
 // GEOLIB
 #include "GeoObject.h"
-#include "GeoLib/Core/Point.h"
+#include "Point.h"
 
 // MathLib
 #include "GeoLib/MathTools.h"
@@ -62,7 +62,7 @@ public:
 
     virtual ~Polyline() {}
 
-    virtual GeoObjType::type getGeoType() const {return GeoObjType::POLYLINE;};
+    virtual GEOTYPE getGeoType() const {return GEOTYPE::POLYLINE;};
 
     /** write the points to the stream */
     void write(std::ostream &os) const;

@@ -12,8 +12,8 @@
 
 #include "Triangle.h"
 
-#include "GeoLib/Vector3.h"
-#include "GeoLib/MathTools.h"
+#include "Vector3.h"
+#include "MathTools.h"
 
 // MathLib
 #include "MathLib/LinAlg/Solvers/GaussAlgorithm.h"

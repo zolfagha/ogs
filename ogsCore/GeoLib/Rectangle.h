@@ -14,9 +14,10 @@
 
 #include <vector>
 
-#include "GeoLib/Core/Point.h"
-#include "GeoLib/Core/Polyline.h"
 #include "BaseLib/CodingTools.h"
+
+#include "Point.h"
+#include "Polyline.h"
 
 namespace GeoLib
 {

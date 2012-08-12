@@ -13,7 +13,7 @@
 #include "MeshGenerator.h"
 
 #include <memory>
-#include "GeoLib/Core/Point.h"
+#include "GeoLib/Point.h"
 #include "MeshLib/Topology/Topology.h"
 
 namespace MeshLib

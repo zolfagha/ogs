@@ -13,16 +13,16 @@
 #ifndef GEOOBJECTS_H_
 #define GEOOBJECTS_H_
 
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
+#include "Point.h"
 #include "PointVec.h"
-#include "GeoLib/Core/Point.h"
+#include "Polyline.h"
 #include "PolylineVec.h"
-#include "GeoLib/Core/Polyline.h"
+#include "Surface.h"
 #include "SurfaceVec.h"
-#include "GeoLib/Core/Surface.h"
 
 
 namespace GeoLib

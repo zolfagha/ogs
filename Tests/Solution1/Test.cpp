@@ -17,7 +17,7 @@
 
 #include "MathLib/Vector.h"
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
-#include "GeoLib/Shape/Line.h"
+#include "GeoLib/Line.h"
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TransientCoupling/AsyncPartitionedSystem.h"

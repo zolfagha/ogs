@@ -14,8 +14,8 @@
 
 #include <vector>
 
-#include "GeoLib/Core/GeoObject.h"
-#include "GeoLib/Core/Polyline.h"
+#include "GeoLib/GeoObject.h"
+#include "GeoLib/Polyline.h"
 
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Core/UnstructuredMesh.h"

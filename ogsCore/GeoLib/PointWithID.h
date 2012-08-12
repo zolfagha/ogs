@@ -13,9 +13,11 @@
 #ifndef POINTWITHID_H_
 #define POINTWITHID_H_
 
-#include "GeoLib/Core/Point.h"
+#include "Point.h"
 
-namespace GeoLib {
+namespace GeoLib 
+{
+
 /**
  * class PointWithID is derived from class Point in
  * order to extend the class Point with an ID.

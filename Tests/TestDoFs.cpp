@@ -23,7 +23,7 @@
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
 #endif
 
-#include "GeoLib/Shape/Rectangle.h"
+#include "GeoLib/Rectangle.h"
 
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "MeshLib/Core/IMesh.h"

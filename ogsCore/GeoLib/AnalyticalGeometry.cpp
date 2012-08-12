@@ -20,18 +20,20 @@
 #include "BaseLib/swap.h"
 #include "BaseLib/quicksort.h"
 
-// GEO
-#include "GeoLib/Core/Polyline.h"
-#include "GeoLib/Shape/Triangle.h"
-#include "GeoLib/AnalyticalGeometry.h"
-
 // MathLib
 #include "MathLib/MathTools.h"
 #include "MathLib/LinAlg/Solvers/GaussAlgorithm.h"
 #include "MathLib/LinAlg/Dense/Matrix.h" // for transformation matrix
 #include "MathLib/max.h"
 
-namespace GeoLib {
+// GEO
+#include "Polyline.h"
+#include "Triangle.h"
+#include "AnalyticalGeometry.h"
+
+
+namespace GeoLib 
+{
 
 Orientation getOrientation (const double& p0_x, const double& p0_y,
     const double& p1_x, const double& p1_y,

@@ -13,7 +13,7 @@
 #pragma once
 
 #include "MathLib/LinAlg/VectorNorms.h"
-#include "GeoLib/Shape/Rectangle.h"
+#include "GeoLib/Rectangle.h"
 #include "FemLib/Function/FemFunction.h"
 #include "NumLib/Function/Function.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"

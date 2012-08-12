@@ -14,7 +14,7 @@
 #define POLYLINEVEC_H_
 
 #include "TemplateVec.h"
-#include "GeoLib/Core/Polyline.h"
+#include "Polyline.h"
 
 namespace GeoLib {
 

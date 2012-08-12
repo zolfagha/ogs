@@ -16,7 +16,7 @@
 #include <algorithm>
 
 #include "BaseLib/CodingTools.h"
-#include "GeoLib/Core/Point.h"
+#include "GeoLib/Point.h"
 
 #include "IMesh.h"
 #include "IElement.h"

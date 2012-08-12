@@ -15,20 +15,21 @@
 
 #include <string>
 
-namespace GeoLib {
+namespace GeoLib 
+{
 
 /**
- * \ingroup GEOLIB
+ * \ingroup GeoLib
  */
 
-enum GEOTYPE {
+enum GEOTYPE 
+{
     INVALID = 0,
     POINT,     //!< POINT
     POLYLINE,  //!< POLYLINE
+    POLYGON,   //!< POLYGON  
     SURFACE,   //!< SURFACE
-    VOLUME,    //!< VOLUME
-    GEODOMAIN, //!< GEODOMAIN
-    COLUMN     //!< COLUMN. //WW/JOD 
+    VOLUME    //!< VOLUME
 };
 
 GEOTYPE convertGeoType (const std::string& geo_type_str);

@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "GeoLib/Core/GeoObject.h"
+#include "GeoLib/GeoObject.h"
 #include "NumLib/Function/TXFunction.h"
 
 namespace SolutionLib

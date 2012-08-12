@@ -16,7 +16,7 @@
 #include <list>
 
 // GEOLIB
-#include "Core/Polygon.h"
+#include "Polygon.h"
 
 namespace GeoLib
 {

@@ -19,7 +19,7 @@
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
 
-#include "GeoLib/Shape/Rectangle.h"
+#include "GeoLib/Rectangle.h"
 
 #include "MeshLib/Core/IMesh.h"
 

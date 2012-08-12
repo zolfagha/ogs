@@ -13,10 +13,6 @@
 #include <cstdlib> // for exit
 #include <cmath>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 #include "Polygon.h"
 
 // MathLib
@@ -28,6 +24,11 @@
 // Base
 #include "BaseLib/quicksort.h"
 #include "BaseLib/swap.h"
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 
 namespace GeoLib {
 

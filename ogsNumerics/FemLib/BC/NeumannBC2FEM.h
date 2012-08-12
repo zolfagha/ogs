@@ -15,8 +15,8 @@
 #include <map>
 #include <vector>
 
-#include "GeoLib/Core/GeoObject.h"
-#include "GeoLib/Core/Point.h"
+#include "GeoLib/GeoObject.h"
+#include "GeoLib/Point.h"
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Tools/Tools.h"
 #include "NumLib/Function/TXFunction.h"

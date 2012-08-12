@@ -13,8 +13,8 @@
 #pragma once
 
 #include "BaseLib/CodingTools.h"
-#include "GeoLib/Core/Point.h"
-#include "GeoLib/Core/Polyline.h"
+#include "Point.h"
+#include "Polyline.h"
 
 namespace GeoLib
 {

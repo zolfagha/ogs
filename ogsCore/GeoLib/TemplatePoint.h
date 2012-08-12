@@ -51,7 +51,7 @@ public:
     /** virtual destructor */
     virtual ~TemplatePoint() {};
 
-    virtual GeoObjType::type getGeoType() const {return GeoObjType::POINT;};
+    virtual GEOTYPE getGeoType() const {return GEOTYPE::POINT;};
 
     inline TemplatePoint<T> operator- (const TemplatePoint<T> &p) const
     {

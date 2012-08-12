@@ -14,7 +14,7 @@
 #define _TEST_UTIL_H_
 
 #include <gtest/gtest.h>
-#include "GeoLib/Core/Point.h"
+#include "GeoLib/Point.h"
 #include "MathLib/Vector.h"
 
 inline void ASSERT_DOUBLE_ARRAY_EQ(const double* Expected, const double* Actual, size_t N, double epsilon=1.0e-8) {

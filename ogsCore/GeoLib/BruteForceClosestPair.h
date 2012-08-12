@@ -15,13 +15,14 @@
 
 #include "ClosestPair.h"
 
-namespace GeoLib {
+namespace GeoLib 
+{
 
 class BruteForceClosestPair : public ClosestPair {
 public:
     BruteForceClosestPair(std::vector<GeoLib::Point*> const & pnts, size_t& id0, size_t& id1);
 };
 
-} // end namespace GEOLIB
+} // end namespace GeoLib
 
 #endif /* BRUTEFORCECLOSESTPAIR_H_ */

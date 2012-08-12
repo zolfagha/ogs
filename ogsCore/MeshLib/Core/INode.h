@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "GeoLib/Core/Point.h"
+#include "GeoLib/Point.h"
 
 namespace MeshLib
 {

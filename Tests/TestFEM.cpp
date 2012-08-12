@@ -18,7 +18,7 @@
 #include "NumLib/Function/Function.h"
 #include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
 
-#include "GeoLib/Shape/Rectangle.h"
+#include "GeoLib/Rectangle.h"
 
 #include "MeshLib/Tools/MeshGenerator.h"
 

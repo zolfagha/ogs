@@ -14,7 +14,7 @@
 
 #include <vector>
 
-#include "GeoLib/Core/Point.h"
+#include "GeoLib/Point.h"
 #include "IElement.h"
 
 namespace MeshLib

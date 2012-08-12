@@ -14,7 +14,7 @@
 
 #include <vector>
 
-#include "GeoLib/Core/Point.h"
+#include "GeoLib/Point.h"
 
 #include "MeshLib/Core/INode.h"
 //#include "CoordinateSystem.h"

@@ -15,7 +15,7 @@
 
 #include <vector>
 
-#include "GeoLib/Core/GeoObject.h"
+#include "GeoLib/GeoObject.h"
 #include "MeshLib/Core/IMesh.h"
 #include "NumLib/Function/TXFunction.h"
 

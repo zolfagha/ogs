@@ -13,10 +13,10 @@
 #ifndef ANALYTICAL_GEOMETRY_H_
 #define ANALYTICAL_GEOMETRY_H_
 
-// GEOLIB
-#include "GeoLib/Vector3.h"
-#include "GeoLib/Core/Point.h"
-#include "GeoLib/Shape/Triangle.h"
+// GeoLib
+#include "Vector3.h"
+#include "Point.h"
+#include "Triangle.h"
 
 #include <vector>
 

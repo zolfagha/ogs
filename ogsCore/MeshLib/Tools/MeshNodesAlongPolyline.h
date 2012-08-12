@@ -14,7 +14,7 @@
 #define MESHNODESALONGPOLYLINE_H_
 
 // GEOLIB
-#include "GeoLib/Core/Polyline.h"
+#include "GeoLib/Polyline.h"
 
 // Mesh
 #include "MeshLib/Core/IMesh.h"

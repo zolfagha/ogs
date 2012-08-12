@@ -15,7 +15,7 @@
 #define SURFACEVEC_H_
 
 #include "TemplateVec.h"
-#include "GeoLib/Core/Surface.h"
+#include "Surface.h"
 
 namespace GeoLib {
 

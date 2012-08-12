@@ -13,15 +13,16 @@
 #ifndef AXISALIGNEDBOUNDINGBOX_H_
 #define AXISALIGNEDBOUNDINGBOX_H_
 
-#include "GeoLib/Core/Point.h"
-#include <vector>
 #include <limits>
+#include <vector>
 
-namespace GeoLib {
+#include "Point.h"
 
+namespace GeoLib
+{
 /**
  *
- * \ingroup GEOLIB
+ * \ingroup GeoLib
  *
  * \brief Class AABB is a bounding box around a given geometric entity
  * */
@@ -58,9 +59,9 @@ public:
      */
     bool containsPoint (GeoLib::Point const & pnt, double eps = std::numeric_limits<double>::epsilon()) const;
 
-    /**
-     * wrapper for GEOLIB::Point
-     */
+	/**
+	 * wrapper for GeoLib::Point
+	 */
     bool containsPoint (const double *pnt, double eps = std::numeric_limits<double>::epsilon()) const;
 
     /**

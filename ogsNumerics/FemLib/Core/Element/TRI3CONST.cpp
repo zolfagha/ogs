@@ -13,7 +13,7 @@
 #include "TRI3CONST.h"
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
-#include "GeoLib/Core/Point.h"
+#include "GeoLib/Point.h"
 #include "NumLib/Function/Function.h"
 
 namespace FemLib

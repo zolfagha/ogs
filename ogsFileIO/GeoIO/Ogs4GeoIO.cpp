@@ -23,12 +23,12 @@
 
 // GEO
 #include "GeoLib/GEOObjects.h"
-#include "GeoLib/Core/Point.h"
-#include "GeoLib/Core/Polygon.h"
-#include "GeoLib/Core/Polyline.h"
+#include "GeoLib/Point.h"
+#include "GeoLib/Polygon.h"
+#include "GeoLib/Polyline.h"
 #include "GeoLib/SimplePolygonTree.h"
-#include "GeoLib/Core/Surface.h"
-#include "GeoLib/Shape/Triangle.h"
+#include "GeoLib/Surface.h"
+#include "GeoLib/Triangle.h"
 
 // for tests only
 #include "GeoLib/PointVec.h"

@@ -16,7 +16,7 @@
 #include <vector>
 
 // GeoLib
-#include "GeoLib/Core/Point.h"
+#include "Point.h"
 
 namespace GeoLib 
 {

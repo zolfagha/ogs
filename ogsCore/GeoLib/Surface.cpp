@@ -15,9 +15,9 @@
 // GEOLIB
 #include "Surface.h"
 #include "Polygon.h"
-#include "GeoLib/AxisAlignedBoundingBox.h"
-#include "GeoLib/AnalyticalGeometry.h"
-#include "GeoLib/EarClippingTriangulation.h"
+#include "AxisAlignedBoundingBox.h"
+#include "AnalyticalGeometry.h"
+#include "EarClippingTriangulation.h"
 
 namespace GeoLib {
 

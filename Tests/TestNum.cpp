@@ -21,7 +21,7 @@
 #include "MathLib/LinAlg/LinearEquations/SparseLinearEquations.h"
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
 
-#include "GeoLib/Shape/Rectangle.h"
+#include "GeoLib/Rectangle.h"
 
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "MeshLib/Core/IMesh.h"

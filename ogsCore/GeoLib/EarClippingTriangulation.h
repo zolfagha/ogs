@@ -16,9 +16,9 @@
 // STL
 #include <list>
 
-// GEOLIB
-#include "GeoLib/Core/Polygon.h"
-#include "GeoLib/Shape/Triangle.h"
+// GeoLib
+#include "Polygon.h"
+#include "Triangle.h"
 
 // MathLib
 #include "AnalyticalGeometry.h"

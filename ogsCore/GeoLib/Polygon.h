@@ -17,8 +17,9 @@
 #include <list>
 
 // GEOLIB
-#include "GeoLib/AxisAlignedBoundingBox.h"
-#include "GeoLib/Core/Polyline.h"
+#include "GeoType.h"
+#include "Polyline.h"
+#include "AxisAlignedBoundingBox.h"
 
 namespace GeoLib {
 
@@ -57,7 +58,7 @@ public:
 
     virtual ~Polygon();
 
-    virtual GeoObjType::type getGeoType() const {return GeoObjType::POLYGON;};
+    virtual GEOTYPE getGeoType() const {return GEOTYPE::POLYGON;};
 
     /**
      *

@@ -16,9 +16,9 @@
 
 #include "BaseLib/CodingTools.h"
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
-#include "GeoLib/Core/Polyline.h"
-#include "GeoLib/Shape/Line.h"
-#include "GeoLib/Shape/Rectangle.h"
+#include "GeoLib/Polyline.h"
+#include "GeoLib/Line.h"
+#include "GeoLib/Rectangle.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "NumLib/Function/TXFunction.h"

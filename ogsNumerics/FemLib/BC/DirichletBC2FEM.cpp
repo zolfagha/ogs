@@ -12,7 +12,7 @@
 
 #include "DirichletBC2FEM.h"
 
-#include "GeoLib/Core/Point.h"
+#include "GeoLib/Point.h"
 #include "MeshLib/Tools/Tools.h"
 
 

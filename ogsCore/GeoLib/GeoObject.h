@@ -13,23 +13,13 @@
 #ifndef GEOOBJECT_H_
 #define GEOOBJECT_H_
 
-namespace GeoLib {
+#include "GeoType.h"
 
-struct GeoObjType
+namespace GeoLib 
 {
-    enum type {
-        POINT,
-        POLYLINE,
-        POLYGON,
-        SURFACE,
-        VOLUME,
-        INVALID
-    };
-};
-    
 
 /**
- * \ingroup GEOLIB
+ * \ingroup GeoLib
  *
  * \brief Base class for classes Point, Polyline, Surface.
  */
@@ -39,9 +29,9 @@ public:
     GeoObject() {};
     virtual ~GeoObject() {};
 
-    virtual GeoObjType::type getGeoType() const = 0;
+    virtual GEOTYPE getGeoType() const = 0;
 };
 
-} // end namespace GEOLIB
+} // end namespace GeoLib
 
 #endif /* GEOOBJECT_H_ */

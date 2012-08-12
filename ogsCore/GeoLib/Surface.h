@@ -16,10 +16,10 @@
 #include <vector>
 
 #include "GeoObject.h"
-#include "GeoLib/Core/Point.h"
-#include "GeoLib/Core/Polyline.h"
-#include "GeoLib/Shape/Triangle.h"
-#include "GeoLib/AxisAlignedBoundingBox.h"
+#include "Point.h"
+#include "Polyline.h"
+#include "Triangle.h"
+#include "AxisAlignedBoundingBox.h"
 
 namespace GeoLib {
 
@@ -36,7 +36,7 @@ public:
     Surface    (const std::vector<Point*> &pnt_vec);
     virtual ~Surface ();
 
-    virtual GeoObjType::type getGeoType() const {return GeoObjType::SURFACE;};
+    virtual GEOTYPE getGeoType() const {return GEOTYPE::SURFACE;};
 
     /**
      * adds three indices describing a triangle and updates the bounding box

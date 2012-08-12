@@ -16,8 +16,8 @@
 // STL
 #include <vector>
 
-// GEOLIB
-#include "GeoLib/Core/Point.h"
+// GeoLib
+#include "Point.h"
 
 namespace GeoLib {
 
@@ -34,6 +34,6 @@ protected:
     size_t _id1;
 };
 
-} // end namespace GEOLIB
+} // end namespace GeoLib
 
 #endif /* CLOSESTPAIR_H_ */
