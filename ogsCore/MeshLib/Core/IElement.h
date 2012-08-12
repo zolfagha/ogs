@@ -16,13 +16,14 @@
 
 #include "GeoLib/Point.h"
 
-#include "MeshLib/Core/INode.h"
-//#include "CoordinateSystem.h"
+#include "MeshLib/Core/Node.h"
 
 namespace MeshLib
 {
 
-/// List of available element types
+class IElementCoordinatesMapping;
+
+/// List of element shape types
 struct ElementShape
 {
     enum type {
@@ -37,6 +38,7 @@ struct ElementShape
     };
 };
 
+/// List of available element types
 struct ElementType
 {
     enum type {
@@ -57,23 +59,45 @@ struct ElementType
     };
 };
 
-class IElementCoordinatesMapping;
-
 /**
  * \brief Interface of element classes
  *
+ * Any elements have the following attributes
+ * - element id
+ * - group id
+ * - shape type
+ * - dimension size
+ * - node index
+ * - faces
+ * - edges
+ * - coordinates mapping
+ * - order
  */
 class IElement
 {
 public:
-    virtual ~IElement() {};
     ///
-    virtual void initialize() = 0;
+    virtual ~IElement() {};
+    
+    //--- init/finalize ---
+    /// reset element data 
+    virtual void reset() = 0;
+    /// return a clone of this object
     virtual IElement* clone() const = 0;
 
-    /// return if this element has the given list of nodes 
-    virtual bool hasNodeIds(const std::vector<size_t> &node_ids) const = 0;
+    //--- element topology ---
+    /// return the shape type
+    virtual ElementShape::type getShapeType() const = 0;
+    /// return intrinsic dimensions of this element
+    virtual size_t getDimension() const = 0;
+    /// return the number of nodes under current order
+    virtual size_t getNumberOfNodes() const = 0;
+    /// get the number of element faces
+    virtual size_t getNumberOfFaces() const = 0;
+    /// get the number of element edges
+    virtual size_t getNumberOfEdges() const = 0;
 
+    //--- element attributes ---
     /// return this element id
     virtual size_t getID() const = 0;
     /// set this element id
@@ -84,39 +108,30 @@ public:
     /// set the group if of this element
     virtual void setGroupID(size_t id) = 0;
 
-    /// return the shape type
-    virtual ElementShape::type getShapeType() const = 0;
-    /// return intrinsic dimensions of this element
-    virtual size_t getDimension() const = 0;
-
-    /// return the number of nodes under current order
-    virtual size_t getNumberOfNodes() const = 0;
-    /// set node id
-    virtual void setNodeID(const size_t &local_node_id, const size_t &node_id) = 0;
-    /// return node id
-    virtual size_t getNodeID(size_t local_node_id) const = 0;
-    /// get a list of node ids
-    virtual void getNodeIDList( std::vector<size_t> &e_node_id_list ) const = 0;
-
-    /// get the number of element faces
-    virtual size_t getNumberOfFaces() const = 0;
-
-    /// get the number of element edges
-    virtual size_t getNumberOfEdges() const = 0;
-    /// get an edge element
-    virtual IElement* getEdgeElement(size_t edge_id) const = 0;
-    /// set an edge element
-    virtual void setEdgeElement(size_t edge_id, IElement* e) = 0;
-    /// get node ids of the edge element
-    virtual void getNodeIDsOfEdgeElement(size_t edge_id, std::vector<size_t> &vec_node_ids) const = 0;
-    /// get edge element type
-    virtual ElementShape::type getEdgeElementType(size_t edge_id) const = 0;
-
-    /// set mapped coordinates
-    virtual void setMappedCoordinates(IElementCoordinatesMapping* mapping) = 0;
     /// get mapped coordinates
     virtual IElementCoordinatesMapping* getMappedCoordinates() = 0;
+    /// set mapped coordinates
+    virtual void setMappedCoordinates(IElementCoordinatesMapping* mapping) = 0;
 
+    /// return node id
+    virtual size_t getNodeID(size_t local_node_id) const = 0;
+    /// set node id
+    virtual void setNodeID(const size_t &local_node_id, const size_t &node_id) = 0;
+    /// get a list of node ids
+    virtual void getNodeIDList( std::vector<size_t> &e_node_id_list ) const = 0;
+    /// return if this element has the given list of nodes 
+    virtual bool hasNodeIds(const std::vector<size_t> &node_ids) const = 0;
+
+    /// get an edge element
+    virtual IElement* getEdge(size_t edge_id) const = 0;
+    /// set an edge element
+    virtual void setEdge(size_t edge_id, IElement* e) = 0;
+    /// get node ids of the edge element
+    virtual void getNodeIDsOfEdges(size_t edge_id, std::vector<size_t> &vec_node_ids) const = 0;
+    /// get edge element type
+    virtual ElementShape::type getEdgeType(size_t edge_id) const = 0;
+
+    //--- element order ---
     /// set max. order
     virtual void setMaximumOrder(size_t) = 0;
     /// get max. order

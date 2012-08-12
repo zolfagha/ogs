@@ -14,7 +14,7 @@
 
 //#include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MeshLib/Core/IMesh.h"
-#include "MeshLib/Core/ElementCoordinatesMapping.h"
+#include "MeshLib/Core/IElementCoordinatesMapping.h"
 #include "FemLib/Core/ShapeFunction/IFemShapeFunction.h"
 #include "IFemCoordinatesMapping.h"
 
@@ -24,19 +24,23 @@ namespace FemLib
 /**
  * \brief Mapping element shapes to natural coordinates
  *
- * FemNaturalCoordinates mapping converts element shapes in physical coordinates (x,y,z) to that in natural coordinates (r,s,t).
- * - Given physical coordinates should correspond to dimensions of the element, i.e (x,y) for triangles
+ * FemNaturalCoordinates mapping converts element shapes in physical coordinates
+ * (x,y,z) to that in natural coordinates (r,s,t).
+ * - Given physical coordinates should correspond to dimensions of the element, 
+ *   i.e. (x,y) for triangles
  * - x(r,s,t) = N(r,s,t) x_i
  */
 class FemNaturalCoordinates : public IFemCoordinatesMapping
 {
 public:
-    FemNaturalCoordinates(IFemShapeFunction *shape) 
+    ///
+    explicit FemNaturalCoordinates(IFemShapeFunction *shape) 
     {
         _shape = shape;
         _prop = new CoordinateMappingProperty();
     }
 
+    ///
     virtual ~FemNaturalCoordinates()
     {
         delete _prop;
@@ -45,6 +49,7 @@ public:
     /// initialize element
     virtual void initialize(MeshLib::IElement &ele);
 
+    ///
     virtual const CoordinateMappingProperty* getProperties() const {return _prop;};
 
     /// compute mapping properties at the given location in natural coordinates

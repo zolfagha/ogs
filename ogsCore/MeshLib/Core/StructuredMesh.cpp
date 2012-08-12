@@ -40,7 +40,7 @@ template<> void StructuredMesh<ElementShape::QUAD>::construct()
 template<> IElement* StructuredMesh<ElementShape::QUAD>::getElemenet( size_t element_id ) const 
 {
     //set e
-    _e->initialize();
+    _e->reset();
     _e->setID(element_id);
     _e->setMaximumOrder(getMaxiumOrder());
     _e->setCurrentOrder(_order);
@@ -69,10 +69,10 @@ template<> IElement* StructuredMesh<ElementShape::QUAD>::getElemenet( size_t ele
     return _e;
 };
 
-template<> INode* StructuredMesh<ElementShape::QUAD>::getNode( size_t id ) const 
+template<> Node* StructuredMesh<ElementShape::QUAD>::getNode( size_t id ) const 
 {
     _nod->setNodeID(id);
-    getNodeCoordinates(id, const_cast<GeoLib::Point*>(_nod->getData()));
+    getNodeCoordinates(id, const_cast<GeoLib::Point*>(_nod->getX()));
 
     return _nod;
 };

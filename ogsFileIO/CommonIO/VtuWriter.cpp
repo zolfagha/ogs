@@ -17,7 +17,7 @@
 #include "BaseLib/SystemTools.h"
 #include "BaseLib/FileTools.h"
 #include "MeshLib/Core/CoordinateSystem.h"
-#include "MeshLib/Core/MeshGeometricProperties.h"
+#include "MeshLib/Core/MeshGeometricProperty.h"
 
 using namespace MeshLib;
 

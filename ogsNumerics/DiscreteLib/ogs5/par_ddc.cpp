@@ -179,7 +179,7 @@ void CPARDomain::CreateElements()
     int j, nNodes, nNodesHQ;
     long* elem_nodes = NULL;
     MeshLib::IElement* m_ele = NULL;
-    MeshLib::INode* m_nod = NULL;
+    MeshLib::Node* m_nod = NULL;
     //*** Buffer for acceleration. 14.09.2007 WW:
     // As long buffer
     std::vector<int> node_connected_doms;

@@ -41,7 +41,7 @@ size_t UnstructuredMesh::setNodeCoordinates( size_t node_id, GeoLib::Point &x )
 {
     size_t new_node_id = node_id;
     if (node_id<_list_nodes.size()) {
-        INode *node = this->_list_nodes.at(node_id);
+        Node *node = this->_list_nodes.at(node_id);
         node->setX(x);
     } else {
         new_node_id = addNode(x);

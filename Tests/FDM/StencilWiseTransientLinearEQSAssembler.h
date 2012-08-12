@@ -75,7 +75,7 @@ public:
         LocalVectorType local_u_n1;
         LocalVectorType local_u_n;
         for (size_t i=0; i<n_nod; i++) {
-            MeshLib::INode* nod = msh.getNode(i);
+            MeshLib::Node* nod = msh.getNode(i);
             ele_node_ids.clear();
             ele_node_size_order.clear();
             local_dofmap.clear();

@@ -5,7 +5,7 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file INode.h
+ * \file ElementCoordinatesMapping.h
  *
  * Created on 2012-08-03 by Norihiro Watanabe
  */
@@ -16,22 +16,20 @@
 
 namespace MeshLib
 {
+
 /**
- * \brief 
+ * \brief Interface of methods mapping coordinates of elements.
  *
- * 
- */  
-class INode
+ *
+ */
+class IElementCoordinatesMapping
 {
 public:
-    INode () {};
-    virtual ~INode (){};
-
-    virtual size_t getNodeID() const = 0;
-    virtual void setNodeID(const size_t &id) = 0;
-    virtual const GeoLib::Point* getData() const = 0;
-    virtual void setX(const GeoLib::Point &x) = 0; 
+    ///
+    virtual ~IElementCoordinatesMapping() {};
+    
+    /// get mapped coordinates of nodes
+    virtual GeoLib::Point* getNodePoint(size_t node_id) = 0;
 };
 
-} // end namespace
-
+}

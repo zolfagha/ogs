@@ -15,7 +15,9 @@
 #include <vector>
 #include <cassert>
 
-#include "MeshLib/Core/MeshGeometricProperties.h"
+#include "MeshLib/Core/MeshGeometricProperty.h"
+#include "MeshLib/Core/ElementCoordinatesInvariant.h"
+#include "MeshLib/Core/ElementCoordinatesMappingLocal.h"
 
 #include "FemLib/Core/Extrapolation/FemExtrapolation.h"
 #include "FemLib/Core/CoordinatesMapping/FemNaturalCoordinates.h"
@@ -63,9 +65,9 @@ public:
         if (e.getMappedCoordinates()==0) {
             MeshLib::IElementCoordinatesMapping *ele_map = 0;
             if (msh->getDimension() == e.getDimension()) {
-                ele_map = new MeshLib::EleMapInvariant(*msh, e);
+                ele_map = new MeshLib::ElementCoordinatesInvariant(msh, &e);
             } else {
-                ele_map = new MeshLib::EleMapLocalCoordinates(*msh, e, *msh->getGeometricProperty()->getCoordinateSystem());
+                ele_map = new MeshLib::ElementCoordinatesMappingLocal(msh, e, msh->getGeometricProperty()->getCoordinateSystem());
             }
             e.setMappedCoordinates(ele_map);
         }

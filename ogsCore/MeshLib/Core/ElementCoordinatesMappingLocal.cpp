@@ -5,12 +5,12 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file ElementCoordinatesMapping.cpp
+ * \file ElementCoordinatesMappingLocal
  *
  * Created on 2012-08-03 by Norihiro Watanabe
  */
 
-#include "ElementCoordinatesMapping.h"
+#include "ElementCoordinatesMappingLocal.h"
 
 #include <limits>
 #include "MathLib/MathTools.h"
@@ -19,7 +19,7 @@ namespace MeshLib
 {
 
 ///
-void EleMapLocalCoordinates::flip(IElement &ele, const CoordinateSystem &coordinate_system)
+void ElementCoordinatesMappingLocal::flip(IElement &ele, const CoordinateSystem &coordinate_system)
 {
     IElement* e = &ele;
     switch(coordinate_system.getType())
@@ -67,7 +67,7 @@ void EleMapLocalCoordinates::flip(IElement &ele, const CoordinateSystem &coordin
 }
 
 ///
-void EleMapLocalCoordinates::rotate(IElement &ele, const CoordinateSystem &coordinate_system)
+void ElementCoordinatesMappingLocal::rotate(IElement &ele, const CoordinateSystem &coordinate_system)
 {
     IElement* e = &ele;
     _point_vec.resize(e->getNumberOfNodes());
@@ -99,7 +99,7 @@ void EleMapLocalCoordinates::rotate(IElement &ele, const CoordinateSystem &coord
 };
 
 // x=Rx' where x is original coordinates and x' is local coordinates
-void EleMapLocalCoordinates::getRotationMatrixToOriginal(const IElement &ele, const CoordinateSystem &/*coordinate_system*/, const std::vector<GeoLib::Point> &vec_pt)
+void ElementCoordinatesMappingLocal::getRotationMatrixToOriginal(const IElement &ele, const CoordinateSystem &/*coordinate_system*/, const std::vector<GeoLib::Point> &vec_pt)
 {
     const IElement* e = &ele;
     double xx[3];

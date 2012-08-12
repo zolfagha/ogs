@@ -12,43 +12,36 @@
 
 #pragma once
 
-//#include <cmath>
-#include <set>
-
-#include "MathLib/Vector.h"
 #include "GeoLib/Point.h"
-
-#include "INode.h"
 
 namespace MeshLib
 {
 
 /**
- * 
+ * \brief Mesh node class
  */
-class Node : public INode
+class Node
 {
+public:
+    ///
+    Node() : _node_id(0) {};
+
+    ///
+    Node (size_t id, const GeoLib::Point &x) : _node_id(id), _x(x) {};
+
+    ///
+    size_t getNodeID() const { return _node_id;};
+    ///
+    void setNodeID(const size_t &id) { _node_id = id;};
+
+    ///
+    const GeoLib::Point* getX() const  { return &_x; };
+    ///
+    void setX(const GeoLib::Point &x) { _x = x; };
+
 private:
     size_t _node_id;
-    std::set<size_t> _connected_nodes;
     GeoLib::Point _x;
-public:
-    Node() {};
-    Node (size_t id, const GeoLib::Point &x) {
-        this->_node_id = id;
-        this->_x = x;
-    };
-
-    size_t getNodeID() const { return _node_id;};
-    void setNodeID(const size_t &id) { _node_id = id;};
-    virtual const GeoLib::Point* getData() const 
-    {
-        return &_x;
-    };
-    void setX(const GeoLib::Point &x) 
-    {
-        _x = x;
-    };
 };
 
 } // end namespace

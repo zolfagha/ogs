@@ -14,27 +14,10 @@
 #pragma once
 
 #include "IElement.h"
+#include "TemplateElementTopology.h"
 
 namespace MeshLib
 {
-
-template <ElementShape::type TYPE, size_t DIMENSION, size_t NUMBER_OF_FACES, size_t NUMER_OF_EDGES, size_t NUMBER_OF_NODES1, size_t NUMBER_OF_NODES2>
-class TemplateElementTopology
-{
-public:
-    static ElementShape::type getShapeType() {return TYPE;};
-    static size_t getDimension() {return DIMENSION;};
-    static size_t getNumberOfFaces() {return NUMBER_OF_FACES;};
-    static size_t getNumberOfEdges() {return NUMER_OF_EDGES;};
-    static size_t getNumberOfNodes(size_t order)
-    {
-        switch (order) {
-        case 1: return NUMBER_OF_NODES1;
-        case 2: return NUMBER_OF_NODES2;
-        }
-        return 0;
-    }
-};
 
 class LineTopology : public TemplateElementTopology<ElementShape::LINE, 1, 0, 1, 2, 3>
 {

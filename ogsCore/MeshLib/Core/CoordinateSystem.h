@@ -15,6 +15,9 @@
 namespace MeshLib
 {
 
+/**
+ * \brief Coordinate system type
+ */
 struct CoordinateSystemType
 {
     enum type {
@@ -38,14 +41,17 @@ class CoordinateSystem
 {
 public:
 
+    ///
     CoordinateSystem() {
         _type = CoordinateSystemType::INVALID;
     }
 
-    CoordinateSystem(CoordinateSystemType::type coord) {
+    ///
+    explicit CoordinateSystem(CoordinateSystemType::type coord) {
         _type = coord;
     }
 
+    ///
     void setType(CoordinateSystemType::type coord) {
         _type = coord;
     }

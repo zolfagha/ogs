@@ -105,7 +105,7 @@ StructuredMesh<ElementShape::QUAD>* MeshGenerator::generateStructuredRegularQuad
 
 void MeshGenerator::generateSubMesh(const MeshLib::IMesh &src, const std::vector<size_t> &list_e, MeshLib::IMesh* &dest, BaseLib::BidirectionalMap<size_t, size_t> &map_global2local)
 {
-    MeshLib::UnstructuredMesh* new_msh = new MeshLib::UnstructuredMesh(src.getGeometricProperty()->getCoordinateSystem()->getType());
+    MeshLib::UnstructuredMesh* new_msh = new MeshLib::UnstructuredMesh(src.getGeometricProperty()->getCoordinateSystem().getType());
     std::set<size_t> list_nodes_subset;
     for (size_t i=0; i<list_e.size(); i++) {
         const MeshLib::IElement *e = src.getElemenet(list_e[i]);

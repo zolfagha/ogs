@@ -118,8 +118,8 @@ void findBoundaryElementsOnGeometry(IMesh * msh, GeoLib::GeoObject const* obj, s
 IElement* createEdgeElement(IMesh& msh, IElement &e, size_t j)
 {
     std::vector<size_t> vec_edge_nodes;
-    IElement* edge = ElemenetFactory::createNewElement(e.getEdgeElementType(j)); 
-    e.getNodeIDsOfEdgeElement(j, vec_edge_nodes);
+    IElement* edge = ElemenetFactory::createNewElement(e.getEdgeType(j)); 
+    e.getNodeIDsOfEdges(j, vec_edge_nodes);
     for (size_t k=0; k<vec_edge_nodes.size(); k++) {
         edge->setNodeID(k, vec_edge_nodes[k]);
     }
@@ -147,21 +147,21 @@ void findEdgeElements(IMesh& msh, IElement &e, std::vector<IElement*> &edges)
     const size_t n_edges = e.getNumberOfEdges();
     for (size_t j=0; j<n_edges; j++) {
         //check if already exists
-        e.getNodeIDsOfEdgeElement(j, vec_edge_nodes);
+        e.getNodeIDsOfEdges(j, vec_edge_nodes);
         IElement* edge = findEdgeElement(edges, vec_edge_nodes);
         if (edge!=0) {
-            if (e.getEdgeElement(j)==0)
-                e.setEdgeElement(j, edge);
+            if (e.getEdge(j)==0)
+                e.setEdge(j, edge);
             continue;
         }
 
-        edge = e.getEdgeElement(j);
+        edge = e.getEdge(j);
         if (edge==0) {
             //if new, create 
             if (edge==0) {
                 edge = createEdgeElement(msh, e, j);
             }
-            e.setEdgeElement(j, edge);
+            e.setEdge(j, edge);
         }
         edges.push_back(edge);
 
@@ -220,7 +220,7 @@ void generateHigherOrderUnstrucuredMesh(UnstructuredMesh &msh, size_t order)
         e->setMaximumOrder(order);
         // for each edge
         for (size_t j=0; j<e->getNumberOfEdges(); j++) {
-            IElement *edge = e->getEdgeElement(j);
+            IElement *edge = e->getEdge(j);
             size_t new_nod = edge->getNodeID(2);
             size_t local_id = e_nnodes1 + j;
             e->setNodeID(local_id, new_nod);

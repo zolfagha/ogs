@@ -23,7 +23,7 @@
 // Mesh
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Core/Node.h"
-#include "MeshLib/Core/MeshGeometricProperties.h"
+#include "MeshLib/Core/MeshGeometricProperty.h"
 
 
 namespace MeshLib
