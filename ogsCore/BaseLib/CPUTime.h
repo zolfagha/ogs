@@ -17,7 +17,8 @@
 
 #include "TimeMeasurementBase.h"
 
-namespace BaseLib {
+namespace BaseLib 
+{
 
 class CPUTime
 {
@@ -25,7 +26,7 @@ public:
 	virtual void start();
     virtual void stop();
     virtual double elapsed();
-	~CPUTime() {};
+	virtual ~CPUTime() {};
 private:
 	clock_t _start;
 	clock_t _stop;
