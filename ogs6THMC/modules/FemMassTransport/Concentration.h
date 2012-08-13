@@ -59,7 +59,8 @@ public:
             > MySolutionType;
 
     FunctionConcentration() 
-        : TemplateTransientProcess<1,1>("MASS_TRANSPORT")
+        : TemplateTransientProcess<1,1>("MASS_TRANSPORT"),
+          _problem(0), _solution(0), _feObjects(0), _compound(0)
     {
     };
 

@@ -114,7 +114,7 @@ bool FunctionConcentration::initialize(const BaseLib::Options &option)
     return true;
 }
 
-void FunctionConcentration::initializeTimeStep(const NumLib::TimeStep &time)
+void FunctionConcentration::initializeTimeStep(const NumLib::TimeStep &/*time*/)
 {
     const NumLib::ITXFunction *vel = this->getInput<NumLib::ITXFunction>(Velocity);
     this->_problem->getEquation()->getLinearAssembler()->setVelocity(vel);
@@ -122,12 +122,12 @@ void FunctionConcentration::initializeTimeStep(const NumLib::TimeStep &time)
     this->_problem->getEquation()->getJacobianAssembler()->setVelocity(vel);
 }
 
-void FunctionConcentration::updateOutputParameter(const NumLib::TimeStep &time)
+void FunctionConcentration::updateOutputParameter(const NumLib::TimeStep &/*time*/)
 {
     setOutput(Concentration, _solution->getCurrentSolution(0));
 }
 
-void FunctionConcentration::output(const NumLib::TimeStep &time) 
+void FunctionConcentration::output(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
