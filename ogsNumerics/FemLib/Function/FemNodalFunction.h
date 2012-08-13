@@ -227,6 +227,6 @@ inline void TemplateFEMNodalFunction<double>::eval(const NumLib::TXPosition x,  
 };
 
 typedef TemplateFEMNodalFunction<double> FemNodalFunctionScalar;
-typedef TemplateFEMNodalFunction<NumLib::LocalVector> FemNodalFunctionVector2d;
+typedef TemplateFEMNodalFunction<NumLib::LocalVector> FemNodalFunctionVector;
 
 } //end
