@@ -17,6 +17,7 @@
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "NumLib/Function/IFunction.h"
 #include "NumLib/TimeStepping/TimeStep.h"
+#include "NumLib/TransientAssembler/ElementWiseTransientLinearEQSAssembler.h"
 #include "FemLib/Function/FemFunction.h"
 #include "FemDirichletBC.h"
 #include "FemNeumannBC.h"
