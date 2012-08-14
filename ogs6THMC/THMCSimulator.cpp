@@ -109,23 +109,32 @@ THMCSimulator::THMCSimulator(int argc, char* argv[])
         if (! logfile_arg.getValue().empty()) {
             if (!logog_file) delete logog_file;
             std::string log_file = logfile_arg.getValue();
-            BaseLib::truncateFile(log_file);
+            BaseLib::truncateFile(log_file); // do this not to append log into an existing file
             logog_file = new logog::LogFile(log_file.c_str());
             logog_file->SetFormatter( *custom_format );
         }
 
+
         SimulationInfo::outputHeader();
-        
         // list modules
         unsigned flag_list_modules (pcs_arg.getValue());
         if (flag_list_modules!=0) {
             ProcessBuilder::getInstance()->output();
         }
 
+        INFO("->Parsing input arguments");
+        if (!input_arg.getValue().empty()) {
+            INFO("* Project path    : %s", input_arg.getValue().c_str());
+        }
+        if (! logfile_arg.getValue().empty()) {
+            INFO("* Log file path   : %s", logfile_arg.getValue().c_str());
+        }
+        
         // data output directory
         std::string output_dir_path = "";
         if (! output_dir_arg.getValue().empty()) {
             output_dir_path = output_dir_arg.getValue();
+            INFO("* Output directory: %s", output_dir_path.c_str());
         }
 
         if (! input_arg.getValue().empty()) {
@@ -133,7 +142,7 @@ THMCSimulator::THMCSimulator(int argc, char* argv[])
             if (checkInputFiles(proj_path)) {
                 _sim_info = new SimulationInfo(proj_path, output_dir_path);
             } else {
-                ERR("Cannot find a project - %s", proj_path.c_str());
+                ERR("***Error: Cannot find a project - %s", proj_path.c_str());
             }
         }
 
@@ -204,7 +213,7 @@ int THMCSimulator::execute()
     }
 
     // construct coupling system
-    INFO("->Generating coulpling system...");
+    INFO("->Generating coupling system...");
     MyConvergenceCheckerFactory checkFac;
     NumLib::TransientCoulplingStrucutreBuilder cpl_builder;
     if (_cpl_system!=NULL) delete _cpl_system;
@@ -231,7 +240,7 @@ int THMCSimulator::execute()
         }
     }
 
-    INFO("->Setting time steppting...");
+    INFO("->Setting time stepping...");
     TimeSteppingControllerWithOutput timestepping(&ogs6fem->outController);
     timestepping.setTransientSystem(*_cpl_system);
 
