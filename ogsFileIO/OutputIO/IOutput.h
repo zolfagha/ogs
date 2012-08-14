@@ -63,7 +63,7 @@ class IOutput
 {
 public:
     ///
-    IOutput() : _output_timing(0), _geo_obj(0) {};
+    IOutput() : _output_timing(0), _geo_obj(0), _msh(0) {};
 
     ///
     virtual ~IOutput()
@@ -85,24 +85,45 @@ public:
     std::string getOutputBaseName() const {return _base_name;};
 
     ///
-    void addVariable(const std::string &var_name)
+    void addNodalVariable(const std::string &var_name)
     {
-        _list_var_name.push_back(var_name);
+        _list_nod_var_name.push_back(var_name);
     };
 
     ///
-    void addVariable(const std::vector<std::string> &vec_var_name)
+    void addNodalVariable(const std::vector<std::string> &vec_var_name)
     {
-        _list_var_name.insert(_list_var_name.end(), vec_var_name.begin(), vec_var_name.end());
+        _list_nod_var_name.insert(_list_nod_var_name.end(), vec_var_name.begin(), vec_var_name.end());
     };
     
     ///
-    std::vector<std::string>& getListOfVariables() {return _list_var_name;};
+    std::vector<std::string>& getListOfNodalVariables() {return _list_nod_var_name;};
     
     ///
-    bool hasVariable(const std::string &var_name) const
+    bool hasNodalVariable(const std::string &var_name) const
     {
-        return (std::find(_list_var_name.begin(), _list_var_name.end(), var_name) != _list_var_name.end());
+        return (std::find(_list_nod_var_name.begin(), _list_nod_var_name.end(), var_name) != _list_nod_var_name.end());
+    }
+
+    ///
+    void addElementalVariable(const std::string &var_name)
+    {
+        _list_ele_var_name.push_back(var_name);
+    };
+
+    ///
+    void addElementalVariable(const std::vector<std::string> &vec_var_name)
+    {
+        _list_ele_var_name.insert(_list_ele_var_name.end(), vec_var_name.begin(), vec_var_name.end());
+    };
+
+    ///
+    std::vector<std::string>& getListOfElementalVariables() {return _list_ele_var_name;};
+
+    ///
+    bool hasElementalVariable(const std::string &var_name) const
+    {
+        return (std::find(_list_ele_var_name.begin(), _list_ele_var_name.end(), var_name) != _list_ele_var_name.end());
     }
 
     ///
@@ -126,7 +147,8 @@ private:
     std::string _output_dir_path;
     std::string _base_name;
     IOutputTiming* _output_timing;
-    std::vector<std::string> _list_var_name;
+    std::vector<std::string> _list_nod_var_name;
+    std::vector<std::string> _list_ele_var_name;
     const GeoLib::GeoObject* _geo_obj;
     MeshLib::IMesh* _msh;
 };
