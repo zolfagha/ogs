@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<coupling>
+	<P algorithm="Serial" convergence="FemFunctionConvergenceCheck" max_itr="1" epsilon="1e-4">
+		<out>u</out>
+		<out>gp_strain</out>
+		<out>gp_stress</out>
+		<out>nod_strain</out>
+		<out>nod_stress</out>
+		<problems>
+			<M name="DEFORMATION">
+				<out>u</out>
+			</M>
+			<M name="ELEMENT_STRESS_STRAIN">
+				<in>u</in>
+				<out>gp_strain</out>
+				<out>gp_stress</out>
+			</M>
+			<M name="NODAL_STRESS_STRAIN">
+				<in>gp_strain</in>
+				<in>gp_stress</in>
+				<out>nod_strain</out>
+				<out>nod_stress</out>
+			</M>
+		</problems>
+	</P>
+</coupling>
+
