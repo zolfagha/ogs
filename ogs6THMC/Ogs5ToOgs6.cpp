@@ -347,9 +347,8 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         opt->addOption("GeometryName", rfout->geo_name);
         opt->addOption("TimeType", rfout->tim_type_name);
         opt->addOptionAsNum("TimeSteps", rfout->nSteps);
-        std::vector<std::string> values(rfout->_nod_value_vector);
-        values.insert(values.end(), rfout->_ele_value_vector.begin(), rfout->_ele_value_vector.end());
-        opt->addOptionAsArray("Variables", values);
+        opt->addOptionAsArray("NodalVariables", rfout->_nod_value_vector);
+        opt->addOptionAsArray("ElementalVariables", rfout->_ele_value_vector);
         opt->addOptionAsArray("MMPValues", rfout->mmp_value_vector);
         opt->addOptionAsArray("MFPValues", rfout->mfp_value_vector);
     }

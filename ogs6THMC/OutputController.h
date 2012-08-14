@@ -50,8 +50,10 @@ public:
             size_t out_steps = op->getOption<size_t>("TimeSteps");
             out->setOutputTiming(outTimBuilder.create(time_type, out_steps));
 
-            const std::vector<std::string>* var_name = op->getOptionAsArray<std::string>("Variables");
-            out->addVariable(*var_name);
+            const std::vector<std::string>* nod_var_name = op->getOptionAsArray<std::string>("NodalVariables");
+            out->addNodalVariable(*nod_var_name);
+            const std::vector<std::string>* ele_var_name = op->getOptionAsArray<std::string>("ElementalVariables");
+            out->addElementalVariable(*ele_var_name);
 
             std::string geo_type = op->getOption("GeometryType");
             std::string geo_name = op->getOption("GeometryName");
