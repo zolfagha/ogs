@@ -115,7 +115,7 @@ private:
         double rel_mnorm_dx = .0;
         if (abs_mnorm_x!=.0) rel_mnorm_dx = abs_mnrom_dx/abs_mnorm_x;
 
-        INFO("-> %d: ||r||_inf=%1.3e, ||dx||_inf=%1.3e, ||dx||/||x||=%1.3e", _itr_count, abs_mnorm_r, abs_mnrom_dx, rel_mnorm_dx);
+        INFO("-> %d: ||r||_inf=%1.3e, ||dx||_inf=%1.3e, ||x||_inf=%1.3e, ||dx||/||x||=%1.3e", _itr_count, abs_mnorm_r, abs_mnrom_dx, abs_mnorm_x, rel_mnorm_dx);
 
         _itr_count++;
 
