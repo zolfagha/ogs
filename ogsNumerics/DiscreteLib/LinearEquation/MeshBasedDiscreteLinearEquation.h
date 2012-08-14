@@ -53,8 +53,8 @@ public:
     void setPrescribedDoF(size_t varId, std::vector<size_t> &list_discrete_pt_id, std::vector<double> &list_prescribed_values)
     {
         //assert(_list_prescribed_dof_id.size()==0);
-        _list_prescribed_dof_id.clear();
-        _list_prescribed_values.clear();
+//        _list_prescribed_dof_id.clear();
+//        _list_prescribed_values.clear();
 
         const size_t n = list_discrete_pt_id.size();
         const DofEquationIdTable* dofmap = getDofMapManger(); 
@@ -83,6 +83,8 @@ public:
         } else {
             _eqs->reset();
         }
+        _list_prescribed_dof_id.clear();
+        _list_prescribed_values.clear();
     }
 
     /// construct the linear equation
