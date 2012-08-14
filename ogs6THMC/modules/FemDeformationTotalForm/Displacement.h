@@ -14,6 +14,7 @@
 
 #include "BaseLib/CodingTools.h"
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
+#include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
 #include "FemLib/Function/FemIntegrationPointFunction.h"
 #include "SolutionLib/FemProblem/FemEquation.h"
 #include "SolutionLib/FemProblem/FemIVBVProblem.h"
@@ -48,6 +49,7 @@ public:
     typedef SolutionLib::SingleStepFEM
             <
                 FemLinearElasticProblem,
+                //MathLib::DenseLinearEquations
                 MathLib::CRSLisSolver
             > MySolutionType;
 

@@ -13,16 +13,13 @@
 
 #pragma once
 
-#include "FemLib/Core/Element/IFemElement.h"
 #include "FemLib/Tools/LagrangeFeObjectContainer.h"
-#include "NumLib/TransientAssembler/IElementWiseTransientLinearEQSLocalAssembler.h"
 #include "NumLib/TransientAssembler/IElementWiseTransientResidualLocalAssembler.h"
-#include "NumLib/TransientAssembler/IElementWiseTransientJacobianLocalAssembler.h"
 
 class FemLinearElasticResidualLocalAssembler : public NumLib::IElementWiseTransientResidualLocalAssembler
 {
 public:
-    FemLinearElasticResidualLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
+    explicit FemLinearElasticResidualLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
     : _feObjects(feObjects)
     {
     };
@@ -35,10 +32,7 @@ public:
     /// @param local_u_n1    guess of current time step value
     /// @param local_u_n    previous time step value
     /// @param local_r        local residual
-    virtual void assembly(const NumLib::TimeStep &time,  MeshLib::IElement &e, const NumLib::LocalVector &local_u_n1, const NumLib::LocalVector &local_u_n, NumLib::LocalVector &local_r)
-    {
-
-    }
+    virtual void assembly(const NumLib::TimeStep &time,  MeshLib::IElement &e, const NumLib::LocalVector &local_u_n1, const NumLib::LocalVector &local_u_n, NumLib::LocalVector &local_r);
 
 private:
     FemLib::LagrangianFeObjectContainer* _feObjects;
