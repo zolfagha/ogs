@@ -21,6 +21,7 @@ class SparseLinearEquation : public AbstractCRSLinearEquation<unsigned>
 public:
     enum SolverType
     {
+        INVALID,
         SolverCG,
         SolverBiCGStab,
         SolverGMRes
@@ -29,8 +30,8 @@ public:
     enum PreconditionerType
     {
         NONE,
-        PreconDiag,
-        PreconDiagScale
+        DIAG,
+        DIAGSCALE
     };
 
     struct SpLinearOptions
@@ -47,6 +48,27 @@ public:
             error_tolerance = 1.e-10;
             max_iteration_step = 500;
         };
+
+
+        SolverType getSolverType(const std::string &str)
+        {
+            if (str.compare("CG")==0)
+                return SolverCG;
+            if (str.compare("BICGSTAB")==0)
+                return SolverBiCGStab;
+            if (str.compare("GMRES")==0)
+                return SolverGMRes;
+
+            return INVALID;
+        }
+        PreconditionerType getPreconType(const std::string &str)
+        {
+            RETURN_ENUM_IF_SAME_STRING(NONE, str);
+            RETURN_ENUM_IF_SAME_STRING(DIAG, str);
+            RETURN_ENUM_IF_SAME_STRING(DIAGSCALE, str);
+
+            return NONE;
+        }
     };
 
     SparseLinearEquation() {};

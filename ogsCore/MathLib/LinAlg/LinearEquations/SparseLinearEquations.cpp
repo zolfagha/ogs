@@ -12,15 +12,17 @@ namespace MathLib
 {
 
 
-void SparseLinearEquation::setOption(const Base::Options &option)
+void SparseLinearEquation::setOption(const BaseLib::Options &option)
 {
-    const Base::Options *op = option.getSubGroup("SpLinearOptions");
-    if (op==0) return;
+    const BaseLib::Options *op = option.getSubGroup("LinearSolver");
+    if (op==0) {
+        return;
+    }
 
     if (op->hasOption("solver_type"))
-        _option.solver_type = (SolverType)op->getOption<int>("solver_type");
+        _option.solver_type = _option.getSolverType(op->getOption("solver_type"));
     if (op->hasOption("precon_type"))
-        _option.precon_type = (PreconditionerType)op->getOption<int>("precon_type");
+        _option.precon_type = _option.getPreconType(op->getOption("precon_type"));
     if (op->hasOption("error_tolerance"))
         _option.error_tolerance = op->getOption<double>("error_tolerance");
     if (op->hasOption("max_iteration_step"))
