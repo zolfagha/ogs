@@ -45,8 +45,8 @@ public:
     /// constructor
     /// @param problem        Fem problem
     /// @param linear_eqs    Discrete linear equation
-    TemplateTransientDxFEMFunction(std::vector<FemVariable*> &list_var, UserLocalJacobianAssembler* asssembler, DiscreteLib::IDiscreteLinearEquation* linear_eqs)
-        : _local_assembler(asssembler),  _linear_eqs(linear_eqs),
+    TemplateTransientDxFEMFunction(MeshLib::IMesh* msh, std::vector<FemVariable*> &list_var, UserLocalJacobianAssembler* asssembler, DiscreteLib::IDiscreteLinearEquation* linear_eqs)
+        : _msh(msh), _local_assembler(asssembler),  _linear_eqs(linear_eqs),
           _t_n1(0), _u_n0(0), _list_var(list_var)
     {
     };
@@ -79,6 +79,8 @@ public:
         const NumLib::TimeStep &t_n1 = *this->_t_n1;
         SolutionVector* u_n = this->_u_n0;
 
+        _linear_eqs->initialize();
+
         // setup BC1 for solution increment
         for (size_t i=0; i<_list_var.size(); i++) {
             FemVariable* var = _list_var[i];
@@ -91,7 +93,8 @@ public:
                 for (size_t k=0; k<bc_value_for_dx.size(); k++) {
                     size_t id = bc1->getListOfBCNodes()[k];
                     double v =  bc1->getListOfBCValues()[k];
-                    bc_value_for_dx[k] = v - u_n1[id]; // dx = (bc value) - (current value)
+                    size_t eqs_id = _linear_eqs->getDofMapManger()->mapEqsID(i, _msh->getID(), id);
+                    bc_value_for_dx[k] = v - u_n1[eqs_id]; // dx = (bc value) - (current value)
                 }
                 var_bc_id.insert(var_bc_id.end(), bc1->getListOfBCNodes().begin(), bc1->getListOfBCNodes().end());
                 var_bc_val.insert(var_bc_val.end(), bc_value_for_dx.begin(), bc_value_for_dx.end());
@@ -99,15 +102,8 @@ public:
             _linear_eqs->setPrescribedDoF(i, var_bc_id, var_bc_val);
         }
 
-        //TODO temporally
-        std::vector<SolutionVector*> vec_un;
-        vec_un.push_back(const_cast<SolutionVector*>(u_n));
-        std::vector<SolutionVector*> vec_un1;
-        vec_un1.push_back(const_cast<SolutionVector*>(&u_n1));
-
         // assembly
-        _linear_eqs->initialize();
-        NumLib::ElementWiseTransientDxEQSAssembler assembler(&t_n1, &vec_un, &vec_un1, _local_assembler);
+        NumLib::ElementWiseTransientDxEQSAssembler assembler(&t_n1, u_n, &u_n1, _local_assembler);
         _linear_eqs->construct(assembler);
 
         // set residual
@@ -120,6 +116,7 @@ public:
 
 
 private:
+    MeshLib::IMesh* _msh;
     UserLocalJacobianAssembler *_local_assembler;
     DiscreteLib::IDiscreteLinearEquation* _linear_eqs;
     NumLib::TimeStep* _t_n1;

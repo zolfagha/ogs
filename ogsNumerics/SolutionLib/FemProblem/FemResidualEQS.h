@@ -79,20 +79,15 @@ public:
         const NumLib::TimeStep &t_n1 = *this->_t_n1;
         SolutionVector *u_n = this->_u_n0;
 
-        //TODO temporally
-        std::vector<SolutionVector*> vec_un;
-        vec_un.push_back(const_cast<SolutionVector*>(u_n));
-        std::vector<SolutionVector*> vec_un1;
-        vec_un1.push_back(const_cast<SolutionVector*>(&u_n1));
-
         // assembly
-        NumLib::ElementWiseTransientResidualAssembler assembler(&t_n1, &vec_un, &vec_un1, _local_assembler);
+        NumLib::ElementWiseTransientResidualAssembler assembler(&t_n1, u_n, &u_n1, _local_assembler);
         r = .0;
         assembler.assembly(*_msh, *_dofManager, r);
 
         // add source/sink term (i.e. RHS in linear equation)
-        if (_st!=0)
+        if (_st!=0) {
             r += *_st;
+        }
 
         // set residuals to zero for Dirichlet BC
         std::vector<size_t> list_bc1_eqs_id;

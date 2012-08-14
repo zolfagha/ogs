@@ -78,6 +78,8 @@ public:
         const NumLib::TimeStep &t_n1 = *this->_t_n1;
         SolutionVector* u_n = this->_u_n0;
 
+        _linear_eqs->initialize();
+
         // setup BC
         for (size_t i=0; i<_list_var.size(); i++) {
             FemVariable* var = _list_var[i];
@@ -102,7 +104,6 @@ public:
         //vec_un1.push_back(const_cast<SolutionVector*>(&u_n1));
 
         // assembly
-        _linear_eqs->initialize();
         NumLib::ElementWiseTransientLinearEQSAssembler assembler(&t_n1, u_n, &u_n1, _local_assembler);
         _linear_eqs->construct(assembler);
 
