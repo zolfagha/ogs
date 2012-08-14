@@ -32,10 +32,14 @@ public:
     virtual void extrapolate(TemplateFEMIntegrationPointFunction<Tvalue> &ele, TemplateFEMNodalFunction<Tvalue> &nod) = 0;
 };
 
+/**
+ * \brief
+ */
 template<typename Tvalue>
 class FemExtrapolationAverage : public IFemExtrapolation<Tvalue>
 {
 public:
+
     void extrapolate(TemplateFEMIntegrationPointFunction<Tvalue> &ele_var, TemplateFEMNodalFunction<Tvalue> &nod_var)
     {
         const MeshLib::IMesh* msh = ele_var.getMesh();
@@ -43,7 +47,8 @@ public:
         MeshLib::TopologySequentialNodes2Elements node2eles(*msh);
         Tvalue v0 = ele_var.getIntegrationPointValues(0)[0];
         v0 *= .0;
-        std::vector<Tvalue> vec_v(msh->getNumberOfNodes(), v0);
+        DiscreteLib::IDiscreteVector<Tvalue>* node_vec = nod_var.getNodalValues();
+        (*node_vec) = v0;
 
         for (size_t i=0; i<msh->getNumberOfElements(); i++) {
             MeshLib::IElement* e = msh->getElemenet(i);
@@ -57,11 +62,9 @@ public:
             for (size_t j=0; j<e_nnodes; j++) {
                 const size_t nod_id = e->getNodeID(j);
                 size_t n_conn_eles = node2eles.getConnectedElements(nod_id).size();
-                vec_v[nod_id] += nodal_values[j] / static_cast<double>(n_conn_eles);
+                (*node_vec)[nod_id] += nodal_values[j] / static_cast<double>(n_conn_eles);
             }
         }
-
-        nod_var.setNodalValues(&vec_v[0], 0, vec_v.size());
     }
 };
 
