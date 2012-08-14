@@ -44,6 +44,16 @@ public:
     };
 
     ///
+    TemplateFEMIntegrationPointFunction(DiscreteLib::DiscreteSystem &dis, Tvalue &v0)
+    {
+        initialize(dis);
+        for (size_t i=0; i<_values->size(); i++) {
+            (*_values)[i].resize(1);
+            (*_values)[i][0] = v0;
+        }
+    };
+
+    ///
     explicit TemplateFEMIntegrationPointFunction(const TemplateFEMIntegrationPointFunction &src)
     {
         initialize(*src._discrete_system);
@@ -112,6 +122,11 @@ public:
     const IntegrationPointVectorType& getIntegrationPointValues(size_t i_e) const
     {
         return (*_values)[i_e];
+    }
+
+    bool hasIntegrationPointValues(size_t i_e) const
+    {
+        return (*_values)[i_e].size()>0;
     }
 
     const DiscreteVectorType* getNodalValues() const
