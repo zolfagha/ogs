@@ -27,7 +27,7 @@ namespace FemLib
 class LagrangianFeObjectContainer : public FeObjectCachePerFeType, public IFeObjectContainer
 {
 public:
-    LagrangianFeObjectContainer(MeshLib::IMesh &msh) :  FeObjectCachePerFeType(msh), _order(1) {};
+    explicit LagrangianFeObjectContainer(MeshLib::IMesh &msh) :  FeObjectCachePerFeType(msh), _order(1) {};
     virtual ~LagrangianFeObjectContainer() {};
 
     void setPolynomialOrder(size_t order) { _order = order; };

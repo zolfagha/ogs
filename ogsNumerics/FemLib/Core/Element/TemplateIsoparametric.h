@@ -40,7 +40,7 @@ class TemplateIsoparametric : public TemplateFeBase<T_FETYPE, N_VARIABLES>
 {
 public:
     ///
-    TemplateIsoparametric(MeshLib::IMesh &msh) : TemplateFeBase<T_FETYPE, N_VARIABLES>(msh)
+    explicit TemplateIsoparametric(MeshLib::IMesh &msh) : TemplateFeBase<T_FETYPE, N_VARIABLES>(msh)
     {
         _mapping = new FemNaturalCoordinates(new T_SHAPE());
         _integration = new T_INTEGRAL();

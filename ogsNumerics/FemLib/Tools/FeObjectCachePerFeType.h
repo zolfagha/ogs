@@ -29,7 +29,7 @@ namespace FemLib
 class FeObjectCachePerFeType
 {
 public:
-    FeObjectCachePerFeType(MeshLib::IMesh &msh) : _msh(&msh) {};
+    explicit FeObjectCachePerFeType(MeshLib::IMesh &msh) : _msh(&msh) {};
 
     virtual ~FeObjectCachePerFeType()
     {

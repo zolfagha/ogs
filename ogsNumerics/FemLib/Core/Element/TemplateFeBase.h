@@ -27,7 +27,7 @@ template <FiniteElementType::type T_FETYPE, size_t N_VARIABLES>
 class TemplateFeBase : public IFiniteElement
 {
 public:
-    TemplateFeBase(MeshLib::IMesh &msh) : _msh(&msh), _ele(0) {};
+    explicit TemplateFeBase(MeshLib::IMesh &msh) : _msh(&msh), _ele(0) {};
     virtual ~TemplateFeBase() {};
 
     void setMesh(MeshLib::IMesh &msh) {_msh = &msh;};
