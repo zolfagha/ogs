@@ -33,10 +33,10 @@ void ElementWiseTransientResidualAssembler::assembly( const MeshLib::IMesh &msh,
         // get dof map
         e->getNodeIDList(e->getMaximumOrder(), ele_node_ids);
         e->getListOfNumberOfNodesForAllOrders(ele_node_size_order);
-        dofManager.mapEqsID(msh.getID(), ele_node_ids, local_dofmap);
+        dofManager.mapEqsID(msh.getID(), ele_node_ids, local_dofmap, DiscreteLib::DofNumberingType::BY_POINT);
         // previous and current results
-        DiscreteLib::getLocalVector(dofManager, ele_node_ids, ele_node_size_order, *_u1, local_u_n1);
-        DiscreteLib::getLocalVector(dofManager, ele_node_ids, ele_node_size_order, *_u0, local_u_n);
+        DiscreteLib::getLocalVector(local_dofmap, *_vec_u1, local_u_n1);
+        DiscreteLib::getLocalVector(local_dofmap, *_vec_u0, local_u_n);
         // local assembly
         localVec.resize(local_dofmap.size());
         localVec *= .0;

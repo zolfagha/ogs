@@ -44,8 +44,8 @@ public:
     /// @param u0
     /// @param u1
     /// @param a
-    ElementWiseTransientResidualAssembler(const TimeStep* time, const std::vector<GlobalVectorType*>* u0, const std::vector<GlobalVectorType*>* u1, IElementWiseTransientResidualLocalAssembler* a)
-        : _transient_e_assembler(a), _timestep(time), _u0(u0), _u1(u1)
+    ElementWiseTransientResidualAssembler(const TimeStep* time, const GlobalVectorType* u0, const GlobalVectorType* u1, IElementWiseTransientResidualLocalAssembler* a)
+        : _transient_e_assembler(a), _timestep(time), _vec_u0(u0), _vec_u1(u1)
     { };
 
 
@@ -60,8 +60,8 @@ public:
 private:
     IElementWiseTransientResidualLocalAssembler* _transient_e_assembler;
     const TimeStep* _timestep;
-    const std::vector<GlobalVectorType*>* _u0;
-    const std::vector<GlobalVectorType*>* _u1;
+    const GlobalVectorType* _vec_u0;
+    const GlobalVectorType* _vec_u1;
 };
 
 

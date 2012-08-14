@@ -40,8 +40,8 @@ public:
     /// @param u0
     /// @param u1
     /// @param a
-    ElementWiseTransientDxEQSAssembler(const TimeStep* time, const std::vector<GlobalVector*>* u0, const std::vector<GlobalVector*>* u1, IElementWiseTransientJacobianLocalAssembler* a)
-        : _transient_e_assembler(a), _timestep(time), _u0(u0), _u1(u1)
+    ElementWiseTransientDxEQSAssembler(const TimeStep* time, const GlobalVector* u0, const GlobalVector* u1, IElementWiseTransientJacobianLocalAssembler* a)
+        : _transient_e_assembler(a), _timestep(time), _vec_u0(u0), _vec_u1(u1)
     { };
 
 
@@ -66,23 +66,26 @@ public:
             // get dof map
             e->getNodeIDList(e->getMaximumOrder(), ele_node_ids);
             e->getListOfNumberOfNodesForAllOrders(ele_node_size_order);
-            dofManager.mapEqsID(msh.getID(), ele_node_ids, local_dofmap);
+            dofManager.mapEqsID(msh.getID(), ele_node_ids, local_dofmap, DiscreteLib::DofNumberingType::BY_POINT);
             // previous and current results
-            DiscreteLib::getLocalVector(dofManager, ele_node_ids, ele_node_size_order, *_u1, local_u_n1);
-            DiscreteLib::getLocalVector(dofManager, ele_node_ids, ele_node_size_order, *_u0, local_u_n);
+            DiscreteLib::getLocalVector(local_dofmap, *_vec_u1, local_u_n1);
+            DiscreteLib::getLocalVector(local_dofmap, *_vec_u0, local_u_n);
             // local assembly
             localEQS.create(local_dofmap.size());
             _transient_e_assembler->assembly(time, *e, local_u_n1, local_u_n, *localEQS.getA());
             // update global
             eqs.addAsub(local_dofmap, *localEQS.getA());
+
+//            if (i<2)
+//                std::cout << "local A = \n" << *localEQS.getA() << std::endl;
         }
     }
 
 private:
     IElementWiseTransientJacobianLocalAssembler* _transient_e_assembler;
     const TimeStep* _timestep;
-    const std::vector<GlobalVector*>* _u0;
-    const std::vector<GlobalVector*>* _u1;
+    const GlobalVector* _vec_u0;
+    const GlobalVector* _vec_u1;
 };
 
 
