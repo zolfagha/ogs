@@ -174,6 +174,7 @@ private:
         std::cout << "-> " << i <<": ";
         std::cout << "r=(";
         for (size_t i=0; i<dx.size(); i++) std::cout << r[i] << " ";
+        std::cout << std::endl;
 #if 0
         std::cout << "-> " << i <<": x=(";
         for (size_t i=0; i<x_new.size(); i++) std::cout << x_new[i] << " ";
