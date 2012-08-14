@@ -96,14 +96,18 @@ public:
 
         // create linear equation systems
         _linear_solver = new LinearSolverType();
-        _linear_eqs = _discrete_system->createLinearEquation<DiscreteLib::TemplateMeshBasedDiscreteLinearEquation, LinearSolverType, DiscreteLib::SparsityBuilderFromNodeConnectivity>(*_linear_solver, _dofManager);
+        _linear_eqs = _discrete_system->createLinearEquation
+                <   DiscreteLib::TemplateMeshBasedDiscreteLinearEquation,
+                    LinearSolverType,
+                    DiscreteLib::SparsityBuilderFromNodeConnectivity
+                >(*_linear_solver, _dofManager);
 
         // setup functions
         std::vector<FemVariable*> list_var(n_var);
         for (size_t i=0; i<n_var; i++) list_var[i] = problem->getVariable(i);
         _f_linear = new UserLinearFunction(list_var, problem->getEquation()->getLinearAssembler(), _linear_eqs);
         _f_r = new UserResidualFunction(dis->getMesh(), list_var, &_dofManager, problem->getEquation()->getResidualAssembler());
-        _f_dx = new UserDxFunction(list_var, problem->getEquation()->getJacobianAssembler(), _linear_eqs);
+        _f_dx = new UserDxFunction(dis->getMesh(), list_var, problem->getEquation()->getJacobianAssembler(), _linear_eqs);
 
         // setup nonlinear solver
         _f_nonlinear = new NonlinearSolverType(dis, _f_linear, _f_r, _f_dx);
