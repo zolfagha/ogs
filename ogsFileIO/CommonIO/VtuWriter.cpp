@@ -14,6 +14,8 @@
 
 #include <fstream>
 
+#include "logog.hpp"
+
 #include "BaseLib/SystemTools.h"
 #include "BaseLib/FileTools.h"
 #include "MeshLib/Core/CoordinateSystem.h"
@@ -35,13 +37,13 @@ bool VtuWriter::write(const std::string &vtkfile,
     //-------------------------------------------------------------------------
     std::fstream fin;
     if (_useBinary)
-        fin.open(vtkfile.data(), std::ios::out | std::ios::binary);
+        fin.open(vtkfile.c_str(), std::ios::out | std::ios::binary);
     else
-        fin.open(vtkfile.data(), std::ios::out);
+        fin.open(vtkfile.c_str(), std::ios::out);
 
     if (!fin.good())
     {
-        std::cout << "***Warning: Cannot open the output file, " << vtkfile << std::endl;
+        WARN("***Warning: Cannot open the output file, %s", vtkfile.c_str());
         return false;
     }
 

@@ -14,6 +14,7 @@
 #include "PVDWriter.h"
 
 #include <fstream>
+#include "logog.hpp"
 
 const std::string INDEX_STR = "  ";
 
@@ -33,9 +34,11 @@ bool PVDWriter::update(double time, const std::string &vtk_file)
     vtk_info.vtk_file = vtk_file;
     this->_pvd_data.vec_dataset.push_back(vtk_info);
     
-    std::fstream fin(this->_pvd_file_name.data(), std::ios::out);
-    if (!fin.good())
+    std::fstream fin(this->_pvd_file_name.c_str(), std::ios::out);
+    if (!fin.good()) {
+        WARN("***Warning: Cannot open the PVD file, %s", this->_pvd_file_name.c_str());
         return false;
+    }
 
     PVDWriter::writeHeader(fin);
     for (int i = 0; i < (int)_pvd_data.vec_dataset.size(); i++)
