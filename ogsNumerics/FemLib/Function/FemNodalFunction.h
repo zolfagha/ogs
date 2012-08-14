@@ -125,6 +125,11 @@ public:
         return (*_nodal_values)[node_id];
     }
 
+    void setValue(size_t node_id, Tvalue &v)
+    {
+        (*_nodal_values)[node_id] = v;
+    }
+
     /// get nodal values
     DiscreteLib::IDiscreteVector<Tvalue>* getNodalValues()
     {
