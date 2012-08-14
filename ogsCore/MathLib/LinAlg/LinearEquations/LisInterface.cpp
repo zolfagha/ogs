@@ -64,6 +64,14 @@ void CRSLisSolver::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)
     std::cout << "------------------------------------------------------------------" << std::endl;
     std::cout << "*** LIS solver computation" << std::endl;
 
+//    std::cout << "A=" << std::endl;
+//    A->printMat();
+//    std::cout << "b=" << std::endl;
+//    for (size_t i=0; i<A->getNRows(); i++)
+//        std::cout << b[i] << " ";
+//    std::cout << std::endl;
+
+
     int ierr;
     // Creating a matrix.
     LIS_SOLVER solver;
@@ -113,6 +121,8 @@ void CRSLisSolver::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)
     ierr = lis_solver_set_option("-print mem", solver);
     
     ierr = lis_solve(AA, bb, xx, solver);
+    //lis_output(AA, bb, xx, LIS_FMT_MM, "/home/norihiro/work/task/20120814_ogs6test/deformation/matrix1.txt");
+
     int iter = 0;
     double resid = 0.0;
     ierr = lis_solver_get_iters(solver, (LIS_INT*)&iter);
