@@ -74,7 +74,7 @@ public:
                                           //WW/OK
 
 //    MeshLib::CFEMesh* m_msh;
-    int nSteps;                           // After each nSteps, make output
+    size_t nSteps;                           // After each nSteps, make output
 
     // GEO
     /**
