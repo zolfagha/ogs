@@ -80,6 +80,9 @@ bool FunctionDisplacement::initialize(const BaseLib::Options &option)
         std::string st_type = opST->getOption("STType");
         std::string dis_name = opST->getOption("DistributionType");
         double dis_v = opST->getOption<double>("DistributionValue");
+        if (st_type.compare("NEUMANN")==0) {
+            dis_v *= -1; //TODO
+        }
         NumLib::ITXFunction* f_st =  f_builder.create(dis_name, dis_v);
         if (f_st!=NULL) {
             SolutionLib::IFemNeumannBC *femSt = 0;
@@ -101,18 +104,22 @@ bool FunctionDisplacement::initialize(const BaseLib::Options &option)
     linear_solver->setOption(*optNum);
     _solution->getNonlinearSolver()->setOption(*optNum);
 
+    // create u variable which is vector
+    NumLib::LocalVector tmp_u0(3);
+    tmp_u0 *= .0;
+    _displacement = new FemLib::FemNodalFunctionVector(*dis, FemLib::PolynomialOrder::Linear, tmp_u0);
+    for (size_t i=0; i<_displacement->getNumberOfNodes(); i++) {
+        _displacement->getValue(i)(0) = _solution->getCurrentSolution(0)->getValue(i);
+        _displacement->getValue(i)(1) = _solution->getCurrentSolution(1)->getValue(i);
+    }
+
     // set initial output
-    OutputVariableInfo var("DISPLACEMENT", OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
+    OutputVariableInfo var("DISPLACEMENT", OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
     femData->outController.setOutput(var.name, var);
 
     // initial output parameter
-    this->setOutput(Displacement, _problem->getVariable(0)->getIC());
+    this->setOutput(Displacement, _displacement);
 
-    NumLib::LocalVector tmp_u0(3);
-    tmp_u0 *= .0;
-    _displacement = new FemLib::FemNodalFunctionVector(*dis, FemLib::PolynomialOrder::Quadratic, tmp_u0);
-//    _strain = new FemLib::FEMIntegrationPointFunctionVector(*dis);
-//    _stress = new FemLib::FEMIntegrationPointFunctionVector(*dis);
 
     return true;
 }
@@ -132,89 +139,7 @@ void FunctionDisplacement::output(const NumLib::TimeStep &time)
 {
     //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    OutputVariableInfo var("DISPLACEMENT", OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
+    OutputVariableInfo var("DISPLACEMENT", OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
     femData->outController.setOutput(var.name, var);
 };
 
-//void FunctionDisplacement::calculateStressStrain()
-//{
-//    const MeshLib::IMesh *msh = _problem->getMesh();
-//    FemLib::FemNodalFunctionScalar *ux = _solution->getCurrentSolution(0);
-//    FemLib::FemNodalFunctionScalar *uy = _solution->getCurrentSolution(1);
-//    FemLib::FEMIntegrationPointFunctionVector* strain = _strain;
-//    FemLib::FEMIntegrationPointFunctionVector* stress = _stress;
-//    FemLib::LagrangianFeObjectContainer* feObjects = ux->getFeObjectContainer();
-//
-//    const size_t dim = msh->getDimension();
-//    const size_t n_strain_components = (dim==2 ? 4 : 6);
-//
-//    Ogs6FemData* femData = Ogs6FemData::getInstance();
-//
-//    //calculate strain, stress
-//    for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++)
-//    {
-//        // element setup
-//        MeshLib::IElement* e = msh->getElemenet(i_e);
-//        const size_t nnodes = e->getNumberOfNodes();
-//        FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
-//        FemLib::IFemNumericalIntegration *integral = fe->getIntegrationMethod();
-//        const size_t n_gp = integral->getNumberOfSamplingPoints();
-//        strain->setNumberOfIntegationPoints(i_e, n_gp);
-//        stress->setNumberOfIntegationPoints(i_e, n_gp);
-//        const NumLib::TXPosition e_pos(NumLib::TXPosition::Element, e->getID());
-//
-//        MaterialLib::Solid *solidphase = femData->list_solid[e->getGroupID()];
-//        // set D
-//        NumLib::LocalMatrix matD = NumLib::LocalMatrix::Zero(n_strain_components, n_strain_components);
-//        //matD *= .0;
-//        NumLib::LocalMatrix nv(1,1);
-//        NumLib::LocalMatrix E(1,1);
-//        solidphase->poisson_ratio->eval(e_pos, nv);
-//        solidphase->Youngs_modulus->eval(e_pos, E);
-//        double Lambda, G, K;
-//        MaterialLib::calculateLameConstant(nv(0,0), E(0,0), Lambda, G, K);
-//        MaterialLib::setElasticConsitutiveTensor(dim, Lambda, G, matD);
-//
-//        // local u
-//        NumLib::LocalVector local_u(dim*nnodes);
-//        for (size_t j=0; j<nnodes; j++) {
-//            const size_t node_id = e->getNodeID(j);
-//            local_u[j*dim] = ux->getValue(node_id);
-//            local_u[j*dim+1] = uy->getValue(node_id);
-//        }
-//
-//        // for each integration points
-//        NumLib::LocalMatrix matB(n_strain_components, nnodes*dim);
-//        NumLib::LocalMatrix matN(dim, nnodes*dim);
-//        double r[3] = {};
-//        double x[3] = {};
-//        for (size_t ip=0; ip<n_gp; ip++) {
-//            integral->getSamplingPoint(ip, r);
-//            fe->computeBasisFunctions(r);
-//            NumLib::LocalMatrix &N = *fe->getBasisFunction();
-//            const NumLib::LocalMatrix &dN = *fe->getGradBasisFunction();
-//            fe->getRealCoordinates(x);
-//
-//            // set N,B
-//            setNu_Matrix(dim, nnodes, N, matN);
-//            setB_Matrix(dim, nnodes, dN, matB);
-//
-//            // strain
-//            NumLib::LocalVector gp_strain(n_strain_components);
-//            gp_strain.noalias() = matB * local_u;
-//            strain->setIntegrationPointValue(i_e, ip, gp_strain);
-//
-//            // stress
-//            NumLib::LocalVector gp_stress(n_strain_components);
-//            gp_stress = matD * gp_strain;
-//            stress->setIntegrationPointValue(i_e, ip, gp_stress);
-//
-////                std::cout << "strain=\n" << gp_strain << std::endl;
-////                std::cout << "D=\n" << matD << std::endl;
-////                std::cout << "stress=\n" << gp_stress << std::endl;
-//        }
-//    }
-//
-//    setOutput(Strain, strain);
-//    setOutput(Stress, stress);
-//}

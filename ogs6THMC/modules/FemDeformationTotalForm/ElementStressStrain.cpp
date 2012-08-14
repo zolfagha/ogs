@@ -10,7 +10,7 @@
  * Created on 2012-07-13 by Norihiro Watanabe
  */
 
-#include "StressStrain.h"
+#include "ElementStressStrain.h"
 
 #include "logog.hpp"
 
@@ -18,14 +18,14 @@
 #include "FemLinearElasticTools.h"
 
 
-size_t FunctionStressStrain::getNumberOfStrainComponents() const
+size_t FunctionElementStressStrain::getNumberOfStrainComponents() const
 {
     MeshLib::IMesh* msh = _dis->getMesh();
     const size_t dim = msh->getDimension();
     return (dim==2 ? 4 : 6);
 }
 
-bool FunctionStressStrain::initialize(const BaseLib::Options &option)
+bool FunctionElementStressStrain::initialize(const BaseLib::Options &option)
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
 
@@ -34,14 +34,22 @@ bool FunctionStressStrain::initialize(const BaseLib::Options &option)
     const size_t n_strain_components = getNumberOfStrainComponents();
 
     // create strain, stress vectors
-    _strain = new FemLib::FEMIntegrationPointFunctionVector(*_dis);
-    _stress = new FemLib::FEMIntegrationPointFunctionVector(*_dis);
+    NumLib::LocalVector v0(n_strain_components);
+    v0 *= .0;
+    _strain = new FemLib::FEMIntegrationPointFunctionVector(*_dis, v0);
+    _stress = new FemLib::FEMIntegrationPointFunctionVector(*_dis, v0);
 
     // set initial output
-    OutputVariableInfo var1("STRAIN", OutputVariableInfo::Element, OutputVariableInfo::Real, n_strain_components, _strain);
-    femData->outController.setOutput(var1.name, var1);
-    OutputVariableInfo var2("STRESS", OutputVariableInfo::Element, OutputVariableInfo::Real, n_strain_components, _stress);
-    femData->outController.setOutput(var2.name, var2);
+    for (size_t i=0; i<n_strain_components; i++) {
+        _vec_strain_components.push_back(new IntegrationPointScalarWrapper(_strain, i));
+        _vec_stress_components.push_back(new IntegrationPointScalarWrapper(_stress, i));
+    }
+    for (size_t i=0; i<n_strain_components; i++) {
+        OutputVariableInfo var1(getStrainComponentName(i), OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_strain_components[i]);
+        femData->outController.setOutput(var1.name, var1);
+        OutputVariableInfo var2(getStressComponentName(i), OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_stress_components[i]);
+        femData->outController.setOutput(var2.name, var2);
+    }
 
     // initial output parameter
     setOutput(Strain, _strain);
@@ -50,22 +58,22 @@ bool FunctionStressStrain::initialize(const BaseLib::Options &option)
     return true;
 }
 
-void FunctionStressStrain::accept(const NumLib::TimeStep &/*time*/)
+void FunctionElementStressStrain::accept(const NumLib::TimeStep &/*time*/)
 {
-    //std::cout << "Velocity=" << std::endl;
-    //_vel->printout();
     //update data for output
     const size_t n_strain_components = getNumberOfStrainComponents();
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    OutputVariableInfo var1("STRAIN", OutputVariableInfo::Element, OutputVariableInfo::Real, n_strain_components, _strain);
-    femData->outController.setOutput(var1.name, var1);
-    OutputVariableInfo var2("STRESS", OutputVariableInfo::Element, OutputVariableInfo::Real, n_strain_components, _stress);
-    femData->outController.setOutput(var2.name, var2);
+    for (size_t i=0; i<n_strain_components; i++) {
+        OutputVariableInfo var1(getStrainComponentName(i), OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_strain_components[i]);
+        femData->outController.setOutput(var1.name, var1);
+        OutputVariableInfo var2(getStressComponentName(i), OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_stress_components[i]);
+        femData->outController.setOutput(var2.name, var2);
+    }
 };
 
-int FunctionStressStrain::solveTimeStep(const NumLib::TimeStep &/*time*/)
+int FunctionElementStressStrain::solveTimeStep(const NumLib::TimeStep &/*time*/)
 {
-    INFO("Solving ELEMENT_VELOCITY...");
+    INFO("Solving ELEMENT_STRESS_STRAIN...");
 
     const MeshLib::IMesh *msh = _dis->getMesh();
     FemLib::FemNodalFunctionVector* u = (FemLib::FemNodalFunctionVector*)getInput(Displacement);

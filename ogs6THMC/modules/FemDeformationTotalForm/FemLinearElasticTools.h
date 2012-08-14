@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <string>
+
 template <class T_MATRIX>
 inline void setNu_Matrix(const size_t dim, const size_t nnodes, const T_MATRIX &N, T_MATRIX &matN)
 {
@@ -127,4 +129,30 @@ inline void setB_Matrix4axisymmetry(const size_t dim, double radius, double dsha
     (*B_matrix)(3,0) = dshape_dy;
     // B_42, dN/dx
     (*B_matrix)(3,1) = dshape_dx;
+}
+
+inline const std::string getStrainComponentName(size_t i)
+{
+    switch (i) {
+    case 0: return "STRAIN_XX";
+    case 1: return "STRAIN_YY";
+    case 2: return "STRAIN_ZZ";
+    case 3: return "STRAIN_XY";
+    case 4: return "STRAIN_XZ";
+    case 5: return "STRAIN_YZ";
+    }
+    return "";
+}
+
+inline const std::string getStressComponentName(size_t i)
+{
+    switch (i) {
+    case 0: return "STRESS_XX";
+    case 1: return "STRESS_YY";
+    case 2: return "STRESS_ZZ";
+    case 3: return "STRESS_XY";
+    case 4: return "STRESS_XZ";
+    case 5: return "STRESS_YZ";
+    }
+    return "";
 }

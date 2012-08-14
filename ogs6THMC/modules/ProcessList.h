@@ -20,7 +20,8 @@
 #include "FemGroundwaterFlow/ElementVelocity.h"
 #include "FemMassTransport/Concentration.h"
 #include "FemDeformationTotalForm/Displacement.h"
-#include "FemDeformationTotalForm/StressStrain.h"
+#include "FemDeformationTotalForm/ElementStressStrain.h"
+#include "FemDeformationTotalForm/NodalStressStrain.h"
 
 
 //#include "ProcessBuilder.h"

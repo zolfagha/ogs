@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "BaseLib/CodingTools.h"
 #include "BaseLib/Options.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
@@ -22,19 +24,25 @@
 /**
  * \brief Stress, strain evaluator based on total displacements
  */
-class FunctionStressStrain
+class FunctionElementStressStrain
     : public ProcessLib::TemplateTimeIndependentProcess<1,2>
 {
     enum In { Displacement=0 };
-    enum Out { Stress=0, Strain=1};
-
+    enum Out { Strain=0, Stress=1};
+    typedef NumLib::TXVectorFunctionAsColumnData<FemLib::FEMIntegrationPointFunctionVector> IntegrationPointScalarWrapper;
+    typedef NumLib::TXVectorFunctionAsColumnData<FemLib::FemNodalFunctionVector> NodalPointScalarWrapper;
 public:
 
-    FunctionStressStrain() : _dis(0), _strain(0), _stress(0)
+    FunctionElementStressStrain() : _dis(0), _strain(0), _stress(0)
     {
     };
 
-    virtual ~FunctionStressStrain() {};
+    virtual ~FunctionElementStressStrain()
+    {
+        BaseLib::releaseObject(_strain, _stress);
+        BaseLib::releaseObjectsInStdVector(_vec_strain_components);
+        BaseLib::releaseObjectsInStdVector(_vec_stress_components);
+    };
 
     virtual bool initialize(const BaseLib::Options &op);
 
@@ -47,10 +55,12 @@ public:
 private:
     size_t getNumberOfStrainComponents() const;
 
-    DISALLOW_COPY_AND_ASSIGN(FunctionStressStrain);
+    DISALLOW_COPY_AND_ASSIGN(FunctionElementStressStrain);
 
 private:
     DiscreteLib::DiscreteSystem* _dis;
     FemLib::FEMIntegrationPointFunctionVector* _strain;
     FemLib::FEMIntegrationPointFunctionVector* _stress;
+    std::vector<IntegrationPointScalarWrapper*> _vec_strain_components;
+    std::vector<IntegrationPointScalarWrapper*> _vec_stress_components;
 };
