@@ -82,14 +82,14 @@
       call lis_get_esolvername(nsol,esolvername,ierr)
 	
       If( my_rank.eq.0 ) then
-        write(*,*) esolvername,': target   = ',evalue0
-        write(*,*) esolvername,': iter     = ',iter
-        write(*,*) esolvername,': times    = ',times
-        write(*,*) esolvername,': p_times  = ',ptimes
-        write(*,*) esolvername,':   p_c    = ',p_c_times
-        write(*,*) esolvername,':   p_i    = ',p_i_times
-        write(*,*) esolvername,': i_times  = ',itimes
-        write(*,*) esolvername,': Residual = ',resid
+        write(*,*) esolvername,': mode number              = ',0
+        write(*,*) esolvername,': eigenvalue               = ',evalue0
+        write(*,*) esolvername,': number of iterations     = ',iter
+        write(*,*) esolvername,': elapsed time             = ',times
+        write(*,*) esolvername,':   preconditioner         = ',ptimes
+        write(*,*) esolvername,':     matrix creation      = ',p_c_times
+        write(*,*) esolvername,': linear solver            = ',itimes
+        write(*,*) esolvername,': relative residual 2-norm = ',resid
         write(*,*) 
       endif
 

@@ -360,8 +360,14 @@
 #define lis_solver_get_solver			lis_solver_get_solver_f
 #define LIS_SOLVER_GET_SOLVER			lis_solver_get_solver_f
 
+#define lis_solver_get_precon			lis_solver_get_precon_f
+#define LIS_SOLVER_GET_PRECON			lis_solver_get_precon_f
+
 #define lis_get_solvername				lis_get_solvername_f
 #define LIS_GET_SOLVERNAME				lis_get_solvername_f
+
+#define lis_get_preconname				lis_get_preconname_f
+#define LIS_GET_PRECONNAME				lis_get_preconname_f
 
 #define lis_esolver_create				lis_esolver_create_f
 #define LIS_ESOLVER_CREATE				lis_esolver_create_f

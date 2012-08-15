@@ -124,6 +124,8 @@ LIS_INT lis_eaii(LIS_ESOLVER esolver)
   LIS_SOLVER        solver;
   LIS_PRECON        precon;
   double	    times,itimes,ptimes,p_c_times,p_i_times;
+  LIS_INT           nsol, precon_type;
+  char              solvername[128], preconname[128];
 
   LIS_DEBUG_FUNC_IN;
 
@@ -149,6 +151,12 @@ LIS_INT lis_eaii(LIS_ESOLVER esolver)
   lis_solver_create(&solver);
   lis_solver_set_option("-i bicg -p ilu",solver);
   lis_solver_set_optionC(solver);
+  lis_solver_get_solver(solver, &nsol);
+  lis_solver_get_precon(solver, &precon_type);
+  lis_get_solvername(nsol, solvername);
+  lis_get_preconname(precon_type, preconname);
+  printf("solver     : %s %d\n", solvername, nsol);
+  printf("precon     : %s %d\n", preconname, precon_type);
 
   lis_vector_set_all(1.0,q);
   lis_solve(A, q, x, solver);
