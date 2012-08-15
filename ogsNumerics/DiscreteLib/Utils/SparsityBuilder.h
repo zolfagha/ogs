@@ -19,7 +19,7 @@
 #include "MeshLib/Topology/Topology.h"
 
 #include "DiscreteLib/DDC/DDCGlobal.h"
-#include "DiscreteLib/EquationId/DofEquationIdTable.h"
+#include "DiscreteLib/Utils/DofEquationIdTable.h"
 
 namespace DiscreteLib
 {

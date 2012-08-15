@@ -18,7 +18,7 @@
 #include "MeshLib/Topology/Topology.h"
 
 #include "DiscreteLib/EquationId/DofEquationIdTable.h"
-#include "DiscreteLib/Vector/DiscreteVector.h"
+#include "DiscreteLib/Serial/DiscreteVector.h"
 #include "DiscreteLib/Assembler/IDiscreteLinearEquationAssembler.h"
 #include "DiscreteLib/Utils/Tools.h"
 #include "IStencilWiseTransientLinearEQSLocalAssembler.h"

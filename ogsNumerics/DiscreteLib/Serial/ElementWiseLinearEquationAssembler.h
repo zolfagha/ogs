@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include "IDiscreteLinearEquationAssembler.h"
-#include "IElemenetWiseLinearEquationLocalAssembler.h"
+#include "DiscreteLib/Core/IDiscreteLinearEquationAssembler.h"
+#include "DiscreteLib/Core/IElemenetWiseLinearEquationLocalAssembler.h"
 
 namespace MeshLib 
 {

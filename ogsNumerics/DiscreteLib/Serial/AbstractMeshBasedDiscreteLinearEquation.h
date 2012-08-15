@@ -14,7 +14,7 @@
 
 #include "BaseLib/CodingTools.h"
 
-#include "MathLib/LinAlg/Sparse/SparseTableCRS.h"
+#include "MathLib/LinAlg/Sparse/Sparsity.h"
 
 #include "MeshLib/Core/IMesh.h"
 
@@ -26,12 +26,18 @@ namespace DiscreteLib
 
 /**
  * \brief Abstract class for mesh-based discrete linear equations
+ * 
+ * - Mesh
+ * - DoF manager
+ * - Sparse pattern
  */
 class AbstractMeshBasedDiscreteLinearEquation : public IDiscreteLinearEquation
 {
 public:
-    ///
-    AbstractMeshBasedDiscreteLinearEquation(MeshLib::IMesh &msh, DofEquationIdTable &dofManager) : _msh(&msh), _dofManager(&dofManager), _sparsity(0)
+    /// \param  msh
+    /// \param  dofManager
+    AbstractMeshBasedDiscreteLinearEquation(MeshLib::IMesh &msh, DofEquationIdTable &dofManager)
+    : _msh(&msh), _dofManager(&dofManager), _sparsity(0)
     {
     }
 
@@ -41,33 +47,25 @@ public:
         BaseLib::releaseObject(_sparsity);
     }
 
-    MeshLib::IMesh* getMesh() const
-    {
-        return _msh;
-    }
+    /// return a mesh
+    MeshLib::IMesh* getMesh() const { return _msh; }
 
-    DofEquationIdTable* getDofMapManger() const 
-    {
-        return _dofManager;
-    }
+    /// return DoF map table
+    virtual DofEquationIdTable* getDofMapManger() const { return _dofManager; }
 
-    MathLib::RowMajorSparsity* getSparsity() const
-    {
-        return _sparsity;
-    }
+    /// return a sparse pattern of equation matrix
+    MathLib::RowMajorSparsity* getSparsity() const { return _sparsity; };
 
 protected:
-    void setSparsity(MathLib::RowMajorSparsity* sp)
-    {
-        _sparsity = sp;;
-    }
+    void setSparsity(MathLib::RowMajorSparsity* sp) { _sparsity = sp; }
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(AbstractMeshBasedDiscreteLinearEquation);
 
 private:
     MeshLib::IMesh* _msh;
     DofEquationIdTable* _dofManager;
     MathLib::RowMajorSparsity* _sparsity;
-
-    DISALLOW_COPY_AND_ASSIGN(AbstractMeshBasedDiscreteLinearEquation);
 };
 
 

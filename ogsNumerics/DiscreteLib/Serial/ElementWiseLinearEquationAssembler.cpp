@@ -17,7 +17,7 @@
 #include "MeshLib/Core/IMesh.h"
 
 #include "DiscreteLib/Core/LocalDataType.h"
-#include "DiscreteLib/EquationId/DofEquationIdTable.h"
+#include "DiscreteLib/Utils/DofEquationIdTable.h"
 
 
 namespace DiscreteLib

@@ -15,7 +15,7 @@
 #include <string>
 
 #include "BaseLib/Options.h"
-#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "DiscreteLib/Core/IDiscreteVector.h"
 #include "NonlinearSolver.h"
 #include "NonlinearSolverOption.h"

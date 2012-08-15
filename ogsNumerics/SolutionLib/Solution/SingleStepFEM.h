@@ -17,8 +17,8 @@
 #include "BaseLib/CodingTools.h"
 #include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
 #include "MeshLib/Core/IMesh.h"
-#include "DiscreteLib/Core/DiscreteSystem.h"
-#include "DiscreteLib/LinearEquation/MeshBasedDiscreteLinearEquation.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteLinearEquation.h"
 #include "DiscreteLib/Utils/SparsityBuilder.h"
 #include "FemLib/Function/FemFunction.h"
 #include "NumLib/TransientAssembler/ElementWiseTransientLinearEQSAssembler.h"
@@ -54,7 +54,7 @@ public:
     typedef typename UserFemProblem::EquationType::DxEQSType UserDxFunction;
     typedef NumLib::TemplateDiscreteNonlinearSolver<UserLinearFunction, UserResidualFunction, UserDxFunction> NonlinearSolverType;
     typedef T_LINEAR_SOLVER LinearSolverType;
-    typedef DiscreteLib::DiscreteVector<double> ImplVector;
+    //typedef DiscreteLib::DiscreteVector<double> ImplVector;
 
     /// constructor
     /// - initialize solution vectors
@@ -83,10 +83,10 @@ public:
         }
 
         // initialize vectors for solution, ST
-        _x_n0 = dis->createVector<ImplVector>(n_total_dofs);
-        _x_n1 = dis->createVector<ImplVector>(n_total_dofs);
-        _x_n1_0 = dis->createVector<ImplVector>(n_total_dofs);
-        _x_st = dis->createVector<ImplVector>(n_total_dofs);
+        _x_n0 = dis->createVector<double>(n_total_dofs);
+        _x_n1 = dis->createVector<double>(n_total_dofs);
+        _x_n1_0 = dis->createVector<double>(n_total_dofs);
+        _x_st = dis->createVector<double>(n_total_dofs);
 
         // copy values of each variable to one solution vector
         for (size_t i=0; i<n_var; i++) {
@@ -97,8 +97,7 @@ public:
         // create linear equation systems
         _linear_solver = new LinearSolverType();
         _linear_eqs = _discrete_system->createLinearEquation
-                <   DiscreteLib::TemplateMeshBasedDiscreteLinearEquation,
-                    LinearSolverType,
+                <   LinearSolverType,
                     DiscreteLib::SparsityBuilderFromNodeConnectivity
                 >(*_linear_solver, _dofManager);
 

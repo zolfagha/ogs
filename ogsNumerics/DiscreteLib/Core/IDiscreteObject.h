@@ -5,7 +5,7 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file IDiscreteResource.h
+ * \file IDiscreteObject.h
  *
  * Created on 2012-08-03 by Norihiro Watanabe
  */
@@ -18,15 +18,16 @@ namespace DiscreteLib
 {
 
 /**
- * \brief Interface of all resource
+ * \brief Object in discrete systems
  */
-class IDiscreteResource
+class IDiscreteObject
 {
 public:
-    IDiscreteResource() : _obj_id(0) {};
-    virtual ~IDiscreteResource() {};
+    IDiscreteObject() : _obj_id(0) {};
+    virtual ~IDiscreteObject() {};
     size_t getObjectID() const {return _obj_id;};
     void setObjectID(size_t i) {_obj_id = i;};
+    
 private:
     size_t _obj_id;
 };

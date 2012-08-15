@@ -26,10 +26,6 @@ public:
 
     virtual void resize(size_t n) {_data.resize(n);};
     virtual size_t size() const {return _data.size();};
-    virtual double dot(const IDiscreteVector<T> &/*vec*/) {return .0;};
-    virtual double norm1() {return .0;};
-    virtual double norm2() {return .0;};
-    virtual double norm_max() {return .0;};
 
     virtual DiscreteVector<T>& operator= (T v)
     {

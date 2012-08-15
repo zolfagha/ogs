@@ -16,7 +16,7 @@
 
 #include "BaseLib/OrderedMap.h"
 #include "GeoLib/GEOObjects.h"
-#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "OutputIO/OutputBuilder.h"
 #include "OutputIO/OutputTimingBuilder.h"

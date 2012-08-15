@@ -21,7 +21,7 @@
 
 #include "BaseLib/CodingTools.h"
 #include "BaseLib/BidirectionalMap.h"
-#include "EquationIdStorage.h"
+#include "IEquationIdStorage.h"
 
 namespace DiscreteLib
 {

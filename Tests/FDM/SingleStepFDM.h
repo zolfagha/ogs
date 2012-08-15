@@ -17,7 +17,7 @@
 #include "BaseLib/CodingTools.h"
 #include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
 #include "MeshLib/Core/IMesh.h"
-#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "DiscreteLib/LinearEquation/MeshBasedDiscreteLinearEquation.h"
 #include "DiscreteLib/Utils/SparsityBuilder.h"
 #include "NumLib/TransientAssembler/ElementWiseTransientLinearEQSAssembler.h"
@@ -79,7 +79,7 @@ public:
         *_vec_n1 = *f_ic->getNodalValues();
         // create linear equation systems
         _linear_solver = new LinearSolverType();
-        _linear_eqs = _discrete_system->createLinearEquation<DiscreteLib::TemplateMeshBasedDiscreteLinearEquation, LinearSolverType, DiscreteLib::SparsityBuilderFromNodeConnectivity>(*_linear_solver, _dofManager);
+        _linear_eqs = _discrete_system->createLinearEquation<DiscreteLib::DiscreteLinearEquation, LinearSolverType, DiscreteLib::SparsityBuilderFromNodeConnectivity>(*_linear_solver, _dofManager);
         // setup functions
         _f_linear = new UserLinearFemFunction(problem, problem->getLinearAssembler(), _linear_eqs);
     };

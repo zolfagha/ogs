@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "DiscreteLib/Vector/DiscreteVector.h"
+#include "DiscreteLib/Serial/DiscreteVector.h"
 #include "FdmFunction.h"
 
 

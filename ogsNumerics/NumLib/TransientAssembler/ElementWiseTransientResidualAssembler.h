@@ -15,9 +15,9 @@
 #include <vector>
 #include <valarray>
 
-#include "DiscreteLib/EquationId/DofEquationIdTable.h"
-#include "DiscreteLib/Vector/DiscreteVector.h"
-#include "DiscreteLib/Assembler/IDiscreteVectorAssembler.h"
+#include "DiscreteLib/Utils/DofEquationIdTable.h"
+#include "DiscreteLib/Serial/DiscreteVector.h"
+#include "DiscreteLib/Core/IDiscreteVectorAssembler.h"
 
 #include "IElementWiseTransientResidualLocalAssembler.h"
 

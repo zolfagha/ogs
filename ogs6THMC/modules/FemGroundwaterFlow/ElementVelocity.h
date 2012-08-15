@@ -13,7 +13,7 @@
 #pragma once
 
 #include "BaseLib/CodingTools.h"
-#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "FemLib/Function/FemFunction.h"
 #include "NumLib/Function/Function.h"
 #include "NumLib/TimeStepping/TimeStep.h"

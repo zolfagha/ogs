@@ -14,7 +14,7 @@
 
 #include "BaseLib/CodingTools.h"
 #include "MathLib/Nonlinear/NewtonRaphson.h"
-#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 
 #include "INonlinearSolver.h"
 
@@ -32,8 +32,6 @@ class NewtonRaphson : public INonlinearSolver
     F_DX* _f_dx;
     VectorType* _r;
     VectorType* _dx;
-
-    typedef DiscreteLib::DiscreteVector<double> ImplVector;
 public:
     NewtonRaphson(DiscreteLib::DiscreteSystem* dis_sys, F_R* f_r, F_DX* f_dx) : _dis_sys(dis_sys), _f_r(f_r), _f_dx(f_dx)
     {
@@ -49,8 +47,8 @@ public:
     virtual void solve(const VectorType &x_0, VectorType &x_new)
     {
         if (_r==0) {
-            _r = _dis_sys->createVector<ImplVector>(x_0.size());
-            _dx = _dis_sys->createVector<ImplVector>(x_0.size());
+            _r = _dis_sys->createVector<double>(x_0.size());
+            _dx = _dis_sys->createVector<double>(x_0.size());
         }
         MathLib::NRCheckConvergence<VectorType, MathLib::NRErrorAbsResMNormOrRelDxMNorm> check(_option.error_tolerance);
         MathLib::NewtonRaphsonMethod nr;

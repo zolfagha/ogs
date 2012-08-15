@@ -14,7 +14,7 @@
 
 #include "logog.hpp"
 
-#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "FemLib/Tools/LagrangeFeObjectContainer.h"
 #include "NumLib/Function/TXFunction.h"
 #include "NumLib/TimeStepping/TimeStepFunction.h"

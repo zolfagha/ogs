@@ -19,7 +19,7 @@
 
 #include "BaseLib/CodingTools.h"
 
-#include "EquationIdStorage.h"
+#include "IEquationIdStorage.h"
 #include "SequentialEquationIdStorage.h"
 #include "RandomEquationIdStorage.h"
 

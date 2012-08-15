@@ -23,7 +23,7 @@
 
 #include "MeshLib/Core/IMesh.h"
 
-#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "DiscreteLib/Assembler/IElemenetWiseLinearEquationLocalAssembler.h"
 
 #include "NumLib/Function/TXFunction.h"

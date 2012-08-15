@@ -18,8 +18,8 @@
 #include "MathLib/Vector.h"
 #include "MeshLib/Core/IMesh.h"
 #include "FemLib/Core/DataType.h"
-#include "DiscreteLib/Core/DiscreteSystem.h"
-#include "DiscreteLib/Vector/DiscreteVector.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteVector.h"
 #include "NumLib/Function/TXFunction.h"
 
 
@@ -153,7 +153,7 @@ private:
     void initialize(DiscreteLib::DiscreteSystem &dis)
     {
         _discrete_system = &dis;
-        _values = _discrete_system->createVector<DiscreteVectorType>(dis.getMesh()->getNumberOfElements());
+        _values = _discrete_system->createVector<IntegrationPointVectorType>(dis.getMesh()->getNumberOfElements());
     }
 };
 

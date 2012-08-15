@@ -19,7 +19,7 @@
 #include "GeoLib/Polyline.h"
 #include "GeoLib/Line.h"
 #include "GeoLib/Rectangle.h"
-#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "NumLib/Function/TXFunction.h"
 #include "NumLib/Coupling/Algorithm/IConvergenceCheck.h"

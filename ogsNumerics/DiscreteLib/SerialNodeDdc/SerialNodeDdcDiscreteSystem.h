@@ -14,10 +14,7 @@
 
 #include <vector>
 
-#include "BaseLib/BidirectionalMap.h"
-#include "MeshLib/Core/IMesh.h"
-#include "DiscreteLib/Core/DiscreteSystem.h"
-#include "DiscreteLib/LinearEquation/MeshBasedDiscreteLinearEquation.h"
+#include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "DiscreteLib/DDC/DDCGlobal.h"
 #include "DDCDiscreteVector.h"
 #include "SerialNodeDdcSharedLinearEquation.h"
@@ -27,38 +24,38 @@ namespace DiscreteLib
 {
 
 /**
+ * \brief template class for serial node-based decomposition system
  * 
+ * \tparam T_EQS Linear equation class
  */
 template <template <typename, typename> class T_EQS>
 class TemplateSerialNodeDdcDiscreteSystem : public IDiscreteSystem
 {
 public:
-
-    TemplateSerialNodeDdcDiscreteSystem(DDCGlobal &ddc_global)
+    /// \param ddc_global   DDC object
+    explicit TemplateSerialNodeDdcDiscreteSystem(DDCGlobal &ddc_global)
     : _ddc_global(&ddc_global)
-    {
-
-    }
-
-    virtual ~TemplateSerialNodeDdcDiscreteSystem()
-    {
-
-    }
+    { };
+    
+    /// 
+    virtual ~TemplateSerialNodeDdcDiscreteSystem() {};
 
     /// create a new linear equation
+    /// \tparam T_LINEAR_SOLVER     Linear solver class
+    /// \tparam T_SPARSITY_BUILDER  Sparse pattern builder class
+    /// \param linear_solver
+    /// \param dofManager
     template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
     IDiscreteLinearEquation* createLinearEquation(T_LINEAR_SOLVER &linear_solver, DofEquationIdTable &dofManager)
     {
-        _vec_linear_sys.push_back(new T_EQS<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_ddc_global, linear_solver, dofManager));
-        //return _vec_linear_sys.size()-1;
-        return _vec_linear_sys.back();
+        T_EQS<T_LINEAR_SOLVER, T_SPARSITY_BUILDER> *eqs = new T_EQS<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_ddc_global, linear_solver, dofManager);
+        _data_container.addLinearEquation(eqs);
+        return eqs;
     }
 
-    //IDiscreteLinearEquation* getLinearEquation(size_t i)
-    //{
-    //    return _vec_linear_sys[i];
-    //}
-
+    //// create a vector
+    /// \tparam T   data type
+    /// \param n    vector size
     template<typename T>
     IDiscreteVector<T>* createVector(const size_t &n) 
     {
@@ -69,22 +66,22 @@ public:
         }
 
         DDCDiscreteVector<T>* v = new DDCDiscreteVector<T>(n, list_range_begin);
-        _vec_vectors.push_back(v);
+        _data_container.addVector(v);
         return v;
     };
+
 private:
     DISALLOW_COPY_AND_ASSIGN(TemplateSerialNodeDdcDiscreteSystem);
 
 private:
     DDCGlobal* _ddc_global;
-
-    // linear equations
-    std::vector<IDiscreteLinearEquation*> _vec_linear_sys;
-    // vector
-    std::vector<IDiscreteResource*> _vec_vectors;
+    DiscreteDataContainer _data_container;
 };
 
+/// \brief Discrete system for node-based decomposition using shared memory
 typedef TemplateSerialNodeDdcDiscreteSystem<SerialNodeDdcSharedLinearEquation> SerialNodeDdcSharedDiscreteSystem;
+
+/// \brief Discrete system for node-based decomposition using distributed memory
 typedef TemplateSerialNodeDdcDiscreteSystem<SerialNodeDdcDistributedLinearEquation> SerialNodeDdcDistributedDiscreteSystem;
 
 } //end

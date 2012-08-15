@@ -22,7 +22,7 @@
 
 #include "MeshLib/Tools/MeshGenerator.h"
 
-#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 
 #include "FemLib/Function/FemFunction.h"
 #include "FemLib/BC/DirichletBC2FEM.h"

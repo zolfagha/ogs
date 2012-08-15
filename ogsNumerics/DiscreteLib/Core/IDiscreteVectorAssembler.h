@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "DiscreteLib/Core/IDiscreteVector.h"
+#include "IDiscreteVector.h"
 
 namespace MeshLib 
 {

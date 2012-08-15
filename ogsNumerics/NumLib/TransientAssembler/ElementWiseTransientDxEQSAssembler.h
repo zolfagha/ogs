@@ -17,9 +17,9 @@
 
 #include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
 #include "MeshLib/Core/IMesh.h"
-#include "DiscreteLib/EquationId/DofEquationIdTable.h"
+#include "DiscreteLib/Utils/DofEquationIdTable.h"
 #include "DiscreteLib/Core/IDiscreteVector.h"
-#include "DiscreteLib/Assembler/IDiscreteVectorAssembler.h"
+#include "DiscreteLib/Core/IDiscreteVectorAssembler.h"
 #include "DiscreteLib/Utils/Tools.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 

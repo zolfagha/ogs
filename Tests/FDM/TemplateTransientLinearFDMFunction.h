@@ -15,7 +15,7 @@
 #include <vector>
 
 #include "NumLib/Function/IFunction.h"
-#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "StencilWiseTransientLinearEQSAssembler.h"
 #include "FdmFunction.h"

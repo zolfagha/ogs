@@ -10,7 +10,7 @@
 
 #include "MathLib/LinAlg/LinearEquations/LisMPILinearEquation.h"
 
-#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "DiscreteLib/LinearEquation/MeshBasedDiscreteLinearEquation.h"
 #include "LisMPIDiscreteVector.h"
 #include "LisMPILinearSystem.h"

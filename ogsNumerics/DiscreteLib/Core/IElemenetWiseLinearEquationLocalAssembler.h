@@ -12,12 +12,8 @@
 
 #pragma once
 
-#include "DiscreteLib/Core/LocalDataType.h"
+#include "LocalDataType.h"
 
-namespace MathLib
-{
-class DenseLinearEquations;
-}
 
 namespace MeshLib
 {

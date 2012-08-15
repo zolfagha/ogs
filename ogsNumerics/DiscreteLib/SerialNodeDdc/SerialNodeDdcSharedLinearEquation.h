@@ -14,7 +14,7 @@
 
 #include "BaseLib/BidirectionalMap.h"
 #include "MeshLib/Core/IMesh.h"
-#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "DiscreteLib/LinearEquation/MeshBasedDiscreteLinearEquation.h"
 #include "DiscreteLib/DDC/DDCGlobal.h"
 #include "DDCDiscreteVector.h"
@@ -32,7 +32,7 @@ public:
         for (size_t i=0; i<ddc_global.getNumberOfSubDomains(); i++) {
             DDCSubDomain* dom = ddc_global.getSubDomain(i);
             DofEquationIdTable *local_dofManager = new DofEquationIdTable();
-            _list_local_eq.push_back(new TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*dom->getLoalMesh(), shared_linear_solver, *local_dofManager));
+            _list_local_eq.push_back(new SerialDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*dom->getLoalMesh(), shared_linear_solver, *local_dofManager));
         }
         _do_create_eqs = true;
         _sheared_eqs = &shared_linear_solver;

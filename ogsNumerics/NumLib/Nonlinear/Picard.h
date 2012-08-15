@@ -13,7 +13,7 @@
 #pragma once
 
 #include "MathLib/Nonlinear/Picard.h"
-#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "INonlinearSolver.h"
 
 namespace NumLib
@@ -30,7 +30,6 @@ class Picard : public INonlinearSolver
     VectorType* _x_old;
     VectorType* _dx;
 
-    typedef DiscreteLib::DiscreteVector<double> ImplVector;
 public:
     Picard(DiscreteLib::DiscreteSystem* dis_sys, F_LINEAR* linear_f) : _linear_f(linear_f), _dis_sys(dis_sys)
     {
@@ -46,8 +45,8 @@ public:
     virtual void solve(const VectorType &x_0, VectorType &x_new)
     {
         if (_x_old==0) {
-            _x_old = _dis_sys->createVector<ImplVector>(x_0.size());
-            _dx = _dis_sys->createVector<ImplVector>(x_0.size());
+            _x_old = _dis_sys->createVector<double>(x_0.size());
+            _dx = _dis_sys->createVector<double>(x_0.size());
         }
 
         MathLib::PicardMethod picard;

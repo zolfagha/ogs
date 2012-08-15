@@ -15,7 +15,7 @@
 #include "BaseLib/CodingTools.h"
 #include "BaseLib/BidirectionalMap.h"
 #include "MeshLib/Core/IMesh.h"
-#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "DiscreteLib/LinearEquation/MeshBasedDiscreteLinearEquation.h"
 #include "DiscreteLib/DDC/DDCGlobal.h"
 #include "DDCDiscreteVector.h"
@@ -49,7 +49,7 @@ public:
             }
             local_dofManager->construct(DofNumberingType::BY_POINT);
             // create local EQS
-            _list_local_eq.push_back(new TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*dom->getLoalMesh(), *local_solver, *local_dofManager));
+            _list_local_eq.push_back(new SerialDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*dom->getLoalMesh(), *local_solver, *local_dofManager));
         }
         _do_create_eqs = true;
         _global_linear_solver = &global_linear_solver;
@@ -117,7 +117,7 @@ public:
         for (size_t i=0; i<_list_local_eq.size(); i++) {
             DDCSubDomain* dom = _ddc_global->getSubDomain(i);
             IDDCGlobaLocalMapping* pt_id_mapping = dom->getGlobalLocalIdMap();
-            TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>* local_eqs = _list_local_eq[i];
+            SerialDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>* local_eqs = _list_local_eq[i];
             DofEquationIdTable* local_dofTable = local_eqs->getDofMapManger();
             MathLib::ILinearEquations* local_solver = local_eqs->getLinearSolver();
             //local_solver->printout();
@@ -202,7 +202,7 @@ public:
 
 private:
     DDCGlobal* _ddc_global;
-    std::vector<TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>*> _list_local_eq;
+    std::vector<SerialDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>*> _list_local_eq;
     T_LINEAR_SOLVER* _global_linear_solver;
     bool _do_create_eqs;
     DofEquationIdTable* _global_dofManager;

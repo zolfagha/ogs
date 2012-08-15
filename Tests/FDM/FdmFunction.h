@@ -14,7 +14,7 @@
 
 #include "NumLib/Function/TXFunction.h"
 #include "MathLib/LinAlg/VectorNorms.h"
-#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 
 namespace FdmLib
 {

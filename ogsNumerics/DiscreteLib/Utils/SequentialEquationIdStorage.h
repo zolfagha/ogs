@@ -18,7 +18,7 @@
 #include <iostream>
 
 #include "BaseLib/CodingTools.h"
-#include "EquationIdStorage.h"
+#include "IEquationIdStorage.h"
 
 
 namespace DiscreteLib

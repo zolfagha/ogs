@@ -21,8 +21,8 @@
 #include "MathLib/LinAlg/VectorNorms.h"
 #include "MeshLib/Core/IMesh.h"
 
-#include "DiscreteLib/Core/DiscreteSystem.h"
-#include "DiscreteLib/Vector/DiscreteVector.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteVector.h"
 
 #include "NumLib/Function/TXFunction.h"
 
@@ -201,7 +201,7 @@ private:
         _msh = &msh;
         _order = order;
         size_t nnodes = msh.getNumberOfNodes();
-        _nodal_values = dis.createVector<DiscreteLib::DiscreteVector<Tvalue> >(nnodes);
+        _nodal_values = dis.createVector<Tvalue>(nnodes);
         _feObjects = new LagrangianFeObjectContainer(msh);
     }
 
