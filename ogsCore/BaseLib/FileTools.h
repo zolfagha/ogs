@@ -88,6 +88,8 @@ static std::string getFileBaseName(const std::string &file_path)
         dir_path = file_path.substr(indexChWin+1, file_path.length());
     else if(indexChLinux != std::string::npos)
         dir_path = file_path.substr(indexChLinux+1, file_path.length());
+    else
+        dir_path = file_path;
 
     return dir_path;
 }
