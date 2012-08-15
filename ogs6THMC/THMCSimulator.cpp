@@ -124,18 +124,18 @@ THMCSimulator::THMCSimulator(int argc, char* argv[])
 
         INFO("->Parsing input arguments");
         if (!input_arg.getValue().empty()) {
-            INFO("* Project path    : %s", input_arg.getValue().c_str());
+            INFO("project path     : %s", input_arg.getValue().c_str());
         }
         if (! logfile_arg.getValue().empty()) {
-            INFO("* Log file path   : %s", logfile_arg.getValue().c_str());
+            INFO("log file path    : %s", logfile_arg.getValue().c_str());
         }
         
         // data output directory
         std::string output_dir_path = "";
         if (! output_dir_arg.getValue().empty()) {
             output_dir_path = output_dir_arg.getValue();
-            INFO("* Output directory: %s", output_dir_path.c_str());
         }
+        INFO("output directory : %s", output_dir_path.c_str());
 
         if (! input_arg.getValue().empty()) {
             const std::string proj_path = input_arg.getValue();
