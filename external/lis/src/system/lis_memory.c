@@ -41,7 +41,7 @@
 #include <stdarg.h>
 #include "lislib.h"
 
-#ifdef _DEBUG
+#ifdef _LIS_DEBUG
 	#define USE_MALLOC_TAG	1
 #endif
 
