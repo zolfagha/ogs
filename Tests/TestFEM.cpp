@@ -116,7 +116,7 @@ TEST(FEM, ExtrapolateAverage1)
     GWFemTest::calculateHead(gw);
     GWFemTest::calculateVelocity(gw);
 
-    FemNodalFunctionVector2d nodal_vel(*gw.dis, PolynomialOrder::Linear);
+    FemNodalFunctionVector nodal_vel(*gw.dis, PolynomialOrder::Linear);
     FemExtrapolationAverage<NumLib::LocalVector> extrapo;
     extrapo.extrapolate(*gw.vel, nodal_vel);
 
@@ -160,7 +160,7 @@ TEST(FEM, ExtrapolateAverage2)
     GWFemTest::calculateHead(gw);
     GWFemTest::calculateVelocity(gw);
 
-    FemNodalFunctionVector2d nodal_vel(*gw.dis, PolynomialOrder::Linear);
+    FemNodalFunctionVector nodal_vel(*gw.dis, PolynomialOrder::Linear);
     FemExtrapolationAverage<NumLib::LocalVector> extrapo;
     extrapo.extrapolate(*gw.vel, nodal_vel);
 
