@@ -25,6 +25,11 @@ INCLUDE_DIRECTORIES(
         ../external/tinyxml2
 )
 
+TARGET_LINK_LIBRARIES( ogsCore 
+    tinyxml2
+    logog 
+    )
+
 IF(USE_EXTERNAL_LIS)
     INCLUDE_DIRECTORIES( ${LIS_INCLUDE_DIR} )
     TARGET_LINK_LIBRARIES( ogsCore ${LIS_LIBRARIES} )

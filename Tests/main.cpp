@@ -11,6 +11,20 @@
  */
 
 #include <gtest/gtest.h>
+#include "logog.hpp"
+#include "logog/include/formatter.hpp"
+
+/**
+ * new formatter for logog
+ */
+class FormatterCustom : public logog::FormatterGCC
+{
+    virtual TOPIC_FLAGS GetTopicFlags( const logog::Topic &topic )
+    {
+        return ( Formatter::GetTopicFlags( topic ) &
+                 ~( TOPIC_LEVEL_FLAG | TOPIC_FILE_NAME_FLAG | TOPIC_LINE_NUMBER_FLAG ));
+    }
+};
 
 //int add (int x, int y) {return x+y;};
 //
@@ -22,7 +36,14 @@
 
 int main(int argc, char *argv[])
 {
-#if 1
+    int ret = 0;
+    LOGOG_INITIALIZE();
+    {
+        logog::Cout out;
+        FormatterCustom custom_format;
+        out.SetFormatter(custom_format);
+
+#if 0
     argc = 2;
     //argv[1] = "--gtest_filter=Math.Nonlinear*";
     //argv[1] = "--gtest_filter=Num.Discrete*:FEM.*";
@@ -35,7 +56,11 @@ int main(int argc, char *argv[])
     //argv[1] = "--gtest_filter=Solution.CouplingF*";
     //argv[1] = "--gtest_filter=*";
 #endif
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+        ::testing::InitGoogleTest(&argc, argv);
+        ret = RUN_ALL_TESTS();
+    }
+    LOGOG_SHUTDOWN();
+
+    return ret;
 }
 
