@@ -31,6 +31,17 @@
 /**************************************/
 #include <stdio.h>
 
+//NW undef _LONGLONG
+#ifdef _LONGLONG
+#define _ORG_LONGLONG _LONGLONG
+#undef _LONGLONG
+#endif
+#ifdef _DEBUG
+#define _IS_DEBUG _DEBUG
+#undef _DEBUG
+//#define _DEBUG _LIS_DEBUG
+#endif
+
 #define _max(a,b) ((a) >= (b) ? (a) : (b))
 #define _min(a,b) ((a) <= (b) ? (a) : (b))
 
@@ -836,4 +847,16 @@ extern "C"
 		(is) = (id)*(ie)<((n)+1)?(id)*(ie):(n)+1;	\
 		(ie) = (is)+(ie)-1<(n)?(is)+(ie)-1:(n);
 #endif
+
+//NW recover _LONGLONG
+#ifdef _ORG_LONGLONG
+#define _LONGLONG _ORG_LONGLONG
+#undef _ORG_LONGLONG
+#endif
+#ifdef _IS_DEBUG
+#undef _DEBUG
+#define _DEBUG _IS_DEBUG
+#undef _IS_DEBUG
+#endif
+
 #endif
