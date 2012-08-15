@@ -18,7 +18,7 @@
 
 #include "MeshLib/Topology/Topology.h"
 
-#include "DiscreteLib/DDC/DomainDecomposition.h"
+#include "DiscreteLib/DDC/DDCGlobal.h"
 #include "DiscreteLib/EquationId/DofEquationIdTable.h"
 
 namespace DiscreteLib
