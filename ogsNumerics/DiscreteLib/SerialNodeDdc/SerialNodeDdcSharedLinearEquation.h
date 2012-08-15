@@ -16,17 +16,17 @@
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/Core/DiscreteSystem.h"
 #include "DiscreteLib/LinearEquation/MeshBasedDiscreteLinearEquation.h"
-#include "DomainDecomposition.h"
+#include "DiscreteLib/DDC/DDCGlobal.h"
 #include "DDCDiscreteVector.h"
 
 namespace DiscreteLib
 {
 
 template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
-class NodeDDCSerialSharedLinearEquation : public IDiscreteLinearEquation
+class SerialNodeDdcSharedLinearEquation : public IDiscreteLinearEquation
 {
 public:
-    NodeDDCSerialSharedLinearEquation(DDCGlobal &ddc_global, T_LINEAR_SOLVER &shared_linear_solver, DofEquationIdTable &global_dofManager)
+    SerialNodeDdcSharedLinearEquation(DDCGlobal &ddc_global, T_LINEAR_SOLVER &shared_linear_solver, DofEquationIdTable &global_dofManager)
     {
         _ddc_global = &ddc_global;
         for (size_t i=0; i<ddc_global.getNumberOfSubDomains(); i++) {
@@ -39,7 +39,7 @@ public:
         _global_dofManager = &global_dofManager;
     };
 
-    virtual ~NodeDDCSerialSharedLinearEquation() 
+    virtual ~SerialNodeDdcSharedLinearEquation() 
     {
         BaseLib::releaseObjectsInStdVector(_list_local_eq);
     };
@@ -173,62 +173,7 @@ private:
     std::vector<size_t> _list_prescribed_dof_id;
     std::vector<double> _list_prescribed_values;
 
-    DISALLOW_COPY_AND_ASSIGN(NodeDDCSerialSharedLinearEquation);
-};
-
-
-/**
- * 
- */
-class NodeDDCSerialSharedDiscreteSystem : public IDiscreteSystem
-{
-public:
-    NodeDDCSerialSharedDiscreteSystem(DDCGlobal &ddc_global) : _ddc_global(&ddc_global)
-    {
-
-    }
-    virtual ~NodeDDCSerialSharedDiscreteSystem()
-    {
-
-    }
-
-    /// create a new linear equation
-    template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
-    IDiscreteLinearEquation* createLinearEquation(T_LINEAR_SOLVER &linear_solver, DofEquationIdTable &dofManager)
-    {
-        _vec_linear_sys.push_back(new NodeDDCSerialSharedLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_ddc_global, linear_solver, dofManager));
-        //return _vec_linear_sys.size()-1;
-        return _vec_linear_sys.back();
-    }
-
-    //IDiscreteLinearEquation* getLinearEquation(size_t i)
-    //{
-    //    return _vec_linear_sys[i];
-    //}
-
-    template<typename T>
-    IDiscreteVector<T>* createVector(const size_t &n) 
-    {
-        std::vector<size_t> list_range_begin;
-        for (size_t i=0; i<_ddc_global->getNumberOfSubDomains(); i++) {
-            size_t cnt = (size_t)((double)n / (double)_ddc_global->getNumberOfSubDomains() * (double)i);
-            list_range_begin.push_back(cnt);
-        }
-
-        DDCDiscreteVector<T>* v = new DDCDiscreteVector<T>(n, list_range_begin);
-        _vec_vectors.push_back(v);
-        return v;
-    };
-private:
-    DISALLOW_COPY_AND_ASSIGN(NodeDDCSerialSharedDiscreteSystem);
-
-private:
-    DDCGlobal* _ddc_global;
-
-    // linear equations
-    std::vector<IDiscreteLinearEquation*> _vec_linear_sys;
-    // vector
-    std::vector<IDiscreteResource*> _vec_vectors;
+    DISALLOW_COPY_AND_ASSIGN(SerialNodeDdcSharedLinearEquation);
 };
 
 } //end

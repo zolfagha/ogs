@@ -25,13 +25,19 @@ SOURCE_GROUP( ogsNumerics\\DiscreteLib\\Assembler FILES ${DiscreteLib_Assembler_
 # ./DDC
 FILE(GLOB DiscreteLib_DDC_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} DiscreteLib/DDC/*.h DiscreteLib/DDC/*.cpp)
 SOURCE_GROUP( ogsNumerics\\DiscreteLib\\DDC FILES ${DiscreteLib_DDC_Files} )
+# ./SerialNodeDdc
+FILE(GLOB DiscreteLib_SearialNodeDdc_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} DiscreteLib/SerialNodeDdc/*.h DiscreteLib/SerialNodeDdc/*.cpp)
+SOURCE_GROUP( ogsNumerics\\DiscreteLib\\SerialNodeDdc FILES ${DiscreteLib_SearialNodeDdc_Files} )
+# ./lis
+FILE(GLOB DiscreteLib_LIS_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} DiscreteLib/lis/*.h DiscreteLib/lis/*.cpp)
+SOURCE_GROUP( ogsNumerics\\DiscreteLib\\lis FILES ${DiscreteLib_LIS_Files} )
 IF(NOT USE_LIS OR NOT USE_MPI)
-    LIST(REMOVE_ITEM DiscreteLib_DDC_Files 
-        DiscreteLib/DDC/LisMPIDiscreteVector.h 
-        DiscreteLib/DDC/LisMPIDiscreteVector.cpp
-        DiscreteLib/DDC/LisMPILinearSystem.h 
-        DiscreteLib/DDC/LisDiscreteSystem.h
-        DiscreteLib/DDC/LisDiscreteSystem.cpp
+    LIST(REMOVE_ITEM DiscreteLib_LIS_Files 
+        DiscreteLib/lis/LisMPIDiscreteVector.h 
+        DiscreteLib/lis/LisMPIDiscreteVector.cpp
+        DiscreteLib/lis/LisMPILinearSystem.h 
+        DiscreteLib/lis/LisDiscreteSystem.h
+        DiscreteLib/lis/LisDiscreteSystem.cpp
         )
 ENDIF()
 # ./OpenMP
@@ -46,6 +52,8 @@ LIST(APPEND DiscreteLib_Files
     ${DiscreteLib_Assembler_Files} 
     ${DiscreteLib_Utils_Files} 
     ${DiscreteLib_DDC_Files} 
+    ${DiscreteLib_SearialNodeDdc_Files} 
+    ${DiscreteLib_LIS_Files} 
     ${DiscreteLib_OpenMP_Files} 
 	${DiscreteLib_OGS5_Files} 
 )

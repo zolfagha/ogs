@@ -34,15 +34,16 @@
 #include "DiscreteLib/Vector/DiscreteVector.h"
 #include "DiscreteLib/Core/IDiscreteLinearEquation.h"
 #include "DiscreteLib/EquationId/DofEquationIdTable.h"
-#include "DiscreteLib/OpenMP/OMPDiscreteSystem.h"
+#include "DiscreteLib/OpenMP/OMPMasterNodeDecomposedDiscreteSystem.h"
 #include "DiscreteLib/Assembler/ElementWiseLinearEquationAssembler.h"
 #include "DiscreteLib/Assembler/IElemenetWiseLinearEquationLocalAssembler.h"
 #include "DiscreteLib/Utils/SparsityBuilder.h"
 #ifdef USE_MPI
 #include "DiscreteLib/ogs5/par_ddc_group.h"
 #endif
-#include "DiscreteLib/DDC/NodeDDCSerialSharedDiscreteSystem.h"
-#include "DiscreteLib/DDC/NodeDDCSerialDistributedDiscreteSystem.h"
+#include "DiscreteLib/SerialNodeDdc/SerialNodeDdcDiscreteSystem.h"
+#include "DiscreteLib/DDC/DDCGlobalLocalMappingOffset.h"
+#include "DiscreteLib/DDC/DDCGlobalLocalMappingAll.h"
 
 #include "TestUtil.h"
 
@@ -163,7 +164,7 @@ TEST(Discrete, NDDCSSVec1)
     DDCGlobal* ddc = setupNDDC1();
 
     // discrete system
-    NodeDDCSerialSharedDiscreteSystem dis(*ddc);
+    SerialNodeDdcSharedDiscreteSystem dis(*ddc);
 
     // vector
     IDiscreteVector<double>* v = dis.createVector<double>(ddc->getTotalNumberOfDecomposedObjects());
@@ -178,7 +179,7 @@ TEST(Discrete, NDDCSSVec2)
 {
     DDCGlobal* ddc = setupNDDC2();
     // discrete system
-    NodeDDCSerialSharedDiscreteSystem dis(*ddc);
+    SerialNodeDdcSharedDiscreteSystem dis(*ddc);
 
     // vector
     IDiscreteVector<double>* v = dis.createVector<double>(ddc->getTotalNumberOfDecomposedObjects());
@@ -200,7 +201,7 @@ TEST(Discrete, NDDCSSEqs2)
     DDCGlobal* ddc = setupNDDC2();
 
     // discrete system
-    NodeDDCSerialSharedDiscreteSystem dis(*ddc);
+    SerialNodeDdcSharedDiscreteSystem dis(*ddc);
     // dof
     DofEquationIdTable dofManager;
     dofManager.addVariableDoFs(0, 0, ddc->getTotalNumberOfDecomposedObjects());
@@ -227,7 +228,7 @@ TEST(Discrete, NDDCSDEqs2)
     DDCGlobal* ddc = setupNDDC2();
 
     // discrete system
-    NodeDDCSerialDistributedDiscreteSystem dis(*ddc);
+    SerialNodeDdcDistributedDiscreteSystem dis(*ddc);
     // dof
     DofEquationIdTable dofManager;
     dofManager.addVariableDoFs(0, 0, ddc->getTotalNumberOfDecomposedObjects());
@@ -380,18 +381,18 @@ TEST(Discrete, OMP_vec1)
 
 #endif
 
-#if 0
+#if 1
 TEST(Discrete, OMP_eqs1)
 {
     DiscreteExample1 ex1;
     struct NodeDDC
     {
-        Base::BidirectionalMap<size_t, size_t> map_global2localNodeId;
+        BaseLib::BidirectionalMap<size_t, size_t> map_global2localNodeId;
         std::set<size_t> ghost_nodes;
     };
     MeshLib::IMesh *org_msh = MeshGenerator::generateRegularQuadMesh(2.0, 2, .0, .0, .0);
     const size_t n_dom = 2;
-    OMPMasterNodeDecomposedDiscreteSystem global_dis(*org_msh, n_dom);
+    OmpNodeDdcDiscreteSystem global_dis(*org_msh, n_dom);
 
     omp_set_num_threads(n_dom);
 
@@ -427,7 +428,7 @@ TEST(Discrete, OMP_eqs1)
         ex1.setLocalDirichletBC(dom.map_global2localNodeId, list_dirichlet_bc_id, list_dirichlet_bc_value);
 
         // discrete system
-        OMPLocalNodeDecomposedDiscreteSystem *local_dis = global_dis.createLocal(*local_msh, dom.map_global2localNodeId, dom.ghost_nodes);
+        OmpNodeDdcLocalDiscreteSystem *local_dis = global_dis.createLocal(*local_msh, dom.map_global2localNodeId, dom.ghost_nodes);
 
         //// create dof map
         //DofMapManager dofManager;
