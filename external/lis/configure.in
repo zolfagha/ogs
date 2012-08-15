@@ -1,12 +1,12 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(lis, 1.2.93, devel@ssisc.org)
+AC_INIT(lis, 1.2.97, devel@ssisc.org)
 AC_CONFIG_SRCDIR([src/fortran/lisf_matrix.c])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_CANONICAL_SYSTEM
-AM_INIT_AUTOMAKE(lis,1.2.93,devel@ssisc.org)
+AM_INIT_AUTOMAKE(lis,1.2.97,devel@ssisc.org)
 AM_CONFIG_HEADER(include/lis_config.h)
 
 AM_MAINTAINER_MODE
@@ -98,8 +98,8 @@ if test "$TARGET" != ""; then
                     MPINP="-n"
                     OMPFLAG="-KOMP"
 	  ;;
-# Fujitsu FX10
-          fujitsu_fx10) CC="fcc"
+# Fujitsu Techcal Computing Suite (for FX and PRIMERGY)
+          fujitsu_tcs) CC="fcc"
                     F77="frt"
                     FC="frt"
                     MPICC="mpifcc"
@@ -315,9 +315,9 @@ if test "$CFLAGS" = "-g -O2"; then
 fi
 if test "$TARGET" = ""; then
   if test "$CC" = "fcc"; then
-    CFLAGS="-O3"
-    FFLAGS="-O3 -Cpp"
-    FCFLAGS="-O3 -Cpp -Am"
+    CFLAGS="-O3 -w"
+    FFLAGS="-O3 -Cpp -fs"
+    FCFLAGS="-O3 -Cpp -Am -fs"
     ax_f77_mangling="lower case, underscore, no extra underscore"
     MPIRUN="mpiexec"
     MPINP="-n"
@@ -786,7 +786,6 @@ if test "$enable_omp" = "yes"; then
     FFLAGS="$FFLAGS $OMPFLAG"
     FCFLAGS="$FCFLAGS $OMPFLAG"
     LDFLAGS="$LDFLAGS $OMPFLAG"
-    FCLDFLAGS="$FCLDFLAGS $OMPFLAG"
   fi
 fi
 

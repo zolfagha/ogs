@@ -1,22 +1,28 @@
 # Makefile for LaTeX Systems
 
-FILE=lis-manual
+DOC=lis-manual
 
-all: en ja
+LATEX=latex
+JLATEX=platex
 
-# English version
+DVIPDF=dvipdfmx
 
-en: 
-	latex $(FILE)-en.tex
-	latex $(FILE)-en.tex
-	dvipdfmx $(FILE)-en.dvi
+all: en ja 
 
-# Japanese version
+en: $(DOC)-en.pdf
 
-ja: 
-	platex $(FILE)-ja.tex
-	platex $(FILE)-ja.tex
-	dvipdfmx $(FILE)-ja.dvi
+ja: $(DOC)-ja.pdf
+
+%.pdf: %.dvi
+	$(DVIPDF) $< 
+
+%-en.dvi: %-en.tex
+	$(LATEX) $<
+	$(LATEX) $<
+
+%-ja.dvi: %-ja.tex
+	$(JLATEX) $<
+	$(JLATEX) $<
 
 clean: 
 	-$(RM) *.dvi *.aux *.toc *.log

@@ -33,7 +33,7 @@
 \@addtoreset{equation}{section}
 \def\theequation{\thesection.\arabic{equation}}
 \makeatother
-\title{Lis User Manual Revision 1.2.93}
+\title{Lis User Manual Revision 1.2.97}
 \author{}
 \date{}
 \begin{document}
@@ -41,7 +41,7 @@
 \vspace*{4cm}
 \begin{flushleft}
 {\Large Lis User Manual}\\
-Version 1.2.93
+Version 1.2.97
 \end{flushleft}
 
 \vspace*{2cm}
@@ -59,7 +59,7 @@ Project\\
 
 \vspace*{5mm}
 \begin{flushleft}
-August 9, 2012
+August 15, 2012
 \end{flushleft}
 \thispagestyle{empty}
 \newpage
@@ -934,7 +934,7 @@ for the multiprocessing environment.
  
 Programs to create the vector $v$ are as follows, 
 where the number of the processing elements for the multiprocessing environment is assumed to be two:
-\begin{itembox}[l]{C (for the serial and multithreaded environments)}
+\begin{itembox}[l]{C (for serial and multithreaded environments)}
 \small
 \begin{verbatim}
  1: LIS_INT       i,n;
@@ -949,7 +949,7 @@ where the number of the processing elements for the multiprocessing environment 
 10:  }
 \end{verbatim}
 \end{itembox}
-\begin{itembox}[l]{C (for the multiprocessing environment)}
+\begin{itembox}[l]{C (for multiprocessing environment)}
 \small
 \begin{verbatim}
  1: LIS_INT       i,n,is,ie;                 /* or LIS_INT  i,ln,is,ie; */
@@ -964,7 +964,7 @@ where the number of the processing elements for the multiprocessing environment 
 10:  }
 \end{verbatim}
 \end{itembox}
-\begin{itembox}[l]{Fortran (for the serial and multithreaded environments)}
+\begin{itembox}[l]{Fortran (for serial and multithreaded environments)}
 \small
 \begin{verbatim}
  1: LIS_INTEGER   i,n
@@ -978,7 +978,7 @@ where the number of the processing elements for the multiprocessing environment 
 10: enddo
 \end{verbatim}
 \end{itembox}
-\begin{itembox}[l]{Fortran (for the multiprocessing environment)}
+\begin{itembox}[l]{Fortran (for multiprocessing environment)}
 \small
 \begin{verbatim}
  1: LIS_INTEGER   i,n,is,ie                 
@@ -1123,7 +1123,7 @@ for the multiprocessing environment.
 
 Programs to create the matrix $A$ in the CRS format are as follows, 
 where the number of the processing elements for the multiprocessing environment is assumed to be two:
-\begin{itembox}[l]{C (for the serial and multithreaded environments)}
+\begin{itembox}[l]{C (for serial and multithreaded environments)}
 \small
 \begin{verbatim}
  1: LIS_INT       i,n;
@@ -1140,7 +1140,7 @@ where the number of the processing elements for the multiprocessing environment 
 12:  lis_matrix_assemble(A);
 \end{verbatim}
 \end{itembox}
-\begin{itembox}[l]{C (for the multiprocessing environment)}
+\begin{itembox}[l]{C (for multiprocessing environment)}
 \small
 \begin{verbatim}
  1: LIS_INT       i,n,gn,is,ie;                 
@@ -1159,7 +1159,7 @@ where the number of the processing elements for the multiprocessing environment 
 14:  lis_matrix_assemble(A);
 \end{verbatim}
 \end{itembox}
-\begin{itembox}[l]{Fortran (for the serial and multithreaded environments)}
+\begin{itembox}[l]{Fortran (for serial and multithreaded environments)}
 \small
 \begin{verbatim}
  1: LIS_INTEGER   i,n
@@ -1176,7 +1176,7 @@ where the number of the processing elements for the multiprocessing environment 
 12:  call lis_matrix_assemble(A,ierr)
 \end{verbatim}
 \end{itembox}
-\begin{itembox}[l]{Fortran (for the multiprocessing environment)}
+\begin{itembox}[l]{Fortran (for multiprocessing environment)}
 \small
 \begin{verbatim}
  1: LIS_INTEGER   i,n,gn,is,ie                 
@@ -1324,7 +1324,7 @@ for the multiprocessing environment.
 
 Programs to create the matrix $A$ in the CRS format are as follows,
 where the number of the processing elements for the multiprocessing environment is assumed to be two: 
-\begin{itembox}[l]{C (for the serial and multithreaded environments)}
+\begin{itembox}[l]{C (for serial and multithreaded environments)}
 \small
 \begin{verbatim}
  1: LIS_INT       i,k,n,nnz;
@@ -1350,7 +1350,7 @@ where the number of the processing elements for the multiprocessing environment 
 
 \end{verbatim}
 \end{itembox}
-\begin{itembox}[l]{C (for the multiprocessing environment)}
+\begin{itembox}[l]{C (for multiprocessing environment)}
 \small
 \begin{verbatim}
  1: LIS_INT       i,k,n,nnz,is,ie;
@@ -1394,7 +1394,7 @@ Programs to read the matrix $A$ in Equation (\ref{eq:mat}) in the CRS format and
 vector $b$ in Equation (\ref{eq:vecv}) from an external file are as
 follows: 
 \\
-\begin{itembox}[l]{C (for the serial, multithreaded and multiprocessing environments)}
+\begin{itembox}[l]{C (for serial, multithreaded and multiprocessing environments)}
 \small
 \begin{verbatim}
  1: LIS_MATRIX    A;
@@ -1406,7 +1406,7 @@ follows:
  7: lis_input(A,b,x,"matvec.mtx"); 
 \end{verbatim}
 \end{itembox}
-\begin{itembox}[l]{Fortran (for the serial, multithreaded and multiprocessing environments)}
+\begin{itembox}[l]{Fortran (for serial, multithreaded and multiprocessing environments)}
 \small
 \begin{verbatim}
  1: LIS_MATRIX    A
@@ -1477,7 +1477,7 @@ The following file formats are supported:
 \subsection{Solving Linear Equations}\label{subsec:solve}
 A program to solve the linear equation $Ax = b$ with a specified 
 solver is as follows: 
-\begin{itembox}[l]{C (for the serial, multithreaded and multiprocessing environments)}
+\begin{itembox}[l]{C (for serial, multithreaded and multiprocessing environments)}
 \small
 \begin{verbatim}
  1: LIS_MATRIX A; 
@@ -1492,7 +1492,7 @@ solver is as follows:
 10: lis_solver(A,b,x,solver); 
 \end{verbatim}
 \end{itembox}
-\begin{itembox}[l]{Fortran (for the serial, multithreaded and multiprocessing environments)}
+\begin{itembox}[l]{Fortran (for serial, multithreaded and multiprocessing environments)}
 \small
 \begin{verbatim}
  1: LIS_MATRIX A 
@@ -1670,7 +1670,7 @@ To solve the linear equation $Ax = b$, the following functions are used:
 \subsection{Solving Eigenvalue Problems}\label{subsec:solve}
 A program to solve the eigenvalue problem $Ax = \lambda x$ with a specified 
 solver is as follows: 
-\begin{itembox}[l]{C (for the serial, multithreaded and multiprocessing environments)}
+\begin{itembox}[l]{C (for serial, multithreaded and multiprocessing environments)}
 \small
 \begin{verbatim}
  1: LIS_MATRIX A; 
@@ -1686,7 +1686,7 @@ solver is as follows:
 11: lis_esolve(A,x,evalue,esolver); 
 \end{verbatim}
 \end{itembox}
-\begin{itembox}[l]{Fortran (for the serial, multithreaded and multiprocessing environments)}
+\begin{itembox}[l]{Fortran (for serial, multithreaded and multiprocessing environments)}
 \small
 \begin{verbatim}
  1: LIS_MATRIX A 
@@ -1994,7 +1994,7 @@ The preprocessor macro \verb|USE_MPI| must be defined for the multiprocessing en
 {\bf Linking (with SA-AMG)}\\
 \verb+      >ifort -nofor_main -o test4 test4.o -llis+
 \end{itembox}
-\begin{itembox}[l]{For the multithreaded environment}
+\begin{itembox}[l]{For multithreaded environment}
 \small
 {\bf Compiling}\\
 \verb+      >icc -c -openmp -I$(INSTALLDIR)/include test4.c+\\
@@ -2003,7 +2003,7 @@ The preprocessor macro \verb|USE_MPI| must be defined for the multiprocessing en
 {\bf Linking (with SA-AMG)}\\
 \verb+      >ifort -nofor_main -openmp -o test4 test4.o -llis+
 \end{itembox}
-\begin{itembox}[l]{For the multiprocessing environment}
+\begin{itembox}[l]{For multiprocessing environment}
 \small
 {\bf Compiling}\\
 \verb+      >icc -c -DUSE_MPI -I$(INSTALLDIR)/include test4.c+\\
@@ -2012,7 +2012,7 @@ The preprocessor macro \verb|USE_MPI| must be defined for the multiprocessing en
 {\bf Linking (with SA-AMG)}\\
 \verb+      >ifort -nofor_main -o test4 test4.o -llis -lmpi+
 \end{itembox}
-\begin{itembox}[l]{For the multithreaded and multiprocessing environments}
+\begin{itembox}[l]{For multithreaded and multiprocessing environments}
 \small
 {\bf Compiling}\\
 \verb+      >icc -c -openmp -DUSE_MPI -I$(INSTALLDIR)/include test4.c+\\
@@ -2028,28 +2028,28 @@ using the Intel Fortran Compiler 8.1 (ifort).
 Since an \verb|include| statement is used in the program, 
 the compiler option \verb|-fpp| is specified to use the preprocessor. 
 
-\begin{itembox}[l]{For the serial environment}
+\begin{itembox}[l]{For serial environment}
 \small
 {\bf Compiling}\\
 \verb+      >ifort -c -fpp -I$(INSTALLDIR)/include test4f.F+\\
 {\bf Linking}\\
 \verb+      >ifort -o test4 test4.o -llis+\\
 \end{itembox}
-\begin{itembox}[l]{For the multithreaded environment}
+\begin{itembox}[l]{For multithreaded environment}
 \small
 {\bf Compiling}\\
 \verb+      >ifort -c -fpp -openmp -I$(INSTALLDIR)/include test4f.F+\\
 {\bf Linking}\\
 \verb+      >ifort -openmp -o test4 test4.o -llis+\\
 \end{itembox}
-\begin{itembox}[l]{For the multiprocessing environment}
+\begin{itembox}[l]{For multiprocessing environment}
 \small
 {\bf Compiling}\\
 \verb+      >ifort -c -fpp -DUSE_MPI -I$(INSTALLDIR)/include test4f.F+\\
 {\bf Linking}\\
 \verb+      >ifort -o test4 test4.o -llis -lmpi+\\
 \end{itembox}
-\begin{itembox}[l]{For the multithreaded and multiprocessing environments}
+\begin{itembox}[l]{For multithreaded and multiprocessing environments}
 \small
 {\bf Compiling}\\
 \verb+      >ifort -c -fpp -openmp -DUSE_MPI -I$(INSTALLDIR)/include test4f.F+\\
@@ -2060,13 +2060,13 @@ the compiler option \verb|-fpp| is specified to use the preprocessor.
 \subsection{Running}
 The test programs \verb|test4| and \verb|test4f| 
 in the directory \verb|lis-($VERSION)/test| are run as follows: \\\\
-{\bf for the serial environment}\\
+{\bf For serial environment}\\
 \verb+      >./test4 -i bicgstab+\\
-{\bf for the multithreaded environment}\\
+{\bf For multithreaded environment}\\
 \verb+      >env OMP_NUM_THREADS=2 ./test4 -i bicgstab +\\
-{\bf for the multiprocessing environment}\\
+{\bf For multiprocessing environment}\\
 \verb+      >mpirun -np 2 ./test4 -i bicgstab +\\
-{\bf for the multithreaded and multiprocessing environment}\\
+{\bf For multithreaded and multiprocessing environment}\\
 \verb+      >mpirun -np 2 env OMP_NUM_THREADS=2 ./test4 -i bicgstab +\\\\
 The following results will be returned:
 
@@ -2198,7 +2198,7 @@ The CRS format uses three arrays {\ttfamily ptr}, {\ttfamily index} and {\ttfami
       stores the starting points of the rows of the arrays {\ttfamily value} and {\ttfamily index}. 
 \end{itemize}
 
-\subsubsection{Creating Matrices (for the Serial and Multithreaded Environments)}
+\subsubsection{Creating Matrices (for Serial and Multithreaded Environments)}
 The right diagram in Figure \ref{fig:storage01} shows how the matrix $A$ in Figure \ref{fig:storage01} is stored in the CRS format. A program to create the matrix in the CRS format is as follows:
 \begin{figure}[h]
 {\centering 
@@ -2220,9 +2220,9 @@ $
 \includegraphics{storage01.eps} 
 \end{flushleft}
 \end{minipage}
-\caption{The data structure of the CRS format (for the serial and multithreaded environments).}\label{fig:storage01}}
+\caption{Data structure of CRS format (for serial and multithreaded environments).}\label{fig:storage01}}
 \end{figure}
-\begin{itembox}[l]{For the serial and multithreaded environments}
+\begin{itembox}[l]{For serial and multithreaded environments}
 \small
 \begin{verbatim}
  1: LIS_INT       n,nnz;
@@ -2248,7 +2248,7 @@ $
 \end{itembox}
 
 \newpage
-\subsubsection{Creating Matrices (for the Multiprocessing Environment)}
+\subsubsection{Creating Matrices (for Multiprocessing Environment)}
 Figure \ref{fig:storage01_mpi} shows how the matrix $A$ in 
 Figure \ref{fig:storage01} is stored in the CRS format on two 
 processing elements. A program to create the matrix in the CRS format 
@@ -2256,9 +2256,9 @@ on two processing elements is as follows:
 \begin{figure}[h]
 {\centering 
 \includegraphics{storage01_mpi.eps} 
-\caption{The data structure of the CRS format (for the multiprocessing environment).}\label{fig:storage01_mpi}}
+\caption{Data structure of CRS format (for multiprocessing environment).}\label{fig:storage01_mpi}}
 \end{figure}
-\begin{itembox}[l]{For the multiprocessing environment}
+\begin{itembox}[l]{For multiprocessing environment}
 \small
 \begin{verbatim}
  1: LIS_INT       i,k,n,nnz,my_rank;
@@ -2312,7 +2312,7 @@ The CSS format uses three arrays {\ttfamily ptr}, {\ttfamily index} and
       stores the starting points of the rows of the arrays {\ttfamily value} and {\ttfamily index}. 
 \end{itemize}
 
-\subsubsection{Creating Matrices (for the Serial and Multithreaded Environments)}
+\subsubsection{Creating Matrices (for Serial and Multithreaded Environments)}
 The right diagram in Figure \ref{fig:storage02} shows how the matrix $A$ in Figure \ref{fig:storage02} is stored in the CCS format. A program to create the matrix in the CCS format is as follows:
 
 \begin{figure}[h]
@@ -2335,9 +2335,9 @@ $
 \includegraphics{storage02.eps} 
 \end{flushleft}
 \end{minipage}
-\caption{The data structure of the CCS format (for the serial and multithreaded environments).}\label{fig:storage02}}
+\caption{Data structure of CCS format (for serial and multithreaded environments).}\label{fig:storage02}}
 \end{figure}
-\begin{itembox}[l]{For the serial and multithreaded environments}
+\begin{itembox}[l]{For serial and multithreaded environments}
 \small
 \begin{verbatim}
  1: LIS_INT       n,nnz;
@@ -2363,16 +2363,16 @@ $
 \end{itembox}
 
 \newpage
-\subsubsection{Creating Matrices (for the Multiprocessing Environment)}
+\subsubsection{Creating Matrices (for Multiprocessing Environment)}
 Figure \ref{fig:storage02_mpi} shows how the matrix $A$ in Figure
 \ref{fig:storage02} is stored on two processing elements. A program to create the
 matrix in the CCS format on two processing elements is as follows:
 \begin{figure}[h]
 {\centering 
 \includegraphics{storage02_mpi.eps} 
-\caption{The data structure of the CCS format (for the multiprocessing environment).}\label{fig:storage02_mpi}}
+\caption{Data structure of CCS format (for multiprocessing environment).}\label{fig:storage02_mpi}}
 \end{figure}
-\begin{itembox}[l]{For the multiprocessing environment}
+\begin{itembox}[l]{For multiprocessing environment}
 \small
 \begin{verbatim}
  1: LIS_INT       i,k,n,nnz,my_rank;
@@ -2430,7 +2430,7 @@ Assume that $ndz$ represents the number of the zero elements of the diagonal.
       the matrix $A$ stored in the array {\ttfamily value}.
 \end{itemize}
 
-\subsubsection{Creating Matrices (for the Serial and Multithreaded Environments)}
+\subsubsection{Creating Matrices (for Serial and Multithreaded Environments)}
 The right diagram in Figure \ref{fig:storage03} shows how matrix A is stored in the MSR format. A program to create the matrix in the MSR format is as follows:
 \begin{figure}[h]
 {\centering 
@@ -2452,9 +2452,9 @@ $
 \includegraphics{storage03.eps} 
 \end{flushleft}
 \end{minipage}
-\caption{The data structure of the MSR format (for the serial and multithreaded environments).}\label{fig:storage03}}
+\caption{Data structure of MSR format (for serial and multithreaded environments).}\label{fig:storage03}}
 \end{figure}
-\begin{itembox}[l]{For the serial and multithreaded environments}
+\begin{itembox}[l]{For serial and multithreaded environments}
 \small
 \begin{verbatim}
  1: LIS_INT       n,nnz,ndz;
@@ -2478,16 +2478,16 @@ $
 \end{itembox}
 
 \newpage
-\subsubsection{Creating Matrices (for the Multiprocessing Environment)}
+\subsubsection{Creating Matrices (for Multiprocessing Environment)}
 Figure \ref{fig:storage03_mpi} shows how the matrix $A$ in Figure
 \ref{fig:storage03} is stored in the MSR format on two processing 
 elements. A program to create the matrix in the MSR format on two processing element is as follows:
 \begin{figure}[h]
 {\centering 
 \includegraphics{storage03_mpi.eps} 
-\caption{The data structure of the MSR format (for the multiprocessing environment).}\label{fig:storage03_mpi}}
+\caption{Data structure of MSR format (for multiprocessing environment).}\label{fig:storage03_mpi}}
 \end{figure}
-\begin{itembox}[l]{For the multiprocessing environment}
+\begin{itembox}[l]{For multiprocessing environment}
 \small
 \begin{verbatim}
  1: LIS_INT       i,k,n,nnz,ndz,my_rank;
@@ -2550,7 +2550,7 @@ $maxnnd$ is the maximum value $nnd_p$.
       \times maxnnd$, which stores the offsets from the main diagonal.
 \end{itemize}
 
-\subsubsection{Creating Matrices (for the Serial Environment)}
+\subsubsection{Creating Matrices (for Serial Environment)}
 The right diagram in Figure \ref{fig:storage04} shows how the matrix $A$
 in Figure \ref{fig:storage04} is stored in the DIA format. A program to create the matrix in the DIA format is as follows:
 \begin{figure}[h]
@@ -2573,9 +2573,9 @@ $
 \includegraphics{storage04.eps} 
 \end{flushleft}
 \end{minipage}
-\caption{The data structure of the DIA format (for the serial environment).}\label{fig:storage04}}
+\caption{Data structure of DIA format (for serial environment).}\label{fig:storage04}}
 \end{figure}
-\begin{itembox}[l]{For the serial environment}
+\begin{itembox}[l]{For serial environment}
 \small
 \begin{verbatim}
  1: LIS_INT       n,nnd;
@@ -2599,14 +2599,14 @@ $
 \end{itembox}
 
 \newpage
-\subsubsection{Creating Matrices (for the Multithreaded Environment)}
+\subsubsection{Creating Matrices (for Multithreaded Environment)}
 Figure \ref{fig:storage04_omp} shows how the matrix $A$ in Figure \ref{fig:storage04} is stored in the DIA format on two threads. A program to create the matrix in the DIA format on two threads is as follows:
 \begin{figure}[h]
 {\centering 
 \includegraphics{storage04_omp.eps} 
-\caption{The data structure of the DIA format (for the multithreaded environment).}\label{fig:storage04_omp}}
+\caption{Data structure of DIA format (for multithreaded environment).}\label{fig:storage04_omp}}
 \end{figure}
-\begin{itembox}[l]{For the multithreaded environment}
+\begin{itembox}[l]{For multithreaded environment}
 \small
 \begin{verbatim}
  1: LIS_INT       n,maxnnd,nprocs;
@@ -2629,14 +2629,14 @@ Figure \ref{fig:storage04_omp} shows how the matrix $A$ in Figure \ref{fig:stora
 \end{itembox}
 
 \newpage
-\subsubsection{Creating Matrices (for the Multiprocessing Environment)}
+\subsubsection{Creating Matrices (for Multiprocessing Environment)}
 Figure \ref{fig:storage04_mpi} shows how the matrix $A$ in Figure \ref{fig:storage04} is stored in the DIA format on two processing elements. A program to create the matrix in the DIA format on two processing elements is as follows:
 \begin{figure}[h]
 {\centering 
 \includegraphics{storage04_mpi.eps} 
-\caption{The data structure of the DIA format (for the multiprocessing environment).}\label{fig:storage04_mpi}}
+\caption{Data structure of DIA format (for multiprocessing environment).}\label{fig:storage04_mpi}}
 \end{figure}
-\begin{itembox}[l]{For the multiprocessing environment}
+\begin{itembox}[l]{For multiprocessing environment}
 \small
 \begin{verbatim}
  1: LIS_INT       i,n,nnd,my_rank;
@@ -2690,7 +2690,7 @@ data. Assume that $maxnzr$ is the maximum value of the number of the nonzero ele
       \times n + i$]} stores row number $i$.
 \end{itemize}
 
-\subsubsection{Creating Matrices (for the Serial and Multithreaded Environments)}
+\subsubsection{Creating Matrices (for Serial and Multithreaded Environments)}
 The right diagram in Figure \ref{fig:storage05} shows how the matrix $A$ in Figure \ref{fig:storage05} is stored in the ELL format. A program to create the matrix in the ELL format is as follows:
 \begin{figure}[h]
 {\centering 
@@ -2712,9 +2712,9 @@ $
 \includegraphics{storage05.eps} 
 \end{flushleft}
 \end{minipage}
-\caption{The data structure of the ELL format (for the serial and multithreaded environments).}\label{fig:storage05}}
+\caption{Data structure of ELL format (for serial and multithreaded environments).}\label{fig:storage05}}
 \end{figure}
-\begin{itembox}[l]{For the serial and multithreaded environments}
+\begin{itembox}[l]{For serial and multithreaded environments}
 \small
 \begin{verbatim}
  1: LIS_INT       n,maxnzr;
@@ -2738,14 +2738,14 @@ $
 \end{itembox}
 
 \newpage
-\subsubsection{Creating Matrices (for the Multiprocessing Environment)}
+\subsubsection{Creating Matrices (for Multiprocessing Environment)}
 Figure \ref{fig:storage05_mpi} shows how the matrix $A$ in Figure \ref{fig:storage05} is stored in the ELL format. A program to create the matrix in the ELL format on two processing elements is as follows:
 \begin{figure}[h]
 {\centering 
 \includegraphics{storage05_mpi.eps} 
-\caption{The data structure of the ELL format (for the multiprocessing environment).}\label{fig:storage05_mpi}}
+\caption{Data structure of ELL format (for multiprocessing environment).}\label{fig:storage05_mpi}}
 \end{figure}
-\begin{itembox}[l]{For the multiprocessing environment}
+\begin{itembox}[l]{For multiprocessing environment}
 \small
 \begin{verbatim}
  1: LIS_INT       i,n,maxnzr,my_rank;
@@ -2827,7 +2827,7 @@ $maxmaxnzr$ is the maximum value of $maxnzr_p$.
 \end{itemize}
 
 \newpage
-\subsubsection{Creating Matrices (for the Serial Environment)}
+\subsubsection{Creating Matrices (for Serial Environment)}
 The right diagram in Figure \ref{fig:storage06} shows how the matrix $A$ in Figure \ref{fig:storage06} is stored in the JDS format. A program to create the matrix in the JDS format is as follows: 
 \begin{figure}[h]
 {\centering 
@@ -2849,9 +2849,9 @@ $
 \includegraphics{storage06.eps} 
 \end{flushleft}
 \end{minipage}
-\caption{The data structure of the JDS format (for the serial environment).}\label{fig:storage06}}
+\caption{Data structure of JDS format (for serial environment).}\label{fig:storage06}}
 \end{figure}
-\begin{itembox}[l]{For the serial environment}
+\begin{itembox}[l]{For serial environment}
 \small
 \begin{verbatim}
  1: LIS_INT       n,nnz,maxnzr;
@@ -2879,14 +2879,14 @@ $
 \end{itembox}
 
 \newpage
-\subsubsection{Creating Matrices (for the Multithreaded Environment)}
+\subsubsection{Creating Matrices (for Multithreaded Environment)}
 Figure \ref{fig:storage06_omp} shows how the matrix $A$ in Figure \ref{fig:storage06} is stored in the JDS format on two threads. A program to create the matrix in the JDS format on two threads is as follows:
 \begin{figure}[h]
 {\centering 
 \includegraphics{storage06_omp.eps} 
-\caption{The data structure of the JDS format (for the multithreaded environment).}\label{fig:storage06_omp}}
+\caption{Data structure of JDS format (for multithreaded environment).}\label{fig:storage06_omp}}
 \end{figure}
-\begin{itembox}[l]{For the multithreaded environment}
+\begin{itembox}[l]{For multithreaded environment}
 \small
 \begin{verbatim}
  1: LIS_INT       n,nnz,maxmaxnzr,nprocs;
@@ -2915,14 +2915,14 @@ Figure \ref{fig:storage06_omp} shows how the matrix $A$ in Figure \ref{fig:stora
 \end{itembox}
 
 \newpage
-\subsubsection{Creating Matrices (for the Multiprocessing Environment)}
+\subsubsection{Creating Matrices (for Multiprocessing Environment)}
 Figure \ref{fig:storage06_mpi} shows how the matrix $A$ in Figure \ref{fig:storage06} is stored in the JDS format on two processing elements. A program to create the matrix in the JDS format on two processing elements is as follows:
 \begin{figure}[h]
 {\centering 
 \includegraphics{storage06_mpi.eps} 
-\caption{The data structure of the JDS format (for the multiprocessing environment).}\label{fig:storage06_mpi}}
+\caption{Data structure of JDS format (for multiprocessing environment).}\label{fig:storage06_mpi}}
 \end{figure}
-\begin{itembox}[l]{For the multiprocessing environment}
+\begin{itembox}[l]{For multiprocessing environment}
 \small
 \begin{verbatim}
  1: LIS_INT       i,n,nnz,maxnzr,my_rank;
@@ -2982,7 +2982,7 @@ The BSR format uses three arrays {\ttfamily bptr}, {\ttfamily bindex} and {\ttfa
       which stores the starting points of the block rows in the array {\ttfamily bindex}.
 \end{itemize}
 
-\subsubsection{Creating Matrices (for the Serial and Multithreaded Environments)}
+\subsubsection{Creating Matrices (for Serial and Multithreaded Environments)}
 The right diagram in Figure \ref{fig:storage07} shows how the matrix $A$ in Figure \ref{fig:storage07} is stored in the BSR format. A program to create the matrix in the BSR format is as follows:
 \begin{figure}[h]
 {\centering 
@@ -3004,9 +3004,9 @@ $
 \includegraphics{storage07.eps} 
 \end{flushleft}
 \end{minipage}
-\caption{The data structure of the BSR format (for the serial and multithreaded environments).}\label{fig:storage07}}
+\caption{Data structure of BSR format (for serial and multithreaded environments).}\label{fig:storage07}}
 \end{figure}
-\begin{itembox}[l]{For the serial and multithreaded environments}
+\begin{itembox}[l]{For serial and multithreaded environments}
 \small
 \begin{verbatim}
  1: LIS_INT       n,bnr,bnc,nr,nc,bnnz;
@@ -3032,14 +3032,14 @@ $
 \end{itembox}
 
 \newpage
-\subsubsection{Creating Matrices (for the Multiprocessing Environment)}
+\subsubsection{Creating Matrices (for Multiprocessing Environment)}
 Figure \ref{fig:storage07_mpi} shows how the matrix $A$ in Figure \ref{fig:storage07} is stored in the BSR format on two processing elements. A program to create the matrix in the BSR format on two processing elements is as follows:
 \begin{figure}[h]
 {\centering 
 \includegraphics{storage07_mpi.eps} 
-\caption{The data structure of the BSR format (for the multiprocessing environment).}\label{fig:storage07_mpi}}
+\caption{Data structure of BSR format (for multiprocessing environment).}\label{fig:storage07_mpi}}
 \end{figure}
-\begin{itembox}[l]{For the multiprocessing environment}
+\begin{itembox}[l]{For multiprocessing environment}
 \small
 \begin{verbatim}
  1: LIS_INT       n,bnr,bnc,nr,nc,bnnz,my_rank;
@@ -3099,7 +3099,7 @@ and {\ttfamily value} to store data.
       {\ttfamily bindex}.
 \end{itemize}
 
-\subsubsection{Creating Matrices (for the Serial and Multithreaded Environments)}
+\subsubsection{Creating Matrices (for Serial and Multithreaded Environments)}
 The right diagram in Figure \ref{fig:storage08} shows how the matrix $A$ in Figure \ref{fig:storage08} is stored in the BSC format. A program to create the matrix in the BSC format is as follows:
 \begin{figure}[h]
 {\centering 
@@ -3121,9 +3121,9 @@ $
 \includegraphics{storage08.eps} 
 \end{flushleft}
 \end{minipage}
-\caption{The data structure of the BSC format (for the serial and multithreaded environments).}\label{fig:storage08}}
+\caption{Data structure of BSC format (for serial and multithreaded environments).}\label{fig:storage08}}
 \end{figure}
-\begin{itembox}[l]{For the serial and multithreaded environments}
+\begin{itembox}[l]{For serial and multithreaded environments}
 \small
 \begin{verbatim}
  1: LIS_INT       n,bnr,bnc,nr,nc,bnnz;
@@ -3149,16 +3149,16 @@ $
 \end{itembox}
 
 \newpage
-\subsubsection{Creating Matrices (for the Multiprocessing Environment)}
+\subsubsection{Creating Matrices (for Multiprocessing Environment)}
 Figure \ref{fig:storage08_mpi} shows how the matrix $A$ in Figure
 \ref{fig:storage08} is stored in the BSC format on two processing
 elements. A program to create the matrix in the BSC format on two processing elements is as follows:
 \begin{figure}[h]
 {\centering 
 \includegraphics{storage08_mpi.eps} 
-\caption{The data structure of the BSC format (for the multiprocessing environment).}\label{fig:storage08_mpi}}
+\caption{Data structure of BSC format (for multiprocessing environment).}\label{fig:storage08_mpi}}
 \end{figure}
-\begin{itembox}[l]{For the multiprocessing environment}
+\begin{itembox}[l]{For multiprocessing environment}
 \small
 \begin{verbatim}
  1: LIS_INT       n,bnr,bnc,nr,nc,bnnz,my_rank;
@@ -3227,7 +3227,7 @@ row}, {\ttfamily col}, {\ttfamily ptr} and {\ttfamily value} to store data.
 \end{itemize}
 
 \newpage
-\subsubsection{Creating Matrices (for the Serial and Multithreaded Environments)}
+\subsubsection{Creating Matrices (for Serial and Multithreaded Environments)}
 The right diagram in Figure \ref{fig:storage09} shows how the matrix $A$ in Figure \ref{fig:storage09} is stored in the VBR format. A program to create the matrix in the VBR format is as follows:
 \begin{figure}[h]
 {\centering 
@@ -3249,9 +3249,9 @@ $
 \includegraphics{storage09.eps} 
 \end{flushleft}
 \end{minipage}
-\caption{The data structure of the VBR format (for the serial and multithreaded environments).}\label{fig:storage09}}
+\caption{Data structure of VBR format (for serial and multithreaded environments).}\label{fig:storage09}}
 \end{figure}
-\begin{itembox}[l]{For the serial and multithreaded environments}
+\begin{itembox}[l]{For serial and multithreaded environments}
 \small
 \begin{verbatim}
  1: LIS_INT       n,nnz,nr,nc,bnnz;
@@ -3285,14 +3285,14 @@ $
 \end{itembox}
 
 \newpage
-\subsubsection{Creating Matrices (for the Multiprocessing Environment)}
+\subsubsection{Creating Matrices (for Multiprocessing Environment)}
 Figure \ref{fig:storage09_mpi} shows how the matrix $A$ in Figure \ref{fig:storage09} is stored in the VBR format on two processing elements. A program to create the matrix in the VBR format on two processing elements is as follows:
 \begin{figure}[h]
 {\centering 
 \includegraphics{storage09_mpi.eps} 
-\caption{The data structure of the VBR format (for the multiprocessing environment).}\label{fig:storage09_mpi}}
+\caption{Data structure of VBR format (for multiprocessing environment).}\label{fig:storage09_mpi}}
 \end{figure}
-\begin{itembox}[l]{For the multiprocessing environment}
+\begin{itembox}[l]{For multiprocessing environment}
 \small
 \begin{verbatim}
  1: LIS_INT       n,nnz,nr,nc,bnnz,my_rank;
@@ -3355,7 +3355,7 @@ The COO format uses three arrays {\ttfamily row}, {\ttfamily col} and {\ttfamily
 \item {\ttfamily col} is an integer array with a length of $nnz$, which stores the column numbers of the nonzero elements.
 \end{itemize}
 
-\subsubsection{Creating Matrices (for the Serial and Multithreaded Environments)}
+\subsubsection{Creating Matrices (for Serial and Multithreaded Environments)}
 The right diagram in Figure \ref{fig:storage10} shows how the matrix $A$ in Figure \ref{fig:storage10} is stored in the COO format. A program to create the matrix in the COO format is as follows:
 \begin{figure}[h]
 {\centering 
@@ -3377,9 +3377,9 @@ $
 \includegraphics{storage10.eps} 
 \end{flushleft}
 \end{minipage}
-\caption{The data structure of the COO format (for the serial and multithreaded environments).}\label{fig:storage10}}
+\caption{Data structure of COO format (for serial and multithreaded environments).}\label{fig:storage10}}
 \end{figure}
-\begin{itembox}[l]{For the serial and multithreaded environments}
+\begin{itembox}[l]{For serial and multithreaded environments}
 \small
 \begin{verbatim}
  1: LIS_INT       n,nnz;
@@ -3406,16 +3406,16 @@ $
 \end{itembox}
 
 \newpage
-\subsubsection{Creating Matrices (for the Multiprocessing Environment)}
+\subsubsection{Creating Matrices (for Multiprocessing Environment)}
 Figure \ref{fig:storage10_mpi} shows how the matrix $A$ in Figure
 \ref{fig:storage10} is stored in the COO format on two processing
 elements. A program to create the matrix in the COO format on two processing elements is as follows:
 \begin{figure}[h]
 {\centering 
 \includegraphics{storage10_mpi.eps} 
-\caption{The data structure of the COO format (for the multiprocessing environment).}\label{fig:storage10_mpi}}
+\caption{Data structure of COO format (for multiprocessing environment).}\label{fig:storage10_mpi}}
 \end{figure}
-\begin{itembox}[l]{For the multiprocessing environment}
+\begin{itembox}[l]{For multiprocessing environment}
 \small
 \begin{verbatim}
  1: LIS_INT       n,nnz,my_rank;
@@ -3463,7 +3463,7 @@ The DNS format uses one array {\ttfamily value} to store data.
       \times n$, which stores the values of the elements with priority given to the columns.
 \end{itemize}
 
-\subsubsection{Creating Matrices (for the Serial and Multithreaded Environments)}
+\subsubsection{Creating Matrices (for Serial and Multithreaded Environments)}
 The right diagram in Figure \ref{fig:storage11} shows how the matrix $A$ in Figure \ref{fig:storage11} is stored in the DNS format. A program to create the matrix in the DNS format is as follows:
 \begin{figure}[h]
 {\centering 
@@ -3485,9 +3485,9 @@ $
 \includegraphics{storage11.eps} 
 \end{flushleft}
 \end{minipage}
-\caption{The data structure of the DNS format (for the serial and multithreaded environments).}\label{fig:storage11}}
+\caption{Data structure of DNS format (for serial and multithreaded environments).}\label{fig:storage11}}
 \end{figure}
-\begin{itembox}[l]{For the serial and multithreaded environments}
+\begin{itembox}[l]{For serial and multithreaded environments}
 \small
 \begin{verbatim}
  1: LIS_INT       n;
@@ -3509,7 +3509,7 @@ $
 \end{itembox}
 
 \newpage
-\subsubsection{Creating Matrices (for the Multiprocessing Environment)}
+\subsubsection{Creating Matrices (for Multiprocessing Environment)}
 Figure \ref{fig:storage11_mpi} shows how the matrix $A$ in Figure
 \ref{fig:storage11} is stored in the DNS format on two
 processing elements. A program to create the matrix in the DNS format on
@@ -3517,9 +3517,9 @@ two processing elements is as follows:
 \begin{figure}[h]
 {\centering 
 \includegraphics{storage11_mpi.eps} 
-\caption{The data structure of the DNS format (for the multiprocessing environment).}\label{fig:storage11_mpi}}
+\caption{Data structure of DNS format (for multiprocessing environment).}\label{fig:storage11_mpi}}
 \end{figure}
-\begin{itembox}[l]{For the multiprocessing environment}
+\begin{itembox}[l]{For multiprocessing environment}
 \small
 \begin{verbatim}
  1: LIS_INT       n,my_rank;
@@ -3555,11 +3555,10 @@ To associate the arrays in the DNS format with the matrix $A$, the following fun
 \newpage
 \section{Functions}\label{sec:func}
 This section describes the functions which can be employed by the user.
-The return values of the functions in C and the values of {\tt ierr} in Fortran are as 
+The return codes of the functions in C and the values of {\tt ierr} in Fortran are as 
 follows: 
 \\ \\ 
 \noindent
-{\bf Return Values}
 \begin{namelist}{XXXXXXXXXXXXXXXXXXXX}
 \item[\tt LIS\_SUCCESS(0)] ~~~~~Normal termination
 \item[\tt LIS\_ILL\_OPTION(1)] ~~~~~Illegal option
@@ -5505,6 +5504,51 @@ Gauss-Seidel & 11     & MINRES       & 22     \\
 \end{minipage}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\subsubsection{lis\_solver\_get\_precon}
+\begin{screen}
+\verb|C       LIS_INT lis_solver_get_precon(LIS_SOLVER solver, LIS_INT *precon_type)|\\
+\verb|Fortran subroutine lis_solver_get_precon(LIS_SOLVER solver, LIS_INTEGER precon_type,|\\
+\verb|         LIS_INTEGER ierr)|
+\end{screen}
+{\bf Description}\\
+\indent
+Get the preconditioner number from the solver
+\\ \\
+\noindent
+{\bf Input}
+\begin{namelist}{XXXXXXXXXXXXXXXXXXXX}
+\item[\tt solver] The solver
+\end{namelist}
+{\bf Output}
+\begin{namelist}{XXXXXXXXXXXXXXXXXXXX}
+\item[\tt precon\_type] The preconditioner number
+\item[\tt ierr] The return code
+\end{namelist}
+{\bf Note}\\
+\indent
+The number of the preconditioner is as follows:\\ \\
+\begin{minipage}[t]{\textwidth}
+\begin{center}
+\begin{tabular}{l|l}\hline\hline
+ Preconditioner & Number \\ \hline
+ none           & 0 \\
+ Jacobi         & 1 \\
+ ILU(k)         & 2 \\
+ SSOR           & 3 \\
+ Hybrid         & 4 \\
+ I+S            & 5 \\
+ SAINV          & 6 \\
+ SA-AMG         & 7 \\
+ Crout ILU      & 8 \\
+ ILUT           & 9 \\
+\hline         
+\end{tabular}
+\end{center}
+\end{minipage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
 \subsubsection{lis\_get\_solvername}
 \begin{screen}
 \verb|C       LIS_INT lis_get_solvername(LIS_INT nsol, char *name)|\\
@@ -5523,6 +5567,28 @@ Get the solver name from the solver number
 {\bf Output}
 \begin{namelist}{XXXXXXXXXXXXXXXXXXXX}
 \item[\tt name] The solver name
+\item[\tt ierr] The return code
+\end{namelist}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{lis\_get\_preconname}
+\begin{screen}
+\verb|C       LIS_INT lis_get_preconname(LIS_INT precon_type, char *name)|\\
+\verb|Fortran subroutine lis_get_preconname(LIS_INTEGER precon_type, character name,|\\
+\verb|        LIS_INTEGER ierr)|
+\end{screen}
+{\bf Description}\\
+\indent
+Get the preconditioner name from the preconditioner number
+\\ \\
+\noindent
+{\bf Input}
+\begin{namelist}{XXXXXXXXXXXXXXXXXXXX}
+\item[\tt precon\_type] The preconditioner number
+\end{namelist}
+{\bf Output}
+\begin{namelist}{XXXXXXXXXXXXXXXXXXXX}
+\item[\tt name] The preconditioner name
 \item[\tt ierr] The return code
 \end{namelist}
 

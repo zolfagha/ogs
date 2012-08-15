@@ -126,6 +126,9 @@ LIS_INT lis_eii(LIS_ESOLVER esolver)
 
   LIS_INT		    err;
   LIS_PRECON        precon;
+  LIS_INT           nsol, precon_type;
+  char              solvername[128], preconname[128];
+
   LIS_DEBUG_FUNC_IN;
 
   emaxiter = esolver->options[LIS_EOPTIONS_MAXITER];
@@ -150,6 +153,12 @@ LIS_INT lis_eii(LIS_ESOLVER esolver)
   lis_solver_create(&solver);
   lis_solver_set_option("-i bicg -p ilu",solver);
   lis_solver_set_optionC(solver);
+  lis_solver_get_solver(solver, &nsol);
+  lis_solver_get_precon(solver, &precon_type);
+  lis_get_solvername(nsol, solvername);
+  lis_get_preconname(precon_type, preconname);
+  printf("solver     : %s %d\n", solvername, nsol);
+  printf("precon     : %s %d\n", preconname, precon_type);
 
   /* create preconditioner */
   solver->A = A;

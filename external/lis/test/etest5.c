@@ -122,11 +122,7 @@ LIS_INT main(LIS_INT argc, char* argv[])
     lis_esolver_get_iters(esolver, &iters);
     lis_esolver_get_timeex(esolver,&times,&itimes,&ptimes,&p_c_times,&p_i_times);
     if( my_rank==0 ) {
-#ifdef _LONGLONG
-      printf("%s: mode number              = %lld\n", esolvername, esolver->options[LIS_EOPTIONS_MODE]);
-#else
-      printf("%s: mode number              = %d\n", esolvername, esolver->options[LIS_EOPTIONS_MODE]);
-#endif
+      printf("%s: mode number              = %d\n", esolvername, 0);
       printf("%s: eigenvalue               = %e\n", esolvername, evalue0);
 #ifdef _LONGLONG
       printf("%s: number of iterations     = %lld\n",esolvername, iters);

@@ -123,15 +123,15 @@
       call lis_get_solvername(nsol,solvername,ierr)
 
       if( my_rank.eq.0 ) then
-        write(*,*) solvername,': iter     = ',iter
-        write(*,*) solvername,':   double = ',iter_double
-        write(*,*) solvername,':   quad   = ',iter_quad
-        write(*,*) solvername,': times    = ',times
-        write(*,*) solvername,': p_times  = ',ptimes
-        write(*,*) solvername,':   p_c    = ',p_c_times
-        write(*,*) solvername,':   p_i    = ',p_i_times
-        write(*,*) solvername,': i_times  = ',itimes
-        write(*,*) solvername,': Residual = ',resid
+        write(*,*) solvername,': number of iterations     = ',iter
+        write(*,*) solvername,':   double                 = ',
+     .       iter_double
+        write(*,*) solvername,':   quad                   = ',iter_quad
+        write(*,*) solvername,': elapsed time             = ',times
+        write(*,*) solvername,':   preconditioner         = ',ptimes
+        write(*,*) solvername,':     matrix creation      = ',p_c_times
+        write(*,*) solvername,':   linear solver          = ',itimes
+        write(*,*) solvername,': relative residual 2-norm = ',resid
       endif
 
 ! write solution 
