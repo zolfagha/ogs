@@ -62,7 +62,6 @@ void lis_matvec_vbr(LIS_MATRIX A, LIS_SCALAR x[], LIS_SCALAR y[])
 	nc  = A->nc;
 	if( A->is_splited )
 	{
-	  printf("testvbr1\n");
 		#ifdef _OPENMP
 		#pragma omp parallel for private(bi,i,j,k,t,bn)
 		#endif

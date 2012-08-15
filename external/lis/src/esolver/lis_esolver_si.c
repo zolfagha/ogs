@@ -138,6 +138,8 @@ LIS_INT lis_esi(LIS_ESOLVER esolver)
   LIS_PRECON        precon;
   double	    times,itimes,ptimes,p_c_times,p_i_times;
   LIS_INT		    err;
+  LIS_INT           nsol, precon_type;
+  char              solvername[128], preconname[128];
 
   LIS_DEBUG_FUNC_IN;
 
@@ -165,6 +167,12 @@ LIS_INT lis_esi(LIS_ESOLVER esolver)
       lis_solver_create(&solver);
       lis_solver_set_option("-i bicg -p ilu",solver);
       lis_solver_set_optionC(solver);
+      lis_solver_get_solver(solver, &nsol);
+      lis_solver_get_precon(solver, &precon_type);
+      lis_get_solvername(nsol, solvername);
+      lis_get_preconname(precon_type, preconname);
+      printf("solver     : %s %d\n", solvername, nsol);
+      printf("precon     : %s %d\n", preconname, precon_type);
       if( A->my_rank==0 ) printf("local shift = %e\n", lshift);
       if (lshift != 0) lis_matrix_shift_diagonal(A, lshift);
       break;
@@ -172,6 +180,12 @@ LIS_INT lis_esi(LIS_ESOLVER esolver)
       lis_solver_create(&solver);
       lis_solver_set_option("-i bicg -p ilu",solver);
       lis_solver_set_optionC(solver);
+      lis_solver_get_solver(solver, &nsol);
+      lis_solver_get_precon(solver, &precon_type);
+      lis_get_solvername(nsol, solvername);
+      lis_get_preconname(precon_type, preconname);
+      printf("solver     : %s %d\n", solvername, nsol);
+      printf("precon     : %s %d\n", preconname, precon_type);
       if( A->my_rank==0 ) printf("local shift = %e\n", lshift);
       if (lshift != 0) lis_matrix_shift_diagonal(A, lshift);
       lis_vector_set_all(1.0,q);
@@ -183,6 +197,12 @@ LIS_INT lis_esi(LIS_ESOLVER esolver)
       lis_solver_create(&solver);
       lis_solver_set_option("-p ilu -maxiter 10",solver);
       lis_solver_set_optionC(solver);
+      lis_solver_get_solver(solver, &nsol);
+      lis_solver_get_precon(solver, &precon_type);
+      lis_get_solvername(nsol, solvername);
+      lis_get_preconname(precon_type, preconname);
+      printf("solver     : %s %d\n", solvername, nsol);
+      printf("precon     : %s %d\n", preconname, precon_type);
       if( A->my_rank==0 ) printf("local shift = %e\n", lshift);
       if (lshift != 0) lis_matrix_shift_diagonal(A, lshift);
       break;
@@ -362,6 +382,8 @@ LIS_INT lis_esi_quad(LIS_ESOLVER esolver)
   LIS_PRECON        precon;
   double	    times,itimes,ptimes,p_c_times,p_i_times;
   LIS_INT		    err;
+  LIS_INT           nsol, precon_type;
+  char              solvername[128], preconname[128];
 
   LIS_DEBUG_FUNC_IN;
 
@@ -393,6 +415,12 @@ LIS_INT lis_esi_quad(LIS_ESOLVER esolver)
       lis_solver_create(&solver);
       lis_solver_set_option("-i bicg -p ilu -precision quad",solver);
       lis_solver_set_optionC(solver);
+      lis_solver_get_solver(solver, &nsol);
+      lis_solver_get_precon(solver, &precon_type);
+      lis_get_solvername(nsol, solvername);
+      lis_get_preconname(precon_type, preconname);
+      printf("solver     : %s %d\n", solvername, nsol);
+      printf("precon     : %s %d\n", preconname, precon_type);
       if( A->my_rank==0 ) printf("local shift = %e\n", lshift);
       if (lshift != 0) lis_matrix_shift_diagonal(A, lshift);
       break;
@@ -400,6 +428,12 @@ LIS_INT lis_esi_quad(LIS_ESOLVER esolver)
       lis_solver_create(&solver);
       lis_solver_set_option("-i bicg -p ilu -precision quad",solver);
       lis_solver_set_optionC(solver);
+      lis_solver_get_solver(solver, &nsol);
+      lis_solver_get_precon(solver, &precon_type);
+      lis_get_solvername(nsol, solvername);
+      lis_get_preconname(precon_type, preconname);
+      printf("solver     : %s %d\n", solvername, nsol);
+      printf("precon     : %s %d\n", preconname, precon_type);
       if( A->my_rank==0 ) printf("local shift = %e\n", lshift);
       if (lshift != 0) lis_matrix_shift_diagonal(A, lshift);
       lis_vector_set_all(1.0,q);
@@ -411,6 +445,12 @@ LIS_INT lis_esi_quad(LIS_ESOLVER esolver)
       lis_solver_create(&solver);
       lis_solver_set_option("-p ilu -precision quad -maxiter 10",solver);
       lis_solver_set_optionC(solver);
+      lis_solver_get_solver(solver, &nsol);
+      lis_solver_get_precon(solver, &precon_type);
+      lis_get_solvername(nsol, solvername);
+      lis_get_preconname(precon_type, preconname);
+      printf("solver     : %s %d\n", solvername, nsol);
+      printf("precon     : %s %d\n", preconname, precon_type);
       if( A->my_rank==0 ) printf("local shift = %e\n", lshift);
       if (lshift != 0) lis_matrix_shift_diagonal(A, lshift);
       break;

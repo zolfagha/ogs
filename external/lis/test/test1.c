@@ -158,7 +158,7 @@ LIS_INT main(LIS_INT argc, char* argv[])
 	lis_solver_set_option("-print mem",solver);
 	lis_solver_set_optionC(solver);
 
-	err = lis_solve(A,b,x,solver);
+	err = lis_solve(A,b,x,solver); 
 
 	CHKERR(err);
 	lis_solver_get_itersex(solver,&iter,&iter_double,&iter_quad);

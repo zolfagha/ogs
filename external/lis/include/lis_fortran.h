@@ -138,7 +138,9 @@ extern LIS_Comm_f	lis_comm_world_f;
 #define lis_solver_get_residualnorm_f F77_FUNC_(lis_solver_get_residualnorm_f, LIS_SOLVER_GET_RESIDUALNORM_F) 
 #define lis_solver_get_rhistory_f F77_FUNC_(lis_solver_get_rhistory_f, LIS_SOLVER_GET_RHISTORY_F) 
 #define lis_solver_get_solver_f F77_FUNC_(lis_solver_get_solver_f, LIS_SOLVER_GET_SOLVER_F) 
+#define lis_solver_get_precon_f F77_FUNC_(lis_solver_get_precon_f, LIS_SOLVER_GET_PRECON_F) 
 #define lis_get_solvername_f F77_FUNC_(lis_get_solvername_f, LIS_GET_SOLVERNAME_F) 
+#define lis_get_preconname_f F77_FUNC_(lis_get_preconname_f, LIS_GET_PRECONNAME_F) 
 #define lis_solver_set_optionC_f F77_FUNC_(lis_solver_set_optionc_f, LIS_SOLVER_SET_OPTIONC_F) 
 /**************/
 /* ESOLVER     */

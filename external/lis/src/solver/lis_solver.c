@@ -817,7 +817,9 @@ LIS_INT lis_solve_kernel(LIS_MATRIX A, LIS_VECTOR b, LIS_VECTOR x, LIS_SOLVER so
 		}
 	}
 	lis_vector_nrm2(t,&nrm2);
+	/*
 	solver->resid = nrm2;
+	*/
 	if( A->my_rank==0 )
 	{
 		if( err )
@@ -1516,6 +1518,18 @@ LIS_INT lis_solver_get_solver(LIS_SOLVER solver, LIS_INT *nsol)
 }
 
 #undef __FUNC__
+#define __FUNC__ "lis_solver_get_precon"
+LIS_INT lis_solver_get_precon(LIS_SOLVER solver, LIS_INT *precon_type)
+{
+	LIS_DEBUG_FUNC_IN;
+
+	*precon_type = solver->options[LIS_OPTIONS_PRECON];
+
+	LIS_DEBUG_FUNC_OUT;
+	return LIS_SUCCESS;
+}
+
+#undef __FUNC__
 #define __FUNC__ "lis_solver_get_status"
 LIS_INT lis_solver_get_status(LIS_SOLVER solver, LIS_INT *status)
 {
@@ -1558,6 +1572,23 @@ LIS_INT lis_get_solvername(LIS_INT solver, char *solvername)
 		return LIS_FAILS;
 	}
 	strcpy(solvername,lis_solvername[solver]);
+
+	LIS_DEBUG_FUNC_OUT;
+	return LIS_SUCCESS;
+}
+
+#undef __FUNC__
+#define __FUNC__ "lis_get_preconname"
+LIS_INT lis_get_preconname(LIS_INT precon_type, char *preconname)
+{
+	LIS_DEBUG_FUNC_IN;
+
+	if( precon_type < 0 || precon_type > LIS_PRECON_TYPE_LEN-1 )
+	{
+		preconname = NULL;
+		return LIS_FAILS;
+	}
+	strcpy(preconname,lis_preconname[precon_type]);
 
 	LIS_DEBUG_FUNC_OUT;
 	return LIS_SUCCESS;

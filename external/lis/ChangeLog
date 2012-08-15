@@ -1,11 +1,31 @@
+Lis 1.2.97  August 15, 2012
+
+  - Added support for Fujitsu Technical Computing Suite on PRIMERGY.
+
+Lis 1.2.96  August 14, 2012
+
+  - Added support for lis_solver_get_precon() and lis_get_preconname().
+  - Updated print format of eigensolvers.
+  - Updated documents.
+
+Lis 1.2.95  August 13, 2012
+
+  - Changed specification of lis_solve_kernel() to return residual
+    computed by lis_solve_execute() (thanks to Jonathan Schleifer).
+
+Lis 1.2.94  August 12, 2012
+
+  - Fixed OpenMP flag bug.
+  - Updated documents.
+
 Lis 1.2.93  August 9, 2012
 
-  - Fixed OpenMP flag related bug in configure.in (thanks to Jonathan Schleifer). 
-  - Fixed installation destination of examples. 
+  - Fixed OpenMP flag related bug in configure.in (thanks to Jonathan Schleifer).
+  - Fixed installation destination of examples.
 
 Lis 1.2.92  August 7, 2012
 
-  - Updated support for out-of-tree build (thanks to Jussi Lehtola). 
+  - Updated support for out-of-tree build (thanks to Jussi Lehtola).
   - Updated documents.
 
 Lis 1.2.91  August 2, 2012

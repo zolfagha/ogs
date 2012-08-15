@@ -27,7 +27,7 @@
 #ifndef __LIS_H__
 #define __LIS_H__
 /**************************************/
-#define LIS_VERSION	"1.2.93"
+#define LIS_VERSION	"1.2.97"
 /**************************************/
 #include <stdio.h>
 
@@ -740,6 +740,7 @@ extern "C"
 	extern LIS_INT lis_solver_get_timeex(LIS_SOLVER solver, double *times, double *itimes, double *ptimes, double *p_c_times, double *p_i_times);
 	extern LIS_INT lis_solver_get_residualnorm(LIS_SOLVER solver, LIS_REAL *residual);
 	extern LIS_INT lis_solver_get_solver(LIS_SOLVER solver, LIS_INT *nsol);
+	extern LIS_INT lis_solver_get_precon(LIS_SOLVER solver, LIS_INT *precon_type);
 	extern LIS_INT lis_solver_get_status(LIS_SOLVER solver, LIS_INT *status);
         extern LIS_INT lis_solver_get_rhistory(LIS_SOLVER solver, LIS_VECTOR v);
 	extern LIS_INT lis_solver_set_option(char *text, LIS_SOLVER solver);
@@ -751,6 +752,7 @@ extern "C"
 	extern LIS_INT lis_precon_register(char *name, LIS_PRECON_CREATE_XXX pcreate, LIS_PSOLVE_XXX psolve, LIS_PSOLVET_XXX psolvet);
 	extern LIS_INT lis_precon_register_free(void);
 	extern LIS_INT lis_get_solvername(LIS_INT solver, char *solvername);
+	extern LIS_INT lis_get_preconname(LIS_INT precon_type, char *preconname);
 /****************************/
 /* Esolvers                  */
 /****************************/
