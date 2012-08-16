@@ -99,7 +99,7 @@ public:
         _linear_eqs = _discrete_system->createLinearEquation
                 <   LinearSolverType,
                     DiscreteLib::SparsityBuilderFromNodeConnectivity
-                >(*_linear_solver, _dofManager);
+                >(_linear_solver, &_dofManager);
 
         // setup functions
         std::vector<FemVariable*> list_var(n_var);
