@@ -17,9 +17,9 @@
 #include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
 #include "MeshLib/Topology/Topology.h"
 
-#include "DiscreteLib/EquationId/DofEquationIdTable.h"
+#include "DiscreteLib/Utils/DofEquationIdTable.h"
 #include "DiscreteLib/Serial/DiscreteVector.h"
-#include "DiscreteLib/Assembler/IDiscreteLinearEquationAssembler.h"
+#include "DiscreteLib/Core/IDiscreteLinearEquationAssembler.h"
 #include "DiscreteLib/Utils/Tools.h"
 #include "IStencilWiseTransientLinearEQSLocalAssembler.h"
 #include "IStencil.h"

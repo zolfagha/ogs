@@ -5,7 +5,7 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file DomainDecomposition.h
+ * \file RandomGlobalLocalMappingTable.h
  *
  * Created on 2012-08-03 by Norihiro Watanabe
  */
@@ -15,18 +15,21 @@
 #include <vector>
 
 #include "BaseLib/BidirectionalMap.h"
-#include "IDDCGlobalLocalMapping.h"
+#include "IGlobaLocalMappingTable.h"
 
 namespace DiscreteLib
 {
 
-class DDCGlobaLocalMappingAll : public IDDCGlobaLocalMapping
+/**
+ * \brief Mapping table for random rule
+ */
+class RandomGlobalLocalMappingTable : public IGlobaLocalMappingTable
 {
 public:
-    DDCGlobaLocalMappingAll(BaseLib::BidirectionalMap<size_t, size_t> &map) : _map_global_local(&map)
+    RandomGlobalLocalMappingTable(BaseLib::BidirectionalMap<size_t, size_t> &map) : _map_global_local(&map)
     {
     }
-    virtual ~DDCGlobaLocalMappingAll()
+    virtual ~RandomGlobalLocalMappingTable()
     {
         BaseLib::releaseObject(_map_global_local);
     }

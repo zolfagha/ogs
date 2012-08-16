@@ -45,10 +45,10 @@ public:
         }
 
         if (_v_diff==0) {
-            _v_diff = _dis->createVector<DiscreteLib::DiscreteVector<Tvalue> >(n);
+            _v_diff = _dis->createVector<Tvalue>(n);
         } else if (_v_diff->size() != n) {
             _dis->deleteVector(_v_diff);
-            _v_diff = _dis->createVector<DiscreteLib::DiscreteVector<Tvalue> >(n);
+            _v_diff = _dis->createVector<Tvalue>(n);
         }
 
         *_v_diff = *vec1;

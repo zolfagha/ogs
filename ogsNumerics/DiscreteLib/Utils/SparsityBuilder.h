@@ -18,8 +18,10 @@
 
 #include "MeshLib/Topology/Topology.h"
 
-#include "DiscreteLib/DDC/DDCGlobal.h"
 #include "DiscreteLib/Utils/DofEquationIdTable.h"
+#include "DiscreteLib/DDC/DecomposedDomain.h"
+#include "DiscreteLib/DDC/SubDomain.h"
+#include "DiscreteLib/DDC/IGlobaLocalMappingTable.h"
 
 namespace DiscreteLib
 {
@@ -73,7 +75,7 @@ public:
         }
     }
 
-    static void createRowMajorSparsityFromNodeConnectivity(const MeshLib::ITopologyNode2Nodes &local_topo_node2nodes, IDDCGlobaLocalMapping &pt_mapping, size_t mesh_id, DofEquationIdTable &global_dofTable, MathLib::RowMajorSparsity &row_major_entries)
+    static void createRowMajorSparsityFromNodeConnectivity(const MeshLib::ITopologyNode2Nodes &local_topo_node2nodes, IGlobaLocalMappingTable &pt_mapping, size_t mesh_id, DofEquationIdTable &global_dofTable, MathLib::RowMajorSparsity &row_major_entries)
     {
         row_major_entries.resize(global_dofTable.getTotalNumberOfActiveDoFs());
 
@@ -171,7 +173,7 @@ public:
         //    SparsityBuilder::createRowMajorSparsityForMultipleDOFs(topo_node2nodes, dofManager.getNumberOfVariables(), sparse);
         //}
     }
-    SparsityBuilderFromNodeConnectivity(DDCSubDomain &ddc_dom, MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
+    SparsityBuilderFromNodeConnectivity(SubDomain &ddc_dom, MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
     {
         MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes(&msh);
         SparsityBuilder::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, *ddc_dom.getGlobalLocalIdMap(), msh.getID(), dofManager, sparse);
@@ -221,7 +223,7 @@ template <class T_SPARSITY_BUILDER>
 class SparsityBuilderFromDDC
 {
 public:
-    SparsityBuilderFromDDC(DDCGlobal &ddc_global, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
+    SparsityBuilderFromDDC(DecomposedDomain &ddc_global, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
     {
         const size_t n_dom = ddc_global.getNumberOfSubDomains();
         const size_t n_dofs = dofManager.getTotalNumberOfActiveDoFs();
@@ -229,13 +231,13 @@ public:
 
         std::vector<MathLib::RowMajorSparsity> local_sparse(ddc_global.getNumberOfSubDomains());
         for (size_t i=0; i<n_dom; i++) {
-            DDCSubDomain* dom = ddc_global.getSubDomain(i);
+            SubDomain* dom = ddc_global.getSubDomain(i);
             T_SPARSITY_BUILDER builder(*dom, *dom->getLoalMesh(), dofManager, local_sparse[i]);
         }
 
         for (size_t i=0; i<n_dom; i++) {
-            DDCSubDomain* dom = ddc_global.getSubDomain(i);
-            IDDCGlobaLocalMapping* mapping = dom->getGlobalLocalIdMap();
+            SubDomain* dom = ddc_global.getSubDomain(i);
+            IGlobaLocalMappingTable* mapping = dom->getGlobalLocalIdMap();
             MathLib::RowMajorSparsity &local_sp = local_sparse[i];
             for (size_t j=0; j<local_sp.size(); j++) {
                 const std::set<size_t> &local_row = local_sp[j];

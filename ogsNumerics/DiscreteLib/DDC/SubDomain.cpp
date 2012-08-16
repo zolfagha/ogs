@@ -5,24 +5,24 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file IDDCGlobaLocalMapping.h
+ * \file SubDomain.cpp
  *
  * Created on 2012-08-03 by Norihiro Watanabe
  */
 
-#pragma once
+#include "SubDomain.h"
 
 namespace DiscreteLib
 {
 
-class IDDCGlobaLocalMapping
+SubDomain::SubDomain(MeshLib::IMesh &msh, IGlobaLocalMappingTable &mapping, std::set<size_t>* list_ghosts)
+: _local_msh(&msh), _map_global_local(&mapping)
 {
-public:
-    virtual ~IDDCGlobaLocalMapping() {};
-    virtual bool hasGlobal(size_t global_id) = 0;
-    virtual size_t global2local(size_t global) = 0;
-    virtual size_t local2global(size_t local) = 0;
-};
+    _dom_id = 0;
+    if (list_ghosts) {
+        _list_ghosts.insert(list_ghosts->begin(), list_ghosts->end());
+    }
+}
 
 } //end
 

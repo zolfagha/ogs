@@ -150,7 +150,7 @@ private:
         _discrete_system = &dis;
         _msh = &msh;
         size_t nnodes = msh.getNumberOfNodes();
-        _nodal_values = dis.createVector<DiscreteLib::DiscreteVector<Tvalue> >(nnodes);
+        _nodal_values = dis.createVector<Tvalue>(nnodes);
     }
 
     /// Assign this object from the given object

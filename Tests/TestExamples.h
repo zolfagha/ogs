@@ -24,7 +24,7 @@
 #include "MeshLib/Core/IMesh.h"
 
 #include "DiscreteLib/Serial/DiscreteSystem.h"
-#include "DiscreteLib/Assembler/IElemenetWiseLinearEquationLocalAssembler.h"
+#include "DiscreteLib/Core/IElemenetWiseLinearEquationLocalAssembler.h"
 
 #include "NumLib/Function/TXFunction.h"
 
