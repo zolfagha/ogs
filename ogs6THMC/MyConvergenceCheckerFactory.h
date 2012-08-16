@@ -41,10 +41,13 @@ public:
     }
 };
 
+template <class T_DIS_SYS>
 class FemFunctionConvergenceCheck : public NumLib::IConvergenceCheck
 {
     //FemLib::NormOfFemNodalFunction<double> _norm;
 public:
+    typedef typename FemLib::FemNodalFunctionScalar<T_DIS_SYS>::type MyNodalFunctionScalar;
+    typedef typename FemLib::FEMIntegrationPointFunctionVector<T_DIS_SYS>::type MyIntegrationPointFunctionVector;
     //explicit FemFunctionConvergenceCheck(DiscreteLib::DiscreteSystem *dis) : _norm(dis)
     //{
 
@@ -60,16 +63,16 @@ public:
         for (size_t i=0; i<vars_prev.size(); i++) {
 #if 1
             if (vars_prev.getName(i).compare("h")==0 || vars_prev.getName(i).compare("c")==0) {
-                const FemLib::FemNodalFunctionScalar* f_fem_prev = vars_prev.get<FemLib::FemNodalFunctionScalar>(i);
-                const FemLib::FemNodalFunctionScalar* f_fem_cur = vars_current.get<FemLib::FemNodalFunctionScalar>(i);
+                const MyNodalFunctionScalar* f_fem_prev = vars_prev.get<MyNodalFunctionScalar>(i);
+                const MyNodalFunctionScalar* f_fem_cur = vars_current.get<MyNodalFunctionScalar>(i);
                 //v_diff = f_fem_cur->norm_diff(*f_fem_prev);
-                FemLib::NormOfFemNodalFunction<double> _norm(f_fem_cur->getDiscreteSystem());
+                FemLib::NormOfFemNodalFunction<T_DIS_SYS, double> _norm(f_fem_cur->getDiscreteSystem());
                 v_diff = _norm(*f_fem_prev, *f_fem_cur);
             } else if (vars_prev.getName(i).compare("v")==0) {
-                const FemLib::FEMIntegrationPointFunctionVector* f_fem_prev = vars_prev.get<FemLib::FEMIntegrationPointFunctionVector>(i);
-                const FemLib::FEMIntegrationPointFunctionVector* f_fem_cur = vars_current.get<FemLib::FEMIntegrationPointFunctionVector>(i);
+                const MyIntegrationPointFunctionVector* f_fem_prev = vars_prev.get<MyIntegrationPointFunctionVector>(i);
+                const MyIntegrationPointFunctionVector* f_fem_cur = vars_current.get<MyIntegrationPointFunctionVector>(i);
                 //v_diff = f_fem_cur->norm_diff(*f_fem_prev);
-                FemLib::NormOfFemNodalFunction<double> _norm(f_fem_cur->getDiscreteSystem());
+                FemLib::NormOfFemNodalFunction<T_DIS_SYS, double> _norm(f_fem_cur->getDiscreteSystem());
                 v_diff = _norm(*f_fem_prev, *f_fem_cur);
             }
 #endif
@@ -81,6 +84,7 @@ public:
     }
 };
 
+template <class T_DIS_SYS>
 class MyConvergenceCheckerFactory
 {
 public:
@@ -89,7 +93,7 @@ public:
         if (name.compare("MyConvergenceCheck")==0) {
             return new MyConvergenceCheck();
         } else if (name.compare("FemFunctionConvergenceCheck")==0) {
-            return new FemFunctionConvergenceCheck();
+            return new FemFunctionConvergenceCheck<T_DIS_SYS>();
         }
         return NULL;
     };

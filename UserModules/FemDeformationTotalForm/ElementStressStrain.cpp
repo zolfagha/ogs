@@ -30,14 +30,16 @@ bool FunctionElementStressStrain::initialize(const BaseLib::Options &option)
     Ogs6FemData* femData = Ogs6FemData::getInstance();
 
     size_t msh_id = option.getOption<size_t>("MeshID");
-    _dis = femData->list_dis_sys[msh_id];
+    _dis = (MyDiscreteSystem*)femData->list_dis_sys[msh_id]; //TODO
     const size_t n_strain_components = getNumberOfStrainComponents();
 
     // create strain, stress vectors
     NumLib::LocalVector v0(n_strain_components);
     v0 *= .0;
-    _strain = new FemLib::FEMIntegrationPointFunctionVector(*_dis, v0);
-    _stress = new FemLib::FEMIntegrationPointFunctionVector(*_dis, v0);
+    _strain = new MyIntegrationPointFunctionVector();
+    _strain->initialize(_dis, v0);
+    _stress = new MyIntegrationPointFunctionVector();
+    _stress->initialize(_dis, v0);
 
     // set initial output
     for (size_t i=0; i<n_strain_components; i++) {
@@ -76,9 +78,9 @@ int FunctionElementStressStrain::solveTimeStep(const NumLib::TimeStep &/*time*/)
     INFO("Solving ELEMENT_STRESS_STRAIN...");
 
     const MeshLib::IMesh *msh = _dis->getMesh();
-    FemLib::FemNodalFunctionVector* u = (FemLib::FemNodalFunctionVector*)getInput(Displacement);
-    FemLib::FEMIntegrationPointFunctionVector* strain = _strain;
-    FemLib::FEMIntegrationPointFunctionVector* stress = _stress;
+    MyNodalFunctionVector* u = (MyNodalFunctionVector*)getInput(Displacement);
+    MyIntegrationPointFunctionVector* strain = _strain;
+    MyIntegrationPointFunctionVector* stress = _stress;
     FemLib::LagrangianFeObjectContainer* feObjects = u->getFeObjectContainer();
 
     const size_t dim = msh->getDimension();

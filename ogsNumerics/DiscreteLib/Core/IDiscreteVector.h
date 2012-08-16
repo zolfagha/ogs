@@ -21,6 +21,12 @@
 namespace DiscreteLib
 {
 
+// forward declaration to avoid circular reference
+template <typename T> class IDiscreteVectorAssembler;
+
+/**
+ *
+ */
 class IDiscreteVectorBase : public IDiscreteObject
 {
 public:
@@ -83,6 +89,17 @@ public:
             (*this)[pos[i]] += local_v[i];
         }
     }
+    /// set values to given entries
+    virtual void setSubvector(const std::vector<size_t> &pos, T v)
+    {
+        for (size_t i=0; i<pos.size(); ++i) {
+            if (pos[i]==BaseLib::index_npos) continue;
+            (*this)[pos[i]] = v;
+        }
+    }
+
+    /// construct
+    virtual void construct(IDiscreteVectorAssembler<T>& assemler) = 0;
 
 };
 

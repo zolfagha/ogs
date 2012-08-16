@@ -16,9 +16,9 @@
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
 #include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
 #include "FemLib/Function/FemIntegrationPointFunction.h"
-#include "SolutionLib/FemProblem/FemEquation.h"
-#include "SolutionLib/FemProblem/FemIVBVProblem.h"
-#include "SolutionLib/Solution/SingleStepFEM.h"
+#include "SolutionLib/Fem/FemEquation.h"
+#include "SolutionLib/Fem/FemIVBVProblem.h"
+#include "SolutionLib/Fem/SingleStepFEM.h"
 
 #include "ProcessLib/TemplateTransientProcess.h"
 
@@ -26,15 +26,21 @@
 #include "LinearElasticResidualLocalAssembler.h"
 #include "LinearElasticJacobianLocalAssembler.h"
 
+#include "DiscreteLib/Serial/DiscreteSystem.h"
+typedef DiscreteLib::DiscreteSystem MyDiscreteSystem;
 
 typedef SolutionLib::TemplateFemEquation<
+        MyDiscreteSystem,
         FemLinearElasticLinearLocalAssembler,
         FemLinearElasticResidualLocalAssembler,
         FemLinearElasticJacobianLocalAssembler
         >
         FemLinearElasticEquation;
 
-typedef SolutionLib::FemIVBVProblem< FemLinearElasticEquation > FemLinearElasticProblem;
+typedef SolutionLib::FemIVBVProblem<
+        MyDiscreteSystem,
+        FemLinearElasticEquation
+        > FemLinearElasticProblem;
 
 
 
@@ -52,6 +58,7 @@ public:
                 //MathLib::DenseLinearEquations
                 MathLib::CRSLisSolver
             > MySolutionType;
+    typedef FemLib::FemNodalFunctionVector<MyDiscreteSystem>::type MyNodalFunctionVector;
 
     ///
     FunctionDisplacement()
@@ -89,7 +96,7 @@ private:
     FemLinearElasticProblem* _problem;
     MySolutionType* _solution;
     FemLib::LagrangianFeObjectContainer* _feObjects;
-    FemLib::FemNodalFunctionVector* _displacement;
+    MyNodalFunctionVector* _displacement;
 //    FemLib::FEMIntegrationPointFunctionVector* _strain;
 //    FemLib::FEMIntegrationPointFunctionVector* _stress;
 

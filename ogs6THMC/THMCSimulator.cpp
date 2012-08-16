@@ -31,6 +31,7 @@
 #include "NumLib/TransientCoupling/TransientCouplingStructureBuilder.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "FemIO/ogs5/Ogs5FemIO.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 
 // this module
 #include "SimulationInfo.h"
@@ -51,6 +52,8 @@ static logog::LogFile *logog_file;
 static FormatterCustom *custom_format;
 static bool isOgsInitCalled = false;
 static bool isOgsExitCalled = false;
+
+typedef DiscreteLib::DiscreteSystem MyDiscreteSystem;
 ////////////////////////////////////////////////////////////////////////////////
 
 void ogsInit(int argc, char* argv[])
@@ -214,7 +217,7 @@ int THMCSimulator::execute()
 
     // construct coupling system
     INFO("->Generating coupling system...");
-    MyConvergenceCheckerFactory checkFac;
+    MyConvergenceCheckerFactory<MyDiscreteSystem> checkFac;
     NumLib::TransientCoulplingStrucutreBuilder cpl_builder;
     if (_cpl_system!=NULL) delete _cpl_system;
     _cpl_system = cpl_builder.build(&op, *GeoProcessBuilder::getInstance(), checkFac);

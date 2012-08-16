@@ -14,25 +14,25 @@
 
 #include <vector>
 
-#include "GeoLib/Point.h"
-
+#include "GeoLib/GeoObject.h"
 #include "MeshLib/Core/IMesh.h"
-#include "MeshLib/Tools/Tools.h"
-
-#include "FemLib/Function/FemFunction.h"
-#include "FemLib/BC/DirichletBC2FEM.h"
+#include "NumLib/Function/ITXFunction.h"
 
 namespace SolutionLib
 {
 
 /**
- * \brief A class contains DirichletBC data for FEM
+ * \brief DirichletBC data for FEM
+ *
+ * - mesh
+ * - geometry
+ * - BC function
  */
 class FemDirichletBC
 {
 public:
     ///
-    FemDirichletBC(MeshLib::IMesh* msh, const GeoLib::GeoObject* geo, NumLib::ITXFunction* bc_func)
+    FemDirichletBC(const MeshLib::IMesh* msh, const GeoLib::GeoObject* geo, NumLib::ITXFunction* bc_func)
     {
         _msh = msh;
         _geo = geo;
@@ -47,22 +47,19 @@ public:
     }
 
     /// setup B.C.
-    void setup()
-    {
-        if (!_do_setup) return;
-        if (!_is_transient) _do_setup = false;
+    void setup();
 
-        FemLib::DirichletBC2FEM convert(*_msh, *_geo, *_bc_func, _vec_nodes, _vec_values);
-
-        if (!_is_transient)
-            _do_setup = false;
-    }
-
+    ///
     std::vector<size_t>& getListOfBCNodes() {return _vec_nodes;};
+
+    ///
     std::vector<double>& getListOfBCValues() {return _vec_values;};
 
+    ///
+    bool isTransient() const {return _is_transient;};
+
 private:
-    MeshLib::IMesh* _msh;
+    const MeshLib::IMesh* _msh;
     const GeoLib::GeoObject* _geo;
     NumLib::ITXFunction* _bc_func;
     std::vector<size_t> _vec_nodes;

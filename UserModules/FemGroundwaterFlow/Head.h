@@ -16,17 +16,22 @@
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
-#include "SolutionLib/FemProblem/FemIVBVProblem.h"
-#include "SolutionLib/FemProblem/AbstractTransientFemFunction.h"
+#include "SolutionLib/Fem/FemIVBVProblem.h"
+#include "SolutionLib/Fem/FemEquation.h"
+#include "SolutionLib/Fem/SingleStepFEM.h"
 #include "ProcessLib/TemplateTransientProcess.h"
 
 #include "GWTimeODELocalAssembler.h"
 #include "GWJacobianLocalAssembler.h"
 
+#include "DiscreteLib/Serial/DiscreteSystem.h"
+typedef DiscreteLib::DiscreteSystem MyDiscreteSystem;
+
 //--------------------------------------------------------------------------------------------------
 // Equation definition
 //--------------------------------------------------------------------------------------------------
 typedef SolutionLib::TemplateFemEquation <
+        MyDiscreteSystem,
         GroundwaterFlowTimeODELocalAssembler<
             NumLib::ElementWiseTimeEulerEQSLocalAssembler>,
         GroundwaterFlowTimeODELocalAssembler<
@@ -39,7 +44,10 @@ typedef SolutionLib::TemplateFemEquation <
 //--------------------------------------------------------------------------------------------------
 // IVBV problem definition
 //--------------------------------------------------------------------------------------------------
-typedef SolutionLib::FemIVBVProblem< FemGWEquation > FemGWProblem;
+typedef SolutionLib::FemIVBVProblem<
+        MyDiscreteSystem,
+        FemGWEquation
+        > FemGWProblem;
 
 
 
@@ -51,6 +59,8 @@ class FunctionHead
 {
     enum Out { Head=0 };
 public:
+    typedef FemGWProblem MyProblemType;
+    typedef MyProblemType::EquationType MyEquationType;
     typedef SolutionLib::SingleStepFEM
             <
                 FemGWProblem,
@@ -88,7 +98,7 @@ private:
     DISALLOW_COPY_AND_ASSIGN(FunctionHead);
 
 private:
-    FemGWProblem* _problem;
+    MyProblemType* _problem;
     MySolutionType* _solution;
     FemLib::LagrangianFeObjectContainer* _feObjects;
 };

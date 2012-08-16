@@ -32,7 +32,7 @@ bool FunctionNodalStressStrain::initialize(const BaseLib::Options &option)
     Ogs6FemData* femData = Ogs6FemData::getInstance();
 
     size_t msh_id = option.getOption<size_t>("MeshID");
-    _dis = femData->list_dis_sys[msh_id];
+    _dis = (MyDiscreteSystem*)femData->list_dis_sys[msh_id]; //TODO
     const size_t n_strain_components = getNumberOfStrainComponents();
 
     // create strain, stress vectors
@@ -40,8 +40,10 @@ bool FunctionNodalStressStrain::initialize(const BaseLib::Options &option)
     v0 *= .0;
 
     // set initial output
-    _nodal_strain = new FemLib::FemNodalFunctionVector(*_dis, FemLib::PolynomialOrder::Linear, v0);
-    _nodal_stress = new FemLib::FemNodalFunctionVector(*_dis, FemLib::PolynomialOrder::Linear, v0);
+    _nodal_strain = new MyNodalFunctionVector();
+    _nodal_strain->initialize(*_dis, FemLib::PolynomialOrder::Linear, v0);
+    _nodal_stress = new MyNodalFunctionVector();
+    _nodal_stress->initialize(*_dis, FemLib::PolynomialOrder::Linear, v0);
     for (size_t i=0; i<n_strain_components; i++) {
         _vec_nodal_strain_components.push_back(new NodalPointScalarWrapper(_nodal_strain, i));
         _vec_nodal_stress_components.push_back(new NodalPointScalarWrapper(_nodal_stress, i));
@@ -77,10 +79,10 @@ int FunctionNodalStressStrain::solveTimeStep(const NumLib::TimeStep &/*time*/)
 {
     INFO("Solving NODAL_STRESS_STRAIN...");
 
-    FemLib::FEMIntegrationPointFunctionVector* strain = (FemLib::FEMIntegrationPointFunctionVector*)getInput(GpStrain);
-    FemLib::FEMIntegrationPointFunctionVector* stress = (FemLib::FEMIntegrationPointFunctionVector*)getInput(GpStress);
+    MyIntegrationPointFunctionVector* strain = (MyIntegrationPointFunctionVector*)getInput(GpStrain);
+    MyIntegrationPointFunctionVector* stress = (MyIntegrationPointFunctionVector*)getInput(GpStress);
 
-    FemLib::FemExtrapolationAverage<NumLib::LocalVector> extrapo;
+    FemLib::FemExtrapolationAverage<MyDiscreteSystem, NumLib::LocalVector> extrapo;
     extrapo.extrapolate(*strain, *_nodal_strain);
     extrapo.extrapolate(*stress, *_nodal_stress);
 

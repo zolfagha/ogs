@@ -19,6 +19,7 @@
 #include "NumLib/Function/TXFunctionBuilder.h"
 #include "OutputIO/OutputBuilder.h"
 #include "OutputIO/OutputTimingBuilder.h"
+#include "SolutionLib/Fem/FemSourceTerm.h"
 #include "Ogs6FemData.h"
 
 bool FunctionConcentration::initialize(const BaseLib::Options &option)
@@ -29,7 +30,7 @@ bool FunctionConcentration::initialize(const BaseLib::Options &option)
     NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
 
     //mesh and FE objects
-    DiscreteLib::DiscreteSystem* dis = femData->list_dis_sys[msh_id];
+    MyProblemType::MyDiscreteSystem* dis = (MyProblemType::MyDiscreteSystem*)femData->list_dis_sys[msh_id]; //TODO
     MeshLib::IMesh* msh = dis->getMesh();
     _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
 
@@ -45,17 +46,18 @@ bool FunctionConcentration::initialize(const BaseLib::Options &option)
     MyEquationType::LinearAssemblerType* linear_assembler = new MyEquationType::LinearAssemblerType(_compound, _feObjects);
     MyEquationType::ResidualAssemblerType* r_assembler = new MyEquationType::ResidualAssemblerType(_compound, _feObjects);
     MyEquationType::JacobianAssemblerType* j_eqs = new MyEquationType::JacobianAssemblerType(_compound, _feObjects);
-    MyEquationType* eqs = new  MyEquationType(linear_assembler, r_assembler, j_eqs);
 
     // set up problem
     _problem = new MyProblemType(dis);
-    _problem->setEquation(eqs);
+    MyEquationType* eqs = _problem->createEquation();
+    eqs->initialize(linear_assembler, r_assembler, j_eqs);
     _problem->setTimeSteppingFunction(*tim);
     // set up variable
-    SolutionLib::FemVariable* concentration = _problem->addVariable("concentration");
+    MyProblemType::MyVariable* concentration = _problem->addVariable("concentration");
     // IC
     NumLib::TXFunctionBuilder f_builder;
-    FemLib::FemNodalFunctionScalar* c0 = new FemLib::FemNodalFunctionScalar(*dis, FemLib::PolynomialOrder::Linear, 0);
+    MyProblemType::MyVariable::MyNodalFunctionScalar* c0 = new MyProblemType::MyVariable::MyNodalFunctionScalar();
+    c0->initialize(*dis, FemLib::PolynomialOrder::Linear, 0);
     concentration->setIC(c0);
     // BC
     const BaseLib::Options* opBCList = option.getSubGroup("BCList");
@@ -105,6 +107,7 @@ bool FunctionConcentration::initialize(const BaseLib::Options &option)
     _solution->getNonlinearSolver()->setOption(*optNum);
 
     // set initial output
+    NumLib::ITXFunction* temp = _solution->getCurrentSolution(0);
     OutputVariableInfo var(_compound->name, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput(var.name, var); 
 

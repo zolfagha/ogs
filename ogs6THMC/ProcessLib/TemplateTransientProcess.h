@@ -16,7 +16,7 @@
 
 #include "BaseLib/Options.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
-#include "SolutionLib/Solution/AbstractTimeSteppingAlgorithm.h"
+#include "SolutionLib/Core/AbstractTimeSteppingAlgorithm.h"
 #include "Process.h"
 
 namespace ProcessLib

@@ -15,8 +15,6 @@
 #include "BaseLib/CodingTools.h"
 
 #include "DiscreteLib/Core/IDiscreteSystem.h"
-#include "DiscreteLib/Core/IDiscreteLinearEquation.h"
-
 #include "DiscreteVector.h"
 #include "DiscreteLinearEquation.h"
 
@@ -32,20 +30,35 @@ class DofEquationIdTable;
 
 /**
  * \brief Discrete system based on a single mesh
+ *
+ * - Mesh
  */
 class DiscreteSystem : public IDiscreteSystem
 {
 public:
+    template<typename T_LINEAR_SOLVER, typename T_SPARSITY_BUILDER>
+    struct MyLinearEquation
+    {
+        typedef DiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER> type;
+    };
+    template<typename T>
+    struct MyVector
+    {
+        typedef DiscreteVector<T> type;
+    };
    
     /// constructor
     /// \param msh  a mesh to represent discrete systems by nodes or elements or edges
     explicit DiscreteSystem(MeshLib::IMesh& msh) : _msh(&msh) {};
 
     ///
-    virtual ~DiscreteSystem() {};
+    virtual ~DiscreteSystem()
+    {
+        BaseLib::releaseObject(_msh);
+    };
 
-    /// get this mesh
-    MeshLib::IMesh* getMesh() const { return _msh; };
+    /// return this mesh
+    virtual MeshLib::IMesh* getMesh() const {return (MeshLib::IMesh*)_msh;};
 
     /// create a new linear equation
     /// @tparam T_LINEAR_EQUATION
@@ -54,21 +67,18 @@ public:
     /// @param linear_solver         Linear solver
     /// @param dofManager            Equation index table
     template <class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
-    DiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>* createLinearEquation(T_LINEAR_SOLVER* linear_solver, DofEquationIdTable* dofManager)
+    typename MyLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>::type* createLinearEquation(T_LINEAR_SOLVER* linear_solver, DofEquationIdTable* dofManager)
     {
-        DiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>* eq;
-        eq = DiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>::createInstance(*this, _msh, linear_solver, dofManager);
-        return eq;
+        return MyLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>::type::createInstance(*this, _msh, linear_solver, dofManager);
     }
 
     /// create a new vector
     /// @param n    vector length
     /// @return vector object
     template<typename T>
-    DiscreteVector<T>* createVector(const size_t n)
+    typename MyVector<T>::type* createVector(size_t n)
     {
-        DiscreteVector<T>* v = DiscreteVector<T>::createInstance(*this, n);
-        return v;
+        return MyVector<T>::type::createInstance(*this, n);
     };
 
 private:

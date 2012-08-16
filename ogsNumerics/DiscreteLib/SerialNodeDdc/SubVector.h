@@ -5,7 +5,7 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file DDCDiscreteVector.h
+ * \file SubVector.h
  *
  * Created on 2012-08-03 by Norihiro Watanabe
  */
@@ -20,7 +20,7 @@ namespace DiscreteLib
  * \brief Local discrete vector for OpenMP
  */
 template<typename T>
-class DDCLocalDiscreteVector : public DiscreteVector<T>
+class SubVector : public DiscreteVector<T>
 {     
  public:
      /// Constructor without ghost elements
@@ -28,7 +28,7 @@ class DDCLocalDiscreteVector : public DiscreteVector<T>
      /// @param n_global    size of the global vector 
      /// @param i_begin     global index starting this local vector
      /// @param i_end       global index ending this local vector + 1 
-    DDCLocalDiscreteVector(size_t local_id, size_t n_global, size_t i_begin, size_t i_end) : DiscreteVector<T>(i_end - i_begin)
+    SubVector(size_t local_id, size_t n_global, size_t i_begin, size_t i_end) : DiscreteVector<T>(i_end - i_begin)
     {
         _local_id = local_id;
         _global_n = n_global;
@@ -42,7 +42,7 @@ class DDCLocalDiscreteVector : public DiscreteVector<T>
     /// @param i_begin     global index starting this local vector
     /// @param i_end       global index ending this local vector + 1 
     /// @param ghost_id    a list of ghost id
-    DDCLocalDiscreteVector(size_t local_id, size_t n_global, size_t i_begin, size_t i_end, std::vector<size_t> &ghost_id) : DiscreteVector<T>(i_end - i_begin + ghost_id.size()), _ghost_id(ghost_id)
+    SubVector(size_t local_id, size_t n_global, size_t i_begin, size_t i_end, std::vector<size_t> &ghost_id) : DiscreteVector<T>(i_end - i_begin + ghost_id.size()), _ghost_id(ghost_id)
     {
         _local_id = local_id;
         _global_n = n_global;
@@ -51,7 +51,7 @@ class DDCLocalDiscreteVector : public DiscreteVector<T>
     };
 
     /// destructor
-    virtual ~DDCLocalDiscreteVector() {};
+    virtual ~SubVector() {};
 
     /// get the global vector size
     size_t getGlobalSize() const {return _global_n;};

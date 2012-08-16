@@ -16,6 +16,7 @@
 #include "NumLib/Function/TXFunctionBuilder.h"
 #include "OutputIO/OutputBuilder.h"
 #include "OutputIO/OutputTimingBuilder.h"
+#include "SolutionLib/Fem/FemSourceTerm.h"
 #include "Ogs6FemData.h"
 
 bool FunctionHead::initialize(const BaseLib::Options &option)
@@ -26,25 +27,26 @@ bool FunctionHead::initialize(const BaseLib::Options &option)
     NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
 
     //mesh and FE objects
-    DiscreteLib::DiscreteSystem* dis = femData->list_dis_sys[msh_id];
+    MyProblemType::MyDiscreteSystem* dis = (MyProblemType::MyDiscreteSystem*)femData->list_dis_sys[msh_id]; //TODO
     MeshLib::IMesh* msh = dis->getMesh();
     _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
 
-    // equations
+    // local assemblers
     FemGWEquation::LinearAssemblerType* linear_assembler = new FemGWEquation::LinearAssemblerType(*_feObjects);
     FemGWEquation::ResidualAssemblerType* r_assembler = new FemGWEquation::ResidualAssemblerType(*_feObjects);
     FemGWEquation::JacobianAssemblerType* j_eqs = new FemGWEquation::JacobianAssemblerType(*_feObjects);
-    FemGWEquation* eqs = new  FemGWEquation(linear_assembler, r_assembler, j_eqs);
 
     // set up problem
     _problem = new FemGWProblem(dis);
-    _problem->setEquation(eqs);
+    FemGWEquation* eqs = _problem->createEquation();
+    eqs->initialize(linear_assembler, r_assembler, j_eqs);
     _problem->setTimeSteppingFunction(*tim);
     // set up variable
-    SolutionLib::FemVariable* head = _problem->addVariable("head");
+    MyProblemType::MyVariable* head = _problem->addVariable("head");
     // IC
     NumLib::TXFunctionBuilder f_builder;
-    FemLib::FemNodalFunctionScalar* h0 = new FemLib::FemNodalFunctionScalar(*dis, FemLib::PolynomialOrder::Linear, 0);
+    MyProblemType::MyVariable::MyNodalFunctionScalar* h0 = new MyProblemType::MyVariable::MyNodalFunctionScalar();
+    h0->initialize(*dis, FemLib::PolynomialOrder::Linear, 0);
     head->setIC(h0);
     // BC
     const BaseLib::Options* opBCList = option.getSubGroup("BCList");

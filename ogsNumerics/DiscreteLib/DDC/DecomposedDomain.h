@@ -33,30 +33,40 @@ class SubDomain;
 class DecomposedDomain
 {
 public:
+    /**
+     * \param ddc_type decomposition type
+     */
     explicit DecomposedDomain(DecompositionType::type ddc_type)
-    : _ddc_type(ddc_type), _n_discrete_pt(0), _id(0)
+    : _ddc_type(ddc_type), _n_discrete_pt(0), _n_nodes(0), _n_eles(0)
     { };
 
+    ///
     virtual ~DecomposedDomain()
     {
         BaseLib::releaseObjectsInStdVector(_list_dom);
     }
 
-    size_t getID() const {return _id;};
-
-    void setID(size_t i) {_id = i;};
-
+    /// return this decomposition type
     DecompositionType::type getDecompositionType() const {return _ddc_type;};
 
+    /// return the number of total decomposed objects, e.g. the number of all nodes
     size_t getTotalNumberOfDecomposedObjects() const {return _n_discrete_pt;};
 
+    /// return the number of sub domains
     size_t getNumberOfSubDomains() const {return _list_dom.size();};
 
+    /// add a new sub domain
     size_t addSubDomain(SubDomain* sub);
 
+    /// return a sub domain
     SubDomain* getSubDomain(size_t i) {return _list_dom[i];};
 
-    size_t findDomainID(size_t global_obj_id) const;
+    /// find a sub domain in which the given object exist and return its domain id
+    size_t findSubDomainID(size_t global_obj_id) const;
+
+    size_t getNumberOfNodes() const {return _n_nodes;};
+
+    size_t getNumberOfElements() const {return _n_eles;};
 
 private:
     DISALLOW_COPY_AND_ASSIGN(DecomposedDomain);
@@ -66,7 +76,8 @@ private:
     std::vector<size_t> _list_dom_start_obj;
     std::vector<SubDomain*> _list_dom;
     size_t _n_discrete_pt;
-    size_t _id;
+    size_t _n_nodes;
+    size_t _n_eles;
 };
 
 } //end

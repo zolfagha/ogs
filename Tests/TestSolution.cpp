@@ -33,10 +33,10 @@
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
 #include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
 
-#include "SolutionLib/FemProblem/FemDirichletBC.h"
-#include "SolutionLib/FemProblem/FemNeumannBC.h"
-#include "SolutionLib/FemProblem/FemIVBVProblem.h"
-#include "SolutionLib/Solution/SingleStepFEM.h"
+#include "SolutionLib/Fem/FemDirichletBC.h"
+#include "SolutionLib/Fem/FemNeumannBC.h"
+#include "SolutionLib/Fem/FemIVBVProblem.h"
+#include "SolutionLib/Fem/SingleStepFEM.h"
 
 #include "TestUtil.h"
 

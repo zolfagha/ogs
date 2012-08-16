@@ -16,7 +16,7 @@
 
 #include "BaseLib/OrderedMap.h"
 #include "GeoLib/GEOObjects.h"
-#include "DiscreteLib/Serial/DiscreteSystem.h"
+#include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "OutputIO/OutputBuilder.h"
 #include "OutputIO/OutputTimingBuilder.h"
@@ -30,7 +30,7 @@ namespace ogs6
 class OutputController
 {
 public:
-    void initialize(const BaseLib::Options &option, const std::string &output_dir, const std::string &project_name, std::vector<DiscreteLib::DiscreteSystem*> &list_dis_sys, GeoLib::GEOObjects &geo, const std::string &geo_unique_name)
+    void initialize(const BaseLib::Options &option, const std::string &output_dir, const std::string &project_name, std::vector<DiscreteLib::IDiscreteSystem*> &list_dis_sys, GeoLib::GEOObjects &geo, const std::string &geo_unique_name)
     {
         //Ogs6FemData* femData = Ogs6FemData::getInstance();
         OutputBuilder outBuilder;

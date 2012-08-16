@@ -19,11 +19,11 @@
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "DiscreteLib/Serial/DiscreteLinearEquation.h"
-#include "DiscreteLib/Utils/SparsityBuilder.h"
+#include "DiscreteLib/Utils/SparsityBuilderFromNodeConnectivity.h"
 #include "NumLib/TransientAssembler/ElementWiseTransientLinearEQSAssembler.h"
 #include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
 
-#include "SolutionLib/Solution/AbstractTimeSteppingAlgorithm.h"
+#include "SolutionLib/Core/AbstractTimeSteppingAlgorithm.h"
 
 #include "FdmFunction.h"
 #include "BoundaryConditions.h"

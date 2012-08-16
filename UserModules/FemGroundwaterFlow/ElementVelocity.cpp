@@ -12,7 +12,10 @@
 
 #include "ElementVelocity.h"
 
+#include "logog.hpp"
 #include "MathLib/Vector.h"
+#include "MaterialLib/PorousMedia.h"
+
 #include "Ogs6FemData.h"
 
 bool FunctionElementVelocity::initialize(const BaseLib::Options &option)
@@ -20,11 +23,12 @@ bool FunctionElementVelocity::initialize(const BaseLib::Options &option)
     Ogs6FemData* femData = Ogs6FemData::getInstance();
 
     size_t msh_id = option.getOption<size_t>("MeshID");
-    DiscreteLib::DiscreteSystem* dis = femData->list_dis_sys[msh_id];
+    MyDiscreteSystem* dis = (MyDiscreteSystem*)femData->list_dis_sys[msh_id]; //TODO
     MeshLib::IMesh* msh = dis->getMesh();
 
     _dis = dis;
-    _vel = new FemLib::FEMIntegrationPointFunctionVector(*dis);
+    _vel = new MyIntegrationPointFunctionVector();
+    _vel->initialize(dis);
     
     // set initial output
     OutputVariableInfo var("VELOCITY", OutputVariableInfo::Element, OutputVariableInfo::Real, 3, _vel);
@@ -51,8 +55,8 @@ int FunctionElementVelocity::solveTimeStep(const NumLib::TimeStep &/*time*/)
     INFO("Solving ELEMENT_VELOCITY...");
 
     const MeshLib::IMesh *msh = _dis->getMesh();
-    FemLib::FemNodalFunctionScalar *head = (FemLib::FemNodalFunctionScalar*)getInput(Head);
-    FemLib::FEMIntegrationPointFunctionVector *vel = _vel;;
+    MyNodalFunctionScalar *head = (MyNodalFunctionScalar*)getInput(Head);
+    MyIntegrationPointFunctionVector *vel = _vel;;
 
 
     FemLib::LagrangianFeObjectContainer* feObjects = head->getFeObjectContainer();

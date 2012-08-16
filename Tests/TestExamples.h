@@ -38,12 +38,14 @@
 class GWFemTest
 {
 public:
+    typedef FemLib::FemNodalFunctionScalar<DiscreteLib::DiscreteSystem>::type MyNodalFunctionScalar;
+    typedef FemLib::FEMIntegrationPointFunctionVector<DiscreteLib::DiscreteSystem>::type MyIntegrationPointFunctionVector;
     GeoLib::Rectangle *rec;
     DiscreteLib::DiscreteSystem *dis;
     MeshLib::IMesh *msh;
     NumLib::ITXFunction *_K;
-    FemLib::FemNodalFunctionScalar *head;
-    FemLib::FEMIntegrationPointFunctionVector *vel;
+    MyNodalFunctionScalar *head;
+    MyIntegrationPointFunctionVector *vel;
     std::vector<size_t> vec_bc1_nodes;
     std::vector<double> vec_bc1_vals;
     std::vector<size_t> vec_bc2_nodes;
@@ -60,8 +62,10 @@ public:
         this->msh = msh;
         dis = new DiscreteLib::DiscreteSystem(*msh);
         //discretization
-        head = new FemLib::FemNodalFunctionScalar(*dis, FemLib::PolynomialOrder::Linear);
-        vel = new FemLib::FEMIntegrationPointFunctionVector(*dis);
+        head = new MyNodalFunctionScalar();
+        head->initialize(*dis, FemLib::PolynomialOrder::Linear);
+        vel = new MyIntegrationPointFunctionVector();
+        vel->initialize(dis);
         //bc
         NumLib::TXFunctionConstant f_bc1(.0);
         FemLib::DirichletBC2FEM bc1(*msh, *poly_right, f_bc1, vec_bc1_nodes, vec_bc1_vals);

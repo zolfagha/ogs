@@ -24,23 +24,23 @@ namespace FemLib
 /**
  * \brief Extrapolation methods for integration point values
  */
-template<typename Tvalue>
+template<typename T_DIS_SYS, typename Tvalue>
 class IFemExtrapolation
 {
 public:
     virtual ~IFemExtrapolation() {};
-    virtual void extrapolate(TemplateFEMIntegrationPointFunction<Tvalue> &ele, TemplateFEMNodalFunction<Tvalue> &nod) = 0;
+    virtual void extrapolate(TemplateFEMIntegrationPointFunction<T_DIS_SYS,Tvalue> &ele, TemplateFEMNodalFunction<T_DIS_SYS,Tvalue> &nod) = 0;
 };
 
 /**
  * \brief
  */
-template<typename Tvalue>
-class FemExtrapolationAverage : public IFemExtrapolation<Tvalue>
+template<typename T_DIS_SYS, typename Tvalue>
+class FemExtrapolationAverage : public IFemExtrapolation<T_DIS_SYS, Tvalue>
 {
 public:
 
-    void extrapolate(TemplateFEMIntegrationPointFunction<Tvalue> &ele_var, TemplateFEMNodalFunction<Tvalue> &nod_var)
+    void extrapolate(TemplateFEMIntegrationPointFunction<T_DIS_SYS,Tvalue> &ele_var, TemplateFEMNodalFunction<T_DIS_SYS,Tvalue> &nod_var)
     {
         const MeshLib::IMesh* msh = ele_var.getMesh();
         LagrangianFeObjectContainer* feObjects = nod_var.getFeObjectContainer();
@@ -52,7 +52,7 @@ public:
 
         for (size_t i=0; i<msh->getNumberOfElements(); i++) {
             MeshLib::IElement* e = msh->getElemenet(i);
-            const typename TemplateFEMIntegrationPointFunction<Tvalue>::IntegrationPointVectorType &gp_values = ele_var.getIntegrationPointValues(i);
+            const typename TemplateFEMIntegrationPointFunction<T_DIS_SYS, Tvalue>::IntegrationPointVectorType &gp_values = ele_var.getIntegrationPointValues(i);
             std::vector<Tvalue> vec_gp_values(&gp_values[0], &gp_values[0]+gp_values.size());
             const size_t e_nnodes = e->getNumberOfNodes();
             std::vector<Tvalue> nodal_values(e_nnodes);
@@ -77,15 +77,15 @@ struct FEMExtrapolationMethod
     };
 };
 
-template<typename Tvalue>
+template<typename T_DIS_SYS, typename Tvalue>
 class FEMExtrapolationFactory
 {
 public:
-    static IFemExtrapolation<Tvalue>* create(FEMExtrapolationMethod::type tp)
+    static IFemExtrapolation<T_DIS_SYS, Tvalue>* create(FEMExtrapolationMethod::type tp)
     {
         switch (tp) {
             case FEMExtrapolationMethod::Average:
-                return new FemExtrapolationAverage<Tvalue>();
+                return new FemExtrapolationAverage<T_DIS_SYS,Tvalue>();
         }
         return 0;
     };

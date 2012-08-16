@@ -16,18 +16,23 @@
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
-#include "SolutionLib/FemProblem/FemIVBVProblem.h"
-#include "SolutionLib/FemProblem/AbstractTransientFemFunction.h"
+#include "SolutionLib/Fem/FemIVBVProblem.h"
+#include "SolutionLib/Fem/FemEquation.h"
+#include "SolutionLib/Fem/SingleStepFEM.h"
 #include "ProcessLib/TemplateTransientProcess.h"
 #include "MaterialLib/Compound.h"
 
 #include "MassTransportTimeODELocalAssembler.h"
 #include "MassTransportJacobianLocalAssembler.h"
 
+#include "DiscreteLib/Serial/DiscreteSystem.h"
+typedef DiscreteLib::DiscreteSystem MyDiscreteSystem;
+
 //--------------------------------------------------------------------------------------------------
 // Equation definition
 //--------------------------------------------------------------------------------------------------
 typedef SolutionLib::TemplateFemEquation<
+        MyDiscreteSystem,
         MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler>,
         MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler>,
         MassTransportJacobianLocalAssembler
@@ -37,7 +42,10 @@ typedef SolutionLib::TemplateFemEquation<
 //--------------------------------------------------------------------------------------------------
 // IVBV problem definition
 //--------------------------------------------------------------------------------------------------
-typedef SolutionLib::FemIVBVProblem< FemMTEquation > FemMTProblem;
+typedef SolutionLib::FemIVBVProblem<
+        MyDiscreteSystem,
+        FemMTEquation
+        > FemMTProblem;
 
 
 //--------------------------------------------------------------------------------------------------

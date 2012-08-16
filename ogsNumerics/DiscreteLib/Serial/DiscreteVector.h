@@ -5,8 +5,10 @@
 #include <cstddef>
 
 #include "BaseLib/CodingTools.h"
+#include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/Core/IDiscreteVector.h"
 #include "DiscreteLib/Core/IDiscreteSystem.h"
+#include "DiscreteLib/Core/IDiscreteVectorAssembler.h"
 
 namespace DiscreteLib
 {
@@ -18,8 +20,9 @@ template<typename T>
 class DiscreteVector : public IDiscreteVector<T>
 {
 protected:
-    DiscreteVector() {};
-    explicit DiscreteVector(size_t n) : _data(n) {};
+    explicit DiscreteVector(MeshLib::IMesh* msh) : _data(0), _msh(msh) {};
+    explicit DiscreteVector(size_t n) : _data(n), _msh(0) {};
+    DiscreteVector(MeshLib::IMesh* msh, size_t n) : _data(n), _msh(msh) {};
 
 public:
     static DiscreteVector<T>* createInstance(IDiscreteSystem &sys, size_t n)
@@ -66,8 +69,15 @@ public:
         return _data.size();
     }
 
+    /// construct
+    virtual void construct(IDiscreteVectorAssembler<T>& assembler)
+    {
+        assembler.assembly(*_msh, *this);
+    }
+
 protected:
     std::vector<T> _data;
+    MeshLib::IMesh* _msh;
 };
 
 } // end

@@ -21,6 +21,8 @@
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "ProcessLib/TemplateTimeIndependentProcess.h"
 
+typedef DiscreteLib::DiscreteSystem MyDiscreteSystem;
+
 /**
  * \brief Stress, strain evaluator based on total displacements
  */
@@ -29,8 +31,10 @@ class FunctionNodalStressStrain
 {
     enum In { GpStrain=0, GpStress=1};
     enum Out { NodStrain=0, NodStress=1};
-    typedef NumLib::TXVectorFunctionAsColumnData<FemLib::FEMIntegrationPointFunctionVector> IntegrationPointScalarWrapper;
-    typedef NumLib::TXVectorFunctionAsColumnData<FemLib::FemNodalFunctionVector> NodalPointScalarWrapper;
+    typedef FemLib::FemNodalFunctionVector<MyDiscreteSystem>::type MyNodalFunctionVector;
+    typedef FemLib::FEMIntegrationPointFunctionVector<MyDiscreteSystem>::type MyIntegrationPointFunctionVector;
+    typedef NumLib::TXVectorFunctionAsColumnData<MyIntegrationPointFunctionVector> IntegrationPointScalarWrapper;
+    typedef NumLib::TXVectorFunctionAsColumnData<MyNodalFunctionVector> NodalPointScalarWrapper;
 public:
 
     FunctionNodalStressStrain() : _dis(0), _nodal_strain(0), _nodal_stress(0)
@@ -58,9 +62,9 @@ private:
     DISALLOW_COPY_AND_ASSIGN(FunctionNodalStressStrain);
 
 private:
-    DiscreteLib::DiscreteSystem* _dis;
-    FemLib::FemNodalFunctionVector* _nodal_strain;
-    FemLib::FemNodalFunctionVector* _nodal_stress;
+    MyDiscreteSystem* _dis;
+    MyNodalFunctionVector* _nodal_strain;
+    MyNodalFunctionVector* _nodal_stress;
     std::vector<NodalPointScalarWrapper*> _vec_nodal_strain_components;
     std::vector<NodalPointScalarWrapper*> _vec_nodal_stress_components;
 };

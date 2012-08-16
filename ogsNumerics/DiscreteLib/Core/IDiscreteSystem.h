@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/Utils/DiscreteDataContainer.h"
 
 namespace DiscreteLib
@@ -23,7 +24,7 @@ class IDiscreteVectorBase;
  * \brief Interface for all kinds of discrete systems
  *
  *  Discrete system class contains the followings
- *  - discrete points (space, time) 
+ *  - discrete space (i.e. mesh)
  *  - discrete data (i.e. vector)
  *  - linear equations which are used to calculate discrete data
  */
@@ -32,8 +33,7 @@ class IDiscreteSystem
 public:
     virtual ~IDiscreteSystem() {};
     
-    //IDiscreteLinearEquation* createLinearEquation();
-    //IDiscreteVector* createVector();
+    virtual MeshLib::IMesh* getMesh() const = 0;
 
     void addLinearEquation(IDiscreteLinearEquation *eqs)
     {

@@ -24,7 +24,7 @@
 #include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
 #include "NumLib/Coupling/Algorithm/TransientPartitionedAlgorithm.h"
 #include "FemLib/Function/FemNorm.h"
-#include "SolutionLib/FemProblem/FemNeumannBC.h"
+#include "SolutionLib/Fem/FemNeumannBC.h"
 #include "Tests/Geo/Model/Head.h"
 #include "Tests/Geo/Model/Velocity.h"
 #include "Tests/Geo/Model/Concentration.h"

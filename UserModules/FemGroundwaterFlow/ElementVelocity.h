@@ -13,20 +13,22 @@
 #pragma once
 
 #include "BaseLib/CodingTools.h"
-#include "DiscreteLib/Serial/DiscreteSystem.h"
+#include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "FemLib/Function/FemFunction.h"
 #include "NumLib/Function/Function.h"
 #include "NumLib/TimeStepping/TimeStep.h"
-#include "MaterialLib/PorousMedia.h"
-#include "SolutionLib/FemProblem/AbstractTimeIndependentFemFunction.h"
-
 #include "ProcessLib/TemplateTimeIndependentProcess.h"
+
+#include "DiscreteLib/Serial/DiscreteSystem.h"
+typedef DiscreteLib::DiscreteSystem MyDiscreteSystem;
 
 class FunctionElementVelocity
     : public ProcessLib::TemplateTimeIndependentProcess<1,1>
 {
     enum In { Head=0 };
     enum Out { Velocity=0 };
+    typedef FemLib::FemNodalFunctionScalar<MyDiscreteSystem>::type MyNodalFunctionScalar;
+    typedef FemLib::FEMIntegrationPointFunctionVector<MyDiscreteSystem>::type MyIntegrationPointFunctionVector;
 public:
 
     FunctionElementVelocity() 
@@ -46,9 +48,8 @@ public:
     virtual void accept(const NumLib::TimeStep &/*time*/);
 
 private:
-    DiscreteLib::DiscreteSystem* _dis;
-    FemLib::FEMIntegrationPointFunctionVector* _vel;
-    //NumLib::ITXFunction* _K;
+    DiscreteLib::IDiscreteSystem* _dis;
+    MyIntegrationPointFunctionVector* _vel;
 
     DISALLOW_COPY_AND_ASSIGN(FunctionElementVelocity);
 };

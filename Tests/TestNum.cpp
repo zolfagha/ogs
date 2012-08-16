@@ -32,7 +32,7 @@
 #include "DiscreteLib/Utils/DofEquationIdTable.h"
 #include "DiscreteLib/Core/IDiscreteLinearEquationAssembler.h"
 #include "DiscreteLib/Core/IElemenetWiseLinearEquationLocalAssembler.h"
-#include "DiscreteLib/Utils/SparsityBuilder.h"
+#include "DiscreteLib/Utils/SparsityBuilderFromNodeConnectivity.h"
 #ifdef USE_MPI
 #include "DiscreteLib/ogs5/par_ddc_group.h"
 #endif

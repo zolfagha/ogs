@@ -18,7 +18,9 @@
 #include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "DiscreteLib/Serial/DiscreteLinearEquation.h"
 #include "DiscreteLib/DDC/DecomposedDomain.h"
-#include "DDCDiscreteVector.h"
+#include "DiscreteLib/DDC/SubDomain.h"
+#include "DiscreteLib/Utils/SparsityBuilderDDC.h"
+#include "DecomposedVector.h"
 
 namespace DiscreteLib
 {

@@ -30,19 +30,18 @@
 #include "MeshLib/Core/IMesh.h"
 
 
+#include "DiscreteLib/Core/IDiscreteLinearEquation.h"
+#include "DiscreteLib/Core/IElemenetWiseLinearEquationLocalAssembler.h"
 #include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "DiscreteLib/Serial/DiscreteVector.h"
-#include "DiscreteLib/Core/IDiscreteLinearEquation.h"
-#include "DiscreteLib/Utils/DofEquationIdTable.h"
 #include "DiscreteLib/Serial/ElementWiseLinearEquationAssembler.h"
-#include "DiscreteLib/Core/IElemenetWiseLinearEquationLocalAssembler.h"
-#include "DiscreteLib/Utils/SparsityBuilder.h"
-#ifdef USE_MPI
-#include "DiscreteLib/ogs5/par_ddc_group.h"
-#endif
 #include "DiscreteLib/SerialNodeDdc/SerialNodeDdcDiscreteSystem.h"
 #include "DiscreteLib/DDC/SequentialGlobaLocalMappingTable.h"
 #include "DiscreteLib/DDC/RandomGlobalLocalMappingTable.h"
+#include "DiscreteLib/DDC/SubDomain.h"
+#include "DiscreteLib/Utils/DofEquationIdTable.h"
+#include "DiscreteLib/Utils/SparsityBuilderFromNodeConnectivity.h"
+#include "DiscreteLib/Utils/SparsityBuilderDDC.h"
 
 #include "TestUtil.h"
 
@@ -342,15 +341,6 @@ TEST(Discrete, Lis1)
 
         ASSERT_DOUBLE_ARRAY_EQ(&ex1.exH[0], linear_eq->getLocalX(), 9, 1.e-5);
     }
-}
-#endif
-
-#ifdef USE_MPI
-TEST(Discrete, OGS51)
-{
-    MeshLib::IMixedOrderMesh* msh;
-    std::set<std::pair<bool, size_t> > set_property;
-    OGS5::CPARDomainGroup dg(*msh, set_property);
 }
 #endif
 

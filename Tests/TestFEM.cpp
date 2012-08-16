@@ -42,6 +42,9 @@ using namespace DiscreteLib;
 
 typedef MathLib::Matrix<double> GlobalMatrixType;
 typedef std::vector<double> GlobalVectorType;
+typedef FemLib::FemNodalFunctionScalar<DiscreteLib::DiscreteSystem>::type MyNodalFunctionScalar;
+typedef FemLib::FemNodalFunctionVector<DiscreteLib::DiscreteSystem>::type MyNodalFunctionVector;
+typedef FemLib::FEMIntegrationPointFunctionVector<DiscreteLib::DiscreteSystem>::type MyIntegrationPointFunctionVector;
 
 //static void outputLinearEQS(MathLib::Matrix<double> &globalA, std::vector<double> &globalRHS)
 //{
@@ -116,8 +119,9 @@ TEST(FEM, ExtrapolateAverage1)
     GWFemTest::calculateHead(gw);
     GWFemTest::calculateVelocity(gw);
 
-    FemNodalFunctionVector nodal_vel(*gw.dis, PolynomialOrder::Linear);
-    FemExtrapolationAverage<NumLib::LocalVector> extrapo;
+    MyNodalFunctionVector nodal_vel;
+    nodal_vel.initialize(*gw.dis, PolynomialOrder::Linear);
+    FemExtrapolationAverage<DiscreteLib::DiscreteSystem, NumLib::LocalVector> extrapo;
     extrapo.extrapolate(*gw.vel, nodal_vel);
 
     DiscreteLib::IDiscreteVector<NumLib::LocalVector> *v = nodal_vel.getNodalValues();
@@ -160,8 +164,9 @@ TEST(FEM, ExtrapolateAverage2)
     GWFemTest::calculateHead(gw);
     GWFemTest::calculateVelocity(gw);
 
-    FemNodalFunctionVector nodal_vel(*gw.dis, PolynomialOrder::Linear);
-    FemExtrapolationAverage<NumLib::LocalVector> extrapo;
+    MyNodalFunctionVector nodal_vel;
+    nodal_vel.initialize(*gw.dis, PolynomialOrder::Linear);
+    FemExtrapolationAverage<DiscreteLib::DiscreteSystem, NumLib::LocalVector> extrapo;
     extrapo.extrapolate(*gw.vel, nodal_vel);
 
     std::vector<double> exH(9);

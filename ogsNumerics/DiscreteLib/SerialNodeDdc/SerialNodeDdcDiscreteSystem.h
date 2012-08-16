@@ -16,7 +16,7 @@
 
 #include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "DiscreteLib/DDC/DecomposedDomain.h"
-#include "DDCDiscreteVector.h"
+#include "DecomposedVector.h"
 #include "SerialNodeDdcSharedLinearEquation.h"
 #include "SerialNodeDdcDistributedLinearEquation.h"
 
@@ -32,13 +32,27 @@ template <template <typename, typename> class T_EQS>
 class TemplateSerialNodeDdcDiscreteSystem : public IDiscreteSystem
 {
 public:
+    template<typename T_LINEAR_SOLVER, typename T_SPARSITY_BUILDER>
+    struct MyLinearEquation
+    {
+        typedef T_EQS<T_LINEAR_SOLVER, T_SPARSITY_BUILDER> type;
+    };
+    template<typename T>
+    struct MyVector
+    {
+        typedef DecomposedVector<T> type;
+    };
+
     /// \param ddc_global   DDC object
     explicit TemplateSerialNodeDdcDiscreteSystem(DecomposedDomain* ddc_global)
-    : _ddc_global(ddc_global)
+    : _ddc_global(ddc_global), _msh(NULL)
     { };
     
     /// 
     virtual ~TemplateSerialNodeDdcDiscreteSystem() {};
+
+    ///
+    virtual MeshLib::IMesh* getMesh() const { return (MeshLib::IMesh*)_msh; };
 
     /// create a new linear equation
     /// \tparam T_LINEAR_SOLVER     Linear solver class
@@ -46,18 +60,16 @@ public:
     /// \param linear_solver
     /// \param dofManager
     template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
-    IDiscreteLinearEquation* createLinearEquation(T_LINEAR_SOLVER* linear_solver, DofEquationIdTable* dofManager)
+    typename MyLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>::type* createLinearEquation(T_LINEAR_SOLVER* linear_solver, DofEquationIdTable* dofManager)
     {
-        T_EQS<T_LINEAR_SOLVER, T_SPARSITY_BUILDER> *eqs;
-        eqs = T_EQS<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>::createInstance(*this, _ddc_global, linear_solver, dofManager);
-        return eqs;
+        return MyLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>::type::createInstance(*this, _ddc_global, linear_solver, dofManager);
     }
 
     //// create a vector
     /// \tparam T   data type
     /// \param n    vector size
     template<typename T>
-    IDiscreteVector<T>* createVector(const size_t &n) 
+    typename MyVector<T>::type* createVector(const size_t &n)
     {
         std::vector<size_t> list_range_begin;
         for (size_t i=0; i<_ddc_global->getNumberOfSubDomains(); i++) {
@@ -65,8 +77,7 @@ public:
             list_range_begin.push_back(cnt);
         }
 
-        DDCDiscreteVector<T>* v = DDCDiscreteVector<T>::createInstance(*this, n, list_range_begin);
-        return v;
+        return MyVector<T>::type::createInstance(*this, n, list_range_begin);
     };
 
 private:
@@ -74,6 +85,7 @@ private:
 
 private:
     DecomposedDomain* _ddc_global;
+    DecomposedMesh* _msh;
 };
 
 /// \brief Discrete system for node-based decomposition using shared memory

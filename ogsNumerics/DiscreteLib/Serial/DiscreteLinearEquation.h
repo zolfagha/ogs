@@ -21,7 +21,8 @@
 
 #include "DiscreteLib/Core/IDiscreteLinearEquation.h"
 #include "DiscreteLib/Core/IDiscreteLinearEquationAssembler.h"
-#include "DiscreteLib/Utils/SparsityBuilder.h"
+#include "DiscreteLib/Utils/DofEquationIdTable.h"
+#include "DiscreteLib/Utils/SparsityBuilderDummy.h"
 
 #include "AbstractMeshBasedDiscreteLinearEquation.h"
 

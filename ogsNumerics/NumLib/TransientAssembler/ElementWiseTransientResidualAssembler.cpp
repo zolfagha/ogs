@@ -18,7 +18,8 @@
 namespace NumLib
 {
 
-void ElementWiseTransientResidualAssembler::assembly( const MeshLib::IMesh &msh, const DiscreteLib::DofEquationIdTable &dofManager, GlobalVectorType &globalVec)
+//svoid ElementWiseTransientResidualAssembler::assembly( const MeshLib::IMesh &msh, const DiscreteLib::DofEquationIdTable &dofManager, GlobalVectorType &globalVec)
+void ElementWiseTransientResidualAssembler::assembly( const MeshLib::IMesh &msh, GlobalVectorType &globalVec)
 {
     const TimeStep &time = *_timestep;
     LocalVector localVec;
@@ -33,7 +34,7 @@ void ElementWiseTransientResidualAssembler::assembly( const MeshLib::IMesh &msh,
         // get dof map
         e->getNodeIDList(e->getMaximumOrder(), ele_node_ids);
         e->getListOfNumberOfNodesForAllOrders(ele_node_size_order);
-        dofManager.mapEqsID(msh.getID(), ele_node_ids, local_dofmap, DiscreteLib::DofNumberingType::BY_POINT);
+        _dofManager->mapEqsID(msh.getID(), ele_node_ids, local_dofmap, DiscreteLib::DofNumberingType::BY_POINT);
         // previous and current results
         DiscreteLib::getLocalVector(local_dofmap, *_vec_u1, local_u_n1);
         DiscreteLib::getLocalVector(local_dofmap, *_vec_u0, local_u_n);

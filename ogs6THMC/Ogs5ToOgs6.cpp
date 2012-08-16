@@ -19,9 +19,9 @@
 #include "NumLib/Function/TXFunction.h"
 #include "NumLib/TimeStepping/TimeStepFunction.h"
 #include "MaterialLib/Fluid.h"
-#include "SolutionLib/FemProblem/FemDirichletBC.h"
-#include "SolutionLib/FemProblem/FemNeumannBC.h"
-#include "SolutionLib/FemProblem/AbstractFemIVBVProblem.h"
+#include "SolutionLib/Fem/FemDirichletBC.h"
+#include "SolutionLib/Fem/FemNeumannBC.h"
+//#include "SolutionLib/Fem/AbstractFemIVBVProblem.h"
 #include "GeoProcessBuilder.h"
 
 using namespace ogs5;

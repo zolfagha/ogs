@@ -29,14 +29,29 @@ namespace SolutionLib
 {
 
 /**
- * \brief Variable
+ * \brief FEM variable
+ *
+ * - var id and name
+ * - Polynomial order (default: linear)
+ * - IC
+ * - BC1, 2
  */
+template <class T_DIS_SYS>
 class FemVariable
 {
 public:
-    FemVariable(size_t id, const std::string &name, FemLib::PolynomialOrder::type order = FemLib::PolynomialOrder::Linear) : _id(id), _name(name), _order(order)
-    {
+    typedef typename FemLib::FemNodalFunctionScalar<T_DIS_SYS>::type MyNodalFunctionScalar;
 
+    FemVariable(size_t id, const std::string &name, FemLib::PolynomialOrder::type order = FemLib::PolynomialOrder::Linear)
+    : _id(id), _name(name), _order(order), _f_ic(NULL)
+    {
+    }
+
+    ~FemVariable()
+    {
+        BaseLib::releaseObject(_f_ic);
+        BaseLib::releaseObjectsInStdVector(_map_bc1);
+        BaseLib::releaseObjectsInStdVector(_map_bc2);
     }
 
     //----------------------------------------------------------------------
@@ -45,8 +60,8 @@ public:
     FemLib::PolynomialOrder::type getOrder() const {return _order;};
 
     //----------------------------------------------------------------------
-    void setIC(FemLib::FemNodalFunctionScalar* ic) { _f_ic = ic; };
-    FemLib::FemNodalFunctionScalar* getIC() const { return _f_ic; };
+    void setIC(MyNodalFunctionScalar* ic) { _f_ic = ic; };
+    MyNodalFunctionScalar* getIC() const { return _f_ic; };
 
 
     //----------------------------------------------------------------------
@@ -76,7 +91,7 @@ private:
     size_t _id;
     std::string _name;
     FemLib::PolynomialOrder::type _order;
-    FemLib::FemNodalFunctionScalar* _f_ic;
+    MyNodalFunctionScalar* _f_ic;
     std::vector<FemDirichletBC*> _map_bc1;
     std::vector<IFemNeumannBC*> _map_bc2;
 };

@@ -20,9 +20,9 @@
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
 #include "FemLib/Function/FemFunction.h"
-#include "SolutionLib/FemProblem/FemEquation.h"
-#include "SolutionLib/FemProblem/FemIVBVProblem.h"
-#include "SolutionLib/Solution/SingleStepFEM.h"
+#include "SolutionLib/Fem/FemEquation.h"
+#include "SolutionLib/Fem/FemIVBVProblem.h"
+#include "SolutionLib/Fem/SingleStepFEM.h"
 
 #include "Tests/Geo/Equation/FemLinearElasticity.h"
 #include "Tests/Geo/Material/PorousMedia.h"

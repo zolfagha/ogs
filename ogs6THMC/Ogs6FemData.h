@@ -16,14 +16,15 @@
 #include <string>
 
 #include "BaseLib/OrderedMap.h"
+#include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "NumLib/Function/TXFunction.h"
 #include "NumLib/TimeStepping/TimeStepFunction.h"
 #include "MaterialLib/PorousMedia.h"
 #include "MaterialLib/Solid.h"
 #include "MaterialLib/Fluid.h"
 #include "MaterialLib/Compound.h"
-#include "SolutionLib/FemProblem/FemDirichletBC.h"
-#include "SolutionLib/FemProblem/FemNeumannBC.h"
+#include "SolutionLib/Fem/FemDirichletBC.h"
+#include "SolutionLib/Fem/FemNeumannBC.h"
 #include "GeoLib/GEOObjects.h"
 #include "ProcessLib/Process.h"
 #include "OutputController.h"
@@ -59,7 +60,7 @@ public:
     //process
     BaseLib::OrderedMap<std::string, ProcessLib::Process*> list_pcs;
     //discrete system
-    std::vector<DiscreteLib::DiscreteSystem*> list_dis_sys;
+    std::vector<DiscreteLib::IDiscreteSystem*> list_dis_sys;
     //
     ogs6::OutputController outController;
     //

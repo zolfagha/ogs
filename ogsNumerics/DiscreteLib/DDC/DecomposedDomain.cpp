@@ -28,10 +28,19 @@ size_t DecomposedDomain::addSubDomain(SubDomain* sub)
         _n_discrete_pt += sub->getLoalMesh()->getNumberOfElements();
     }
     _n_discrete_pt -= sub->getNumberOfGhosts();
+
+    _n_nodes += sub->getLoalMesh()->getNumberOfNodes();
+    _n_eles += sub->getLoalMesh()->getNumberOfElements();
+    if (_ddc_type==DecompositionType::Node) {
+        _n_nodes -= sub->getNumberOfGhosts();
+    } else {
+        _n_eles -= sub->getNumberOfGhosts();
+    }
+
     return sub->getDomainID();
 }
 
-size_t DecomposedDomain::findDomainID(size_t global_obj_id) const
+size_t DecomposedDomain::findSubDomainID(size_t global_obj_id) const
 {
     for (size_t i=0; i<_list_dom_start_obj.size(); ++i) {
         if (_list_dom_start_obj[i] <= global_obj_id)
