@@ -6,6 +6,7 @@
 
 #include "BaseLib/CodingTools.h"
 #include "DiscreteLib/Core/IDiscreteVector.h"
+#include "DiscreteLib/Core/IDiscreteSystem.h"
 
 namespace DiscreteLib
 {
@@ -17,11 +18,16 @@ template<typename T>
 class DiscreteVector : public IDiscreteVector<T>
 {
 protected:
-    friend class DiscreteSystem;
     DiscreteVector() {};
     explicit DiscreteVector(size_t n) : _data(n) {};
 
 public:
+    static DiscreteVector<T>* createInstance(IDiscreteSystem &sys, size_t n)
+    {
+        DiscreteVector<T>* vec = new DiscreteVector<T>(n);
+        sys.addVector(vec);
+        return vec;
+    }
     virtual ~DiscreteVector() {};
 
     virtual void resize(size_t n) {_data.resize(n);};

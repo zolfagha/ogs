@@ -16,8 +16,8 @@
 #include "BaseLib/BidirectionalMap.h"
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/Serial/DiscreteSystem.h"
-#include "DiscreteLib/LinearEquation/MeshBasedDiscreteLinearEquation.h"
-#include "DiscreteLib/DDC/DDCGlobal.h"
+#include "DiscreteLib/Serial/DiscreteLinearEquation.h"
+#include "DiscreteLib/DDC/DecomposedDomain.h"
 #include "DDCDiscreteVector.h"
 
 namespace DiscreteLib
@@ -26,20 +26,20 @@ namespace DiscreteLib
 template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
 class SerialNodeDdcDistributedLinearEquation : public IDiscreteLinearEquation
 {
-public:
+private:
     //TODO is it necessary to pass instance of linear solvers? passing settings seems to be enough.
-    SerialNodeDdcDistributedLinearEquation(DDCGlobal &ddc_global, T_LINEAR_SOLVER &global_linear_solver, DofEquationIdTable &global_dofManager)
+    SerialNodeDdcDistributedLinearEquation(IDiscreteSystem &sys, DecomposedDomain* ddc_global, T_LINEAR_SOLVER* global_linear_solver, DofEquationIdTable* global_dofManager)
+    : _ddc_global(ddc_global), _global_linear_solver(global_linear_solver), _do_create_eqs(true), _global_dofManager(global_dofManager)
     {
-        _ddc_global = &ddc_global;
-        size_t mesh_id = ddc_global.getID();
-        for (size_t i=0; i<ddc_global.getNumberOfSubDomains(); i++) {
-            DDCSubDomain* dom = ddc_global.getSubDomain(i);
+        size_t mesh_id = ddc_global->getID();
+        for (size_t i=0; i<ddc_global->getNumberOfSubDomains(); i++) {
+            SubDomain* dom = ddc_global->getSubDomain(i);
             MeshLib::IMesh* local_msh = dom->getLoalMesh();
             // create local linear solver
             T_LINEAR_SOLVER* local_solver = new T_LINEAR_SOLVER; //TODO option
             // create local DoFmap
             DofEquationIdTable *local_dofManager = new DofEquationIdTable();
-            for (size_t j=0; j<global_dofManager.getNumberOfVariables(); j++) {
+            for (size_t j=0; j<global_dofManager->getNumberOfVariables(); j++) {
                 local_dofManager->addVariableDoFs(mesh_id, 0, local_msh->getNumberOfNodes());
             }
             if (dom->getGhostList()!=0) {
@@ -49,12 +49,18 @@ public:
             }
             local_dofManager->construct(DofNumberingType::BY_POINT);
             // create local EQS
-            _list_local_eq.push_back(new SerialDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*dom->getLoalMesh(), *local_solver, *local_dofManager));
+            _list_local_eq.push_back(DiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>::createInstance(sys, dom->getLoalMesh(), local_solver, local_dofManager));
         }
-        _do_create_eqs = true;
-        _global_linear_solver = &global_linear_solver;
-        _global_dofManager = &global_dofManager;
     };
+
+public:
+    static SerialNodeDdcDistributedLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>* createInstance(IDiscreteSystem &sys, DecomposedDomain* ddc_global, T_LINEAR_SOLVER* global_linear_solver, DofEquationIdTable* global_dofManager)
+    {
+        SerialNodeDdcDistributedLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>* eqs;
+        eqs = new SerialNodeDdcDistributedLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(sys, ddc_global, global_linear_solver, global_dofManager);
+        sys.addLinearEquation(eqs);
+        return eqs;
+    }
 
     virtual ~SerialNodeDdcDistributedLinearEquation() 
     {
@@ -115,9 +121,9 @@ public:
         // merge local eqs into a global eqs
         MathLib::ILinearEquations* global_solver = _global_linear_solver;
         for (size_t i=0; i<_list_local_eq.size(); i++) {
-            DDCSubDomain* dom = _ddc_global->getSubDomain(i);
-            IDDCGlobaLocalMapping* pt_id_mapping = dom->getGlobalLocalIdMap();
-            SerialDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>* local_eqs = _list_local_eq[i];
+            SubDomain* dom = _ddc_global->getSubDomain(i);
+            IGlobaLocalMappingTable* pt_id_mapping = dom->getGlobalLocalIdMap();
+            DiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>* local_eqs = _list_local_eq[i];
             DofEquationIdTable* local_dofTable = local_eqs->getDofMapManger();
             MathLib::ILinearEquations* local_solver = local_eqs->getLinearSolver();
             //local_solver->printout();
@@ -201,8 +207,8 @@ public:
     }
 
 private:
-    DDCGlobal* _ddc_global;
-    std::vector<SerialDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>*> _list_local_eq;
+    DecomposedDomain* _ddc_global;
+    std::vector<DiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>*> _list_local_eq;
     T_LINEAR_SOLVER* _global_linear_solver;
     bool _do_create_eqs;
     DofEquationIdTable* _global_dofManager;

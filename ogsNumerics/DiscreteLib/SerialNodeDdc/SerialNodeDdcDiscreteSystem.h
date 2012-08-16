@@ -15,7 +15,7 @@
 #include <vector>
 
 #include "DiscreteLib/Core/IDiscreteSystem.h"
-#include "DiscreteLib/DDC/DDCGlobal.h"
+#include "DiscreteLib/DDC/DecomposedDomain.h"
 #include "DDCDiscreteVector.h"
 #include "SerialNodeDdcSharedLinearEquation.h"
 #include "SerialNodeDdcDistributedLinearEquation.h"
@@ -33,8 +33,8 @@ class TemplateSerialNodeDdcDiscreteSystem : public IDiscreteSystem
 {
 public:
     /// \param ddc_global   DDC object
-    explicit TemplateSerialNodeDdcDiscreteSystem(DDCGlobal &ddc_global)
-    : _ddc_global(&ddc_global)
+    explicit TemplateSerialNodeDdcDiscreteSystem(DecomposedDomain* ddc_global)
+    : _ddc_global(ddc_global)
     { };
     
     /// 
@@ -46,10 +46,10 @@ public:
     /// \param linear_solver
     /// \param dofManager
     template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
-    IDiscreteLinearEquation* createLinearEquation(T_LINEAR_SOLVER &linear_solver, DofEquationIdTable &dofManager)
+    IDiscreteLinearEquation* createLinearEquation(T_LINEAR_SOLVER* linear_solver, DofEquationIdTable* dofManager)
     {
-        T_EQS<T_LINEAR_SOLVER, T_SPARSITY_BUILDER> *eqs = new T_EQS<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_ddc_global, linear_solver, dofManager);
-        _data_container.addLinearEquation(eqs);
+        T_EQS<T_LINEAR_SOLVER, T_SPARSITY_BUILDER> *eqs;
+        eqs = T_EQS<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>::createInstance(*this, _ddc_global, linear_solver, dofManager);
         return eqs;
     }
 
@@ -65,8 +65,7 @@ public:
             list_range_begin.push_back(cnt);
         }
 
-        DDCDiscreteVector<T>* v = new DDCDiscreteVector<T>(n, list_range_begin);
-        _data_container.addVector(v);
+        DDCDiscreteVector<T>* v = DDCDiscreteVector<T>::createInstance(*this, n, list_range_begin);
         return v;
     };
 
@@ -74,8 +73,7 @@ private:
     DISALLOW_COPY_AND_ASSIGN(TemplateSerialNodeDdcDiscreteSystem);
 
 private:
-    DDCGlobal* _ddc_global;
-    DiscreteDataContainer _data_container;
+    DecomposedDomain* _ddc_global;
 };
 
 /// \brief Discrete system for node-based decomposition using shared memory

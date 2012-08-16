@@ -40,19 +40,25 @@ namespace DiscreteLib
 template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER=SparsityBuilderDummy>
 class DiscreteLinearEquation : public AbstractMeshBasedDiscreteLinearEquation
 {
-protected:
-    friend class DiscreteSystem;
-    
+private:
     /// constructor
     /// \param msh
     /// \param linear_solver
     /// \param dofManager
-    DiscreteLinearEquation(MeshLib::IMesh &msh, T_LINEAR_SOLVER &linear_solver, DofEquationIdTable &dofManager) 
-        : AbstractMeshBasedDiscreteLinearEquation(msh, dofManager), _eqs(&linear_solver), _do_create_eqs(true)
+    DiscreteLinearEquation(MeshLib::IMesh* msh, T_LINEAR_SOLVER* linear_solver, DofEquationIdTable* dofManager)
+        : AbstractMeshBasedDiscreteLinearEquation(msh, dofManager), _eqs(linear_solver), _do_create_eqs(true)
     {
     };
 
 public:
+    static DiscreteLinearEquation<T_LINEAR_SOLVER,T_SPARSITY_BUILDER>* createInstance(IDiscreteSystem &dis_sys, MeshLib::IMesh* msh, T_LINEAR_SOLVER* linear_solver, DofEquationIdTable* dofManager)
+    {
+        DiscreteLinearEquation<T_LINEAR_SOLVER,T_SPARSITY_BUILDER> *eqs;
+        eqs = new DiscreteLinearEquation<T_LINEAR_SOLVER,T_SPARSITY_BUILDER>(msh, linear_solver, dofManager);
+        dis_sys.addLinearEquation(eqs);
+        return eqs;
+    }
+
     /// initialize
     virtual void initialize()
     {

@@ -36,8 +36,8 @@ class AbstractMeshBasedDiscreteLinearEquation : public IDiscreteLinearEquation
 public:
     /// \param  msh
     /// \param  dofManager
-    AbstractMeshBasedDiscreteLinearEquation(MeshLib::IMesh &msh, DofEquationIdTable &dofManager)
-    : _msh(&msh), _dofManager(&dofManager), _sparsity(0)
+    AbstractMeshBasedDiscreteLinearEquation(MeshLib::IMesh* msh, DofEquationIdTable* dofManager)
+    : _msh(msh), _dofManager(dofManager), _sparsity(0)
     {
     }
 

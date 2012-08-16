@@ -26,7 +26,7 @@ namespace DiscreteLib
 template<typename T>
 class DDCDiscreteVector : public IDiscreteVector<T>
 {
-public:
+private:
     /// @param n_global the size of vector
     /// @param n_divide the number of local vectors
     DDCDiscreteVector(size_t n_global, std::vector<size_t> &list_range_start)
@@ -39,6 +39,14 @@ public:
             _local_v[i] = new DDCLocalDiscreteVector<T>(i, _global_n, i_begin, i_end);
         }
     };
+
+public:
+    static DDCDiscreteVector<T>* createInstance(IDiscreteSystem &sys, size_t n_global, std::vector<size_t> &list_range_start)
+    {
+        DDCDiscreteVector<T>* v = new DDCDiscreteVector<T>(n_global, list_range_start);
+        sys.addVector(v);
+        return v;
+    }
 
     /// destructor
     virtual ~DDCDiscreteVector() 

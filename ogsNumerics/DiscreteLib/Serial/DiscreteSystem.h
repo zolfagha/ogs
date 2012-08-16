@@ -16,7 +16,6 @@
 
 #include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "DiscreteLib/Core/IDiscreteLinearEquation.h"
-#include "DiscreteLib/Utils/DiscreteDataContainer.h"
 
 #include "DiscreteVector.h"
 #include "DiscreteLinearEquation.h"
@@ -55,21 +54,11 @@ public:
     /// @param linear_solver         Linear solver
     /// @param dofManager            Equation index table
     template <class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
-    DiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>* createLinearEquation(T_LINEAR_SOLVER &linear_solver, DofEquationIdTable &dofManager)
+    DiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>* createLinearEquation(T_LINEAR_SOLVER* linear_solver, DofEquationIdTable* dofManager)
     {
         DiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>* eq;
-        eq = new DiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*_msh, linear_solver, dofManager);
-        _data.addLinearEquation(eq);
+        eq = DiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>::createInstance(*this, _msh, linear_solver, dofManager);
         return eq;
-    }
-
-    /// delete this linear equation object
-    void deleteLinearEquation(IDiscreteLinearEquation* eqs)
-    {
-        if (eqs!=0) {
-            _data.eraseLinearEquation(eqs);
-            delete eqs;
-        }
     }
 
     /// create a new vector
@@ -78,20 +67,8 @@ public:
     template<typename T>
     DiscreteVector<T>* createVector(const size_t n)
     {
-        DiscreteVector<T>* v = new DiscreteVector<T>(n);
-        _data.addVector(v);
+        DiscreteVector<T>* v = DiscreteVector<T>::createInstance(*this, n);
         return v;
-    };
-
-    /// delete this vector object
-    /// @param n    vector length
-    /// @return vector object
-    void deleteVector(IDiscreteObject* v)
-    {
-        if (v!=0) {
-            _data.eraseVector(v);
-            delete v;
-        }
     };
 
 private:
@@ -99,7 +76,6 @@ private:
 
 protected:
     MeshLib::IMesh* _msh;
-    DiscreteDataContainer _data;
 };
 
 } //end
