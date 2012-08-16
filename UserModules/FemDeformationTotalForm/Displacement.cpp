@@ -124,7 +124,7 @@ bool FunctionDisplacement::initialize(const BaseLib::Options &option)
     return true;
 }
 
-void FunctionDisplacement::updateOutputParameter(const NumLib::TimeStep &time)
+void FunctionDisplacement::updateOutputParameter(const NumLib::TimeStep &/*time*/)
 {
     for (size_t i=0; i<_displacement->getNumberOfNodes(); i++) {
         _displacement->getValue(i)(0) = _solution->getCurrentSolution(0)->getValue(i);
@@ -135,7 +135,7 @@ void FunctionDisplacement::updateOutputParameter(const NumLib::TimeStep &time)
     //calculateStressStrain();
 }
 
-void FunctionDisplacement::output(const NumLib::TimeStep &time)
+void FunctionDisplacement::output(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();

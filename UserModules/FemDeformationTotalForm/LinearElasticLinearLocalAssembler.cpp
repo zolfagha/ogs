@@ -26,7 +26,7 @@ void FemLinearElasticLinearLocalAssembler::assembly(const NumLib::TimeStep &/*ti
     FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
     size_t mat_id = e.getGroupID();
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    MaterialLib::PorousMedia* pm = femData->list_pm[mat_id];
+    //MaterialLib::PorousMedia* pm = femData->list_pm[mat_id];
     MaterialLib::Solid *solidphase = femData->list_solid[mat_id];
 
     const size_t dim = e.getDimension();
