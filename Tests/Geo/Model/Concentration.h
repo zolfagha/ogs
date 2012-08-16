@@ -15,6 +15,7 @@
 #include "NumLib/Function/Function.h"
 #include "MathLib/LinAlg/VectorNorms.h"
 #include "GeoLib/Rectangle.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "FemLib/Function/FemFunction.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
@@ -31,13 +32,14 @@ namespace Geo
 {
 
 typedef TemplateFemEquation<
+        DiscreteLib::DiscreteSystem,
         Geo::MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler>,
         Geo::MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler>,
         Geo::MassTransportJacobianLocalAssembler
         >
         MassFemEquation;
 
-typedef FemIVBVProblem< MassFemEquation > MassFemProblem;
+typedef FemIVBVProblem< DiscreteLib::DiscreteSystem, MassFemEquation > MassFemProblem;
 
 
 template <

@@ -33,7 +33,9 @@ class FunctionVelocity
     enum In { Head=0 };
     enum Out { Velocity=0 };
 public:
-
+    typedef FemLib::FEMIntegrationPointFunctionVector<DiscreteLib::DiscreteSystem>::type MyIntegrationPointFunctionVector;
+    typedef FemLib::FemNodalFunctionScalar<DiscreteLib::DiscreteSystem>::type MyNodalFunctionScalar;
+    
     FunctionVelocity() 
     {
         AbstractTransientMonolithicSystem::resizeInputParameter(1);
@@ -44,15 +46,16 @@ public:
     {
         _dis = &dis;
         _K = pm.hydraulic_conductivity;
-        _vel = new FemLib::FEMIntegrationPointFunctionVector(dis);
+        _vel = new MyIntegrationPointFunctionVector();
+        _vel->initialize(&dis);
         //this->setOutput(Velocity, _vel);
     }
 
     int solveTimeStep(const TimeStep &/*time*/)
     {
         const MeshLib::IMesh *msh = _dis->getMesh();
-        FemLib::FemNodalFunctionScalar *head = (FemLib::FemNodalFunctionScalar*)getInput(Head);
-        FemLib::FEMIntegrationPointFunctionVector *vel = _vel;;
+        MyNodalFunctionScalar *head = (MyNodalFunctionScalar*)getInput(Head);
+        MyIntegrationPointFunctionVector *vel = _vel;;
 
         FemLib::LagrangianFeObjectContainer* feObjects = head->getFeObjectContainer();
         //calculate vel (vel=f(h))
@@ -122,7 +125,7 @@ public:
 
 private:
     DiscreteLib::DiscreteSystem* _dis;
-    FemLib::FEMIntegrationPointFunctionVector* _vel;
+    MyIntegrationPointFunctionVector* _vel;
     NumLib::ITXFunction* _K;
 
     DISALLOW_COPY_AND_ASSIGN(FunctionVelocity);

@@ -16,6 +16,7 @@
 
 #include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "DiscreteLib/DDC/DecomposedDomain.h"
+#include "DiscreteLib/DDC/DecomposedMesh.h"
 #include "DecomposedVector.h"
 #include "SerialNodeDdcSharedLinearEquation.h"
 #include "SerialNodeDdcDistributedLinearEquation.h"

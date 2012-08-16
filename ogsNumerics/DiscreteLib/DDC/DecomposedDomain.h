@@ -67,6 +67,8 @@ public:
     size_t getNumberOfNodes() const {return _n_nodes;};
 
     size_t getNumberOfElements() const {return _n_eles;};
+    
+    size_t getID() const {return _id;};
 
 private:
     DISALLOW_COPY_AND_ASSIGN(DecomposedDomain);
@@ -78,6 +80,7 @@ private:
     size_t _n_discrete_pt;
     size_t _n_nodes;
     size_t _n_eles;
+    size_t _id;
 };
 
 } //end

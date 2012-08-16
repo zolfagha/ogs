@@ -14,6 +14,7 @@
 
 #include "MathLib/LinAlg/VectorNorms.h"
 #include "GeoLib/Rectangle.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "FemLib/Function/FemFunction.h"
 #include "NumLib/Function/Function.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
@@ -38,13 +39,14 @@ namespace Geo
 {
 
 typedef TemplateFemEquation<
+        DiscreteSystem,
         Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerEQSLocalAssembler>,
         Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerResidualLocalAssembler>,
         Geo::GroundwaterFlowJacobianLocalAssembler
         >
         GWFemEquation;
 
-typedef FemIVBVProblem< GWFemEquation > GWFemProblem;
+typedef FemIVBVProblem< DiscreteSystem, GWFemEquation > GWFemProblem;
 
 
 

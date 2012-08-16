@@ -14,6 +14,7 @@
 
 #include "MathLib/LinAlg/VectorNorms.h"
 #include "GeoLib/Rectangle.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "NumLib/Function/Function.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
@@ -40,15 +41,17 @@ namespace Geo
 {
 
 typedef TemplateFemEquation<
+        DiscreteSystem,
         Geo::FemLinearElasticLinearLocalAssembler,
         Geo::FemLinearElasticResidualLocalAssembler,
         Geo::FemLinearElasticJacobianLocalAssembler
         >
         FemLinearElasticEquation;
 
-typedef FemIVBVProblem< FemLinearElasticEquation > FemLinearElasticProblem;
+typedef FemIVBVProblem< DiscreteSystem,FemLinearElasticEquation > FemLinearElasticProblem;
 
-
+typedef FemLib::FEMIntegrationPointFunctionVector<DiscreteSystem>::type MyIntegrationPointFunctionVector;
+typedef FemLib::FemNodalFunctionScalar<DiscreteSystem>::type MyNodalFunctionScalar;
 
 template <
     class T_LINEAR_SOLVER
@@ -81,17 +84,19 @@ public:
         this->setOutput(u_x, problem_u->getVariable(0)->getIC());
         this->setOutput(u_y, problem_u->getVariable(1)->getIC());
 
-        _strain = new FemLib::FEMIntegrationPointFunctionVector(*dis);
-        _stress = new FemLib::FEMIntegrationPointFunctionVector(*dis);
+        _strain = new MyIntegrationPointFunctionVector();
+        _strain->initialize(dis);
+        _stress = new MyIntegrationPointFunctionVector();
+        _stress->initialize(dis);
     }
 
     void calculateStressStrain()
     {
         const MeshLib::IMesh *msh = _dis->getMesh();
-        FemLib::FemNodalFunctionScalar *ux = _sol_u->getCurrentSolution(0);
-        FemLib::FemNodalFunctionScalar *uy = _sol_u->getCurrentSolution(1);
-        FemLib::FEMIntegrationPointFunctionVector* strain = _strain;
-        FemLib::FEMIntegrationPointFunctionVector* stress = _stress;
+        MyNodalFunctionScalar *ux = _sol_u->getCurrentSolution(0);
+        MyNodalFunctionScalar *uy = _sol_u->getCurrentSolution(1);
+        MyIntegrationPointFunctionVector* strain = _strain;
+        MyIntegrationPointFunctionVector* stress = _stress;
         FemLib::LagrangianFeObjectContainer* feObjects = ux->getFeObjectContainer();
 
         const size_t dim = msh->getDimension();
@@ -192,8 +197,8 @@ private:
     DiscreteSystem* _dis;
     Geo::PorousMedia* _pm;
     LagrangianFeObjectContainer* _feObjects;
-    FemLib::FEMIntegrationPointFunctionVector* _strain;
-    FemLib::FEMIntegrationPointFunctionVector* _stress;
+    MyIntegrationPointFunctionVector* _strain;
+    MyIntegrationPointFunctionVector* _stress;
 
     DISALLOW_COPY_AND_ASSIGN(FunctionDisplacement);
 };

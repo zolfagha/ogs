@@ -99,7 +99,7 @@ public:
     }
 
     /// construct
-    virtual void construct(IDiscreteVectorAssembler<T>& assemler) = 0;
+    virtual void construct(IDiscreteVectorAssembler<T>& assembler) = 0;
 
 };
 

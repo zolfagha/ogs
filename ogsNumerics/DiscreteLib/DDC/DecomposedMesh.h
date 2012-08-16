@@ -14,6 +14,7 @@
 
 #include "MeshLib/Core/IMesh.h"
 #include "DecomposedDomain.h"
+#include "SubDomain.h"
 
 namespace DiscreteLib
 {

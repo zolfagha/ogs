@@ -14,6 +14,7 @@
 
 #include <vector>
 
+#include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/Core/IDiscreteVector.h"
 #include "SubVector.h"
 
@@ -31,8 +32,9 @@ class DecomposedVector : public IDiscreteVector<T>
 private:
     /// @param n_global the size of vector
     /// @param n_divide the number of local vectors
-    DecomposedVector(size_t n_global, std::vector<size_t> &list_range_start)
+    DecomposedVector(MeshLib::IMesh* msh, size_t n_global, std::vector<size_t> &list_range_start)
     {
+        _msh = msh;
         _global_n = n_global;
         _local_v.resize(list_range_start.size());
         for (size_t i=0; i<list_range_start.size(); i++) {
@@ -45,7 +47,7 @@ private:
 public:
     static DecomposedVector<T>* createInstance(IDiscreteSystem &sys, size_t n_global, std::vector<size_t> &list_range_start)
     {
-        DecomposedVector<T>* v = new DecomposedVector<T>(n_global, list_range_start);
+        DecomposedVector<T>* v = new DecomposedVector<T>(sys.getMesh(), n_global, list_range_start);
         sys.addVector(v);
         return v;
     }
@@ -87,6 +89,13 @@ public:
             }
         }
     }
+    
+    /// construct
+    virtual void construct(IDiscreteVectorAssembler<T>& assembler)
+    {
+        assembler.assembly(*_msh, *this);
+    }
+
 
 private:
     /// return a local vector which contain the given element
@@ -116,6 +125,7 @@ private:
     }
 
 private:
+    MeshLib::IMesh* _msh;
     /// vector length
     size_t _global_n;
     /// a list of local vectors

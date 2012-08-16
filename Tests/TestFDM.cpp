@@ -85,8 +85,9 @@ public:
     }
 };
 
+typedef FemNodalFunctionScalar<DiscreteSystem>::type MyFemNodalFunctionScalar;
 typedef TemplateConvergenceCheck<FdmFunctionScalar, FdmLib::NormOfFdmNodalFunction<double> > FdmFunctionConvergenceCheck;
-typedef TemplateConvergenceCheck<FemNodalFunctionScalar, FemLib::NormOfFemNodalFunction<double> > FemFunctionConvergenceCheck;
+typedef TemplateConvergenceCheck<MyFemNodalFunctionScalar, FemLib::NormOfFemNodalFunction<DiscreteSystem,double> > FemFunctionConvergenceCheck;
 
 
 typedef FunctionHead<MathLib::CRSLisSolver> MyFunctionHead;
@@ -121,14 +122,15 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Lin
     Geo::MassFemEquation::LinearAssemblerType* linear_assembler = new Geo::MassFemEquation::LinearAssemblerType(*_feObjects, pm, comp);
     Geo::MassFemEquation::ResidualAssemblerType* r_assembler = new Geo::MassFemEquation::ResidualAssemblerType(*_feObjects, pm, comp);
     Geo::MassFemEquation::JacobianAssemblerType* j_eqs = new Geo::MassFemEquation::JacobianAssemblerType(*_feObjects, pm, comp);
-    Geo::MassFemEquation* eqs = new Geo::MassFemEquation(linear_assembler, r_assembler, j_eqs);
     //IVBV problem
     Geo::MassFemProblem* _problem = new Geo::MassFemProblem(&dis);
-    _problem->setEquation(eqs);
+    Geo::MassFemProblem::EquationType* eqs = _problem->createEquation();
+    eqs->initialize(linear_assembler, r_assembler, j_eqs);
     // var
-    FemVariable* var = _problem->addVariable("concentration");
+    Geo::MassFemProblem::MyVariable* var = _problem->addVariable("concentration");
     //IC
-    FemNodalFunctionScalar* c0 = new FemNodalFunctionScalar(dis, PolynomialOrder::Linear, 0);
+    MyFemNodalFunctionScalar* c0 = new MyFemNodalFunctionScalar();
+    c0->initialize(dis, PolynomialOrder::Linear, 0);
     var->setIC(c0);
     //BC
     NumLib::TXFunctionConstant* f1 = new  NumLib::TXFunctionConstant(1.0);

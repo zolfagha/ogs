@@ -36,6 +36,8 @@ size_t DecomposedDomain::addSubDomain(SubDomain* sub)
     } else {
         _n_eles -= sub->getNumberOfGhosts();
     }
+    
+    _id = sub->getLoalMesh()->getID();
 
     return sub->getDomainID();
 }

@@ -26,6 +26,7 @@ using namespace NumLib;
 
 namespace Geo
 {
+typedef FemLib::FEMIntegrationPointFunctionVector<DiscreteLib::DiscreteSystem>::type MyIntegrationPointFunctionVector;
 
 class FunctionStressStrain
     : public NumLib::AbstractTransientMonolithicSystem
@@ -44,7 +45,8 @@ public:
     {
         _dis = &dis;
         _K = pm.hydraulic_conductivity;
-        _vel = new FemLib::FEMIntegrationPointFunctionVector(dis);
+        _vel = new MyIntegrationPointFunctionVector();
+        _vel->initialize(&dis);
         //this->setOutput(Velocity, _vel);
     }
 
@@ -127,7 +129,7 @@ private:
 
 private:
     DiscreteLib::DiscreteSystem* _dis;
-    FemLib::FEMIntegrationPointFunctionVector* _vel;
+    MyIntegrationPointFunctionVector* _vel;
     NumLib::ITXFunction* _K;
 };
 
