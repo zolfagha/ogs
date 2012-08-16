@@ -12,8 +12,12 @@
 
 #pragma once
 
+#include "DiscreteLib/Utils/DiscreteDataContainer.h"
+
 namespace DiscreteLib
 {
+class IDiscreteLinearEquation;
+class IDiscreteVectorBase;
 
 /**
  * \brief Interface for all kinds of discrete systems
@@ -30,6 +34,38 @@ public:
     
     //IDiscreteLinearEquation* createLinearEquation();
     //IDiscreteVector* createVector();
+
+    void addLinearEquation(IDiscreteLinearEquation *eqs)
+    {
+        _data.addLinearEquation(eqs);
+    }
+
+    void deleteLinearEquation(IDiscreteLinearEquation* eqs)
+    {
+        if (eqs!=0) {
+            _data.eraseLinearEquation(eqs);
+            delete eqs;
+        }
+    }
+
+    void addVector(IDiscreteVectorBase *vec)
+    {
+        _data.addVector(vec);
+    }
+
+    /// delete this vector object
+    /// @param n    vector length
+    /// @return vector object
+    void deleteVector(IDiscreteVectorBase* v)
+    {
+        if (v!=0) {
+            _data.eraseVector(v);
+            delete v;
+        }
+    };
+
+private:
+    DiscreteDataContainer _data;
 };
 
 } //end
