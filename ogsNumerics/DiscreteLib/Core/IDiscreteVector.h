@@ -21,12 +21,18 @@
 namespace DiscreteLib
 {
 
+class IDiscreteVectorBase : public IDiscreteObject
+{
+public:
+    virtual ~IDiscreteVectorBase() {};
+};
+
 /**
  * \brief Interface of vector class
  * 
  */
 template<typename T>
-class IDiscreteVector : public IDiscreteObject
+class IDiscreteVector : public IDiscreteVectorBase
 {
 public:
     typedef IDiscreteVector<T> MyVectorType;
