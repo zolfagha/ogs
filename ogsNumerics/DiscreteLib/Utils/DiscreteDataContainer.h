@@ -16,7 +16,7 @@
 
 #include "BaseLib/CodingTools.h"
 
-#include "DiscreteLib/Core/IDiscreteObject.h"
+#include "DiscreteLib/Core/IDiscreteVector.h"
 #include "DiscreteLib/Core/IDiscreteLinearEquation.h"
 
 namespace DiscreteLib
@@ -35,7 +35,7 @@ public:
         BaseLib::releaseObjectsInStdVector(_vec_linear_sys);
     }
 
-    size_t addVector(IDiscreteObject* v)
+    size_t addVector(IDiscreteVectorBase* v)
     {
         _vec_vectors.push_back(v);
         v->setObjectID(_vec_vectors.size()-1);
@@ -83,7 +83,7 @@ private:
     DISALLOW_COPY_AND_ASSIGN(DiscreteDataContainer);
 
     std::vector<IDiscreteLinearEquation*> _vec_linear_sys;
-    std::vector<IDiscreteObject*> _vec_vectors;
+    std::vector<IDiscreteVectorBase*> _vec_vectors;
 };
 
 } //end
