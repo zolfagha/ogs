@@ -14,6 +14,7 @@
 
 #include <vector>
 #include <set>
+#include <cstddef>
 
 namespace MathLib 
 {
