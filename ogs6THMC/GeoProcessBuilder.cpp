@@ -26,5 +26,5 @@ ProcessLib::AbstractProcessBuilder* GeoProcessBuilder::getInstance()
 
 GeoProcessBuilder::GeoProcessBuilder()
 {
-#include "UserModules/ProcessReg.txt"
+#include "UserModules/ProcessReg.h"
 }

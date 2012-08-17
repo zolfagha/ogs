@@ -31,7 +31,6 @@
 #include "NumLib/TransientCoupling/TransientCouplingStructureBuilder.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "FemIO/ogs5/Ogs5FemIO.h"
-#include "DiscreteLib/Serial/DiscreteSystem.h"
 
 // this module
 #include "SimulationInfo.h"
@@ -52,8 +51,6 @@ static logog::LogFile *logog_file;
 static FormatterCustom *custom_format;
 static bool isOgsInitCalled = false;
 static bool isOgsExitCalled = false;
-
-typedef DiscreteLib::DiscreteSystem MyDiscreteSystem;
 ////////////////////////////////////////////////////////////////////////////////
 
 void ogsInit(int argc, char* argv[])
@@ -208,19 +205,18 @@ int THMCSimulator::execute()
     //INFO("Setting up simulation...");
 
     // construct mesh
-    INFO("->Constructing meshes... %d mesh loaded", ogs6fem->list_dis_sys.size());
-    for (size_t i=0; i<ogs6fem->list_dis_sys.size(); i++) {
-        MeshLib::IMesh* msh = ogs6fem->list_dis_sys[i]->getMesh();
+    INFO("->Constructing meshes... %d mesh loaded", ogs6fem->list_mesh.size());
+    for (size_t i=0; i<ogs6fem->list_mesh.size(); i++) {
+        MeshLib::IMesh* msh = ogs6fem->list_mesh[i];
         msh->constructGeometricProperty();
         INFO("->mesh id %d: dim=%d, nodes=%d, elements=%d", i, msh->getDimension(), msh->getNumberOfNodes(), msh->getNumberOfElements());
     }
 
     // construct coupling system
     INFO("->Generating coupling system...");
-    MyConvergenceCheckerFactory<MyDiscreteSystem> checkFac;
     NumLib::TransientCoulplingStrucutreBuilder cpl_builder;
     if (_cpl_system!=NULL) delete _cpl_system;
-    _cpl_system = cpl_builder.build(&op, *GeoProcessBuilder::getInstance(), checkFac);
+    _cpl_system = cpl_builder.build(&op, *GeoProcessBuilder::getInstance());
 
     if (!_cpl_system->check()) {
         ERR("***Error while checking coupled system");
