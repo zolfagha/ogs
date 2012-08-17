@@ -32,23 +32,43 @@ class DecomposedVector : public IDiscreteVector<T>
 private:
     /// @param n_global the size of vector
     /// @param n_divide the number of local vectors
-    DecomposedVector(MeshLib::IMesh* msh, size_t n_global, std::vector<size_t> &list_range_start)
+    DecomposedVector(IDiscreteSystem* sys, MeshLib::IMesh* msh, size_t n_global, std::vector<size_t> &list_range_start)
     {
+        _sys = sys;
         _msh = msh;
         _global_n = n_global;
         _local_v.resize(list_range_start.size());
         for (size_t i=0; i<list_range_start.size(); i++) {
             size_t i_begin = list_range_start[i];
             size_t i_end = i+1<list_range_start.size() ? list_range_start[i+1] : n_global;
-            _local_v[i] = new SubVector<T>(i, _global_n, i_begin, i_end);
+            _local_v[i] = new SubVector<T>(sys, i, _global_n, i_begin, i_end);
         }
     };
+
+    DecomposedVector(IDiscreteSystem* sys, MeshLib::IMesh* msh, size_t n_global, const std::vector<SubVector<T>*> &local_v)
+    {
+        _sys = sys;
+        _msh = msh;
+        _global_n = n_global;
+        _local_v.resize(local_v.size());
+        for (size_t i=0; i<local_v.size(); i++) {
+            _local_v[i] = local_v[i];
+        }
+    };
+
 
 public:
     static DecomposedVector<T>* createInstance(IDiscreteSystem &sys, size_t n_global, std::vector<size_t> &list_range_start)
     {
-        DecomposedVector<T>* v = new DecomposedVector<T>(sys.getMesh(), n_global, list_range_start);
+        DecomposedVector<T>* v = new DecomposedVector<T>(&sys, sys.getMesh(), n_global, list_range_start);
         sys.addVector(v);
+        return v;
+    }
+
+    virtual DecomposedVector<T>* clone() const
+    {
+        DecomposedVector<T>* v = new DecomposedVector<T>((IDiscreteSystem*)_sys, _sys->getMesh(), _global_n, _local_v);
+        _sys->addVector(v);
         return v;
     }
 
@@ -125,6 +145,7 @@ private:
     }
 
 private:
+    IDiscreteSystem* _sys;
     MeshLib::IMesh* _msh;
     /// vector length
     size_t _global_n;

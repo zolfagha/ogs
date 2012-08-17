@@ -28,7 +28,8 @@ class SubVector : public DiscreteVector<T>
      /// @param n_global    size of the global vector 
      /// @param i_begin     global index starting this local vector
      /// @param i_end       global index ending this local vector + 1 
-    SubVector(size_t local_id, size_t n_global, size_t i_begin, size_t i_end) : DiscreteVector<T>(i_end - i_begin)
+    SubVector(IDiscreteSystem *sys, size_t local_id, size_t n_global, size_t i_begin, size_t i_end)
+    : DiscreteVector<T>(i_end - i_begin, sys)
     {
         _local_id = local_id;
         _global_n = n_global;

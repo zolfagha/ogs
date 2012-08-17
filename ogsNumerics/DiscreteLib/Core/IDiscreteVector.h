@@ -45,6 +45,8 @@ public:
     
     virtual ~IDiscreteVector() {};
 
+    virtual MyVectorType* clone() const = 0;
+
     /// return vector size
     virtual size_t size() const = 0;
     /// return a start index of the active data range 

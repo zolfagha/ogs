@@ -23,8 +23,8 @@ class SubDomain;
 class SparsityBuilderFromNodeConnectivity
 {
 public:
-    SparsityBuilderFromNodeConnectivity(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse);
-    SparsityBuilderFromNodeConnectivity(SubDomain &ddc_dom, MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse);
+    SparsityBuilderFromNodeConnectivity(const MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse);
+    SparsityBuilderFromNodeConnectivity(SubDomain &ddc_dom, const MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse);
 };
 
 }

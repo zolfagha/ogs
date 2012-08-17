@@ -20,18 +20,25 @@ template<typename T>
 class DiscreteVector : public IDiscreteVector<T>
 {
 protected:
-    explicit DiscreteVector(MeshLib::IMesh* msh) : _data(0), _msh(msh) {};
-    explicit DiscreteVector(size_t n) : _data(n), _msh(0) {};
-    DiscreteVector(MeshLib::IMesh* msh, size_t n) : _data(n), _msh(msh) {};
+    explicit DiscreteVector(MeshLib::IMesh* msh) : _data(0), _msh(msh), _sys(0) {};
+    explicit DiscreteVector(size_t n, IDiscreteSystem* sys) : _data(n), _msh(sys->getMesh()), _sys(sys) {};
+    DiscreteVector(MeshLib::IMesh* msh, size_t n) : _data(n), _msh(msh), _sys(0) {};
 
 public:
     static DiscreteVector<T>* createInstance(IDiscreteSystem &sys, size_t n)
     {
-        DiscreteVector<T>* vec = new DiscreteVector<T>(n);
+        DiscreteVector<T>* vec = new DiscreteVector<T>(n, &sys);
         sys.addVector(vec);
         return vec;
     }
     virtual ~DiscreteVector() {};
+
+    virtual DiscreteVector<T>* clone() const
+    {
+        DiscreteVector<T>* vec = DiscreteVector<T>::createInstance(*_sys, _data.size());
+        *vec = (*this);
+        return vec;
+    }
 
     virtual void resize(size_t n) {_data.resize(n);};
     virtual size_t size() const {return _data.size();};
@@ -78,6 +85,7 @@ public:
 protected:
     std::vector<T> _data;
     MeshLib::IMesh* _msh;
+    IDiscreteSystem* _sys;
 };
 
 } // end

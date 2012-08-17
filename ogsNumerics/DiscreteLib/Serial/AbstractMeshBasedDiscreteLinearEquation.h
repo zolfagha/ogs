@@ -35,7 +35,7 @@ class AbstractMeshBasedDiscreteLinearEquation : public IDiscreteLinearEquation
 public:
     /// \param  msh
     /// \param  dofManager
-    AbstractMeshBasedDiscreteLinearEquation(MeshLib::IMesh* msh, DofEquationIdTable* dofManager)
+    AbstractMeshBasedDiscreteLinearEquation(const MeshLib::IMesh* msh, DofEquationIdTable* dofManager)
     : _msh(msh), _dofManager(dofManager), _sparsity(0)
     {
     }
@@ -47,7 +47,7 @@ public:
     }
 
     /// return a mesh
-    MeshLib::IMesh* getMesh() const { return _msh; }
+    const MeshLib::IMesh* getMesh() const { return _msh; }
 
     /// return DoF map table
     virtual DofEquationIdTable* getDofMapManger() const { return _dofManager; }
@@ -62,7 +62,7 @@ private:
     DISALLOW_COPY_AND_ASSIGN(AbstractMeshBasedDiscreteLinearEquation);
 
 private:
-    MeshLib::IMesh* _msh;
+    const MeshLib::IMesh* _msh;
     DofEquationIdTable* _dofManager;
     MathLib::RowMajorSparsity* _sparsity;
 };

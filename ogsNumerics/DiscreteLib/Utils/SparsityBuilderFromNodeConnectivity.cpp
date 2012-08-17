@@ -20,15 +20,15 @@
 namespace DiscreteLib
 {
 
-SparsityBuilderFromNodeConnectivity::SparsityBuilderFromNodeConnectivity(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
+SparsityBuilderFromNodeConnectivity::SparsityBuilderFromNodeConnectivity(const MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
 {
-    MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes(&msh);
+    MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes((MeshLib::IMesh*)&msh);
     SparsityTool::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, msh.getID(), dofManager, sparse);
 }
 
-SparsityBuilderFromNodeConnectivity::SparsityBuilderFromNodeConnectivity(SubDomain &ddc_dom, MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
+SparsityBuilderFromNodeConnectivity::SparsityBuilderFromNodeConnectivity(SubDomain &ddc_dom, const MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
 {
-    MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes(&msh);
+    MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes((MeshLib::IMesh*)&msh);
     SparsityTool::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, *ddc_dom.getGlobalLocalIdMap(), msh.getID(), dofManager, sparse);
 }
 

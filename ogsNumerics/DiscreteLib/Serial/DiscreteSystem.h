@@ -15,6 +15,7 @@
 #include "BaseLib/CodingTools.h"
 
 #include "DiscreteLib/Core/IDiscreteSystem.h"
+#include "DiscreteLib/Core/DiscreteEnums.h"
 #include "DiscreteVector.h"
 #include "DiscreteLinearEquation.h"
 
@@ -46,10 +47,14 @@ public:
     {
         typedef DiscreteVector<T> type;
     };
+
+    static DiscreteSystemType::type getSystemType() { return DiscreteSystemType::Serial;};
+
+//    typedef DiscreteSystemType::Serial SystemType;
    
     /// constructor
     /// \param msh  a mesh to represent discrete systems by nodes or elements or edges
-    explicit DiscreteSystem(MeshLib::IMesh& msh) : _msh(&msh) {};
+    explicit DiscreteSystem(const MeshLib::IMesh& msh) : _msh(&msh) {};
 
     ///
     virtual ~DiscreteSystem()
@@ -85,7 +90,7 @@ private:
     DISALLOW_COPY_AND_ASSIGN(DiscreteSystem);
 
 protected:
-    MeshLib::IMesh* _msh;
+    const MeshLib::IMesh* _msh;
 };
 
 } //end
