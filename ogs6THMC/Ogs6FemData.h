@@ -16,7 +16,7 @@
 #include <string>
 
 #include "BaseLib/OrderedMap.h"
-#include "DiscreteLib/Core/IDiscreteSystem.h"
+//#include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "NumLib/Function/TXFunction.h"
 #include "NumLib/TimeStepping/TimeStepFunction.h"
 #include "MaterialLib/PorousMedia.h"
@@ -54,13 +54,13 @@ public:
     std::string geo_unique_name;
     GeoLib::GEOObjects* geo;
     //mesh data
-    //std::vector<MeshLib::IMesh*> list_mesh;
+    std::vector<MeshLib::IMesh*> list_mesh;
     //time group data
     std::vector<NumLib::ITimeStepFunction*> list_tim;
     //process
     BaseLib::OrderedMap<std::string, ProcessLib::Process*> list_pcs;
     //discrete system
-    std::vector<DiscreteLib::IDiscreteSystem*> list_dis_sys;
+    //std::vector<DiscreteLib::IDiscreteSystem*> list_dis_sys;
     //
     ogs6::OutputController outController;
     //
@@ -74,9 +74,9 @@ public:
         BaseLib::releaseObjectsInStdVector(list_pm);
         BaseLib::releaseObjectsInStdVector(list_solid);
         BaseLib::releaseObjectsInStdVector(list_fluid);
-        //BaseLib::releaseObjectsInStdVector(list_mesh);
+        BaseLib::releaseObjectsInStdVector(list_mesh);
         BaseLib::releaseObjectsInStdVector(list_tim);
-        BaseLib::releaseObjectsInStdVector(list_dis_sys);
+        //BaseLib::releaseObjectsInStdVector(list_dis_sys);
         BaseLib::releaseObjectsInStdMap(list_pcs);
     }
 };

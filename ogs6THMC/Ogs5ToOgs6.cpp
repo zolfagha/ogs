@@ -201,7 +201,8 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
     // Mesh
     // -------------------------------------------------------------------------
     for (size_t i=0; i<ogs5fem.list_mesh.size(); i++) {
-        ogs6fem.list_dis_sys.push_back(new DiscreteLib::DiscreteSystem(*ogs5fem.list_mesh[i]));
+        ogs6fem.list_mesh.push_back(ogs5fem.list_mesh[i]);
+//        ogs6fem.list_dis_sys.push_back(new DiscreteLib::DiscreteSystem(*ogs5fem.list_mesh[i]));
     }
 
     // -------------------------------------------------------------------------
@@ -353,7 +354,7 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         opt->addOptionAsArray("MFPValues", rfout->mfp_value_vector);
     }
 
-    ogs6fem.outController.initialize(option, ogs6fem.output_dir, ogs6fem.project_name, ogs6fem.list_dis_sys, *ogs6fem.geo, ogs6fem.geo_unique_name);
+    ogs6fem.outController.initialize(option, ogs6fem.output_dir, ogs6fem.project_name, ogs6fem.list_mesh, *ogs6fem.geo, ogs6fem.geo_unique_name);
 }
 
 };
