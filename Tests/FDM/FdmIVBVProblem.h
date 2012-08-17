@@ -15,8 +15,8 @@
 #include <vector>
 
 #include "BaseLib/CodingTools.h"
-#include "SolutionLib/FemProblem/MeshBasedProblem.h"
-#include "SolutionLib/FemProblem/TimeSteppingProblem.h"
+#include "SolutionLib/Core/MeshBasedProblem.h"
+#include "SolutionLib/Core/TimeSteppingProblem.h"
 #include "FdmFunction.h"
 #include "BoundaryConditions.h"
 

@@ -29,7 +29,7 @@
 #include "MeshLib/Core/IMesh.h"
 
 
-#include "DiscreteLib/EquationId/DofEquationIdTable.h"
+#include "DiscreteLib/Utils/DofEquationIdTable.h"
 
 #include "TestUtil.h"
 

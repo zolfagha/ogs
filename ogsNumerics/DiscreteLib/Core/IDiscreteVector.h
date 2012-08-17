@@ -16,52 +16,74 @@
 #include <cstddef>
 
 #include "BaseLib/CodingTools.h"
-#include "IDiscreteResource.h"
+#include "IDiscreteObject.h"
 
 namespace DiscreteLib
 {
 
+// forward declaration to avoid circular reference
+template <typename T> class IDiscreteVectorAssembler;
 
-template<typename T>
-class IDiscreteVector : public IDiscreteResource
+/**
+ *
+ */
+class IDiscreteVectorBase : public IDiscreteObject
 {
 public:
+    virtual ~IDiscreteVectorBase() {};
+};
+
+/**
+ * \brief Interface of vector class
+ * 
+ */
+template<typename T>
+class IDiscreteVector : public IDiscreteVectorBase
+{
+public:
+    typedef IDiscreteVector<T> MyVectorType;
+    
     virtual ~IDiscreteVector() {};
 
-    //virtual void resize(size_t n) = 0;
-    virtual size_t size() const = 0;
-    virtual double dot(const IDiscreteVector<T> &/*vec*/) {return .0;};
-    virtual double norm1() {return .0;};
-    virtual double norm2() {return .0;};
-    virtual double norm_max() {return .0;};
+    virtual MyVectorType* clone() const = 0;
 
+    /// return vector size
+    virtual size_t size() const = 0;
+    /// return a start index of the active data range 
+    virtual size_t getRangeBegin() const = 0;
+    /// return an end index of the active data range 
+    virtual size_t getRangeEnd() const = 0;
+
+    /// access data
     virtual T& operator[] (size_t idx) = 0;
     virtual const T& operator[] (size_t idx) const = 0;
-
-    virtual IDiscreteVector<T>& operator= (const IDiscreteVector<T> &src)
+    /// vector operation: set data
+    virtual MyVectorType& operator= (const MyVectorType &src)
     {
         for (size_t i=getRangeBegin(); i<getRangeEnd(); i++)
             (*this)[i] = src[i];
         return *this;
     }
-    virtual void operator+= (const IDiscreteVector<T>& v)
+    /// vector operation: add 
+    virtual void operator+= (const MyVectorType& v)
     {
         for (size_t i=getRangeBegin(); i<getRangeEnd(); i++)
             (*this)[i] += v[i];
     }
-    virtual void operator-= (const IDiscreteVector<T>& v)
+    /// vector operation: subtract
+    virtual void operator-= (const MyVectorType& v)
     {
         for (size_t i=getRangeBegin(); i<getRangeEnd(); i++)
             (*this)[i] -= v[i];
     }
-
-    virtual IDiscreteVector<T>& operator= (T v)
+    /// set all values in this vector
+    virtual MyVectorType& operator= (T v)
     {
         for (size_t i=getRangeBegin(); i<getRangeEnd(); i++)
             (*this)[i] = v;
         return *this;
     }
-
+    /// add values to given entries
     virtual void addSubvector(const std::vector<size_t> &pos, T* local_v)
     {
         for (size_t i=0; i<pos.size(); ++i) {
@@ -69,11 +91,18 @@ public:
             (*this)[pos[i]] += local_v[i];
         }
     }
+    /// set values to given entries
+    virtual void setSubvector(const std::vector<size_t> &pos, T v)
+    {
+        for (size_t i=0; i<pos.size(); ++i) {
+            if (pos[i]==BaseLib::index_npos) continue;
+            (*this)[pos[i]] = v;
+        }
+    }
 
-    //virtual typename std::vector<T>::iterator begin() = 0;
-    //virtual typename std::vector<T>::iterator end() = 0;
-    virtual size_t getRangeBegin() const = 0;
-    virtual size_t getRangeEnd() const = 0;
+    /// construct
+    virtual void construct(IDiscreteVectorAssembler<T>& assembler) = 0;
+
 };
 
 } // end

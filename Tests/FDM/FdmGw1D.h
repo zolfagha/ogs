@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "NumLib/Function/DiscreteDataConvergenceCheck.h"
 #include "Tests/Geo/Material/PorousMedia.h"
 #include "IStencilWiseTransientLinearEQSLocalAssembler.h"
 #include "FdmIVBVProblem.h"
@@ -115,6 +116,12 @@ public:
         //_solHead->getCurrentSolution(0)->printout();
     };
 
+    NumLib::DiscreteDataConvergenceCheck _checker;
+    virtual NumLib::IConvergenceCheck* getConvergenceChecker()
+    {
+        return &_checker;
+    }
+
 private:
     GWFdmProblem* _problem;
     SolutionForHead* _solHead;
@@ -191,6 +198,12 @@ public:
         //std::cout << "Velocity=" << std::endl;
         //_vel->printout();
     };
+
+    NumLib::DiscreteDataConvergenceCheck _checker;
+    virtual NumLib::IConvergenceCheck* getConvergenceChecker()
+    {
+        return &_checker;
+    }
 
 private:
     DiscreteLib::DiscreteSystem* _dis;

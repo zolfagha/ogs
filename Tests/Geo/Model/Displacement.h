@@ -14,15 +14,17 @@
 
 #include "MathLib/LinAlg/VectorNorms.h"
 #include "GeoLib/Rectangle.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "NumLib/Function/Function.h"
+#include "NumLib/Function/DiscreteDataConvergenceCheck.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
 #include "FemLib/Function/FemFunction.h"
-#include "SolutionLib/FemProblem/FemEquation.h"
-#include "SolutionLib/FemProblem/FemIVBVProblem.h"
-#include "SolutionLib/Solution/SingleStepFEM.h"
+#include "SolutionLib/Fem/FemEquation.h"
+#include "SolutionLib/Fem/FemIVBVProblem.h"
+#include "SolutionLib/Fem/SingleStepFEM.h"
 
 #include "Tests/Geo/Equation/FemLinearElasticity.h"
 #include "Tests/Geo/Material/PorousMedia.h"
@@ -40,15 +42,17 @@ namespace Geo
 {
 
 typedef TemplateFemEquation<
+        DiscreteSystem,
         Geo::FemLinearElasticLinearLocalAssembler,
         Geo::FemLinearElasticResidualLocalAssembler,
         Geo::FemLinearElasticJacobianLocalAssembler
         >
         FemLinearElasticEquation;
 
-typedef FemIVBVProblem< FemLinearElasticEquation > FemLinearElasticProblem;
+typedef FemIVBVProblem< DiscreteSystem,FemLinearElasticEquation > FemLinearElasticProblem;
 
-
+typedef FemLib::FEMIntegrationPointFunctionVector<DiscreteSystem>::type MyIntegrationPointFunctionVector;
+typedef FemLib::FemNodalFunctionScalar<DiscreteSystem>::type MyNodalFunctionScalar;
 
 template <
     class T_LINEAR_SOLVER
@@ -81,17 +85,19 @@ public:
         this->setOutput(u_x, problem_u->getVariable(0)->getIC());
         this->setOutput(u_y, problem_u->getVariable(1)->getIC());
 
-        _strain = new FemLib::FEMIntegrationPointFunctionVector(*dis);
-        _stress = new FemLib::FEMIntegrationPointFunctionVector(*dis);
+        _strain = new MyIntegrationPointFunctionVector();
+        _strain->initialize(dis);
+        _stress = new MyIntegrationPointFunctionVector();
+        _stress->initialize(dis);
     }
 
     void calculateStressStrain()
     {
         const MeshLib::IMesh *msh = _dis->getMesh();
-        FemLib::FemNodalFunctionScalar *ux = _sol_u->getCurrentSolution(0);
-        FemLib::FemNodalFunctionScalar *uy = _sol_u->getCurrentSolution(1);
-        FemLib::FEMIntegrationPointFunctionVector* strain = _strain;
-        FemLib::FEMIntegrationPointFunctionVector* stress = _stress;
+        MyNodalFunctionScalar *ux = _sol_u->getCurrentSolution(0);
+        MyNodalFunctionScalar *uy = _sol_u->getCurrentSolution(1);
+        MyIntegrationPointFunctionVector* strain = _strain;
+        MyIntegrationPointFunctionVector* stress = _stress;
         FemLib::LagrangianFeObjectContainer* feObjects = ux->getFeObjectContainer();
 
         const size_t dim = msh->getDimension();
@@ -185,6 +191,11 @@ public:
         //std::cout << "Head=" << std::endl;
         //_solHead->getCurrentSolution(0)->printout();
     };
+    NumLib::DiscreteDataConvergenceCheck _checker;
+    virtual NumLib::IConvergenceCheck* getConvergenceChecker()
+    {
+        return &_checker;
+    }
 
 private:
     //FemLinearElasticProblem* _problem;
@@ -192,8 +203,8 @@ private:
     DiscreteSystem* _dis;
     Geo::PorousMedia* _pm;
     LagrangianFeObjectContainer* _feObjects;
-    FemLib::FEMIntegrationPointFunctionVector* _strain;
-    FemLib::FEMIntegrationPointFunctionVector* _stress;
+    MyIntegrationPointFunctionVector* _strain;
+    MyIntegrationPointFunctionVector* _stress;
 
     DISALLOW_COPY_AND_ASSIGN(FunctionDisplacement);
 };

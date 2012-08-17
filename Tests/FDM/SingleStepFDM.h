@@ -17,13 +17,13 @@
 #include "BaseLib/CodingTools.h"
 #include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
 #include "MeshLib/Core/IMesh.h"
-#include "DiscreteLib/Core/DiscreteSystem.h"
-#include "DiscreteLib/LinearEquation/MeshBasedDiscreteLinearEquation.h"
-#include "DiscreteLib/Utils/SparsityBuilder.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteLinearEquation.h"
+#include "DiscreteLib/Utils/SparsityBuilderFromNodeConnectivity.h"
 #include "NumLib/TransientAssembler/ElementWiseTransientLinearEQSAssembler.h"
 #include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
 
-#include "SolutionLib/Solution/AbstractTimeSteppingAlgorithm.h"
+#include "SolutionLib/Core/AbstractTimeSteppingAlgorithm.h"
 
 #include "FdmFunction.h"
 #include "BoundaryConditions.h"
@@ -71,15 +71,15 @@ public:
         _u_n1.resize(n_var, 0);
         _u_n1[0] = (FdmLib::FdmFunctionScalar*) problem->getIC(0)->clone();
         const size_t n_dofs = _dofManager.getTotalNumberOfActiveDoFs();
-        _vec_n0 = dis->createVector<DiscreteLib::DiscreteVector<double> >(n_dofs);
-        _vec_n1 = dis->createVector<DiscreteLib::DiscreteVector<double> >(n_dofs);
-        _vec_n1_0 = dis->createVector<DiscreteLib::DiscreteVector<double> >(n_dofs);
-        _vec_st = dis->createVector<DiscreteLib::DiscreteVector<double> >(n_dofs);
+        _vec_n0 = dis->createVector<double>(n_dofs);
+        _vec_n1 = dis->createVector<double>(n_dofs);
+        _vec_n1_0 = dis->createVector<double>(n_dofs);
+        _vec_st = dis->createVector<double>(n_dofs);
         FdmLib::FdmFunctionScalar *f_ic = (FdmLib::FdmFunctionScalar*) problem->getIC(0); //TODO one var
         *_vec_n1 = *f_ic->getNodalValues();
         // create linear equation systems
         _linear_solver = new LinearSolverType();
-        _linear_eqs = _discrete_system->createLinearEquation<DiscreteLib::TemplateMeshBasedDiscreteLinearEquation, LinearSolverType, DiscreteLib::SparsityBuilderFromNodeConnectivity>(*_linear_solver, _dofManager);
+        _linear_eqs = _discrete_system->createLinearEquation<LinearSolverType, DiscreteLib::SparsityBuilderFromNodeConnectivity>(_linear_solver, &_dofManager);
         // setup functions
         _f_linear = new UserLinearFemFunction(problem, problem->getLinearAssembler(), _linear_eqs);
     };

@@ -19,7 +19,7 @@
 #include "GeoLib/Polyline.h"
 #include "GeoLib/Line.h"
 #include "GeoLib/Rectangle.h"
-#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "NumLib/Function/TXFunction.h"
 #include "NumLib/Coupling/Algorithm/IConvergenceCheck.h"
@@ -28,7 +28,7 @@
 #include "NumLib/TimeStepping/TimeStepFunction.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "NumLib/TransientCoupling/AsyncPartitionedSystem.h"
-#include "FemLib/Function/FemNorm.h"
+#include "NumLib/Function/NormOfDiscreteDataFunction.h"
 
 #include "TestUtil.h"
 
@@ -85,8 +85,9 @@ public:
     }
 };
 
+typedef FemNodalFunctionScalar<DiscreteSystem>::type MyFemNodalFunctionScalar;
 typedef TemplateConvergenceCheck<FdmFunctionScalar, FdmLib::NormOfFdmNodalFunction<double> > FdmFunctionConvergenceCheck;
-typedef TemplateConvergenceCheck<FemNodalFunctionScalar, FemLib::NormOfFemNodalFunction<double> > FemFunctionConvergenceCheck;
+typedef TemplateConvergenceCheck<MyFemNodalFunctionScalar, NumLib::NormOfDiscreteDataFunction<double> > FemFunctionConvergenceCheck;
 
 
 typedef FunctionHead<MathLib::CRSLisSolver> MyFunctionHead;
@@ -121,14 +122,15 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Lin
     Geo::MassFemEquation::LinearAssemblerType* linear_assembler = new Geo::MassFemEquation::LinearAssemblerType(*_feObjects, pm, comp);
     Geo::MassFemEquation::ResidualAssemblerType* r_assembler = new Geo::MassFemEquation::ResidualAssemblerType(*_feObjects, pm, comp);
     Geo::MassFemEquation::JacobianAssemblerType* j_eqs = new Geo::MassFemEquation::JacobianAssemblerType(*_feObjects, pm, comp);
-    Geo::MassFemEquation* eqs = new Geo::MassFemEquation(linear_assembler, r_assembler, j_eqs);
     //IVBV problem
     Geo::MassFemProblem* _problem = new Geo::MassFemProblem(&dis);
-    _problem->setEquation(eqs);
+    Geo::MassFemProblem::EquationType* eqs = _problem->createEquation();
+    eqs->initialize(linear_assembler, r_assembler, j_eqs);
     // var
-    FemVariable* var = _problem->addVariable("concentration");
+    Geo::MassFemProblem::MyVariable* var = _problem->addVariable("concentration");
     //IC
-    FemNodalFunctionScalar* c0 = new FemNodalFunctionScalar(dis, PolynomialOrder::Linear, 0);
+    MyFemNodalFunctionScalar* c0 = new MyFemNodalFunctionScalar();
+    c0->initialize(dis, PolynomialOrder::Linear, 0);
     var->setIC(c0);
     //BC
     NumLib::TXFunctionConstant* f1 = new  NumLib::TXFunctionConstant(1.0);
@@ -244,7 +246,7 @@ TEST(Fdm, fdm_fem1)
         f_c.setOutputParameterName(0, "c");
 
         FdmFunctionConvergenceCheck checker(&dis);
-        SerialStaggeredMethod method(checker, 1e-5, 100);
+        SerialStaggeredMethod method(1e-5, 100);
         AsyncPartitionedSystem apart1;
         apart1.setAlgorithm(method);
         apart1.resizeOutputParameter(3);

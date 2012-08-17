@@ -21,10 +21,11 @@
 #include "MathLib/LinAlg/VectorNorms.h"
 #include "MeshLib/Core/IMesh.h"
 
-#include "DiscreteLib/Core/DiscreteSystem.h"
-#include "DiscreteLib/Vector/DiscreteVector.h"
+//#include "DiscreteLib/Core/IDiscreteSystem.h"
+#include "DiscreteLib/Core/IDiscreteVector.h"
 
 #include "NumLib/Function/TXFunction.h"
+#include "NumLib/Function/ITXDiscreteFunction.h"
 
 #include "FemLib/Core/Element/IFemElement.h"
 #include "FemLib/Tools/FemElementObjectContainer.h"
@@ -44,28 +45,37 @@ namespace FemLib
  *
  * @tparam Tvalue Nodal value type, e.g. double, vector
  */
-template<typename Tvalue>
-class TemplateFEMNodalFunction : public NumLib::ITXFunction
+template<class T_DIS_SYS, typename Tvalue>
+class TemplateFEMNodalFunction : public NumLib::ITXDiscreteFunction<Tvalue>
 {
 public:
-    /// @param dis         Discrete system
-    /// @param order     Polynomial order
-    /// @param v0        initial value
-    TemplateFEMNodalFunction(DiscreteLib::DiscreteSystem &dis, PolynomialOrder::type order, Tvalue v0)
-    {
-        initialize(dis, *dis.getMesh(), order);
-        resetNodalValues(v0);
-    }
+    typedef TemplateFEMNodalFunction<T_DIS_SYS, Tvalue> MyClassType;
+    typedef T_DIS_SYS MyDiscreteSystem;
+    typedef DiscreteLib::IDiscreteVector<Tvalue> MyVector;
 
-    /// @param dis         Discrete system
-    /// @param order Polynomial order
-    TemplateFEMNodalFunction(DiscreteLib::DiscreteSystem &dis, PolynomialOrder::type order)
-    {
-        initialize(dis, *dis.getMesh(), order);
-    }
+    ///
+    TemplateFEMNodalFunction()
+    : _discrete_system(0), _nodal_values(0), _order(PolynomialOrder::Linear), _feObjects(0)
+    {};
+
+//    /// @param dis         Discrete system
+//    /// @param order     Polynomial order
+//    /// @param v0        initial value
+//    TemplateFEMNodalFunction(MyDiscreteSystem &dis, PolynomialOrder::type order, Tvalue v0)
+//    {
+//        initialize(dis, order);
+//        resetNodalValues(v0);
+//    }
+//
+//    /// @param dis         Discrete system
+//    /// @param order Polynomial order
+//    TemplateFEMNodalFunction(MyDiscreteSystem &dis, PolynomialOrder::type order)
+//    {
+//        initialize(dis, order);
+//    }
 
     /// @param org source object for copying
-    TemplateFEMNodalFunction(const TemplateFEMNodalFunction<Tvalue> &org)
+    explicit TemplateFEMNodalFunction(const MyClassType &org)
     {
         assign(org);
     }
@@ -73,7 +83,11 @@ public:
     ///
     virtual ~TemplateFEMNodalFunction()
     {
-        BaseLib::releaseObject(_feObjects);
+        if (_nodal_values != 0) {
+            _discrete_system->deleteVector(_nodal_values);
+            _nodal_values = 0;
+        }
+        //BaseLib::releaseObject(_feObjects);
     }
 
     ///
@@ -85,27 +99,19 @@ public:
 
     /// make a clone of this object
     /// @return MathLib::IFunction*
-    TemplateFEMNodalFunction<Tvalue>* clone() const
+    MyClassType* clone() const
     {
-        TemplateFEMNodalFunction<Tvalue> *obj = new TemplateFEMNodalFunction<Tvalue>(*this);
-        return obj;
+        return new MyClassType(*this);
     };
 
-    /// get the mesh
-    const MeshLib::IMesh* getMesh() const { return _msh; }
-
-    DiscreteLib::DiscreteSystem* getDiscreteSystem() const {return _discrete_system;};
+    /// get this discrete system
+    MyDiscreteSystem* getDiscreteSystem() const {return _discrete_system;};
 
     ///
     size_t getNumberOfNodes() const {return _nodal_values->size();};
 
 
     /// evaluate this function at the given point
-    //virtual void eval(const NumLib::TXPosition x, Tvalue &v) const
-    //{
-    //    v = (*_nodal_values)[x.getId()];
-    //};
-
     virtual void eval(const NumLib::TXPosition x, NumLib::ITXFunction::DataType &v) const
     {
         switch (x.getIdObjectType()) {
@@ -125,18 +131,20 @@ public:
         return (*_nodal_values)[node_id];
     }
 
+    ///
     void setValue(size_t node_id, Tvalue &v)
     {
         (*_nodal_values)[node_id] = v;
     }
 
     /// get nodal values
-    DiscreteLib::IDiscreteVector<Tvalue>* getNodalValues()
+    MyVector* getDiscreteData()
     {
         return _nodal_values;
     }
 
-    const DiscreteLib::IDiscreteVector<Tvalue>* getNodalValues() const
+    ///
+    const MyVector* getDiscreteData() const
     {
         return _nodal_values;
     }
@@ -146,11 +154,10 @@ public:
     {
         for (size_t i=0; i<n; ++i)
             (*_nodal_values)[i+i_start] = x[i];
-        //std::copy(x, x+getNumberOfNodes(), _nodal_values->begin());
     }
 
     /// set nodal values
-    void setNodalValues( const DiscreteLib::IDiscreteVector<Tvalue> &x )
+    void setNodalValues( const MyVector &x )
     {
         *_nodal_values = x;
     }
@@ -158,32 +165,19 @@ public:
     /// reset nodal values with the given value
     void resetNodalValues (Tvalue &v)
     {
-        //std::fill(_nodal_values->begin(), _nodal_values->end(), v);
         *_nodal_values = v;
     }
 
     /// get Finite element object container
-    LagrangianFeObjectContainer* getFeObjectContainer()
+    LagrangianFeObjectContainer* getFeObjectContainer() const
     {
         return _feObjects;
     }
 
-//    ///
-//    double norm_diff(const TemplateFEMNodalFunction<Tvalue> &ref) const
-//    {
-//        const size_t n = _nodal_values->size();
-//        if (n!=ref._nodal_values->size()) {
-//            std::cout << "***Warning in TemplateFEMIntegrationPointFunction::norm_diff(): size of two vectors is not same." << std::endl;
-//            return .0;
-//        }
-//
-//        const DiscreteLib::DiscreteVector<double>* vec_prev = ref.getNodalValues();
-//        const DiscreteLib::DiscreteVector<double>* vec_cur = this->getNodalValues();
-//        DiscreteLib::DiscreteVector<double> vec_diff(vec_prev->size());
-//        vec_diff = *vec_cur;
-//        vec_diff -= *vec_prev;
-//        return MathLib::norm_max(vec_diff, vec_diff.size());
-//    }
+    void setFeObjectContainer(LagrangianFeObjectContainer *fe)
+    {
+        _feObjects = fe;
+    }
 
     /// printout internal data for debugging
     void printout() const
@@ -193,45 +187,216 @@ public:
             std::cout << (*_nodal_values)[i] << " ";
         std::cout << std::endl;
     }
-private:
+
     /// initialize
-    void initialize(DiscreteLib::DiscreteSystem &dis, MeshLib::IMesh &msh, PolynomialOrder::type order)
+    void initialize(MyDiscreteSystem &dis, PolynomialOrder::type order)
     {
         _discrete_system = &dis;
-        _msh = &msh;
         _order = order;
-        size_t nnodes = msh.getNumberOfNodes();
-        _nodal_values = dis.createVector<DiscreteLib::DiscreteVector<Tvalue> >(nnodes);
-        _feObjects = new LagrangianFeObjectContainer(msh);
+        _nodal_values = dis.template createVector<Tvalue>(dis.getMesh()->getNumberOfNodes());
+        _feObjects = 0;
     }
 
-    /// Assign this object from the given object
-    void assign(const TemplateFEMNodalFunction<Tvalue> &org)
+    template <class T_SYS>
+    void initialize(T_SYS &dis, PolynomialOrder::type order, Tvalue v0)
     {
-        initialize(*org._discrete_system, *org._msh, org._order);
-        //std::copy(org._nodal_values->begin(), org._nodal_values->end(), _nodal_values->begin());
+        initialize(dis, order);
+        resetNodalValues(v0);
+    }
+
+private:
+    /// Assign this object from the given object
+    void assign(const MyClassType &org)
+    {
+        initialize(*org._discrete_system, org._order);
         for (size_t i=org._nodal_values->getRangeBegin(); i<org._nodal_values->getRangeEnd(); ++i)
             (*_nodal_values)[i] = (*org._nodal_values)[i];
     }
 
 private:
-    DiscreteLib::DiscreteSystem* _discrete_system;
-    DiscreteLib::IDiscreteVector<Tvalue>* _nodal_values;
-    MeshLib::IMesh* _msh;
+    MyDiscreteSystem* _discrete_system;
+    MyVector* _nodal_values;
     PolynomialOrder::type _order;
     LagrangianFeObjectContainer* _feObjects;
 };
 
-/// evaluate this function at the given point
-template <> 
-inline void TemplateFEMNodalFunction<double>::eval(const NumLib::TXPosition x,  NumLib::ITXFunction::DataType &v) const
+template <class T_DIS_SYS>
+class TemplateFEMNodalFunction<T_DIS_SYS, double> : public NumLib::ITXDiscreteFunction<double>
 {
-    NumLib::ITXFunction::DataType val(1,1);
-    val(0,0) = (*_nodal_values)[x.getId()];
-    v = val;
+public:
+    inline void eval(const NumLib::TXPosition x,  NumLib::ITXFunction::DataType &v) const
+    {
+        NumLib::ITXFunction::DataType val(1,1);
+        val(0,0) = (*_nodal_values)[x.getId()];
+        v = val;
+    };
+
+public:
+    typedef TemplateFEMNodalFunction<T_DIS_SYS, double> MyClassType;
+    typedef T_DIS_SYS MyDiscreteSystem;
+    typedef DiscreteLib::IDiscreteVector<double> MyVector;
+
+    ///
+    TemplateFEMNodalFunction()
+    : _discrete_system(0), _nodal_values(0), _order(PolynomialOrder::Linear), _feObjects(0)
+    {};
+
+    /// @param org source object for copying
+    explicit TemplateFEMNodalFunction(const MyClassType &org)
+    {
+        assign(org);
+    }
+
+    ///
+    virtual ~TemplateFEMNodalFunction()
+    {
+        if (_nodal_values != 0) {
+            _discrete_system->deleteVector(_nodal_values);
+            _nodal_values = 0;
+        }
+        //BaseLib::releaseObject(_feObjects);
+    }
+
+    ///
+    TemplateFEMNodalFunction &operator=(const TemplateFEMNodalFunction &org)
+    {
+        assign(org);
+        return *this;
+    }
+
+    /// make a clone of this object
+    /// @return MathLib::IFunction*
+    MyClassType* clone() const
+    {
+        return new MyClassType(*this);
+    };
+
+    /// get this discrete system
+    MyDiscreteSystem* getDiscreteSystem() const {return _discrete_system;};
+
+    ///
+    size_t getNumberOfNodes() const {return _nodal_values->size();};
+
+
+
+    /// get nodal value
+    double getValue(size_t node_id)
+    {
+        return (*_nodal_values)[node_id];
+    }
+
+    ///
+    void setValue(size_t node_id, double v)
+    {
+        (*_nodal_values)[node_id] = v;
+    }
+
+    /// get nodal values
+    MyVector* getDiscreteData()
+    {
+        return _nodal_values;
+    }
+
+    ///
+    const MyVector* getDiscreteData() const
+    {
+        return _nodal_values;
+    }
+
+    /// set nodal values
+    void setNodalValues( double* x, size_t i_start, size_t n )
+    {
+        for (size_t i=0; i<n; ++i)
+            (*_nodal_values)[i+i_start] = x[i];
+    }
+
+    /// set nodal values
+    void setNodalValues( const MyVector &x )
+    {
+        *_nodal_values = x;
+    }
+
+    /// reset nodal values with the given value
+    void resetNodalValues (double v)
+    {
+        *_nodal_values = v;
+    }
+
+    /// get Finite element object container
+    LagrangianFeObjectContainer* getFeObjectContainer() const
+    {
+        return _feObjects;
+    }
+
+    void setFeObjectContainer(LagrangianFeObjectContainer *fe)
+    {
+        _feObjects = fe;
+    }
+
+    /// printout internal data for debugging
+    void printout() const
+    {
+        std::cout << "nodal_values = ";
+        for (size_t i=_nodal_values->getRangeBegin(); i<_nodal_values->getRangeEnd(); ++i)
+            std::cout << (*_nodal_values)[i] << " ";
+        std::cout << std::endl;
+    }
+
+    /// initialize
+    void initialize(MyDiscreteSystem &dis, PolynomialOrder::type order)
+    {
+        _discrete_system = &dis;
+        _order = order;
+        size_t n = dis.getMesh()->getNumberOfNodes();
+        _nodal_values = dis.template createVector<double>(n);
+        _feObjects = 0;
+    }
+
+    template <class T_SYS>
+    void initialize(T_SYS &dis, PolynomialOrder::type order, double v0)
+    {
+        initialize(dis, order);
+        resetNodalValues(v0);
+    }
+
+private:
+    /// Assign this object from the given object
+    void assign(const MyClassType &org)
+    {
+        initialize(*org._discrete_system, org._order);
+        for (size_t i=org._nodal_values->getRangeBegin(); i<org._nodal_values->getRangeEnd(); ++i)
+            (*_nodal_values)[i] = (*org._nodal_values)[i];
+    }
+
+private:
+    MyDiscreteSystem* _discrete_system;
+    MyVector* _nodal_values;
+    PolynomialOrder::type _order;
+    LagrangianFeObjectContainer* _feObjects;
 };
 
-typedef TemplateFEMNodalFunction<double> FemNodalFunctionScalar;
-typedef TemplateFEMNodalFunction<NumLib::LocalVector> FemNodalFunctionVector;
+///// evaluate this function at the given point
+//template <class T_DIS_SYS>
+//inline void TemplateFEMNodalFunction<T_DIS_SYS,double>::eval(const NumLib::TXPosition x,  NumLib::ITXFunction::DataType &v) const
+//{
+//    NumLib::ITXFunction::DataType val(1,1);
+//    val(0,0) = (*_nodal_values)[x.getId()];
+//    v = val;
+//};
+
+template <class T_DIS_SYS>
+struct FemNodalFunctionScalar
+{
+    typedef TemplateFEMNodalFunction<T_DIS_SYS, double> type;
+};
+
+template <class T_DIS_SYS>
+struct FemNodalFunctionVector
+{
+    typedef TemplateFEMNodalFunction<T_DIS_SYS, NumLib::LocalVector> type;
+};
+
+//typedef TemplateFEMNodalFunction<double> FemNodalFunctionScalar;
+//typedef TemplateFEMNodalFunction<NumLib::LocalVector> FemNodalFunctionVector;
 
 } //end

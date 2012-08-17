@@ -13,15 +13,17 @@
 #pragma once
 
 #include "NumLib/Function/Function.h"
+#include "NumLib/Function/DiscreteDataConvergenceCheck.h"
 #include "MathLib/LinAlg/VectorNorms.h"
 #include "GeoLib/Rectangle.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "FemLib/Function/FemFunction.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
-#include "SolutionLib/FemProblem/FemIVBVProblem.h"
-#include "SolutionLib/Solution/SingleStepFEM.h"
+#include "SolutionLib/Fem/FemIVBVProblem.h"
+#include "SolutionLib/Fem/SingleStepFEM.h"
 
 #include "Tests/Geo/Equation/FemMassTransport.h"
 #include "Tests/Geo/Material/PorousMedia.h"
@@ -31,13 +33,14 @@ namespace Geo
 {
 
 typedef TemplateFemEquation<
+        DiscreteLib::DiscreteSystem,
         Geo::MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler>,
         Geo::MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler>,
         Geo::MassTransportJacobianLocalAssembler
         >
         MassFemEquation;
 
-typedef FemIVBVProblem< MassFemEquation > MassFemProblem;
+typedef FemIVBVProblem< DiscreteLib::DiscreteSystem, MassFemEquation > MassFemProblem;
 
 
 template <
@@ -100,6 +103,12 @@ public:
         //std::cout << "Concentration=" << std::endl;
         //_solConc->getCurrentSolution(0)->printout();
     };
+
+    NumLib::DiscreteDataConvergenceCheck _checker;
+    virtual NumLib::IConvergenceCheck* getConvergenceChecker()
+    {
+        return &_checker;
+    }
 
 private:
     DISALLOW_COPY_AND_ASSIGN(FunctionConcentration);

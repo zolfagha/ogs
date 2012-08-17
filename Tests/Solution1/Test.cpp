@@ -19,12 +19,13 @@
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
 #include "GeoLib/Line.h"
 #include "MeshLib/Tools/MeshGenerator.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TransientCoupling/AsyncPartitionedSystem.h"
 #include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
 #include "NumLib/Coupling/Algorithm/TransientPartitionedAlgorithm.h"
-#include "FemLib/Function/FemNorm.h"
-#include "SolutionLib/FemProblem/FemNeumannBC.h"
+#include "NumLib/Function/NormOfDiscreteDataFunction.h"
+#include "SolutionLib/Fem/FemNeumannBC.h"
 #include "Tests/Geo/Model/Head.h"
 #include "Tests/Geo/Model/Velocity.h"
 #include "Tests/Geo/Model/Concentration.h"
@@ -35,39 +36,44 @@
 
 #include "TestUtil.h"
 
+typedef FemLib::FEMIntegrationPointFunctionVector<DiscreteSystem>::type MyIntegrationPointFunctionVector;
+typedef FemLib::FemNodalFunctionScalar<DiscreteSystem>::type MyNodalFunctionScalar;
+//typedef NumLib::ITXDiscreteFunction<double> MyNodalFunctionScalar;
+//typedef NumLib::ITXDiscreteFunction<MathLib::TemplateVectorX<NumLib::LocalVector> > MyIntegrationPointFunctionVector;
 
-class FemFunctionConvergenceCheck : public IConvergenceCheck
-{
-    FemLib::NormOfFemNodalFunction<double> _norm;
-public:
-    explicit FemFunctionConvergenceCheck(DiscreteLib::DiscreteSystem *dis) : _norm(dis)
-    {
-
-    }
-
-    bool isConverged(UnnamedParameterSet& vars_prev, UnnamedParameterSet& vars_current, double eps, double &v_diff)
-    {
-        for (size_t i=0; i<vars_prev.size(); i++) {
-#if 1
-            if (vars_prev.getName(i).compare("h")==0 || vars_prev.getName(i).compare("c")==0) {
-                const FemNodalFunctionScalar* f_fem_prev = vars_prev.get<FemNodalFunctionScalar>(i);
-                const FemNodalFunctionScalar* f_fem_cur = vars_current.get<FemNodalFunctionScalar>(i);
-                //v_diff = f_fem_cur->norm_diff(*f_fem_prev);
-                v_diff = _norm(*f_fem_prev, *f_fem_cur);
-            } else if (vars_prev.getName(i).compare("v")==0) {
-                const FEMIntegrationPointFunctionVector* f_fem_prev = vars_prev.get<FEMIntegrationPointFunctionVector>(i);
-                const FEMIntegrationPointFunctionVector* f_fem_cur = vars_current.get<FEMIntegrationPointFunctionVector>(i);
-                //v_diff = f_fem_cur->norm_diff(*f_fem_prev);
-                v_diff = _norm(*f_fem_prev, *f_fem_cur);
-            }
-#endif
-            if (v_diff>eps) {
-                return false;
-            }
-        }
-        return true;
-    }
-};
+//class DiscreteDataConvergenceCheck : public IConvergenceCheck
+//{
+//public:
+//    explicit DiscreteDataConvergenceCheck(DiscreteLib::DiscreteSystem *dis)
+//    {
+//
+//    }
+//
+//    bool isConverged(UnnamedParameterSet& vars_prev, UnnamedParameterSet& vars_current, double eps, double &v_diff)
+//    {
+//        for (size_t i=0; i<vars_prev.size(); i++) {
+//#if 1
+//            if (vars_prev.getName(i).compare("h")==0 || vars_prev.getName(i).compare("c")==0) {
+//                const MyNodalFunctionScalar* f_fem_prev = vars_prev.get<MyNodalFunctionScalar>(i);
+//                const MyNodalFunctionScalar* f_fem_cur = vars_current.get<MyNodalFunctionScalar>(i);
+//                //v_diff = f_fem_cur->norm_diff(*f_fem_prev);
+//                NumLib::NormOfDiscreteDataFunction<double> _norm;
+//                v_diff = _norm(*f_fem_prev, *f_fem_cur);
+//            } else if (vars_prev.getName(i).compare("v")==0) {
+//                const MyIntegrationPointFunctionVector* f_fem_prev = vars_prev.get<MyIntegrationPointFunctionVector>(i);
+//                const MyIntegrationPointFunctionVector* f_fem_cur = vars_current.get<MyIntegrationPointFunctionVector>(i);
+//                //v_diff = f_fem_cur->norm_diff(*f_fem_prev);
+//                NumLib::NormOfDiscreteDataFunction<MathLib::TemplateVectorX<NumLib::LocalVector> > _norm;
+//                v_diff = _norm(*f_fem_prev, *f_fem_cur);
+//            }
+//#endif
+//            if (v_diff>eps) {
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
+//};
 
 Geo::GWFemProblem* createGWProblem(DiscreteSystem &dis, Geo::PorousMedia &pm)
 {
@@ -76,10 +82,10 @@ Geo::GWFemProblem* createGWProblem(DiscreteSystem &dis, Geo::PorousMedia &pm)
     Geo::GWFemEquation::LinearAssemblerType* linear_assembler = new Geo::GWFemEquation::LinearAssemblerType(*_feObjects, pm);
     Geo::GWFemEquation::ResidualAssemblerType* r_assembler = new Geo::GWFemEquation::ResidualAssemblerType(*_feObjects, pm);
     Geo::GWFemEquation::JacobianAssemblerType* j_eqs = new Geo::GWFemEquation::JacobianAssemblerType(*_feObjects, pm);
-    Geo::GWFemEquation* eqs = new  Geo::GWFemEquation(linear_assembler, r_assembler, j_eqs);
     //IVBV problem
     Geo::GWFemProblem* _problem = new Geo::GWFemProblem(&dis);
-    _problem->setEquation(eqs);
+    Geo::GWFemEquation* eqs = _problem->createEquation();
+    eqs->initialize(linear_assembler, r_assembler, j_eqs);
     return _problem;
 }
 
@@ -88,9 +94,10 @@ Geo::GWFemProblem* defineGWProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec,
 {
     Geo::GWFemProblem* _problem = createGWProblem(dis, pm);
     // var
-    FemVariable* head = _problem->addVariable("head");
+    Geo::GWFemProblem::MyVariable* head = _problem->addVariable("head");
     // IC
-    FemNodalFunctionScalar* h0 = new FemNodalFunctionScalar(dis, PolynomialOrder::Linear, 0);
+    MyNodalFunctionScalar* h0 = new MyNodalFunctionScalar();
+    h0->initialize(dis, PolynomialOrder::Linear, 0);
     head->setIC(h0);
     //BC
     GeoLib::Polyline* poly_left = _rec.getLeft();
@@ -105,9 +112,10 @@ Geo::GWFemProblem* defineGWProblem1D(DiscreteSystem &dis, GeoLib::Line &line, Ge
 {
     Geo::GWFemProblem* _problem = createGWProblem(dis, pm);
     // var
-    FemVariable* head = _problem->addVariable("head");
+    Geo::GWFemProblem::MyVariable* head = _problem->addVariable("head");
     // IC
-    FemNodalFunctionScalar* h0 = new FemNodalFunctionScalar(dis, PolynomialOrder::Linear, 0);
+    MyNodalFunctionScalar* h0 = new MyNodalFunctionScalar();
+    h0->initialize(dis, PolynomialOrder::Linear, 0);
     head->setIC(h0);
     //BC
     head->addDirichletBC(new FemDirichletBC(dis.getMesh(), line.getPoint2(), new NumLib::TXFunctionConstant(.0)));
@@ -123,14 +131,15 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Rec
     Geo::MassFemEquation::LinearAssemblerType* linear_assembler = new Geo::MassFemEquation::LinearAssemblerType(*_feObjects, pm, comp);
     Geo::MassFemEquation::ResidualAssemblerType* r_assembler = new Geo::MassFemEquation::ResidualAssemblerType(*_feObjects, pm, comp);
     Geo::MassFemEquation::JacobianAssemblerType* j_eqs = new Geo::MassFemEquation::JacobianAssemblerType(*_feObjects, pm, comp);
-    Geo::MassFemEquation* eqs = new  Geo::MassFemEquation(linear_assembler, r_assembler, j_eqs);
     //IVBV problem
     Geo::MassFemProblem* _problem = new Geo::MassFemProblem(&dis);
-    _problem->setEquation(eqs);
+    Geo::MassFemEquation* eqs = _problem->createEquation();
+    eqs->initialize(linear_assembler, r_assembler, j_eqs);
     // var
-    FemVariable* c = _problem->addVariable("c");
+    Geo::MassFemProblem::MyVariable* c = _problem->addVariable("c");
     // IC
-    FemNodalFunctionScalar* c0 = new FemNodalFunctionScalar(dis, PolynomialOrder::Linear, 0);
+    MyNodalFunctionScalar* c0 = new MyNodalFunctionScalar();
+    c0->initialize(dis, PolynomialOrder::Linear, 0);
     c->setIC(c0);
     //BC
     GeoLib::Polyline* poly_left = _rec.getLeft();
@@ -146,15 +155,16 @@ Geo::FemLinearElasticProblem* defineLinearElasticProblem(DiscreteSystem &dis, Ge
     Geo::FemLinearElasticEquation::LinearAssemblerType* linear_assembler = new Geo::FemLinearElasticEquation::LinearAssemblerType(*_feObjects, pm);
     Geo::FemLinearElasticEquation::ResidualAssemblerType* r_assembler = new Geo::FemLinearElasticEquation::ResidualAssemblerType(*_feObjects, pm);
     Geo::FemLinearElasticEquation::JacobianAssemblerType* j_eqs = new Geo::FemLinearElasticEquation::JacobianAssemblerType(*_feObjects, pm);
-    Geo::FemLinearElasticEquation* eqs = new  Geo::FemLinearElasticEquation(linear_assembler, r_assembler, j_eqs);
     //IVBV problem
     Geo::FemLinearElasticProblem* _problem = new Geo::FemLinearElasticProblem(&dis);
-    _problem->setEquation(eqs);
+    Geo::FemLinearElasticEquation* eqs = _problem->createEquation();
+    eqs->initialize(linear_assembler, r_assembler, j_eqs);
     // var
-    FemVariable* u_x = _problem->addVariable("u_x");
-    FemVariable* u_y = _problem->addVariable("u_y");
+    Geo::FemLinearElasticProblem::MyVariable* u_x = _problem->addVariable("u_x");
+    Geo::FemLinearElasticProblem::MyVariable* u_y = _problem->addVariable("u_y");
     // IC
-    FemNodalFunctionScalar* u0 = new FemNodalFunctionScalar(dis, PolynomialOrder::Linear, 0);
+    MyNodalFunctionScalar* u0 = new MyNodalFunctionScalar();
+    u0->initialize(dis, PolynomialOrder::Linear, 0);
     u_x->setIC(u0);
     u_y->setIC(u0);
     //BC
@@ -214,8 +224,7 @@ TEST(Solution, CouplingFem2D)
         f_vel.setInputParameterName(0, "h");
         f_vel.setOutputParameterName(0, "v");
 
-        FemFunctionConvergenceCheck checker(&dis);
-        SerialStaggeredMethod method(checker, 1e-5, 100);
+        SerialStaggeredMethod method(1e-5, 100);
         AsyncPartitionedSystem apart1;
         apart1.setAlgorithm(method);
         apart1.resizeOutputParameter(2);
@@ -232,9 +241,9 @@ TEST(Solution, CouplingFem2D)
         timestepping.setBeginning(.0);
         timestepping.solve(1.0);
 
-        const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
-        const FEMIntegrationPointFunctionVector* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
-        const IDiscreteVector<double>* vec_h = r_f_head->getNodalValues();
+        const MyNodalFunctionScalar* r_f_head = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("h"));
+        const MyIntegrationPointFunctionVector* r_f_v = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
+        const IDiscreteVector<double>* vec_h = r_f_head->getDiscreteData();
         //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
 
         r_f_head->printout();
@@ -282,8 +291,7 @@ TEST(FEM, line)
         f_vel.setInputParameterName(0, "h");
         f_vel.setOutputParameterName(0, "v");
 
-        FemFunctionConvergenceCheck checker(&dis);
-        SerialStaggeredMethod method(checker, 1e-5, 100);
+        SerialStaggeredMethod method(1e-5, 100);
         AsyncPartitionedSystem apart1;
         apart1.setAlgorithm(method);
         apart1.resizeOutputParameter(2);
@@ -300,9 +308,9 @@ TEST(FEM, line)
         timestepping.setBeginning(.0);
         timestepping.solve(1.0);
 
-        const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
-        const FEMIntegrationPointFunctionVector* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
-        const IDiscreteVector<double>* vec_h = r_f_head->getNodalValues();
+        const MyNodalFunctionScalar* r_f_head = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("h"));
+        const MyIntegrationPointFunctionVector* r_f_v = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
+        const IDiscreteVector<double>* vec_h = r_f_head->getDiscreteData();
         //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
 
         r_f_head->printout();
@@ -382,8 +390,7 @@ TEST(Solution, CouplingFem2)
         f_c.setOutputParameterName(0, "c");
 
 
-        FemFunctionConvergenceCheck checker(&dis);
-        SerialStaggeredMethod method(checker, 1e-5, 100);
+        SerialStaggeredMethod method(1e-5, 100);
         AsyncPartitionedSystem apart1;
         apart1.setAlgorithm(method);
         apart1.resizeOutputParameter(3);
@@ -402,12 +409,12 @@ TEST(Solution, CouplingFem2)
         timestepping.setBeginning(.0);
         timestepping.solve(tim.getEnd());
 
-        const FemNodalFunctionScalar* r_f_head = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("h"));
-        const FEMIntegrationPointFunctionVector* r_f_v = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
-        const FemNodalFunctionScalar* r_f_c = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("c"));
-        const IDiscreteVector<double>* vec_h = r_f_head->getNodalValues();
+        const MyNodalFunctionScalar* r_f_head = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("h"));
+        const MyIntegrationPointFunctionVector* r_f_v = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
+        const MyNodalFunctionScalar* r_f_c = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("c"));
+        const IDiscreteVector<double>* vec_h = r_f_head->getDiscreteData();
         //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
-        const IDiscreteVector<double>* vec_c = r_f_c->getNodalValues();
+        const IDiscreteVector<double>* vec_c = r_f_c->getDiscreteData();
 
         //r_f_head->printout();
         //r_f_v->printout();
@@ -497,8 +504,7 @@ TEST(Fem, LinearElastic2D)
 //        MyFunctionStressStrain f_sigma;
 //        f_sigma.setOutputParameterName(0, "strain_xx");
 
-        FemFunctionConvergenceCheck checker(&dis);
-        SerialStaggeredMethod method(checker, 1e-5, 100);
+        SerialStaggeredMethod method(1e-5, 100);
         AsyncPartitionedSystem apart1;
         apart1.setAlgorithm(method);
         apart1.resizeOutputParameter(4);
@@ -516,14 +522,14 @@ TEST(Fem, LinearElastic2D)
         timestepping.setBeginning(.0);
         timestepping.solve(1.0);
 
-        const FemNodalFunctionScalar* r_f_ux = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("u_x"));
-        const FemNodalFunctionScalar* r_f_uy = apart1.getOutput<FemNodalFunctionScalar>(apart1.getOutputParameterID("u_y"));
-        const FEMIntegrationPointFunctionVector* r_f_strain = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("Strain"));
-        const FEMIntegrationPointFunctionVector* r_f_stress = apart1.getOutput<FEMIntegrationPointFunctionVector>(apart1.getOutputParameterID("Stress"));
-        const IDiscreteVector<double>* vec_r_f_ux = r_f_ux->getNodalValues();
-        const IDiscreteVector<double>* vec_r_f_uy = r_f_uy->getNodalValues();
-        const FEMIntegrationPointFunctionVector::DiscreteVectorType* vec_strain = r_f_strain->getNodalValues();
-        const FEMIntegrationPointFunctionVector::DiscreteVectorType* vec_stress = r_f_stress->getNodalValues();
+        const MyNodalFunctionScalar* r_f_ux = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("u_x"));
+        const MyNodalFunctionScalar* r_f_uy = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("u_y"));
+        const MyIntegrationPointFunctionVector* r_f_strain = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("Strain"));
+        const MyIntegrationPointFunctionVector* r_f_stress = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("Stress"));
+        const IDiscreteVector<double>* vec_r_f_ux = r_f_ux->getDiscreteData();
+        const IDiscreteVector<double>* vec_r_f_uy = r_f_uy->getDiscreteData();
+        const MyIntegrationPointFunctionVector::MyDiscreteVector* vec_strain = r_f_strain->getDiscreteData();
+        const MyIntegrationPointFunctionVector::MyDiscreteVector* vec_stress = r_f_stress->getDiscreteData();
 
 //        r_f_ux->printout();
 //        r_f_uy->printout();

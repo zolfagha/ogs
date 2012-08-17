@@ -5,26 +5,15 @@ SOURCE_GROUP( ogsNumerics\\DiscreteLib FILES ${DiscreteLib_Files} )
 # ./Core
 FILE(GLOB DiscreteLib_Core_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} DiscreteLib/Core/*.h DiscreteLib/Core/*.cpp)
 SOURCE_GROUP( ogsNumerics\\DiscreteLib\\Core FILES ${DiscreteLib_Core_Files} )
-# ./Linear equation
-FILE(GLOB DiscreteLib_LinearEquation_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} DiscreteLib/LinearEquation/*.h DiscreteLib/LinearEquation/*.cpp)
-SOURCE_GROUP( ogsNumerics\\DiscreteLib\\LinearEquation FILES ${DiscreteLib_LinearEquation_Files} )
-# ./EquationId
-FILE(GLOB DiscreteLib_EquationId_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} DiscreteLib/EquationId/*.h DiscreteLib/EquationId/*.cpp)
-SOURCE_GROUP( ogsNumerics\\DiscreteLib\\EquationId FILES ${DiscreteLib_EquationId_Files} )
-# ./OGS5
-IF(USE_MPI)
-	FILE(GLOB DiscreteLib_OGS5_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} DiscreteLib/ogs5/*.h DiscreteLib/ogs5/*.cpp)
-	SOURCE_GROUP( ogsNumerics\\DiscreteLib\\OGS5 FILES ${DiscreteLib_OGS5_Files} )
-ENDIF()
 # ./Utils
 FILE(GLOB DiscreteLib_Utils_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} DiscreteLib/Utils/*.h DiscreteLib/Utils/*.cpp)
 SOURCE_GROUP( ogsNumerics\\DiscreteLib\\Utils FILES ${DiscreteLib_Utils_Files} )
-# ./Assembler
-FILE(GLOB DiscreteLib_Assembler_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} DiscreteLib/Assembler/*.h DiscreteLib/Assembler/*.cpp)
-SOURCE_GROUP( ogsNumerics\\DiscreteLib\\Assembler FILES ${DiscreteLib_Assembler_Files} )
 # ./DDC
 FILE(GLOB DiscreteLib_DDC_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} DiscreteLib/DDC/*.h DiscreteLib/DDC/*.cpp)
 SOURCE_GROUP( ogsNumerics\\DiscreteLib\\DDC FILES ${DiscreteLib_DDC_Files} )
+# ./Serial
+FILE(GLOB DiscreteLib_Searial_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} DiscreteLib/Serial/*.h DiscreteLib/Serial/*.cpp)
+SOURCE_GROUP( ogsNumerics\\DiscreteLib\\Serial FILES ${DiscreteLib_Searial_Files} )
 # ./SerialNodeDdc
 FILE(GLOB DiscreteLib_SearialNodeDdc_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} DiscreteLib/SerialNodeDdc/*.h DiscreteLib/SerialNodeDdc/*.cpp)
 SOURCE_GROUP( ogsNumerics\\DiscreteLib\\SerialNodeDdc FILES ${DiscreteLib_SearialNodeDdc_Files} )
@@ -40,22 +29,15 @@ IF(NOT USE_LIS OR NOT USE_MPI)
         DiscreteLib/lis/LisDiscreteSystem.cpp
         )
 ENDIF()
-# ./OpenMP
-FILE(GLOB DiscreteLib_OpenMP_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} DiscreteLib/OpenMP/*.h DiscreteLib/OpenMP/*.cpp)
-SOURCE_GROUP( ogsNumerics\\DiscreteLib\\OpenMP FILES ${DiscreteLib_OpenMP_Files} )
 
 #
 LIST(APPEND DiscreteLib_Files
     ${DiscreteLib_Core_Files} 
-    ${DiscreteLib_LinearEquation_Files}
-    ${DiscreteLib_EquationId_Files} 
-    ${DiscreteLib_Assembler_Files} 
     ${DiscreteLib_Utils_Files} 
     ${DiscreteLib_DDC_Files} 
+    ${DiscreteLib_Searial_Files} 
     ${DiscreteLib_SearialNodeDdc_Files} 
     ${DiscreteLib_LIS_Files} 
-    ${DiscreteLib_OpenMP_Files} 
-	${DiscreteLib_OGS5_Files} 
 )
 
 

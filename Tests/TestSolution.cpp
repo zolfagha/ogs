@@ -22,7 +22,7 @@
 
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "MeshLib/Core/IMesh.h"
-
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "FemLib/Tools/FemElementObjectContainer.h"
 
 #include "NumLib/Function/TXFunction.h"
@@ -33,10 +33,10 @@
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
 #include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
 
-#include "SolutionLib/FemProblem/FemDirichletBC.h"
-#include "SolutionLib/FemProblem/FemNeumannBC.h"
-#include "SolutionLib/FemProblem/FemIVBVProblem.h"
-#include "SolutionLib/Solution/SingleStepFEM.h"
+#include "SolutionLib/Fem/FemDirichletBC.h"
+#include "SolutionLib/Fem/FemNeumannBC.h"
+#include "SolutionLib/Fem/FemIVBVProblem.h"
+#include "SolutionLib/Fem/SingleStepFEM.h"
 
 #include "TestUtil.h"
 
@@ -145,12 +145,13 @@ class GWFemTestSystem : public NumLib::ITransientSystem
 {
     typedef TemplateFemEquation
             <
+                DiscreteSystem,
                 GWTimeODEAssembler<ElementWiseTimeEulerEQSLocalAssembler>,
                 GWTimeODEAssembler<ElementWiseTimeEulerResidualLocalAssembler>,
                 GWJacobianAssembler
             > GWFemEquation;
 
-    typedef FemIVBVProblem<GWFemEquation> GWFemProblem;
+    typedef FemIVBVProblem<DiscreteSystem,GWFemEquation> GWFemProblem;
 
     typedef GWFemEquation::LinearEQSType MyLinearFunction;
     typedef GWFemEquation::ResidualEQSType MyResidualFunction;
@@ -158,6 +159,7 @@ class GWFemTestSystem : public NumLib::ITransientSystem
 
     typedef TemplateDiscreteNonlinearSolver
             <
+                DiscreteSystem,
                 MyLinearFunction, 
                 MyResidualFunction, 
                 MyDxFunction
@@ -211,14 +213,15 @@ public:
         GWFemEquation::LinearAssemblerType* local_linear = new GWFemEquation::LinearAssemblerType(*_feObjects, K);
         GWFemEquation::ResidualAssemblerType* local_r = new GWFemEquation::ResidualAssemblerType(*_feObjects, K);
         GWFemEquation::JacobianAssemblerType* local_J = new GWFemEquation::JacobianAssemblerType(*_feObjects, K);
-        GWFemEquation* eqs = new GWFemEquation(local_linear, local_r, local_J);
         //IVBV problem
         _problem = new GWFemProblem(&dis);
-        _problem->setEquation(eqs);
+        GWFemEquation* eqs = _problem->createEquation();
+        eqs->initialize(local_linear, local_r, local_J);
         // var
-        FemVariable* _head = _problem->addVariable("head");
+        GWFemProblem::MyVariable* _head = _problem->addVariable("head");
         //IC
-        FemNodalFunctionScalar* h0 = new FemNodalFunctionScalar(dis, PolynomialOrder::Linear, .0);
+        GWFemProblem::MyVariable::MyNodalFunctionScalar* h0 = new GWFemProblem::MyVariable::MyNodalFunctionScalar();
+        h0->initialize(dis, PolynomialOrder::Linear, .0);
         _head->setIC(h0);
         //BC
         _rec = new GeoLib::Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
@@ -242,7 +245,7 @@ public:
         //vel = new FEMIntegrationPointFunctionVector2d(msh);
     }
 
-    FemNodalFunctionScalar* getCurrentHead()
+    GWFemProblem::MyVariable::MyNodalFunctionScalar* getCurrentHead()
     {
         return _head;
     }
@@ -251,7 +254,7 @@ private:
     GWFemProblem* _problem;
     SolutionForHead* _solHead; 
     GeoLib::Rectangle *_rec;
-    FemNodalFunctionScalar *_head;
+    GWFemProblem::MyVariable::MyNodalFunctionScalar *_head;
     LagrangianFeObjectContainer* _feObjects;
 
     DISALLOW_COPY_AND_ASSIGN(GWFemTestSystem);
@@ -288,9 +291,9 @@ TEST(Solution, Fem1_Linear)
         if (i%3==2) expected[i] = 0.e+6;
     }
 
-    FemNodalFunctionScalar* h = gwProblem.getCurrentHead();
+    FemLib::FemNodalFunctionScalar<DiscreteSystem>::type* h = gwProblem.getCurrentHead();
 
-    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getNodalValues())[0], h->getNumberOfNodes());
+    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getDiscreteData())[0], h->getNumberOfNodes());
 
     BaseLib::releaseObject(msh);
 }
@@ -326,9 +329,9 @@ TEST(Solution, Fem1_Picard)
         if (i%3==2) expected[i] = 0.e+6;
     }
 
-    FemNodalFunctionScalar* h = gwProblem.getCurrentHead();
+    FemLib::FemNodalFunctionScalar<DiscreteSystem>::type* h = gwProblem.getCurrentHead();
 
-    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getNodalValues())[0], h->getNumberOfNodes());
+    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getDiscreteData())[0], h->getNumberOfNodes());
 
     BaseLib::releaseObject(msh);
 }
@@ -364,9 +367,9 @@ TEST(Solution, Fem1_Newton)
         if (i%3==2) expected[i] = 0.e+6;
     }
 
-    FemNodalFunctionScalar* h = gwProblem.getCurrentHead();
+    FemLib::FemNodalFunctionScalar<DiscreteSystem>::type* h = gwProblem.getCurrentHead();
 
-    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getNodalValues())[0], h->getNumberOfNodes());
+    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getDiscreteData())[0], h->getNumberOfNodes());
 
     BaseLib::releaseObject(msh);
 }
@@ -403,9 +406,9 @@ TEST(Solution, Fem2)
         if (i%3==2) expected[i] = 0.e+6;
     }
 
-    FemNodalFunctionScalar* h = gwProblem.getCurrentHead();
+    FemLib::FemNodalFunctionScalar<DiscreteSystem>::type* h = gwProblem.getCurrentHead();
 
-    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getNodalValues())[0], h->getNumberOfNodes());
+    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getDiscreteData())[0], h->getNumberOfNodes());
 
 
     BaseLib::releaseObject(msh);

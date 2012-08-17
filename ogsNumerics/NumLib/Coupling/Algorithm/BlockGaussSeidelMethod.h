@@ -28,9 +28,9 @@ public:
     BlockGaussSeidelMethod(double epsilon, size_t max_count) : AbstractIterativePartitionedMethod(epsilon, max_count)
     {
     }
-    BlockGaussSeidelMethod(IConvergenceCheck &checker, double epsilon, size_t max_count) : AbstractIterativePartitionedMethod(checker, epsilon, max_count)
-    {
-    }
+    //BlockGaussSeidelMethod(IConvergenceCheck &checker, double epsilon, size_t max_count) : AbstractIterativePartitionedMethod(checker, epsilon, max_count)
+//    {
+//    }
     ///
     virtual ~BlockGaussSeidelMethod() {};
 

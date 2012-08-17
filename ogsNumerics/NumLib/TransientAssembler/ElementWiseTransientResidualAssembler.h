@@ -15,9 +15,9 @@
 #include <vector>
 #include <valarray>
 
-#include "DiscreteLib/EquationId/DofEquationIdTable.h"
-#include "DiscreteLib/Vector/DiscreteVector.h"
-#include "DiscreteLib/Assembler/IDiscreteVectorAssembler.h"
+#include "DiscreteLib/Utils/DofEquationIdTable.h"
+#include "DiscreteLib/Serial/DiscreteVector.h"
+#include "DiscreteLib/Core/IDiscreteVectorAssembler.h"
 
 #include "IElementWiseTransientResidualLocalAssembler.h"
 
@@ -44,8 +44,8 @@ public:
     /// @param u0
     /// @param u1
     /// @param a
-    ElementWiseTransientResidualAssembler(const TimeStep* time, const GlobalVectorType* u0, const GlobalVectorType* u1, IElementWiseTransientResidualLocalAssembler* a)
-        : _transient_e_assembler(a), _timestep(time), _vec_u0(u0), _vec_u1(u1)
+    ElementWiseTransientResidualAssembler(const TimeStep* time, const GlobalVectorType* u0, const GlobalVectorType* u1, IElementWiseTransientResidualLocalAssembler* a, DiscreteLib::DofEquationIdTable* dofManager)
+        : _transient_e_assembler(a), _timestep(time), _vec_u0(u0), _vec_u1(u1), _dofManager(dofManager)
     { };
 
 
@@ -55,13 +55,15 @@ public:
     /// @param dofManager         Dof map manager
     /// @param list_dofId         List of Dof IDs used in this problem
     /// @param r                 Residual
-    virtual void assembly( const MeshLib::IMesh &msh, const DiscreteLib::DofEquationIdTable &dofManager, GlobalVectorType &r);
+    virtual void assembly( const MeshLib::IMesh &msh, GlobalVectorType &r);
+//    virtual void assembly( const MeshLib::IMesh &msh, const DiscreteLib::DofEquationIdTable &dofManager, GlobalVectorType &r);
 
 private:
     IElementWiseTransientResidualLocalAssembler* _transient_e_assembler;
     const TimeStep* _timestep;
     const GlobalVectorType* _vec_u0;
     const GlobalVectorType* _vec_u1;
+    DiscreteLib::DofEquationIdTable* _dofManager;
 };
 
 

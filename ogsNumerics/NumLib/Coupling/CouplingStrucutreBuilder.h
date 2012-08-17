@@ -34,8 +34,8 @@ class TemplateCouplingStrucutreBuilder
 public:
     TemplateCouplingStrucutreBuilder() {};
 
-    template <class T_EQS_FACTORY, class T_CHECK_FACTORY>
-    T_I* build(const BaseLib::Options *option, T_EQS_FACTORY &eqs_fac, T_CHECK_FACTORY &check_fack)
+    template <class T_EQS_FACTORY>
+    T_I* build(const BaseLib::Options *option, T_EQS_FACTORY &eqs_fac)
     {
         const BaseLib::Options* op_cpl = option->getSubGroup("coupling");
         if (op_cpl->hasSubGroup("M")) {
@@ -44,7 +44,7 @@ public:
             return sys;
         } else if (op_cpl->hasSubGroup("P")) {
             const BaseLib::Options* op_sub = op_cpl->getSubGroup("P");
-            T_P *sys = buildPartitionedSystem(op_sub, eqs_fac, check_fack);
+            T_P *sys = buildPartitionedSystem(op_sub, eqs_fac);
             return sys;
         }
         return 0;
@@ -89,8 +89,8 @@ private:
         return eqs;
     }
 
-    template <class T_EQS_FACTORY, class T_CHECK_FACTORY>
-    T_P* buildPartitionedSystem(const BaseLib::Options *option, T_EQS_FACTORY &eqs_fac, T_CHECK_FACTORY check_fac)
+    template <class T_EQS_FACTORY>
+    T_P* buildPartitionedSystem(const BaseLib::Options *option, T_EQS_FACTORY &eqs_fac)
     {
         T_P* part = new T_P();
         //para
@@ -117,8 +117,7 @@ private:
         //alg
         size_t max_itr = option->getOptionAsNum<size_t>("max_itr");
         double epsilon = option->getOptionAsNum<double>("epsilon");
-        IConvergenceCheck* checker = check_fac.create(option->getOption("convergence"));
-        part->setAlgorithm(*T_ALGORITHM::create(option->getOption("algorithm"), checker, max_itr, epsilon));
+        part->setAlgorithm(*T_ALGORITHM::create(option->getOption("algorithm"), max_itr, epsilon));
 //        IPartitionedAlgorithm* alg = T_ALGORITHM::create(option->getOption("algorithm"), checker, max_itr, epsilon);
 //        if (alg!=0) {
 //        }
@@ -131,7 +130,7 @@ private:
             if (str.compare("M")==0) {
                 sys = buildMonolithicSystem(op_sub, eqs_fac);
             } else if (str.compare("P")==0) {
-                sys = buildPartitionedSystem(op_sub, eqs_fac, check_fac);
+                sys = buildPartitionedSystem(op_sub, eqs_fac);
             }
             if (sys!=0) part->addProblem(*sys);
         }

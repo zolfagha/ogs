@@ -26,15 +26,23 @@ endmacro()
 
 # look for directories in modules
 #MESSAGE (STATUS "Look for subdirectory")
-list_subdirectories(List_subdir ${CMAKE_CURRENT_SOURCE_DIR}/modules 1)
+list_subdirectories(List_subdir ${CMAKE_CURRENT_SOURCE_DIR}/../UserModules 1)
 LIST(LENGTH List_subdir n_dir)
 MESSAGE (STATUS "${n_dir} processses are found.")
+
+INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/../UserModules/InactiveModules.cmake)
+LIST(LENGTH INACTIVE_MODULES n_inactive_dir)
+MESSAGE (STATUS "${n_inactive_dir} processses are excluded. Inactive modules are defined in UserModules/CMakeLists.txt")
+IF (n_inactive_dir GREATER 0)
+    LIST(REMOVE_ITEM List_subdir ${INACTIVE_MODULES})
+ENDIF()
+
 FOREACH(dir ${List_subdir})
 #    MESSAGE (STATUS "sub dir found: ${dir}")
-    IF(EXISTS modules/${dir}/CMakeLists.txt)
-        INCLUDE(modules/${dir}/CMakeLists.txt)
+    IF(EXISTS ../UserModules/${dir}/CMakeLists.txt)
+        INCLUDE(../UserModules/${dir}/CMakeLists.txt)
     ENDIF()
-    FILE(GLOB TempProcessLib_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} modules/${dir}/*.h modules/${dir}/*.cpp)
+    FILE(GLOB TempProcessLib_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ../UserModules/${dir}/*.h ../UserModules/${dir}/*.hpp ../UserModules/${dir}/*.cpp)
     SOURCE_GROUP( ogs6THMC\\modules\\${dir} FILES ${TempProcessLib_Files} )
     LIST(APPEND THMC_Files ${TempProcessLib_Files}) 
 ENDFOREACH()
@@ -45,7 +53,7 @@ SOURCE_GROUP( ogs6THMC FILES ${TempProcessLib_Files} )
 LIST(APPEND THMC_Files ${TempProcessLib_Files}) 
 
 # ./modules
-FILE(GLOB TempProcessLib_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} modules/*.h modules/*.cpp modules/*.txt)
+FILE(GLOB TempProcessLib_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ../UserModules/*.h ../UserModules/*.cpp ../UserModules/*.txt)
 SOURCE_GROUP( ogs6THMC\\modules FILES ${TempProcessLib_Files} )
 LIST(APPEND THMC_Files ${TempProcessLib_Files}) 
 
@@ -73,6 +81,7 @@ SET_TARGET_PROPERTIES(ogs6THMC PROPERTIES LINKER_LANGUAGE CXX)
 
 INCLUDE_DIRECTORIES(
         .
+        ..
         ../ogsCore
         ../ogsNumerics
         ../ogsFileIO

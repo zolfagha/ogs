@@ -15,13 +15,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "BaseLib/CodingTools.h"
-
-#include "MathLib/Vector.h"
 #include "MeshLib/Core/IMesh.h"
-
-//#include "DiscreteLib/Core/DiscreteSystem.h"
-//#include "DiscreteLib/Core/DiscreteVector.h"
 
 #include "NumLib/Function/Function.h"
 

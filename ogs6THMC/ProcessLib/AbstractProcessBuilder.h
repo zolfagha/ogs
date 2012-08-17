@@ -81,6 +81,10 @@ int link_##pcs_name = class_##pcs_name;
 #define OGS_LINK_PROCESS(pcs_name, pcs_classname)
 #define OGS_ADD_PROCESS(pcs_name, pcs_classname)\
         registerProcess(#pcs_name, new ProcessLib::ProcessFactoryImpl<pcs_classname>);
+#define OGS_ADD_PROCESS_SYS(pcs_name, pcs_classname, discrete_system)\
+        registerProcess(#pcs_name, new ProcessLib::ProcessFactoryImpl<pcs_classname<discrete_system> >);
+#define OGS_ADD_PROCESS_SYS_SOLVER(pcs_name, pcs_classname, discrete_system, linear_solver)\
+        registerProcess(#pcs_name, new ProcessLib::ProcessFactoryImpl<pcs_classname<discrete_system,linear_solver> >);
 
 #endif
 

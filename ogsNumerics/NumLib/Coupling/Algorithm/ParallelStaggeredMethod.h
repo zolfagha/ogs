@@ -23,7 +23,7 @@ class ParallelStaggeredMethod : public AbstractPartitionedStaggeredMethod<NumLib
 public:
     ParallelStaggeredMethod() {};
     ParallelStaggeredMethod(double epsilon, size_t max_count) : AbstractPartitionedStaggeredMethod<BlockJacobiMethod >(epsilon, max_count) {};
-    ParallelStaggeredMethod(IConvergenceCheck &checker, double epsilon, size_t max_count) : AbstractPartitionedStaggeredMethod<BlockJacobiMethod >(checker, epsilon, max_count) {};
+    //ParallelStaggeredMethod(IConvergenceCheck &checker, double epsilon, size_t max_count) : AbstractPartitionedStaggeredMethod<BlockJacobiMethod >(checker, epsilon, max_count) {};
     virtual ~ParallelStaggeredMethod() {};
 };
 

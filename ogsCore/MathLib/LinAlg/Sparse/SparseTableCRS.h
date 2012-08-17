@@ -17,13 +17,10 @@
 #include <set>
 #include <cassert>
 
+#include "Sparsity.h"
+
 namespace MathLib 
 {
-
-/**
- * Row-major sparsity class
- */
-typedef std::vector<std::set<size_t> > RowMajorSparsity;
 
 /**
  * Compressible row storage

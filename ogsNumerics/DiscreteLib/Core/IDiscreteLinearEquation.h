@@ -14,23 +14,25 @@
 
 #include <vector>
 
-#include "IDiscreteResource.h"
+#include "IDiscreteObject.h"
 #include "IDiscreteVector.h"
 
 namespace DiscreteLib
 {
 
+// forward declaration
 class DofEquationIdTable;
 class IDiscreteLinearEquationAssembler;
 
 /** 
  * \brief Interface for discrete linear equations
  */
-class IDiscreteLinearEquation : public IDiscreteResource
+class IDiscreteLinearEquation : public IDiscreteObject
 {
 public:
     typedef IDiscreteVector<double> GlobalVectorType;
 
+    ///
     virtual ~IDiscreteLinearEquation() {};
     /// 
     virtual void initialize() = 0;
@@ -40,13 +42,10 @@ public:
     virtual void solve() = 0;
     /// get solution
     virtual void getGlobalX(std::vector<double> &x) = 0;
+    ///
     virtual double* getLocalX() = 0;
+    ///
     virtual void getX(GlobalVectorType &v) = 0;
-//    virtual DiscreteVector<double>* getX() = 0;
-    ///// get RHS 
-    //virtual double* getRHS() = 0;
-    ///// get a linear equation object
-    //virtual MathLib::ILinearEquations* getLinearEquation() const = 0;
     /// get a Dof map manager
     virtual DofEquationIdTable* getDofMapManger() const = 0;
     /// set prescribed dof

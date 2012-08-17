@@ -15,7 +15,7 @@
 #include "FemIO/ogs5/Ogs5FemIO.h"
 #include "MaterialLib/Solid.h"
 #include "MaterialLib/PorousMedia.h"
-#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "GeoLib/GEOObjects.h"
 #include "Ogs6FemData.h"
 

@@ -13,7 +13,7 @@
 #pragma once
 
 #include "MathLib/Nonlinear/Picard.h"
-#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "INonlinearSolver.h"
 
 namespace NumLib
@@ -22,17 +22,13 @@ namespace NumLib
 /**
  * \brief Picard
  */
-template <class F_LINEAR>
+template <class T_DIS_SYS, class F_LINEAR>
 class Picard : public INonlinearSolver
 {
-    F_LINEAR* _linear_f;
-    DiscreteLib::DiscreteSystem* _dis_sys;
-    VectorType* _x_old;
-    VectorType* _dx;
-
-    typedef DiscreteLib::DiscreteVector<double> ImplVector;
 public:
-    Picard(DiscreteLib::DiscreteSystem* dis_sys, F_LINEAR* linear_f) : _linear_f(linear_f), _dis_sys(dis_sys)
+    typedef T_DIS_SYS MyDiscreteSystem;
+
+    Picard(MyDiscreteSystem* dis_sys, F_LINEAR* linear_f) : _linear_f(linear_f), _dis_sys(dis_sys)
     {
         _x_old = _dx = 0;
     };
@@ -46,14 +42,20 @@ public:
     virtual void solve(const VectorType &x_0, VectorType &x_new)
     {
         if (_x_old==0) {
-            _x_old = _dis_sys->createVector<ImplVector>(x_0.size());
-            _dx = _dis_sys->createVector<ImplVector>(x_0.size());
+            _x_old = _dis_sys->template createVector<double>(x_0.size());
+            _dx = _dis_sys->template createVector<double>(x_0.size());
         }
 
         MathLib::PicardMethod picard;
         MathLib::NRCheckConvergence<VectorType, MathLib::NRErrorNorm1DX> check(getOption().error_tolerance);
         picard.solve(*_linear_f, x_0, x_new, *_x_old, *_dx, getOption().max_iteration, &check);
     }
+
+private:
+    F_LINEAR* _linear_f;
+    MyDiscreteSystem* _dis_sys;
+    VectorType* _x_old;
+    VectorType* _dx;
 };
 
 } //end

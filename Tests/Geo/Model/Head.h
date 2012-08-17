@@ -14,14 +14,16 @@
 
 #include "MathLib/LinAlg/VectorNorms.h"
 #include "GeoLib/Rectangle.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "FemLib/Function/FemFunction.h"
 #include "NumLib/Function/Function.h"
+#include "NumLib/Function/DiscreteDataConvergenceCheck.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
-#include "SolutionLib/FemProblem/FemIVBVProblem.h"
-#include "SolutionLib/Solution/SingleStepFEM.h"
+#include "SolutionLib/Fem/FemIVBVProblem.h"
+#include "SolutionLib/Fem/SingleStepFEM.h"
 
 #include "Tests/Geo/Equation/FemGroundwaterFlow.h"
 #include "Tests/Geo/Material/PorousMedia.h"
@@ -38,13 +40,14 @@ namespace Geo
 {
 
 typedef TemplateFemEquation<
+        DiscreteSystem,
         Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerEQSLocalAssembler>,
         Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerResidualLocalAssembler>,
         Geo::GroundwaterFlowJacobianLocalAssembler
         >
         GWFemEquation;
 
-typedef FemIVBVProblem< GWFemEquation > GWFemProblem;
+typedef FemIVBVProblem< DiscreteSystem, GWFemEquation > GWFemProblem;
 
 
 
@@ -97,6 +100,11 @@ public:
         //std::cout << "Head=" << std::endl;
         //_solHead->getCurrentSolution(0)->printout();
     };
+    NumLib::DiscreteDataConvergenceCheck _checker;
+    virtual NumLib::IConvergenceCheck* getConvergenceChecker()
+    {
+        return &_checker;
+    }
 
 private:
     GWFemProblem* _problem;

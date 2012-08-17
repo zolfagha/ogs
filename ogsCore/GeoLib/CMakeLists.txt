@@ -1,6 +1,6 @@
 # Source files
 FILE(GLOB GeoLib_Files GeoLib/*.h GeoLib/*.cpp)
-SOURCE_GROUP( ogsGeometry FILES ${GeoLib_Files})
+SOURCE_GROUP( ogsCore\\GeoLib FILES ${GeoLib_Files})
 
 
 #SET( GeoLib_Files ${GeoLib_Files} PARENT_SCOPE )

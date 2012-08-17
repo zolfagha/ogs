@@ -22,7 +22,7 @@
 
 #include "MeshLib/Tools/MeshGenerator.h"
 
-#include "DiscreteLib/Core/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
 
 #include "FemLib/Function/FemFunction.h"
 #include "FemLib/BC/DirichletBC2FEM.h"
@@ -42,6 +42,9 @@ using namespace DiscreteLib;
 
 typedef MathLib::Matrix<double> GlobalMatrixType;
 typedef std::vector<double> GlobalVectorType;
+typedef FemLib::FemNodalFunctionScalar<DiscreteLib::DiscreteSystem>::type MyNodalFunctionScalar;
+typedef FemLib::FemNodalFunctionVector<DiscreteLib::DiscreteSystem>::type MyNodalFunctionVector;
+typedef FemLib::FEMIntegrationPointFunctionVector<DiscreteLib::DiscreteSystem>::type MyIntegrationPointFunctionVector;
 
 //static void outputLinearEQS(MathLib::Matrix<double> &globalA, std::vector<double> &globalRHS)
 //{
@@ -84,7 +87,7 @@ TEST(FEM, testUnstructuredMesh)
     //#Solve
     GWFemTest::calculateHead(gw);
 
-    DiscreteLib::IDiscreteVector<double>* h = gw.head->getNodalValues();
+    DiscreteLib::IDiscreteVector<double>* h = gw.head->getDiscreteData();
     std::vector<double> expected;
     getGWExpectedHead(expected);
 
@@ -99,7 +102,7 @@ TEST(FEM, testStructuredMesh)
     //#Solve
     GWFemTest::calculateHead(gw);
 
-    DiscreteLib::IDiscreteVector<double>* h = gw.head->getNodalValues();
+    DiscreteLib::IDiscreteVector<double>* h = gw.head->getDiscreteData();
     std::vector<double> expected;
     getGWExpectedHead(expected);
 
@@ -116,11 +119,12 @@ TEST(FEM, ExtrapolateAverage1)
     GWFemTest::calculateHead(gw);
     GWFemTest::calculateVelocity(gw);
 
-    FemNodalFunctionVector nodal_vel(*gw.dis, PolynomialOrder::Linear);
-    FemExtrapolationAverage<NumLib::LocalVector> extrapo;
+    MyNodalFunctionVector nodal_vel;
+    nodal_vel.initialize(*gw.dis, PolynomialOrder::Linear);
+    FemExtrapolationAverage<DiscreteLib::DiscreteSystem, NumLib::LocalVector> extrapo;
     extrapo.extrapolate(*gw.vel, nodal_vel);
 
-    DiscreteLib::IDiscreteVector<NumLib::LocalVector> *v = nodal_vel.getNodalValues();
+    DiscreteLib::IDiscreteVector<NumLib::LocalVector> *v = nodal_vel.getDiscreteData();
     NumLib::LocalVector expected(2);
     expected[0] = 1.e-5;
     expected[1] = .0;
@@ -160,8 +164,9 @@ TEST(FEM, ExtrapolateAverage2)
     GWFemTest::calculateHead(gw);
     GWFemTest::calculateVelocity(gw);
 
-    FemNodalFunctionVector nodal_vel(*gw.dis, PolynomialOrder::Linear);
-    FemExtrapolationAverage<NumLib::LocalVector> extrapo;
+    MyNodalFunctionVector nodal_vel;
+    nodal_vel.initialize(*gw.dis, PolynomialOrder::Linear);
+    FemExtrapolationAverage<DiscreteLib::DiscreteSystem, NumLib::LocalVector> extrapo;
     extrapo.extrapolate(*gw.vel, nodal_vel);
 
     std::vector<double> exH(9);
@@ -171,10 +176,10 @@ TEST(FEM, ExtrapolateAverage2)
         if (i%3==2) exH[i] = 0.e+6;
     }
 
-    DiscreteLib::IDiscreteVector<double> *h = gw.head->getNodalValues();
+    DiscreteLib::IDiscreteVector<double> *h = gw.head->getDiscreteData();
     ASSERT_DOUBLE_ARRAY_EQ(&exH[0], &(*h)[0], gw.head->getNumberOfNodes(), 10);
 
-    DiscreteLib::IDiscreteVector<NumLib::LocalVector> *v = nodal_vel.getNodalValues();
+    DiscreteLib::IDiscreteVector<NumLib::LocalVector> *v = nodal_vel.getDiscreteData();
     NumLib::LocalVector expected(2);
     expected[0] = 4./3.*1.e-5;
     expected[1] = .0;

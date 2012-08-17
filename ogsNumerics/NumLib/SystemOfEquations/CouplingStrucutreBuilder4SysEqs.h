@@ -30,8 +30,8 @@ template <class T_I, class T_M, class T_P, class T_ALGORITHM>
 class TemplateCouplingStrucutreBuilder4SysEqs
 {
 public:
-    template <class T_EQS_FACTORY, class T_CHECK_FACTORY>
-    T_I* build(const BaseLib::Options *option, T_EQS_FACTORY eqs_fac, T_CHECK_FACTORY check_fack)
+    template <class T_EQS_FACTORY>
+    T_I* build(const BaseLib::Options *option, T_EQS_FACTORY eqs_fac)
     {
         const BaseLib::Options* op_cpl = option->getSubGroup("coupling");
         if (op_cpl->begin()==op_cpl->end()) return 0;
@@ -44,7 +44,7 @@ public:
             return sys;
         } else if (str.find("P")==0) {
             //const Base::Options* op_sub = op_cpl->getSubGroup("P");
-            T_P *sys = buildPartitionedSystem(op_sub, eqs_fac, check_fack);
+            T_P *sys = buildPartitionedSystem(op_sub, eqs_fac);
             return sys;
         }
 
@@ -69,15 +69,15 @@ private:
         return eqs;
     }
 
-    template <class T_EQS_FACTORY, class T_CHECK_FACTORY>
-    T_P* buildPartitionedSystem(const BaseLib::Options *option, T_EQS_FACTORY &eqs_fac, T_CHECK_FACTORY check_fac)
+    template <class T_EQS_FACTORY>
+    T_P* buildPartitionedSystem(const BaseLib::Options *option, T_EQS_FACTORY &eqs_fac)
     {
         T_P* part = new T_P();
         //alg
         size_t max_itr = option->getOption<size_t>("max_itr");
         double epsilon = option->getOption<double>("epsilon");
-        IConvergenceCheck* checker = check_fac.create(option->getOption("convergence"));
-        part->setAlgorithm(*T_ALGORITHM::create(option->getOption("algorithm"), checker, max_itr, epsilon));
+        //IConvergenceCheck* checker = check_fac.create(option->getOption("convergence"));
+        part->setAlgorithm(*T_ALGORITHM::create(option->getOption("algorithm"), max_itr, epsilon));
         //problems
         const BaseLib::Options* op_problems = option->getSubGroup("problems");
         std::vector<T_I*> list_subproblems;
@@ -88,7 +88,7 @@ private:
             if (str.find("M")==0) {
                 sys = buildMonolithicSystem(op_sub, eqs_fac);
             } else if (str.compare("P")==0) {
-                sys = buildPartitionedSystem(op_sub, eqs_fac, check_fac);
+                sys = buildPartitionedSystem(op_sub, eqs_fac);
             }
             if (sys!=0) {
                 part->addProblem(*sys);
@@ -99,7 +99,14 @@ private:
     }
 };
 
-typedef class TemplateCouplingStrucutreBuilder4SysEqs<ICoupledSystem,MyCouplingEQS,PartitionedProblem,PartitionedAlgorithmFactory> CouplingStrucutreBuilder4SysEqs;
+template <class T_CONVERGENCE>
+struct CouplingStrucutreBuilder4SysEqs
+{
+    typedef TemplateCouplingStrucutreBuilder4SysEqs<ICoupledSystem,MyCouplingEQS<T_CONVERGENCE>,PartitionedProblem,PartitionedAlgorithmFactory> type;
+
+};
+
+//typedef class TemplateCouplingStrucutreBuilder4SysEqs<ICoupledSystem,MyCouplingEQS,PartitionedProblem,PartitionedAlgorithmFactory> CouplingStrucutreBuilder4SysEqs;
 
 
 } //end

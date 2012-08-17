@@ -14,6 +14,7 @@
 
 #include "NumLib/IOSystem/IIOSystem.h"
 #include "NumLib/IOSystem/INamedIO.h"
+#include "NumLib/Coupling/Algorithm/IConvergenceCheck.h"
 
 namespace NumLib
 {
@@ -32,6 +33,9 @@ public:
 
     /// check consistency
     virtual bool check() const= 0;
+
+    /// return a convergence check for this system
+    virtual IConvergenceCheck* getConvergenceChecker() = 0;
 };
 
 }

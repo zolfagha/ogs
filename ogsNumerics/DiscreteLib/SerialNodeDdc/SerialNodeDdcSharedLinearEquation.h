@@ -14,10 +14,12 @@
 
 #include "BaseLib/BidirectionalMap.h"
 #include "MeshLib/Core/IMesh.h"
-#include "DiscreteLib/Core/DiscreteSystem.h"
-#include "DiscreteLib/LinearEquation/MeshBasedDiscreteLinearEquation.h"
-#include "DiscreteLib/DDC/DDCGlobal.h"
-#include "DDCDiscreteVector.h"
+#include "DiscreteLib/Serial/DiscreteSystem.h"
+#include "DiscreteLib/Serial/DiscreteLinearEquation.h"
+#include "DiscreteLib/DDC/DecomposedDomain.h"
+#include "DiscreteLib/DDC/SubDomain.h"
+#include "DiscreteLib/Utils/SparsityBuilderDDC.h"
+#include "DecomposedVector.h"
 
 namespace DiscreteLib
 {
@@ -25,19 +27,27 @@ namespace DiscreteLib
 template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
 class SerialNodeDdcSharedLinearEquation : public IDiscreteLinearEquation
 {
-public:
-    SerialNodeDdcSharedLinearEquation(DDCGlobal &ddc_global, T_LINEAR_SOLVER &shared_linear_solver, DofEquationIdTable &global_dofManager)
+private:
+    SerialNodeDdcSharedLinearEquation(IDiscreteSystem &sys, DecomposedDomain* ddc_global, T_LINEAR_SOLVER* shared_linear_solver, DofEquationIdTable* global_dofManager)
+    : _ddc_global(ddc_global), _sheared_eqs(shared_linear_solver), _global_dofManager(global_dofManager)
     {
-        _ddc_global = &ddc_global;
-        for (size_t i=0; i<ddc_global.getNumberOfSubDomains(); i++) {
-            DDCSubDomain* dom = ddc_global.getSubDomain(i);
+        for (size_t i=0; i<ddc_global->getNumberOfSubDomains(); i++) {
+            SubDomain* dom = ddc_global->getSubDomain(i);
             DofEquationIdTable *local_dofManager = new DofEquationIdTable();
-            _list_local_eq.push_back(new TemplateMeshBasedDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(*dom->getLoalMesh(), shared_linear_solver, *local_dofManager));
+            _list_local_eq.push_back(DiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>::createInstance(sys, dom->getLoalMesh(), shared_linear_solver, local_dofManager));
         }
         _do_create_eqs = true;
-        _sheared_eqs = &shared_linear_solver;
-        _global_dofManager = &global_dofManager;
     };
+
+public:
+    static SerialNodeDdcSharedLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>*
+    createInstance(IDiscreteSystem &sys, DecomposedDomain* ddc_global, T_LINEAR_SOLVER* shared_linear_solver, DofEquationIdTable* global_dofManager)
+    {
+        SerialNodeDdcSharedLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>* eqs;
+        eqs = new SerialNodeDdcSharedLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>(sys, ddc_global, shared_linear_solver, global_dofManager);
+        sys.addLinearEquation(eqs);
+        return eqs;
+    }
 
     virtual ~SerialNodeDdcSharedLinearEquation() 
     {
@@ -57,7 +67,7 @@ public:
             //local dof
             size_t mesh_id = _ddc_global->getID();
             for (size_t i=0; i<_list_local_eq.size(); i++) {
-                DDCSubDomain* dom = _ddc_global->getSubDomain(i);
+                SubDomain* dom = _ddc_global->getSubDomain(i);
                 MeshLib::IMesh* local_msh = dom->getLoalMesh();
                 DofEquationIdTable *local_dofManager = _list_local_eq[i]->getDofMapManger();
                 // for each var
@@ -165,7 +175,7 @@ public:
     }
 
 private:
-    DDCGlobal* _ddc_global;
+    DecomposedDomain* _ddc_global;
     std::vector<AbstractMeshBasedDiscreteLinearEquation*> _list_local_eq;
     T_LINEAR_SOLVER* _sheared_eqs;
     bool _do_create_eqs;

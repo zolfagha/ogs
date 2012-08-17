@@ -13,9 +13,9 @@
 #pragma once
 
 #include <vector>
-#include "DiscreteLib/Vector/DiscreteVector.h"
+#include "DiscreteLib/Serial/DiscreteVector.h"
 #include "DiscreteLib/Core/LocalDataType.h"
-#include "DiscreteLib/EquationId/DofEquationIdTable.h"
+#include "DiscreteLib/Utils/DofEquationIdTable.h"
 
 namespace DiscreteLib
 {

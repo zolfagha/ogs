@@ -24,6 +24,7 @@
 namespace NumLib
 {
 
+template <class T_CONVERGENCE>
 class MyCouplingEQS : public AbstractMonolithicSystem<ICoupledSystem>
 {
 public:
@@ -82,6 +83,11 @@ public:
     size_t getNumberOfInputParameters() const {return _inactive_variables.size();};
     size_t getNumberOfParameters() const {return _inactive_variables.size() + _active_variables.size();};
 
+    virtual NumLib::IConvergenceCheck* getConvergenceChecker()
+    {
+        return &_checker;
+    }
+
 private:
     bool isActiveVariable(const Variable* var) const
     {
@@ -114,6 +120,7 @@ private:
     const std::vector<Variable*> _active_variables;
     std::vector<Variable*> _inactive_variables;
     const std::vector<LinearEquation*> _equations;
+    T_CONVERGENCE _checker;
 };
 
 } //end

@@ -13,7 +13,7 @@
 #include "GeoProcessBuilder.h"
 
 #include "ProcessLib/ProcessFactoryImpl.h"
-#include "modules/ProcessList.h"
+#include "UserModules/ProcessList.h"
 
 ProcessLib::AbstractProcessBuilder* GeoProcessBuilder::_obj = 0;
 
@@ -26,5 +26,5 @@ ProcessLib::AbstractProcessBuilder* GeoProcessBuilder::getInstance()
 
 GeoProcessBuilder::GeoProcessBuilder()
 {
-#include "modules/ProcessReg.txt"
+#include "UserModules/ProcessReg.h"
 }
