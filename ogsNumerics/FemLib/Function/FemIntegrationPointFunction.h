@@ -21,6 +21,7 @@
 #include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "DiscreteLib/Core/IDiscreteVector.h"
 #include "NumLib/Function/TXFunction.h"
+#include "NumLib/Function/ITXDiscreteFunction.h"
 
 
 
@@ -31,7 +32,7 @@ namespace FemLib
  * \brief Template class for FEM integration point-based functions
  */
 template<class T_DIS_SYS, typename Tvalue>
-class TemplateFEMIntegrationPointFunction : public NumLib::ITXFunction
+class TemplateFEMIntegrationPointFunction : public NumLib::ITXDiscreteFunction<MathLib::TemplateVectorX<Tvalue> >
 {
 public:
     typedef MathLib::TemplateVectorX<Tvalue> IntegrationPointVectorType;
@@ -142,7 +143,12 @@ public:
         return (*_values)[i_e].size()>0;
     }
 
-    const MyDiscreteVector* getElementValues() const
+    const MyDiscreteVector* getDiscreteData() const
+    {
+        return _values;
+    }
+
+    MyDiscreteVector* getDiscreteData()
     {
         return _values;
     }

@@ -88,6 +88,12 @@ public:
     {
         return static_cast<const T*>(_list_var_data[var_id]);
     }
+    /// return the variable with the given index
+    template <class T>
+    T* get(size_t var_id)
+    {
+        return const_cast<T*>(static_cast<const T*>(_list_var_data[var_id]));
+    }
 
     /// register the variable
     size_t add(size_t key, bool is_fixed=false)

@@ -47,7 +47,7 @@ public:
         MeshLib::TopologySequentialNodes2Elements node2eles(*msh);
         Tvalue v0 = ele_var.getIntegrationPointValues(0)[0];
         v0 *= .0;
-        DiscreteLib::IDiscreteVector<Tvalue>* node_vec = nod_var.getNodalValues();
+        DiscreteLib::IDiscreteVector<Tvalue>* node_vec = nod_var.getDiscreteData();
         (*node_vec) = v0;
 
         for (size_t i=0; i<msh->getNumberOfElements(); i++) {

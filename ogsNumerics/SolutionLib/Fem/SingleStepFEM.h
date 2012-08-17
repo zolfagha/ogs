@@ -164,7 +164,7 @@ SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER>::SingleStepFEM(MyDiscreteSyste
 
     // copy values of each variable to one solution vector
     for (size_t i=0; i<n_var; i++) {
-        SolutionVector* vec_var = problem->getVariable(i)->getIC()->getNodalValues();
+        SolutionVector* vec_var = problem->getVariable(i)->getIC()->getDiscreteData();
         DiscreteLib::setGlobalVector(_dofManager, i, msh->getID(), *vec_var, *_x_n1);
     }
 
@@ -249,7 +249,7 @@ int SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER>::solveTimeStep(const NumLi
     // distribute solution vector to local vector for each variable
     for (size_t i=0; i<n_var; i++) {
         //SolutionVector* vec_var = _problem->getVariable(i)->getIC()->getNodalValues();
-        DiscreteLib::setLocalVector(_dofManager, i, msh_id, *_x_n1, *_vec_u_n1[i]->getNodalValues());
+        DiscreteLib::setLocalVector(_dofManager, i, msh_id, *_x_n1, *_vec_u_n1[i]->getDiscreteData());
     }
 
     return 0;

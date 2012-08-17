@@ -25,6 +25,7 @@
 #include "DiscreteLib/Core/IDiscreteVector.h"
 
 #include "NumLib/Function/TXFunction.h"
+#include "NumLib/Function/ITXDiscreteFunction.h"
 
 #include "FemLib/Core/Element/IFemElement.h"
 #include "FemLib/Tools/FemElementObjectContainer.h"
@@ -45,7 +46,7 @@ namespace FemLib
  * @tparam Tvalue Nodal value type, e.g. double, vector
  */
 template<class T_DIS_SYS, typename Tvalue>
-class TemplateFEMNodalFunction : public NumLib::ITXFunction
+class TemplateFEMNodalFunction : public NumLib::ITXDiscreteFunction<Tvalue>
 {
 public:
     typedef TemplateFEMNodalFunction<T_DIS_SYS, Tvalue> MyClassType;
@@ -137,13 +138,13 @@ public:
     }
 
     /// get nodal values
-    MyVector* getNodalValues()
+    MyVector* getDiscreteData()
     {
         return _nodal_values;
     }
 
     ///
-    const MyVector* getNodalValues() const
+    const MyVector* getDiscreteData() const
     {
         return _nodal_values;
     }
@@ -220,7 +221,7 @@ private:
 };
 
 template <class T_DIS_SYS>
-class TemplateFEMNodalFunction<T_DIS_SYS, double> : public NumLib::ITXFunction
+class TemplateFEMNodalFunction<T_DIS_SYS, double> : public NumLib::ITXDiscreteFunction<double>
 {
 public:
     inline void eval(const NumLib::TXPosition x,  NumLib::ITXFunction::DataType &v) const
@@ -291,13 +292,13 @@ public:
     }
 
     /// get nodal values
-    MyVector* getNodalValues()
+    MyVector* getDiscreteData()
     {
         return _nodal_values;
     }
 
     ///
-    const MyVector* getNodalValues() const
+    const MyVector* getDiscreteData() const
     {
         return _nodal_values;
     }
