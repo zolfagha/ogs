@@ -1,12 +1,12 @@
 # Source files
 FILE(GLOB MeshLib_Core_Files MeshLib/Core/*.h MeshLib/Core/*.cpp)
-SOURCE_GROUP(ogsMesh\\Core FILES ${MeshLib_Core_Files})
+SOURCE_GROUP(ogsCore\\MeshLib\\Core FILES ${MeshLib_Core_Files})
 
 FILE(GLOB MeshLib_Topology_Files MeshLib/Topology/*.h MeshLib/Topology/*.cpp)
-SOURCE_GROUP(ogsMesh\\Topology FILES ${MeshLib_Topology_Files})
+SOURCE_GROUP(ogsCore\\MeshLib\\Topology FILES ${MeshLib_Topology_Files})
 
 FILE(GLOB MeshLib_Tools_Files MeshLib/Tools/*.h MeshLib/Tools/*.cpp)
-SOURCE_GROUP(ogsMesh\\Tools FILES ${MeshLib_Tools_Files})
+SOURCE_GROUP(ogsCore\\MeshLib\\Tools FILES ${MeshLib_Tools_Files})
 
 #
 LIST(APPEND MeshLib_Files
