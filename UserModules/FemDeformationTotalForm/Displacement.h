@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <string>
 #include "BaseLib/CodingTools.h"
 #include "MathLib/LinAlg/LinearEquations/LisInterface.h"
 #include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
@@ -26,39 +27,45 @@
 #include "LinearElasticResidualLocalAssembler.h"
 #include "LinearElasticJacobianLocalAssembler.h"
 
-#include "DiscreteLib/Serial/DiscreteSystem.h"
-typedef DiscreteLib::DiscreteSystem MyDiscreteSystem;
-
-typedef SolutionLib::TemplateFemEquation<
-        MyDiscreteSystem,
-        FemLinearElasticLinearLocalAssembler,
-        FemLinearElasticResidualLocalAssembler,
-        FemLinearElasticJacobianLocalAssembler
-        >
-        FemLinearElasticEquation;
-
-typedef SolutionLib::FemIVBVProblem<
-        MyDiscreteSystem,
-        FemLinearElasticEquation
-        > FemLinearElasticProblem;
-
-
-
+/**
+ *
+ */
+template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER>
 class FunctionDisplacement
 : public ProcessLib::TemplateTransientProcess<0,1>
 {
-    enum Out { Displacement=0 };
-    //enum Out { Displacement=0, Strain=1, Stress=2 };
 public:
-    typedef FemLinearElasticProblem MyProblemType;
-    typedef MyProblemType::EquationType MyEquationType;
+    enum Out { Displacement=0 };
+
+    typedef T_DISCRETE_SYSTEM MyDiscreteSystem;
+    typedef T_LINEAR_SOLVER MyLinearSolver;
+    // local assembler
+    typedef FemLinearElasticLinearLocalAssembler MyLinearAssemblerType;
+    typedef FemLinearElasticResidualLocalAssembler MyResidualAssemblerType;
+    typedef FemLinearElasticJacobianLocalAssembler MyJacobianAssemblerType;
+    // Equation definition
+    typedef SolutionLib::TemplateFemEquation<
+            MyDiscreteSystem,
+            MyLinearAssemblerType,
+            MyResidualAssemblerType,
+            MyJacobianAssemblerType
+            >
+    MyEquationType;
+    // IVBV problem definition
+    typedef SolutionLib::FemIVBVProblem<
+            MyDiscreteSystem,
+            MyEquationType
+            > MyProblemType;
+    // Solution algorithm definition
     typedef SolutionLib::SingleStepFEM
             <
-                FemLinearElasticProblem,
-                //MathLib::DenseLinearEquations
-                MathLib::CRSLisSolver
+                MyProblemType,
+                MyLinearSolver
             > MySolutionType;
-    typedef FemLib::FemNodalFunctionVector<MyDiscreteSystem>::type MyNodalFunctionVector;
+
+    typedef typename FemLib::FemNodalFunctionScalar<MyDiscreteSystem>::type MyNodalFunctionScalar;
+    typedef typename FemLib::FemNodalFunctionVector<MyDiscreteSystem>::type MyNodalFunctionVector;
+    typedef typename MyProblemType::MyVariable MyVariable;
 
     ///
     FunctionDisplacement()
@@ -79,6 +86,11 @@ public:
     /// finalize but nothing to do here
     virtual void finalize() {};
 
+    ///
+    virtual NumLib::IConvergenceCheck* getConvergenceChecker()
+    {
+        return &_checker;
+    }
 
 protected:
     virtual void updateOutputParameter(const NumLib::TimeStep &time);
@@ -88,19 +100,21 @@ protected:
     virtual void output(const NumLib::TimeStep &time);
 
 private:
+    MyVariable* getDisplacementComponent(MyVariable *u_x, MyVariable* u_y, MyVariable* u_z, const std::string &var_name);
     //void calculateStressStrain();
 
     DISALLOW_COPY_AND_ASSIGN(FunctionDisplacement);
 
 private:
-    FemLinearElasticProblem* _problem;
+    MyProblemType* _problem;
     MySolutionType* _solution;
     FemLib::LagrangianFeObjectContainer* _feObjects;
+    NumLib::DiscreteDataConvergenceCheck _checker;
     MyNodalFunctionVector* _displacement;
 //    FemLib::FEMIntegrationPointFunctionVector* _strain;
 //    FemLib::FEMIntegrationPointFunctionVector* _stress;
 
 };
 
-
+#include "Displacement.hpp"
 

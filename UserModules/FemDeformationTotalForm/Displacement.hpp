@@ -1,5 +1,5 @@
 
-#include "Displacement.h"
+//#include "Displacement.h"
 
 #include "logog.hpp"
 
@@ -14,7 +14,8 @@
 
 #include "FemLinearElasticTools.h"
 
-FemLinearElasticProblem::MyVariable* getDisplacementComponent(FemLinearElasticProblem::MyVariable *u_x, FemLinearElasticProblem::MyVariable* u_y, FemLinearElasticProblem::MyVariable* u_z, const std::string &var_name)
+template <class T1, class T2>
+typename FunctionDisplacement<T1,T2>::MyVariable* FunctionDisplacement<T1,T2>::getDisplacementComponent(MyVariable *u_x, MyVariable* u_y, MyVariable* u_z, const std::string &var_name)
 {
     if (var_name.compare("DISPLACEMENT_X1")==0) {
         return u_x;
@@ -25,7 +26,8 @@ FemLinearElasticProblem::MyVariable* getDisplacementComponent(FemLinearElasticPr
     }
 }
 
-bool FunctionDisplacement::initialize(const BaseLib::Options &option)
+template <class T1, class T2>
+bool FunctionDisplacement<T1,T2>::initialize(const BaseLib::Options &option)
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
     size_t msh_id = option.getOption<size_t>("MeshID");
@@ -33,14 +35,15 @@ bool FunctionDisplacement::initialize(const BaseLib::Options &option)
     NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
 
     //mesh and FE objects
-    MyProblemType::MyDiscreteSystem* dis = (MyProblemType::MyDiscreteSystem*)femData->list_dis_sys[msh_id]; //TODO
-    MeshLib::IMesh* msh = dis->getMesh();
+    MeshLib::IMesh* msh = femData->list_mesh[msh_id];
+    MyDiscreteSystem* dis = 0;
+    dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
     _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
 
     // equations
-    MyEquationType::LinearAssemblerType* linear_assembler = new MyEquationType::LinearAssemblerType(_feObjects);
-    MyEquationType::ResidualAssemblerType* r_assembler = new MyEquationType::ResidualAssemblerType(_feObjects);
-    MyEquationType::JacobianAssemblerType* j_eqs = new MyEquationType::JacobianAssemblerType(_feObjects);
+    MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_feObjects);
+    MyResidualAssemblerType* r_assembler = new MyResidualAssemblerType(_feObjects);
+    MyJacobianAssemblerType* j_eqs = new MyJacobianAssemblerType(_feObjects);
 
     // set up problem
     _problem = new MyProblemType(dis);
@@ -48,11 +51,11 @@ bool FunctionDisplacement::initialize(const BaseLib::Options &option)
     eqs->initialize(linear_assembler, r_assembler, j_eqs);
     _problem->setTimeSteppingFunction(*tim);
     // set up variable
-    MyProblemType::MyVariable* u_x = _problem->addVariable("u_x");
-    MyProblemType::MyVariable* u_y = _problem->addVariable("u_y");
+    MyVariable* u_x = _problem->addVariable("u_x");
+    MyVariable* u_y = _problem->addVariable("u_y");
     // IC
     NumLib::TXFunctionBuilder f_builder;
-    MyProblemType::MyVariable::MyNodalFunctionScalar* u0 = new MyProblemType::MyVariable::MyNodalFunctionScalar();
+    MyNodalFunctionScalar* u0 = new MyNodalFunctionScalar();
     u0->initialize(*dis, FemLib::PolynomialOrder::Linear, 0);
     u_x->setIC(u0);
     u_y->setIC(u0);
@@ -100,7 +103,7 @@ bool FunctionDisplacement::initialize(const BaseLib::Options &option)
 
     // set up solution
     _solution = new MySolutionType(dis, _problem);
-    MySolutionType::LinearSolverType* linear_solver = _solution->getLinearEquationSolver();
+    typename MySolutionType::LinearSolverType* linear_solver = _solution->getLinearEquationSolver();
     const BaseLib::Options* optNum = option.getSubGroup("Numerics");
     linear_solver->setOption(*optNum);
     _solution->getNonlinearSolver()->setOption(*optNum);
@@ -126,7 +129,8 @@ bool FunctionDisplacement::initialize(const BaseLib::Options &option)
     return true;
 }
 
-void FunctionDisplacement::updateOutputParameter(const NumLib::TimeStep &/*time*/)
+template <class T1, class T2>
+void FunctionDisplacement<T1,T2>::updateOutputParameter(const NumLib::TimeStep &/*time*/)
 {
     for (size_t i=0; i<_displacement->getNumberOfNodes(); i++) {
         _displacement->getValue(i)(0) = _solution->getCurrentSolution(0)->getValue(i);
@@ -137,7 +141,8 @@ void FunctionDisplacement::updateOutputParameter(const NumLib::TimeStep &/*time*
     //calculateStressStrain();
 }
 
-void FunctionDisplacement::output(const NumLib::TimeStep &/*time*/)
+template <class T1, class T2>
+void FunctionDisplacement<T1,T2>::output(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();

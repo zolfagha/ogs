@@ -10,30 +10,34 @@
  * Created on 2012-08-14 by Norihiro Watanabe
  */
 
-#include "NodalStressStrain.h"
+//#include "NodalStressStrain.h"
 
 #include "logog.hpp"
 
+#include "DiscreteLib/Utils/DiscreteSystemContainerPerMesh.h"
 #include "FemLib/Post/Extrapolation.h"
 
 #include "Ogs6FemData.h"
 #include "FemLinearElasticTools.h"
 
-
-size_t FunctionNodalStressStrain::getNumberOfStrainComponents() const
+template <class T>
+size_t FunctionNodalStressStrain<T>::getNumberOfStrainComponents() const
 {
     MeshLib::IMesh* msh = _dis->getMesh();
     const size_t dim = msh->getDimension();
     return (dim==2 ? 4 : 6);
 }
 
-bool FunctionNodalStressStrain::initialize(const BaseLib::Options &option)
+template <class T>
+bool FunctionNodalStressStrain<T>::initialize(const BaseLib::Options &option)
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
 
     size_t msh_id = option.getOption<size_t>("MeshID");
-    _dis = (MyDiscreteSystem*)femData->list_dis_sys[msh_id]; //TODO
+    MeshLib::IMesh* msh = femData->list_mesh[msh_id];
+    _dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
     const size_t n_strain_components = getNumberOfStrainComponents();
+    _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
 
     // create strain, stress vectors
     NumLib::LocalVector v0(n_strain_components);
@@ -62,7 +66,8 @@ bool FunctionNodalStressStrain::initialize(const BaseLib::Options &option)
     return true;
 }
 
-void FunctionNodalStressStrain::accept(const NumLib::TimeStep &/*time*/)
+template <class T>
+void FunctionNodalStressStrain<T>::accept(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
     const size_t n_strain_components = getNumberOfStrainComponents();
@@ -75,7 +80,8 @@ void FunctionNodalStressStrain::accept(const NumLib::TimeStep &/*time*/)
     }
 };
 
-int FunctionNodalStressStrain::solveTimeStep(const NumLib::TimeStep &/*time*/)
+template <class T>
+int FunctionNodalStressStrain<T>::solveTimeStep(const NumLib::TimeStep &/*time*/)
 {
     INFO("Solving NODAL_STRESS_STRAIN...");
 
@@ -83,6 +89,8 @@ int FunctionNodalStressStrain::solveTimeStep(const NumLib::TimeStep &/*time*/)
     MyIntegrationPointFunctionVector* stress = (MyIntegrationPointFunctionVector*)getInput(GpStress);
 
     FemLib::FemExtrapolationAverage<MyDiscreteSystem, NumLib::LocalVector> extrapo;
+    _nodal_strain->setFeObjectContainer(_feObjects);
+    _nodal_stress->setFeObjectContainer(_feObjects);
     extrapo.extrapolate(*strain, *_nodal_strain);
     extrapo.extrapolate(*stress, *_nodal_stress);
 

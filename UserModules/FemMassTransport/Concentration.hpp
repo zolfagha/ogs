@@ -11,10 +11,11 @@
  */
 
 
-#include "Concentration.h"
+//#include "Concentration.h"
 
 #include "logog.hpp"
 
+#include "DiscreteLib/Utils/DiscreteSystemContainerPerMesh.h"
 #include "FemLib/Function/FemNodalFunction.h"
 #include "NumLib/Function/TXFunctionBuilder.h"
 #include "OutputIO/OutputBuilder.h"
@@ -22,7 +23,8 @@
 #include "SolutionLib/Fem/FemSourceTerm.h"
 #include "Ogs6FemData.h"
 
-bool FunctionConcentration::initialize(const BaseLib::Options &option)
+template <class T1, class T2>
+bool FunctionConcentration<T1,T2>::initialize(const BaseLib::Options &option)
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
     size_t msh_id = option.getOption<size_t>("MeshID");
@@ -30,8 +32,9 @@ bool FunctionConcentration::initialize(const BaseLib::Options &option)
     NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
 
     //mesh and FE objects
-    MyProblemType::MyDiscreteSystem* dis = (MyProblemType::MyDiscreteSystem*)femData->list_dis_sys[msh_id]; //TODO
-    MeshLib::IMesh* msh = dis->getMesh();
+    MeshLib::IMesh* msh = femData->list_mesh[msh_id];
+    MyDiscreteSystem* dis = 0;
+    dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
     _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
 
     //Compound
@@ -43,9 +46,9 @@ bool FunctionConcentration::initialize(const BaseLib::Options &option)
     _compound = femData->list_compound[compound_id];
 
     // equations
-    MyEquationType::LinearAssemblerType* linear_assembler = new MyEquationType::LinearAssemblerType(_compound, _feObjects);
-    MyEquationType::ResidualAssemblerType* r_assembler = new MyEquationType::ResidualAssemblerType(_compound, _feObjects);
-    MyEquationType::JacobianAssemblerType* j_eqs = new MyEquationType::JacobianAssemblerType(_compound, _feObjects);
+    MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_compound, _feObjects);
+    MyResidualAssemblerType* r_assembler = new MyResidualAssemblerType(_compound, _feObjects);
+    MyJacobianAssemblerType* j_eqs = new MyJacobianAssemblerType(_compound, _feObjects);
 
     // set up problem
     _problem = new MyProblemType(dis);
@@ -53,10 +56,10 @@ bool FunctionConcentration::initialize(const BaseLib::Options &option)
     eqs->initialize(linear_assembler, r_assembler, j_eqs);
     _problem->setTimeSteppingFunction(*tim);
     // set up variable
-    MyProblemType::MyVariable* concentration = _problem->addVariable("concentration");
+    typename MyProblemType::MyVariable* concentration = _problem->addVariable("concentration");
     // IC
     NumLib::TXFunctionBuilder f_builder;
-    MyProblemType::MyVariable::MyNodalFunctionScalar* c0 = new MyProblemType::MyVariable::MyNodalFunctionScalar();
+    typename MyProblemType::MyVariable::MyNodalFunctionScalar* c0 = new typename MyProblemType::MyVariable::MyNodalFunctionScalar();
     c0->initialize(*dis, FemLib::PolynomialOrder::Linear, 0);
     concentration->setIC(c0);
     // BC
@@ -101,13 +104,12 @@ bool FunctionConcentration::initialize(const BaseLib::Options &option)
 
     // set up solution
     _solution = new MySolutionType(dis, _problem);
-    MySolutionType::LinearSolverType* linear_solver = _solution->getLinearEquationSolver();
+    MyLinearSolver* linear_solver = _solution->getLinearEquationSolver();
     const BaseLib::Options* optNum = option.getSubGroup("Numerics");
     linear_solver->setOption(*optNum);
     _solution->getNonlinearSolver()->setOption(*optNum);
 
     // set initial output
-    NumLib::ITXFunction* temp = _solution->getCurrentSolution(0);
     OutputVariableInfo var(_compound->name, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput(var.name, var); 
 
@@ -117,7 +119,8 @@ bool FunctionConcentration::initialize(const BaseLib::Options &option)
     return true;
 }
 
-void FunctionConcentration::initializeTimeStep(const NumLib::TimeStep &/*time*/)
+template <class T1, class T2>
+void FunctionConcentration<T1, T2>::initializeTimeStep(const NumLib::TimeStep &/*time*/)
 {
     const NumLib::ITXFunction *vel = this->getInput<NumLib::ITXFunction>(Velocity);
     this->_problem->getEquation()->getLinearAssembler()->setVelocity(vel);
@@ -125,12 +128,14 @@ void FunctionConcentration::initializeTimeStep(const NumLib::TimeStep &/*time*/)
     this->_problem->getEquation()->getJacobianAssembler()->setVelocity(vel);
 }
 
-void FunctionConcentration::updateOutputParameter(const NumLib::TimeStep &/*time*/)
+template <class T1, class T2>
+void FunctionConcentration<T1, T2>::updateOutputParameter(const NumLib::TimeStep &/*time*/)
 {
     setOutput(Concentration, _solution->getCurrentSolution(0));
 }
 
-void FunctionConcentration::output(const NumLib::TimeStep &/*time*/)
+template <class T1, class T2>
+void FunctionConcentration<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();

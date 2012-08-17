@@ -10,27 +10,30 @@
  * Created on 2012-07-13 by Norihiro Watanabe
  */
 
-#include "ElementStressStrain.h"
+//#include "ElementStressStrain.h"
 
 #include "logog.hpp"
 
+#include "DiscreteLib/Utils/DiscreteSystemContainerPerMesh.h"
 #include "Ogs6FemData.h"
 #include "FemLinearElasticTools.h"
 
-
-size_t FunctionElementStressStrain::getNumberOfStrainComponents() const
+template <class T>
+size_t FunctionElementStressStrain<T>::getNumberOfStrainComponents() const
 {
     MeshLib::IMesh* msh = _dis->getMesh();
     const size_t dim = msh->getDimension();
     return (dim==2 ? 4 : 6);
 }
 
-bool FunctionElementStressStrain::initialize(const BaseLib::Options &option)
+template <class T>
+bool FunctionElementStressStrain<T>::initialize(const BaseLib::Options &option)
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
 
     size_t msh_id = option.getOption<size_t>("MeshID");
-    _dis = (MyDiscreteSystem*)femData->list_dis_sys[msh_id]; //TODO
+    MeshLib::IMesh* msh = femData->list_mesh[msh_id];
+    _dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
     const size_t n_strain_components = getNumberOfStrainComponents();
 
     // create strain, stress vectors
@@ -40,6 +43,7 @@ bool FunctionElementStressStrain::initialize(const BaseLib::Options &option)
     _strain->initialize(_dis, v0);
     _stress = new MyIntegrationPointFunctionVector();
     _stress->initialize(_dis, v0);
+    _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
 
     // set initial output
     for (size_t i=0; i<n_strain_components; i++) {
@@ -60,7 +64,8 @@ bool FunctionElementStressStrain::initialize(const BaseLib::Options &option)
     return true;
 }
 
-void FunctionElementStressStrain::accept(const NumLib::TimeStep &/*time*/)
+template <class T>
+void FunctionElementStressStrain<T>::accept(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
     const size_t n_strain_components = getNumberOfStrainComponents();
@@ -73,7 +78,8 @@ void FunctionElementStressStrain::accept(const NumLib::TimeStep &/*time*/)
     }
 };
 
-int FunctionElementStressStrain::solveTimeStep(const NumLib::TimeStep &/*time*/)
+template <class T>
+int FunctionElementStressStrain<T>::solveTimeStep(const NumLib::TimeStep &/*time*/)
 {
     INFO("Solving ELEMENT_STRESS_STRAIN...");
 
@@ -81,7 +87,7 @@ int FunctionElementStressStrain::solveTimeStep(const NumLib::TimeStep &/*time*/)
     MyNodalFunctionVector* u = (MyNodalFunctionVector*)getInput(Displacement);
     MyIntegrationPointFunctionVector* strain = _strain;
     MyIntegrationPointFunctionVector* stress = _stress;
-    FemLib::LagrangianFeObjectContainer* feObjects = u->getFeObjectContainer();
+    FemLib::LagrangianFeObjectContainer* feObjects = _feObjects;
 
     const size_t dim = msh->getDimension();
     const size_t n_strain_components = getNumberOfStrainComponents();

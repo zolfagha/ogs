@@ -13,7 +13,7 @@
 #pragma once
 
 #include "BaseLib/CodingTools.h"
-#include "MathLib/LinAlg/LinearEquations/LisInterface.h"
+#include "NumLib/Function/DiscreteDataConvergenceCheck.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
 #include "SolutionLib/Fem/FemIVBVProblem.h"
@@ -24,47 +24,41 @@
 #include "GWTimeODELocalAssembler.h"
 #include "GWJacobianLocalAssembler.h"
 
-#include "DiscreteLib/Serial/DiscreteSystem.h"
-typedef DiscreteLib::DiscreteSystem MyDiscreteSystem;
 
-//--------------------------------------------------------------------------------------------------
-// Equation definition
-//--------------------------------------------------------------------------------------------------
-typedef SolutionLib::TemplateFemEquation <
-        MyDiscreteSystem,
-        GroundwaterFlowTimeODELocalAssembler<
-            NumLib::ElementWiseTimeEulerEQSLocalAssembler>,
-        GroundwaterFlowTimeODELocalAssembler<
-            NumLib::ElementWiseTimeEulerResidualLocalAssembler>,
-        GroundwaterFlowJacobianLocalAssembler
-        >
-        FemGWEquation;
-
-
-//--------------------------------------------------------------------------------------------------
-// IVBV problem definition
-//--------------------------------------------------------------------------------------------------
-typedef SolutionLib::FemIVBVProblem<
-        MyDiscreteSystem,
-        FemGWEquation
-        > FemGWProblem;
-
-
-
-//--------------------------------------------------------------------------------------------------
-// Function definition
-//--------------------------------------------------------------------------------------------------
+/**
+ *
+ */
+template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER>
 class FunctionHead
 : public ProcessLib::TemplateTransientProcess<0,1>
 {
-    enum Out { Head=0 };
 public:
-    typedef FemGWProblem MyProblemType;
-    typedef MyProblemType::EquationType MyEquationType;
+    enum Out { Head=0 };
+
+    typedef T_DISCRETE_SYSTEM MyDiscreteSystem;
+    typedef T_LINEAR_SOLVER MyLinearSolver;
+    // local assembler
+    typedef GroundwaterFlowTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler> MyLinearAssemblerType;
+    typedef GroundwaterFlowTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyResidualAssemblerType;
+    typedef GroundwaterFlowJacobianLocalAssembler MyJacobianAssemblerType;
+    // Equation definition
+    typedef SolutionLib::TemplateFemEquation<
+            MyDiscreteSystem,
+            MyLinearAssemblerType,
+            MyResidualAssemblerType,
+            MyJacobianAssemblerType
+            >
+            MyEquationType;
+    // IVBV problem definition
+    typedef SolutionLib::FemIVBVProblem<
+            MyDiscreteSystem,
+            MyEquationType
+            > MyProblemType;
+    // Solution algorithm definition
     typedef SolutionLib::SingleStepFEM
             <
-                FemGWProblem,
-                MathLib::CRSLisSolver
+            MyProblemType,
+            MyLinearSolver
             > MySolutionType;
 
     ///
@@ -85,6 +79,11 @@ public:
     /// finalize but nothing to do here
     virtual void finalize() {};
 
+    ///
+    virtual NumLib::IConvergenceCheck* getConvergenceChecker()
+    {
+        return &_checker;
+    }
 
 protected:
     virtual void updateOutputParameter(const NumLib::TimeStep &time);
@@ -101,8 +100,9 @@ private:
     MyProblemType* _problem;
     MySolutionType* _solution;
     FemLib::LagrangianFeObjectContainer* _feObjects;
+    NumLib::DiscreteDataConvergenceCheck _checker;
 };
 
-
+#include "Head.hpp"
 
 

@@ -5,13 +5,14 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file Head.cpp
+ * \file Head.hpp
  *
  * Created on 2012-07-13 by Norihiro Watanabe
  */
 
-#include "Head.h"
-
+//#include "Head.h"
+#include "logog.hpp"
+#include "DiscreteLib/Utils/DiscreteSystemContainerPerMesh.h"
 #include "FemLib/Function/FemNodalFunction.h"
 #include "NumLib/Function/TXFunctionBuilder.h"
 #include "OutputIO/OutputBuilder.h"
@@ -19,7 +20,8 @@
 #include "SolutionLib/Fem/FemSourceTerm.h"
 #include "Ogs6FemData.h"
 
-bool FunctionHead::initialize(const BaseLib::Options &option)
+template <class T1, class T2>
+bool FunctionHead<T1,T2>::initialize(const BaseLib::Options &option)
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
     size_t msh_id = option.getOption<size_t>("MeshID");
@@ -27,26 +29,28 @@ bool FunctionHead::initialize(const BaseLib::Options &option)
     NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
 
     //mesh and FE objects
-    MyProblemType::MyDiscreteSystem* dis = (MyProblemType::MyDiscreteSystem*)femData->list_dis_sys[msh_id]; //TODO
-    MeshLib::IMesh* msh = dis->getMesh();
+    MeshLib::IMesh* msh = femData->list_mesh[msh_id];
+    MyDiscreteSystem* dis = 0;
+    dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
     _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
 
     // local assemblers
-    FemGWEquation::LinearAssemblerType* linear_assembler = new FemGWEquation::LinearAssemblerType(*_feObjects);
-    FemGWEquation::ResidualAssemblerType* r_assembler = new FemGWEquation::ResidualAssemblerType(*_feObjects);
-    FemGWEquation::JacobianAssemblerType* j_eqs = new FemGWEquation::JacobianAssemblerType(*_feObjects);
+    MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(*_feObjects);
+    MyResidualAssemblerType* r_assembler = new MyResidualAssemblerType(*_feObjects);
+    MyJacobianAssemblerType* j_eqs = new MyJacobianAssemblerType(*_feObjects);
 
     // set up problem
-    _problem = new FemGWProblem(dis);
-    FemGWEquation* eqs = _problem->createEquation();
+    _problem = new MyProblemType(dis);
+    MyEquationType* eqs = _problem->createEquation();
     eqs->initialize(linear_assembler, r_assembler, j_eqs);
     _problem->setTimeSteppingFunction(*tim);
     // set up variable
-    MyProblemType::MyVariable* head = _problem->addVariable("head");
+    typename MyProblemType::MyVariable* head = _problem->addVariable("head");
     // IC
     NumLib::TXFunctionBuilder f_builder;
-    MyProblemType::MyVariable::MyNodalFunctionScalar* h0 = new MyProblemType::MyVariable::MyNodalFunctionScalar();
+    typename MyProblemType::MyVariable::MyNodalFunctionScalar* h0 = new typename MyProblemType::MyVariable::MyNodalFunctionScalar();
     h0->initialize(*dis, FemLib::PolynomialOrder::Linear, 0);
+    h0->setFeObjectContainer(_feObjects);
     head->setIC(h0);
     // BC
     const BaseLib::Options* opBCList = option.getSubGroup("BCList");
@@ -90,7 +94,7 @@ bool FunctionHead::initialize(const BaseLib::Options &option)
 
     // set up solution
     _solution = new MySolutionType(dis, _problem);
-    MySolutionType::LinearSolverType* linear_solver = _solution->getLinearEquationSolver();
+    typename MySolutionType::LinearSolverType* linear_solver = _solution->getLinearEquationSolver();
     const BaseLib::Options* optNum = option.getSubGroup("Numerics");
     linear_solver->setOption(*optNum);
     _solution->getNonlinearSolver()->setOption(*optNum);
@@ -105,12 +109,14 @@ bool FunctionHead::initialize(const BaseLib::Options &option)
     return true;
 }
 
-void FunctionHead::updateOutputParameter(const NumLib::TimeStep &time)
+template <class T1, class T2>
+void FunctionHead<T1,T2>::updateOutputParameter(const NumLib::TimeStep &time)
 {
     setOutput(Head, _solution->getCurrentSolution(0));
 }
 
-void FunctionHead::output(const NumLib::TimeStep &time) 
+template <class T1, class T2>
+void FunctionHead<T1,T2>::output(const NumLib::TimeStep &time)
 {
     //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();

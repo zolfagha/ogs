@@ -13,57 +13,53 @@
 #pragma once
 
 #include "BaseLib/CodingTools.h"
-#include "MathLib/LinAlg/LinearEquations/LisInterface.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
+#include "NumLib/Function/DiscreteDataConvergenceCheck.h"
 #include "SolutionLib/Fem/FemIVBVProblem.h"
 #include "SolutionLib/Fem/FemEquation.h"
 #include "SolutionLib/Fem/SingleStepFEM.h"
 #include "ProcessLib/TemplateTransientProcess.h"
-#include "MaterialLib/Compound.h"
 
+#include "MaterialLib/Compound.h"
 #include "MassTransportTimeODELocalAssembler.h"
 #include "MassTransportJacobianLocalAssembler.h"
 
-#include "DiscreteLib/Serial/DiscreteSystem.h"
-typedef DiscreteLib::DiscreteSystem MyDiscreteSystem;
-
-//--------------------------------------------------------------------------------------------------
-// Equation definition
-//--------------------------------------------------------------------------------------------------
-typedef SolutionLib::TemplateFemEquation<
-        MyDiscreteSystem,
-        MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler>,
-        MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler>,
-        MassTransportJacobianLocalAssembler
-        >
-        FemMTEquation;
-
-//--------------------------------------------------------------------------------------------------
-// IVBV problem definition
-//--------------------------------------------------------------------------------------------------
-typedef SolutionLib::FemIVBVProblem<
-        MyDiscreteSystem,
-        FemMTEquation
-        > FemMTProblem;
-
-
-//--------------------------------------------------------------------------------------------------
-// Function definition
-//--------------------------------------------------------------------------------------------------
+/**
+ *
+ */
+template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER>
 class FunctionConcentration
 : public ProcessLib::TemplateTransientProcess<1,1>
 {
+public:
     enum In { Velocity=0 };
     enum Out { Concentration = 0 };
 
-public:
-    typedef FemMTProblem MyProblemType;
-    typedef MyProblemType::EquationType MyEquationType;
+    typedef T_DISCRETE_SYSTEM MyDiscreteSystem;
+    typedef T_LINEAR_SOLVER MyLinearSolver;
+    // local assembler
+    typedef MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler> MyLinearAssemblerType;
+    typedef MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyResidualAssemblerType;
+    typedef MassTransportJacobianLocalAssembler MyJacobianAssemblerType;
+    // Equation definition
+    typedef SolutionLib::TemplateFemEquation<
+            MyDiscreteSystem,
+            MyLinearAssemblerType,
+            MyResidualAssemblerType,
+            MyJacobianAssemblerType
+            >
+            MyEquationType;
+    // IVBV problem definition
+    typedef SolutionLib::FemIVBVProblem<
+            MyDiscreteSystem,
+            MyEquationType
+            > MyProblemType;
+    // Solution algorithm definition
     typedef SolutionLib::SingleStepFEM
             <
-                FemMTProblem,
-                MathLib::CRSLisSolver
+            MyProblemType,
+            MyLinearSolver
             > MySolutionType;
 
     FunctionConcentration() 
@@ -83,6 +79,11 @@ public:
     /// finalize but nothing to do here
     virtual void finalize() {};
 
+    virtual NumLib::IConvergenceCheck* getConvergenceChecker()
+    {
+        return &_checker;
+    }
+
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
 
@@ -100,5 +101,8 @@ private:
     MySolutionType* _solution;
     FemLib::LagrangianFeObjectContainer* _feObjects;
     MaterialLib::Compound* _compound;
+    NumLib::DiscreteDataConvergenceCheck _checker;
 };
+
+#include "Concentration.hpp"
 

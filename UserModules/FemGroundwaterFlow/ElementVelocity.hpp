@@ -5,27 +5,31 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file ElementVelocity.cpp
+ * \file ElementVelocity.hpp
  *
  * Created on 2012-07-13 by Norihiro Watanabe
  */
 
-#include "ElementVelocity.h"
+//#include "ElementVelocity.h"
 
 #include "logog.hpp"
 #include "MathLib/Vector.h"
+#include "DiscreteLib/Utils/DiscreteSystemContainerPerMesh.h"
 #include "MaterialLib/PorousMedia.h"
 
 #include "Ogs6FemData.h"
 
-bool FunctionElementVelocity::initialize(const BaseLib::Options &option)
+template <class T>
+bool FunctionElementVelocity<T>::initialize(const BaseLib::Options &option)
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
 
     size_t msh_id = option.getOption<size_t>("MeshID");
-    MyDiscreteSystem* dis = (MyDiscreteSystem*)femData->list_dis_sys[msh_id]; //TODO
-    MeshLib::IMesh* msh = dis->getMesh();
+    MeshLib::IMesh* msh = femData->list_mesh[msh_id];
+    MyDiscreteSystem* dis = 0;
+    dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
 
+    _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
     _dis = dis;
     _vel = new MyIntegrationPointFunctionVector();
     _vel->initialize(dis);
@@ -40,7 +44,8 @@ bool FunctionElementVelocity::initialize(const BaseLib::Options &option)
     return true;
 }
 
-void FunctionElementVelocity::accept(const NumLib::TimeStep &/*time*/)
+template <class T>
+void FunctionElementVelocity<T>::accept(const NumLib::TimeStep &/*time*/)
 {
     //std::cout << "Velocity=" << std::endl;
     //_vel->printout();
@@ -50,7 +55,8 @@ void FunctionElementVelocity::accept(const NumLib::TimeStep &/*time*/)
     femData->outController.setOutput(var.name, var); 
 };
 
-int FunctionElementVelocity::solveTimeStep(const NumLib::TimeStep &/*time*/)
+template <class T>
+int FunctionElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &/*time*/)
 {
     INFO("Solving ELEMENT_VELOCITY...");
 
@@ -59,7 +65,7 @@ int FunctionElementVelocity::solveTimeStep(const NumLib::TimeStep &/*time*/)
     MyIntegrationPointFunctionVector *vel = _vel;;
 
 
-    FemLib::LagrangianFeObjectContainer* feObjects = head->getFeObjectContainer();
+    FemLib::LagrangianFeObjectContainer* feObjects = _feObjects;
     //calculate vel (vel=f(h))
     for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
         MeshLib::IElement* e = msh->getElemenet(i_e);
