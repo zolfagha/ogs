@@ -87,7 +87,7 @@ TEST(FEM, testUnstructuredMesh)
     //#Solve
     GWFemTest::calculateHead(gw);
 
-    DiscreteLib::IDiscreteVector<double>* h = gw.head->getNodalValues();
+    DiscreteLib::IDiscreteVector<double>* h = gw.head->getDiscreteData();
     std::vector<double> expected;
     getGWExpectedHead(expected);
 
@@ -102,7 +102,7 @@ TEST(FEM, testStructuredMesh)
     //#Solve
     GWFemTest::calculateHead(gw);
 
-    DiscreteLib::IDiscreteVector<double>* h = gw.head->getNodalValues();
+    DiscreteLib::IDiscreteVector<double>* h = gw.head->getDiscreteData();
     std::vector<double> expected;
     getGWExpectedHead(expected);
 
@@ -124,7 +124,7 @@ TEST(FEM, ExtrapolateAverage1)
     FemExtrapolationAverage<DiscreteLib::DiscreteSystem, NumLib::LocalVector> extrapo;
     extrapo.extrapolate(*gw.vel, nodal_vel);
 
-    DiscreteLib::IDiscreteVector<NumLib::LocalVector> *v = nodal_vel.getNodalValues();
+    DiscreteLib::IDiscreteVector<NumLib::LocalVector> *v = nodal_vel.getDiscreteData();
     NumLib::LocalVector expected(2);
     expected[0] = 1.e-5;
     expected[1] = .0;
@@ -176,10 +176,10 @@ TEST(FEM, ExtrapolateAverage2)
         if (i%3==2) exH[i] = 0.e+6;
     }
 
-    DiscreteLib::IDiscreteVector<double> *h = gw.head->getNodalValues();
+    DiscreteLib::IDiscreteVector<double> *h = gw.head->getDiscreteData();
     ASSERT_DOUBLE_ARRAY_EQ(&exH[0], &(*h)[0], gw.head->getNumberOfNodes(), 10);
 
-    DiscreteLib::IDiscreteVector<NumLib::LocalVector> *v = nodal_vel.getNodalValues();
+    DiscreteLib::IDiscreteVector<NumLib::LocalVector> *v = nodal_vel.getDiscreteData();
     NumLib::LocalVector expected(2);
     expected[0] = 4./3.*1.e-5;
     expected[1] = .0;

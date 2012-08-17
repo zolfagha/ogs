@@ -13,6 +13,7 @@
 #pragma once
 
 #include "NumLib/Function/Function.h"
+#include "NumLib/Function/DiscreteDataConvergenceCheck.h"
 #include "MathLib/LinAlg/VectorNorms.h"
 #include "GeoLib/Rectangle.h"
 #include "DiscreteLib/Serial/DiscreteSystem.h"
@@ -102,6 +103,12 @@ public:
         //std::cout << "Concentration=" << std::endl;
         //_solConc->getCurrentSolution(0)->printout();
     };
+
+    NumLib::DiscreteDataConvergenceCheck _checker;
+    virtual NumLib::IConvergenceCheck* getConvergenceChecker()
+    {
+        return &_checker;
+    }
 
 private:
     DISALLOW_COPY_AND_ASSIGN(FunctionConcentration);

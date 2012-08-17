@@ -28,7 +28,7 @@
 #include "NumLib/TimeStepping/TimeStepFunction.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "NumLib/TransientCoupling/AsyncPartitionedSystem.h"
-#include "FemLib/Function/FemNorm.h"
+#include "NumLib/Function/NormOfDiscreteDataFunction.h"
 
 #include "TestUtil.h"
 
@@ -87,7 +87,7 @@ public:
 
 typedef FemNodalFunctionScalar<DiscreteSystem>::type MyFemNodalFunctionScalar;
 typedef TemplateConvergenceCheck<FdmFunctionScalar, FdmLib::NormOfFdmNodalFunction<double> > FdmFunctionConvergenceCheck;
-typedef TemplateConvergenceCheck<MyFemNodalFunctionScalar, FemLib::NormOfFemNodalFunction<DiscreteSystem,double> > FemFunctionConvergenceCheck;
+typedef TemplateConvergenceCheck<MyFemNodalFunctionScalar, NumLib::NormOfDiscreteDataFunction<double> > FemFunctionConvergenceCheck;
 
 
 typedef FunctionHead<MathLib::CRSLisSolver> MyFunctionHead;
@@ -246,7 +246,7 @@ TEST(Fdm, fdm_fem1)
         f_c.setOutputParameterName(0, "c");
 
         FdmFunctionConvergenceCheck checker(&dis);
-        SerialStaggeredMethod method(checker, 1e-5, 100);
+        SerialStaggeredMethod method(1e-5, 100);
         AsyncPartitionedSystem apart1;
         apart1.setAlgorithm(method);
         apart1.resizeOutputParameter(3);

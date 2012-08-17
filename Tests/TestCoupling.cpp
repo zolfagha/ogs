@@ -145,6 +145,11 @@ public:
 
         setOutput(a, new FunctionConstant<double,double>(.0));
     }
+    MyConvergenceCheck _checker;
+    virtual NumLib::IConvergenceCheck* getConvergenceChecker()
+    {
+        return &_checker;
+    }
 
     int solve()
     {
@@ -169,6 +174,11 @@ public:
         resizeOutputParameter(1);
         setOutput(b, new FunctionConstant<double,double>(.0));
     }
+    MyConvergenceCheck _checker;
+    virtual NumLib::IConvergenceCheck* getConvergenceChecker()
+    {
+        return &_checker;
+    }
 
     int solve()
     {
@@ -192,6 +202,11 @@ public:
         resizeInputParameter(2);
         resizeOutputParameter(1);
         setOutput(c, new FunctionConstant<double,double>(.0));
+    }
+    MyConvergenceCheck _checker;
+    virtual NumLib::IConvergenceCheck* getConvergenceChecker()
+    {
+        return &_checker;
     }
 
     int solve()
@@ -293,6 +308,7 @@ public:
         }
         return 0;
     };
+
 };
 
 class MyConvergenceCheckerFactory
@@ -310,7 +326,7 @@ TEST(Coupling, SteadyCouplingOption)
     MyEQSFactory eqsFac;
     MyConvergenceCheckerFactory checkFac;
     CouplingStrucutreBuilder cpl_builder;
-    ICoupledSystem *coupled_sys = cpl_builder.build(option, eqsFac, checkFac);
+    ICoupledSystem *coupled_sys = cpl_builder.build(option, eqsFac);
     ASSERT_TRUE(coupled_sys->check());
     coupled_sys->solve();
 
@@ -346,7 +362,7 @@ TEST(Coupling, SteadyCouplingCheck1)
 
     BlockJacobiMethod method(1.e-4, 100);
     MyConvergenceCheck checker;
-    method.setConvergenceCheck(checker);
+    //method.setConvergenceCheck(checker);
     {
         // correct
         //BlockJacobiMethod<MyConvergenceCheck> method(1.e-4, 100);
@@ -461,7 +477,7 @@ TEST(Coupling, SteadyCouplingJacobi)
     PartitionedProblem part2;
 
     MyConvergenceCheck checker;
-    BlockJacobiMethod method(checker, 1.e-4, 100);
+    BlockJacobiMethod method(1.e-4, 100);
 
     defineSteadyExample1(eqs1, eqs2, eqs3, part1, part2, method, method);
     ASSERT_TRUE(part2.check());
@@ -487,7 +503,7 @@ TEST(Coupling, SteadyCouplingSeidel)
     PartitionedProblem part2;
 
     MyConvergenceCheck checker;
-    BlockGaussSeidelMethod method(checker, 1.e-5, 100);
+    BlockGaussSeidelMethod method(1.e-5, 100);
 
     defineSteadyExample1(eqs1, eqs2, eqs3, part1, part2, method, method);
 
@@ -523,6 +539,11 @@ public:
     {
         reset();
     };
+    MyConvergenceCheck _checker;
+    virtual NumLib::IConvergenceCheck* getConvergenceChecker()
+    {
+        return &_checker;
+    }
 
     void setTimeStepSize(double dt) {_dt = dt;};
 
@@ -570,6 +591,11 @@ public:
     {
         reset();
     };
+    MyConvergenceCheck _checker;
+    virtual NumLib::IConvergenceCheck* getConvergenceChecker()
+    {
+        return &_checker;
+    }
 
     void setTimeStepSize(double dt) {_dt = dt;};
 
@@ -617,6 +643,11 @@ public:
     {
         reset();
     };
+    MyConvergenceCheck _checker;
+    virtual NumLib::IConvergenceCheck* getConvergenceChecker()
+    {
+        return &_checker;
+    }
 
     void setTimeStepSize(double dt) {_dt = dt;};
 
@@ -782,7 +813,7 @@ TEST(Coupling, TransientCouplingOption)
     MyTransientEQSFactory eqsFac(1.0, 1.0, 1.0);
     MyConvergenceCheckerFactory checkFac;
     TransientCoulplingStrucutreBuilder cpl_builder;
-    ITransientCoupledSystem *coupled_sys = cpl_builder.build(option, eqsFac, checkFac);
+    ITransientCoupledSystem *coupled_sys = cpl_builder.build(option, eqsFac);
     ASSERT_TRUE(coupled_sys->check());
 
     const double epsilon = 1.e-3;
@@ -818,7 +849,7 @@ TEST(Coupling, TransientCouplingParallelStaggered1)
     AsyncPartitionedSystem part2;
 
     MyConvergenceCheck checker;
-    ParallelStaggeredMethod method(checker, 1e-5, 100);
+    ParallelStaggeredMethod method(1e-5, 100);
     defineTransientExample1(eqs1, eqs2, eqs3, part1, part2, method, method);
 
     TimeSteppingController timestepping;
@@ -853,7 +884,7 @@ TEST(Coupling, TransientCouplingParallelStaggered2)
     AsyncPartitionedSystem part2;
 
     MyConvergenceCheck checker;
-    ParallelStaggeredMethod method(checker, 1e-5, 100);
+    ParallelStaggeredMethod method(1e-5, 100);
     defineTransientExample1(eqs1, eqs2, eqs3, part1, part2, method, method);
 
     TimeSteppingController timestepping;
@@ -913,7 +944,7 @@ TEST(Coupling, TransientCouplingParallelStaggered3)
     AsyncPartitionedSystem part2;
 
     MyConvergenceCheck checker;
-    ParallelStaggeredMethod method(checker, 1e-5, 1);
+    ParallelStaggeredMethod method(1e-5, 1);
     defineTransientExample1(eqs1, eqs2, eqs3, part1, part2, method, method);
 
     TimeSteppingController timestepping;
@@ -984,7 +1015,7 @@ TEST(Coupling, TransientCouplingSerialStaggered1)
     AsyncPartitionedSystem part2;
 
     MyConvergenceCheck checker;
-    SerialStaggeredMethod method(checker, 1e-5, 100);
+    SerialStaggeredMethod method(1e-5, 100);
     defineTransientExample1(eqs1, eqs2, eqs3, part1, part2, method, method);
 
     TimeSteppingController timestepping;
@@ -1044,7 +1075,7 @@ TEST(Coupling, TransientCouplingSerialStaggered2)
     AsyncPartitionedSystem part2;
 
     MyConvergenceCheck checker;
-    SerialStaggeredMethod method(checker, 1e-5, 1);
+    SerialStaggeredMethod method(1e-5, 1);
     defineTransientExample1(eqs1, eqs2, eqs3, part1, part2, method, method);
 
     TimeSteppingController timestepping;

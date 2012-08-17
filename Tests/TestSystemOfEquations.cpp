@@ -97,8 +97,8 @@ public:
     bool isConverged(UnnamedParameterSet& vars_prev, UnnamedParameterSet& vars_current, double eps, double &v_diff)
     {
         for (size_t i=0; i<vars_prev.size(); i++) {
-            MyCouplingEQS::ArrayType *v_prev = vars_prev.get<MyCouplingEQS::ParameterType>(i)->getArray();
-            MyCouplingEQS::ArrayType *v_cur = vars_current.get<MyCouplingEQS::ParameterType>(i)->getArray();
+            MyCouplingEQS<MyConvergenceCheck4Array>::ArrayType *v_prev = vars_prev.get<MyCouplingEQS<MyConvergenceCheck4Array>::ParameterType>(i)->getArray();
+            MyCouplingEQS<MyConvergenceCheck4Array>::ArrayType *v_cur = vars_current.get<MyCouplingEQS<MyConvergenceCheck4Array>::ParameterType>(i)->getArray();
             v_diff = std::abs((*v_cur)[0] - (*v_prev)[0]);
             if (v_diff>eps) {
                 return false;
@@ -217,14 +217,16 @@ BaseLib::Options* defineCouplingP1_P2M1()
     return options;
 };
 
+typedef MyCouplingEQS<MyConvergenceCheck4Array> MyMyCouplingEQS;
+
 TEST(Math, SystemOfEqs_M1)
 {
     SystemOfEquations sysEqs;
     defineProblem1(sysEqs);
     //initial value
-    MyCouplingEQS::ArrayType vec0(1);
+    MyMyCouplingEQS::ArrayType vec0(1);
     vec0 *= .0;
-    std::vector<MyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
+    std::vector<MyMyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
     // grouping variables
     std::vector<std::vector<Variable*> > list_active_vars;
     list_active_vars.resize(1);
@@ -234,8 +236,8 @@ TEST(Math, SystemOfEqs_M1)
     std::vector<IPartitionedAlgorithm* > list_part_alg;
 
     // create coupling structure
-    CoupledProblemConstructor probgen;
-    std::vector<MyCouplingEQS*> list_sub_problem;
+    CoupledProblemConstructor<MyConvergenceCheck4Array> probgen;
+    std::vector<MyMyCouplingEQS*> list_sub_problem;
     ICoupledSystem *part1 = probgen.build(sysEqs, list_active_vars, list_part_alg, list_sub_problem);
     // configure
     for (size_t i=0; i<list_sub_problem.size(); i++) {
@@ -247,12 +249,12 @@ TEST(Math, SystemOfEqs_M1)
     part1->solve();
 
     const double epsilon = 1.e-3;
-    const MyCouplingEQS::ParameterType *o1 = (const MyCouplingEQS::ParameterType*)part1->getOutput(part1->getOutputParameterID("p"));
-    const MyCouplingEQS::ParameterType *o2 = (const MyCouplingEQS::ParameterType*)part1->getOutput(part1->getOutputParameterID("T"));
-    const MyCouplingEQS::ParameterType *o3 = (const MyCouplingEQS::ParameterType*)part1->getOutput(part1->getOutputParameterID("c"));
-    MyCouplingEQS::ArrayType* v1 = o1->getArray();
-    MyCouplingEQS::ArrayType* v2 = o2->getArray();
-    MyCouplingEQS::ArrayType* v3 = o3->getArray();
+    const MyMyCouplingEQS::ParameterType *o1 = (const MyMyCouplingEQS::ParameterType*)part1->getOutput(part1->getOutputParameterID("p"));
+    const MyMyCouplingEQS::ParameterType *o2 = (const MyMyCouplingEQS::ParameterType*)part1->getOutput(part1->getOutputParameterID("T"));
+    const MyMyCouplingEQS::ParameterType *o3 = (const MyMyCouplingEQS::ParameterType*)part1->getOutput(part1->getOutputParameterID("c"));
+    MyMyCouplingEQS::ArrayType* v1 = o1->getArray();
+    MyMyCouplingEQS::ArrayType* v2 = o2->getArray();
+    MyMyCouplingEQS::ArrayType* v3 = o3->getArray();
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
@@ -263,12 +265,12 @@ TEST(Math, SystemOfEqs_P2)
     SystemOfEquations sysEqs;
     defineProblem1(sysEqs);
     //initial value
-    MyCouplingEQS::ArrayType vec0(1);
+    MyMyCouplingEQS::ArrayType vec0(1);
     vec0 *= .0;
-    std::vector<MyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
+    std::vector<MyMyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
     //coupling parameter
     MyConvergenceCheck4Array checker;
-    BlockJacobiMethod method(checker, 1.e-4, 100);
+    BlockJacobiMethod method(1.e-4, 100);
     // grouping variables
     std::vector<std::vector<Variable*> > list_active_vars;
     list_active_vars.resize(2);
@@ -279,8 +281,8 @@ TEST(Math, SystemOfEqs_P2)
     list_part_alg.push_back(&method);
 
     // create coupling structure
-    CoupledProblemConstructor probgen;
-    std::vector<MyCouplingEQS*> list_sub_problem;
+    CoupledProblemConstructor<MyConvergenceCheck4Array> probgen;
+    std::vector<MyMyCouplingEQS*> list_sub_problem;
     ICoupledSystem *part1 = probgen.build(sysEqs, list_active_vars, list_part_alg, list_sub_problem);
     // configure
     for (size_t i=0; i<list_sub_problem.size(); i++) {
@@ -292,12 +294,12 @@ TEST(Math, SystemOfEqs_P2)
     part1->solve();
 
     const double epsilon = 1.e-3;
-    const MyCouplingEQS::ParameterType *o1 = (const MyCouplingEQS::ParameterType*)part1->getOutput(part1->getOutputParameterID("p"));
-    const MyCouplingEQS::ParameterType *o2 = (const MyCouplingEQS::ParameterType*)part1->getOutput(part1->getOutputParameterID("T"));
-    const MyCouplingEQS::ParameterType *o3 = (const MyCouplingEQS::ParameterType*)part1->getOutput(part1->getOutputParameterID("c"));
-    MyCouplingEQS::ArrayType* v1 = o1->getArray();
-    MyCouplingEQS::ArrayType* v2 = o2->getArray();
-    MyCouplingEQS::ArrayType* v3 = o3->getArray();
+    const MyMyCouplingEQS::ParameterType *o1 = (const MyMyCouplingEQS::ParameterType*)part1->getOutput(part1->getOutputParameterID("p"));
+    const MyMyCouplingEQS::ParameterType *o2 = (const MyMyCouplingEQS::ParameterType*)part1->getOutput(part1->getOutputParameterID("T"));
+    const MyMyCouplingEQS::ParameterType *o3 = (const MyMyCouplingEQS::ParameterType*)part1->getOutput(part1->getOutputParameterID("c"));
+    MyMyCouplingEQS::ArrayType* v1 = o1->getArray();
+    MyMyCouplingEQS::ArrayType* v2 = o2->getArray();
+    MyMyCouplingEQS::ArrayType* v3 = o3->getArray();
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
@@ -308,12 +310,12 @@ TEST(Math, SystemOfEqs_P3)
     SystemOfEquations sysEqs;
     defineProblem1(sysEqs);
     //initial value
-    MyCouplingEQS::ArrayType vec0(1);
+    MyMyCouplingEQS::ArrayType vec0(1);
     vec0 *= .0;
-    std::vector<MyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
+    std::vector<MyMyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
     //coupling parameter
     MyConvergenceCheck4Array checker;
-    BlockJacobiMethod method(checker, 1.e-4, 100);
+    BlockJacobiMethod method( 1.e-4, 100);
     // grouping variables
     std::vector<std::vector<Variable*> > list_active_vars;
     list_active_vars.resize(3);
@@ -324,8 +326,8 @@ TEST(Math, SystemOfEqs_P3)
     list_part_alg.push_back(&method);
 
     // create coupling structure
-    CoupledProblemConstructor probgen;
-    std::vector<MyCouplingEQS*> list_sub_problem;
+    CoupledProblemConstructor<MyConvergenceCheck4Array> probgen;
+    std::vector<MyMyCouplingEQS*> list_sub_problem;
     ICoupledSystem *part1 = probgen.build(sysEqs, list_active_vars, list_part_alg, list_sub_problem);
     // configure
     for (size_t i=0; i<list_sub_problem.size(); i++) {
@@ -337,12 +339,12 @@ TEST(Math, SystemOfEqs_P3)
     part1->solve();
 
     const double epsilon = 1.e-3;
-    const MyCouplingEQS::ParameterType *o1 = (const MyCouplingEQS::ParameterType*)part1->getOutput(part1->getOutputParameterID("p"));
-    const MyCouplingEQS::ParameterType *o2 = (const MyCouplingEQS::ParameterType*)part1->getOutput(part1->getOutputParameterID("T"));
-    const MyCouplingEQS::ParameterType *o3 = (const MyCouplingEQS::ParameterType*)part1->getOutput(part1->getOutputParameterID("c"));
-    MyCouplingEQS::ArrayType* v1 = o1->getArray();
-    MyCouplingEQS::ArrayType* v2 = o2->getArray();
-    MyCouplingEQS::ArrayType* v3 = o3->getArray();
+    const MyMyCouplingEQS::ParameterType *o1 = (const MyMyCouplingEQS::ParameterType*)part1->getOutput(part1->getOutputParameterID("p"));
+    const MyMyCouplingEQS::ParameterType *o2 = (const MyMyCouplingEQS::ParameterType*)part1->getOutput(part1->getOutputParameterID("T"));
+    const MyMyCouplingEQS::ParameterType *o3 = (const MyMyCouplingEQS::ParameterType*)part1->getOutput(part1->getOutputParameterID("c"));
+    MyMyCouplingEQS::ArrayType* v1 = o1->getArray();
+    MyMyCouplingEQS::ArrayType* v2 = o2->getArray();
+    MyMyCouplingEQS::ArrayType* v3 = o3->getArray();
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
@@ -363,16 +365,16 @@ TEST(Math, SystemOfEqs_AutoM3)
     SystemOfEquations sysEqs;
     defineProblem1(sysEqs);
     //initial value
-    MyCouplingEQS::ArrayType vec0(1);
+    MyMyCouplingEQS::ArrayType vec0(1);
     vec0 *= .0;
-    std::vector<MyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
+    std::vector<MyMyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
 
     BaseLib::Options* option = defineCouplingM3();
-    std::vector<MyCouplingEQS*> list_sub_problem;
-    CoupledProblemFactory eqs_fac(sysEqs, ini_para, list_sub_problem);
+    std::vector<MyMyCouplingEQS*> list_sub_problem;
+    CoupledProblemFactory<MyConvergenceCheck4Array> eqs_fac(sysEqs, ini_para, list_sub_problem);
     MyConvergenceChecker4ArrayFactory checker;
-    CouplingStrucutreBuilder4SysEqs cpl_builder;
-    ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac, checker);
+    CouplingStrucutreBuilder4SysEqs<MyConvergenceCheck4Array>::type cpl_builder;
+    ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac);
 
     //for (size_t i=0; i<list_sub_problem.size(); i++) {
     //    list_sub_problem[i]->setInitial(ini_para);
@@ -383,12 +385,12 @@ TEST(Math, SystemOfEqs_AutoM3)
     cpl_sys->solve();
 
     const double epsilon = 1.e-3;
-    const MyCouplingEQS::ParameterType *o1 = (const MyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("p"));
-    const MyCouplingEQS::ParameterType *o2 = (const MyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("T"));
-    const MyCouplingEQS::ParameterType *o3 = (const MyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("c"));
-    MyCouplingEQS::ArrayType* v1 = o1->getArray();
-    MyCouplingEQS::ArrayType* v2 = o2->getArray();
-    MyCouplingEQS::ArrayType* v3 = o3->getArray();
+    const MyMyCouplingEQS::ParameterType *o1 = (const MyMyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("p"));
+    const MyMyCouplingEQS::ParameterType *o2 = (const MyMyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("T"));
+    const MyMyCouplingEQS::ParameterType *o3 = (const MyMyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("c"));
+    MyMyCouplingEQS::ArrayType* v1 = o1->getArray();
+    MyMyCouplingEQS::ArrayType* v2 = o2->getArray();
+    MyMyCouplingEQS::ArrayType* v3 = o3->getArray();
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
@@ -399,16 +401,16 @@ TEST(Math, SystemOfEqs_AutoP1_M2M1)
     SystemOfEquations sysEqs;
     defineProblem1(sysEqs);
     //initial value
-    MyCouplingEQS::ArrayType vec0(1);
+    MyMyCouplingEQS::ArrayType vec0(1);
     vec0 *= .0;
-    std::vector<MyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
+    std::vector<MyMyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
 
     BaseLib::Options* option = defineCouplingP1_M2M1();
-    std::vector<MyCouplingEQS*> list_sub_problem;
-    CoupledProblemFactory eqs_fac(sysEqs, ini_para, list_sub_problem);
+    std::vector<MyMyCouplingEQS*> list_sub_problem;
+    CoupledProblemFactory<MyConvergenceCheck4Array> eqs_fac(sysEqs, ini_para, list_sub_problem);
     MyConvergenceChecker4ArrayFactory checker;
-    CouplingStrucutreBuilder4SysEqs cpl_builder;
-    ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac, checker);
+    CouplingStrucutreBuilder4SysEqs<MyConvergenceCheck4Array>::type cpl_builder;
+    ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac);
 
     //for (size_t i=0; i<list_sub_problem.size(); i++) {
     //    list_sub_problem[i]->setInitial(ini_para);
@@ -419,12 +421,12 @@ TEST(Math, SystemOfEqs_AutoP1_M2M1)
     cpl_sys->solve();
 
     const double epsilon = 1.e-3;
-    const MyCouplingEQS::ParameterType *o1 = (const MyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("p"));
-    const MyCouplingEQS::ParameterType *o2 = (const MyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("T"));
-    const MyCouplingEQS::ParameterType *o3 = (const MyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("c"));
-    MyCouplingEQS::ArrayType* v1 = o1->getArray();
-    MyCouplingEQS::ArrayType* v2 = o2->getArray();
-    MyCouplingEQS::ArrayType* v3 = o3->getArray();
+    const MyMyCouplingEQS::ParameterType *o1 = (const MyMyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("p"));
+    const MyMyCouplingEQS::ParameterType *o2 = (const MyMyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("T"));
+    const MyMyCouplingEQS::ParameterType *o3 = (const MyMyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("c"));
+    MyMyCouplingEQS::ArrayType* v1 = o1->getArray();
+    MyMyCouplingEQS::ArrayType* v2 = o2->getArray();
+    MyMyCouplingEQS::ArrayType* v3 = o3->getArray();
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
@@ -435,16 +437,16 @@ TEST(Math, SystemOfEqs_AutoP1_3M1)
     SystemOfEquations sysEqs;
     defineProblem1(sysEqs);
     //initial value
-    MyCouplingEQS::ArrayType vec0(1);
+    MyMyCouplingEQS::ArrayType vec0(1);
     vec0 *= .0;
-    std::vector<MyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
+    std::vector<MyMyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
 
     BaseLib::Options* option = defineCouplingP1_3M1();
-    std::vector<MyCouplingEQS*> list_sub_problem;
-    CoupledProblemFactory eqs_fac(sysEqs, ini_para, list_sub_problem);
+    std::vector<MyMyCouplingEQS*> list_sub_problem;
+    CoupledProblemFactory<MyConvergenceCheck4Array> eqs_fac(sysEqs, ini_para, list_sub_problem);
     MyConvergenceChecker4ArrayFactory checker;
-    CouplingStrucutreBuilder4SysEqs cpl_builder;
-    ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac, checker);
+    CouplingStrucutreBuilder4SysEqs<MyConvergenceCheck4Array>::type cpl_builder;
+    ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac);
 
     //for (size_t i=0; i<list_sub_problem.size(); i++) {
     //    list_sub_problem[i]->setInitial(ini_para);
@@ -455,12 +457,12 @@ TEST(Math, SystemOfEqs_AutoP1_3M1)
     cpl_sys->solve();
 
     const double epsilon = 1.e-3;
-    const MyCouplingEQS::ParameterType *o1 = (const MyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("p"));
-    const MyCouplingEQS::ParameterType *o2 = (const MyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("T"));
-    const MyCouplingEQS::ParameterType *o3 = (const MyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("c"));
-    MyCouplingEQS::ArrayType* v1 = o1->getArray();
-    MyCouplingEQS::ArrayType* v2 = o2->getArray();
-    MyCouplingEQS::ArrayType* v3 = o3->getArray();
+    const MyMyCouplingEQS::ParameterType *o1 = (const MyMyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("p"));
+    const MyMyCouplingEQS::ParameterType *o2 = (const MyMyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("T"));
+    const MyMyCouplingEQS::ParameterType *o3 = (const MyMyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("c"));
+    MyMyCouplingEQS::ArrayType* v1 = o1->getArray();
+    MyMyCouplingEQS::ArrayType* v2 = o2->getArray();
+    MyMyCouplingEQS::ArrayType* v3 = o3->getArray();
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
@@ -471,16 +473,16 @@ TEST(Math, SystemOfEqs_AutoP1_P2M1)
     SystemOfEquations sysEqs;
     defineProblem1(sysEqs);
     //initial value
-    MyCouplingEQS::ArrayType vec0(1);
+    MyMyCouplingEQS::ArrayType vec0(1);
     vec0 *= .0;
-    std::vector<MyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
+    std::vector<MyMyCouplingEQS::ArrayType*> ini_para(sysEqs.getNumberOfVariables(), &vec0);
 
     BaseLib::Options* option = defineCouplingP1_P2M1();
-    std::vector<MyCouplingEQS*> list_sub_problem;
-    CoupledProblemFactory eqs_fac(sysEqs, ini_para, list_sub_problem);
+    std::vector<MyMyCouplingEQS*> list_sub_problem;
+    CoupledProblemFactory<MyConvergenceCheck4Array> eqs_fac(sysEqs, ini_para, list_sub_problem);
     MyConvergenceChecker4ArrayFactory checker;
-    CouplingStrucutreBuilder4SysEqs cpl_builder;
-    ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac, checker);
+    CouplingStrucutreBuilder4SysEqs<MyConvergenceCheck4Array>::type cpl_builder;
+    ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac);
 
     //for (size_t i=0; i<list_sub_problem.size(); i++) {
     //    list_sub_problem[i]->setInitial(ini_para);
@@ -491,12 +493,12 @@ TEST(Math, SystemOfEqs_AutoP1_P2M1)
     cpl_sys->solve();
 
     const double epsilon = 1.e-3;
-    const MyCouplingEQS::ParameterType *o1 = (const MyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("p"));
-    const MyCouplingEQS::ParameterType *o2 = (const MyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("T"));
-    const MyCouplingEQS::ParameterType *o3 = (const MyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("c"));
-    MyCouplingEQS::ArrayType* v1 = o1->getArray();
-    MyCouplingEQS::ArrayType* v2 = o2->getArray();
-    MyCouplingEQS::ArrayType* v3 = o3->getArray();
+    const MyMyCouplingEQS::ParameterType *o1 = (const MyMyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("p"));
+    const MyMyCouplingEQS::ParameterType *o2 = (const MyMyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("T"));
+    const MyMyCouplingEQS::ParameterType *o3 = (const MyMyCouplingEQS::ParameterType*)cpl_sys->getOutput(cpl_sys->getOutputParameterID("c"));
+    MyMyCouplingEQS::ArrayType* v1 = o1->getArray();
+    MyMyCouplingEQS::ArrayType* v2 = o2->getArray();
+    MyMyCouplingEQS::ArrayType* v3 = o3->getArray();
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);

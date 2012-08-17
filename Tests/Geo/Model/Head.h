@@ -17,6 +17,7 @@
 #include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "FemLib/Function/FemFunction.h"
 #include "NumLib/Function/Function.h"
+#include "NumLib/Function/DiscreteDataConvergenceCheck.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
@@ -99,6 +100,11 @@ public:
         //std::cout << "Head=" << std::endl;
         //_solHead->getCurrentSolution(0)->printout();
     };
+    NumLib::DiscreteDataConvergenceCheck _checker;
+    virtual NumLib::IConvergenceCheck* getConvergenceChecker()
+    {
+        return &_checker;
+    }
 
 private:
     GWFemProblem* _problem;

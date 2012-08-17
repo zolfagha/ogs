@@ -19,6 +19,7 @@
 #include "NumLib/Function/Function.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 #include "NumLib/TimeStepping/TimeStep.h"
+#include "NumLib/Function/DiscreteDataConvergenceCheck.h"
 
 #include "Tests/Geo/Material/PorousMedia.h"
 
@@ -49,6 +50,11 @@ public:
         _vel = new MyIntegrationPointFunctionVector();
         _vel->initialize(&dis);
         //this->setOutput(Velocity, _vel);
+    }
+    NumLib::DiscreteDataConvergenceCheck _checker;
+    virtual NumLib::IConvergenceCheck* getConvergenceChecker()
+    {
+        return &_checker;
     }
 
     int solveTimeStep(const TimeStep &/*time*/)

@@ -293,7 +293,7 @@ TEST(Solution, Fem1_Linear)
 
     FemLib::FemNodalFunctionScalar<DiscreteSystem>::type* h = gwProblem.getCurrentHead();
 
-    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getNodalValues())[0], h->getNumberOfNodes());
+    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getDiscreteData())[0], h->getNumberOfNodes());
 
     BaseLib::releaseObject(msh);
 }
@@ -331,7 +331,7 @@ TEST(Solution, Fem1_Picard)
 
     FemLib::FemNodalFunctionScalar<DiscreteSystem>::type* h = gwProblem.getCurrentHead();
 
-    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getNodalValues())[0], h->getNumberOfNodes());
+    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getDiscreteData())[0], h->getNumberOfNodes());
 
     BaseLib::releaseObject(msh);
 }
@@ -369,7 +369,7 @@ TEST(Solution, Fem1_Newton)
 
     FemLib::FemNodalFunctionScalar<DiscreteSystem>::type* h = gwProblem.getCurrentHead();
 
-    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getNodalValues())[0], h->getNumberOfNodes());
+    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getDiscreteData())[0], h->getNumberOfNodes());
 
     BaseLib::releaseObject(msh);
 }
@@ -408,7 +408,7 @@ TEST(Solution, Fem2)
 
     FemLib::FemNodalFunctionScalar<DiscreteSystem>::type* h = gwProblem.getCurrentHead();
 
-    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getNodalValues())[0], h->getNumberOfNodes());
+    ASSERT_DOUBLE_ARRAY_EQ(&expected[0], &(*h->getDiscreteData())[0], h->getNumberOfNodes());
 
 
     BaseLib::releaseObject(msh);

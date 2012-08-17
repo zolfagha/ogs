@@ -24,7 +24,7 @@
 #include "NumLib/TransientCoupling/AsyncPartitionedSystem.h"
 #include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
 #include "NumLib/Coupling/Algorithm/TransientPartitionedAlgorithm.h"
-#include "FemLib/Function/FemNorm.h"
+#include "NumLib/Function/NormOfDiscreteDataFunction.h"
 #include "SolutionLib/Fem/FemNeumannBC.h"
 #include "Tests/Geo/Model/Head.h"
 #include "Tests/Geo/Model/Velocity.h"
@@ -38,39 +38,42 @@
 
 typedef FemLib::FEMIntegrationPointFunctionVector<DiscreteSystem>::type MyIntegrationPointFunctionVector;
 typedef FemLib::FemNodalFunctionScalar<DiscreteSystem>::type MyNodalFunctionScalar;
+//typedef NumLib::ITXDiscreteFunction<double> MyNodalFunctionScalar;
+//typedef NumLib::ITXDiscreteFunction<MathLib::TemplateVectorX<NumLib::LocalVector> > MyIntegrationPointFunctionVector;
 
-class FemFunctionConvergenceCheck : public IConvergenceCheck
-{
-    FemLib::NormOfFemNodalFunction<DiscreteLib::DiscreteSystem, double> _norm;
-public:
-    explicit FemFunctionConvergenceCheck(DiscreteLib::DiscreteSystem *dis) : _norm(dis)
-    {
-
-    }
-
-    bool isConverged(UnnamedParameterSet& vars_prev, UnnamedParameterSet& vars_current, double eps, double &v_diff)
-    {
-        for (size_t i=0; i<vars_prev.size(); i++) {
-#if 1
-            if (vars_prev.getName(i).compare("h")==0 || vars_prev.getName(i).compare("c")==0) {
-                const MyNodalFunctionScalar* f_fem_prev = vars_prev.get<MyNodalFunctionScalar>(i);
-                const MyNodalFunctionScalar* f_fem_cur = vars_current.get<MyNodalFunctionScalar>(i);
-                //v_diff = f_fem_cur->norm_diff(*f_fem_prev);
-                v_diff = _norm(*f_fem_prev, *f_fem_cur);
-            } else if (vars_prev.getName(i).compare("v")==0) {
-                const MyIntegrationPointFunctionVector* f_fem_prev = vars_prev.get<MyIntegrationPointFunctionVector>(i);
-                const MyIntegrationPointFunctionVector* f_fem_cur = vars_current.get<MyIntegrationPointFunctionVector>(i);
-                //v_diff = f_fem_cur->norm_diff(*f_fem_prev);
-                v_diff = _norm(*f_fem_prev, *f_fem_cur);
-            }
-#endif
-            if (v_diff>eps) {
-                return false;
-            }
-        }
-        return true;
-    }
-};
+//class DiscreteDataConvergenceCheck : public IConvergenceCheck
+//{
+//public:
+//    explicit DiscreteDataConvergenceCheck(DiscreteLib::DiscreteSystem *dis)
+//    {
+//
+//    }
+//
+//    bool isConverged(UnnamedParameterSet& vars_prev, UnnamedParameterSet& vars_current, double eps, double &v_diff)
+//    {
+//        for (size_t i=0; i<vars_prev.size(); i++) {
+//#if 1
+//            if (vars_prev.getName(i).compare("h")==0 || vars_prev.getName(i).compare("c")==0) {
+//                const MyNodalFunctionScalar* f_fem_prev = vars_prev.get<MyNodalFunctionScalar>(i);
+//                const MyNodalFunctionScalar* f_fem_cur = vars_current.get<MyNodalFunctionScalar>(i);
+//                //v_diff = f_fem_cur->norm_diff(*f_fem_prev);
+//                NumLib::NormOfDiscreteDataFunction<double> _norm;
+//                v_diff = _norm(*f_fem_prev, *f_fem_cur);
+//            } else if (vars_prev.getName(i).compare("v")==0) {
+//                const MyIntegrationPointFunctionVector* f_fem_prev = vars_prev.get<MyIntegrationPointFunctionVector>(i);
+//                const MyIntegrationPointFunctionVector* f_fem_cur = vars_current.get<MyIntegrationPointFunctionVector>(i);
+//                //v_diff = f_fem_cur->norm_diff(*f_fem_prev);
+//                NumLib::NormOfDiscreteDataFunction<MathLib::TemplateVectorX<NumLib::LocalVector> > _norm;
+//                v_diff = _norm(*f_fem_prev, *f_fem_cur);
+//            }
+//#endif
+//            if (v_diff>eps) {
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
+//};
 
 Geo::GWFemProblem* createGWProblem(DiscreteSystem &dis, Geo::PorousMedia &pm)
 {
@@ -221,8 +224,7 @@ TEST(Solution, CouplingFem2D)
         f_vel.setInputParameterName(0, "h");
         f_vel.setOutputParameterName(0, "v");
 
-        FemFunctionConvergenceCheck checker(&dis);
-        SerialStaggeredMethod method(checker, 1e-5, 100);
+        SerialStaggeredMethod method(1e-5, 100);
         AsyncPartitionedSystem apart1;
         apart1.setAlgorithm(method);
         apart1.resizeOutputParameter(2);
@@ -241,7 +243,7 @@ TEST(Solution, CouplingFem2D)
 
         const MyNodalFunctionScalar* r_f_head = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("h"));
         const MyIntegrationPointFunctionVector* r_f_v = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
-        const IDiscreteVector<double>* vec_h = r_f_head->getNodalValues();
+        const IDiscreteVector<double>* vec_h = r_f_head->getDiscreteData();
         //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
 
         r_f_head->printout();
@@ -289,8 +291,7 @@ TEST(FEM, line)
         f_vel.setInputParameterName(0, "h");
         f_vel.setOutputParameterName(0, "v");
 
-        FemFunctionConvergenceCheck checker(&dis);
-        SerialStaggeredMethod method(checker, 1e-5, 100);
+        SerialStaggeredMethod method(1e-5, 100);
         AsyncPartitionedSystem apart1;
         apart1.setAlgorithm(method);
         apart1.resizeOutputParameter(2);
@@ -309,7 +310,7 @@ TEST(FEM, line)
 
         const MyNodalFunctionScalar* r_f_head = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("h"));
         const MyIntegrationPointFunctionVector* r_f_v = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
-        const IDiscreteVector<double>* vec_h = r_f_head->getNodalValues();
+        const IDiscreteVector<double>* vec_h = r_f_head->getDiscreteData();
         //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
 
         r_f_head->printout();
@@ -389,8 +390,7 @@ TEST(Solution, CouplingFem2)
         f_c.setOutputParameterName(0, "c");
 
 
-        FemFunctionConvergenceCheck checker(&dis);
-        SerialStaggeredMethod method(checker, 1e-5, 100);
+        SerialStaggeredMethod method(1e-5, 100);
         AsyncPartitionedSystem apart1;
         apart1.setAlgorithm(method);
         apart1.resizeOutputParameter(3);
@@ -412,9 +412,9 @@ TEST(Solution, CouplingFem2)
         const MyNodalFunctionScalar* r_f_head = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("h"));
         const MyIntegrationPointFunctionVector* r_f_v = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
         const MyNodalFunctionScalar* r_f_c = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("c"));
-        const IDiscreteVector<double>* vec_h = r_f_head->getNodalValues();
+        const IDiscreteVector<double>* vec_h = r_f_head->getDiscreteData();
         //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
-        const IDiscreteVector<double>* vec_c = r_f_c->getNodalValues();
+        const IDiscreteVector<double>* vec_c = r_f_c->getDiscreteData();
 
         //r_f_head->printout();
         //r_f_v->printout();
@@ -504,8 +504,7 @@ TEST(Fem, LinearElastic2D)
 //        MyFunctionStressStrain f_sigma;
 //        f_sigma.setOutputParameterName(0, "strain_xx");
 
-        FemFunctionConvergenceCheck checker(&dis);
-        SerialStaggeredMethod method(checker, 1e-5, 100);
+        SerialStaggeredMethod method(1e-5, 100);
         AsyncPartitionedSystem apart1;
         apart1.setAlgorithm(method);
         apart1.resizeOutputParameter(4);
@@ -527,10 +526,10 @@ TEST(Fem, LinearElastic2D)
         const MyNodalFunctionScalar* r_f_uy = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("u_y"));
         const MyIntegrationPointFunctionVector* r_f_strain = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("Strain"));
         const MyIntegrationPointFunctionVector* r_f_stress = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("Stress"));
-        const IDiscreteVector<double>* vec_r_f_ux = r_f_ux->getNodalValues();
-        const IDiscreteVector<double>* vec_r_f_uy = r_f_uy->getNodalValues();
-        const MyIntegrationPointFunctionVector::MyDiscreteVector* vec_strain = r_f_strain->getElementValues();
-        const MyIntegrationPointFunctionVector::MyDiscreteVector* vec_stress = r_f_stress->getElementValues();
+        const IDiscreteVector<double>* vec_r_f_ux = r_f_ux->getDiscreteData();
+        const IDiscreteVector<double>* vec_r_f_uy = r_f_uy->getDiscreteData();
+        const MyIntegrationPointFunctionVector::MyDiscreteVector* vec_strain = r_f_strain->getDiscreteData();
+        const MyIntegrationPointFunctionVector::MyDiscreteVector* vec_stress = r_f_stress->getDiscreteData();
 
 //        r_f_ux->printout();
 //        r_f_uy->printout();
