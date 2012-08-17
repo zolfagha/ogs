@@ -21,13 +21,14 @@
 namespace NumLib
 {
 
+template <class T_CONVERGENCE>
 class CoupledProblemConstructor
 {
 public:
-    ICoupledSystem* build(SystemOfEquations &sys, std::vector<std::vector<Variable*> > &list_active_vars, std::vector<IPartitionedAlgorithm* > &list_part_alg, std::vector<MyCouplingEQS*> &list_sub_problem)
+    ICoupledSystem* build(SystemOfEquations &sys, std::vector<std::vector<Variable*> > &list_active_vars, std::vector<IPartitionedAlgorithm* > &list_part_alg, std::vector<MyCouplingEQS<T_CONVERGENCE>*> &list_sub_problem)
     {
         for (size_t i=0; i<list_active_vars.size(); i++) {
-            MyCouplingEQS* eqs1 = createPartitionedProblem(sys, list_active_vars[i]);
+            MyCouplingEQS<T_CONVERGENCE>* eqs1 = createPartitionedProblem(sys, list_active_vars[i]);
             list_sub_problem.push_back(eqs1);
         }
 
@@ -47,7 +48,7 @@ public:
         }
     }
 
-    MyCouplingEQS* createPartitionedProblem(SystemOfEquations &sys, const std::vector<Variable*> &active_vars)
+    MyCouplingEQS<T_CONVERGENCE>* createPartitionedProblem(SystemOfEquations &sys, const std::vector<Variable*> &active_vars)
     {
         std::vector<LinearEquation*> active_eqs;
         for (size_t i=0; i<active_vars.size(); i++) {
@@ -56,24 +57,25 @@ public:
                     active_eqs.push_back(sys.getEquation(j));
             }
         }
-        MyCouplingEQS* eqs = new MyCouplingEQS(active_vars, active_eqs);
+        MyCouplingEQS<T_CONVERGENCE>* eqs = new MyCouplingEQS<T_CONVERGENCE>(active_vars, active_eqs);
         return eqs;
     }
 
-    MyCouplingEQS* createMonolithicProblem(SystemOfEquations &sys)
+    MyCouplingEQS<T_CONVERGENCE>* createMonolithicProblem(SystemOfEquations &sys)
     {
-        MyCouplingEQS* eqs = new MyCouplingEQS(*sys.getListOfVariables(), *sys.getListOfEquations());
+        MyCouplingEQS<T_CONVERGENCE>* eqs = new MyCouplingEQS<T_CONVERGENCE>(*sys.getListOfVariables(), *sys.getListOfEquations());
         return eqs;
     }
 };
 
+template <class T_CONVERGENCE>
 class CoupledProblemFactory
 {
     SystemOfEquations* _sys;
-    std::vector<MyCouplingEQS*>* _list_sub_problem;
-    std::vector<MyCouplingEQS::ArrayType*>* _ini_para;
+    std::vector<MyCouplingEQS<T_CONVERGENCE>*>* _list_sub_problem;
+    std::vector<typename MyCouplingEQS<T_CONVERGENCE>::ArrayType*>* _ini_para;
 public:
-    CoupledProblemFactory(SystemOfEquations &sys, std::vector<MyCouplingEQS::ArrayType*> &ini_para, std::vector<MyCouplingEQS*> &list_sub_problem)
+    CoupledProblemFactory(SystemOfEquations &sys, std::vector<typename MyCouplingEQS<T_CONVERGENCE>::ArrayType*> &ini_para, std::vector<MyCouplingEQS<T_CONVERGENCE>*> &list_sub_problem)
     {
         _sys = &sys;
         _list_sub_problem = &list_sub_problem;
@@ -121,7 +123,7 @@ public:
         part->connectParameters();
     }
 
-    MyCouplingEQS* create(const std::vector<std::string> &list_var_name)
+    MyCouplingEQS<T_CONVERGENCE>* create(const std::vector<std::string> &list_var_name)
     {
         std::vector<Variable*> list_active_vars;
         for (size_t i=0; i<list_var_name.size(); i++) {
@@ -140,7 +142,7 @@ public:
                     active_eqs.push_back(_sys->getEquation(j));
             }
         }
-        MyCouplingEQS* eqs = new MyCouplingEQS(list_active_vars, active_eqs);
+        MyCouplingEQS<T_CONVERGENCE>* eqs = new MyCouplingEQS<T_CONVERGENCE>(list_active_vars, active_eqs);
         eqs->setInitial(*_ini_para);
         _list_sub_problem->push_back(eqs);
 
