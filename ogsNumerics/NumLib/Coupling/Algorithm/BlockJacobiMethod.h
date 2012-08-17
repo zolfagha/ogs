@@ -29,9 +29,9 @@ public:
     {
     }
 
-    BlockJacobiMethod(IConvergenceCheck &checker, double epsilon, size_t max_count) : AbstractIterativePartitionedMethod(checker, epsilon, max_count)
-    {
-    }
+    //BlockJacobiMethod(IConvergenceCheck &checker, double epsilon, size_t max_count) : AbstractIterativePartitionedMethod(checker, epsilon, max_count)
+//    {
+//    }
 
     virtual ~BlockJacobiMethod() {};
 

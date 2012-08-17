@@ -23,6 +23,7 @@
 #include "ICoupledProblem.h"
 #include "ParameterProblemMappingTable.h"
 #include "Algorithm/PartitionedAlgorithm.h"
+#include "Algorithm/PartitionedConvergenceCheck.h"
 
 namespace NumLib
 {
@@ -35,7 +36,7 @@ public:
     typedef NamedDynamicIOSystem<T_PROBLEM> BaseClass;
 
     ///
-    AbstractPartitionedProblem() {};
+    AbstractPartitionedProblem() : _check(&_list_subproblems, &_map) {};
 
     ///
     virtual ~AbstractPartitionedProblem() {};
@@ -85,6 +86,10 @@ public:
         return flag;
     }
 
+    virtual NumLib::IConvergenceCheck* getConvergenceChecker()
+    {
+        return &_check;
+    }
 
 #if 0
     /// add parameter without giving reference
@@ -219,7 +224,7 @@ public:
 protected:
     std::vector<T_PROBLEM*> _list_subproblems;
     ParameterProblemMappingTable _map;
-
+    PartitionedConvergenceCheck<T_PROBLEM> _check;
 };
 
 

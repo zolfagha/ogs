@@ -35,15 +35,15 @@ class AbstractIterativePartitionedMethod : public IPartitionedAlgorithm
 {
 public:
     ///
-    AbstractIterativePartitionedMethod() : _max_itr(100), _epsilon(1e-3), _convergence_check(0) {}
+    AbstractIterativePartitionedMethod() : _max_itr(100), _itr_count(0), _epsilon(1e-3)/*, _convergence_check(0)*/ {}
     ///
-    AbstractIterativePartitionedMethod(double epsilon, size_t max_count) : _max_itr(max_count), _epsilon(epsilon), _convergence_check(0) {}
-    AbstractIterativePartitionedMethod(IConvergenceCheck &checker, double epsilon, size_t max_count) : _max_itr(max_count), _epsilon(epsilon), _convergence_check(&checker) {}
+    AbstractIterativePartitionedMethod(double epsilon, size_t max_count) : _max_itr(max_count), _itr_count(0), _epsilon(epsilon)/*, _convergence_check(0)*/ {}
+    //AbstractIterativePartitionedMethod(IConvergenceCheck &checker, double epsilon, size_t max_count) : _max_itr(max_count), _itr_count(0), _epsilon(epsilon), _convergence_check(&checker) {}
     ///
     virtual ~AbstractIterativePartitionedMethod() {};
 
     ///
-    void setConvergenceCheck(IConvergenceCheck &checker) {_convergence_check = &checker;};
+    //void setConvergenceCheck(IConvergenceCheck &checker) {_convergence_check = &checker;};
 
     /// get max. iteration
     size_t getMaximumIterationCounts() const {return _max_itr;};
@@ -64,10 +64,10 @@ public:
             const ParameterProblemMappingTable &mapping
             )
     {
-        if (_convergence_check==0) {
-            ERR("***Error: No convergence checker is specified in AbstractIterativePartitionedMethod::solve()");
-            return -1;
-        }
+//        if (_convergence_check==0) {
+//            ERR("***Error: No convergence checker is specified in AbstractIterativePartitionedMethod::solve()");
+//            return -1;
+//        }
         const size_t n_subproblems = list_coupled_problems.size();
 
         // initialize variables
@@ -106,11 +106,20 @@ public:
 
             if (n_subproblems>1) {
                 // check convergence
-                if (_convergence_check!=0) {
-                    //T_CONVERGENCE_CHECK check;
-                    //is_converged = check.isConverged(prev_parameter_table, parameter_table, getEpsilon(), v_diff);
-                    is_converged = _convergence_check->isConverged(prev_parameter_table, parameter_table, getEpsilon(), v_diff);
+                is_converged = true;
+                for (size_t i=0; i<n_subproblems; i++) {
+                    ICoupledSystem *problem = list_coupled_problems[i];
+                    IConvergenceCheck* checker = problem->getConvergenceChecker();
+                    double temp_diff = .0;
+                    bool is_this_converged = checker->isConverged(prev_parameter_table, parameter_table, getEpsilon(), temp_diff);
+                    v_diff = std::max(temp_diff, v_diff);
+                    if (!is_this_converged) is_converged = false;
                 }
+//                if (_convergence_check!=0) {
+//                    //T_CONVERGENCE_CHECK check;
+//                    //is_converged = check.isConverged(prev_parameter_table, parameter_table, getEpsilon(), v_diff);
+//                    is_converged = _convergence_check->isConverged(prev_parameter_table, parameter_table, getEpsilon(), v_diff);
+//                }
                 //std::cout.setf(std::ios_base::scientific, std::ios_base::floatfield);
                 //std::cout.precision(3);
                 //std::cout << v_diff << " ";
@@ -206,7 +215,7 @@ private:
     size_t _max_itr;
     size_t _itr_count;
     double _epsilon;
-    IConvergenceCheck *_convergence_check;
+    //IConvergenceCheck *_convergence_check;
 };
 
 

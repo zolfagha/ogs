@@ -14,7 +14,7 @@
 
 #include <vector>
 #include "NumLib/Coupling/ICoupledProblem.h"
-#include "IConvergenceCheck.h"
+//#include "IConvergenceCheck.h"
 
 namespace NumLib
 {
@@ -30,7 +30,7 @@ public:
 
     virtual ~IPartitionedAlgorithm() {};
 
-    virtual void setConvergenceCheck(IConvergenceCheck &checker) = 0;
+//    virtual void setConvergenceCheck(IConvergenceCheck &checker) = 0;
 
     /// solve coupled problems
     /// @param subproblems    a list of subproblems

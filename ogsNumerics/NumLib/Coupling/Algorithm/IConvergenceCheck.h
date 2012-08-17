@@ -17,6 +17,9 @@
 namespace NumLib
 {
 
+/**
+ *
+ */
 class IConvergenceCheck
 {
 public:
