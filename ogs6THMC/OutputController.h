@@ -16,7 +16,8 @@
 
 #include "BaseLib/OrderedMap.h"
 #include "GeoLib/GEOObjects.h"
-#include "DiscreteLib/Core/IDiscreteSystem.h"
+#include "MeshLib/Core/IMesh.h"
+//#include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "OutputIO/OutputBuilder.h"
 #include "OutputIO/OutputTimingBuilder.h"
@@ -30,7 +31,7 @@ namespace ogs6
 class OutputController
 {
 public:
-    void initialize(const BaseLib::Options &option, const std::string &output_dir, const std::string &project_name, std::vector<DiscreteLib::IDiscreteSystem*> &list_dis_sys, GeoLib::GEOObjects &geo, const std::string &geo_unique_name)
+    void initialize(const BaseLib::Options &option, const std::string &output_dir, const std::string &project_name, std::vector<MeshLib::IMesh*> &list_mesh, GeoLib::GEOObjects &geo, const std::string &geo_unique_name)
     {
         //Ogs6FemData* femData = Ogs6FemData::getInstance();
         OutputBuilder outBuilder;
@@ -44,7 +45,7 @@ public:
             out->setOutputPath(output_dir, project_name);
 
             size_t msh_id = 0; //TODO
-            out->setMesh(list_dis_sys[msh_id]->getMesh());
+            out->setMesh(list_mesh[msh_id]);
 
             std::string time_type = op->getOption("TimeType");
             size_t out_steps = op->getOption<size_t>("TimeSteps");
