@@ -37,7 +37,6 @@
 #include "FormatterCustom.h"
 #include "Ogs6FemData.h"
 #include "Ogs5ToOgs6.h"
-#include "MyConvergenceCheckerFactory.h"
 #include "TimeSteppingControllerWithOutput.h"
 
 namespace ogs6
