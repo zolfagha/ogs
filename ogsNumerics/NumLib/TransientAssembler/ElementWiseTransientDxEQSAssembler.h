@@ -15,7 +15,6 @@
 #include <vector>
 #include <valarray>
 
-#include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/Utils/DofEquationIdTable.h"
 #include "DiscreteLib/Core/IDiscreteVector.h"
@@ -51,7 +50,7 @@ public:
     /// @param dofManager         Dof map manager
     /// @param list_dofId         List of Dof IDs used in this problem
     /// @param J                 Jacobian matrix
-    virtual void assembly( MeshLib::IMesh &msh, DiscreteLib::DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs)
+    virtual void assembly( MeshLib::IMesh &msh, DiscreteLib::DofEquationIdTable &dofManager, MathLib::ILinearEquation &eqs)
     {
         const TimeStep &time = *_timestep;
         LocalEquation localEQS;

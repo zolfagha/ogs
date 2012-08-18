@@ -13,7 +13,7 @@
 #pragma once
 
 #include <vector>
-#include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
+#include "MathLib/LinAlg/LinearEquation/ILinearEquation.h"
 
 namespace FemLib
 {
@@ -27,7 +27,7 @@ public:
 class DiagonalizeMethod : public IDirichletBCMethod
 {
 public:
-    void apply(const std::vector<size_t> &bc_nodes, const std::vector<double> &bc_values, MathLib::ILinearEquations& eqs)
+    void apply(const std::vector<size_t> &bc_nodes, const std::vector<double> &bc_values, MathLib::ILinearEquation& eqs)
     {
         eqs.setKnownX(bc_nodes, bc_values);
     }

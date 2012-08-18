@@ -14,8 +14,7 @@
 
 #include "logog.hpp"
 
-#include "MathLib/LinAlg/MatrixBase.h"
-#include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
+#include "MathLib/LinAlg/LinearEquation/DenseLinearEquation.h"
 #include "Convergence.h"
 
 namespace MathLib
@@ -153,9 +152,9 @@ public:
     {
         const size_t n = x0.size();
         T_V r(n), dx(n);
-        MathLib::DenseLinearEquations dense;
+        MathLib::DenseLinearEquation dense;
         dense.create(n);
-        NewtonFunctionDXVector<F_JACOBIAN, MathLib::DenseLinearEquations> f_dx(f_jac, dense);
+        NewtonFunctionDXVector<F_JACOBIAN, MathLib::DenseLinearEquation> f_dx(f_jac, dense);
         return solve(f_residuals, f_dx, x0, x_new, r, dx, max_itr_count, check_error);
     }
 

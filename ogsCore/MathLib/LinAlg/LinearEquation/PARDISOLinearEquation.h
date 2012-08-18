@@ -12,12 +12,12 @@
 
 #pragma once
 
-#include "LinearEquations.h"
+#include "AbstractCRSLinearEquation.h"
 
 namespace MathLib
 {
 
-class PARDISO_Solver : public CRSLinearEquationsBase<signed>
+class PARDISO_Solver : public AbstractCRSLinearEquation<signed>
 {
 
 };

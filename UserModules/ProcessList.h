@@ -12,9 +12,6 @@
 
 #pragma once
 
-#include "DiscreteLib/Serial/DiscreteSystem.h"
-#include "MathLib/LinAlg/LinearEquations/LisInterface.h"
-
 //------------------------------------------------------------------------------
 // List of active modules
 // * This file should be called in body files (e.g. cpp)

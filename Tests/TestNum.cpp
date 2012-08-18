@@ -18,8 +18,11 @@
 #include "BaseLib/BidirectionalMap.h"
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
-#include "MathLib/LinAlg/LinearEquations/SparseLinearEquations.h"
-#include "MathLib/LinAlg/LinearEquations/LisInterface.h"
+#include "MathLib/LinAlg/LinearEquation/DenseLinearEquation.h"
+#include "MathLib/LinAlg/LinearEquation/SparseLinearEquation.h"
+#ifdef USE_LIS
+#include "MathLib/LinAlg/LinearEquation/LisLinearEquation.h"
+#endif
 
 #include "GeoLib/Rectangle.h"
 

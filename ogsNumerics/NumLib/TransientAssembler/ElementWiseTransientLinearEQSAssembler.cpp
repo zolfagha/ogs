@@ -12,7 +12,6 @@
 
 #include "ElementWiseTransientLinearEQSAssembler.h"
 
-#include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/Utils/Tools.h"
 #include "NumLib/TimeStepping/TimeStep.h"
@@ -20,7 +19,7 @@
 namespace NumLib
 {
 
-void ElementWiseTransientLinearEQSAssembler::assembly(MeshLib::IMesh &msh, DiscreteLib::DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs)
+void ElementWiseTransientLinearEQSAssembler::assembly(MeshLib::IMesh &msh, DiscreteLib::DofEquationIdTable &dofManager, MathLib::ILinearEquation &eqs)
 {
     const TimeStep &time = *_timestep;
     LocalEquation localEQS;

@@ -15,7 +15,7 @@
 #include <vector>
 
 #include "BaseLib/CodingTools.h"
-#include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
+#include "MathLib/LinAlg/LinearEquation/ILinearEquation.h"
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "DiscreteLib/Serial/DiscreteLinearEquation.h"

@@ -16,7 +16,7 @@
 #include <vector>
 #include <Eigen>
 
-#include "ILinearEquations.h"
+#include "ILinearEquation.h"
 
 
 namespace MathLib
@@ -25,7 +25,7 @@ namespace MathLib
 /**
  * \brief Dense linear equation using Eigen
  */
-class EigenDenseLinearEquation : public ILinearEquations
+class EigenDenseLinearEquation : public ILinearEquation
 {
 public:
     typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> MatrixType;

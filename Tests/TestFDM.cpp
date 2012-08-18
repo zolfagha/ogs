@@ -15,7 +15,7 @@
 #include <gtest/gtest.h>
 
 #include "BaseLib/CodingTools.h"
-#include "MathLib/LinAlg/LinearEquations/LisInterface.h"
+#include "MathLib/LinAlg/LinearEquation/LisLinearEquation.h"
 #include "GeoLib/Polyline.h"
 #include "GeoLib/Line.h"
 #include "GeoLib/Rectangle.h"
@@ -90,10 +90,10 @@ typedef TemplateConvergenceCheck<FdmFunctionScalar, FdmLib::NormOfFdmNodalFuncti
 typedef TemplateConvergenceCheck<MyFemNodalFunctionScalar, NumLib::NormOfDiscreteDataFunction<double> > FemFunctionConvergenceCheck;
 
 
-typedef FunctionHead<MathLib::CRSLisSolver> MyFunctionHead;
-typedef Geo::FunctionHead<CRSLisSolver> MyFemFunctionHead;
+typedef FunctionHead<MathLib::LisLinearEquation> MyFunctionHead;
+typedef Geo::FunctionHead<LisLinearEquation> MyFemFunctionHead;
 typedef Geo::FunctionVelocity MyFemFunctionVelocity;
-typedef Geo::FunctionConcentration<CRSLisSolver> MyFunctionConcentration;
+typedef Geo::FunctionConcentration<LisLinearEquation> MyFunctionConcentration;
 
 GWFdmProblem* defineGWProblem4FDM(DiscreteSystem &dis, double h, GeoLib::Line &line, Geo::PorousMedia &pm)
 {

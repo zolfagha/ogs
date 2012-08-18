@@ -17,7 +17,7 @@
 #include "BaseLib/CodingTools.h"
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
-#include "MathLib/LinAlg/LinearEquations/LisInterface.h"
+#include "MathLib/LinAlg/LinearEquation/LisLinearEquation.h"
 #include "GeoLib/Rectangle.h"
 
 #include "MeshLib/Tools/MeshGenerator.h"
@@ -279,7 +279,7 @@ TEST(Solution, Fem1_Linear)
     op_lis->addOptionAsNum("error_tolerance", 1e-10);
     op_lis->addOptionAsNum("max_iteration_step", 500);
     // define problems
-    GWFemTestSystem<MathLib::CRSLisSolver> gwProblem;
+    GWFemTestSystem<MathLib::LisLinearEquation> gwProblem;
     gwProblem.define(dis, K, options);
 
     gwProblem.solveTimeStep(TimeStep(1.0, 1.0));
@@ -317,7 +317,7 @@ TEST(Solution, Fem1_Picard)
     op_nl->addOptionAsNum("error_tolerance", 1e-6);
     op_nl->addOptionAsNum("max_iteration_step", 500);
     // define problems
-    GWFemTestSystem<MathLib::CRSLisSolver> gwProblem;
+    GWFemTestSystem<MathLib::LisLinearEquation> gwProblem;
     gwProblem.define(dis, K, options);
 
     gwProblem.solveTimeStep(TimeStep(1.0, 1.0));
@@ -355,7 +355,7 @@ TEST(Solution, Fem1_Newton)
     op_nl->addOptionAsNum("error_tolerance", 1e-6);
     op_nl->addOptionAsNum("max_iteration_step", 10);
     // define problems
-    GWFemTestSystem<MathLib::CRSLisSolver> gwProblem;
+    GWFemTestSystem<MathLib::LisLinearEquation> gwProblem;
     gwProblem.define(dis, K, options);
 
     gwProblem.solveTimeStep(TimeStep(1.0, 1.0));
@@ -389,7 +389,7 @@ TEST(Solution, Fem2)
     op_lis->addOptionAsNum("error_tolerance", 1e-10);
     op_lis->addOptionAsNum("max_iteration_step", 500);
     // define problems
-    GWFemTestSystem<MathLib::CRSLisSolver> gwProblem;
+    GWFemTestSystem<MathLib::LisLinearEquation> gwProblem;
     gwProblem.define(dis, K, options);
 
     // start time stepping

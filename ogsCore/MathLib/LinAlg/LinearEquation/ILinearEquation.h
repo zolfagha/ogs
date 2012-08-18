@@ -26,13 +26,13 @@ namespace MathLib
 /**
  * \brief Interface for all algebraic linear equation systems
  */
-class ILinearEquations
+class ILinearEquation
 {
 public:
     typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> LocalMatrix;
     typedef Eigen::VectorXd LocalVector;
 
-    virtual ~ILinearEquations() {};
+    virtual ~ILinearEquation() {};
 
     virtual void create(size_t length, RowMajorSparsity *sparsity=0) = 0;
     virtual bool isCreated() const = 0;

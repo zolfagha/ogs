@@ -1,13 +1,13 @@
 
 #pragma once
 
-#include "ILinearEquations.h"
+#include "ILinearEquation.h"
 #include "LisInterface.h"
 
 namespace MathLib
 {
 
-class LisMPILinearEquation : public MathLib::ILinearEquations
+class LisMPILinearEquation : public MathLib::ILinearEquation
 {
 public:
     LisMPILinearEquation() 

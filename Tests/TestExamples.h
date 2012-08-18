@@ -17,7 +17,7 @@
 #include "BaseLib/BidirectionalMap.h"
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
-#include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
+#include "MathLib/LinAlg/LinearEquation/DenseLinearEquation.h"
 
 #include "GeoLib/Rectangle.h"
 
@@ -228,7 +228,7 @@ struct DiscreteExample1
                 for (size_t j=0; j<i; j++) _m(i,j) = _m(j,i);
             _m *= 1.e-11/6.0;
         }
-        void assembly(MeshLib::IElement &/*e*/, MathLib::DenseLinearEquations &eqs)
+        void assembly(MeshLib::IElement &/*e*/, MathLib::DenseLinearEquation &eqs)
         {
             (*eqs.getA()) = _m;
         }

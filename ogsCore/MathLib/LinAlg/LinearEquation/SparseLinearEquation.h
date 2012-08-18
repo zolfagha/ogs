@@ -6,9 +6,9 @@
 
 #include "BaseLib/CodingTools.h"
 
-#include "MathLib/LinAlg/LinearEquations/SparseLinearEquationBase.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/LinAlg/Sparse/CRSMatrix.h"
+#include "AbstractCRSLinearEquation.h"
 
 namespace MathLib
 {

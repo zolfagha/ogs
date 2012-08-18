@@ -103,7 +103,7 @@ void gw1(double len, size_t div, std::vector<double> *x, std::vector<double> *re
     op_lis->addOptionAsNum("error_tolerance", 1e-10);
     op_lis->addOptionAsNum("max_iteration_step", 500);
 
-    Geo::FunctionHead<MathLib::DenseLinearEquations> f_head;
+    Geo::FunctionHead<MathLib::DenseLinearEquation> f_head;
 //    Geo::FunctionHead<MathLib::CRSLisSolver> f_head;
     f_head.define(&dis, pGW, options);
     f_head.setOutputParameterName(0, "h");

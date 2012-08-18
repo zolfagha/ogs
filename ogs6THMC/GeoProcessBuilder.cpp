@@ -14,6 +14,8 @@
 
 #include "ProcessLib/ProcessFactoryImpl.h"
 #include "UserModules/ProcessList.h"
+#include "DiscreteSystemList.h"
+#include "LinearSolverList.h"
 
 ProcessLib::AbstractProcessBuilder* GeoProcessBuilder::_obj = 0;
 

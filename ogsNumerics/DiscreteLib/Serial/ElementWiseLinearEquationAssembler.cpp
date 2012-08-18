@@ -23,7 +23,7 @@
 namespace DiscreteLib
 {
 
-void ElementWiseLinearEquationAssembler::assembly(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs)
+void ElementWiseLinearEquationAssembler::assembly(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquation &eqs)
 {
     LocalEquation localEQS;
     std::vector<size_t> ele_node_ids, ele_node_size_order;

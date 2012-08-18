@@ -5,7 +5,7 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file DenseLinearEquations.h
+ * \file AbstractDenseLinearEquation
  *
  * Created on 2012-06-25 by Norihiro Watanabe
  */
@@ -15,7 +15,7 @@
 #include <valarray>
 #include <vector>
 
-#include "ILinearEquations.h"
+#include "ILinearEquation.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
 
 
@@ -25,15 +25,15 @@ namespace MathLib
 /**
  * \brief 
  */
-class DenseLinearEquationsBase : public ILinearEquations
+class AbstractDenseLinearEquation : public ILinearEquation
 {
 public:
     typedef Matrix<double> MatrixType;
     typedef std::valarray<double> VectorType;
 
-    DenseLinearEquationsBase() : _A(0) {};
+    AbstractDenseLinearEquation() : _A(0) {};
 
-    virtual ~DenseLinearEquationsBase()
+    virtual ~AbstractDenseLinearEquation()
     {
         if (_A) delete _A;
     }
@@ -130,20 +130,5 @@ private:
     VectorType _x;
 
 };
-
-/**
- * \brief 
- */
-class DenseLinearEquations : public DenseLinearEquationsBase
-{
-public:
-    void initialize() {};
-    void finalize() {};
-
-    void setOption(const BaseLib::Options &option);
-
-    void solve();
-};
-
 
 }

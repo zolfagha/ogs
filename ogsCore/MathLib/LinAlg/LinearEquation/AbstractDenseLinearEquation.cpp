@@ -10,17 +10,15 @@
  * Created on 2012-06-25 by Norihiro Watanabe
  */
 
-#include "DenseLinearEquations.h"
+#include "AbstractDenseLinearEquation.h"
 
 #include <algorithm>
-
-#include "MathLib/LinAlg/Solvers/GaussAlgorithm.h"
 
 
 namespace MathLib
 {
 
-void DenseLinearEquationsBase::resize(size_t length)
+void AbstractDenseLinearEquation::resize(size_t length)
 {
     if (_A==0) {
         _A = new Matrix<double>(length, length);
@@ -32,7 +30,7 @@ void DenseLinearEquationsBase::resize(size_t length)
     reset();
 }
 
-void DenseLinearEquationsBase::setKnownX(size_t row_id, double x)
+void AbstractDenseLinearEquation::setKnownX(size_t row_id, double x)
 {
     const size_t n_cols = _A->getNCols();
     //A(k, j) = 0.
@@ -49,21 +47,5 @@ void DenseLinearEquationsBase::setKnownX(size_t row_id, double x)
     //A(k, k) = 1.0
     (*_A)(row_id, row_id) = 1.0; //=x
 }
-
-void DenseLinearEquations::setOption(const BaseLib::Options&)
-{
-
-}
-
-void DenseLinearEquations::solve()
-{
-    MathLib::GaussAlgorithm solver(*this->getA());
-    DenseLinearEquationsBase::VectorType *b = this->getRHSAsStdVec();
-    DenseLinearEquationsBase::VectorType *x = this->getXAsStdVec();
-    //std::copy(b->begin(), b->end(), x->begin());
-    *x = *b;
-    solver.execute(&(*x)[0]);
-}
-
 
 } //end namespace

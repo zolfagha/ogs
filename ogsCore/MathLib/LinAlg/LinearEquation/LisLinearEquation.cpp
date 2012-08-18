@@ -5,12 +5,12 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file LisInterface.cpp
+ * \file LisLinearEquation.cpp
  *
  * Created on 2012-06-25 by Norihiro Watanabe
  */
 
-#include "LisInterface.h"
+#include "LisLinearEquation.h"
 
 #include <iostream>
 #ifdef _OPENMP
@@ -22,25 +22,25 @@
 namespace MathLib
 {
 
-void CRSLisSolver::initialize()
+void LisLinearEquation::initialize()
 {
     int argc=0;
     char **argv;
     lis_initialize(&argc, &argv);
 }
 
-void CRSLisSolver::finalize()
+void LisLinearEquation::finalize()
 {
     lis_finalize();
 }
 
-CRSLisSolver::~CRSLisSolver()
+LisLinearEquation::~LisLinearEquation()
 {
     lis_vector_destroy(bb);
     lis_vector_destroy(xx);
 }
 
-void CRSLisSolver::setOption(const BaseLib::Options &option)
+void LisLinearEquation::setOption(const BaseLib::Options &option)
 {
     const BaseLib::Options *op = option.getSubGroup("LinearSolver");
     if (op==0) {
@@ -57,7 +57,7 @@ void CRSLisSolver::setOption(const BaseLib::Options &option)
         _option.ls_max_iterations = op->getOption<int>("max_iteration_step");
 }
 
-void CRSLisSolver::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)
+void LisLinearEquation::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)
 {
     long dimension = static_cast<long>(A->getNRows());
 
@@ -145,7 +145,7 @@ void CRSLisSolver::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)
     std::cout << "------------------------------------------------------------------" << std::endl;
 }
 
-void CRSLisSolver::gatherX(std::vector<double> &x)
+void LisLinearEquation::gatherX(std::vector<double> &x)
 {
     int local_n, global_n;
     lis_vector_get_size(xx, &local_n, &global_n);

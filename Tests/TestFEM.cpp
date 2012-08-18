@@ -16,7 +16,7 @@
 #include "MathLib/Interpolation/LinearInterpolation.h"
 //#include "MathLib/LinAlg/Solvers/GaussAlgorithm.h"
 #include "NumLib/Function/Function.h"
-#include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
+#include "MathLib/LinAlg/LinearEquation/DenseLinearEquation.h"
 
 #include "GeoLib/Rectangle.h"
 

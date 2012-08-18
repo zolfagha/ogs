@@ -5,12 +5,12 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file SparseLinearEquationBase.cpp
+ * \file AbstractCRSLinearEquation.cpp
  *
  * Created on 2012-06-25 by Norihiro Watanabe
  */
 
-#include "MathLib/LinAlg/LinearEquations/SparseLinearEquationBase.h"
+#include "AbstractCRSLinearEquation.h"
 
 #include <algorithm>
 

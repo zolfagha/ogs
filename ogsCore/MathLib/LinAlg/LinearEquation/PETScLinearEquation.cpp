@@ -9,7 +9,7 @@
 
 #include<iostream>
 
-#include "PETScLinearSolver.h"
+#include "PETScLinearEquation.h"
 
 namespace MathLib
 {

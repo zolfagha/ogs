@@ -5,7 +5,7 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file SparseLinearEquationBase.h
+ * \file AbstractCRSLinearEquation.h
  *
  * Created on 2012-06-25 by Norihiro Watanabe
  */
@@ -17,9 +17,9 @@
 
 #include "BaseLib/CodingTools.h"
 
-#include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/LinAlg/Sparse/CRSMatrix.h"
+#include "ILinearEquation.h"
 
 namespace MathLib
 {
@@ -27,7 +27,7 @@ namespace MathLib
  * \brief 
  */
 template<typename IDX_TYPE>
-class AbstractCRSLinearEquation : public ILinearEquations
+class AbstractCRSLinearEquation : public ILinearEquation
 {
 public:
     typedef CRSMatrix<double, IDX_TYPE> MatrixType;

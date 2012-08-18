@@ -5,7 +5,7 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file LisInterface.h
+ * \file LisLinearEquation.h
  *
  * Created on 2012-06-25 by Norihiro Watanabe
  */
@@ -18,8 +18,7 @@
 
 #include "BaseLib/CodingTools.h"
 #include "MathLib/LinAlg/Sparse/SparseTableCRS.h"
-#include "ILinearEquations.h"
-#include "SparseLinearEquationBase.h"
+#include "AbstractCRSLinearEquation.h"
 
 /*
 LIS matrix solver options
@@ -137,12 +136,12 @@ struct LIS_option
     }
 };
 
-class CRSLisSolver : public AbstractCRSLinearEquation<signed>
+class LisLinearEquation : public AbstractCRSLinearEquation<signed>
 {
 public:
     void initialize();
     void finalize();
-    virtual ~CRSLisSolver();
+    virtual ~LisLinearEquation();
 
     void setOption(const BaseLib::Options &option);
     void setOption(const LIS_option &option)

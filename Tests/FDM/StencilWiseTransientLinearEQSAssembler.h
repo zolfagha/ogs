@@ -14,7 +14,7 @@
 
 #include <vector>
 
-#include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
+#include "MathLib/LinAlg/LinearEquation/ILinearEquation.h"
 #include "MeshLib/Topology/Topology.h"
 
 #include "DiscreteLib/Utils/DofEquationIdTable.h"
@@ -63,7 +63,7 @@ public:
     /// @param dofManager         Dof map manager
     /// @param list_dofId         List of Dof IDs used in this problem
     /// @param eqs                 Linear equation solver
-    void assembly(MeshLib::IMesh &msh, DiscreteLib::DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs)
+    void assembly(MeshLib::IMesh &msh, DiscreteLib::DofEquationIdTable &dofManager, MathLib::ILinearEquation &eqs)
     {
         const NumLib::TimeStep &time = *_timestep;
         LocalEquationType localEQS;

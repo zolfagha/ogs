@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include "SparseLinearEquationBase.h"
+#include "AbstractCRSLinearEquation.h"
 #include "petscmat.h"
 #include "petscksp.h"
 

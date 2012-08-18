@@ -14,8 +14,6 @@
 
 #include <string>
 #include "BaseLib/CodingTools.h"
-#include "MathLib/LinAlg/LinearEquations/LisInterface.h"
-#include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
 #include "FemLib/Function/FemIntegrationPointFunction.h"
 #include "SolutionLib/Fem/FemEquation.h"
 #include "SolutionLib/Fem/FemIVBVProblem.h"

@@ -121,13 +121,13 @@ public:
             _global_linear_solver->reset();
         }
         // merge local eqs into a global eqs
-        MathLib::ILinearEquations* global_solver = _global_linear_solver;
+        MathLib::ILinearEquation* global_solver = _global_linear_solver;
         for (size_t i=0; i<_list_local_eq.size(); i++) {
             SubDomain* dom = _ddc_global->getSubDomain(i);
             IGlobaLocalMappingTable* pt_id_mapping = dom->getGlobalLocalIdMap();
             DiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>* local_eqs = _list_local_eq[i];
             DofEquationIdTable* local_dofTable = local_eqs->getDofMapManger();
-            MathLib::ILinearEquations* local_solver = local_eqs->getLinearSolver();
+            MathLib::ILinearEquation* local_solver = local_eqs->getLinearSolver();
             //local_solver->printout();
             MathLib::RowMajorSparsity* local_sp = local_eqs->getSparsity();
             const size_t n_local_pt = dom->getLoalMesh()->getNumberOfNodes();

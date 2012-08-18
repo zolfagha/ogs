@@ -16,7 +16,7 @@
 #include "BaseLib/CodingTools.h"
 
 #include "MathLib/Vector.h"
-#include "MathLib/LinAlg/LinearEquations/LisInterface.h"
+#include "MathLib/LinAlg/LinearEquation/LisLinearEquation.h"
 #include "GeoLib/Line.h"
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "DiscreteLib/Serial/DiscreteSystem.h"
@@ -185,10 +185,10 @@ static void getGWExpectedHead(std::vector<double> &expected)
     }
 }
 
-typedef Geo::FunctionHead<CRSLisSolver> MyFunctionHead;
+typedef Geo::FunctionHead<LisLinearEquation> MyFunctionHead;
 typedef Geo::FunctionVelocity MyFunctionVelocity;
-typedef Geo::FunctionConcentration<CRSLisSolver> MyFunctionConcentration;
-typedef Geo::FunctionDisplacement<CRSLisSolver> MyFunctionDisplacement;
+typedef Geo::FunctionConcentration<LisLinearEquation> MyFunctionConcentration;
+typedef Geo::FunctionDisplacement<LisLinearEquation> MyFunctionDisplacement;
 typedef Geo::FunctionStressStrain MyFunctionStressStrain;
 
 

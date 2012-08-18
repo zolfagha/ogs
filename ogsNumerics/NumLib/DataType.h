@@ -12,12 +12,12 @@
 
 #pragma once
 
-#include "MathLib/LinAlg/LinearEquations/EigenLinearEquation.h"
+#include "DiscreteLib/Core/LocalDataType.h"
 
 namespace NumLib
 {
-typedef MathLib::EigenDenseLinearEquation LocalEquation;
-typedef LocalEquation::LocalMatrix LocalMatrix;
-typedef LocalEquation::LocalVector LocalVector;
+typedef DiscreteLib::LocalEquation LocalEquation;
+typedef DiscreteLib::LocalMatrix LocalMatrix;
+typedef DiscreteLib::LocalVector LocalVector;
 } //end
 

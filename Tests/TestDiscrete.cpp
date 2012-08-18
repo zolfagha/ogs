@@ -18,10 +18,10 @@
 #include "BaseLib/BidirectionalMap.h"
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
-#include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
-#include "MathLib/LinAlg/LinearEquations/SparseLinearEquations.h"
+#include "MathLib/LinAlg/LinearEquation/DenseLinearEquation.h"
+#include "MathLib/LinAlg/LinearEquation/SparseLinearEquation.h"
 #ifdef USE_LIS
-#include "MathLib/LinAlg/LinearEquations/LisInterface.h"
+#include "MathLib/LinAlg/LinearEquation/LisLinearEquation.h"
 #endif
 
 #include "GeoLib/Rectangle.h"
@@ -193,7 +193,7 @@ TEST(Discrete, NDDCSSEqs2)
 {
     DiscreteExample1 ex1;
     DiscreteExample1::TestElementAssembler ele_assembler;
-    CRSLisSolver lis;
+    LisLinearEquation lis;
     lis.getOption().ls_method = LIS_option::CG;
     lis.getOption().ls_precond = LIS_option::NONE;
     DecomposedDomain* ddc = setupNDDC2();
@@ -205,7 +205,7 @@ TEST(Discrete, NDDCSSEqs2)
     dofManager.addVariableDoFs(0, 0, ddc->getTotalNumberOfDecomposedObjects());
     dofManager.construct(DofNumberingType::BY_DOF);
     // eqs
-    IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivity>(&lis, &dofManager);
+    IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<LisLinearEquation, SparsityBuilderFromNodeConnectivity>(&lis, &dofManager);
     linear_eq->initialize();
     linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
     ElementWiseLinearEquationAssembler assem(ele_assembler);
@@ -220,7 +220,7 @@ TEST(Discrete, NDDCSDEqs2)
 {
     DiscreteExample1 ex1;
     DiscreteExample1::TestElementAssembler ele_assembler;
-    CRSLisSolver lis;
+    LisLinearEquation lis;
     lis.getOption().ls_method = LIS_option::CG;
     lis.getOption().ls_precond = LIS_option::NONE;
     DecomposedDomain* ddc = setupNDDC2();
@@ -232,7 +232,7 @@ TEST(Discrete, NDDCSDEqs2)
     dofManager.addVariableDoFs(0, 0, ddc->getTotalNumberOfDecomposedObjects());
     dofManager.construct(DofNumberingType::BY_DOF);
     // eqs
-    IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivity>(&lis, &dofManager);
+    IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<LisLinearEquation, SparsityBuilderFromNodeConnectivity>(&lis, &dofManager);
     linear_eq->initialize();
     linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
     ElementWiseLinearEquationAssembler assem(ele_assembler);
@@ -317,7 +317,7 @@ TEST(Discrete, Lis1)
 {
     DiscreteExample1 ex1;
     DiscreteExample1::TestElementAssembler ele_assembler;
-    CRSLisSolver lis;
+    LisLinearEquation lis;
     lis.getOption().ls_method = LIS_option::CG;
     lis.getOption().ls_precond = LIS_option::NONE;
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
@@ -330,7 +330,7 @@ TEST(Discrete, Lis1)
         dofManager.addVariableDoFs(msh->getID(), 0, msh->getNumberOfNodes());
         dofManager.construct(DofNumberingType::BY_DOF);
         // create a linear problem
-        IDiscreteLinearEquation *linear_eq = dis.createLinearEquation<CRSLisSolver, SparsityBuilderFromNodeConnectivity>(&lis, &dofManager);
+        IDiscreteLinearEquation *linear_eq = dis.createLinearEquation<LisLinearEquation, SparsityBuilderFromNodeConnectivity>(&lis, &dofManager);
         // solve the equation
         linear_eq->initialize();
         linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
@@ -428,7 +428,7 @@ TEST(Discrete, OMP_eqs1)
         //dofManager.construct(DofMapManager::BY_POINT);
 
         // create a linear problem
-        CRSLisSolver lis;
+        LisLinearEquation lis;
         lis.getOption().ls_method = LIS_option::CG;
         lis.getOption().ls_precond = LIS_option::NONE;
         DofEquationIdTable dofManager;

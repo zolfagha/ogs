@@ -13,7 +13,7 @@
 #pragma once
 
 #include <Eigen>
-#include "MathLib/LinAlg/LinearEquations/EigenLinearEquation.h"
+#include "MathLib/LinAlg/LinearEquation/EigenDenseLinearEquation.h"
 
 namespace DiscreteLib
 {

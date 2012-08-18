@@ -14,7 +14,7 @@
 
 #include <vector>
 
-#include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
+#include "MathLib/LinAlg/LinearEquation/ILinearEquation.h"
 
 
 #include "DiscreteLib/Utils/DofEquationIdTable.h"
@@ -57,7 +57,7 @@ public:
     /// @param dofManager         Dof map manager
     /// @param list_dofId         List of Dof IDs used in this problem
     /// @param eqs                 Linear equation solver
-    void assembly(MeshLib::IMesh &msh, DiscreteLib::DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs);
+    void assembly(MeshLib::IMesh &msh, DiscreteLib::DofEquationIdTable &dofManager, MathLib::ILinearEquation &eqs);
 
 private:
     IElementWiseTransientLinearEQSLocalAssembler* _transient_e_assembler;

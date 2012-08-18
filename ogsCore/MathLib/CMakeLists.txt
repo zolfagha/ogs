@@ -41,33 +41,33 @@ FILE(GLOB MathLib_LinAlg_Preconditioner_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DI
 	MathLib/LinAlg/Preconditioner/*.h 
 	MathLib/LinAlg/Preconditioner/*.cpp)
 SOURCE_GROUP( ogsCore\\MathLib\\LinAlg\\Preconditioner FILES ${MathLib_LinAlg_Preconditioner_Files} )
-#LinAlg/LinearEquations/
+#LinAlg/LinearEquation/
 FILE(GLOB MathLib_LinAlg_LinearEquations_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
-	MathLib/LinAlg/LinearEquations/*.h 
-	MathLib/LinAlg/LinearEquations/*.cpp)
+	MathLib/LinAlg/LinearEquation/*.h 
+	MathLib/LinAlg/LinearEquation/*.cpp)
 IF (NOT USE_BLAS_LAPACK)
 	LIST(REMOVE_ITEM MathLib_LinAlg_LinearEquations_Files 
-		MathLib/LinAlg/LinearEquations/SparseLinearEquations.h
-		MathLib/LinAlg/LinearEquations/SparseLinearEquations.cpp
+		MathLib/LinAlg/LinearEquation/SparseLinearEquation.h
+		MathLib/LinAlg/LinearEquation/SparseLinearEquation.cpp
 	)
 ENDIF ()
 IF (NOT USE_LIS)
 	LIST(REMOVE_ITEM MathLib_LinAlg_LinearEquations_Files 
-		MathLib/LinAlg/LinearEquations/LisInterface.h
-		MathLib/LinAlg/LinearEquations/LisInterface.cpp
+		MathLib/LinAlg/LinearEquation/LisLinearEquation.h
+		MathLib/LinAlg/LinearEquation/LisLinearEquation.cpp
 	)
 ENDIF ()
 IF(NOT (USE_MPI AND USE_LIS))
 	LIST(REMOVE_ITEM MathLib_LinAlg_LinearEquations_Files 
-		MathLib/LinAlg/LinearEquations/LisMPILinearEquation.h
-		MathLib/LinAlg/LinearEquations/LisMPILinearEquation.cpp
+		MathLib/LinAlg/LinearEquation/LisMPILinearEquation.h
+		MathLib/LinAlg/LinearEquation/LisMPILinearEquation.cpp
 	)
 ENDIF()
 
 IF (NOT USE_PETSC)
 	LIST(REMOVE_ITEM MathLib_LinAlg_LinearEquations_Files 
-		MathLib/LinAlg/LinearEquations/PETScLinearSolver.h
-		MathLib/LinAlg/LinearEquations/PETScLinearSolver.cpp
+		MathLib/LinAlg/LinearEquation/PETScLinearEquation.h
+		MathLib/LinAlg/LinearEquation/PETScLinearEquation.cpp
 	)
 ENDIF ()
 SOURCE_GROUP( ogsCore\\MathLib\\LinAlg\\LinearEquations FILES ${MathLib_LinAlg_LinearEquations_Files})

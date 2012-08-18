@@ -15,9 +15,11 @@
 #include <valarray>
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
-#include "MathLib/LinAlg/LinearEquations/LinearEquationsFactory.h"
-#include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
-#include "MathLib/LinAlg/LinearEquations/LisInterface.h"
+#include "MathLib/LinAlg/LinearEquation/DenseLinearEquation.h"
+#include "MathLib/LinAlg/LinearEquation/SparseLinearEquation.h"
+#ifdef USE_LIS
+#include "MathLib/LinAlg/LinearEquation/LisLinearEquation.h"
+#endif
 #include "MathLib/Nonlinear/NewtonRaphson.h"
 #include "MathLib/Nonlinear/Picard.h"
 #include "MathLib/Nonlinear/BisectionMethod.h"
@@ -30,7 +32,7 @@ using namespace NumLib;
 template<class T_F, class T_DF>
 class TemplateFixedPointFunctonUsingC1Equation
 {
-    MathLib::DenseLinearEquations solver;
+    MathLib::DenseLinearEquation solver;
     std::valarray<double> b;
     std::valarray<double> tmp;
     T_F nr;
@@ -128,7 +130,7 @@ typedef TemplateFixedPointFunctonUsingC1Equation<NL2_NR,NL2_NR_D1> NL2_PC1;
 
 class NL2_PC2
 {
-    MathLib::DenseLinearEquations solver;
+    MathLib::DenseLinearEquation solver;
     std::valarray<double> b;
 public:
     NL2_PC2(size_t n)
@@ -189,17 +191,17 @@ public:
         r[1] = 2*x[0]*x[0]-x[1];
   }
 
-  MathLib::CRSLisSolver* getLinearSolver() {return &_linear_solver;};
+  MathLib::LisLinearEquation* getLinearSolver() {return &_linear_solver;};
 
 
 private:
-  MathLib::CRSLisSolver _linear_solver;
+  MathLib::LisLinearEquation _linear_solver;
 };
 
 class NL3_NR_D1
 {
 public:
-    NL3_NR_D1(MathLib::CRSLisSolver* solver) : _linear_solver(solver)
+    NL3_NR_D1(MathLib::LisLinearEquation* solver) : _linear_solver(solver)
     {
     }
 
@@ -211,11 +213,11 @@ public:
         j.setValue(1, 1,  -1.0);
     }
 
-    MathLib::CRSLisSolver* getLinearSolver() {return _linear_solver;};
+    MathLib::LisLinearEquation* getLinearSolver() {return _linear_solver;};
 
 
 private:
-  MathLib::CRSLisSolver* _linear_solver;
+  MathLib::LisLinearEquation* _linear_solver;
 };
 
 class NL4_Residual
@@ -358,7 +360,7 @@ TEST(Math, NonlinearNR_sparse)
     typedef std::valarray<double> MyVector;
     typedef MathLib::CRSMatrix<double, signed> MyMatrix;
     typedef NRCheckConvergence<MyVector,NRErrorAbsResMNormOrRelDxMNorm > MyConverge;
-    typedef NewtonFunctionDXVector<NL3_NR_D1, MathLib::CRSLisSolver> MyDxFunction;
+    typedef NewtonFunctionDXVector<NL3_NR_D1, MathLib::LisLinearEquation> MyDxFunction;
 
     NL3_NR f;
     NL3_NR_D1 df(f.getLinearSolver());

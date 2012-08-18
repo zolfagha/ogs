@@ -22,7 +22,7 @@ class IMesh;
 
 namespace MathLib
 {
-    class ILinearEquations;
+    class ILinearEquation;
 }
 
 namespace DiscreteLib
@@ -43,7 +43,7 @@ public:
     /// @param dofManager Dof map manager
     /// @param list_dofId List of Dof IDs used in this problem
     /// @param eqs Linear equation solver
-    void assembly(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs);
+    void assembly(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquation &eqs);
 
 private:
     IElemenetWiseLinearEquationLocalAssembler* _e_assembler;

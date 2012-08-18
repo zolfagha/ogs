@@ -12,10 +12,10 @@
 
 #include <gtest/gtest.h>
 
-#include "MathLib/LinAlg/LinearEquations/DenseLinearEquations.h"
-#include "MathLib/LinAlg/LinearEquations/SparseLinearEquations.h"
+#include "MathLib/LinAlg/LinearEquation/DenseLinearEquation.h"
+#include "MathLib/LinAlg/LinearEquation/SparseLinearEquation.h"
 #ifdef USE_LIS
-#include "MathLib/LinAlg/LinearEquations/LisInterface.h"
+#include "MathLib/LinAlg/LinearEquation/LisLinearEquation.h"
 #endif
 #ifdef USE_PETSC
 #include "MathLib/LinAlg/LinearEquations/PETScLinearSolver.h"
@@ -77,7 +77,7 @@ TEST(Math, LinearSolverDirect)
     Example1 ex1;
 
     // construct discrete eqs
-    DenseLinearEquations eqs;
+    DenseLinearEquation eqs;
     eqs.create(ex1.sparse.size(), &ex1.sparse);
 
     //
@@ -188,7 +188,7 @@ TEST(Math, LinearSolverLis1)
     Example1 ex1;
 
     // construct discrete eqs
-    CRSLisSolver eqs;
+    LisLinearEquation eqs;
     eqs.create(ex1.sparse.size(), &ex1.sparse);
     eqs.getOption().ls_method = LIS_option::CG;
     eqs.getOption().ls_precond = LIS_option::NONE;

@@ -21,7 +21,7 @@ class IMesh;
 
 namespace MathLib
 {
-    class ILinearEquations;
+    class ILinearEquation;
 }
 
 namespace DiscreteLib
@@ -39,7 +39,7 @@ public:
     virtual ~IDiscreteLinearEquationAssembler() {};
 
     /// assembly
-    virtual void assembly( MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquations &eqs) = 0;
+    virtual void assembly( MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquation &eqs) = 0;
 };
 
 }

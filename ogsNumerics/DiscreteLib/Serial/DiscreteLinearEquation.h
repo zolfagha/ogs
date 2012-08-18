@@ -14,8 +14,8 @@
 
 #include "BaseLib/CodingTools.h"
 
-#include "MathLib/LinAlg/LinearEquations/ILinearEquations.h"
-#include "MathLib/LinAlg/Sparse/SparseTableCRS.h"
+#include "MathLib/LinAlg/LinearEquation/ILinearEquation.h"
+#include "MathLib/LinAlg/Sparse/Sparsity.h"
 
 #include "MeshLib/Core/IMesh.h"
 
