@@ -60,7 +60,7 @@ public:
         GeoLib::Polyline* poly_right = rec->getRight();
         //mesh
         this->msh = msh;
-        dis = new DiscreteLib::DiscreteSystem(*msh);
+        dis = new DiscreteLib::DiscreteSystem(msh);
         //discretization
         head = new MyNodalFunctionScalar();
         head->initialize(*dis, FemLib::PolynomialOrder::Linear);

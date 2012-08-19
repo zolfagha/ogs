@@ -25,7 +25,7 @@ namespace DiscreteLib
 template <typename T> class IDiscreteVectorAssembler;
 
 /**
- *
+ * \brief Super class for all discrete data 
  */
 class IDiscreteVectorBase : public IDiscreteObject
 {
@@ -45,6 +45,7 @@ public:
     
     virtual ~IDiscreteVector() {};
 
+    /// clone this object
     virtual MyVectorType* clone() const = 0;
 
     /// return vector size

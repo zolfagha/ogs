@@ -16,7 +16,7 @@
 #include "logog/include/formatter.hpp"
 
 /**
- * new formatter for logog
+ * \brief new formatter for logog
  */
 class FormatterCustom : public logog::FormatterGCC
 {

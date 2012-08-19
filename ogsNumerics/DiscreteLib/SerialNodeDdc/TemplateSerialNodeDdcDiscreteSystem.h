@@ -15,11 +15,10 @@
 #include <vector>
 
 #include "DiscreteLib/Core/IDiscreteSystem.h"
+#include "DiscreteLib/Core/DiscreteEnums.h"
 #include "DiscreteLib/DDC/DecomposedDomain.h"
 #include "DiscreteLib/DDC/DecomposedMesh.h"
 #include "DecomposedVector.h"
-#include "SerialNodeDdcSharedLinearEquation.h"
-#include "SerialNodeDdcDistributedLinearEquation.h"
 
 namespace DiscreteLib
 {
@@ -29,7 +28,7 @@ namespace DiscreteLib
  * 
  * \tparam T_EQS Linear equation class
  */
-template <template <typename, typename> class T_EQS>
+template <template <typename, typename> class T_EQS, DiscreteSystemType::type T_TYPE>
 class TemplateSerialNodeDdcDiscreteSystem : public IDiscreteSystem
 {
 public:
@@ -43,16 +42,38 @@ public:
     {
         typedef DecomposedVector<T> type;
     };
+    
+    ///
+    static DiscreteSystemType::type getSystemType() { return T_TYPE;};
 
-    /// \param ddc_global   DDC object
-    explicit TemplateSerialNodeDdcDiscreteSystem(DecomposedDomain* ddc_global)
-    : _ddc_global(ddc_global), _msh(NULL)
+    /**
+     * 
+     * @param msh
+     */
+    explicit TemplateSerialNodeDdcDiscreteSystem(const MeshLib::IMesh *msh)
+    : _ddc_global(NULL), _msh(msh)
     { };
     
     /// 
-    virtual ~TemplateSerialNodeDdcDiscreteSystem() {};
+    virtual ~TemplateSerialNodeDdcDiscreteSystem()
+    {
+        BaseLib::releaseObject(_msh);
+    };
 
-    ///
+    /**
+     * 
+     * @param ddc_global
+     */
+    void initialize(DecomposedDomain* ddc_global)
+    {
+        _ddc_global = ddc_global;
+        //_msh = new DecomposedMesh(ddc_global->getID(), ddc_global);
+    }
+    
+    /**
+     * 
+     * @return
+     */
     virtual MeshLib::IMesh* getMesh() const { return (MeshLib::IMesh*)_msh; };
 
     /// create a new linear equation
@@ -86,13 +107,7 @@ private:
 
 private:
     DecomposedDomain* _ddc_global;
-    DecomposedMesh* _msh;
+    const MeshLib::IMesh* _msh;
 };
-
-/// \brief Discrete system for node-based decomposition using shared memory
-typedef TemplateSerialNodeDdcDiscreteSystem<SerialNodeDdcSharedLinearEquation> SerialNodeDdcSharedDiscreteSystem;
-
-/// \brief Discrete system for node-based decomposition using distributed memory
-typedef TemplateSerialNodeDdcDiscreteSystem<SerialNodeDdcDistributedLinearEquation> SerialNodeDdcDistributedDiscreteSystem;
 
 } //end

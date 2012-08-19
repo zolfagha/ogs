@@ -33,13 +33,16 @@ class IDiscreteSystem
 public:
     virtual ~IDiscreteSystem() {};
     
+    /// return this mesh
     virtual MeshLib::IMesh* getMesh() const = 0;
 
+    /// add equation object
     void addLinearEquation(IDiscreteLinearEquation *eqs)
     {
         _data.addLinearEquation(eqs);
     }
 
+    /// delete equation object
     void deleteLinearEquation(IDiscreteLinearEquation* eqs)
     {
         if (eqs!=0) {
@@ -48,14 +51,14 @@ public:
         }
     }
 
+    /// add vector object
     void addVector(IDiscreteVectorBase *vec)
     {
         _data.addVector(vec);
     }
 
     /// delete this vector object
-    /// @param n    vector length
-    /// @return vector object
+    /// \param vector object
     void deleteVector(IDiscreteVectorBase* v)
     {
         if (v!=0) {

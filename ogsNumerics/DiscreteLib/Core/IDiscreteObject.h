@@ -23,9 +23,13 @@ namespace DiscreteLib
 class IDiscreteObject
 {
 public:
+    ///
     IDiscreteObject() : _obj_id(0) {};
+    ///
     virtual ~IDiscreteObject() {};
+    ///
     size_t getObjectID() const {return _obj_id;};
+    ///
     void setObjectID(size_t i) {_obj_id = i;};
     
 private:

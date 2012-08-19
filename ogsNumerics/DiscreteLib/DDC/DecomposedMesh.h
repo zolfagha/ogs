@@ -19,17 +19,29 @@
 namespace DiscreteLib
 {
 
+/**
+ * \brief 
+ * 
+ */
 class DecomposedMesh : public MeshLib::IMesh
 {
 public:
+    /**
+     * 
+     * @param id
+     * @param ddc_dom
+     */
     DecomposedMesh(size_t id, DecomposedDomain* ddc_dom)
-    : _id(id), _ddc_dom(ddc_dom), _msh0(0)
+    : _id(id), _ddc_dom(ddc_dom), _msh0(NULL)
     {
         if (ddc_dom->getNumberOfSubDomains()>0) {
             _msh0 = ddc_dom->getSubDomain(0)->getLoalMesh();
         }
     }
 
+    /**
+     * 
+     */
     virtual ~DecomposedMesh()
     {
     }
@@ -90,6 +102,9 @@ public:
     {
         _msh0->constructGeometricProperty();
     };
+    
+    ///
+    DecomposedDomain* getDecomposedDomain() const {return _ddc_dom;};
 
 private:
     size_t _id;

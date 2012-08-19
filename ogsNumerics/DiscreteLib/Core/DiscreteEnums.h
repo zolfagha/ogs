@@ -16,6 +16,9 @@
 namespace DiscreteLib
 {
 
+/**
+ * \brief Discrete System Type
+ */
 struct DiscreteSystemType
 {
     enum type

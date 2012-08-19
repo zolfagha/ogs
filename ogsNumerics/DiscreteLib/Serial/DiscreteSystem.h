@@ -48,13 +48,15 @@ public:
         typedef DiscreteVector<T> type;
     };
 
+    /**
+     * 
+     * @return
+     */
     static DiscreteSystemType::type getSystemType() { return DiscreteSystemType::Serial;};
 
-//    typedef DiscreteSystemType::Serial SystemType;
-   
     /// constructor
     /// \param msh  a mesh to represent discrete systems by nodes or elements or edges
-    explicit DiscreteSystem(const MeshLib::IMesh& msh) : _msh(&msh) {};
+    explicit DiscreteSystem(const MeshLib::IMesh* msh) : _msh(msh) {};
 
     ///
     virtual ~DiscreteSystem()

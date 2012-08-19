@@ -35,7 +35,8 @@
 #include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "DiscreteLib/Serial/DiscreteVector.h"
 #include "DiscreteLib/Serial/ElementWiseLinearEquationAssembler.h"
-#include "DiscreteLib/SerialNodeDdc/SerialNodeDdcDiscreteSystem.h"
+#include "DiscreteLib/SerialNodeDdc/SerialNodeDdcDistributedDiscreteSystem.h"
+#include "DiscreteLib/SerialNodeDdc/SerialNodeDdcSharedDiscreteSystem.h"
 #include "DiscreteLib/DDC/SequentialGlobaLocalMappingTable.h"
 #include "DiscreteLib/DDC/RandomGlobalLocalMappingTable.h"
 #include "DiscreteLib/DDC/SubDomain.h"
@@ -114,7 +115,7 @@ DecomposedDomain* setupNDDC1()
 {
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     SequentialGlobaLocalMappingTable* mapping = new SequentialGlobaLocalMappingTable(0, msh->getNumberOfNodes(), 0);
-    SubDomain* dom1 = new SubDomain(*msh, *mapping);
+    SubDomain* dom1 = new SubDomain(msh, mapping);
     // global
     DecomposedDomain *ddc = new DecomposedDomain(DecompositionType::Node);
     ddc->addSubDomain(dom1);
@@ -126,18 +127,17 @@ DecomposedDomain* setupNDDC2()
     MeshLib::IMesh *org_msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
     DecomposedDomain *ddc = new DecomposedDomain(DecompositionType::Node);
     {
-        MeshLib::IMesh* local_msh;
         int dom1_eles[] = {0, 1, 2, 3};
         int dom1_ghost_nodes[] = {5, 6, 7, 8};
-        std::set<size_t> list_ghost(dom1_ghost_nodes, dom1_ghost_nodes + 4);
+        std::set<size_t> list_ghost_nodes(dom1_ghost_nodes, dom1_ghost_nodes + 4);
         std::vector<size_t> dom1_e(dom1_eles, dom1_eles+4);
         BaseLib::BidirectionalMap<size_t, size_t> msh_node_id_mapping;
+        MeshLib::IMesh* local_msh;
         MeshGenerator::generateSubMesh(*org_msh, dom1_e, local_msh, msh_node_id_mapping);
         SequentialGlobaLocalMappingTable* mapping = new SequentialGlobaLocalMappingTable(0, local_msh->getNumberOfNodes(), 0);
-        SubDomain* dom = new SubDomain(*local_msh, *mapping, &list_ghost);
+        SubDomain* dom = new SubDomain(local_msh, mapping, &list_ghost_nodes);
         ddc->addSubDomain(dom);
     }
-    //size_t offset = ddc->getSubDomain(0)->getLoalMesh()->getNumberOfNodes() - ddc->getSubDomain(0)->getNumberOfGhosts();
     {
         MeshLib::IMesh* local_msh;
         int dom1_eles[] = {1, 2, 3};
@@ -150,8 +150,8 @@ DecomposedDomain* setupNDDC2()
         for (size_t i=0; i<n_ghost; i++) {
             list_ghost.insert(msh_node_id_mapping->mapAtoB(dom1_ghost_nodes[i]));
         }
-        RandomGlobalLocalMappingTable* mapping = new RandomGlobalLocalMappingTable(*msh_node_id_mapping);
-        SubDomain* dom = new SubDomain(*local_msh, *mapping, &list_ghost);
+        RandomGlobalLocalMappingTable* mapping = new RandomGlobalLocalMappingTable(msh_node_id_mapping);
+        SubDomain* dom = new SubDomain(local_msh, mapping, &list_ghost);
         ddc->addSubDomain(dom);
     }
     return ddc;
@@ -160,9 +160,10 @@ DecomposedDomain* setupNDDC2()
 TEST(Discrete, NDDCSSVec1)
 {
     DecomposedDomain* ddc = setupNDDC1();
+    DecomposedMesh* msh = new DecomposedMesh(0, ddc);
 
     // discrete system
-    SerialNodeDdcSharedDiscreteSystem dis(ddc);
+    SerialNodeDdcSharedDiscreteSystem dis(msh);
 
     // vector
     IDiscreteVector<double>* v = dis.createVector<double>(ddc->getTotalNumberOfDecomposedObjects());
@@ -176,8 +177,10 @@ TEST(Discrete, NDDCSSVec1)
 TEST(Discrete, NDDCSSVec2)
 {
     DecomposedDomain* ddc = setupNDDC2();
+    DecomposedMesh* msh = new DecomposedMesh(0, ddc);
     // discrete system
-    SerialNodeDdcSharedDiscreteSystem dis(ddc);
+    SerialNodeDdcSharedDiscreteSystem dis(msh);
+    dis.initialize(ddc);
 
     // vector
     IDiscreteVector<double>* v = dis.createVector<double>(ddc->getTotalNumberOfDecomposedObjects());
@@ -197,9 +200,11 @@ TEST(Discrete, NDDCSSEqs2)
     lis.getOption().ls_method = LIS_option::CG;
     lis.getOption().ls_precond = LIS_option::NONE;
     DecomposedDomain* ddc = setupNDDC2();
+    DecomposedMesh* msh = new DecomposedMesh(0, ddc);
 
     // discrete system
-    SerialNodeDdcSharedDiscreteSystem dis(ddc);
+    SerialNodeDdcSharedDiscreteSystem dis(msh);
+    dis.initialize(ddc);
     // dof
     DofEquationIdTable dofManager;
     dofManager.addVariableDoFs(0, 0, ddc->getTotalNumberOfDecomposedObjects());
@@ -224,9 +229,11 @@ TEST(Discrete, NDDCSDEqs2)
     lis.getOption().ls_method = LIS_option::CG;
     lis.getOption().ls_precond = LIS_option::NONE;
     DecomposedDomain* ddc = setupNDDC2();
-
+    DecomposedMesh* msh = new DecomposedMesh(0, ddc);
+    
     // discrete system
-    SerialNodeDdcDistributedDiscreteSystem dis(ddc);
+    SerialNodeDdcDistributedDiscreteSystem dis(msh);
+    dis.initialize(ddc);
     // dof
     DofEquationIdTable dofManager;
     dofManager.addVariableDoFs(0, 0, ddc->getTotalNumberOfDecomposedObjects());
@@ -247,7 +254,7 @@ TEST(Discrete, NDDCSDEqs2)
 TEST(Discrete, VecSingle1)
 {
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
-    DiscreteSystem dis(*msh);
+    DiscreteSystem dis(msh);
     DiscreteVector<double> *v = dis.createVector<double>(msh->getNumberOfNodes());
 
     double expected[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
@@ -323,7 +330,7 @@ TEST(Discrete, Lis1)
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
 
     // define discrete system
-    DiscreteSystem dis(*msh);
+    DiscreteSystem dis(msh);
     {
         // DoF?
         DofEquationIdTable dofManager;

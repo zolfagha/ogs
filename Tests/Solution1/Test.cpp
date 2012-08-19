@@ -200,7 +200,7 @@ TEST(Solution, CouplingFem2D)
         Geo::PorousMedia pm;
         pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
         pm.porosity = new NumLib::TXFunctionConstant(0.2);
-        DiscreteSystem dis(*msh);
+        DiscreteSystem dis(msh);
         Geo::GWFemProblem* pGW = defineGWProblem(dis, *_rec, pm);
         TimeStepFunctionConstant tim(.0, 100.0, 10.0);
         pGW->setTimeSteppingFunction(tim);
@@ -271,7 +271,7 @@ TEST(FEM, line)
         Geo::PorousMedia pm;
         pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
         pm.porosity = new NumLib::TXFunctionConstant(0.2);
-        DiscreteSystem dis(*msh);
+        DiscreteSystem dis(msh);
         Geo::GWFemProblem* pGW = defineGWProblem1D(dis, *line, pm);
         TimeStepFunctionConstant tim(.0, 10.0, 10.0);
         pGW->setTimeSteppingFunction(tim);
@@ -350,7 +350,7 @@ TEST(Solution, CouplingFem2)
         Geo::Compound tracer;
         tracer.molecular_diffusion = new NumLib::TXFunctionConstant(1.e-6);
         //problems
-        DiscreteSystem dis(*msh);
+        DiscreteSystem dis(msh);
         Geo::GWFemProblem* pGW = defineGWProblem(dis, *_rec, pm);
         Geo::MassFemProblem* pMass = defineMassTransportProblem(dis, *_rec, pm, tracer);
         pGW->setTimeSteppingFunction(tim);
@@ -479,7 +479,7 @@ TEST(Fem, LinearElastic2D)
         solid.poisson_ratio = 0.2;
         solid.Youngs_modulus = 10e+9;
         pm.solidphase = &solid;
-        DiscreteSystem dis(*msh);
+        DiscreteSystem dis(msh);
         Geo::FemLinearElasticProblem* pDe = defineLinearElasticProblem(dis, *_rec, pm);
         TimeStepFunctionConstant tim(.0, 10.0, 10.0);
         pDe->setTimeSteppingFunction(tim);

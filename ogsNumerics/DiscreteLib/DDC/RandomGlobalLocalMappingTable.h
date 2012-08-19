@@ -26,22 +26,49 @@ namespace DiscreteLib
 class RandomGlobalLocalMappingTable : public IGlobaLocalMappingTable
 {
 public:
-    RandomGlobalLocalMappingTable(BaseLib::BidirectionalMap<size_t, size_t> &map) : _map_global_local(&map)
+    /**
+     * 
+     * @param map
+     */
+    explicit RandomGlobalLocalMappingTable(BaseLib::BidirectionalMap<size_t, size_t>* map)
+    : _map_global_local(map)
     {
     }
+    
+    /**
+     * 
+     */
     virtual ~RandomGlobalLocalMappingTable()
     {
         BaseLib::releaseObject(_map_global_local);
     }
-    bool hasGlobal(size_t global_id) 
+    
+    /**
+     * 
+     * @param global_id
+     * @return
+     */
+    virtual bool hasGlobal(size_t global_id) 
     {
         return _map_global_local->countInA(global_id)>0;
     }
-    size_t global2local(size_t global)
+    
+    /**
+     * 
+     * @param global
+     * @return
+     */
+    virtual size_t global2local(size_t global)
     {
         return _map_global_local->mapAtoB(global);
     }
-    size_t local2global(size_t local)
+    
+    /**
+     * 
+     * @param local
+     * @return
+     */
+    virtual size_t local2global(size_t local)
     {
         return _map_global_local->mapBtoA(local);
     }

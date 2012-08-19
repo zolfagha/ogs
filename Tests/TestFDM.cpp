@@ -149,7 +149,7 @@ TEST(Fdm, fdm1)
         GeoLib::Line line(Point(0.0, .0, .0), Point(len, .0, .0));
         Geo::PorousMedia pm;
         pm.hydraulic_conductivity = new TXFunctionConstant(1.e-11);
-        DiscreteSystem dis(*msh);
+        DiscreteSystem dis(msh);
         GWFdmProblem* pGW = defineGWProblem4FDM(dis, h, line, pm);
         TimeStepFunctionConstant tim(.0, 10.0, 10.0);
         pGW->setTimeSteppingFunction(tim);
@@ -212,7 +212,7 @@ TEST(Fdm, fdm_fem1)
         pm.porosity = new NumLib::TXFunctionConstant(1.0);
         Geo::Compound tracer;
         tracer.molecular_diffusion = new NumLib::TXFunctionConstant(1.e-6);
-        DiscreteSystem dis(*msh);
+        DiscreteSystem dis(msh);
         GWFdmProblem* pGW = defineGWProblem4FDM(dis, h, line, pm);
         Geo::MassFemProblem* pMass = defineMassTransportProblem(dis, line, pm, tracer);
 

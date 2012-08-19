@@ -50,7 +50,7 @@ public:
         T* sys = 0;
         std::map<MyKey, IDiscreteSystem*>::iterator itr = _map_sys.find(key);
         if (itr == _map_sys.end()) {
-            sys = new T(*msh);
+            sys = new T(msh);
             _map_sys.insert(std::pair<MyKey, IDiscreteSystem*>(key, sys));
         } else {
             sys = static_cast<T*>(itr->second);

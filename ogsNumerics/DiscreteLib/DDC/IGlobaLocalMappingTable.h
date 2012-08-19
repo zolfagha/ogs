@@ -23,9 +23,13 @@ namespace DiscreteLib
 class IGlobaLocalMappingTable
 {
 public:
+    ///
     virtual ~IGlobaLocalMappingTable() {};
+    /// return if given global id exists in this table
     virtual bool hasGlobal(size_t global_id) = 0;
+    /// map global id to local id
     virtual size_t global2local(size_t global) = 0;
+    /// map local id to global id
     virtual size_t local2global(size_t local) = 0;
 };
 

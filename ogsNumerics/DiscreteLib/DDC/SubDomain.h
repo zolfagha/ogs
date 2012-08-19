@@ -37,18 +37,53 @@ namespace DiscreteLib
 class SubDomain
 {
 public:
-    SubDomain(MeshLib::IMesh &msh, IGlobaLocalMappingTable &mapping, std::set<size_t>* list_ghosts=0);
+    /**
+     * 
+     * @param msh
+     * @param mapping
+     * @param list_ghosts
+     */
+    SubDomain(MeshLib::IMesh* msh, IGlobaLocalMappingTable* mapping, std::set<size_t>* list_ghosts=0);
 
+    /**
+     * 
+     */
     virtual ~SubDomain() {};
 
+    /**
+     * 
+     * @param i
+     */
     void setDomainID(size_t i) {_dom_id = i;};
+    
+    /**
+     * 
+     * @return
+     */
     size_t getDomainID() const {return _dom_id;};
 
+    /**
+     * 
+     * @return
+     */
     MeshLib::IMesh* getLoalMesh() {return _local_msh;};
 
+    /**
+     * 
+     * @return
+     */
     IGlobaLocalMappingTable* getGlobalLocalIdMap() {return _map_global_local;};
 
+    /**
+     * 
+     * @return
+     */
     size_t getNumberOfGhosts() const {return _list_ghosts.size();};
+    
+    /**
+     * 
+     * @return
+     */
     std::set<size_t>* getGhostList() {return &_list_ghosts;};
 
 private:

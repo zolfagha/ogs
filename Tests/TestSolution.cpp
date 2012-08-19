@@ -268,7 +268,7 @@ TEST(Solution, Fem1_Linear)
 {
     // create a discrete system
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
-    DiscreteSystem dis(*msh);
+    DiscreteSystem dis(msh);
     // mat
     NumLib::TXFunctionConstant K(1.e-11);
     // options
@@ -302,7 +302,7 @@ TEST(Solution, Fem1_Picard)
 {
     // create a discrete system
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
-    DiscreteSystem dis(*msh);
+    DiscreteSystem dis(msh);
     // mat
     NumLib::TXFunctionConstant K(1.e-11);
     // options
@@ -340,7 +340,7 @@ TEST(Solution, Fem1_Newton)
 {
     // create a discrete system
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
-    DiscreteSystem dis(*msh);
+    DiscreteSystem dis(msh);
     // mat
     NumLib::TXFunctionConstant K(1.e-11);
     // options
@@ -378,7 +378,7 @@ TEST(Solution, Fem2)
 {
     // create a discrete system
     MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
-    DiscreteSystem dis(*msh);
+    DiscreteSystem dis(msh);
     // mat
     NumLib::TXFunctionConstant K(1.e-11);
     // options

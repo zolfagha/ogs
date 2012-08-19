@@ -15,8 +15,8 @@
 namespace DiscreteLib
 {
 
-SubDomain::SubDomain(MeshLib::IMesh &msh, IGlobaLocalMappingTable &mapping, std::set<size_t>* list_ghosts)
-: _local_msh(&msh), _map_global_local(&mapping)
+SubDomain::SubDomain(MeshLib::IMesh* msh, IGlobaLocalMappingTable* mapping, std::set<size_t>* list_ghosts)
+: _local_msh(msh), _map_global_local(mapping)
 {
     _dom_id = 0;
     if (list_ghosts) {

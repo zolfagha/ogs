@@ -59,8 +59,6 @@ public:
     std::vector<NumLib::ITimeStepFunction*> list_tim;
     //process
     BaseLib::OrderedMap<std::string, ProcessLib::Process*> list_pcs;
-    //discrete system
-    //std::vector<DiscreteLib::IDiscreteSystem*> list_dis_sys;
     //
     ogs6::OutputController outController;
     //
