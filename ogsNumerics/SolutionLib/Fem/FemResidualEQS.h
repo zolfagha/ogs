@@ -17,7 +17,7 @@
 #include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "DiscreteLib/Utils/Tools.h"
 #include "NumLib/Function/IFunction.h"
-#include "NumLib/TransientAssembler/ElementWiseTransientResidualAssembler.h"
+#include "NumLib/TransientAssembler/GlobalVectorUpdaterWithLocalAssembler.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "FemLib/Function/FemFunction.h"
 
@@ -43,6 +43,8 @@ public:
     typedef T_DIS_SYS MyDiscreteSystem;
     typedef FemVariable<T_DIS_SYS> MyVariable;
     typedef T_LOCAL_RESIDUAL_ASSEMBLER UserLocalResidualAssembler;
+    typedef typename NumLib::TransientGlobalVectorUpdaterWithLocalAssembler<UserLocalResidualAssembler> MyUpdater;
+    typedef typename T_DIS_SYS::template MyVectorAssembler<double, MyUpdater>::type MyGlobalAssembler;
 
     /// constructor
     /// @param problem        Fem problem
@@ -99,7 +101,9 @@ void TemplateTransientResidualFEMFunction<T1,T2>::eval(const SolutionVector &u_n
     size_t msh_id = _dis_sys->getMesh()->getID();
 
     // assembly
-    NumLib::ElementWiseTransientResidualAssembler assembler(&t_n1, u_n, &u_n1, _local_assembler, _dofManager);
+    MeshLib::IMesh* msh = _dis_sys->getMesh();
+    MyUpdater updater(&t_n1, msh, _dofManager, u_n, &u_n1, _local_assembler);
+    MyGlobalAssembler assembler(&updater);
     r = .0;
     r.construct(assembler);
 

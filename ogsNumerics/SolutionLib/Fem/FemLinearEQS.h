@@ -17,7 +17,7 @@
 #include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "NumLib/Function/IFunction.h"
 #include "NumLib/TimeStepping/TimeStep.h"
-#include "NumLib/TransientAssembler/ElementWiseTransientLinearEQSAssembler.h"
+#include "NumLib/TransientAssembler/GlobalEquationUpdaterWithLocalAssembler.h"
 #include "FemLib/Function/FemFunction.h"
 #include "FemVariable.h"
 #include "FemDirichletBC.h"
@@ -47,15 +47,18 @@ class TemplateTransientLinearFEMFunction
     : public NumLib::TemplateFunction<SolutionVector, SolutionVector>
 {
 public:
+    typedef T_DIS_SYS MyDiscreteSystem;
     typedef FemVariable<T_DIS_SYS> MyVariable;
     typedef T_LOCAL_ASSEMBLER UserLocalAssembler;
+    typedef typename NumLib::TransientGlobalEquationUpdaterWithLocalAssembler<UserLocalAssembler> MyUpdater;
+    typedef typename T_DIS_SYS::template MyLinearEquationAssembler<MyUpdater>::type MyGlobalAssembler;
 
     /// constructor
     /// \param list_var
     /// \param assembler
     /// \param linear_eqs    Linear equation
-    TemplateTransientLinearFEMFunction(const std::vector<MyVariable*> &list_var, UserLocalAssembler* assembler, DiscreteLib::IDiscreteLinearEquation* linear_eqs)
-        : _local_assembler(assembler),  _linear_eqs(linear_eqs),
+    TemplateTransientLinearFEMFunction(MyDiscreteSystem* sys, const std::vector<MyVariable*> &list_var, UserLocalAssembler* assembler, DiscreteLib::IDiscreteLinearEquation* linear_eqs)
+        : _sys(sys), _local_assembler(assembler),  _linear_eqs(linear_eqs),
           _t_n1(0), _u_n0(0), _list_var(list_var)
     {
     };
@@ -69,7 +72,7 @@ public:
         return new TemplateTransientLinearFEMFunction<
                 T_DIS_SYS,
                 UserLocalAssembler
-                    >(_list_var, _local_assembler, _linear_eqs);
+                    >(_sys, _list_var, _local_assembler, _linear_eqs);
     }
 
     /// reset property
@@ -85,6 +88,7 @@ public:
     void eval(const SolutionVector &/*u0*/, SolutionVector &u_n1);
 
 private:
+    MyDiscreteSystem* _sys;
     UserLocalAssembler* _local_assembler;
     DiscreteLib::IDiscreteLinearEquation* _linear_eqs;
     const NumLib::TimeStep* _t_n1;
@@ -120,7 +124,9 @@ void TemplateTransientLinearFEMFunction<T1, T2>::eval(const SolutionVector &/*u0
     }
 
     // assembly
-    NumLib::ElementWiseTransientLinearEQSAssembler assembler(&t_n1, u_n, &u_n1, _local_assembler);
+    MeshLib::IMesh* msh = _sys->getMesh();
+    MyUpdater updater(&t_n1, msh, _linear_eqs->getDofMapManger(), u_n, &u_n1, _local_assembler);
+    MyGlobalAssembler assembler(&updater);
     _linear_eqs->construct(assembler);
 
     //apply BC1,2

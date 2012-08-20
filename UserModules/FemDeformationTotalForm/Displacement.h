@@ -15,7 +15,7 @@
 #include <string>
 #include "BaseLib/CodingTools.h"
 #include "FemLib/Function/FemIntegrationPointFunction.h"
-#include "SolutionLib/Fem/FemEquation.h"
+#include "SolutionLib/Fem/TemplateFemEquation.h"
 #include "SolutionLib/Fem/FemIVBVProblem.h"
 #include "SolutionLib/Fem/SingleStepFEM.h"
 

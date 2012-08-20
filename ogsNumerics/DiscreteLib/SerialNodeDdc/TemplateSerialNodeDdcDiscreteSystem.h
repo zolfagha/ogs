@@ -18,6 +18,8 @@
 #include "DiscreteLib/Core/DiscreteEnums.h"
 #include "DiscreteLib/DDC/DecomposedDomain.h"
 #include "DiscreteLib/DDC/DecomposedMesh.h"
+#include "DiscreteLib/Serial/ElementWiseLinearEquationAssembler.h"
+#include "DiscreteLib/Serial/ElementWiseVectorAssembler.h"
 #include "DecomposedVector.h"
 
 namespace DiscreteLib
@@ -41,6 +43,18 @@ public:
     struct MyVector
     {
         typedef DecomposedVector<T> type;
+    };
+
+    template <typename T_UPDATER>
+    struct MyLinearEquationAssembler
+    {
+        typedef ElementWiseLinearEquationAssembler<T_UPDATER> type;
+    };
+
+    template <typename T_VALUE, typename T_UPDATER>
+    struct MyVectorAssembler
+    {
+        typedef ElementWiseVectorAssembler<T_VALUE, T_UPDATER> type;
     };
     
     ///

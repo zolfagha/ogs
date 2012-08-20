@@ -63,7 +63,7 @@ public:
     virtual ~GWTimeODEAssembler() {};
 
 protected:
-    virtual void assembleODE(const NumLib::TimeStep &/*time*/, MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/, LocalMatrixType &/*localM*/, LocalMatrixType &localK, LocalVectorType &/*localF*/)
+    virtual void assembleODE(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/, LocalMatrixType &/*localM*/, LocalMatrixType &localK, LocalVectorType &/*localF*/)
     {
         IFiniteElement* fe = _feObjects->getFeObject(e);
 
@@ -104,7 +104,7 @@ public:
     /// @param local_u_n1    guess of current time step value
     /// @param local_u_n    previous time step value
     /// @param local_J        local Jacobian
-    virtual void assembly(const TimeStep &/*time*/,  MeshLib::IElement &e, const LocalVectorType &local_u_n1, const LocalVectorType &/*local_u_n*/, LocalMatrixType &local_J)
+    virtual void assembly(const TimeStep &/*time*/,  const MeshLib::IElement &e, const LocalVectorType &local_u_n1, const LocalVectorType &/*local_u_n*/, LocalMatrixType &local_J)
     {
         IFiniteElement* fe = _feObjects->getFeObject(e);
         const size_t n = local_u_n1.size();

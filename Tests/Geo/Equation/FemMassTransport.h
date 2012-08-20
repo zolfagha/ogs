@@ -44,7 +44,7 @@ public:
     }
 
 protected:
-    virtual void assembleODE(const NumLib::TimeStep &/*time*/, MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/, LocalMatrixType &localM, LocalMatrixType &localK, LocalVectorType &/*localF*/)
+    virtual void assembleODE(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/, LocalMatrixType &localM, LocalMatrixType &localK, LocalVectorType &/*localF*/)
     {
         FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
         const size_t n_dim = e.getDimension();
@@ -106,7 +106,7 @@ public:
         _vel = const_cast<NumLib::ITXFunction*>(vel);
     }
 
-    void assembly(const NumLib::TimeStep &time, MeshLib::IElement &e, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/, NumLib::LocalMatrix &localJ)
+    void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/, NumLib::LocalMatrix &localJ)
     {
         FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
 

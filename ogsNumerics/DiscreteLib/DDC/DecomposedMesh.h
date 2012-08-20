@@ -61,7 +61,7 @@ public:
     /// return if this mesh is axisymmetric or not
     virtual bool isAxisymmetric() const { return _msh0->isAxisymmetric();};
     /// set axisymmetric
-    virtual void setAxisymmetric(bool flag) { };
+    virtual void setAxisymmetric(bool flag) { _msh0->setAxisymmetric(flag);};
 
     //--- nodes ---
     /// get the number of nodes

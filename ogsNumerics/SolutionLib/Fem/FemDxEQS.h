@@ -17,7 +17,7 @@
 #include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "NumLib/Function/IFunction.h"
 #include "NumLib/TimeStepping/TimeStep.h"
-#include "NumLib/TransientAssembler/ElementWiseTransientDxEQSAssembler.h"
+#include "NumLib/TransientAssembler/GlobalMatrixUpdaterWithLocalAssembler.h"
 #include "FemLib/Function/FemFunction.h"
 #include "SolutionLib/DataType.h"
 #include "FemDirichletBC.h"
@@ -42,6 +42,8 @@ class TemplateTransientDxFEMFunction
 public:
     typedef FemVariable<T_DIS_SYS> MyVariable;
     typedef T_LOCAL_JACOBIAN_ASSEMBLER UserLocalJacobianAssembler;
+    typedef typename NumLib::TransientGlobalMatrixUpdaterWithLocalAssembler<UserLocalJacobianAssembler> MyUpdater;
+    typedef typename T_DIS_SYS::template MyLinearEquationAssembler<MyUpdater>::type MyGlobalAssembler;
 
     /// constructor
     /// @param problem        Fem problem
@@ -118,7 +120,9 @@ void TemplateTransientDxFEMFunction<T1,T2>::eval(const SolutionVector &u_n1, con
     }
 
     // assembly
-    NumLib::ElementWiseTransientDxEQSAssembler assembler(&t_n1, u_n, &u_n1, _local_assembler);
+    //NumLib::ElementWiseTransientDxEQSAssembler<UserLocalJacobianAssembler> assembler(&t_n1, u_n, &u_n1, _local_assembler);
+    MyUpdater updater(&t_n1, _msh, _linear_eqs->getDofMapManger(), u_n, &u_n1, _local_assembler);
+    MyGlobalAssembler assembler(&updater);
     _linear_eqs->construct(assembler);
 
     // set residual

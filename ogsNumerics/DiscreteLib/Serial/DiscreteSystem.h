@@ -18,6 +18,8 @@
 #include "DiscreteLib/Core/DiscreteEnums.h"
 #include "DiscreteVector.h"
 #include "DiscreteLinearEquation.h"
+#include "ElementWiseLinearEquationAssembler.h"
+#include "ElementWiseVectorAssembler.h"
 
 namespace MeshLib
 {
@@ -42,10 +44,23 @@ public:
     {
         typedef DiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER> type;
     };
+
     template<typename T>
     struct MyVector
     {
         typedef DiscreteVector<T> type;
+    };
+
+    template <typename T_UPDATER>
+    struct MyLinearEquationAssembler
+    {
+        typedef ElementWiseLinearEquationAssembler<T_UPDATER> type;
+    };
+
+    template <typename T_VALUE, typename T_UPDATER>
+    struct MyVectorAssembler
+    {
+        typedef ElementWiseVectorAssembler<T_VALUE, T_UPDATER> type;
     };
 
     /**

@@ -32,7 +32,7 @@ public:
     virtual ~IElemenetWiseLinearEquationLocalAssembler() {};
 
     /// assemble a local linear equation for the given element
-    virtual void assembly(MeshLib::IElement &e, LocalEquation &eqs) = 0;
+    virtual void assembly(const MeshLib::IElement &e, LocalEquation &eqs) = 0;
 };
 
 } //end

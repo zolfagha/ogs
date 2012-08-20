@@ -32,6 +32,7 @@
 
 #include "DiscreteLib/Core/IDiscreteLinearEquation.h"
 #include "DiscreteLib/Core/IElemenetWiseLinearEquationLocalAssembler.h"
+#include "DiscreteLib/Core/GlobalEquationUpdaterWithLocalAssembler.h"
 #include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "DiscreteLib/Serial/DiscreteVector.h"
 #include "DiscreteLib/Serial/ElementWiseLinearEquationAssembler.h"
@@ -104,7 +105,7 @@ struct DiscreteExample1
                 for (size_t j=0; j<i; j++) _m(i,j) = _m(j,i);
             _m *= 1.e-11/6.0;
         }
-        void assembly(MeshLib::IElement &/*e*/, DiscreteLib::LocalEquation &eqs)
+        void assembly(const MeshLib::IElement &/*e*/, DiscreteLib::LocalEquation &eqs)
         {
             (*eqs.getA()) = _m;
         }
@@ -213,8 +214,11 @@ TEST(Discrete, NDDCSSEqs2)
     IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<LisLinearEquation, SparsityBuilderFromNodeConnectivity>(&lis, &dofManager);
     linear_eq->initialize();
     linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
-    ElementWiseLinearEquationAssembler assem(ele_assembler);
-    linear_eq->construct(assem);
+    typedef typename DiscreteLib::GlobalEquationUpdaterWithLocalAssembler<DiscreteExample1::TestElementAssembler> MyUpdater;
+    typedef typename SerialNodeDdcSharedDiscreteSystem::MyLinearEquationAssembler<MyUpdater>::type MyGlobalAssembler;
+    MyUpdater updater(msh, &dofManager, &ele_assembler);
+    MyGlobalAssembler assembler(&updater);
+    linear_eq->construct(assembler);
     //linear_eq->getLinearEquation()->printout();
     linear_eq->solve();
 
@@ -242,8 +246,11 @@ TEST(Discrete, NDDCSDEqs2)
     IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<LisLinearEquation, SparsityBuilderFromNodeConnectivity>(&lis, &dofManager);
     linear_eq->initialize();
     linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
-    ElementWiseLinearEquationAssembler assem(ele_assembler);
-    linear_eq->construct(assem);
+    typedef typename DiscreteLib::GlobalEquationUpdaterWithLocalAssembler<DiscreteExample1::TestElementAssembler> MyUpdater;
+    typedef typename SerialNodeDdcSharedDiscreteSystem::MyLinearEquationAssembler<MyUpdater>::type MyGlobalAssembler;
+    MyUpdater updater(msh, &dofManager, &ele_assembler);
+    MyGlobalAssembler assembler(&updater);
+    linear_eq->construct(assembler);
     //linear_eq->getLinearEquation()->printout();
     linear_eq->solve();
 
@@ -341,8 +348,11 @@ TEST(Discrete, Lis1)
         // solve the equation
         linear_eq->initialize();
         linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
-        ElementWiseLinearEquationAssembler eqs_assembler(ele_assembler);
-        linear_eq->construct(eqs_assembler);
+        typedef typename DiscreteLib::GlobalEquationUpdaterWithLocalAssembler<DiscreteExample1::TestElementAssembler> MyUpdater;
+        typedef typename SerialNodeDdcSharedDiscreteSystem::MyLinearEquationAssembler<MyUpdater>::type MyGlobalAssembler;
+        MyUpdater updater(msh, &dofManager, &ele_assembler);
+        MyGlobalAssembler assembler(&updater);
+        linear_eq->construct(assembler);
         //linear_eq->getLinearEquation()->printout();
         linear_eq->solve();
 

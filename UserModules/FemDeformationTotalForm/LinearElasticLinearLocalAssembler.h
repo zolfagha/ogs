@@ -31,7 +31,6 @@ public:
 
     virtual ~FemLinearElasticLinearLocalAssembler() {};
 
-protected:
     virtual void assembly(const NumLib::TimeStep &/*time*/,  MeshLib::IElement &e, const LocalVectorType &/*local_u_n1*/, const LocalVectorType &/*local_u_n*/, NumLib::LocalEquation &eqs);
 
 private:

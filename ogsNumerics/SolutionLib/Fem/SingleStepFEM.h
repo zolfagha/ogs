@@ -21,12 +21,11 @@
 #include "DiscreteLib/Core/IDiscreteLinearEquation.h"
 #include "DiscreteLib/Utils/SparsityBuilderFromNodeConnectivity.h"
 #include "FemLib/Function/FemFunction.h"
-#include "NumLib/TransientAssembler/ElementWiseTransientLinearEQSAssembler.h"
 #include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
 
 #include "SolutionLib/DataType.h"
 #include "SolutionLib/Core/AbstractTimeSteppingAlgorithm.h"
-#include "FemEquation.h"
+#include "TemplateFemEquation.h"
 #include "FemDirichletBC.h"
 #include "FemNeumannBC.h"
 
@@ -178,7 +177,7 @@ SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER>::SingleStepFEM(MyDiscreteSyste
     // setup functions
     std::vector<MyVariable*> list_var(n_var);
     for (size_t i=0; i<n_var; i++) list_var[i] = problem->getVariable(i);
-    _f_linear = new UserLinearFunction(list_var, problem->getEquation()->getLinearAssembler(), _linear_eqs);
+    _f_linear = new UserLinearFunction(dis, list_var, problem->getEquation()->getLinearAssembler(), _linear_eqs);
     _f_r = new UserResidualFunction(dis, list_var, &_dofManager, problem->getEquation()->getResidualAssembler());
     _f_dx = new UserDxFunction(dis->getMesh(), list_var, problem->getEquation()->getJacobianAssembler(), _linear_eqs);
 

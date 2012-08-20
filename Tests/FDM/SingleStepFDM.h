@@ -20,7 +20,6 @@
 #include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "DiscreteLib/Serial/DiscreteLinearEquation.h"
 #include "DiscreteLib/Utils/SparsityBuilderFromNodeConnectivity.h"
-#include "NumLib/TransientAssembler/ElementWiseTransientLinearEQSAssembler.h"
 #include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
 
 #include "SolutionLib/Core/AbstractTimeSteppingAlgorithm.h"

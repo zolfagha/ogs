@@ -31,47 +31,39 @@ namespace DiscreteLib
 /**
  * \brief Element-based discrete vector assembler classes
  */
-template <class T>
-class ElementWiseVectorAssembler : public IDiscreteVectorAssembler<T>
+template <class T_VALUE, class T_UPDATER>
+class ElementWiseVectorAssembler : public IDiscreteVectorAssembler<T_VALUE>
 {
 public:
-    typedef IDiscreteVectorAssembler<T>::VectorType GlobalVectorType;
+    typedef typename IDiscreteVectorAssembler<T_VALUE>::VectorType GlobalVectorType;
+    typedef T_UPDATER UpdaterType;
 
     ///
-    explicit ElementWiseVectorAssembler(IElemenetWiseVectorLocalAssembler<T>* a) : _e_assembler(a) {};
+    explicit ElementWiseVectorAssembler(UpdaterType* a) : _e_assembler(a) {};
+    ///
+    virtual ~ElementWiseVectorAssembler() {};
 
     /// Conduct the element by element assembly procedure
     ///
     /// @param msh Mesh
     /// @param dofManager Dof map manager
     /// @param vec Discrete vector
-    void assembly(const MeshLib::IMesh &msh, const DofEquationIdTable &dofManager, GlobalVectorType &globalVec);
+    virtual void assembly(const MeshLib::IMesh &msh, GlobalVectorType &globalVec);
+    //void assembly(const MeshLib::IMesh &msh, const DofEquationIdTable &dofManager, GlobalVectorType &globalVec);
 
 private:
-    IElemenetWiseVectorLocalAssembler<T>* _e_assembler;
+    UpdaterType* _e_assembler;
 };
 
 
-template <class T>
-void ElementWiseVectorAssembler<T>::assembly(const MeshLib::IMesh &msh, const DofEquationIdTable &dofManager, GlobalVectorType &globalVec)
+template <class T1, class T2>
+void ElementWiseVectorAssembler<T1,T2>::assembly(const MeshLib::IMesh &msh, GlobalVectorType &globalVec)
 {
-    LocalVector localVec;
-    std::vector<size_t> ele_node_ids, ele_node_size_order;
-    std::vector<long> local_dofmap_row;
     const size_t n_ele = msh.getNumberOfElements();
 
-    std::vector<double> local_u_n;
     for (size_t i=0; i<n_ele; i++) {
         MeshLib::IElement *e = msh.getElemenet(i);
-        // get dof map
-        e->getNodeIDList(e->getMaximumOrder(), ele_node_ids);
-        e->getListOfNumberOfNodesForAllOrders(ele_node_size_order);
-        dofManager.mapEqsID(msh.getID(), ele_node_ids, local_dofmap_column, local_dofmap_row); //TODO order
-        // local assembly
-        localVec.resize(local_dofmap_column.size(), .0);
-        _e_assembler->assembly(*e, localVec);
-        // update global
-        globalVec.addSubvector(local_dofmap_row, &localVec[0]);
+        _e_assembler->update(*e, globalVec);
     }
 };
 

@@ -31,11 +31,14 @@ namespace DiscreteLib
 /**
  * \brief Element-based discrete system assembler classes
  */
+template <class T_UPDATER>
 class ElementWiseLinearEquationAssembler : public IDiscreteLinearEquationAssembler
 {
 public:
+    typedef T_UPDATER UpdaterType;
+
     ///
-    explicit ElementWiseLinearEquationAssembler(IElemenetWiseLinearEquationLocalAssembler &a) : _e_assembler(&a) {};
+    explicit ElementWiseLinearEquationAssembler(UpdaterType* a) : _e_assembler(a) {};
 
     /// Conduct the element by element assembly procedure
     ///
@@ -46,8 +49,17 @@ public:
     void assembly(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquation &eqs);
 
 private:
-    IElemenetWiseLinearEquationLocalAssembler* _e_assembler;
+    UpdaterType* _e_assembler;
 };
 
+template <class T>
+void ElementWiseLinearEquationAssembler<T>::assembly(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquation &eqs)
+{
+    const size_t n_ele = msh.getNumberOfElements();
+    for (size_t i=0; i<n_ele; i++) {
+        MeshLib::IElement *e = msh.getElemenet(i);
+        _e_assembler->update(*e, eqs);
+    }
+};
 
 }

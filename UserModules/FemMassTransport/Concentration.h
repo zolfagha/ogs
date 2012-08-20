@@ -17,7 +17,7 @@
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
 #include "NumLib/Function/DiscreteDataConvergenceCheck.h"
 #include "SolutionLib/Fem/FemIVBVProblem.h"
-#include "SolutionLib/Fem/FemEquation.h"
+#include "SolutionLib/Fem/TemplateFemEquation.h"
 #include "SolutionLib/Fem/SingleStepFEM.h"
 #include "ProcessLib/TemplateTransientProcess.h"
 

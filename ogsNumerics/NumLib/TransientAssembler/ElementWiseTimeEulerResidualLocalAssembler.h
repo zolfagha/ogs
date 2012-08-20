@@ -52,7 +52,7 @@ public:
     /// @param local_u_n1    guess of current time step value
     /// @param local_u_n    previous time step value
     /// @param eqs            local algebraic equation
-    virtual void assembly(const TimeStep &time, MeshLib::IElement &e, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalVector &local_r)
+    virtual void assembly(const TimeStep &time, const MeshLib::IElement &e, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalVector &local_r)
     {
         const double delta_t = time.getTimeStepSize();
         const size_t n_dof = local_r.size();
@@ -98,7 +98,7 @@ public:
     }
 
 protected:
-    virtual void assembleODE(const TimeStep &time, MeshLib::IElement &e, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalMatrix &M, LocalMatrix &K, LocalVector &F)  = 0;
+    virtual void assembleODE(const TimeStep &time, const MeshLib::IElement &e, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalMatrix &M, LocalMatrix &K, LocalVector &F)  = 0;
 
 private:
     double _theta;

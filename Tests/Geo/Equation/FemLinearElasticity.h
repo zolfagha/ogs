@@ -156,8 +156,7 @@ public:
 
     virtual ~FemLinearElasticLinearLocalAssembler() {};
 
-protected:
-    virtual void assembly(const NumLib::TimeStep &/*time*/,  MeshLib::IElement &e, const LocalVectorType &/*local_u_n1*/, const LocalVectorType &/*local_u_n*/, NumLib::LocalEquation &eqs)
+    virtual void assembly(const NumLib::TimeStep &/*time*/,  const MeshLib::IElement &e, const LocalVectorType &/*local_u_n1*/, const LocalVectorType &/*local_u_n*/, NumLib::LocalEquation &eqs)
     {
         FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
 
@@ -230,7 +229,7 @@ public:
     /// @param local_u_n1    guess of current time step value
     /// @param local_u_n    previous time step value
     /// @param local_r        local residual
-    virtual void assembly(const NumLib::TimeStep &time,  MeshLib::IElement &e, const NumLib::LocalVector &local_u_n1, const NumLib::LocalVector &local_u_n, NumLib::LocalVector &local_r)
+    virtual void assembly(const NumLib::TimeStep &time,  const MeshLib::IElement &e, const NumLib::LocalVector &local_u_n1, const NumLib::LocalVector &local_u_n, NumLib::LocalVector &local_r)
     {
 
     }
@@ -247,7 +246,7 @@ public:
     {
     };
 
-    void assembly(const NumLib::TimeStep &/*time*/, MeshLib::IElement &e, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/,  NumLib::LocalMatrix &localJ)
+    void assembly(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/,  NumLib::LocalMatrix &localJ)
     {
         FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
 
