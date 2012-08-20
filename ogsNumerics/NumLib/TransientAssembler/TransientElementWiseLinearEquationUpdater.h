@@ -20,19 +20,40 @@ namespace NumLib
 {
 
 template <class T_LOCAL>
-class TransientGlobalMatrixUpdaterWithLocalAssembler
+class TransientElementWiseLinearEquationUpdater
 {
 public:
     typedef T_LOCAL LocalAssemblerType;
     typedef DiscreteLib::IDiscreteVector<double> GlobalVector;
 
-    TransientGlobalMatrixUpdaterWithLocalAssembler(const TimeStep* time, MeshLib::IMesh* msh, DiscreteLib::DofEquationIdTable* dofManager, const GlobalVector* u0, const GlobalVector* u1, LocalAssemblerType* a)
-    : _msh(msh), _dofManager(dofManager), _transient_e_assembler(a), _timestep(time), _vec_u0(u0), _vec_u1(u1)
+    TransientElementWiseLinearEquationUpdater(const TimeStep* time, MeshLib::IMesh* msh, DiscreteLib::DofEquationIdTable* dofManager, const GlobalVector* u0, const GlobalVector* u1, LocalAssemblerType* a)
+    : _msh(msh), _dofManager(dofManager), _transient_e_assembler(new LocalAssemblerType(*a)), _timestep(time), _vec_u0(u0), _vec_u1(u1)
     {
 
     }
 
-    void update(const MeshLib::IElement &e, MathLib::ILinearEquation &eqs)
+    TransientElementWiseLinearEquationUpdater(const TransientElementWiseLinearEquationUpdater<LocalAssemblerType> &obj)
+    {
+        _msh = obj._msh;
+        _dofManager = obj._dofManager;
+        _transient_e_assembler = new LocalAssemblerType(*obj._transient_e_assembler);
+        _timestep = obj._timestep;
+        _vec_u0 = obj._vec_u0;
+        _vec_u1 = obj._vec_u1;
+    }
+
+    TransientElementWiseLinearEquationUpdater<LocalAssemblerType> &operator=(const TransientElementWiseLinearEquationUpdater<LocalAssemblerType> &obj)
+    {
+        return * new TransientElementWiseLinearEquationUpdater<LocalAssemblerType>(obj);
+    }
+
+    virtual ~TransientElementWiseLinearEquationUpdater()
+    {
+        BaseLib::releaseObject(_transient_e_assembler);
+    }
+
+    template <class T_SOLVER>
+    void update(const MeshLib::IElement &e, T_SOLVER &eqs)
     {
         std::vector<size_t> ele_node_ids, ele_node_size_order;
         std::vector<size_t> local_dofmap_row;
@@ -50,10 +71,16 @@ public:
         DiscreteLib::getLocalVector(local_dofmap_row, *_vec_u0, local_u_n);
         // local assembly
         localEQS.create(local_dofmap_row.size());
-        _transient_e_assembler->assembly(*_timestep, e, local_u_n1, local_u_n, *localEQS.getA());
+        _transient_e_assembler->assembly(*_timestep, e, local_u_n1, local_u_n, localEQS);
+
+//        if (i<3) {
+//            std::cout << "local A = \n" << *localEQS.getA();
+//            std::cout << "local b = \n" << *localEQS.getRHS();
+//        }
 
         // update global
         eqs.addAsub(local_dofmap_row, *localEQS.getA());
+        eqs.addRHSsub(local_dofmap_row, localEQS.getRHS());
     }
 
 private:

@@ -20,19 +20,35 @@ namespace NumLib
 {
 
 template <class T_LOCAL>
-class TransientGlobalEquationUpdaterWithLocalAssembler
+class TransientElementWiseMatrixUpdater
 {
 public:
     typedef T_LOCAL LocalAssemblerType;
     typedef DiscreteLib::IDiscreteVector<double> GlobalVector;
 
-    TransientGlobalEquationUpdaterWithLocalAssembler(const TimeStep* time, MeshLib::IMesh* msh, DiscreteLib::DofEquationIdTable* dofManager, const GlobalVector* u0, const GlobalVector* u1, LocalAssemblerType* a)
+    TransientElementWiseMatrixUpdater(const TimeStep* time, MeshLib::IMesh* msh, DiscreteLib::DofEquationIdTable* dofManager, const GlobalVector* u0, const GlobalVector* u1, LocalAssemblerType* a)
     : _msh(msh), _dofManager(dofManager), _transient_e_assembler(a), _timestep(time), _vec_u0(u0), _vec_u1(u1)
     {
 
     }
 
-    void update(const MeshLib::IElement &e, MathLib::ILinearEquation &eqs)
+    TransientElementWiseMatrixUpdater(const TransientElementWiseMatrixUpdater<LocalAssemblerType> &obj)
+    {
+        _msh = obj._msh;
+        _dofManager = obj._dofManager;
+        _transient_e_assembler = obj._transient_e_assembler;
+        _timestep = obj._timestep;
+        _vec_u0 = obj._vec_u0;
+        _vec_u1 = obj._vec_u1;
+    }
+
+    TransientElementWiseMatrixUpdater<LocalAssemblerType> &operator=(const TransientElementWiseMatrixUpdater<LocalAssemblerType> &obj)
+    {
+        return * new TransientElementWiseMatrixUpdater<LocalAssemblerType>(obj);
+    }
+
+    template <class T_SOLVER>
+    void update(const MeshLib::IElement &e, T_SOLVER &eqs)
     {
         std::vector<size_t> ele_node_ids, ele_node_size_order;
         std::vector<size_t> local_dofmap_row;
@@ -50,16 +66,10 @@ public:
         DiscreteLib::getLocalVector(local_dofmap_row, *_vec_u0, local_u_n);
         // local assembly
         localEQS.create(local_dofmap_row.size());
-        _transient_e_assembler->assembly(*_timestep, e, local_u_n1, local_u_n, localEQS);
-
-//        if (i<3) {
-//            std::cout << "local A = \n" << *localEQS.getA();
-//            std::cout << "local b = \n" << *localEQS.getRHS();
-//        }
+        _transient_e_assembler->assembly(*_timestep, e, local_u_n1, local_u_n, *localEQS.getA());
 
         // update global
         eqs.addAsub(local_dofmap_row, *localEQS.getA());
-        eqs.addRHSsub(local_dofmap_row, localEQS.getRHS());
     }
 
 private:

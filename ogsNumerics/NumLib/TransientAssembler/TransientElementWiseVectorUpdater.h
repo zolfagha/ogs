@@ -20,16 +20,31 @@ namespace NumLib
 {
 
 template <class T_LOCAL>
-class TransientGlobalVectorUpdaterWithLocalAssembler
+class TransientElementWiseVectorUpdater
 {
 public:
     typedef T_LOCAL LocalAssemblerType;
     typedef DiscreteLib::IDiscreteVector<double> GlobalVector;
 
-    TransientGlobalVectorUpdaterWithLocalAssembler(const TimeStep* time, MeshLib::IMesh* msh, DiscreteLib::DofEquationIdTable* dofManager, const GlobalVector* u0, const GlobalVector* u1, LocalAssemblerType* a)
+    TransientElementWiseVectorUpdater(const TimeStep* time, MeshLib::IMesh* msh, DiscreteLib::DofEquationIdTable* dofManager, const GlobalVector* u0, const GlobalVector* u1, LocalAssemblerType* a)
     : _msh(msh), _dofManager(dofManager), _transient_e_assembler(a), _timestep(time), _vec_u0(u0), _vec_u1(u1)
     {
 
+    }
+
+    TransientElementWiseVectorUpdater(const TransientElementWiseVectorUpdater<LocalAssemblerType> &obj)
+    {
+        _msh = obj._msh;
+        _dofManager = obj._dofManager;
+        _transient_e_assembler = obj._transient_e_assembler;
+        _timestep = obj._timestep;
+        _vec_u0 = obj._vec_u0;
+        _vec_u1 = obj._vec_u1;
+    }
+
+    TransientElementWiseVectorUpdater<LocalAssemblerType> &operator=(const TransientElementWiseVectorUpdater<LocalAssemblerType> &obj)
+    {
+        return * new TransientElementWiseVectorUpdater<LocalAssemblerType>(obj);
     }
 
     void update(const MeshLib::IElement &e, GlobalVector &globalVec)
