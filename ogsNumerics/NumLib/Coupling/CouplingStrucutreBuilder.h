@@ -66,6 +66,10 @@ private:
     {
         std::string eqs_name = option->getOption("name");
         T_M* eqs = eqs_fac.create(eqs_name);
+        if (eqs==NULL) {
+            ERR("***Error: %s is not found. Please check your compilation setting.", eqs_name.c_str());
+            return NULL;
+        }
         if (option->hasOption("in")) {
             std::vector<std::string> in_names;
             for (std::string in_name = option->getFirstOption<std::string>("in"); in_name != ""; in_name = option->getNextOption<std::string>()) {

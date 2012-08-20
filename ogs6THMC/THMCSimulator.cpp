@@ -216,7 +216,11 @@ int THMCSimulator::execute()
     NumLib::TransientCoulplingStrucutreBuilder cpl_builder;
     if (_cpl_system!=NULL) delete _cpl_system;
     _cpl_system = cpl_builder.build(&op, *GeoProcessBuilder::getInstance());
-
+    std::vector<std::string> &list_mono_system_name = cpl_builder.getListOfMonolithicSystemName();
+    if (list_mono_system_name.size()==0) {
+        ERR("***Error: no active process is selected.");
+        return 0;
+    }
     if (!_cpl_system->check()) {
         ERR("***Error while checking coupled system");
         return 0;
@@ -225,7 +229,6 @@ int THMCSimulator::execute()
     // list up monolithic processes
     INFO("->Initializing all processes...");
     std::vector<NumLib::AbstractTransientMonolithicSystem*> &list_mono_system = cpl_builder.getListOfMonolithicSystem();
-    std::vector<std::string> &list_mono_system_name = cpl_builder.getListOfMonolithicSystemName();
     for (size_t i=0; i<list_mono_system.size(); i++) {
         std::string &pcs_name = list_mono_system_name[i];
         ProcessLib::Process* pcs = list_mono_system[i];
