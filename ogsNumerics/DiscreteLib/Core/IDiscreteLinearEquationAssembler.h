@@ -26,7 +26,6 @@ namespace MathLib
 
 namespace DiscreteLib
 {
-class DofEquationIdTable;
 
 /**
  * \brief Interface of discrete system assembler classes
@@ -39,7 +38,7 @@ public:
     virtual ~IDiscreteLinearEquationAssembler() {};
 
     /// assembly
-    virtual void assembly( MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquation &eqs) = 0;
+    virtual void assembly( const MeshLib::IMesh &msh, MathLib::ILinearEquation &eqs) = 0;
 };
 
 }

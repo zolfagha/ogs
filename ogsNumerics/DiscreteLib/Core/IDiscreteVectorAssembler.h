@@ -22,8 +22,6 @@ class IMesh;
 namespace DiscreteLib
 {
 
-class DofEquationIdTable;
-
 /**
  * \brief Interface of discrete vector assembler classes
  */
@@ -40,13 +38,6 @@ public:
     /// @param msh Mesh
     /// @param vec Discrete vector
     virtual void assembly( const MeshLib::IMesh &msh, IDiscreteVector<T> &vec) = 0;
-
-//    /// Conduct the element by element assembly procedure
-//    ///
-//    /// @param msh Mesh
-//    /// @param dofManager Dof map manager
-//    /// @param vec Discrete vector
-//    virtual void assembly( const MeshLib::IMesh &msh, const DofEquationIdTable &dofManager, IDiscreteVector<T> &vec) = 0;
 };
 
 }
