@@ -42,7 +42,7 @@ public:
         return _vec_vectors.size()-1;
     }
 
-    void eraseVector(IDiscreteObject* v)
+    void eraseVector(IDiscreteVectorBase* v)
     {
         const size_t i = v->getObjectID();
         if (_vec_vectors.size() > i) {
@@ -52,7 +52,7 @@ public:
 
     size_t getNumberOfVectors() const {return _vec_vectors.size();};
 
-    IDiscreteObject* getVector(size_t i)
+    IDiscreteVectorBase* getVector(size_t i)
     {
         return _vec_vectors[i];
     }
