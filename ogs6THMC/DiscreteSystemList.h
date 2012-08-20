@@ -14,6 +14,7 @@
 #pragma once
 
 #include "DiscreteLib/Serial/DiscreteSystem.h"
+#include "DiscreteLib/OpenMP/OMPDiscreteSystem.h"
 #include "DiscreteLib/SerialNodeDdc/SerialNodeDdcSharedDiscreteSystem.h"
 #include "DiscreteLib/SerialNodeDdc/SerialNodeDdcDistributedDiscreteSystem.h"
 #if defined(USE_LIS) && defined(USE_MPI)

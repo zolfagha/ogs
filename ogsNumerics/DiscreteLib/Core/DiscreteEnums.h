@@ -26,6 +26,7 @@ struct DiscreteSystemType
         Serial,
         SerialShared,
         SerialDistributed,
+        OpenMP,
         MPI
     };
 };
