@@ -41,15 +41,6 @@ using namespace DiscreteLib;
 namespace Geo
 {
 
-typedef TemplateFemEquation<
-        DiscreteSystem,
-        Geo::FemLinearElasticLinearLocalAssembler,
-        Geo::FemLinearElasticResidualLocalAssembler,
-        Geo::FemLinearElasticJacobianLocalAssembler
-        >
-        FemLinearElasticEquation;
-
-typedef FemIVBVProblem< DiscreteSystem,FemLinearElasticEquation > FemLinearElasticProblem;
 
 typedef FemLib::FEMIntegrationPointFunctionVector<DiscreteSystem>::type MyIntegrationPointFunctionVector;
 typedef FemLib::FemNodalFunctionScalar<DiscreteSystem>::type MyNodalFunctionScalar;
@@ -61,6 +52,16 @@ class FunctionDisplacement : public AbstractTransientMonolithicSystem
 {
     enum Out { u_x=0, u_y=1, Strain=2, Stress=3 };
 public:
+    typedef TemplateFemEquation<
+            DiscreteSystem,
+            T_LINEAR_SOLVER,
+            Geo::FemLinearElasticLinearLocalAssembler,
+            Geo::FemLinearElasticResidualLocalAssembler,
+            Geo::FemLinearElasticJacobianLocalAssembler
+            >
+            FemLinearElasticEquation;
+
+    typedef FemIVBVProblem< DiscreteSystem,FemLinearElasticEquation > FemLinearElasticProblem;
     typedef SingleStepFEM
             <
                 FemLinearElasticProblem,

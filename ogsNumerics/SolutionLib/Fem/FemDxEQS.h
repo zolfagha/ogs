@@ -17,7 +17,7 @@
 #include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "NumLib/Function/IFunction.h"
 #include "NumLib/TimeStepping/TimeStep.h"
-#include "NumLib/TransientAssembler/GlobalMatrixUpdaterWithLocalAssembler.h"
+#include "NumLib/TransientAssembler/TransientElementWiseMatrixUpdater.h"
 #include "FemLib/Function/FemFunction.h"
 #include "SolutionLib/DataType.h"
 #include "FemDirichletBC.h"
@@ -35,15 +35,17 @@ namespace SolutionLib
  */
 template <
     class T_DIS_SYS,
+    class T_LINEAR_SOLVER,
     class T_LOCAL_JACOBIAN_ASSEMBLER
     >
 class TemplateTransientDxFEMFunction
 {
 public:
     typedef FemVariable<T_DIS_SYS> MyVariable;
+    typedef T_LINEAR_SOLVER LinearSolverType;
     typedef T_LOCAL_JACOBIAN_ASSEMBLER UserLocalJacobianAssembler;
-    typedef typename NumLib::TransientGlobalMatrixUpdaterWithLocalAssembler<UserLocalJacobianAssembler> MyUpdater;
-    typedef typename T_DIS_SYS::template MyLinearEquationAssembler<MyUpdater>::type MyGlobalAssembler;
+    typedef typename NumLib::TransientElementWiseMatrixUpdater<UserLocalJacobianAssembler> MyUpdater;
+    typedef typename T_DIS_SYS::template MyLinearEquationAssembler<MyUpdater,LinearSolverType>::type MyGlobalAssembler;
 
     /// constructor
     /// @param problem        Fem problem
@@ -62,6 +64,7 @@ public:
     {
         return new TemplateTransientDxFEMFunction<
                     T_DIS_SYS,
+                    T_LINEAR_SOLVER,
                     T_LOCAL_JACOBIAN_ASSEMBLER
                     >(_list_var, _local_assembler, _linear_eqs);
     }
@@ -89,8 +92,8 @@ private:
 };
 
 
-template <class T1, class T2>
-void TemplateTransientDxFEMFunction<T1,T2>::eval(const SolutionVector &u_n1, const SolutionVector &r, SolutionVector &du)
+template <class T1, class T2, class T3>
+void TemplateTransientDxFEMFunction<T1,T2,T3>::eval(const SolutionVector &u_n1, const SolutionVector &r, SolutionVector &du)
 {
     // input, output
     const NumLib::TimeStep &t_n1 = *this->_t_n1;

@@ -51,10 +51,10 @@ public:
         typedef DiscreteVector<T> type;
     };
 
-    template <typename T_UPDATER>
+    template <typename T_UPDATER, typename T_LINEAR_SOLVER>
     struct MyLinearEquationAssembler
     {
-        typedef SequentialElementWiseLinearEquationAssembler<T_UPDATER> type;
+        typedef SequentialElementWiseLinearEquationAssembler<T_UPDATER, T_LINEAR_SOLVER> type;
     };
 
     template <typename T_VALUE, typename T_UPDATER>

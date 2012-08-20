@@ -17,7 +17,7 @@
 #include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "DiscreteLib/Utils/Tools.h"
 #include "NumLib/Function/IFunction.h"
-#include "NumLib/TransientAssembler/GlobalVectorUpdaterWithLocalAssembler.h"
+#include "NumLib/TransientAssembler/TransientElementWiseVectorUpdater.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "FemLib/Function/FemFunction.h"
 
@@ -43,7 +43,7 @@ public:
     typedef T_DIS_SYS MyDiscreteSystem;
     typedef FemVariable<T_DIS_SYS> MyVariable;
     typedef T_LOCAL_RESIDUAL_ASSEMBLER UserLocalResidualAssembler;
-    typedef typename NumLib::TransientGlobalVectorUpdaterWithLocalAssembler<UserLocalResidualAssembler> MyUpdater;
+    typedef typename NumLib::TransientElementWiseVectorUpdater<UserLocalResidualAssembler> MyUpdater;
     typedef typename T_DIS_SYS::template MyVectorAssembler<double, MyUpdater>::type MyGlobalAssembler;
 
     /// constructor

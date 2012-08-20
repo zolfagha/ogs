@@ -21,9 +21,9 @@
 #include "FemLinearElasticTools.h"
 #include "Ogs6FemData.h"
 
-void FemLinearElasticLinearLocalAssembler::assembly(const NumLib::TimeStep &/*time*/,  MeshLib::IElement &e, const LocalVectorType &/*local_u_n1*/, const LocalVectorType &/*local_u_n*/, NumLib::LocalEquation &eqs)
+void FemLinearElasticLinearLocalAssembler::assembly(const NumLib::TimeStep &/*time*/,  const MeshLib::IElement &e, const LocalVectorType &/*local_u_n1*/, const LocalVectorType &/*local_u_n*/, NumLib::LocalEquation &eqs)
 {
-    FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
+    FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
     size_t mat_id = e.getGroupID();
     Ogs6FemData* femData = Ogs6FemData::getInstance();
     //MaterialLib::PorousMedia* pm = femData->list_pm[mat_id];

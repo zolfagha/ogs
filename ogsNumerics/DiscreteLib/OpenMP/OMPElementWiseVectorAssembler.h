@@ -13,6 +13,9 @@
 #pragma once
 
 #include <vector>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/Core/LocalDataType.h"
@@ -57,10 +60,12 @@ template <class T1, class T2>
 void OMPElementWiseVectorAssembler<T1,T2>::assembly(const MeshLib::IMesh &msh, GlobalVectorType &globalVec)
 {
     const size_t n_ele = msh.getNumberOfElements();
+    UpdaterType assembler(*_e_assembler);
 
+    #pragma omp parallel for default(none), shared(msh, globalVec), firstprivate(assembler)
     for (size_t i=0; i<n_ele; i++) {
         MeshLib::IElement *e = msh.getElemenet(i);
-        _e_assembler->update(*e, globalVec);
+        assembler.update(*e, globalVec);
     }
 };
 

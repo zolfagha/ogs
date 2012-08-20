@@ -115,19 +115,19 @@ GWFdmProblem* defineGWProblem4FDM(DiscreteSystem &dis, double h, GeoLib::Line &l
 
 
 
-Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Line &line, Geo::PorousMedia &pm, Geo::Compound &comp)
+MyFunctionConcentration::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Line &line, Geo::PorousMedia &pm, Geo::Compound &comp)
 {
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
-    Geo::MassFemEquation::LinearAssemblerType* linear_assembler = new Geo::MassFemEquation::LinearAssemblerType(*_feObjects, pm, comp);
-    Geo::MassFemEquation::ResidualAssemblerType* r_assembler = new Geo::MassFemEquation::ResidualAssemblerType(*_feObjects, pm, comp);
-    Geo::MassFemEquation::JacobianAssemblerType* j_eqs = new Geo::MassFemEquation::JacobianAssemblerType(*_feObjects, pm, comp);
+    MyFunctionConcentration::MassFemEquation::LinearAssemblerType* linear_assembler = new MyFunctionConcentration::MassFemEquation::LinearAssemblerType(*_feObjects, pm, comp);
+    MyFunctionConcentration::MassFemEquation::ResidualAssemblerType* r_assembler = new MyFunctionConcentration::MassFemEquation::ResidualAssemblerType(*_feObjects, pm, comp);
+    MyFunctionConcentration::MassFemEquation::JacobianAssemblerType* j_eqs = new MyFunctionConcentration::MassFemEquation::JacobianAssemblerType(*_feObjects, pm, comp);
     //IVBV problem
-    Geo::MassFemProblem* _problem = new Geo::MassFemProblem(&dis);
-    Geo::MassFemProblem::EquationType* eqs = _problem->createEquation();
+    MyFunctionConcentration::MassFemProblem* _problem = new MyFunctionConcentration::MassFemProblem(&dis);
+    MyFunctionConcentration::MassFemProblem::EquationType* eqs = _problem->createEquation();
     eqs->initialize(linear_assembler, r_assembler, j_eqs);
     // var
-    Geo::MassFemProblem::MyVariable* var = _problem->addVariable("concentration");
+    MyFunctionConcentration::MassFemProblem::MyVariable* var = _problem->addVariable("concentration");
     //IC
     MyFemNodalFunctionScalar* c0 = new MyFemNodalFunctionScalar();
     c0->initialize(dis, PolynomialOrder::Linear, 0);
@@ -214,7 +214,7 @@ TEST(Fdm, fdm_fem1)
         tracer.molecular_diffusion = new NumLib::TXFunctionConstant(1.e-6);
         DiscreteSystem dis(msh);
         GWFdmProblem* pGW = defineGWProblem4FDM(dis, h, line, pm);
-        Geo::MassFemProblem* pMass = defineMassTransportProblem(dis, line, pm, tracer);
+        MyFunctionConcentration::MassFemProblem* pMass = defineMassTransportProblem(dis, line, pm, tracer);
 
         TimeStepFunctionConstant tim(.0, 1e+4, 1e+3);
         pGW->setTimeSteppingFunction(tim);

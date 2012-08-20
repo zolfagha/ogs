@@ -28,7 +28,7 @@ class MassTransportJacobianLocalAssembler: public NumLib::IElementWiseTransientJ
 {
 public:
     MassTransportJacobianLocalAssembler(MaterialLib::Compound* cmp, FemLib::LagrangianFeObjectContainer* feObjects)
-        : _cmp(cmp), _feObjects(feObjects)
+        : _cmp(cmp), _feObjects(*feObjects), _vel(NULL)
     {
     };
 
@@ -39,9 +39,9 @@ public:
         _vel = const_cast<NumLib::ITXFunction*>(vel);
     }
 
-    void assembly(const NumLib::TimeStep &time, MeshLib::IElement &e, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/, NumLib::LocalMatrix &localJ)
+    void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/, NumLib::LocalMatrix &localJ)
     {
-        FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
+        FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
         size_t mat_id = e.getGroupID();
         MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];
         double cmp_mol_diffusion = .0;
@@ -87,6 +87,6 @@ public:
 
 private:
     MaterialLib::Compound* _cmp;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangianFeObjectContainer _feObjects;
     NumLib::ITXFunction* _vel;
 };

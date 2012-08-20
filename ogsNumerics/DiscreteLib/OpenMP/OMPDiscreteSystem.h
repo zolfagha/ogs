@@ -54,10 +54,10 @@ public:
     {
         typedef DiscreteVector<T> type;
     };
-    template <class T_UPDATER>
+    template <class T_UPDATER, typename T_LINEAR_SOLVER>
     struct MyLinearEquationAssembler
     {
-        typedef OMPElementWiseLinearEquationAssembler<T_UPDATER> type;
+        typedef OMPElementWiseLinearEquationAssembler<T_UPDATER, T_LINEAR_SOLVER> type;
     };
     template <typename T_VALUE, typename T_UPDATER>
     struct MyVectorAssembler

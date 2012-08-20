@@ -20,22 +20,18 @@ namespace MeshLib
 class IMesh;
 }
 
-namespace MathLib
-{
-    class ILinearEquation;
-}
-
 namespace DiscreteLib
 {
 
 /**
  * \brief Element-based linear equation assembler
  */
-template <class T_UPDATER>
+template <class T_UPDATER, class T_SOLVER>
 class SequentialElementWiseLinearEquationAssembler : public IDiscreteLinearEquationAssembler
 {
 public:
     typedef T_UPDATER UpdaterType;
+    typedef T_SOLVER SolverType;
 
     /**
      *
@@ -51,14 +47,19 @@ public:
     /// @param msh Mesh
     /// @param list_dofId List of Dof IDs used in this problem
     /// @param eqs Linear equation solver
-    virtual void assembly(const MeshLib::IMesh &msh, MathLib::ILinearEquation &eqs);
+    void assembly(const MeshLib::IMesh &msh, SolverType &eqs);
+
+    virtual void assembly(const MeshLib::IMesh &msh, MathLib::ILinearEquation &eqs)
+    {
+        assembly(msh, *((SolverType*)&eqs));
+    }
 
 private:
     UpdaterType* _e_assembler;
 };
 
-template <class T>
-void SequentialElementWiseLinearEquationAssembler<T>::assembly(const MeshLib::IMesh &msh, MathLib::ILinearEquation &eqs)
+template <class T1, class T2>
+void SequentialElementWiseLinearEquationAssembler<T1, T2>::assembly(const MeshLib::IMesh &msh, SolverType &eqs)
 {
     const size_t n_ele = msh.getNumberOfElements();
     for (size_t i=0; i<n_ele; i++) {

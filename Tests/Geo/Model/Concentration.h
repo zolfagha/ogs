@@ -32,15 +32,6 @@
 namespace Geo
 {
 
-typedef TemplateFemEquation<
-        DiscreteLib::DiscreteSystem,
-        Geo::MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler>,
-        Geo::MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler>,
-        Geo::MassTransportJacobianLocalAssembler
-        >
-        MassFemEquation;
-
-typedef FemIVBVProblem< DiscreteLib::DiscreteSystem, MassFemEquation > MassFemProblem;
 
 
 template <
@@ -52,6 +43,16 @@ class FunctionConcentration : public NumLib::AbstractTransientMonolithicSystem
     enum Out { Concentration = 0 };
 
 public:
+    typedef TemplateFemEquation<
+            DiscreteLib::DiscreteSystem,
+            T_LINEAR_SOLVER,
+            Geo::MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler>,
+            Geo::MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler>,
+            Geo::MassTransportJacobianLocalAssembler
+            >
+            MassFemEquation;
+
+    typedef FemIVBVProblem< DiscreteLib::DiscreteSystem, MassFemEquation > MassFemProblem;
     typedef SolutionLib::SingleStepFEM
             <
                 MassFemProblem,

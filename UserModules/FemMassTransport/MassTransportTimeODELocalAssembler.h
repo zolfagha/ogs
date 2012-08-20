@@ -33,7 +33,7 @@ public:
     typedef NumLib::LocalMatrix LocalMatrixType;
 
     MassTransportTimeODELocalAssembler(MaterialLib::Compound* cmp, FemLib::LagrangianFeObjectContainer* feObjects)
-        : _cmp(cmp), _feObjects(feObjects)
+        : _cmp(cmp), _feObjects(*feObjects), _vel(NULL)
     {
     };
 
@@ -45,9 +45,9 @@ public:
     }
 
 protected:
-    virtual void assembleODE(const NumLib::TimeStep &/*time*/, MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/, LocalMatrixType &localM, LocalMatrixType &localK, LocalVectorType &/*localF*/)
+    virtual void assembleODE(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/, LocalMatrixType &localM, LocalMatrixType &localK, LocalVectorType &/*localF*/)
     {
-        FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
+        FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
         const size_t n_dim = e.getDimension();
         size_t mat_id = e.getGroupID();
         MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];
@@ -88,6 +88,6 @@ protected:
 
 private:
     MaterialLib::Compound* _cmp;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangianFeObjectContainer _feObjects;
     NumLib::ITXFunction* _vel;
 };

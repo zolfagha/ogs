@@ -39,15 +39,6 @@ using namespace DiscreteLib;
 namespace Geo
 {
 
-typedef TemplateFemEquation<
-        DiscreteSystem,
-        Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerEQSLocalAssembler>,
-        Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerResidualLocalAssembler>,
-        Geo::GroundwaterFlowJacobianLocalAssembler
-        >
-        GWFemEquation;
-
-typedef FemIVBVProblem< DiscreteSystem, GWFemEquation > GWFemProblem;
 
 
 
@@ -58,6 +49,16 @@ class FunctionHead : public AbstractTransientMonolithicSystem
 {
     enum Out { Head=0 };
 public:
+    typedef TemplateFemEquation<
+            DiscreteSystem,
+            T_LINEAR_SOLVER,
+            Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerEQSLocalAssembler>,
+            Geo::GroundwaterFlowTimeODELocalAssembler<ElementWiseTimeEulerResidualLocalAssembler>,
+            Geo::GroundwaterFlowJacobianLocalAssembler
+            >
+            GWFemEquation;
+
+    typedef FemIVBVProblem< DiscreteSystem, GWFemEquation > GWFemProblem;
     typedef SingleStepFEM
             <
                 GWFemProblem,

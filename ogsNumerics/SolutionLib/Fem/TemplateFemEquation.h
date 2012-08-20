@@ -34,6 +34,7 @@ namespace SolutionLib
 template
     <
     class T_DIS_SYS,
+    class T_LINEAR_SOLVER,
     class T_LOCAL_ASSEMBLER_LINEAR,
     class T_LOCAL_ASSEMBLER_RESIDUAL,
     class T_LOCAL_ASSEMBLER_JACOBIAN
@@ -42,12 +43,13 @@ class TemplateFemEquation
 {
 public:
     typedef T_DIS_SYS MyDiscreteSystem;
+    typedef T_LINEAR_SOLVER LinearSolverType;
     typedef T_LOCAL_ASSEMBLER_LINEAR LinearAssemblerType;
     typedef T_LOCAL_ASSEMBLER_RESIDUAL ResidualAssemblerType;
     typedef T_LOCAL_ASSEMBLER_JACOBIAN JacobianAssemblerType;
-    typedef TemplateTransientLinearFEMFunction<MyDiscreteSystem,LinearAssemblerType> LinearEQSType;
+    typedef TemplateTransientLinearFEMFunction<MyDiscreteSystem,LinearSolverType,LinearAssemblerType> LinearEQSType;
     typedef TemplateTransientResidualFEMFunction<MyDiscreteSystem,ResidualAssemblerType> ResidualEQSType;
-    typedef TemplateTransientDxFEMFunction<MyDiscreteSystem,JacobianAssemblerType> DxEQSType;
+    typedef TemplateTransientDxFEMFunction<MyDiscreteSystem,LinearSolverType,JacobianAssemblerType> DxEQSType;
 
     ///
     TemplateFemEquation() :

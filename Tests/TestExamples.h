@@ -30,7 +30,7 @@
 
 #include "FemLib/Function/FemFunction.h"
 #include "FemLib/BC/DirichletBC2FEM.h"
-#include "FemLib/BC/FemDirichletBCMethod.h"
+//#include "FemLib/BC/FemDirichletBCMethod.h"
 #include "FemLib/BC/NeumannBC2FEM.h"
 #include "FemLib/Post/Extrapolation.h"
 
@@ -121,8 +121,9 @@ public:
             globalRHS[gw.vec_bc2_nodes[i]] -= gw.vec_bc2_vals[i];
         }
         //outputLinearEQS(globalA, globalRHS);
-        FemLib::DiagonalizeMethod diag;
-        diag.apply(gw.vec_bc1_nodes, gw.vec_bc1_vals, eqs);
+//        FemLib::DiagonalizeMethod diag;
+//        diag.apply(gw.vec_bc1_nodes, gw.vec_bc1_vals, eqs);
+        eqs.setKnownX(gw.vec_bc1_nodes, gw.vec_bc1_vals);
         //for (size_t i=0; i<gw.vec_bc1.size(); i++) gw.vec_bc1[i]->apply(eqs);
         //outputLinearEQS(*globalA, globalRHS);
 

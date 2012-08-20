@@ -146,6 +146,7 @@ class GWFemTestSystem : public NumLib::ITransientSystem
     typedef TemplateFemEquation
             <
                 DiscreteSystem,
+                T_LINEAR_SOLVER,
                 GWTimeODEAssembler<ElementWiseTimeEulerEQSLocalAssembler>,
                 GWTimeODEAssembler<ElementWiseTimeEulerResidualLocalAssembler>,
                 GWJacobianAssembler
@@ -153,9 +154,9 @@ class GWFemTestSystem : public NumLib::ITransientSystem
 
     typedef FemIVBVProblem<DiscreteSystem,GWFemEquation> GWFemProblem;
 
-    typedef GWFemEquation::LinearEQSType MyLinearFunction;
-    typedef GWFemEquation::ResidualEQSType MyResidualFunction;
-    typedef GWFemEquation::DxEQSType MyDxFunction;
+    typedef typename GWFemEquation::LinearEQSType MyLinearFunction;
+    typedef typename GWFemEquation::ResidualEQSType MyResidualFunction;
+    typedef typename GWFemEquation::DxEQSType MyDxFunction;
 
     typedef TemplateDiscreteNonlinearSolver
             <
@@ -210,17 +211,17 @@ public:
         //size_t nnodes = msh->getNumberOfNodes();
         _feObjects = new LagrangianFeObjectContainer(*msh);
         //equations
-        GWFemEquation::LinearAssemblerType* local_linear = new GWFemEquation::LinearAssemblerType(*_feObjects, K);
-        GWFemEquation::ResidualAssemblerType* local_r = new GWFemEquation::ResidualAssemblerType(*_feObjects, K);
-        GWFemEquation::JacobianAssemblerType* local_J = new GWFemEquation::JacobianAssemblerType(*_feObjects, K);
+        typename GWFemEquation::LinearAssemblerType* local_linear = new typename GWFemEquation::LinearAssemblerType(*_feObjects, K);
+        typename GWFemEquation::ResidualAssemblerType* local_r = new typename GWFemEquation::ResidualAssemblerType(*_feObjects, K);
+        typename GWFemEquation::JacobianAssemblerType* local_J = new typename GWFemEquation::JacobianAssemblerType(*_feObjects, K);
         //IVBV problem
         _problem = new GWFemProblem(&dis);
         GWFemEquation* eqs = _problem->createEquation();
         eqs->initialize(local_linear, local_r, local_J);
         // var
-        GWFemProblem::MyVariable* _head = _problem->addVariable("head");
+        typename GWFemProblem::MyVariable* _head = _problem->addVariable("head");
         //IC
-        GWFemProblem::MyVariable::MyNodalFunctionScalar* h0 = new GWFemProblem::MyVariable::MyNodalFunctionScalar();
+        typename GWFemProblem::MyVariable::MyNodalFunctionScalar* h0 = new typename GWFemProblem::MyVariable::MyNodalFunctionScalar();
         h0->initialize(dis, PolynomialOrder::Linear, .0);
         _head->setIC(h0);
         //BC
@@ -245,7 +246,7 @@ public:
         //vel = new FEMIntegrationPointFunctionVector2d(msh);
     }
 
-    GWFemProblem::MyVariable::MyNodalFunctionScalar* getCurrentHead()
+    typename GWFemProblem::MyVariable::MyNodalFunctionScalar* getCurrentHead()
     {
         return _head;
     }
@@ -254,7 +255,7 @@ private:
     GWFemProblem* _problem;
     SolutionForHead* _solHead; 
     GeoLib::Rectangle *_rec;
-    GWFemProblem::MyVariable::MyNodalFunctionScalar *_head;
+    typename GWFemProblem::MyVariable::MyNodalFunctionScalar *_head;
     LagrangianFeObjectContainer* _feObjects;
 
     DISALLOW_COPY_AND_ASSIGN(GWFemTestSystem);

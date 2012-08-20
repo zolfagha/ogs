@@ -45,6 +45,7 @@ public:
     // Equation definition
     typedef SolutionLib::TemplateFemEquation<
             MyDiscreteSystem,
+            MyLinearSolver,
             MyLinearAssemblerType,
             MyResidualAssemblerType,
             MyJacobianAssemblerType

@@ -17,7 +17,7 @@
 
 void GroundwaterFlowJacobianLocalAssembler::assembly(const NumLib::TimeStep &ts, const MeshLib::IElement &e, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/,  NumLib::LocalMatrix &localJ)
 {
-    FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
+    FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
     size_t mat_id = e.getGroupID();
     MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];
     NumLib::LocalMatrix localM(localJ.rows(), localJ.cols());

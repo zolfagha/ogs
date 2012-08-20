@@ -13,6 +13,7 @@
 #pragma once
 
 #include <vector>
+
 #include "MeshLib/Core/IElement.h"
 #include "DiscreteLib/Utils/DofEquationIdTable.h"
 
@@ -24,11 +25,12 @@ namespace DiscreteLib
  *
  * \tparam T_LOCAL Local assembler
  */
-template <class T_LOCAL>
+template <class T_LOCAL, class T_SOLVER>
 class ElementWiseLinearEquationUpdater
 {
 public:
     typedef T_LOCAL LocalAssemblerType;
+    typedef T_SOLVER SolverType;
 
     /**
      *
@@ -47,7 +49,7 @@ public:
      * @param e     mesh element
      * @param eqs   global equation
      */
-    void update(const MeshLib::IElement &e, MathLib::ILinearEquation &eqs)
+    void update(const MeshLib::IElement &e, SolverType &eqs)
     {
         std::vector<size_t> ele_node_ids, ele_node_size_order;
         std::vector<size_t> local_dofmap_row;

@@ -23,13 +23,13 @@
 /// assemble a local residual for the given element
 void FemLinearElasticResidualLocalAssembler::assembly
     (   const NumLib::TimeStep &/*time*/,
-        MeshLib::IElement &e,
+        const MeshLib::IElement &e,
         const NumLib::LocalVector &local_u_n1,
         const NumLib::LocalVector &/*local_u_n*/,
         NumLib::LocalVector &local_r    )
 {
 
-    FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
+    FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
     size_t mat_id = e.getGroupID();
     Ogs6FemData* femData = Ogs6FemData::getInstance();
     //MaterialLib::PorousMedia* pm = femData->list_pm[mat_id];

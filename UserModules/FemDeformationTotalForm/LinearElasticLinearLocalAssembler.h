@@ -25,15 +25,15 @@ public:
     typedef NumLib::LocalMatrix LocalMatrixType;
 
     explicit FemLinearElasticLinearLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
-    : _feObjects(feObjects)
+    : _feObjects(*feObjects)
     {
     };
 
     virtual ~FemLinearElasticLinearLocalAssembler() {};
 
-    virtual void assembly(const NumLib::TimeStep &/*time*/,  MeshLib::IElement &e, const LocalVectorType &/*local_u_n1*/, const LocalVectorType &/*local_u_n*/, NumLib::LocalEquation &eqs);
+    virtual void assembly(const NumLib::TimeStep &/*time*/,  const MeshLib::IElement &e, const LocalVectorType &/*local_u_n1*/, const LocalVectorType &/*local_u_n*/, NumLib::LocalEquation &eqs);
 
 private:
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangianFeObjectContainer _feObjects;
 };
 

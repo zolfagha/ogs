@@ -17,7 +17,7 @@
 #include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "NumLib/Function/IFunction.h"
 #include "NumLib/TimeStepping/TimeStep.h"
-#include "NumLib/TransientAssembler/GlobalEquationUpdaterWithLocalAssembler.h"
+#include "NumLib/TransientAssembler/TransientElementWiseLinearEquationUpdater.h"
 #include "FemLib/Function/FemFunction.h"
 #include "FemVariable.h"
 #include "FemDirichletBC.h"
@@ -41,6 +41,7 @@ namespace SolutionLib
  */
 template <
     class T_DIS_SYS,
+    class T_LINEAR_SOLVER,
     class T_LOCAL_ASSEMBLER
     >
 class TemplateTransientLinearFEMFunction
@@ -48,10 +49,11 @@ class TemplateTransientLinearFEMFunction
 {
 public:
     typedef T_DIS_SYS MyDiscreteSystem;
+    typedef T_LINEAR_SOLVER LinearSolverType;
     typedef FemVariable<T_DIS_SYS> MyVariable;
     typedef T_LOCAL_ASSEMBLER UserLocalAssembler;
-    typedef typename NumLib::TransientGlobalEquationUpdaterWithLocalAssembler<UserLocalAssembler> MyUpdater;
-    typedef typename T_DIS_SYS::template MyLinearEquationAssembler<MyUpdater>::type MyGlobalAssembler;
+    typedef typename NumLib::TransientElementWiseLinearEquationUpdater<UserLocalAssembler> MyUpdater;
+    typedef typename T_DIS_SYS::template MyLinearEquationAssembler<MyUpdater,LinearSolverType>::type MyGlobalAssembler;
 
     /// constructor
     /// \param list_var
@@ -70,7 +72,8 @@ public:
     NumLib::TemplateFunction<SolutionVector,SolutionVector>* clone() const
     {
         return new TemplateTransientLinearFEMFunction<
-                T_DIS_SYS,
+                MyDiscreteSystem,
+                LinearSolverType,
                 UserLocalAssembler
                     >(_sys, _list_var, _local_assembler, _linear_eqs);
     }
@@ -97,8 +100,8 @@ private:
 };
 
 
-template <class T1, class T2>
-void TemplateTransientLinearFEMFunction<T1, T2>::eval(const SolutionVector &/*u0*/, SolutionVector &u_n1)
+template <class T1, class T2, class T3>
+void TemplateTransientLinearFEMFunction<T1, T2, T3>::eval(const SolutionVector &/*u0*/, SolutionVector &u_n1)
 {
     // input, output
     const NumLib::TimeStep &t_n1 = *this->_t_n1;

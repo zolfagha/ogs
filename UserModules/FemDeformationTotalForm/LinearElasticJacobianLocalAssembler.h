@@ -20,12 +20,12 @@ class FemLinearElasticJacobianLocalAssembler: public NumLib::IElementWiseTransie
 {
 public:
     explicit FemLinearElasticJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
-    : _feObjects(feObjects)
+    : _feObjects(*feObjects)
     {
     };
 
-    void assembly(const NumLib::TimeStep &/*time*/, MeshLib::IElement &e, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/,  NumLib::LocalMatrix &localJ);
+    void assembly(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/,  NumLib::LocalMatrix &localJ);
 
 private:
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangianFeObjectContainer _feObjects;
 };

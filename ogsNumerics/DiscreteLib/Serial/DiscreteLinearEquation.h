@@ -14,7 +14,6 @@
 
 #include "BaseLib/CodingTools.h"
 
-#include "MathLib/LinAlg/LinearEquation/ILinearEquation.h"
 #include "MathLib/LinAlg/Sparse/Sparsity.h"
 
 #include "MeshLib/Core/IMesh.h"
@@ -41,21 +40,26 @@ namespace DiscreteLib
 template<class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER=SparsityBuilderDummy>
 class DiscreteLinearEquation : public AbstractMeshBasedDiscreteLinearEquation
 {
+public:
+    typedef T_LINEAR_SOLVER MyLinearSolverType;
+    typedef T_SPARSITY_BUILDER MySparsityBuilder;
+
 private:
     /// constructor
     /// \param msh
     /// \param linear_solver
     /// \param dofManager
-    DiscreteLinearEquation(const MeshLib::IMesh* msh, T_LINEAR_SOLVER* linear_solver, DofEquationIdTable* dofManager)
+    DiscreteLinearEquation(const MeshLib::IMesh* msh, MyLinearSolverType* linear_solver, DofEquationIdTable* dofManager)
         : AbstractMeshBasedDiscreteLinearEquation(msh, dofManager), _eqs(linear_solver), _do_create_eqs(true)
     {
     };
 
 public:
-    static DiscreteLinearEquation<T_LINEAR_SOLVER,T_SPARSITY_BUILDER>* createInstance(IDiscreteSystem &dis_sys, const MeshLib::IMesh* msh, T_LINEAR_SOLVER* linear_solver, DofEquationIdTable* dofManager)
+
+    static DiscreteLinearEquation<MyLinearSolverType,MySparsityBuilder>* createInstance(IDiscreteSystem &dis_sys, const MeshLib::IMesh* msh, MyLinearSolverType* linear_solver, DofEquationIdTable* dofManager)
     {
-        DiscreteLinearEquation<T_LINEAR_SOLVER,T_SPARSITY_BUILDER> *eqs;
-        eqs = new DiscreteLinearEquation<T_LINEAR_SOLVER,T_SPARSITY_BUILDER>(msh, linear_solver, dofManager);
+        DiscreteLinearEquation<MyLinearSolverType,MySparsityBuilder> *eqs;
+        eqs = new DiscreteLinearEquation<MyLinearSolverType,MySparsityBuilder>(msh, linear_solver, dofManager);
         dis_sys.addLinearEquation(eqs);
         return eqs;
     }
@@ -69,7 +73,7 @@ public:
         if (_do_create_eqs && !_eqs->isCreated()) {
             _do_create_eqs = false;
             MathLib::RowMajorSparsity* sparse = new MathLib::RowMajorSparsity();
-            T_SPARSITY_BUILDER sp_builder(*getMesh(), *dofManager, *sparse);
+            MySparsityBuilder sp_builder(*getMesh(), *dofManager, *sparse);
             AbstractMeshBasedDiscreteLinearEquation::setSparsity(sparse);
             _eqs->create(dofManager->getTotalNumberOfActiveDoFs(), sparse);
         } else {
@@ -159,13 +163,13 @@ public:
     };
 
     /// return a linear solver object
-    T_LINEAR_SOLVER* getLinearSolver() {return _eqs;};
+    MyLinearSolverType* getLinearSolver() {return _eqs;};
 
 private:
     DISALLOW_COPY_AND_ASSIGN(DiscreteLinearEquation);
 
 private:
-    T_LINEAR_SOLVER* _eqs;
+    MyLinearSolverType* _eqs;
     bool _do_create_eqs;
     std::vector<size_t> _list_prescribed_dof_id;
     std::vector<double> _list_prescribed_values;

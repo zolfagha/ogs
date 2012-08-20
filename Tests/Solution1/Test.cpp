@@ -75,6 +75,22 @@ typedef FemLib::FemNodalFunctionScalar<DiscreteSystem>::type MyNodalFunctionScal
 //    }
 //};
 
+typedef Geo::FunctionHead<LisLinearEquation> MyFunctionHead;
+typedef Geo::FunctionVelocity MyFunctionVelocity;
+typedef Geo::FunctionConcentration<LisLinearEquation> MyFunctionConcentration;
+typedef Geo::FunctionDisplacement<LisLinearEquation> MyFunctionDisplacement;
+typedef Geo::FunctionStressStrain MyFunctionStressStrain;
+
+namespace Geo
+{
+typedef MyFunctionHead::GWFemProblem GWFemProblem;
+typedef MyFunctionHead::GWFemEquation GWFemEquation;
+typedef MyFunctionConcentration::MassFemProblem MassFemProblem;
+typedef MyFunctionConcentration::MassFemEquation MassFemEquation;
+typedef MyFunctionDisplacement::FemLinearElasticProblem FemLinearElasticProblem;
+typedef MyFunctionDisplacement::FemLinearElasticEquation FemLinearElasticEquation;
+}
+
 Geo::GWFemProblem* createGWProblem(DiscreteSystem &dis, Geo::PorousMedia &pm)
 {
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
@@ -185,11 +201,6 @@ static void getGWExpectedHead(std::vector<double> &expected)
     }
 }
 
-typedef Geo::FunctionHead<LisLinearEquation> MyFunctionHead;
-typedef Geo::FunctionVelocity MyFunctionVelocity;
-typedef Geo::FunctionConcentration<LisLinearEquation> MyFunctionConcentration;
-typedef Geo::FunctionDisplacement<LisLinearEquation> MyFunctionDisplacement;
-typedef Geo::FunctionStressStrain MyFunctionStressStrain;
 
 
 TEST(Solution, CouplingFem2D)
