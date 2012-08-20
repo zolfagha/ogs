@@ -28,6 +28,13 @@ class LagrangianFeObjectContainer : public FeObjectCachePerFeType, public IFeObj
 {
 public:
     explicit LagrangianFeObjectContainer(MeshLib::IMesh &msh) :  FeObjectCachePerFeType(msh), _order(1) {};
+
+    LagrangianFeObjectContainer(const LagrangianFeObjectContainer &src)
+    : FeObjectCachePerFeType(*src.getMesh())
+    {
+        _order = src._order;
+    }
+
     virtual ~LagrangianFeObjectContainer() {};
 
     void setPolynomialOrder(size_t order) { _order = order; };
@@ -37,7 +44,7 @@ public:
 private:
     FiniteElementType::type getFeType(MeshLib::ElementShape::type ele_type, size_t order);
 
-    DISALLOW_COPY_AND_ASSIGN(LagrangianFeObjectContainer);
+    //DISALLOW_COPY_AND_ASSIGN(LagrangianFeObjectContainer);
 
 private:
     size_t _order;
