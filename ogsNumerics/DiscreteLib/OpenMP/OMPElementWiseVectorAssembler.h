@@ -15,10 +15,8 @@
 #include <vector>
 
 #include "MeshLib/Core/IMesh.h"
-#include "DiscreteLib/Utils/DofEquationIdTable.h"
 #include "DiscreteLib/Core/LocalDataType.h"
 #include "DiscreteLib/Core/IDiscreteVectorAssembler.h"
-#include "DiscreteLib/Core/IElemenetWiseVectorLocalAssembler.h"
 
 namespace MeshLib 
 {

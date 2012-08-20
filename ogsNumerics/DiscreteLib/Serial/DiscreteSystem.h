@@ -18,8 +18,8 @@
 #include "DiscreteLib/Core/DiscreteEnums.h"
 #include "DiscreteVector.h"
 #include "DiscreteLinearEquation.h"
-#include "ElementWiseLinearEquationAssembler.h"
-#include "ElementWiseVectorAssembler.h"
+#include "SequentialElementWiseLinearEquationAssembler.h"
+#include "SequentialElementWiseVectorAssembler.h"
 
 namespace MeshLib
 {
@@ -54,13 +54,13 @@ public:
     template <typename T_UPDATER>
     struct MyLinearEquationAssembler
     {
-        typedef ElementWiseLinearEquationAssembler<T_UPDATER> type;
+        typedef SequentialElementWiseLinearEquationAssembler<T_UPDATER> type;
     };
 
     template <typename T_VALUE, typename T_UPDATER>
     struct MyVectorAssembler
     {
-        typedef ElementWiseVectorAssembler<T_VALUE, T_UPDATER> type;
+        typedef SequentialElementWiseVectorAssembler<T_VALUE, T_UPDATER> type;
     };
 
     /**

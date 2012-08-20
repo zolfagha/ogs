@@ -22,8 +22,8 @@
 
 #include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "DiscreteLib/Core/DiscreteEnums.h"
-#include "OMPDiscreteVector.h"
-#include "OMPDiscreteLinearEquation.h"
+#include "DiscreteLib/Serial/DiscreteLinearEquation.h"
+#include "DiscreteLib/Serial/DiscreteVector.h"
 #include "OMPElementWiseLinearEquationAssembler.h"
 #include "OMPElementWiseVectorAssembler.h"
 
@@ -38,9 +38,8 @@ namespace DiscreteLib
 class DofEquationIdTable;
 
 /**
- * \brief Discrete system based on a single mesh
+ * \brief Discrete system using OpenMP parallelization for assembly
  *
- * - Mesh
  */
 class OMPDiscreteSystem : public IDiscreteSystem
 {
@@ -48,12 +47,12 @@ public:
     template<typename T_LINEAR_SOLVER, typename T_SPARSITY_BUILDER>
     struct MyLinearEquation
     {
-        typedef OMPDiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER> type;
+        typedef DiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER> type;
     };
     template<typename T>
     struct MyVector
     {
-        typedef OMPDiscreteVector<T> type;
+        typedef DiscreteVector<T> type;
     };
     template <class T_UPDATER>
     struct MyLinearEquationAssembler

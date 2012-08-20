@@ -82,10 +82,9 @@ public:
     /// construct the linear equation
     virtual void construct(IDiscreteLinearEquationAssembler& assemler)
     {
-        DofEquationIdTable* dofManager = getDofMapManger();
-        assert(dofManager->getNumberOfVariables()>0);
+        assert(getDofMapManger()->getNumberOfVariables()>0);
 
-        assemler.assembly(*(MeshLib::IMesh*)getMesh(), *dofManager, *_eqs);
+        assemler.assembly(*(MeshLib::IMesh*)getMesh(), *_eqs);
 
         //apply 1st bc
         _eqs->setKnownX(_list_prescribed_dof_id, _list_prescribed_values);

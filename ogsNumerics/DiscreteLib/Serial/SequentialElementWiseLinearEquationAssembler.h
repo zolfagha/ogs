@@ -5,7 +5,7 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file ElementWiseLinearEquationAssembler.h
+ * \file SequentialElementWiseLinearEquationAssembler.h
  *
  * Created on 2012-08-03 by Norihiro Watanabe
  */
@@ -29,31 +29,36 @@ namespace DiscreteLib
 {
 
 /**
- * \brief Element-based discrete system assembler classes
+ * \brief Element-based linear equation assembler
  */
 template <class T_UPDATER>
-class ElementWiseLinearEquationAssembler : public IDiscreteLinearEquationAssembler
+class SequentialElementWiseLinearEquationAssembler : public IDiscreteLinearEquationAssembler
 {
 public:
     typedef T_UPDATER UpdaterType;
 
+    /**
+     *
+     * @param updater
+     */
+    explicit SequentialElementWiseLinearEquationAssembler(UpdaterType* updater) : _e_assembler(updater) {};
+
     ///
-    explicit ElementWiseLinearEquationAssembler(UpdaterType* a) : _e_assembler(a) {};
+    virtual ~SequentialElementWiseLinearEquationAssembler(){};
 
     /// Conduct the element by element assembly procedure
     ///
     /// @param msh Mesh
-    /// @param dofManager Dof map manager
     /// @param list_dofId List of Dof IDs used in this problem
     /// @param eqs Linear equation solver
-    void assembly(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquation &eqs);
+    virtual void assembly(const MeshLib::IMesh &msh, MathLib::ILinearEquation &eqs);
 
 private:
     UpdaterType* _e_assembler;
 };
 
 template <class T>
-void ElementWiseLinearEquationAssembler<T>::assembly(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::ILinearEquation &eqs)
+void SequentialElementWiseLinearEquationAssembler<T>::assembly(const MeshLib::IMesh &msh, MathLib::ILinearEquation &eqs)
 {
     const size_t n_ele = msh.getNumberOfElements();
     for (size_t i=0; i<n_ele; i++) {
