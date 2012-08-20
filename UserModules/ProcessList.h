@@ -17,11 +17,11 @@
 // * This file should be called in body files (e.g. cpp)
 //------------------------------------------------------------------------------
 #include "FemGroundwaterFlow/Head.h"
-//#include "FemGroundwaterFlow/ElementVelocity.h"
-//#include "FemMassTransport/Concentration.h"
-//#include "FemDeformationTotalForm/Displacement.h"
-//#include "FemDeformationTotalForm/ElementStressStrain.h"
-//#include "FemDeformationTotalForm/NodalStressStrain.h"
+#include "FemGroundwaterFlow/ElementVelocity.h"
+#include "FemMassTransport/Concentration.h"
+#include "FemDeformationTotalForm/Displacement.h"
+#include "FemDeformationTotalForm/ElementStressStrain.h"
+#include "FemDeformationTotalForm/NodalStressStrain.h"
 
 
 //#include "ProcessBuilder.h"
