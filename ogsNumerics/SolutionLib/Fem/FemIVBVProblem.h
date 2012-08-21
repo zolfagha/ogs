@@ -73,7 +73,8 @@ public:
     /// create an equation
     EquationType* createEquation()
     {
-        _eqs = new EquationType();
+        if (_eqs == NULL)
+            _eqs = new EquationType();
         return _eqs;
     };
 
