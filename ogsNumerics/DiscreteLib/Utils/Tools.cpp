@@ -16,6 +16,7 @@
 namespace DiscreteLib
 {
 
+
 /// create a subset of vector u corresponding to the given vector index
 void getLocalVector2(const DofEquationIdTable &dofManager, const std::vector<size_t> &list_vec_entry_id, const std::vector<size_t> &list_vec_size_for_order, const std::vector<IDiscreteVector<double>*> &list_multiple_u, std::vector<double> &local_u)
 {
@@ -50,11 +51,40 @@ void getLocalVector(const DofEquationIdTable &dofManager, const std::vector<size
         local_u[i] = temp_v[i];
 }
 
+/**
+ * extract entries and create subset
+ *
+ * @param list_vec_entry_id     a list of entry id
+ * @param global_u              global vector
+ * @param local_u               subset
+ */
 void getLocalVector(const std::vector<size_t> &list_vec_entry_id, const IDiscreteVector<double> &global_u, LocalVector &local_u)
 {
-    local_u.resize(list_vec_entry_id.size());
+    size_t valid_entry_cnt = 0;
     for (size_t i=0; i<list_vec_entry_id.size(); i++) {
-        local_u[i] = global_u[list_vec_entry_id[i]];
+        if (list_vec_entry_id[i] != BaseLib::index_npos)
+            valid_entry_cnt++;
+    }
+    local_u.resize(valid_entry_cnt);
+    valid_entry_cnt = 0;
+    for (size_t i=0; i<list_vec_entry_id.size(); i++) {
+        if (list_vec_entry_id[i] != BaseLib::index_npos)
+            local_u[valid_entry_cnt++] = global_u[list_vec_entry_id[i]];
+    }
+}
+
+void getLocalVector(const std::vector<size_t> &list_vec_entry_id, const LocalVector &global_u, LocalVector &local_u)
+{
+    size_t valid_entry_cnt = 0;
+    for (size_t i=0; i<list_vec_entry_id.size(); i++) {
+        if (list_vec_entry_id[i] != BaseLib::index_npos)
+            valid_entry_cnt++;
+    }
+    local_u.resize(valid_entry_cnt);
+    valid_entry_cnt = 0;
+    for (size_t i=0; i<list_vec_entry_id.size(); i++) {
+        if (list_vec_entry_id[i] != BaseLib::index_npos)
+            local_u[valid_entry_cnt++] = global_u[list_vec_entry_id[i]];
     }
 }
 

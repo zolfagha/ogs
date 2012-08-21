@@ -209,7 +209,7 @@ TEST(Discrete, NDDCSSEqs2)
     // dof
     DofEquationIdTable dofManager;
     dofManager.addVariableDoFs(0, 0, ddc->getTotalNumberOfDecomposedObjects());
-    dofManager.construct(DofNumberingType::BY_DOF);
+    dofManager.construct(DofNumberingType::BY_VARIABLE);
     // eqs
     IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<LisLinearEquation, SparsityBuilderFromNodeConnectivity>(&lis, &dofManager);
     linear_eq->initialize();
@@ -241,7 +241,7 @@ TEST(Discrete, NDDCSDEqs2)
     // dof
     DofEquationIdTable dofManager;
     dofManager.addVariableDoFs(0, 0, ddc->getTotalNumberOfDecomposedObjects());
-    dofManager.construct(DofNumberingType::BY_DOF);
+    dofManager.construct(DofNumberingType::BY_VARIABLE);
     // eqs
     IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<LisLinearEquation, SparsityBuilderFromNodeConnectivity>(&lis, &dofManager);
     linear_eq->initialize();
@@ -342,7 +342,7 @@ TEST(Discrete, Lis1)
         // DoF?
         DofEquationIdTable dofManager;
         dofManager.addVariableDoFs(msh->getID(), 0, msh->getNumberOfNodes());
-        dofManager.construct(DofNumberingType::BY_DOF);
+        dofManager.construct(DofNumberingType::BY_VARIABLE);
         // create a linear problem
         IDiscreteLinearEquation *linear_eq = dis.createLinearEquation<LisLinearEquation, SparsityBuilderFromNodeConnectivity>(&lis, &dofManager);
         // solve the equation

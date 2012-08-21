@@ -14,6 +14,17 @@
 #pragma once
 
 #include <string>
+#include "NumLib/DataType.h"
+
+inline size_t getNumberOfStrainComponents(size_t dim) {return (dim==2 ? 4 : 6);};
+
+inline NumLib::LocalMatrix get_m(const size_t dim)
+{
+    NumLib::LocalMatrix m = NumLib::LocalMatrix::Zero(getNumberOfStrainComponents(dim),1);
+    for (size_t i=0; i<dim; i++)
+        m(i,0) = 1.0;
+    return m;
+}
 
 template <class T_MATRIX>
 inline void setNu_Matrix(const size_t dim, const size_t nnodes, const T_MATRIX &N, T_MATRIX &matN)
