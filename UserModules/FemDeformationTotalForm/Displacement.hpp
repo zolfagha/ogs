@@ -17,9 +17,9 @@
 template <class T1, class T2>
 typename FunctionDisplacement<T1,T2>::MyVariable* FunctionDisplacement<T1,T2>::getDisplacementComponent(MyVariable *u_x, MyVariable* u_y, MyVariable* u_z, const std::string &var_name)
 {
-    if (var_name.compare("DISPLACEMENT_X1")==0) {
+    if (var_name.find("_X")!=std::string::npos) {
         return u_x;
-    } else if (var_name.compare("DISPLACEMENT_Y1")==0) {
+    } else if (var_name.find("_Y")!=std::string::npos) {
         return u_y;
     } else {
         return u_z;
@@ -117,10 +117,17 @@ bool FunctionDisplacement<T1,T2>::initialize(const BaseLib::Options &option)
         _displacement->getValue(i)(0) = _solution->getCurrentSolution(0)->getValue(i);
         _displacement->getValue(i)(1) = _solution->getCurrentSolution(1)->getValue(i);
     }
+    for (size_t i=0; i<2; i++) {
+        _vec_u_components.push_back(new NodalPointScalarWrapper(_displacement, i));
+    }
 
     // set initial output
-    OutputVariableInfo var("DISPLACEMENT", OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
+    OutputVariableInfo var(this->getOutputParameterName(Displacement), OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
     femData->outController.setOutput(var.name, var);
+    for (size_t i=0; i<_vec_u_components.size(); i++) {
+        OutputVariableInfo var1(this->getOutputParameterName(Displacement) + getDisplacementComponentPostfix(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_u_components[i]);
+        femData->outController.setOutput(var1.name, var1);
+    }
 
     // initial output parameter
     this->setOutput(Displacement, _displacement);
@@ -146,7 +153,11 @@ void FunctionDisplacement<T1,T2>::output(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    OutputVariableInfo var("DISPLACEMENT", OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
+    OutputVariableInfo var(this->getOutputParameterName(Displacement), OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
     femData->outController.setOutput(var.name, var);
+    for (size_t i=0; i<_vec_u_components.size(); i++) {
+        OutputVariableInfo var1(this->getOutputParameterName(Displacement) + getDisplacementComponentPostfix(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_u_components[i]);
+        femData->outController.setOutput(var1.name, var1);
+    }
 };
 

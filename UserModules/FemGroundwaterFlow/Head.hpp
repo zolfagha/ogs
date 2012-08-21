@@ -45,7 +45,7 @@ bool FunctionHead<T1,T2>::initialize(const BaseLib::Options &option)
     eqs->initialize(linear_assembler, r_assembler, j_eqs);
     _problem->setTimeSteppingFunction(*tim);
     // set up variable
-    typename MyProblemType::MyVariable* head = _problem->addVariable("head");
+    typename MyProblemType::MyVariable* head = _problem->addVariable("head"); //internal name
     // IC
     NumLib::TXFunctionBuilder f_builder;
     typename MyProblemType::MyVariable::MyNodalFunctionScalar* h0 = new typename MyProblemType::MyVariable::MyNodalFunctionScalar();
@@ -100,8 +100,8 @@ bool FunctionHead<T1,T2>::initialize(const BaseLib::Options &option)
     _solution->getNonlinearSolver()->setOption(*optNum);
 
     // set initial output
-    OutputVariableInfo var("HEAD", OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
-    femData->outController.setOutput("HEAD", var); 
+    OutputVariableInfo var(this->getOutputParameterName(Head), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
+    femData->outController.setOutput(var.name, var);
 
     // initial output parameter
     this->setOutput(Head, head->getIC());
@@ -110,16 +110,16 @@ bool FunctionHead<T1,T2>::initialize(const BaseLib::Options &option)
 }
 
 template <class T1, class T2>
-void FunctionHead<T1,T2>::updateOutputParameter(const NumLib::TimeStep &time)
+void FunctionHead<T1,T2>::updateOutputParameter(const NumLib::TimeStep &/*time*/)
 {
     setOutput(Head, _solution->getCurrentSolution(0));
 }
 
 template <class T1, class T2>
-void FunctionHead<T1,T2>::output(const NumLib::TimeStep &time)
+void FunctionHead<T1,T2>::output(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    OutputVariableInfo var("HEAD", OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
-    femData->outController.setOutput("HEAD", var); 
+    OutputVariableInfo var(this->getOutputParameterName(Head), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
+    femData->outController.setOutput(var.name, var);
 };

@@ -19,22 +19,30 @@
 #include "SolutionLib/Fem/FemIVBVProblem.h"
 #include "SolutionLib/Fem/TemplateFemEquation.h"
 #include "SolutionLib/Fem/SingleStepFEM.h"
-#include "ProcessLib/TemplateTransientProcess.h"
+#include "ProcessLib/AbstractTransientProcess.h"
 
 #include "GWTimeODELocalAssembler.h"
 #include "GWJacobianLocalAssembler.h"
 
 
 /**
+ * \brief Hydraulic head calculator based on Groundwater flow equation using FEM
  *
+ * Output result
+ * - Hydraulic head (nodal)
+ *
+ * \tparam T_DISCRETE_SYSTEM    Discrete system type
+ * \tparam T_LINEAR_SOLVER      Linear solver type
  */
 template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER>
 class FunctionHead
-: public ProcessLib::TemplateTransientProcess<0,1>
+: public ProcessLib::AbstractTransientProcess
 {
 public:
+    // define input and output parameter id here
     enum Out { Head=0 };
 
+    //
     typedef T_DISCRETE_SYSTEM MyDiscreteSystem;
     typedef T_LINEAR_SOLVER MyLinearSolver;
     // local assembler
@@ -64,8 +72,10 @@ public:
 
     ///
     FunctionHead() 
-    : TemplateTransientProcess<0,1>("GROUNDWATER_FLOW"), _problem(0), _solution(0), _feObjects(0)
+    : AbstractTransientProcess("GROUNDWATER_FLOW", 0, 1), _problem(0), _solution(0), _feObjects(0)
     {
+        // set default parameter name
+        ProcessLib::AbstractTransientProcess::setOutputParameterName(Head, "Head");
     };
 
     ///
@@ -80,7 +90,7 @@ public:
     /// finalize but nothing to do here
     virtual void finalize() {};
 
-    ///
+    /// return a convergence check class for this function
     virtual NumLib::IConvergenceCheck* getConvergenceChecker()
     {
         return &_checker;

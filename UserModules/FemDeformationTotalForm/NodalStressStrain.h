@@ -21,14 +21,14 @@
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "NumLib/Function/TXVectorFunctionAsColumnData.h"
 #include "NumLib/Function/DiscreteDataConvergenceCheck.h"
-#include "ProcessLib/TemplateTimeIndependentProcess.h"
+#include "ProcessLib/AbstractTimeIndependentProcess.h"
 
 /**
  * \brief Stress, strain evaluator based on total displacements
  */
 template <class T_DISCRETE_SYSTEM>
 class FunctionNodalStressStrain
-    : public ProcessLib::TemplateTimeIndependentProcess<2,2>
+    : public ProcessLib::AbstractTimeIndependentProcess
 {
 public:
     enum In { GpStrain=0, GpStress=1};
@@ -40,8 +40,13 @@ public:
     typedef typename NumLib::TXVectorFunctionAsColumnData<MyIntegrationPointFunctionVector> IntegrationPointScalarWrapper;
     typedef typename NumLib::TXVectorFunctionAsColumnData<MyNodalFunctionVector> NodalPointScalarWrapper;
 
-    FunctionNodalStressStrain() : _dis(0), _nodal_strain(0), _nodal_stress(0)
+    FunctionNodalStressStrain()
+    : ProcessLib::AbstractTimeIndependentProcess("NODAL_STRESS_STRAIN",2,2), _dis(0), _nodal_strain(0), _nodal_stress(0)
     {
+        this->setInputParameterName(GpStrain, "GpStrain");
+        this->setInputParameterName(GpStress, "GpStress");
+        this->setOutputParameterName(NodStrain, "NodStrain");
+        this->setOutputParameterName(NodStress, "NodStress");
     };
 
     virtual ~FunctionNodalStressStrain()

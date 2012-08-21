@@ -19,7 +19,7 @@
 #include "SolutionLib/Fem/FemIVBVProblem.h"
 #include "SolutionLib/Fem/TemplateFemEquation.h"
 #include "SolutionLib/Fem/SingleStepFEM.h"
-#include "ProcessLib/TemplateTransientProcess.h"
+#include "ProcessLib/AbstractTransientProcess.h"
 
 #include "MaterialLib/Compound.h"
 #include "MassTransportTimeODELocalAssembler.h"
@@ -30,7 +30,7 @@
  */
 template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER>
 class FunctionConcentration
-: public ProcessLib::TemplateTransientProcess<1,1>
+: public ProcessLib::AbstractTransientProcess
 {
 public:
     enum In { Velocity=0 };
@@ -64,9 +64,12 @@ public:
             > MySolutionType;
 
     FunctionConcentration() 
-        : TemplateTransientProcess<1,1>("MASS_TRANSPORT"),
+        : AbstractTransientProcess("MASS_TRANSPORT", 1, 1),
           _problem(0), _solution(0), _feObjects(0), _compound(0)
     {
+        // set default parameter name
+        ProcessLib::AbstractTransientProcess::setInputParameterName(Velocity, "Velocity");
+        ProcessLib::AbstractTransientProcess::setOutputParameterName(Concentration, "Concentration");
     };
 
     virtual ~FunctionConcentration()
