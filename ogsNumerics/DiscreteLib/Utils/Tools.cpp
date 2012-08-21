@@ -12,7 +12,6 @@
 
 #include "Tools.h"
 
-
 namespace DiscreteLib
 {
 
