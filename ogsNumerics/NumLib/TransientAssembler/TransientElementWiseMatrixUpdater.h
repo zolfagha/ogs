@@ -60,7 +60,7 @@ public:
         // get dof map
         e.getNodeIDList(e.getMaximumOrder(), ele_node_ids);
         e.getListOfNumberOfNodesForAllOrders(ele_node_size_order);
-        _dofManager->mapEqsID(_msh->getID(), ele_node_ids, local_dofmap_row, DiscreteLib::DofNumberingType::BY_POINT); //TODO order
+        _dofManager->mapEqsID(_msh->getID(), ele_node_ids, local_dofmap_row); //TODO order
         // previous and current results
         DiscreteLib::getLocalVector(local_dofmap_row, *_vec_u1, local_u_n1);
         DiscreteLib::getLocalVector(local_dofmap_row, *_vec_u0, local_u_n);

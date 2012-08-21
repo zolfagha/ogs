@@ -41,7 +41,10 @@ bool FunctionDisplacementPressure<T1,T2>::initialize(const BaseLib::Options &opt
     _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
 
     // equations
-    MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_feObjects);
+    std::vector<size_t> vec_orders;
+    vec_orders.push_back(FemLib::PolynomialOrder::Quadratic);
+    vec_orders.push_back(FemLib::PolynomialOrder::Linear);
+    MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_feObjects, 2, vec_orders);
     MyResidualAssemblerType* r_assembler = new MyResidualAssemblerType(_feObjects);
     MyJacobianAssemblerType* j_eqs = new MyJacobianAssemblerType(_feObjects);
 

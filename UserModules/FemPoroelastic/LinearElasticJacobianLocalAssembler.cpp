@@ -19,7 +19,7 @@
 #include "Ogs6FemData.h"
 
 
-void FemLinearElasticJacobianLocalAssembler::assembly
+void FemPoroelasticJacobianLocalAssembler::assembly
     (   const NumLib::TimeStep &/*time*/,
         const MeshLib::IElement &e,
         const NumLib::LocalVector &/*u1*/,

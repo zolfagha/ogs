@@ -22,38 +22,22 @@
 #include "../FemDeformationTotalForm/FemLinearElasticTools.h"
 #include "Ogs6FemData.h"
 
-
-void FemLinearElasticLinearLocalAssembler::assembly(
-        const NumLib::TimeStep &time,  const MeshLib::IElement &e,
-        const LocalVectorType &local_u_n1, const LocalVectorType &local_u_n,
-        NumLib::LocalEquation &eqs
+void FemPoroelasticLinearLocalAssembler::assemble(
+        const NumLib::TimeStep &timestep,  
+        const MeshLib::IElement &e, 
+        const std::vector<size_t> &vec_order, 
+        const std::vector<LocalVectorType> &vec_u0, 
+        const std::vector<LocalVectorType> &/*vec_u1*/, 
+        std::vector<std::vector<LocalMatrixType> > &vec_K, 
+        std::vector<LocalVectorType> &vec_F
         )
 {
-    // parameters need to be passed
-    DiscreteLib::DofEquationIdTable* localDofManager = NULL; //TODO
-    size_t u_order = 2;
-    size_t p_order = 1;
-
-    //
-    std::vector<size_t> local_pos_u;
-    std::vector<size_t> local_pos_p;
-    {
-        std::vector<size_t> list_nodeid_u;
-        e.getNodeIDList(u_order, list_nodeid_u);
-        localDofManager->mapEqsID(0, 0, list_nodeid_u, local_pos_u);
-        std::vector<size_t> list_nodeid_p;
-        e.getNodeIDList(p_order, list_nodeid_p);
-        localDofManager->mapEqsID(0, 0, list_nodeid_p, local_pos_p);
-
-    }
-    LocalVectorType u0, p0, u1, p1;
-    {
-        DiscreteLib::getLocalVector(local_pos_u, local_u_n, u0);
-        DiscreteLib::getLocalVector(local_pos_u, local_u_n1, u1);
-        DiscreteLib::getLocalVector(local_pos_p, local_u_n, p0);
-        DiscreteLib::getLocalVector(local_pos_p, local_u_n1, p1);
-    }
-
+    assert(vec_order.size()==2);
+    //TODO how do you know 1st is u and 2nd is p? who decides it?
+    const size_t u_order = vec_order[0];
+    const size_t p_order = vec_order[1];
+    const LocalVectorType &u0 = vec_u0[0];
+    const LocalVectorType &p0 = vec_u0[1];
     // ------------------------------------------------------------------------
     // Element
     // ------------------------------------------------------------------------
@@ -66,7 +50,8 @@ void FemLinearElasticLinearLocalAssembler::assembly(
     // ------------------------------------------------------------------------
     // Transient
     // ------------------------------------------------------------------------
-    const double dt = time.getTimeStepSize();
+    const double dt = timestep.getTimeStepSize();
+    const double thetha = 1.0;
 
     // ------------------------------------------------------------------------
     // Material (assuming element constant)
@@ -150,7 +135,6 @@ void FemLinearElasticLinearLocalAssembler::assembly(
         setNu_Matrix(dim, nnodes_u, Nu, Nuvw);
         setB_Matrix(dim, nnodes_u, dNu, B);
         LocalMatrixType &Np = *fe_u->getBasisFunction();
-        LocalMatrixType &dNp = *fe_u->getGradBasisFunction();
 
         // K_uu += B^T * D * B
         Kuu.noalias() += fac_u * B.transpose() * De * B;
@@ -164,7 +148,6 @@ void FemLinearElasticLinearLocalAssembler::assembly(
 
     FemLib::IFiniteElement* fe_p = _feObjects.getFeObject(e, p_order);
     FemLib::IFemNumericalIntegration *q_p = fe_p->getIntegrationMethod();
-    double gp_x[3], real_x[3];
     for (size_t j=0; j<q_p->getNumberOfSamplingPoints(); j++) {
         q_p->getSamplingPoint(j, gp_x);
         fe_p->computeBasisFunctions(gp_x);
@@ -189,20 +172,14 @@ void FemLinearElasticLinearLocalAssembler::assembly(
     }
 
     // Backward euler
-    Fp = 1.0/dt * Mpp * p0 + 1.0/dt * Cpu * u0;
+    Fp = (1.0/dt * Mpp - (1-thetha)*Kpp)* p0 + 1.0/dt * Cpu * u0;
 
-    // ------------------------------------------------------------------------
-    // Local equation assembly
-    // ------------------------------------------------------------------------
-//    LocalMatrixType &localA = *eqs.getA();
-//    LocalVectorType &localRHS = *eqs.getRHSAsVec();
-    eqs.addAsub(local_pos_u, local_pos_u, Kuu);
-    eqs.addAsub(local_pos_u, local_pos_p, Cup, -1.);
-    eqs.addAsub(local_pos_p, local_pos_p, Kpp);
-    eqs.addAsub(local_pos_p, local_pos_p, Mpp, 1.0/dt);
-    eqs.addAsub(local_pos_p, local_pos_u, Cpu, 1.0/dt);
+    //
+    vec_K[0][0] = Kuu;
+    vec_K[0][1] = -1. * Cup;
+    vec_K[1][0] = 1.0/dt * Cpu;
+    vec_K[1][1] = 1.0/dt * Mpp + thetha * Kpp ;
 
-    eqs.addRHSsub(local_pos_u, Fu);
-    eqs.addRHSsub(local_pos_p, Fp);
+    vec_F[0] = Fu;
+    vec_F[1] = Fp;
 }
-

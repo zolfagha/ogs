@@ -39,9 +39,9 @@ public:
     typedef T_DISCRETE_SYSTEM MyDiscreteSystem;
     typedef T_LINEAR_SOLVER MyLinearSolver;
     // local assembler
-    typedef FemLinearElasticLinearLocalAssembler MyLinearAssemblerType;
-    typedef FemLinearElasticResidualLocalAssembler MyResidualAssemblerType;
-    typedef FemLinearElasticJacobianLocalAssembler MyJacobianAssemblerType;
+    typedef FemPoroelasticLinearLocalAssembler MyLinearAssemblerType;
+    typedef FemPoroelasticResidualLocalAssembler MyResidualAssemblerType;
+    typedef FemPoroelasticJacobianLocalAssembler MyJacobianAssemblerType;
     // Equation definition
     typedef SolutionLib::TemplateFemEquation<
             MyDiscreteSystem,

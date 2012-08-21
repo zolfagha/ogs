@@ -16,10 +16,10 @@
 #include "FemLib/Tools/LagrangeFeObjectContainer.h"
 #include "NumLib/TransientAssembler/IElementWiseTransientJacobianLocalAssembler.h"
 
-class FemLinearElasticJacobianLocalAssembler: public NumLib::IElementWiseTransientJacobianLocalAssembler
+class FemPoroelasticJacobianLocalAssembler: public NumLib::IElementWiseTransientJacobianLocalAssembler
 {
 public:
-    explicit FemLinearElasticJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
+    explicit FemPoroelasticJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
     : _feObjects(*feObjects)
     {
     };

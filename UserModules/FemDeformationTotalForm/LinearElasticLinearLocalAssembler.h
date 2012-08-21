@@ -31,7 +31,7 @@ public:
 
     virtual ~FemLinearElasticLinearLocalAssembler() {};
 
-    virtual void assembly(const NumLib::TimeStep &/*time*/,  const MeshLib::IElement &e, const LocalVectorType &/*local_u_n1*/, const LocalVectorType &/*local_u_n*/, NumLib::LocalEquation &eqs);
+    virtual void assembly(const NumLib::TimeStep &/*time*/,  const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const LocalVectorType &/*local_u_n1*/, const LocalVectorType &/*local_u_n*/, NumLib::LocalEquation &eqs);
 
 private:
     FemLib::LagrangianFeObjectContainer _feObjects;

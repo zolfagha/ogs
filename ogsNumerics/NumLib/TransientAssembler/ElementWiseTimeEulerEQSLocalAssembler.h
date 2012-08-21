@@ -49,7 +49,7 @@ public:
     /// @param local_u_n1    guess of current time step value
     /// @param local_u_n    previous time step value
     /// @param eqs            local algebraic equation
-    virtual void assembly(const TimeStep &time, const MeshLib::IElement &e, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalEquation &eqs)
+    virtual void assembly(const TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalEquation &eqs)
     {
         const double delta_t = time.getTimeStepSize();
         const size_t n_dof = eqs.getDimension();

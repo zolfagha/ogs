@@ -107,10 +107,14 @@ public:
         // previous and current results
         DiscreteLib::getLocalVector(local_dofmap_row, *_vec_u1, local_u_n1);
         DiscreteLib::getLocalVector(local_dofmap_row, *_vec_u0, local_u_n);
-
+        
+        DiscreteLib::DofEquationIdTable localDofMap;
+        _dofManager->createLocalMappingTable(_msh->getID(), ele_node_ids, localDofMap);
+        
+        
         // local assembly
         localEQS.create(local_dofmap_row.size());
-        _transient_e_assembler->assembly(*_timestep, e, local_u_n1, local_u_n, localEQS);
+        _transient_e_assembler->assembly(*_timestep, e, localDofMap, local_u_n1, local_u_n, localEQS);
 
 //        if (i<3) {
 //            std::cout << "local A = \n" << *localEQS.getA();

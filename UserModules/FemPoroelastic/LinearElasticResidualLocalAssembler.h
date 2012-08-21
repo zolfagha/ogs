@@ -16,15 +16,15 @@
 #include "FemLib/Tools/LagrangeFeObjectContainer.h"
 #include "NumLib/TransientAssembler/IElementWiseTransientResidualLocalAssembler.h"
 
-class FemLinearElasticResidualLocalAssembler : public NumLib::IElementWiseTransientResidualLocalAssembler
+class FemPoroelasticResidualLocalAssembler : public NumLib::IElementWiseTransientResidualLocalAssembler
 {
 public:
-    explicit FemLinearElasticResidualLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
+    explicit FemPoroelasticResidualLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
     : _feObjects(*feObjects)
     {
     };
 
-    virtual ~FemLinearElasticResidualLocalAssembler() {};
+    virtual ~FemPoroelasticResidualLocalAssembler() {};
 
     /// assemble a local residual for the given element
     /// @param time            time step

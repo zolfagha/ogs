@@ -21,7 +21,7 @@
 #include "Ogs6FemData.h"
 
 /// assemble a local residual for the given element
-void FemLinearElasticResidualLocalAssembler::assembly
+void FemPoroelasticResidualLocalAssembler::assembly
     (   const NumLib::TimeStep &/*time*/,
         const MeshLib::IElement &e,
         const NumLib::LocalVector &local_u_n1,
