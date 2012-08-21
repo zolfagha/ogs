@@ -78,7 +78,7 @@ public:
 #ifdef _OPENMP
         INFO("OMPDiscreteSystem() is created. The number of processors is %d", omp_get_num_procs());
 #else
-        WARN("***Warning: OMPDiscreteSystem() is used however OpenMP was disabled when compiling. ",);
+        WARN("***Warning: OMPDiscreteSystem() is used however OpenMP was disabled when compiling.");
 #endif
     };
 
