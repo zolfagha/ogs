@@ -101,6 +101,8 @@ public:
     /// get a nonlinear solver
     NonlinearSolverType* getNonlinearSolver() { return _f_nonlinear;};
 
+    DiscreteLib::DofEquationIdTable* getDofEquationIdTable() {return &_dofManager;};
+
     ///
     virtual void accept(const NumLib::TimeStep &t)
     {
@@ -142,7 +144,8 @@ SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER>::SingleStepFEM(MyDiscreteSyste
 
     // create dof map
     for (size_t i=0; i<n_var; i++) {
-        size_t n_dof_per_var = msh->getNumberOfNodes();
+        MyVariable* var = problem->getVariable(i);
+        size_t n_dof_per_var = msh->getNumberOfNodes(var->getOrder());
         _dofManager.addVariableDoFs(msh->getID(), 0, n_dof_per_var);
     }
     _dofManager.construct(DiscreteLib::DofNumberingType::BY_POINT);
