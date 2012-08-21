@@ -106,6 +106,18 @@ public:
     ///
     DecomposedDomain* getDecomposedDomain() const {return _ddc_dom;};
 
+    /// get the maximum possible order
+    virtual size_t getMaxiumOrder() const {return _msh0->getMaxiumOrder();};
+
+    /// set current order
+    virtual void setCurrentOrder(size_t order) const {return _msh0->setCurrentOrder(order);};
+
+    /// get current order
+    virtual size_t getCurrentOrder() const {return _msh0->getCurrentOrder();};
+
+    /// get the number of nodes with the given order
+    virtual size_t getNumberOfNodes(size_t order) const {return _msh0->getNumberOfNodes(order);};
+
 private:
     size_t _id;
     DecomposedDomain* _ddc_dom;

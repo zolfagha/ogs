@@ -137,7 +137,7 @@ public:
     /// get max. order
     virtual size_t getMaximumOrder() const = 0;
     /// set current order
-    virtual void setCurrentOrder(size_t) = 0;
+    virtual void setCurrentOrder(size_t) const = 0;
     /// get current order
     virtual size_t getCurrentOrder() const = 0;
     /// return the number of nodes under the given order

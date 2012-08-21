@@ -33,7 +33,7 @@ namespace MeshLib
  * \tparam T_ELEMENT_TYPE element type
  */
 template <ElementShape::type T_ELEMENT_TYPE>
-class StructuredMesh : public IMixedOrderMesh
+class StructuredMesh : public IMesh
 {
 public:
 
@@ -99,7 +99,7 @@ public:
     size_t getMaxiumOrder() const { return _map_order_nnodes.size(); }
 
     ///
-    void setCurrentOrder(size_t order) { _order = order; }
+    void setCurrentOrder(size_t order) const { _order = order; }
     size_t getCurrentOrder() const { return _order; }
     
     
@@ -182,7 +182,7 @@ private:
     std::vector<IElement*> _list_edge_elements;
     MeshGeometricProperty _geo_prop;
     bool _isAxisymmetric;
-    size_t _order;
+    mutable size_t _order;
 };
 
 template<> void StructuredMesh<ElementShape::QUAD>::construct();

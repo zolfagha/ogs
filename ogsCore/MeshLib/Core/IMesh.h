@@ -27,11 +27,11 @@ class MeshGeometricProperty;
  * \brief Interface to mesh classes
  *
  */
-class IMesh
+class IMeshBase
 {
 public:
     ///
-    virtual ~IMesh() {};
+    virtual ~IMeshBase() {};
 
     //--- mesh properties ---
     /// set mesh id
@@ -85,17 +85,17 @@ public:
 /**
  * \brief Interface for mixed order mesh
  */
-class IMixedOrderMesh : public IMesh
+class IMesh : public IMeshBase
 {
 public:
     ///
-    virtual ~IMixedOrderMesh() {};
+    virtual ~IMesh() {};
     
     /// get the maximum possible order
     virtual size_t getMaxiumOrder() const = 0;
     
     /// set current order
-    virtual void setCurrentOrder(size_t order) = 0;
+    virtual void setCurrentOrder(size_t order) const = 0;
     
     /// get current order
     virtual size_t getCurrentOrder() const = 0;

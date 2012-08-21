@@ -29,7 +29,7 @@ namespace MeshLib
  *
  *
  */
-class UnstructuredMesh : public IMixedOrderMesh
+class UnstructuredMesh : public IMesh
 {
 public:
     UnstructuredMesh() : _msh_id(0), _isAxisymmetric(false), _order(1)
@@ -61,7 +61,7 @@ public:
     bool isAxisymmetric() const { return _isAxisymmetric; }
     void setAxisymmetric(bool flag) { _isAxisymmetric = flag; }
 
-    void setCurrentOrder(size_t order) { _order = order; };
+    void setCurrentOrder(size_t order) const { _order = order; };
     size_t getCurrentOrder() const { return _order; };
 
     size_t getMaxiumOrder() const { return _map_order_nnodes.size(); }
@@ -137,7 +137,7 @@ private:
     std::vector<IElement*> _list_edge_elements;
     MeshGeometricProperty _geo_prop;
     bool _isAxisymmetric;
-    size_t _order;
+    mutable size_t _order;
     std::map<size_t, size_t> _map_order_nnodes;
 };
 
