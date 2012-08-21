@@ -148,7 +148,7 @@ SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER>::SingleStepFEM(MyDiscreteSyste
         size_t n_dof_per_var = msh->getNumberOfNodes(var->getOrder());
         _dofManager.addVariableDoFs(msh->getID(), 0, n_dof_per_var);
     }
-    _dofManager.construct(DiscreteLib::DofNumberingType::BY_POINT);
+    _dofManager.construct();
     const size_t n_total_dofs = _dofManager.getTotalNumberOfActiveDoFs();
 
     // initialize vectors for each variable
