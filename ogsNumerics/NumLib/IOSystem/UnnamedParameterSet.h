@@ -5,7 +5,7 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file ParameterSet.h
+ * \file UnnamedParameterSet.h
  *
  * Created on 2012-08-03 by Norihiro Watanabe
  */
