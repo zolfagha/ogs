@@ -131,28 +131,27 @@ inline void setB_Matrix4axisymmetry(const size_t dim, double radius, double dsha
     (*B_matrix)(3,1) = dshape_dx;
 }
 
-inline const std::string getStrainComponentName(size_t i)
+inline const std::string getStressStrainComponentPostfix(size_t i)
 {
     switch (i) {
-    case 0: return "STRAIN_XX";
-    case 1: return "STRAIN_YY";
-    case 2: return "STRAIN_ZZ";
-    case 3: return "STRAIN_XY";
-    case 4: return "STRAIN_XZ";
-    case 5: return "STRAIN_YZ";
+    case 0: return "_XX";
+    case 1: return "_YY";
+    case 2: return "_ZZ";
+    case 3: return "_XY";
+    case 4: return "_XZ";
+    case 5: return "_YZ";
     }
     return "";
 }
 
-inline const std::string getStressComponentName(size_t i)
+inline const std::string getDisplacementComponentPostfix(size_t i)
 {
     switch (i) {
-    case 0: return "STRESS_XX";
-    case 1: return "STRESS_YY";
-    case 2: return "STRESS_ZZ";
-    case 3: return "STRESS_XY";
-    case 4: return "STRESS_XZ";
-    case 5: return "STRESS_YZ";
+    case 0: return "_X";
+    case 1: return "_Y";
+    case 2: return "_Z";
     }
     return "";
 }
+
+

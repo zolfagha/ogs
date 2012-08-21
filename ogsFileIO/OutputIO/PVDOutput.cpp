@@ -14,6 +14,8 @@
 
 #include <vector>
 
+#include "logog.hpp"
+
 #include "CommonIO/PVDWriter.h"
 #include "CommonIO/VtuWriter.h"
 
@@ -43,12 +45,20 @@ void PVDOutput::write(  const NumLib::TimeStep &current_time,
         }
     }
     
+    if (node_values.size() == 0 && ele_values.size() == 0) {
+        WARN("***Warning: Asked to write results but specified data not found. Skip this output. Please check consistency of variable names in process and output settings.");
+        return;
+    }
+
     // write VTU file
     std::string vtk_file_name_relative = getOutputBaseName() + "_";
     vtk_file_name_relative += BaseLib::number2str<size_t>(current_time.getTimeStepCount()) + ".vtu";
     std::string vtk_file_name_absolute = getOutputDir();
     if (vtk_file_name_absolute.length()>0) vtk_file_name_absolute += "/";
     vtk_file_name_absolute += vtk_file_name_relative;
+
+    INFO("Writing results...: %s", vtk_file_name_absolute.c_str());
+
     VtuWriter vtuWriter(false);
     vtuWriter.write(vtk_file_name_absolute, *getMesh(), node_values, ele_values);
     

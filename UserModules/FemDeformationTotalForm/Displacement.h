@@ -15,11 +15,12 @@
 #include <string>
 #include "BaseLib/CodingTools.h"
 #include "FemLib/Function/FemIntegrationPointFunction.h"
+#include "NumLib/Function/TXVectorFunctionAsColumnData.h"
 #include "SolutionLib/Fem/TemplateFemEquation.h"
 #include "SolutionLib/Fem/FemIVBVProblem.h"
 #include "SolutionLib/Fem/SingleStepFEM.h"
 
-#include "ProcessLib/TemplateTransientProcess.h"
+#include "ProcessLib/AbstractTransientProcess.h"
 
 #include "LinearElasticLinearLocalAssembler.h"
 #include "LinearElasticResidualLocalAssembler.h"
@@ -30,7 +31,7 @@
  */
 template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER>
 class FunctionDisplacement
-: public ProcessLib::TemplateTransientProcess<0,1>
+: public ProcessLib::AbstractTransientProcess
 {
 public:
     enum Out { Displacement=0 };
@@ -64,13 +65,16 @@ public:
 
     typedef typename FemLib::FemNodalFunctionScalar<MyDiscreteSystem>::type MyNodalFunctionScalar;
     typedef typename FemLib::FemNodalFunctionVector<MyDiscreteSystem>::type MyNodalFunctionVector;
+    typedef typename NumLib::TXVectorFunctionAsColumnData<MyNodalFunctionVector> NodalPointScalarWrapper;
     typedef typename MyProblemType::MyVariable MyVariable;
 
     ///
     FunctionDisplacement()
-    : ProcessLib::TemplateTransientProcess<0,1>("DEFORMATION"),
+    : ProcessLib::AbstractTransientProcess("DEFORMATION", 0, 1),
       _problem(0), _solution(0), _feObjects(0), _displacement(0)//, _strain(0), _stress(0)
     {
+        // set default parameter name
+        this->setOutputParameterName(Displacement, "Displacement");
     };
 
     ///
@@ -110,6 +114,7 @@ private:
     FemLib::LagrangianFeObjectContainer* _feObjects;
     NumLib::DiscreteDataConvergenceCheck _checker;
     MyNodalFunctionVector* _displacement;
+    std::vector<NodalPointScalarWrapper*> _vec_u_components;
 //    FemLib::FEMIntegrationPointFunctionVector* _strain;
 //    FemLib::FEMIntegrationPointFunctionVector* _stress;
 

@@ -18,11 +18,11 @@
 #include "NumLib/Function/Function.h"
 #include "NumLib/Function/DiscreteDataConvergenceCheck.h"
 #include "NumLib/TimeStepping/TimeStep.h"
-#include "ProcessLib/TemplateTimeIndependentProcess.h"
+#include "ProcessLib/AbstractTimeIndependentProcess.h"
 
 template <class T_DISCRETE_SYSTEM>
 class FunctionElementVelocity
-    : public ProcessLib::TemplateTimeIndependentProcess<1,1>
+    : public ProcessLib::AbstractTimeIndependentProcess
 {
 public:
     enum In { Head=0 };
@@ -33,8 +33,11 @@ public:
     typedef typename FemLib::FEMIntegrationPointFunctionVector<MyDiscreteSystem>::type MyIntegrationPointFunctionVector;
 
     FunctionElementVelocity() 
-    : _dis(NULL), _vel(NULL), _feObjects(NULL)
+    : ProcessLib::AbstractTimeIndependentProcess("ELEMENT_VELOCITY", 1, 1), _dis(NULL), _vel(NULL), _feObjects(NULL)
     {
+        // set default parameter name
+        ProcessLib::AbstractTimeIndependentProcess::setInputParameterName(Head, "Head");
+        ProcessLib::AbstractTimeIndependentProcess::setOutputParameterName(Velocity, "Velocity");
     };
 
     virtual ~FunctionElementVelocity()

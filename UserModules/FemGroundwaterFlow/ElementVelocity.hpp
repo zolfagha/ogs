@@ -35,7 +35,7 @@ bool FunctionElementVelocity<T>::initialize(const BaseLib::Options &option)
     _vel->initialize(dis);
     
     // set initial output
-    OutputVariableInfo var("VELOCITY", OutputVariableInfo::Element, OutputVariableInfo::Real, 3, _vel);
+    OutputVariableInfo var(this->getOutputParameterName(Velocity), OutputVariableInfo::Element, OutputVariableInfo::Real, 3, _vel);
     femData->outController.setOutput(var.name, var); 
 
     // initial output parameter
@@ -51,7 +51,7 @@ void FunctionElementVelocity<T>::accept(const NumLib::TimeStep &/*time*/)
     //_vel->printout();
     //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    OutputVariableInfo var("VELOCITY", OutputVariableInfo::Element, OutputVariableInfo::Real, 3, _vel);
+    OutputVariableInfo var(this->getOutputParameterName(Velocity), OutputVariableInfo::Element, OutputVariableInfo::Real, 3, _vel);
     femData->outController.setOutput(var.name, var); 
 };
 

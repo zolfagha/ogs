@@ -17,7 +17,6 @@
 #include "BaseLib/OrderedMap.h"
 #include "GeoLib/GEOObjects.h"
 #include "MeshLib/Core/IMesh.h"
-//#include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "OutputIO/OutputBuilder.h"
 #include "OutputIO/OutputTimingBuilder.h"
@@ -31,6 +30,15 @@ namespace ogs6
 class OutputController
 {
 public:
+    /**
+     *
+     * @param option
+     * @param output_dir
+     * @param project_name
+     * @param list_mesh
+     * @param geo
+     * @param geo_unique_name
+     */
     void initialize(const BaseLib::Options &option, const std::string &output_dir, const std::string &project_name, std::vector<MeshLib::IMesh*> &list_mesh, GeoLib::GEOObjects &geo, const std::string &geo_unique_name)
     {
         //Ogs6FemData* femData = Ogs6FemData::getInstance();
@@ -65,6 +73,11 @@ public:
         }
     }
 
+    /**
+     *
+     * @param time
+     * @return
+     */
     bool isActive(const NumLib::TimeStep &time) const
     {
         bool doOutput = false;
@@ -77,6 +90,10 @@ public:
         return doOutput;
     }
 
+    /**
+     *
+     * @param time
+     */
     void outputData(const NumLib::TimeStep &time)
     {
         if (!isActive(time)) return;
@@ -88,6 +105,11 @@ public:
         }
     }
 
+    /**
+     *
+     * @param var_name
+     * @param var
+     */
     void setOutput(const std::string &var_name, OutputVariableInfo &var)
     {
         _map_name_var.insert(var_name, var);

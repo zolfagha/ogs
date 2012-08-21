@@ -18,7 +18,7 @@
 
 #include "logog.hpp"
 
-#include "NumLib/IOSystem/ParameterSet.h"
+#include "NumLib/IOSystem/UnnamedParameterSet.h"
 #include "NumLib/Coupling/ICoupledProblem.h"
 #include "NumLib/Coupling/ParameterProblemMappingTable.h"
 #include "IPartitionedAlgorithm.h"

@@ -25,7 +25,7 @@ namespace NumLib
 
 
 /**
- * \brief Implementation of ISystemWithInOutParameters
+ * \brief Input-Output system with the fixed number of parameters
  *
  * @tparam T_BASE A base class inherited of ISystemWithInOutParameters
  */
@@ -95,10 +95,11 @@ protected:
     }
 
 private:
+    DISALLOW_COPY_AND_ASSIGN(IOSystem);
+
+private:
     std::vector<const Parameter*> _in_parameters;
     std::vector<const Parameter*> _out_parameters;
-
-    DISALLOW_COPY_AND_ASSIGN(IOSystem);
 };
 
 

@@ -17,7 +17,7 @@
 
 #include "logog.hpp"
 
-#include "NumLib/IOSystem/ParameterSet.h"
+#include "NumLib/IOSystem/UnnamedParameterSet.h"
 #include "NumLib/IOSystem/NamedIOSystem.h"
 
 #include "ICoupledProblem.h"

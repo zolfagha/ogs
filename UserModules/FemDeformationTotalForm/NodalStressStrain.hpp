@@ -53,9 +53,9 @@ bool FunctionNodalStressStrain<T>::initialize(const BaseLib::Options &option)
         _vec_nodal_stress_components.push_back(new NodalPointScalarWrapper(_nodal_stress, i));
     }
     for (size_t i=0; i<n_strain_components; i++) {
-        OutputVariableInfo var1(getStrainComponentName(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_nodal_strain_components[i]);
+        OutputVariableInfo var1(this->getOutputParameterName(NodStrain) + getStressStrainComponentPostfix(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_nodal_strain_components[i]);
         femData->outController.setOutput(var1.name, var1);
-        OutputVariableInfo var2(getStressComponentName(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_nodal_stress_components[i]);
+        OutputVariableInfo var2(this->getOutputParameterName(NodStress) + getStressStrainComponentPostfix(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_nodal_stress_components[i]);
         femData->outController.setOutput(var2.name, var2);
     }
 
@@ -73,9 +73,9 @@ void FunctionNodalStressStrain<T>::accept(const NumLib::TimeStep &/*time*/)
     const size_t n_strain_components = getNumberOfStrainComponents();
     Ogs6FemData* femData = Ogs6FemData::getInstance();
     for (size_t i=0; i<n_strain_components; i++) {
-        OutputVariableInfo var1(getStrainComponentName(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_nodal_strain_components[i]);
+        OutputVariableInfo var1(this->getOutputParameterName(NodStrain) + getStressStrainComponentPostfix(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_nodal_strain_components[i]);
         femData->outController.setOutput(var1.name, var1);
-        OutputVariableInfo var2(getStressComponentName(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_nodal_stress_components[i]);
+        OutputVariableInfo var2(this->getOutputParameterName(NodStress) + getStressStrainComponentPostfix(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_nodal_stress_components[i]);
         femData->outController.setOutput(var2.name, var2);
     }
 };

@@ -26,6 +26,13 @@
 namespace NumLib
 {
 
+/**
+ * \brief Input-Output system with named parameters
+ *
+ * This class just manage parameter names but does not store parameters themselves.
+ *
+ * \tparam T_BASE A class which stores parameters
+ */
 template <typename T_BASE>
 class NamedIO : public T_BASE
 {
@@ -33,18 +40,32 @@ public:
     NamedIO() {};
     virtual ~NamedIO() {};
 
+    /**
+     *
+     * @param i
+     * @param key
+     */
     virtual void setInputParameterName(size_t i, const std::string& key)
     {
         if (i+1>_in_para_names.size()) _in_para_names.resize(i+1);
         _in_para_names[i] = key;
     }
 
+    /**
+     *
+     * @param i
+     * @param key
+     */
     virtual void setOutputParameterName(size_t i, const std::string& key)
     {
         if (i+1>_out_para_names.size()) _out_para_names.resize(i+1);
         _out_para_names[i] = key;
     }
 
+    /**
+     *
+     * @return
+     */
     virtual bool isValid() const
     {
         if (T_BASE::getNumberOfInputParameters()!=_in_para_names.size()) {
@@ -58,7 +79,11 @@ public:
         return true;
     }
 
-
+    /**
+     *
+     * @param key
+     * @return
+     */
     virtual bool hasInputParameter(const std::string& key) const
     {
         return _in_para_names.end() != std::find(_in_para_names.begin(), _in_para_names.end(), key);

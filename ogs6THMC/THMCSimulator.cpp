@@ -213,7 +213,16 @@ int THMCSimulator::execute()
 
     // construct coupling system
     INFO("->Generating coupling system...");
-    NumLib::TransientCoulplingStrucutreBuilder cpl_builder;
+    typedef class NumLib::TemplateCouplingStrucutreBuilder
+        <
+        NumLib::ITransientCoupledSystem,
+        ProcessLib::Process,
+        NumLib::AsyncPartitionedSystem,
+        NumLib::TransientPartitionedAlgorithmFactory
+        > CoupledProcessStrucutreBuilder;
+
+    //NumLib::TransientCoulplingStrucutreBuilder cpl_builder;
+    CoupledProcessStrucutreBuilder cpl_builder;
     if (_cpl_system!=NULL) delete _cpl_system;
     _cpl_system = cpl_builder.build(&op, *GeoProcessBuilder::getInstance());
     std::vector<std::string> &list_mono_system_name = cpl_builder.getListOfMonolithicSystemName();
@@ -228,10 +237,15 @@ int THMCSimulator::execute()
 
     // list up monolithic processes
     INFO("->Initializing all processes...");
-    std::vector<NumLib::AbstractTransientMonolithicSystem*> &list_mono_system = cpl_builder.getListOfMonolithicSystem();
+    std::vector<ProcessLib::Process*> &list_mono_system = cpl_builder.getListOfMonolithicSystem();
     for (size_t i=0; i<list_mono_system.size(); i++) {
         std::string &pcs_name = list_mono_system_name[i];
         ProcessLib::Process* pcs = list_mono_system[i];
+        INFO("PCS %d: %s (IN=%d, OUT=%d)", i, pcs_name.c_str(), pcs->getNumberOfInputParameters(), pcs->getNumberOfOutputParameters());
+        for (size_t j=0; j<pcs->getNumberOfInputParameters(); j++)
+            INFO("* IN  %d: %s", j, pcs->getInputParameterName(j).c_str());
+        for (size_t j=0; j<pcs->getNumberOfOutputParameters(); j++)
+            INFO("* OUT %d: %s", j, pcs->getOutputParameterName(j).c_str());
         ogs6fem->list_pcs.insert(pcs_name, pcs);
         const BaseLib::Options* opPCS = op.getSubGroup("ProcessData")->getSubGroup(pcs_name);
         bool isPcsReady = pcs->initialize(opPCS!=NULL ? *opPCS : op);

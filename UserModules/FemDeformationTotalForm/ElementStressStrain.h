@@ -20,14 +20,14 @@
 #include "FemLib/Function/FemFunction.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "NumLib/Function/DiscreteDataConvergenceCheck.h"
-#include "ProcessLib/TemplateTimeIndependentProcess.h"
+#include "ProcessLib/AbstractTimeIndependentProcess.h"
 
 /**
  * \brief Stress, strain evaluator based on total displacements
  */
 template <class T_DISCRETE_SYSTEM>
 class FunctionElementStressStrain
-    : public ProcessLib::TemplateTimeIndependentProcess<1,2>
+    : public ProcessLib::AbstractTimeIndependentProcess
 {
 public:
     enum In { Displacement=0 };
@@ -39,8 +39,12 @@ public:
     typedef typename NumLib::TXVectorFunctionAsColumnData<MyIntegrationPointFunctionVector> IntegrationPointScalarWrapper;
     typedef typename NumLib::TXVectorFunctionAsColumnData<MyNodalFunctionVector> NodalPointScalarWrapper;
 
-    FunctionElementStressStrain() : _dis(0), _strain(0), _stress(0), _feObjects(0)
+    FunctionElementStressStrain()
+    : ProcessLib::AbstractTimeIndependentProcess("ELEMENT_STRESS_STRAIN", 1, 2), _dis(0), _strain(0), _stress(0), _feObjects(0)
     {
+        this->setInputParameterName(Displacement, "Displacement");
+        this->setOutputParameterName(Strain, "Strain");
+        this->setOutputParameterName(Stress, "Stress");
     };
 
     virtual ~FunctionElementStressStrain()
