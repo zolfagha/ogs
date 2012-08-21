@@ -5,33 +5,32 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file TemplateTimeIndependentProcess.h
+ * \file AbstractTimeIndependentProcess.h
  *
  * Created on 2012-08-03 by Norihiro Watanabe
  */
 
 #pragma once
 
-#include "BaseLib/Options.h"
-#include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
+#include <string>
 #include "Process.h"
 
 namespace ProcessLib
 {
 
-template <
-    size_t N_IN_PARAMETER,
-    size_t N_OUT_PARAMETER
-    >
-class TemplateTimeIndependentProcess
+/**
+ *
+ */
+class AbstractTimeIndependentProcess
 : public Process
 {
 public:
-    TemplateTimeIndependentProcess()
+    AbstractTimeIndependentProcess(const std::string &pcs_name, size_t n_in_parameters, size_t n_out_parameters)
+    : Process(pcs_name, n_in_parameters, n_out_parameters)
     {
-        AbstractTransientMonolithicSystem::resizeInputParameter(N_IN_PARAMETER);
-        AbstractTransientMonolithicSystem::resizeOutputParameter(N_OUT_PARAMETER);
     }
+
+    virtual ~AbstractTimeIndependentProcess() {};
 
     double suggestNext(const NumLib::TimeStep &/*time_current*/) { return .0; }
 
