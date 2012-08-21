@@ -16,9 +16,9 @@
 namespace DiscreteLib
 {
 
-void DofEquationIdTable::construct(DofNumberingType::type num, long offset)
+void DofEquationIdTable::construct(long offset)
 {
-    if (num==DofNumberingType::BY_DOF) {
+    if (_numbering_type==DofNumberingType::BY_VARIABLE) {
         //order by dof
         long eqs_id = offset;
         for (size_t i=0; i<_map_var2dof.size(); i++) {
