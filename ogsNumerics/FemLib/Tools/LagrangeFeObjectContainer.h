@@ -41,6 +41,8 @@ public:
 
     virtual IFiniteElement* getFeObject(const MeshLib::IElement &e);
 
+    virtual IFiniteElement* getFeObject(const MeshLib::IElement &e, size_t order);
+
 private:
     FiniteElementType::type getFeType(MeshLib::ElementShape::type ele_type, size_t order);
 

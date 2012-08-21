@@ -25,6 +25,13 @@ IFiniteElement* LagrangianFeObjectContainer::getFeObject(const MeshLib::IElement
     return fe;
 }
 
+IFiniteElement* LagrangianFeObjectContainer::getFeObject(const MeshLib::IElement &e, size_t order)
+{
+    setPolynomialOrder(order);
+    return getFeObject(e);
+}
+
+
 FiniteElementType::type LagrangianFeObjectContainer::getFeType(MeshLib::ElementShape::type ele_type, size_t order)
 {
     switch (ele_type)
