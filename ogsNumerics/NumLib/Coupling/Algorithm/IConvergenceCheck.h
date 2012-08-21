@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "NumLib/IOSystem/ParameterSet.h"
+#include "NumLib/IOSystem/UnnamedParameterSet.h"
 
 namespace NumLib
 {

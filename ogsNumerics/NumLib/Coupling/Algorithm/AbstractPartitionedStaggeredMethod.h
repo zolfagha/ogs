@@ -13,7 +13,7 @@
 #pragma once
 
 #include <vector>
-#include "NumLib/IOSystem/ParameterSet.h"
+#include "NumLib/IOSystem/UnnamedParameterSet.h"
 #include "NumLib/Coupling/ParameterProblemMappingTable.h"
 #include "ITransientPartitionedAlgorithm.h"
 #include "IConvergenceCheck.h"

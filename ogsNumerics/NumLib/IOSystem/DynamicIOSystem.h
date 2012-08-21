@@ -17,11 +17,20 @@
 #include <cassert>
 
 #include "BaseLib/CodingTools.h"
-#include "ParameterSet.h"
+#include "UnnamedParameterSet.h"
 
 namespace NumLib
 {
 
+/**
+ * \brief Input-Output system with the variable number of parameters
+ *
+ * - Internal ID
+ * - Input ID
+ * - Output ID
+ *
+ * @tparam T_BASE A base class inherited of ISystemWithInOutParameters
+ */
 template <typename T_BASE>
 class DynamicIOSystem : public T_BASE
 {
@@ -54,12 +63,14 @@ public:
         return _shared_parameters.get<T>(getInternalIDFromOutputID(parameter_id));
     }
 
+    ///
     void resizeInputParameter(size_t n)
     {
         for (size_t i=0; i<n; i++)
             registerInputParameter(i);
     }
 
+    ///
     void resizeOutputParameter(size_t n)
     {
         for (size_t i=0; i<n; i++)
@@ -79,6 +90,7 @@ public:
         return id;
     }
 
+    ///
     InternalID registerOutputParameter(size_t key)
     {
         size_t out_key = create_output_key(key);
@@ -92,7 +104,10 @@ public:
         return id;
     }
 
+    ///
     inline size_t getInternalIDFromOutputID(size_t i) const {return _list_output_para_id[i];}; //TODO
+
+    ///
     inline size_t getInternalIDFromInputID(size_t i) const {return _list_input_para_id[i];}; //TODO
 
 protected:
