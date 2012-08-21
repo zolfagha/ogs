@@ -41,6 +41,12 @@ public:
         _bc_func = func->clone();
         _is_transient = false;
         _do_setup = true;
+        _order = 1;
+    }
+
+    virtual void setOrder(size_t order)
+    {
+        _order = order;
     }
 
     /// setup BC. 
@@ -80,6 +86,7 @@ private:
     std::vector<double> _vec_values;
     bool _is_transient;
     bool _do_setup;
+    size_t _order;
 
 };
 

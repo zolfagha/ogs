@@ -42,11 +42,18 @@ class FemVariable
 public:
     typedef typename FemLib::FemNodalFunctionScalar<T_DIS_SYS>::type MyNodalFunctionScalar;
 
+    /**
+     *
+     * @param id        variable id
+     * @param name      variable name
+     * @param order     polynomial order
+     */
     FemVariable(size_t id, const std::string &name, FemLib::PolynomialOrder::type order = FemLib::PolynomialOrder::Linear)
     : _id(id), _name(name), _order(order), _f_ic(NULL)
     {
     }
 
+    ///
     ~FemVariable()
     {
         BaseLib::releaseObject(_f_ic);
@@ -67,6 +74,7 @@ public:
     //----------------------------------------------------------------------
     void addDirichletBC(FemDirichletBC* bc)
     {
+        bc->setOrder(_order);
         _map_bc1.push_back(bc);
     }
     size_t getNumberOfDirichletBC() const {return _map_bc1.size();};
@@ -79,6 +87,7 @@ public:
     //----------------------------------------------------------------------
     void addNeumannBC(IFemNeumannBC* bc2)
     {
+        bc2->setOrder(_order);
         _map_bc2.push_back(bc2);
     }
     size_t getNumberOfNeumannBC() const {return _map_bc2.size();};

@@ -31,10 +31,16 @@ namespace SolutionLib
 class FemDirichletBC
 {
 public:
-    ///
+    /**
+     *
+     * @param msh
+     * @param geo
+     * @param bc_func
+     */
     FemDirichletBC(const MeshLib::IMesh* msh, const GeoLib::GeoObject* geo, NumLib::ITXFunction* bc_func)
     {
         _msh = msh;
+        _order = 1;
         _geo = geo;
         _bc_func = bc_func;
         _is_transient = !bc_func->isTemporallyConst();
@@ -45,6 +51,8 @@ public:
     virtual ~FemDirichletBC()
     {
     }
+
+    void setOrder(size_t order) {_order = order;};
 
     /// setup B.C.
     void setup();
@@ -60,6 +68,7 @@ public:
 
 private:
     const MeshLib::IMesh* _msh;
+    size_t _order;
     const GeoLib::GeoObject* _geo;
     NumLib::ITXFunction* _bc_func;
     std::vector<size_t> _vec_nodes;
