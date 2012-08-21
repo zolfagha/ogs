@@ -290,6 +290,39 @@ public:
         }
 
     }
+    
+    void createLocalMappingTable(
+        size_t mesh_id, const std::vector<size_t> &pt_id,
+        DofEquationIdTable &local_table
+        ) const
+    {
+        const std::vector<size_t> &list_var = _map_msh2var.find(mesh_id)->second;
+        const size_t n_pt = pt_id.size();
+        const size_t n_dof_per_pt = list_var.size();
+        const size_t n_total_dof = n_pt * n_dof_per_pt;
+        
+        for (size_t i=0; i<n_dof_per_pt; i++) {
+            size_t var_id = list_var[i];
+            const IEquationIdStorage* table = getPointEquationIdTable(var_id, mesh_id);
+            std::vector<size_t> active_pt_list;
+            std::vector<size_t> active_eqs_id_list;
+            for (size_t j=0; j<n_pt; j++) {
+                size_t wrk_pt_id = pt_id[j];
+                if (table->hasKey(wrk_pt_id)) {
+                    active_pt_list.push_back(wrk_pt_id);
+                    active_eqs_id_list.push_back(table->address(wrk_pt_id));
+                }
+            }
+            local_table.addVariableDoFs(mesh_id, active_pt_list);
+            IEquationIdStorage *local_storage = local_table.getPointEquationIdTable(i, mesh_id);
+            for (size_t j=0; j<active_pt_list.size(); j++) {
+                local_storage->set(active_pt_list[j], active_eqs_id_list[j]);
+            }
+        }
+        
+        local_table.setNumberingType(_local_numbering_type);
+        //local_table.construct();
+    }
 
     /**
      *
