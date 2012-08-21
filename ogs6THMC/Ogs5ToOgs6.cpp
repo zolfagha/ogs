@@ -14,14 +14,12 @@
 
 #include "logog.hpp"
 
-#include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "FemLib/Tools/LagrangeFeObjectContainer.h"
 #include "NumLib/Function/TXFunction.h"
 #include "NumLib/TimeStepping/TimeStepFunction.h"
 #include "MaterialLib/Fluid.h"
 #include "SolutionLib/Fem/FemDirichletBC.h"
 #include "SolutionLib/Fem/FemNeumannBC.h"
-//#include "SolutionLib/Fem/AbstractFemIVBVProblem.h"
 #include "GeoProcessBuilder.h"
 
 using namespace ogs5;
@@ -340,7 +338,21 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
     for (size_t i=0; i<ogs5fem.out_vector.size(); i++)
     {
         COutput* rfout = ogs5fem.out_vector[i];
-        //std::string out_pcs_name = FiniteElement::convertProcessTypeToString(rfout->getProcessType());
+
+        // convert *_X1 to *_X (e.g. DISPLACEMENT_X1 to DISPLACEMENT_X)
+        for (size_t j=0; j<rfout->_nod_value_vector.size(); j++) {
+            const size_t len_postfix = 3;
+            std::string str = rfout->_nod_value_vector[j];
+            if (str.length()<len_postfix+1) continue;
+            std::string last3 = str.substr(str.length()-len_postfix, len_postfix);
+            if (last3.compare("_X1")==0) {
+                rfout->_nod_value_vector[j].replace(str.length()-len_postfix, len_postfix, "_X");
+            } else if (last3.compare("_Y1")==0) {
+                rfout->_nod_value_vector[j].replace(str.length()-len_postfix, len_postfix, "_Y");
+            } else if (last3.compare("_Z1")==0) {
+                rfout->_nod_value_vector[j].replace(str.length()-len_postfix, len_postfix, "_Z");
+            }
+        }
 
         BaseLib::Options* opt = optOut->addSubGroup("Output");
         opt->addOption("DataType", rfout->dat_type_name);
