@@ -1,21 +1,22 @@
 <?xml version="1.0"?>
 <coupling>
 	<P algorithm="Serial" convergence="FemFunctionConvergenceCheck" max_itr="1" epsilon="1e-4">
-		<out>h</out>
-		<out>v</out>
-		<out>c</out>
+		<out>HEAD</out>
+		<out>VELOCITY</out>
+		<out>Tracer</out>
 		<problems>
 			<M name="GROUNDWATER_FLOW">
-				<out>h</out>
+				<out>HEAD</out>
 			</M>
 			<M name="ELEMENT_VELOCITY">
-				<in>h</in>
-				<out>v</out>
+				<in>HEAD</in>
+				<out>VELOCITY</out>
 			</M>
 			<M name="MASS_TRANSPORT">
-				<in>v</in>
-				<out>c</out>
+				<in>VELOCITY</in>
+				<out>Tracer</out>
 			</M>
 		</problems>
 	</P>
 </coupling>
+

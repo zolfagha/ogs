@@ -2,8 +2,6 @@ GeoSys-OUT: Output ------------------------------------------------
 #OUTPUT
  $NOD_VALUES
   DISPLACEMENT
-  STRAIN
-  STRESS
   DISPLACEMENT_X1
   DISPLACEMENT_Y1
   STRESS_XX
