@@ -43,7 +43,7 @@ FOREACH(dir ${List_subdir})
         INCLUDE(../UserModules/${dir}/CMakeLists.txt)
     ENDIF()
     FILE(GLOB TempProcessLib_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ../UserModules/${dir}/*.h ../UserModules/${dir}/*.hpp ../UserModules/${dir}/*.cpp)
-    SOURCE_GROUP( ogs6THMC\\modules\\${dir} FILES ${TempProcessLib_Files} )
+    SOURCE_GROUP( ogs6THMC\\UserModules\\${dir} FILES ${TempProcessLib_Files} )
     LIST(APPEND THMC_Files ${TempProcessLib_Files}) 
 ENDFOREACH()
 
@@ -54,7 +54,7 @@ LIST(APPEND THMC_Files ${TempProcessLib_Files})
 
 # ./modules
 FILE(GLOB TempProcessLib_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ../UserModules/*.h ../UserModules/*.cpp ../UserModules/*.txt)
-SOURCE_GROUP( ogs6THMC\\modules FILES ${TempProcessLib_Files} )
+SOURCE_GROUP( ogs6THMC\\UserModules FILES ${TempProcessLib_Files} )
 LIST(APPEND THMC_Files ${TempProcessLib_Files}) 
 
 # ./MaterialLib
