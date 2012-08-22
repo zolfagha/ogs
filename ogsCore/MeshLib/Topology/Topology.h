@@ -88,7 +88,7 @@ private:
 class TopologyNode2NodesConnectedByElements : public ITopologyNode2Nodes
 {
 public:
-    TopologyNode2NodesConnectedByElements(IMesh *msh);
+    explicit TopologyNode2NodesConnectedByElements(IMesh *msh);
     virtual ~TopologyNode2NodesConnectedByElements() {};
 
     const std::set<size_t>& getConnectedNodes(size_t node_id) const 
