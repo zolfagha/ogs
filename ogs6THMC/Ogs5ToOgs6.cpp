@@ -75,6 +75,7 @@ void convertPorousMediumProperty(const CMediumProperties &mmp, MaterialLib::Poro
 {
     if (mmp.permeability_model==1) {
         pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(mmp.permeability_tensor[0]);
+        pm.permeability = new NumLib::TXFunctionConstant(mmp.permeability_tensor[0]);
     }
 
     if (mmp.porosity_model==1) {
