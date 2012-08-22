@@ -191,7 +191,10 @@ int THMCSimulator::execute()
     // ogs5fem
     ogs5::Ogs5FemData ogs5femdata;
     ogs5::Ogs5FemIO::read(proj_path, ogs5femdata);
-    Ogs5ToOgs6::convert(ogs5femdata, *ogs6fem, op);
+    if (!Ogs5ToOgs6::convert(ogs5femdata, *ogs6fem, op)) {
+        ERR("***Error: Failure during conversion of ogs5 to ogs6.");
+        return 0;
+    }
 
     // coupling
     BaseLib::addXMLtoOptions(proj_path+".prop", op);

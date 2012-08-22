@@ -29,6 +29,6 @@ void convertSolidProperty(const ogs5::CSolidProperties &msp, MaterialLib::Solid 
 
 void convertPorousMediumProperty(const ogs5::CMediumProperties &mmp, MaterialLib::PorousMedia &pm);
 
-void convert(const ogs5::Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options &option);
+bool convert(const ogs5::Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options &option);
 };
 } //end
