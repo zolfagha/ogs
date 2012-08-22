@@ -35,12 +35,13 @@ namespace FemLib
  * \tparam T_INTEGRAL
  * \tparam T_EXTRAPOLATE
  */
-template <FiniteElementType::type T_FETYPE, size_t N_VARIABLES, class T_SHAPE, class T_INTEGRAL, class T_EXTRAPOLATE>
+template <FiniteElementType::type T_FETYPE, size_t N_VARIABLES, size_t N_ORDER, class T_SHAPE, class T_INTEGRAL, class T_EXTRAPOLATE>
 class TemplateIsoparametric : public TemplateFeBase<T_FETYPE, N_VARIABLES>
 {
 public:
     ///
-    explicit TemplateIsoparametric(MeshLib::IMesh &msh) : TemplateFeBase<T_FETYPE, N_VARIABLES>(msh)
+    explicit TemplateIsoparametric(MeshLib::IMesh &msh)
+    : TemplateFeBase<T_FETYPE, N_VARIABLES>(msh)
     {
         _mapping = new FemNaturalCoordinates(new T_SHAPE());
         _integration = new T_INTEGRAL();
@@ -57,11 +58,15 @@ public:
     ///
     virtual IFemNumericalIntegration* getIntegrationMethod() const {return _integration;};
 
+    size_t getOrder() const {return N_ORDER;};
+
     /// initialize object for given mesh elements
     virtual void configure( MeshLib::IElement &e )
     {
+        e.setCurrentOrder(getOrder());
         TemplateFeBase<T_FETYPE, N_VARIABLES>::setElement(e);
         const MeshLib::IMesh* msh = TemplateFeBase<T_FETYPE, N_VARIABLES>::getMesh();
+        msh->setCurrentOrder(getOrder());
         if (e.getMappedCoordinates()==0) {
             MeshLib::IElementCoordinatesMapping *ele_map = 0;
             if (msh->getDimension() == e.getDimension()) {
@@ -78,6 +83,7 @@ public:
 
     virtual void computeBasisFunctions(const double *x)
     {
+        _mapping->getElement()->setCurrentOrder(getOrder());
         _mapping->compute(x);
         _is_basis_computed = true;
     }
@@ -86,6 +92,7 @@ public:
     virtual void getRealCoordinates(double* x_real)
     {
         assert(_is_basis_computed);
+        _mapping->getElement()->setCurrentOrder(getOrder());
         _mapping->mapToPhysicalCoordinates(_mapping->getProperties(), x_real);
     }
 
@@ -110,6 +117,7 @@ public:
     /// make interpolation from nodal values
     virtual double interpolate(double *natural_pt, double *nodal_values)
     {
+        _mapping->getElement()->setCurrentOrder(getOrder());
         const CoordinateMappingProperty *prop = _mapping->compute(natural_pt);
         double *N = &(*prop->shape_r)(0,0);
         double v = .0;
