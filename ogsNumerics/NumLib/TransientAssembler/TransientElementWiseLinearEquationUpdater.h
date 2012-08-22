@@ -126,37 +126,6 @@ public:
         eqs.addRHSsub(local_dofmap_row, localEQS.getRHS());
     }
 
-#if 0 // in progress for coupled problem. could be removed later
-    template <class T_LINEAR_EQS>
-    void update2(const MeshLib::IElement &e, T_LINEAR_EQS &eqs)
-    {
-        LocalEquation localEQS;
-        size_t n_var;
-
-        std::vector<std::vector<size_t> > local_dofmap_row(n_var), local_dofmap_column(n_var);
-        std::vector<size_t> vec_var_order(n_var);
-        std::vector<size_t> vec_var_id(n_var);
-
-        std::vector<LocalVector> vec_local_u0(n_var), vec_local_u1(n_var);
-        for (size_t i=0; i<n_var; i++) {
-            std::vector<size_t> ele_node_ids;
-            e.getNodeIDList(vec_var_order[i], ele_node_ids);
-            _dofManager->mapEqsID(vec_var_id[i], _msh->getID(), ele_node_ids, local_dofmap_row[i]);
-            DiscreteLib::getLocalVector(local_dofmap_row[i], *_vec_u1, vec_local_u1[i]);
-            DiscreteLib::getLocalVector(local_dofmap_row[i], *_vec_u0, vec_local_u0[i]);
-        }
-
-        // local assembly
-        localEQS.create(local_dofmap_row.size());
-        _transient_e_assembler->assembly(*_timestep, e, vec_local_u1, vec_local_u0, localEQS);
-
-        // update global
-        eqs.addAsub(local_dofmap_row, local_dofmap_column, *localEQS.getA());
-        eqs.addRHSsub(local_dofmap_row, localEQS.getRHS());
-    }
-#endif
-
-
 private:
     MeshLib::IMesh* _msh;
     DiscreteLib::DofEquationIdTable* _dofManager;
