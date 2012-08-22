@@ -55,6 +55,7 @@ public:
             std::map<size_t, double> map_nodeId2val;
             for (size_t i=0; i<vec_edge_eles.size(); i++) {
                 MeshLib::IElement *e = vec_edge_eles[i];
+                e->setCurrentOrder(msh.getCurrentOrder());
                 const size_t edge_nnodes = e->getNumberOfNodes();
                 // set values at nodes
                 LocalVector nodal_val(edge_nnodes);
@@ -65,7 +66,7 @@ public:
                     nodal_val[i_nod] = v;
                 } 
                 // compute integrals
-                IFiniteElement *fe_edge = feObjects.getFeObject(*e);
+                IFiniteElement *fe_edge = feObjects.getFeObject(*e, msh.getCurrentOrder());
                 fe_edge->getIntegrationMethod()->initialize(*e, 2);
                 //IFiniteElement *fe_edge = _var->getFiniteElement(*e);
                 LocalVector result(edge_nnodes);
