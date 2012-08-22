@@ -103,7 +103,8 @@ public:
 
         // get dof map
         e.getNodeIDList(e.getMaximumOrder(), ele_node_ids);
-        _dofManager->mapEqsID(_msh->getID(), ele_node_ids, local_dofmap_row, local_dofmap_column);
+        _dofManager->mapEqsIDreduced(_msh->getID(), ele_node_ids, local_dofmap_row, local_dofmap_column);
+
         // previous and current results
         DiscreteLib::getLocalVector(local_dofmap_row, *_vec_u1, local_u_n1);
         DiscreteLib::getLocalVector(local_dofmap_row, *_vec_u0, local_u_n);
