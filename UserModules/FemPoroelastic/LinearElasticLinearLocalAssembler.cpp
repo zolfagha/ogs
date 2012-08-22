@@ -26,18 +26,27 @@ void FemPoroelasticLinearLocalAssembler::assemble(
         const NumLib::TimeStep &timestep,  
         const MeshLib::IElement &e, 
         const std::vector<size_t> &vec_order, 
-        const std::vector<LocalVectorType> &vec_u0, 
+        const std::vector<LocalVectorType> &vec_x0, 
         const std::vector<LocalVectorType> &/*vec_u1*/, 
-        std::vector<std::vector<LocalMatrixType> > &vec_K, 
+        std::vector<std::vector<LocalMatrixType> > &vec_K,
         std::vector<LocalVectorType> &vec_F
         )
 {
-    assert(vec_order.size()==2);
-    //TODO how do you know 1st is u and 2nd is p? who decides it?
+    assert(vec_order.size()==3);
+
+    //TODO how do you know 1st is ux and 3rd is p? who decides it?
     const size_t u_order = vec_order[0];
-    const size_t p_order = vec_order[1];
-    const LocalVectorType &u0 = vec_u0[0];
-    const LocalVectorType &p0 = vec_u0[1];
+    assert(u_order==vec_order[1]);
+    const size_t p_order = vec_order[2];
+    const LocalVectorType &ux0 = vec_x0[0];
+    const LocalVectorType &uy0 = vec_x0[1];
+    // combine ux and uy
+    LocalVectorType u0(ux0.rows()*2);
+    for (int i=0; i<ux0.rows(); i++) {
+        u0(i) = ux0(i);
+        u0(i+ux0.rows()) = uy0(i);
+    }
+    const LocalVectorType &p0 = vec_x0[2];
     // ------------------------------------------------------------------------
     // Element
     // ------------------------------------------------------------------------
@@ -65,7 +74,8 @@ void FemPoroelasticLinearLocalAssembler::assemble(
 
     // solid
     double rho_s = .0;
-    solidphase->density->eval(e_pos, rho_s);
+    if (solidphase->density!=NULL)
+        solidphase->density->eval(e_pos, rho_s);
     LocalMatrixType De = LocalMatrixType::Zero(n_strain_components, n_strain_components);
     NumLib::LocalMatrix nv(1,1);
     NumLib::LocalMatrix E(1,1);
@@ -82,14 +92,14 @@ void FemPoroelasticLinearLocalAssembler::assemble(
     fluidphase->density->eval(e_pos, rho_f);
 
     // media
-    LocalMatrixType k;
+    double k;
     pm->permeability->eval(e_pos, k);
     double n = .0;
     pm->porosity->eval(e_pos, n);
     double s = .0;
     pm->storage->eval(e_pos, s);
-    LocalMatrixType k_mu(dim, dim);
-    k_mu = k * 1.0/mu;
+    double k_mu;
+    k_mu = k / mu;
 
 
     // ------------------------------------------------------------------------
@@ -120,11 +130,13 @@ void FemPoroelasticLinearLocalAssembler::assemble(
 
     //
     FemLib::IFiniteElement* fe_u = _feObjects.getFeObject(e, u_order);
+    FemLib::IFiniteElement* fe_p = _feObjects.getFeObject(e, p_order);
     FemLib::IFemNumericalIntegration *q_u = fe_u->getIntegrationMethod();
     double gp_x[3], real_x[3];
     for (size_t j=0; j<q_u->getNumberOfSamplingPoints(); j++) {
         q_u->getSamplingPoint(j, gp_x);
         fe_u->computeBasisFunctions(gp_x);
+        fe_p->computeBasisFunctions(gp_x);
         fe_u->getRealCoordinates(real_x);
         double fac_u = fe_u->getDetJ() * q_u->getWeight(j);
 
@@ -134,7 +146,7 @@ void FemPoroelasticLinearLocalAssembler::assemble(
         LocalMatrixType &dNu = *fe_u->getGradBasisFunction();
         setNu_Matrix(dim, nnodes_u, Nu, Nuvw);
         setB_Matrix(dim, nnodes_u, dNu, B);
-        LocalMatrixType &Np = *fe_u->getBasisFunction();
+        LocalMatrixType &Np = *fe_p->getBasisFunction();
 
         // K_uu += B^T * D * B
         Kuu.noalias() += fac_u * B.transpose() * De * B;
@@ -147,17 +159,17 @@ void FemPoroelasticLinearLocalAssembler::assemble(
     }
     Fu.noalias() += (theta - 1) * Kuu * u0 + (1-theta)* Cup * p0;
 
-    FemLib::IFiniteElement* fe_p = _feObjects.getFeObject(e, p_order);
     FemLib::IFemNumericalIntegration *q_p = fe_p->getIntegrationMethod();
     for (size_t j=0; j<q_p->getNumberOfSamplingPoints(); j++) {
         q_p->getSamplingPoint(j, gp_x);
+        fe_u->computeBasisFunctions(gp_x);
         fe_p->computeBasisFunctions(gp_x);
         fe_p->getRealCoordinates(real_x);
         double fac = fe_p->getDetJ() * q_p->getWeight(j);
 
         //--- local component ----
         // set N,B
-        LocalMatrixType &dNu = *fe_p->getGradBasisFunction();
+        LocalMatrixType &dNu = *fe_u->getGradBasisFunction();
         setB_Matrix(dim, nnodes_u, dNu, B);
         LocalMatrixType &Np = *fe_p->getBasisFunction();
         LocalMatrixType &dNp = *fe_p->getGradBasisFunction();
@@ -176,11 +188,17 @@ void FemPoroelasticLinearLocalAssembler::assemble(
     Fp = (1.0/dt * Mpp - (1-theta)*Kpp)* p0 + 1.0/dt * Cpu * u0;
 
     //
-    vec_K[0][0] = Kuu;
-    vec_K[0][1] = -1. * Cup;
-    vec_K[1][0] = 1.0/dt * Cpu;
-    vec_K[1][1] = 1.0/dt * Mpp + theta * Kpp ;
+    for (size_t i=0; i<dim; i++) {
+        for (size_t j=0; j<dim; j++) {
+            vec_K[i][j] = Kuu.block(i*nnodes_u, j*nnodes_u, nnodes_u, nnodes_u);
+        }
+        vec_K[i][dim] = -1. * Cup.block(i*nnodes_u, 0, nnodes_u, nnodes_p);
+        vec_K[dim][i] = 1.0/dt * Cpu.block(0, i*nnodes_u, nnodes_p, nnodes_u);
+    }
+    vec_K[dim][dim] = 1.0/dt * Mpp + theta * Kpp ;
 
-    vec_F[0] = Fu;
-    vec_F[1] = Fp;
+    for (size_t i=0; i<dim; i++) {
+        vec_F[i] = Fu.segment(i*nnodes_u, nnodes_u);
+    }
+    vec_F[dim] = Fp;
 }
