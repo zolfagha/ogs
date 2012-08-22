@@ -85,7 +85,7 @@ const CoordinateMappingProperty* FemNaturalCoordinates::compute(const double* na
 //        inv_jac->multiply(*dshape_dr, *dshape_dx);
         (*dshape_dx) = (*inv_jac) * (*dshape_dr);
     } else {
-        std::cout << "***error: det_j is not positive." << std::endl;
+        std::cout << "***error: det_j is not positive. element id=" << _ele->getID() << std::endl;
     }
 
     return _prop;

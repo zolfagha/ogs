@@ -38,6 +38,7 @@ public:
     {
         _shape = shape;
         _prop = new CoordinateMappingProperty();
+        _ele = NULL;
     }
 
     ///
@@ -82,6 +83,9 @@ public:
     /// @param physical_pt
     /// @return natural_pt
     void mapFromPhysicalCoordinates(const double* physical_pt, double* natural_pt);
+
+    ///
+    MeshLib::IElement* getElement() const {return _ele;};
 
 private:
     CoordinateMappingProperty* _prop;
