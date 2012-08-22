@@ -51,7 +51,7 @@ void FemPoroelasticLinearLocalAssembler::assemble(
     // Transient
     // ------------------------------------------------------------------------
     const double dt = timestep.getTimeStepSize();
-    const double thetha = 1.0;
+    const double theta = 1.0;
 
     // ------------------------------------------------------------------------
     // Material (assuming element constant)
@@ -145,6 +145,7 @@ void FemPoroelasticLinearLocalAssembler::assemble(
         // Fu += N^T * b
         Fu.noalias() += fac_u * Nuvw.transpose() * body_force;
     }
+    Fu.noalias() += (theta - 1) * Kuu * u0 + (1-theta)* Cup * p0;
 
     FemLib::IFiniteElement* fe_p = _feObjects.getFeObject(e, p_order);
     FemLib::IFemNumericalIntegration *q_p = fe_p->getIntegrationMethod();
@@ -172,13 +173,13 @@ void FemPoroelasticLinearLocalAssembler::assemble(
     }
 
     // Backward euler
-    Fp = (1.0/dt * Mpp - (1-thetha)*Kpp)* p0 + 1.0/dt * Cpu * u0;
+    Fp = (1.0/dt * Mpp - (1-theta)*Kpp)* p0 + 1.0/dt * Cpu * u0;
 
     //
     vec_K[0][0] = Kuu;
     vec_K[0][1] = -1. * Cup;
     vec_K[1][0] = 1.0/dt * Cpu;
-    vec_K[1][1] = 1.0/dt * Mpp + thetha * Kpp ;
+    vec_K[1][1] = 1.0/dt * Mpp + theta * Kpp ;
 
     vec_F[0] = Fu;
     vec_F[1] = Fp;

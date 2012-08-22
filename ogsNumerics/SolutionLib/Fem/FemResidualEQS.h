@@ -122,7 +122,7 @@ void TemplateTransientResidualFEMFunction<T1,T2>::eval(const SolutionVector &u_n
         std::vector<double> var_bc_val;
         for (size_t j=0; j<var->getNumberOfDirichletBC(); j++) {
             FemDirichletBC* bc1 = var->getDirichletBC(j);
-            bc1->setup();
+            bc1->setup(var->getCurrentOrder());
             DiscreteLib::convertToEqsValues(*_dofManager, i, msh_id, bc1->getListOfBCNodes(), bc1->getListOfBCValues(), list_bc1_eqs_id, list_bc1_val);
         }
     }

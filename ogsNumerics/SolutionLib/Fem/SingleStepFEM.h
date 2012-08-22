@@ -145,7 +145,7 @@ SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER>::SingleStepFEM(MyDiscreteSyste
     // create dof map
     for (size_t i=0; i<n_var; i++) {
         MyVariable* var = problem->getVariable(i);
-        size_t n_dof_per_var = msh->getNumberOfNodes(var->getOrder());
+        size_t n_dof_per_var = msh->getNumberOfNodes(var->getCurrentOrder());
         _dofManager.addVariableDoFs(msh->getID(), 0, n_dof_per_var);
     }
     _dofManager.construct();
@@ -208,7 +208,7 @@ int SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER>::solveTimeStep(const NumLi
         MyVariable* var = _problem->getVariable(i_var);
         for (size_t i=0; i<var->getNumberOfDirichletBC(); i++) {
             SolutionLib::FemDirichletBC *bc1 = var->getDirichletBC(i);
-            bc1->setup();
+            bc1->setup(var->getCurrentOrder());
             std::vector<size_t> &list_bc_nodes = bc1->getListOfBCNodes();
             std::vector<double> &list_bc_values = bc1->getListOfBCValues();
             DiscreteLib::convertToEqsValues(_dofManager, i_var, msh_id, list_bc_nodes, list_bc_values, list_bc1_eqs_id, list_bc1_val);
@@ -222,7 +222,7 @@ int SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER>::solveTimeStep(const NumLi
         MyVariable* var = _problem->getVariable(i_var);
         for (size_t i=0; i<var->getNumberOfNeumannBC(); i++) {
             SolutionLib::IFemNeumannBC *bc2 = var->getNeumannBC(i);
-            bc2->setup();
+            bc2->setup(var->getCurrentOrder());
             std::vector<size_t> &list_bc_nodes = bc2->getListOfBCNodes();
             std::vector<double> &list_bc_values = bc2->getListOfBCValues();
             DiscreteLib::convertToEqsValues(_dofManager, i_var, msh_id, list_bc_nodes, list_bc_values, list_st_eqs_id, list_st_val);

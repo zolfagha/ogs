@@ -40,7 +40,7 @@ public:
     FemDirichletBC(const MeshLib::IMesh* msh, const GeoLib::GeoObject* geo, NumLib::ITXFunction* bc_func)
     {
         _msh = msh;
-        _order = 1;
+        //_order = 1;
         _geo = geo;
         _bc_func = bc_func;
         _is_transient = !bc_func->isTemporallyConst();
@@ -52,10 +52,10 @@ public:
     {
     }
 
-    void setOrder(size_t order) {_order = order;};
+    //void setOrder(size_t order) {_order = order;};
 
     /// setup B.C.
-    void setup();
+    void setup(size_t order);
 
     ///
     std::vector<size_t>& getListOfBCNodes() {return _vec_nodes;};
@@ -68,7 +68,7 @@ public:
 
 private:
     const MeshLib::IMesh* _msh;
-    size_t _order;
+    //size_t _order;
     const GeoLib::GeoObject* _geo;
     NumLib::ITXFunction* _bc_func;
     std::vector<size_t> _vec_nodes;

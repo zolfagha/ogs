@@ -58,9 +58,9 @@ public:
     MyDiscreteSystem* getDiscreteSystem() {return _discrete_system;};
 
     /// create FE approximation field
-    MyVariable* addVariable(const std::string &name)
+    MyVariable* addVariable(const std::string &name, FemLib::PolynomialOrder::type initial_order = FemLib::PolynomialOrder::Linear)
     {
-        _variables.push_back(new MyVariable(_variables.size(), name));
+        _variables.push_back(new MyVariable(_variables.size(), name, initial_order));
         return _variables.back();
     }
 

@@ -116,13 +116,13 @@ void TemplateTransientLinearFEMFunction<T1, T2, T3>::eval(const SolutionVector &
         std::vector<double> var_bc_val;
         for (size_t j=0; j<var->getNumberOfDirichletBC(); j++) {
             FemDirichletBC* bc1 = var->getDirichletBC(j);
-            bc1->setup();
+            bc1->setup(var->getCurrentOrder());
             var_bc_id.insert(var_bc_id.end(), bc1->getListOfBCNodes().begin(), bc1->getListOfBCNodes().end());
             var_bc_val.insert(var_bc_val.end(), bc1->getListOfBCValues().begin(), bc1->getListOfBCValues().end());
         }
         _linear_eqs->setPrescribedDoF(i, var_bc_id, var_bc_val);
         for (size_t j=0; j<var->getNumberOfNeumannBC(); j++) {
-            var->getNeumannBC(j)->setup();
+            var->getNeumannBC(j)->setup(var->getCurrentOrder());
         }
     }
 

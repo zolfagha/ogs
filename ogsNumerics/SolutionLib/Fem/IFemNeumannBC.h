@@ -27,10 +27,10 @@ public:
     ///
     virtual ~IFemNeumannBC() {};
 
-    virtual void setOrder(size_t order) = 0;
+    //virtual void setOrder(size_t order) = 0;
 
     /// setup B.C.
-    virtual void setup() = 0;
+    virtual void setup(size_t order) = 0;
 
     ///
     virtual std::vector<size_t>& getListOfBCNodes() = 0;

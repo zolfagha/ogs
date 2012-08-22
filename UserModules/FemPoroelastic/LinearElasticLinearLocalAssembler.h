@@ -44,13 +44,14 @@ public:
         // parameters need to be passed
         const size_t n_var = _n_var;
         std::vector<size_t> &vec_order = _vec_order;
+        size_t mesh_id = 0;
 
         //
         std::vector<std::vector<size_t> > vec_local_pos(n_var);
         for (size_t i=0; i<n_var; i++) {
             std::vector<size_t> list_nodeid;
             e.getNodeIDList(vec_order[i], list_nodeid);
-            localDofManager.mapEqsID(0, 0, list_nodeid, vec_local_pos[i]);
+            localDofManager.mapEqsID(i, mesh_id, list_nodeid, vec_local_pos[i]);
         }
         
         std::vector<LocalVectorType> vec_u0(n_var), vec_u1(n_var);

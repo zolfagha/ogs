@@ -70,11 +70,12 @@ public:
 
     ///
     FunctionDisplacementPressure()
-    : ProcessLib::AbstractTransientProcess("DEFORMATION", 0, 1),
-      _problem(0), _solution(0), _feObjects(0), _displacement(0), _var_p(0)//, _strain(0), _stress(0)
+    : ProcessLib::AbstractTransientProcess("DEFORMATION_FLOW", 0, 2),
+      _problem(0), _solution(0), _feObjects(0), _displacement(0), _var_p_id(0)//, _strain(0), _stress(0)
     {
         // set default parameter name
         this->setOutputParameterName(Displacement, "Displacement");
+        this->setOutputParameterName(Pressure, "Pressure");
     };
 
     ///
@@ -115,7 +116,7 @@ private:
     NumLib::DiscreteDataConvergenceCheck _checker;
     MyNodalFunctionVector* _displacement;
     std::vector<NodalPointScalarWrapper*> _vec_u_components;
-    MyVariable* _var_p;
+    size_t _var_p_id;
 //    FemLib::FEMIntegrationPointFunctionVector* _strain;
 //    FemLib::FEMIntegrationPointFunctionVector* _stress;
 

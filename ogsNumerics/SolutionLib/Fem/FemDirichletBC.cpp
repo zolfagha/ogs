@@ -18,12 +18,12 @@ namespace SolutionLib
 {
 
 /// setup B.C.
-void FemDirichletBC::setup()
+void FemDirichletBC::setup(size_t order)
 {
     if (!_do_setup) return;
     if (!_is_transient) _do_setup = false;
 
-    _msh->setCurrentOrder(_order);
+    _msh->setCurrentOrder(order);
     FemLib::DirichletBC2FEM convert(*_msh, *_geo, *_bc_func, _vec_nodes, _vec_values);
 
     if (!_is_transient)
