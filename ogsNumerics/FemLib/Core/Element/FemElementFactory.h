@@ -40,6 +40,10 @@ public:
                 return new QUAD9(msh);
             case FiniteElementType::TRI3CONST:
                 return new TRI3CONST(msh);
+            case FiniteElementType::TRI3:
+                return new TRI3(msh);
+            case FiniteElementType::TRI6:
+                return new TRI6(msh);
             default:
                 return 0;
         }
