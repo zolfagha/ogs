@@ -249,81 +249,163 @@ public:
     /**
      * return a list of equation id for all variables
      *
+     * Length of a created list is the number of points * the number of variables.
+     * a created list may contain entries with -1 if no valid address is found
+     * for corresponding key (var id, point id). In addition to that, the second
+     * may have -1 for ghost points.
+     *
      * @param mesh_id
      * @param pt_id
      * @param eqs_id
      * @param eqs_id_without_ghost
      */
     void mapEqsID(
-            size_t mesh_id, const std::vector<size_t> &pt_id,
-            std::vector<size_t> &eqs_id,
-            std::vector<size_t> &eqs_id_without_ghost
+            size_t mesh_id, const std::vector<size_t> &list_pt_id,
+            std::vector<size_t> &list_eqs_id,
+            std::vector<size_t> &list_eqs_id_without_ghost
             ) const
     {
         if (_map_msh2var.count(mesh_id)==0) return;
 
         const std::vector<size_t> &list_var = _map_msh2var.find(mesh_id)->second;
-        const size_t n_pt = pt_id.size();
+        const size_t n_pt = list_pt_id.size();
         const size_t n_dof_per_pt = list_var.size();
         const size_t n_total_dof = n_pt * n_dof_per_pt;
-        eqs_id.resize(n_total_dof);
-        eqs_id_without_ghost.resize(n_total_dof);
+        list_eqs_id.resize(n_total_dof);
+        list_eqs_id_without_ghost.resize(n_total_dof);
+
+        for (size_t i_var=0; i_var<list_var.size(); i_var++) {
+            const size_t var_id = list_var[i_var];
+            const IEquationIdStorage* table = getPointEquationIdTable(var_id, mesh_id);
+            for (size_t i_pt=0; i_pt<n_pt; i_pt++) {
+                const size_t pt_id = list_pt_id[i_pt];
+                size_t pos;
+                if (_local_numbering_type==DofNumberingType::BY_VARIABLE) {
+                    pos = i_pt + i_var * n_pt;
+                } else {
+                    pos = i_var + i_pt * n_dof_per_pt;
+                }
+                list_eqs_id[pos] = table->address(pt_id);
+                list_eqs_id_without_ghost[pos] = isGhostPoint(mesh_id, pt_id) ? BaseLib::index_npos : list_eqs_id[pos];
+            }
+        }
+    }
+    
+    /**
+     * return a list of equation id for all variables
+     *
+     * Length of a created list is sum of the number of active points for each variable.
+     * The second list may have -1 for ghost points.
+     *
+     * @param mesh_id
+     * @param pt_id
+     * @param eqs_id
+     * @param eqs_id_without_ghost
+     */
+    void mapEqsIDreduced(
+            size_t mesh_id, const std::vector<size_t> &list_pt_id,
+            std::vector<size_t> &list_eqs_id,
+            std::vector<size_t> &list_eqs_id_without_ghost
+            ) const
+    {
+        if (_map_msh2var.count(mesh_id)==0) return;
+
+        const std::vector<size_t> &list_var = _map_msh2var.find(mesh_id)->second;
+        const size_t n_pt = list_pt_id.size();
+        const size_t n_dof_per_pt = list_var.size();
+        const size_t n_total_dof = n_pt * n_dof_per_pt;
+        list_eqs_id.reserve(n_total_dof);
+        list_eqs_id_without_ghost.reserve(n_total_dof);
 
         if (_local_numbering_type==DofNumberingType::BY_VARIABLE) {
-            for (size_t i=0; i<list_var.size(); i++) {
-                size_t var_id = list_var[i];
+            for (size_t i_var=0; i_var<list_var.size(); i_var++) {
+                const size_t var_id = list_var[i_var];
                 const IEquationIdStorage* table = getPointEquationIdTable(var_id, mesh_id);
-                for (size_t j=0; j<pt_id.size(); j++) {
-                    eqs_id[j+i*n_pt] = table->address(pt_id[j]);
-                    eqs_id_without_ghost[j+i*n_pt] = isGhostPoint(mesh_id, pt_id[j]) ? BaseLib::index_npos : eqs_id[j+i*n_pt];
+                std::vector<size_t> active_pt_list;
+                std::vector<size_t> active_eqs_id_list;
+                for (size_t i_pt=0; i_pt<n_pt; i_pt++) {
+                    const size_t pt_id = list_pt_id[i_pt];
+                    if (!table->hasKey(pt_id)) continue;
+                    list_eqs_id.push_back(table->address(pt_id));
+                    list_eqs_id_without_ghost.push_back(isGhostPoint(mesh_id, pt_id) ? BaseLib::index_npos : list_eqs_id.back());
                 }
             }
-        } else {
-            for (size_t i=0; i<list_var.size(); i++) {
-                size_t var_id = list_var[i];
-                const IEquationIdStorage* table = getPointEquationIdTable(var_id, mesh_id);
-                for (size_t j=0; j<pt_id.size(); j++) {
-                    eqs_id[i + j*n_dof_per_pt] = table->address(pt_id[j]);
-                    eqs_id_without_ghost[i + j*n_dof_per_pt] = isGhostPoint(mesh_id, pt_id[j]) ? BaseLib::index_npos : eqs_id[i + j*n_dof_per_pt];
+        } else { // by point
+            std::vector<std::vector<size_t> > var_active_pt_list(list_var.size());
+            std::vector<std::vector<size_t> > var_active_eqs_id_list(list_var.size());
+            for (size_t i_pt=0; i_pt<n_pt; i_pt++) {
+                const size_t pt_id = list_pt_id[i_pt];
+                for (size_t i_var=0; i_var<list_var.size(); i_var++) {
+                    const size_t var_id = list_var[i_var];
+                    const IEquationIdStorage* table = getPointEquationIdTable(var_id, mesh_id);
+                    if (!table->hasKey(pt_id)) continue;
+                    list_eqs_id.push_back(table->address(pt_id));
+                    list_eqs_id_without_ghost.push_back(isGhostPoint(mesh_id, pt_id) ? BaseLib::index_npos : list_eqs_id.back());
                 }
             }
         }
-
     }
-    
+
+    /**
+     *
+     * @param mesh_id
+     * @param pt_id
+     * @param local_table
+     */
     void createLocalMappingTable(
-        size_t mesh_id, const std::vector<size_t> &pt_id,
+        size_t mesh_id, const std::vector<size_t> &list_pt_id,
         DofEquationIdTable &local_table
         ) const
     {
         const std::vector<size_t> &list_var = _map_msh2var.find(mesh_id)->second;
-        const size_t n_pt = pt_id.size();
-        const size_t n_dof_per_pt = list_var.size();
-        const size_t n_total_dof = n_pt * n_dof_per_pt;
+        const size_t n_pt = list_pt_id.size();
         
-        for (size_t i=0; i<n_dof_per_pt; i++) {
-            size_t var_id = list_var[i];
-            const IEquationIdStorage* table = getPointEquationIdTable(var_id, mesh_id);
-            std::vector<size_t> active_pt_list;
-            std::vector<size_t> active_eqs_id_list;
-            for (size_t j=0; j<n_pt; j++) {
-                size_t wrk_pt_id = pt_id[j];
-                if (table->hasKey(wrk_pt_id)) {
-                    active_pt_list.push_back(wrk_pt_id);
-                    active_eqs_id_list.push_back(table->address(wrk_pt_id));
+        if (_local_numbering_type==DofNumberingType::BY_VARIABLE) {
+            size_t active_entry_counter = 0;
+            for (size_t i_var=0; i_var<list_var.size(); i_var++) {
+                const size_t var_id = list_var[i_var];
+                const IEquationIdStorage* table = getPointEquationIdTable(var_id, mesh_id);
+                std::vector<size_t> active_pt_list;
+                std::vector<size_t> active_eqs_id_list;
+                for (size_t i_pt=0; i_pt<n_pt; i_pt++) {
+                    const size_t pt_id = list_pt_id[i_pt];
+                    if (!table->hasKey(pt_id)) continue;
+                    active_pt_list.push_back(pt_id);
+                    active_eqs_id_list.push_back(active_entry_counter++);
+                }
+                local_table.addVariableDoFs(mesh_id, active_pt_list);
+                IEquationIdStorage *local_storage = local_table.getPointEquationIdTable(i_var, mesh_id);
+                for (size_t j=0; j<active_pt_list.size(); j++) {
+                    local_storage->set(active_pt_list[j], active_eqs_id_list[j]);
                 }
             }
-            local_table.addVariableDoFs(mesh_id, active_pt_list);
-            IEquationIdStorage *local_storage = local_table.getPointEquationIdTable(i, mesh_id);
-            for (size_t j=0; j<active_pt_list.size(); j++) {
-                local_storage->set(active_pt_list[j], active_eqs_id_list[j]);
+        } else { // by point
+            size_t active_entry_counter = 0;
+            std::vector<std::vector<size_t> > var_active_pt_list(list_var.size());
+            std::vector<std::vector<size_t> > var_active_eqs_id_list(list_var.size());
+            for (size_t i_pt=0; i_pt<n_pt; i_pt++) {
+                const size_t pt_id = list_pt_id[i_pt];
+                for (size_t i_var=0; i_var<list_var.size(); i_var++) {
+                    const size_t var_id = list_var[i_var];
+                    const IEquationIdStorage* table = getPointEquationIdTable(var_id, mesh_id);
+                    if (!table->hasKey(pt_id)) continue;
+                    var_active_pt_list[i_var].push_back(pt_id);
+                    var_active_eqs_id_list[i_var].push_back(active_entry_counter++);
+                }
+            }
+
+            for (size_t i_var=0; i_var<var_active_pt_list.size(); i_var++) {
+                local_table.addVariableDoFs(mesh_id, var_active_pt_list[i_var]);
+                IEquationIdStorage *local_storage = local_table.getPointEquationIdTable(i_var, mesh_id);
+                for (size_t j=0; j<var_active_pt_list[i_var].size(); j++) {
+                    local_storage->set(var_active_pt_list[i_var][j], var_active_eqs_id_list[i_var][j]);
+                }
             }
         }
-        
+
         local_table.setNumberingType(_local_numbering_type);
         //local_table.construct();
     }
-
     /**
      *
      * @param eqs_id
