@@ -128,8 +128,8 @@ int FunctionElementStressStrain<T>::solveTimeStep(const NumLib::TimeStep &/*time
         }
 
         // for each integration points
-        NumLib::LocalMatrix matB(n_strain_components, nnodes*dim);
-        NumLib::LocalMatrix matN(dim, nnodes*dim);
+        NumLib::LocalMatrix matB = NumLib::LocalMatrix::Zero(n_strain_components, nnodes*dim);
+        NumLib::LocalMatrix matN = NumLib::LocalMatrix::Zero(dim, nnodes*dim);
         double r[3] = {};
         double x[3] = {};
         for (size_t ip=0; ip<n_gp; ip++) {
@@ -140,8 +140,8 @@ int FunctionElementStressStrain<T>::solveTimeStep(const NumLib::TimeStep &/*time
             fe->getRealCoordinates(x);
 
             // set N,B
-            setNu_Matrix(dim, nnodes, N, matN);
-            setB_Matrix(dim, nnodes, dN, matB);
+            setNu_Matrix_byPoint(dim, nnodes, N, matN);
+            setB_Matrix_byPoint(dim, nnodes, dN, matB);
 
             // strain
             NumLib::LocalVector gp_strain(n_strain_components);
