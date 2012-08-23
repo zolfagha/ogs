@@ -5,12 +5,14 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file GlobalEquationUpdatorWithLocalAssembler.h
+ * \file TransientElementWiseMatrixUpdater.h
  *
  * Created on 2012-08-03 by Norihiro Watanabe
  */
 
 #pragma once
+
+#include <vector>
 
 #include "MeshLib/Core/IElement.h"
 #include "DiscreteLib/Utils/DofEquationIdTable.h"
@@ -47,29 +49,31 @@ public:
         return * new TransientElementWiseMatrixUpdater<LocalAssemblerType>(obj);
     }
 
-    template <class T_SOLVER>
-    void update(const MeshLib::IElement &e, T_SOLVER &eqs)
+    template <class T_LINEAR_EQS>
+    void update(const MeshLib::IElement &e, T_LINEAR_EQS &eqs)
     {
         std::vector<size_t> ele_node_ids, ele_node_size_order;
-        std::vector<size_t> local_dofmap_row;
-        //std::vector<size_t> local_dofmap_column;
+        std::vector<size_t> local_dofmap_row, local_dofmap_column;
         LocalEquation localEQS;
         LocalVector local_u_n1;
         LocalVector local_u_n;
 
         // get dof map
         e.getNodeIDList(e.getMaximumOrder(), ele_node_ids);
-        e.getListOfNumberOfNodesForAllOrders(ele_node_size_order);
-        _dofManager->mapEqsID(_msh->getID(), ele_node_ids, local_dofmap_row); //TODO order
+        _dofManager->mapEqsIDreduced(_msh->getID(), ele_node_ids, local_dofmap_row, local_dofmap_column);
         // previous and current results
         DiscreteLib::getLocalVector(local_dofmap_row, *_vec_u1, local_u_n1);
         DiscreteLib::getLocalVector(local_dofmap_row, *_vec_u0, local_u_n);
+        
+        DiscreteLib::DofEquationIdTable localDofMap;
+        _dofManager->createLocalMappingTable(_msh->getID(), ele_node_ids, localDofMap);
+
         // local assembly
         localEQS.create(local_dofmap_row.size());
-        _transient_e_assembler->assembly(*_timestep, e, local_u_n1, local_u_n, *localEQS.getA());
+        _transient_e_assembler->assembly(*_timestep, e, localDofMap, local_u_n1, local_u_n, *localEQS.getA());
 
         // update global
-        eqs.addAsub(local_dofmap_row, *localEQS.getA());
+        eqs.addAsub(local_dofmap_row, local_dofmap_column, *localEQS.getA());
     }
 
 private:
