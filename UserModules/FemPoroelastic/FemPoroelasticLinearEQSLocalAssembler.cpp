@@ -5,12 +5,12 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file LinearElasticLinearLocalAssembler.cpp
+ * \file FemPoroelasticLinearEQSLocalAssembler.cpp
  *
  * Created on 2012-07-13 by Norihiro Watanabe
  */
 
-#include "LinearElasticLinearLocalAssembler.h"
+#include "FemPoroelasticLinearEQSLocalAssembler.h"
 
 #include "FemLib/Core/Element/IFemElement.h"
 #include "FemLib/Tools/LagrangeFeObjectContainer.h"
@@ -22,7 +22,7 @@
 #include "../FemDeformationTotalForm/FemLinearElasticTools.h"
 #include "Ogs6FemData.h"
 
-void FemPoroelasticLinearLocalAssembler::assemble(
+void FemPoroelasticLinearEQSLocalAssembler::assembleComponents(
         const NumLib::TimeStep &timestep,  
         const MeshLib::IElement &e, 
         const std::vector<size_t> &vec_order, 

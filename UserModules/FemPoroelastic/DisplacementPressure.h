@@ -22,9 +22,9 @@
 
 #include "ProcessLib/AbstractTransientProcess.h"
 
-#include "LinearElasticLinearLocalAssembler.h"
-#include "LinearElasticResidualLocalAssembler.h"
-#include "LinearElasticJacobianLocalAssembler.h"
+#include "FemPoroelasticLinearEQSLocalAssembler.h"
+#include "FemPoroelasticResidualLocalAssembler.h"
+#include "FemPoroelasticJacobianLocalAssembler.h"
 
 /**
  * \brief Monolithic poro-elasticity calculator using FEM
@@ -39,7 +39,7 @@ public:
     typedef T_DISCRETE_SYSTEM MyDiscreteSystem;
     typedef T_LINEAR_SOLVER MyLinearSolver;
     // local assembler
-    typedef FemPoroelasticLinearLocalAssembler MyLinearAssemblerType;
+    typedef FemPoroelasticLinearEQSLocalAssembler MyLinearAssemblerType;
     typedef FemPoroelasticResidualLocalAssembler MyResidualAssemblerType;
     typedef FemPoroelasticJacobianLocalAssembler MyJacobianAssemblerType;
     // Equation definition

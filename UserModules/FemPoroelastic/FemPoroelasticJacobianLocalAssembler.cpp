@@ -5,12 +5,12 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file LinearElasticJacobianLocalAssembler.cpp
+ * \file FemPoroelasticJacobianLocalAssembler.cpp
  *
  * Created on 2012-07-13 by Norihiro Watanabe
  */
 
-#include "LinearElasticJacobianLocalAssembler.h"
+#include "FemPoroelasticJacobianLocalAssembler.h"
 
 #include "FemLib/Core/Element/IFemElement.h"
 #include "MaterialLib/PorousMedia.h"
@@ -18,13 +18,14 @@
 #include "../FemDeformationTotalForm/FemLinearElasticTools.h"
 #include "Ogs6FemData.h"
 
-
-void FemPoroelasticJacobianLocalAssembler::assembly
-    (   const NumLib::TimeStep &/*time*/,
+void FemPoroelasticJacobianLocalAssembler::assembleComponents
+    (  const NumLib::TimeStep &/*time*/,
         const MeshLib::IElement &e,
-        const NumLib::LocalVector &/*u1*/,
-        const NumLib::LocalVector &/*u0*/,
-        NumLib::LocalMatrix &localJ )
+        const std::vector<size_t> &vec_order,
+        const std::vector<LocalVectorType> &vec_u0,
+        const std::vector<LocalVectorType> &vec_u1,
+        std::vector<std::vector<LocalMatrixType> > &vec_K
+        )
 {
     FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
     size_t mat_id = e.getGroupID();
@@ -65,6 +66,6 @@ void FemPoroelasticJacobianLocalAssembler::assembly
         setB_Matrix_byPoint(dim, nnodes, dN, matB);
 
         // K += B^T * D * B
-        localJ.noalias() += fac * matB.transpose() * matD * matB;
+        vec_K[0][0].noalias() += fac * matB.transpose() * matD * matB;
     }
 }

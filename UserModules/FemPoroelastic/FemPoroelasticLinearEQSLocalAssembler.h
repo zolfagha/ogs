@@ -5,7 +5,7 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file LinearElasticLinearLocalAssembler.h
+ * \file FemPoroelasticLinearEQSLocalAssembler.h
  *
  * Created on 2012-07-13 by Norihiro Watanabe
  */
@@ -18,28 +18,27 @@
 #include "DiscreteLib/Utils/Tools.h"
 #include "FemLib/Tools/LagrangeFeObjectContainer.h"
 #include "NumLib/TransientAssembler/IElementWiseTransientLinearEQSLocalAssembler.h"
-#include "NumLib/TransientAssembler/TransientCoupledProlbemLocalAssembler.h"
+#include "NumLib/TransientAssembler/ElementWiseTransientCoupledLinearEQSLocalAssembler.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 
 
 
-class FemPoroelasticLinearLocalAssembler
-: public NumLib::TransientCoupledProlbemLocalAssembler
+class FemPoroelasticLinearEQSLocalAssembler
+: public NumLib::ElementWiseTransientCoupledLinearEQSLocalAssembler
 {
 public:
     typedef NumLib::LocalVector LocalVectorType;
     typedef NumLib::LocalMatrix LocalMatrixType;
 
-    explicit FemPoroelasticLinearLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects, size_t n_var, const std::vector<size_t> &vec_order)
-    : NumLib::TransientCoupledProlbemLocalAssembler(n_var, vec_order), _feObjects(*feObjects)
+    explicit FemPoroelasticLinearEQSLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects, size_t n_var, const std::vector<size_t> &vec_order)
+    : NumLib::ElementWiseTransientCoupledLinearEQSLocalAssembler(n_var, vec_order), _feObjects(*feObjects)
     {
     };
 
-    virtual ~FemPoroelasticLinearLocalAssembler() {};
+    virtual ~FemPoroelasticLinearEQSLocalAssembler() {};
 
 protected:
-    //virtual void assembly(const NumLib::TimeStep &/*time*/,  const MeshLib::IElement &e, const LocalVectorType &/*local_u_n1*/, const LocalVectorType &/*local_u_n*/, NumLib::LocalEquation &eqs);
-    virtual void assemble(  const NumLib::TimeStep &/*time*/,  
+    virtual void assembleComponents(  const NumLib::TimeStep &/*time*/,  
                             const MeshLib::IElement &e, 
                             const std::vector<size_t> &vec_order, 
                             const std::vector<LocalVectorType> &vec_u0, 

@@ -11,7 +11,7 @@
  */
 
 
-#include "LinearElasticResidualLocalAssembler.h"
+#include "FemPoroelasticResidualLocalAssembler.h"
 
 #include "FemLib/Core/Element/IFemElement.h"
 #include "MaterialLib/PorousMedia.h"
@@ -20,13 +20,14 @@
 #include "../FemDeformationTotalForm/FemLinearElasticTools.h"
 #include "Ogs6FemData.h"
 
-/// assemble a local residual for the given element
-void FemPoroelasticResidualLocalAssembler::assembly
-    (   const NumLib::TimeStep &/*time*/,
-        const MeshLib::IElement &e,
-        const NumLib::LocalVector &local_u_n1,
-        const NumLib::LocalVector &/*local_u_n*/,
-        NumLib::LocalVector &local_r    )
+void FemPoroelasticResidualLocalAssembler::assembleComponents
+    (   const NumLib::TimeStep &/*time*/,  
+        const MeshLib::IElement &e, 
+        const std::vector<size_t> &vec_order, 
+        const std::vector<LocalVectorType> &vec_u0, 
+        const std::vector<LocalVectorType> &vec_u1, 
+        std::vector<LocalVectorType> &vec_F
+        )
 {
 
     FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
@@ -62,8 +63,9 @@ void FemPoroelasticResidualLocalAssembler::assembly
     }
 
     //
-    NumLib::LocalMatrix localK = NumLib::LocalMatrix::Zero(local_r.rows(), local_r.rows());
-    NumLib::LocalVector localRHS = NumLib::LocalVector::Zero(local_r.rows());
+    size_t nrows = 0;
+    NumLib::LocalMatrix localK = NumLib::LocalMatrix::Zero(nrows, nrows);
+    NumLib::LocalVector localRHS = NumLib::LocalVector::Zero(nrows);
     NumLib::LocalMatrix matB(n_strain_components, nnodes*dim);
     NumLib::LocalMatrix matN(dim, nnodes*dim);
     FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
@@ -89,5 +91,5 @@ void FemPoroelasticResidualLocalAssembler::assembly
     }
 
     // r = K*u - RHS
-    local_r.noalias() = localK * local_u_n1 - localRHS;
+    vec_F[0].noalias() = localK * vec_u1[0] - localRHS;
 }

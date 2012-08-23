@@ -127,8 +127,8 @@ bool FunctionDisplacementPressure<T1,T2>::initialize(const BaseLib::Options &opt
         vec_orders.push_back(_problem->getVariable(i)->getCurrentOrder());
 
     MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_feObjects, _problem->getNumberOfVariables(), vec_orders);
-    MyResidualAssemblerType* r_assembler = new MyResidualAssemblerType(_feObjects);
-    MyJacobianAssemblerType* j_eqs = new MyJacobianAssemblerType(_feObjects);
+    MyResidualAssemblerType* r_assembler = new MyResidualAssemblerType(_feObjects, _problem->getNumberOfVariables(), vec_orders);
+    MyJacobianAssemblerType* j_eqs = new MyJacobianAssemblerType(_feObjects, _problem->getNumberOfVariables(), vec_orders);
     eqs->initialize(linear_assembler, r_assembler, j_eqs);
 
 
