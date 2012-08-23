@@ -38,7 +38,9 @@ bool FunctionDisplacementPressure<T1,T2>::initialize(const BaseLib::Options &opt
     // set up mesh and FE objects
     //--------------------------------------------------------------------------
     MeshLib::IMesh* msh = femData->list_mesh[msh_id];
+    INFO("->generating higher order mesh...");
     MeshLib::generateHigherOrderUnstrucuredMesh(*(MeshLib::UnstructuredMesh*)msh, 2);
+    INFO("* mesh id %d: order=%d, nodes=%d, elements=%d", msh_id, msh->getMaxiumOrder(), msh->getNumberOfNodes(msh->getMaxiumOrder()), msh->getNumberOfElements());
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
     _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
