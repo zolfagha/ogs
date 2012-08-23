@@ -4,19 +4,19 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file TransientCoupledProlbemLocalAssembler.cpp
+ * \file ElementWiseTransientCoupledLinearEQSLocalAssembler.cpp
  *
  * Created on 2012-08-03 by Norihiro Watanabe
  */
 
-#include "TransientCoupledProlbemLocalAssembler.h"
+#include "ElementWiseTransientCoupledLinearEQSLocalAssembler.h"
 
 #include "DiscreteLib/Utils/Tools.h"
 
 namespace NumLib
 {
 
-void TransientCoupledProlbemLocalAssembler::assembly(  const NumLib::TimeStep &timestep,
+void ElementWiseTransientCoupledLinearEQSLocalAssembler::assembly(  const NumLib::TimeStep &timestep,
                         const MeshLib::IElement &e,
                         const DiscreteLib::DofEquationIdTable &localDofManager,
                         const LocalVectorType &local_u_n1,
@@ -52,7 +52,7 @@ void TransientCoupledProlbemLocalAssembler::assembly(  const NumLib::TimeStep &t
     }
 
 
-    this->assemble(timestep, e, vec_order, vec_u0, vec_u1, vec_K, vec_F);
+    this->assembleComponents(timestep, e, vec_order, vec_u0, vec_u1, vec_K, vec_F);
 
     for (size_t i=0; i<n_var; i++) {
         for (size_t j=0; j<n_var; j++) {
@@ -60,11 +60,6 @@ void TransientCoupledProlbemLocalAssembler::assembly(  const NumLib::TimeStep &t
         }
         eqs.addRHSsub(vec_local_pos[i], vec_F[i]);
     }
-
-//        for (size_t i=0; i<n_var; i++) {
-//            for (size_t j=0; j<n_var; j++)
-//                delete vec_K[i][j];
-//        }
 
 }
 
