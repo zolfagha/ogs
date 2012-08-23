@@ -4,7 +4,7 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file TransientCoupledProlbemLocalAssembler.h
+ * \file ElementWiseTransientCoupledLinearEQSLocalAssembler.h
  *
  * Created on 2012-08-03 by Norihiro Watanabe
  */
@@ -22,19 +22,19 @@
 namespace NumLib
 {
 
-class TransientCoupledProlbemLocalAssembler
+class ElementWiseTransientCoupledLinearEQSLocalAssembler
 : public IElementWiseTransientLinearEQSLocalAssembler
 {
 public:
     typedef LocalVector LocalVectorType;
     typedef LocalMatrix LocalMatrixType;
 
-    TransientCoupledProlbemLocalAssembler(size_t n_var, const std::vector<size_t> &vec_order)
+    ElementWiseTransientCoupledLinearEQSLocalAssembler(size_t n_var, const std::vector<size_t> &vec_order)
     : _n_var(n_var), _vec_order(vec_order)
     {
     };
 
-    virtual ~TransientCoupledProlbemLocalAssembler() {};
+    virtual ~ElementWiseTransientCoupledLinearEQSLocalAssembler() {};
 
     virtual void assembly(  const NumLib::TimeStep &timestep,
                             const MeshLib::IElement &e,
@@ -46,7 +46,7 @@ public:
 
 
 protected:
-    virtual void assemble(  const NumLib::TimeStep &/*time*/,
+    virtual void assembleComponents(  const NumLib::TimeStep &/*time*/,
                             const MeshLib::IElement &e,
                             const std::vector<size_t> &vec_order,
                             const std::vector<LocalVectorType> &vec_u0,
