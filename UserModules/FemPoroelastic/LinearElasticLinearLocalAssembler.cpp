@@ -144,8 +144,8 @@ void FemPoroelasticLinearLocalAssembler::assemble(
         // set N,B
         LocalMatrixType &Nu = *fe_u->getBasisFunction();
         LocalMatrixType &dNu = *fe_u->getGradBasisFunction();
-        setNu_Matrix(dim, nnodes_u, Nu, Nuvw);
-        setB_Matrix(dim, nnodes_u, dNu, B);
+        setNu_Matrix_byComponent(dim, nnodes_u, Nu, Nuvw);
+        setB_Matrix_byComponent(dim, nnodes_u, dNu, B);
         LocalMatrixType &Np = *fe_p->getBasisFunction();
 
         // K_uu += B^T * D * B
@@ -170,7 +170,7 @@ void FemPoroelasticLinearLocalAssembler::assemble(
         //--- local component ----
         // set N,B
         LocalMatrixType &dNu = *fe_u->getGradBasisFunction();
-        setB_Matrix(dim, nnodes_u, dNu, B);
+        setB_Matrix_byComponent(dim, nnodes_u, dNu, B);
         LocalMatrixType &Np = *fe_p->getBasisFunction();
         LocalMatrixType &dNp = *fe_p->getGradBasisFunction();
 
