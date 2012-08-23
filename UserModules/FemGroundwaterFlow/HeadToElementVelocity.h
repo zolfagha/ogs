@@ -21,7 +21,7 @@
 #include "ProcessLib/AbstractTimeIndependentProcess.h"
 
 template <class T_DISCRETE_SYSTEM>
-class FunctionElementVelocity
+class FunctionHeadToElementVelocity
     : public ProcessLib::AbstractTimeIndependentProcess
 {
 public:
@@ -32,15 +32,15 @@ public:
     typedef typename FemLib::FemNodalFunctionScalar<MyDiscreteSystem>::type MyNodalFunctionScalar;
     typedef typename FemLib::FEMIntegrationPointFunctionVector<MyDiscreteSystem>::type MyIntegrationPointFunctionVector;
 
-    FunctionElementVelocity() 
-    : ProcessLib::AbstractTimeIndependentProcess("ELEMENT_VELOCITY", 1, 1), _dis(NULL), _vel(NULL), _feObjects(NULL)
+    FunctionHeadToElementVelocity() 
+    : ProcessLib::AbstractTimeIndependentProcess("HEAD_TO_ELEMENT_VELOCITY", 1, 1), _dis(NULL), _vel(NULL), _feObjects(NULL)
     {
         // set default parameter name
         ProcessLib::AbstractTimeIndependentProcess::setInputParameterName(Head, "Head");
         ProcessLib::AbstractTimeIndependentProcess::setOutputParameterName(Velocity, "Velocity");
     };
 
-    virtual ~FunctionElementVelocity()
+    virtual ~FunctionHeadToElementVelocity()
     {
         BaseLib::releaseObject(_feObjects, _vel);
     };
@@ -63,10 +63,10 @@ private:
     FemLib::LagrangianFeObjectContainer* _feObjects;
     NumLib::DiscreteDataConvergenceCheck _checker;
 
-    DISALLOW_COPY_AND_ASSIGN(FunctionElementVelocity);
+    DISALLOW_COPY_AND_ASSIGN(FunctionHeadToElementVelocity);
 };
 
-#include "ElementVelocity.hpp"
+#include "HeadToElementVelocity.hpp"
 
 
 
