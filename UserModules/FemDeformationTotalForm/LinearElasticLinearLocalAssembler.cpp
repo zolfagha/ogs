@@ -15,18 +15,22 @@
 #include "FemLib/Core/Element/IFemElement.h"
 #include "FemLib/Tools/LagrangeFeObjectContainer.h"
 #include "NumLib/TransientAssembler/IElementWiseTransientLinearEQSLocalAssembler.h"
-#include "MaterialLib/PorousMedia.h"
 #include "MaterialLib/Solid.h"
 
 #include "FemLinearElasticTools.h"
 #include "Ogs6FemData.h"
 
-void FemLinearElasticLinearLocalAssembler::assembly(const NumLib::TimeStep &/*time*/,  const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const LocalVectorType &/*local_u_n1*/, const LocalVectorType &/*local_u_n*/, NumLib::LocalEquation &eqs)
+void FemLinearElasticLinearLocalAssembler::assembly(
+            const NumLib::TimeStep &/*time*/,
+            const MeshLib::IElement &e,
+            const DiscreteLib::DofEquationIdTable &/*localDofManager*/,
+            const LocalVectorType &/*local_u_n1*/,
+            const LocalVectorType &/*local_u_n*/,
+            NumLib::LocalEquation &eqs)
 {
     FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
     size_t mat_id = e.getGroupID();
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    //MaterialLib::PorousMedia* pm = femData->list_pm[mat_id];
     MaterialLib::Solid *solidphase = femData->list_solid[mat_id];
 
     const size_t dim = e.getDimension();
@@ -72,14 +76,16 @@ void FemLinearElasticLinearLocalAssembler::assembly(const NumLib::TimeStep &/*ti
         // set N,B
         LocalMatrixType &N = *fe->getBasisFunction();
         LocalMatrixType &dN = *fe->getGradBasisFunction();
-        setNu_Matrix(dim, nnodes, N, matN);
-        setB_Matrix(dim, nnodes, dN, matB);
+        setNu_Matrix_byPoint(dim, nnodes, N, matN);
+        setB_Matrix_byPoint(dim, nnodes, dN, matB);
 
         // K += B^T * D * B
         localK.noalias() += fac * matB.transpose() * matD * matB;
 
         // RHS
-        localRHS.noalias() += fac * matN.transpose() * body_force;
+        if (hasGravity) {
+            localRHS.noalias() += fac * matN.transpose() * body_force;
+        }
     }
 }
 
