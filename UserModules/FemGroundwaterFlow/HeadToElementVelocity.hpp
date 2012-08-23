@@ -20,7 +20,7 @@
 #include "Ogs6FemData.h"
 
 template <class T>
-bool FunctionElementVelocity<T>::initialize(const BaseLib::Options &option)
+bool FunctionHeadToElementVelocity<T>::initialize(const BaseLib::Options &option)
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
 
@@ -45,7 +45,7 @@ bool FunctionElementVelocity<T>::initialize(const BaseLib::Options &option)
 }
 
 template <class T>
-void FunctionElementVelocity<T>::accept(const NumLib::TimeStep &/*time*/)
+void FunctionHeadToElementVelocity<T>::accept(const NumLib::TimeStep &/*time*/)
 {
     //std::cout << "Velocity=" << std::endl;
     //_vel->printout();
@@ -56,9 +56,9 @@ void FunctionElementVelocity<T>::accept(const NumLib::TimeStep &/*time*/)
 };
 
 template <class T>
-int FunctionElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &/*time*/)
+int FunctionHeadToElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &/*time*/)
 {
-    INFO("Solving ELEMENT_VELOCITY...");
+    INFO("Calculating Darcy velocity within elements from hydraulic head...");
 
     const MeshLib::IMesh *msh = _dis->getMesh();
     MyNodalFunctionScalar *head = (MyNodalFunctionScalar*)getInput(Head);
