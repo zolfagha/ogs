@@ -24,7 +24,7 @@ public:
     {
     };
 
-    void assembly(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/,  NumLib::LocalMatrix &localJ);
+    void assembly(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/,  NumLib::LocalMatrix &localJ);
 
 private:
     FemLib::LagrangianFeObjectContainer _feObjects;

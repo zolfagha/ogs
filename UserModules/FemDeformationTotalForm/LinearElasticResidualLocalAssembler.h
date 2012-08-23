@@ -32,7 +32,7 @@ public:
     /// @param local_u_n1    guess of current time step value
     /// @param local_u_n    previous time step value
     /// @param local_r        local residual
-    virtual void assembly(const NumLib::TimeStep &time,  const MeshLib::IElement &e, const NumLib::LocalVector &local_u_n1, const NumLib::LocalVector &local_u_n, NumLib::LocalVector &local_r);
+    virtual void assembly(const NumLib::TimeStep &time,  const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const NumLib::LocalVector &local_u_n1, const NumLib::LocalVector &local_u_n, NumLib::LocalVector &local_r);
 
 private:
     FemLib::LagrangianFeObjectContainer _feObjects;
