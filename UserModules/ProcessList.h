@@ -17,7 +17,9 @@
 // * This file should be called in body files (e.g. cpp)
 //------------------------------------------------------------------------------
 #include "FemGroundwaterFlow/Head.h"
-#include "FemGroundwaterFlow/ElementVelocity.h"
+#include "FemGroundwaterFlow/HeadToElementVelocity.h"
+#include "FemGroundwaterFlow/PressureToHead.h"
+#include "FemGroundwaterFlow/PressureToElementVelocity.h"
 #include "FemMassTransport/Concentration.h"
 #include "FemDeformationTotalForm/Displacement.h"
 #include "FemDeformationTotalForm/ElementStressStrain.h"
