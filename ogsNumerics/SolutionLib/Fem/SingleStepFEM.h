@@ -14,6 +14,8 @@
 
 #include <vector>
 
+#include "logog.hpp"
+
 #include "BaseLib/CodingTools.h"
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/Core/IDiscreteSystem.h"
@@ -139,6 +141,8 @@ SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER>::SingleStepFEM(MyDiscreteSyste
     : AbstractTimeSteppingAlgorithm(*problem->getTimeSteppingFunction()),
       _problem(problem), _discrete_system(dis)
 {
+    INFO("->setting up a solution algorithm SingleStepFEM");
+
     const size_t n_var = problem->getNumberOfVariables();
     MeshLib::IMesh* msh = dis->getMesh();
 
@@ -147,9 +151,11 @@ SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER>::SingleStepFEM(MyDiscreteSyste
         MyVariable* var = problem->getVariable(i);
         size_t n_dof_per_var = msh->getNumberOfNodes(var->getCurrentOrder());
         _dofManager.addVariableDoFs(msh->getID(), 0, n_dof_per_var);
+        INFO("* Variable %d: name=%s, order=%d, n_dof=%d", i, var->getName().c_str(), var->getCurrentOrder(), n_dof_per_var);
     }
     _dofManager.construct();
     const size_t n_total_dofs = _dofManager.getTotalNumberOfActiveDoFs();
+    INFO("* Total number of DoFs = %d", n_total_dofs);
 
     // initialize vectors for each variable
     _vec_u_n1.resize(n_var, 0);
