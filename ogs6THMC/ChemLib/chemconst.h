@@ -15,6 +15,7 @@
 
 #include <string>
 #include <vector>
+#include "FemLib/Core/DataType.h"
 
 namespace ogsChem
 {
@@ -64,6 +65,11 @@ namespace ogsChem
         PQC,          // PhreeQC format
         GRE_XML       // XML database format of this program
     };
+
+
+	// type definitions
+	typedef DiscreteLib::LocalMatrix LocalMatrix;
+	typedef DiscreteLib::LocalVector LocalVector;
 }
 
 #endif // CHEMCONST_H

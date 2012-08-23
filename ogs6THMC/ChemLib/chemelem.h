@@ -14,8 +14,6 @@
 
 #include "chemconst.h"
 
-// using namespace std;
-
 namespace ogsChem
 {
 class ChemElem
