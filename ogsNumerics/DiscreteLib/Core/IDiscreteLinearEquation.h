@@ -46,6 +46,8 @@ public:
     virtual double* getLocalX() = 0;
     ///
     virtual void getX(GlobalVectorType &v) = 0;
+    ///
+    virtual void setX(const GlobalVectorType &v) = 0;
     /// get a Dof map manager
     virtual DofEquationIdTable* getDofMapManger() const = 0;
     /// set prescribed dof
