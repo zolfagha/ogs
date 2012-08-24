@@ -135,8 +135,8 @@ public:
             }
 
             // for each integration points
-            NumLib::LocalMatrix matB(n_strain_components, nnodes*dim);
-            NumLib::LocalMatrix matN(dim, nnodes*dim);
+            NumLib::LocalMatrix matB = NumLib::LocalVector::Zero(n_strain_components, nnodes*dim);
+            NumLib::LocalMatrix matN = NumLib::LocalVector::Zero(dim, nnodes*dim);
             double r[3] = {};
             double x[3] = {};
             for (size_t ip=0; ip<n_gp; ip++) {

@@ -175,8 +175,7 @@ public:
         setElasticConsitutiveTensor(dim, Lambda, G, matD);
 
         // body force
-        LocalVectorType body_force(dim);
-        body_force *= .0;
+        LocalVectorType body_force = LocalVectorType::Zero(dim);
         bool hasGravity = false;
         if (hasGravity)
             body_force[dim-1] = solidphase->density * 9.81;
@@ -184,8 +183,8 @@ public:
         //
         LocalMatrixType &localK = *eqs.getA();
         LocalVectorType &localRHS = *eqs.getRHSAsVec();
-        LocalMatrixType matB(n_strain_components, nnodes*dim);
-        LocalMatrixType matN(dim, nnodes*dim);
+        LocalMatrixType matB = NumLib::LocalVector::Zero(n_strain_components, nnodes*dim);
+        LocalMatrixType matN = NumLib::LocalVector::Zero(dim, nnodes*dim);
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
         for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {

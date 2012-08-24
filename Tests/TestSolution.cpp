@@ -112,10 +112,9 @@ public:
         //const double dt = time.getTimeStepSize();
         const double theta = 1.0;
         LocalVectorType localX0;
-        LocalMatrixType localM(n,n), localK(n,n);
+        LocalMatrixType localM = LocalMatrixType::Zero(n,n);
+        LocalMatrixType localK = LocalMatrixType::Zero(n,n);
         LocalVectorType localF;
-        localM *= .0;
-        localK *= .0;
         //localF.resize(localF.size(), .0);
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];

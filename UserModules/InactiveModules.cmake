@@ -3,7 +3,7 @@
 #-------------------------------------------------------------------------------
 LIST(APPEND INACTIVE_MODULES
      #FemGroundwaterFlow
-     FemMassTransport
+     #FemMassTransport
      #FemDeformationTotalForm
      ) 
 
