@@ -96,7 +96,7 @@ THMCSimulator::THMCSimulator(int argc, char* argv[])
         cmd.add( logfile_arg );
         TCLAP::ValueArg<unsigned> verbosity_arg("v", "verbose", "level of verbosity [0 very low information, 1 much information]", false, 0, "number");
         cmd.add( verbosity_arg );
-        TCLAP::ValueArg<unsigned> pcs_arg("m", "modules", "list available modules [0 off, 1 on]", false, 1, "number");
+        TCLAP::SwitchArg pcs_arg("m", "modules", "list available modules", false);
         cmd.add( pcs_arg );
         cmd.parse( argc, argv ); // process can exit in this function
 
@@ -113,35 +113,35 @@ THMCSimulator::THMCSimulator(int argc, char* argv[])
             logog_file->SetFormatter( *custom_format );
         }
 
-
         SimulationInfo::outputHeader();
         // list modules
-        unsigned flag_list_modules (pcs_arg.getValue());
+        const unsigned flag_list_modules (pcs_arg.getValue());
         if (flag_list_modules!=0) {
             ProcessBuilder::getInstance()->output();
         }
 
-        INFO("->Parsing input arguments");
-        if (!input_arg.getValue().empty()) {
-            INFO("project path     : %s", input_arg.getValue().c_str());
-        }
-        if (! logfile_arg.getValue().empty()) {
-            INFO("log file path    : %s", logfile_arg.getValue().c_str());
-        }
-        
-        // data output directory
-        std::string output_dir_path = "";
-        if (! output_dir_arg.getValue().empty()) {
-            output_dir_path = output_dir_arg.getValue();
-        }
-        INFO("output directory : %s", output_dir_path.c_str());
+        const bool is_input_file_given = !input_arg.getValue().empty();
+        if (is_input_file_given) {
+            INFO("->Parsing input arguments");
+            INFO("* project path     : %s", input_arg.getValue().c_str());
+            if (! logfile_arg.getValue().empty()) {
+                INFO("* log file path    : %s", logfile_arg.getValue().c_str());
+            }
 
-        if (! input_arg.getValue().empty()) {
-            const std::string proj_path = input_arg.getValue();
-            if (checkInputFiles(proj_path)) {
-                _sim_info = new SimulationInfo(proj_path, output_dir_path);
-            } else {
-                ERR("***Error: Cannot find a project - %s", proj_path.c_str());
+            // data output directory
+            std::string output_dir_path = "";
+            if (! output_dir_arg.getValue().empty()) {
+                output_dir_path = output_dir_arg.getValue();
+            }
+            INFO("* output directory : %s", output_dir_path.c_str());
+
+            if (! input_arg.getValue().empty()) {
+                const std::string proj_path = input_arg.getValue();
+                if (checkInputFiles(proj_path)) {
+                    _sim_info = new SimulationInfo(proj_path, output_dir_path);
+                } else {
+                    ERR("***Error: Cannot find a project - %s", proj_path.c_str());
+                }
             }
         }
 
