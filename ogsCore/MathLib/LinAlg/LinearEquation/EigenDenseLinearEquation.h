@@ -35,27 +35,13 @@ public:
 
     virtual ~EigenDenseLinearEquation() {};
 
-    void create(size_t length, RowMajorSparsity* /*sp*/=0)
-    {
-        resize(length);
-    }
+    void create(size_t length, RowMajorSparsity* /*sp*/=0);
 
     bool isCreated() const { return true; };
 
-    void resize(size_t length)
-    {
-        _A.resize(length, length);
-        _b.resize(length);
-        _x.resize(length);
-        reset();
-    }
+    void resize(size_t length);
 
-    void reset()
-    {
-        _A *= .0;
-        _b *= .0;
-        _x *= .0;
-    }
+    void reset();
 
     size_t getDimension() const { return _A.rows(); }
 
@@ -75,18 +61,6 @@ public:
     {
         _A(rowId, colId) += v;
     }
-
-//    void addA(std::vector<size_t> &rowId, std::vector<size_t> &colId, MatrixType &m)
-//    {
-//        for (size_t i=0; i<rowId.size(); i++)
-//            for (size_t j=0; j<colId.size(); j++)
-//                _A(rowId[i], colId[j]) += m(i,j);
-//    }
-//
-//    void addA(std::vector<size_t> &pos, MatrixType &m)
-//    {
-//        addA(pos, pos, m);
-//    }
 
     double getRHS(size_t rowId)
     {
@@ -118,41 +92,15 @@ public:
     VectorType* getXAsVec() {return &_x;};
 
 
-    void setKnownX(size_t row_id, double x)
-    {
-        const size_t n_cols = _A.cols();
-        //A(k, j) = 0.
-        for (size_t j=0; j<n_cols; j++)
-            _A(row_id, j) = .0;
-        //b_i -= A(i,k)*val, i!=k
-        for (size_t j=0; j<n_cols; j++)
-            _b[j] -= _A(j, row_id)*x;
-        //b_k = val
-        _b[row_id] = x;
-        //A(i, k) = 0., i!=k
-        for (size_t j=0; j<n_cols; j++)
-            _A(j, row_id) = .0;
-        //A(k, k) = 1.0
-        _A(row_id, row_id) = 1.0; //=x
-    }
+    void setKnownX(size_t row_id, double x);
 
-    void setKnownX(const std::vector<size_t> &vec_id, const std::vector<double> &vec_x)
-    {
-        for (size_t i=0; i<vec_id.size(); ++i)
-            setKnownX(vec_id[i], vec_x[i]);
-    }
+    void setKnownX(const std::vector<size_t> &vec_id, const std::vector<double> &vec_x);
 
-    void printout(std::ostream &os=std::cout) const
-    {
-        os << "not implemented yet." << std::endl;
-    }
+    void printout(std::ostream &os=std::cout) const;
 
     void setOption(const BaseLib::Options &/*option*/) {};
 
-    void solve()
-    {
-        _x = _A.colPivHouseholderQr().solve(_b);
-    }
+    void solve();
 
 private:
     MatrixType _A;
