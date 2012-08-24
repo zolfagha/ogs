@@ -69,8 +69,7 @@ public:
         _dofManager->createLocalMappingTable(_msh->getID(), ele_node_ids, localDofMap);
         
         // local assembly
-        localVec.resize(local_dofmap_row.size());
-        localVec *= .0;
+        localVec = LocalVector::Zero(local_dofmap_row.size());
         _transient_e_assembler->assembly(*_timestep, e, localDofMap, local_u_n1, local_u_n, localVec);
         // update global
         globalVec.addSubvector(local_dofmap_row, &localVec[0]);

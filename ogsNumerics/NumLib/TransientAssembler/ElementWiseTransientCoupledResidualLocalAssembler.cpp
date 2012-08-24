@@ -43,16 +43,21 @@ void ElementWiseTransientCoupledResidualLocalAssembler::assembly(  const NumLib:
         DiscreteLib::getLocalVector(vec_local_pos[i], local_u_n1, vec_u1[i]);
     }
 
-    std::vector<LocalVectorType> vec_F(n_var);
+    std::vector<LocalVectorType> vec_r(n_var);
 
-    this->assembleComponents(timestep, e, vec_order, vec_u0, vec_u1, vec_F);
+    this->assembleComponents(timestep, e, vec_order, vec_u0, vec_u1, vec_r);
 
     for (size_t i=0; i<n_var; i++) {
         for (size_t j=0; j<vec_local_pos[i].size(); j++) {
-            local_r[vec_local_pos[i][j]] += vec_F[i][j];
+            local_r[vec_local_pos[i][j]] += vec_r[i][j];
         }
     }
 
+//    if (e.getID()==0) {
+//        std::cout << "local_u_n0=" << local_u_n << std::endl;
+//        std::cout << "local_u_n1=" << local_u_n1 << std::endl;
+//        std::cout << "local_r=" << local_r << std::endl;
+//    }
 }
 
 
