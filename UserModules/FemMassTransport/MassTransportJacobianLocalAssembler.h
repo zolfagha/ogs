@@ -39,46 +39,44 @@ public:
         _vel = const_cast<NumLib::ITXFunction*>(vel);
     }
 
-    void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/, NumLib::LocalMatrix &localJ)
+    void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &/*localDofManager*/, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/, NumLib::LocalMatrix &localJ)
     {
         FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
+        const size_t n_dim = e.getDimension();
         size_t mat_id = e.getGroupID();
         MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];
         double cmp_mol_diffusion = .0;
         _cmp->molecular_diffusion->eval(0, cmp_mol_diffusion);
 
-        NumLib::LocalMatrix matM(localJ);
-        NumLib::LocalMatrix matDiff(localJ);
-        NumLib::LocalMatrix matAdv(localJ);
+        NumLib::LocalMatrix matM = NumLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
+        NumLib::LocalMatrix matDiff = NumLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
+        NumLib::LocalMatrix matAdv = NumLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
 
-        FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
-        double gp_x[3], real_x[3];
         NumLib::LocalMatrix poro(1,1);
         NumLib::LocalMatrix d_poro(1,1);
         NumLib::ITXFunction::DataType v;
 
+        double gp_x[3], real_x[3];
+        FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
             q->getSamplingPoint(j, gp_x);
             fe->computeBasisFunctions(gp_x);
             fe->getRealCoordinates(real_x);
+            NumLib::TXPosition gp_pos(NumLib::TXPosition::IntegrationPoint, e.getID(), j, real_x);
 
-            pm->porosity->eval(real_x, poro);
+            pm->porosity->eval(gp_pos, poro);
             d_poro(0,0) = cmp_mol_diffusion * poro(0,0);
-            _vel->eval(real_x, v);
+            _vel->eval(gp_pos, v);
+            NumLib::ITXFunction::DataType v2 = v.topRows(n_dim).transpose();
 
             fe->integrateWxN(j, poro, matM);
             fe->integrateDWxDN(j, d_poro, matDiff);
-            fe->integrateWxDN(j, v, matAdv);
+            fe->integrateWxDN(j, v2, matAdv);
         }
 
         double dt = time.getTimeStepSize();
         double theta = 1.0;
-        matM *= 1.0 / dt;
-        matDiff *= theta;
-        matAdv *= theta;
-        localJ = matM;
-        localJ += matDiff;
-        localJ += matAdv;
+        localJ = (1.0/dt * matM + theta *(matDiff + matAdv));
 
         //std::cout << "M="; localM.write(std::cout); std::cout << std::endl;
         //std::cout << "L="; matDiff.write(std::cout); std::cout << std::endl;

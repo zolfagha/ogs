@@ -52,17 +52,18 @@ protected:
         size_t mat_id = e.getGroupID();
         MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];
 
-        LocalMatrixType localDispersion(localK);
-        LocalMatrixType localAdvection(localK);
+        LocalMatrixType localDispersion = NumLib::LocalMatrix::Zero(localK.rows(), localK.cols());
+        LocalMatrixType localAdvection = NumLib::LocalMatrix::Zero(localK.rows(), localK.cols());
 
         double cmp_mol_diffusion = .0;
         _cmp->molecular_diffusion->eval(0, cmp_mol_diffusion);
 
-        FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
-        double gp_x[3], real_x[3];
         NumLib::LocalMatrix poro(1,1);
         NumLib::LocalMatrix d_poro(1,1);
         NumLib::ITXFunction::DataType v;
+
+        FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
+        double gp_x[3], real_x[3];
         for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
             q->getSamplingPoint(j, gp_x);
             fe->computeBasisFunctions(gp_x);

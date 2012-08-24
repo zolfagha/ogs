@@ -40,7 +40,6 @@ void FemLinearElasticLinearLocalAssembler::assembly(
 
     // set D
     LocalMatrixType matD = LocalMatrixType::Zero(n_strain_components, n_strain_components);
-    //matD *= .0;
     NumLib::LocalMatrix nv(1,1);
     NumLib::LocalMatrix E(1,1);
     solidphase->poisson_ratio->eval(e_pos, nv);
@@ -50,8 +49,7 @@ void FemLinearElasticLinearLocalAssembler::assembly(
     MaterialLib::setElasticConsitutiveTensor(dim, Lambda, G, matD);
 
     // body force
-    LocalVectorType body_force(dim);
-    body_force *= .0;
+    LocalVectorType body_force = LocalVectorType::Zero(dim);
     bool hasGravity = false;
     if (hasGravity) {
         double rho_s = .0;
@@ -62,8 +60,8 @@ void FemLinearElasticLinearLocalAssembler::assembly(
     //
     LocalMatrixType &localK = *eqs.getA();
     LocalVectorType &localRHS = *eqs.getRHSAsVec();
-    LocalMatrixType matB(n_strain_components, nnodes*dim);
-    LocalMatrixType matN(dim, nnodes*dim);
+    LocalMatrixType matB = LocalMatrixType::Zero(n_strain_components, nnodes*dim);
+    LocalMatrixType matN = LocalMatrixType::Zero(dim, nnodes*dim);
     FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
     double gp_x[3], real_x[3];
     for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
