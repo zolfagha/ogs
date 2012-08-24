@@ -21,26 +21,26 @@
 #include "ProcessLib/AbstractTimeIndependentProcess.h"
 
 template <class T_DISCRETE_SYSTEM>
-class FunctionElementVelocity
+class FunctionPressureToElementVelocity
     : public ProcessLib::AbstractTimeIndependentProcess
 {
 public:
-    enum In { Head=0 };
+    enum In { Pressure=0 };
     enum Out { Velocity=0 };
 
     typedef T_DISCRETE_SYSTEM MyDiscreteSystem;
     typedef typename FemLib::FemNodalFunctionScalar<MyDiscreteSystem>::type MyNodalFunctionScalar;
     typedef typename FemLib::FEMIntegrationPointFunctionVector<MyDiscreteSystem>::type MyIntegrationPointFunctionVector;
 
-    FunctionElementVelocity() 
-    : ProcessLib::AbstractTimeIndependentProcess("ELEMENT_VELOCITY", 1, 1), _dis(NULL), _vel(NULL), _feObjects(NULL)
+    FunctionPressureToElementVelocity()
+    : ProcessLib::AbstractTimeIndependentProcess("PRESSURE_TO_ELEMENT_VELOCITY", 1, 1), _dis(NULL), _vel(NULL), _feObjects(NULL)
     {
         // set default parameter name
-        ProcessLib::AbstractTimeIndependentProcess::setInputParameterName(Head, "Head");
+        ProcessLib::AbstractTimeIndependentProcess::setInputParameterName(Pressure, "Pressure");
         ProcessLib::AbstractTimeIndependentProcess::setOutputParameterName(Velocity, "Velocity");
     };
 
-    virtual ~FunctionElementVelocity()
+    virtual ~FunctionPressureToElementVelocity()
     {
         BaseLib::releaseObject(_feObjects, _vel);
     };
@@ -63,10 +63,10 @@ private:
     FemLib::LagrangianFeObjectContainer* _feObjects;
     NumLib::DiscreteDataConvergenceCheck _checker;
 
-    DISALLOW_COPY_AND_ASSIGN(FunctionElementVelocity);
+    DISALLOW_COPY_AND_ASSIGN(FunctionPressureToElementVelocity);
 };
 
-#include "ElementVelocity.hpp"
+#include "PressureToElementVelocity.hpp"
 
 
 

@@ -108,7 +108,7 @@ void TemplateTransientDxFEMFunction<T1,T2,T3>::eval(const SolutionVector &u_n1, 
         std::vector<double> var_bc_val;
         for (size_t j=0; j<var->getNumberOfDirichletBC(); j++) {
             FemDirichletBC* bc1 = var->getDirichletBC(j);
-            bc1->setup();
+            bc1->setup(var->getCurrentOrder());
             std::vector<double> bc_value_for_dx(bc1->getListOfBCNodes().size(), .0);
             for (size_t k=0; k<bc_value_for_dx.size(); k++) {
                 size_t id = bc1->getListOfBCNodes()[k];

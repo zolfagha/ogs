@@ -39,6 +39,7 @@ void createRowMajorSparsityFromNodeConnectivity(const MeshLib::ITopologyNode2Nod
     }
 }
 
+#if 0
 void createRowMajorSparsityFromNodeConnectivity(const MeshLib::ITopologyNode2Nodes &topo_node2nodes, size_t mesh_id, DofEquationIdTable &local_dofTable, MathLib::RowMajorSparsity &row_major_entries)
 {
     row_major_entries.resize(local_dofTable.getTotalNumberOfActiveDoFs());
@@ -65,6 +66,43 @@ void createRowMajorSparsityFromNodeConnectivity(const MeshLib::ITopologyNode2Nod
         }
     }
 }
+#else
+void createRowMajorSparsityFromNodeConnectivity(const MeshLib::ITopologyNode2Nodes &topo_node2nodes_max_order, size_t mesh_id, DofEquationIdTable &local_dofTable, MathLib::RowMajorSparsity &row_major_entries)
+{
+    const size_t n_rows = local_dofTable.getTotalNumberOfActiveDoFs();
+    row_major_entries.resize(n_rows);
+
+    size_t n_nodes_max = topo_node2nodes_max_order.getNumberOfNodes();
+
+    const size_t n_var = local_dofTable.getNumberOfVariables();
+    for (size_t pt_id=0; pt_id<n_nodes_max; pt_id++) {
+        for (size_t var_id=0; var_id<n_var; var_id++) {
+//            if (!local_dofTable.getPointEquationIdTable(var_id, mesh_id)->hasKey(pt_id))
+//                continue;
+//            size_t row_id = pt_id*n_var + var_id;
+            size_t row_id = local_dofTable.mapEqsID(var_id, mesh_id, pt_id);
+            if (row_id == BaseLib::index_npos) continue;
+            // for each DoF(var,pt)
+            std::set<size_t> &setConnection = row_major_entries[row_id];
+            // add all DoFs defined in this point
+            for (size_t l=0; l<n_var; l++) {
+                size_t col_id = local_dofTable.mapEqsID(l, mesh_id, pt_id);
+                if (col_id != BaseLib::index_npos)
+                    setConnection.insert(col_id);
+            }
+            // add DoFs defined in connected nodes
+            const std::set<size_t> connected_nodes = topo_node2nodes_max_order.getConnectedNodes(pt_id);
+            for (std::set<size_t>::const_iterator it=connected_nodes.begin(); it!=connected_nodes.end(); it++) {
+                for (size_t l=0; l<n_var; l++) {
+                    size_t col_id = local_dofTable.mapEqsID(l, mesh_id, *it);
+                    if (col_id != BaseLib::index_npos)
+                        setConnection.insert(col_id);
+                }
+            }
+        }
+    }
+}
+#endif
 
 void createRowMajorSparsityFromNodeConnectivity(const MeshLib::ITopologyNode2Nodes &local_topo_node2nodes, IGlobaLocalMappingTable &pt_mapping, size_t mesh_id, DofEquationIdTable &global_dofTable, MathLib::RowMajorSparsity &row_major_entries)
 {

@@ -60,8 +60,7 @@ const CoordinateMappingProperty* FemNaturalCoordinates::compute(const double* na
 
     //jacobian: J=[dx/dr dy/dr // dx/ds dy/ds]
     LocalMatrix *jac = _prop->jacobian_dxdr;
-    //(*jac) = .0;
-    (*jac) *= .0;
+    (*jac) = LocalMatrix::Zero(jac->rows(), jac->cols());
     for (size_t i_r=0; i_r<dim; i_r++) {
         for (size_t j_x=0; j_x<dim; j_x++) {
             for (size_t k=0; k<nnodes; k++) {
@@ -85,7 +84,7 @@ const CoordinateMappingProperty* FemNaturalCoordinates::compute(const double* na
 //        inv_jac->multiply(*dshape_dr, *dshape_dx);
         (*dshape_dx) = (*inv_jac) * (*dshape_dr);
     } else {
-        std::cout << "***error: det_j is not positive." << std::endl;
+        std::cout << "***error: det_j is not positive. element id=" << _ele->getID() << std::endl;
     }
 
     return _prop;

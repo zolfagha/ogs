@@ -22,6 +22,7 @@ namespace DiscreteLib
 
 SparsityBuilderFromNodeConnectivity::SparsityBuilderFromNodeConnectivity(const MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
 {
+    msh.setCurrentOrder(msh.getMaxiumOrder());
     MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes((MeshLib::IMesh*)&msh);
     SparsityTool::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, msh.getID(), dofManager, sparse);
 }

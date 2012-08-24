@@ -18,11 +18,12 @@ namespace SolutionLib
 {
 
 /// setup BC.
-void FemNeumannBC::setup()
+void FemNeumannBC::setup(size_t order)
 {
     if (!_do_setup) return;
     if (!_is_transient) _do_setup = false;
 
+    _msh->setCurrentOrder(order);
     FemLib::NeumannBC2FEM convert(*_msh, *_feObjects, *_geo, *_bc_func, _vec_nodes, _vec_values);
 
     if (!_is_transient)

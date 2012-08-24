@@ -24,6 +24,7 @@
 void FemLinearElasticResidualLocalAssembler::assembly
     (   const NumLib::TimeStep &/*time*/,
         const MeshLib::IElement &e,
+        const DiscreteLib::DofEquationIdTable &localDofManager, 
         const NumLib::LocalVector &local_u_n1,
         const NumLib::LocalVector &/*local_u_n*/,
         NumLib::LocalVector &local_r    )
@@ -42,7 +43,6 @@ void FemLinearElasticResidualLocalAssembler::assembly
 
     // set D
     NumLib::LocalMatrix matD = NumLib::LocalMatrix::Zero(n_strain_components, n_strain_components);
-    //matD *= .0;
     NumLib::LocalMatrix nv(1,1);
     NumLib::LocalMatrix E(1,1);
     solidphase->poisson_ratio->eval(e_pos, nv);
@@ -52,8 +52,7 @@ void FemLinearElasticResidualLocalAssembler::assembly
     MaterialLib::setElasticConsitutiveTensor(dim, Lambda, G, matD);
 
     // body force
-    NumLib::LocalVector body_force(dim);
-    body_force *= .0;
+    NumLib::LocalVector body_force = NumLib::LocalVector::Zero(dim);
     bool hasGravity = false;
     if (hasGravity) {
         double rho_s = .0;
@@ -64,8 +63,8 @@ void FemLinearElasticResidualLocalAssembler::assembly
     //
     NumLib::LocalMatrix localK = NumLib::LocalMatrix::Zero(local_r.rows(), local_r.rows());
     NumLib::LocalVector localRHS = NumLib::LocalVector::Zero(local_r.rows());
-    NumLib::LocalMatrix matB(n_strain_components, nnodes*dim);
-    NumLib::LocalMatrix matN(dim, nnodes*dim);
+    NumLib::LocalMatrix matB = NumLib::LocalVector::Zero(n_strain_components, nnodes*dim);
+    NumLib::LocalMatrix matN = NumLib::LocalVector::Zero(dim, nnodes*dim);
     FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
     double gp_x[3], real_x[3];
     for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
@@ -77,8 +76,8 @@ void FemLinearElasticResidualLocalAssembler::assembly
         // set N,B
         NumLib::LocalMatrix &N = *fe->getBasisFunction();
         NumLib::LocalMatrix &dN = *fe->getGradBasisFunction();
-        setNu_Matrix(dim, nnodes, N, matN);
-        setB_Matrix(dim, nnodes, dN, matB);
+        setNu_Matrix_byPoint(dim, nnodes, N, matN);
+        setB_Matrix_byPoint(dim, nnodes, dN, matB);
 
         // K += B^T * D * B
         localK.noalias() += fac * matB.transpose() * matD * matB;

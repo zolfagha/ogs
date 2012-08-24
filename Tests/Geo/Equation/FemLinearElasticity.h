@@ -156,7 +156,7 @@ public:
 
     virtual ~FemLinearElasticLinearLocalAssembler() {};
 
-    virtual void assembly(const NumLib::TimeStep &/*time*/,  const MeshLib::IElement &e, const LocalVectorType &/*local_u_n1*/, const LocalVectorType &/*local_u_n*/, NumLib::LocalEquation &eqs)
+    virtual void assembly(const NumLib::TimeStep &/*time*/,  const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const LocalVectorType &/*local_u_n1*/, const LocalVectorType &/*local_u_n*/, NumLib::LocalEquation &eqs)
     {
         FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
 
@@ -175,8 +175,7 @@ public:
         setElasticConsitutiveTensor(dim, Lambda, G, matD);
 
         // body force
-        LocalVectorType body_force(dim);
-        body_force *= .0;
+        LocalVectorType body_force = LocalVectorType::Zero(dim);
         bool hasGravity = false;
         if (hasGravity)
             body_force[dim-1] = solidphase->density * 9.81;
@@ -184,8 +183,8 @@ public:
         //
         LocalMatrixType &localK = *eqs.getA();
         LocalVectorType &localRHS = *eqs.getRHSAsVec();
-        LocalMatrixType matB(n_strain_components, nnodes*dim);
-        LocalMatrixType matN(dim, nnodes*dim);
+        LocalMatrixType matB = NumLib::LocalVector::Zero(n_strain_components, nnodes*dim);
+        LocalMatrixType matN = NumLib::LocalVector::Zero(dim, nnodes*dim);
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
         for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
@@ -229,7 +228,7 @@ public:
     /// @param local_u_n1    guess of current time step value
     /// @param local_u_n    previous time step value
     /// @param local_r        local residual
-    virtual void assembly(const NumLib::TimeStep &time,  const MeshLib::IElement &e, const NumLib::LocalVector &local_u_n1, const NumLib::LocalVector &local_u_n, NumLib::LocalVector &local_r)
+    virtual void assembly(const NumLib::TimeStep &time,  const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const NumLib::LocalVector &local_u_n1, const NumLib::LocalVector &local_u_n, NumLib::LocalVector &local_r)
     {
 
     }
@@ -246,7 +245,7 @@ public:
     {
     };
 
-    void assembly(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/,  NumLib::LocalMatrix &localJ)
+    void assembly(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/,  NumLib::LocalMatrix &localJ)
     {
         FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
 

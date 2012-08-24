@@ -196,6 +196,10 @@ void generateHigherOrderUnstrucuredMesh(UnstructuredMesh &msh, size_t order)
 
     TopologySequentialNodes2Elements nod2ele(msh);
 
+    if (msh.getNumberOfEdges()==0) {
+        createEdgeElements(&msh);
+    }
+
     // make all edges higher order
     for (size_t i=0; i<msh.getNumberOfEdges(); i++) {
         IElement* e = msh.getEdgeElement(i);
@@ -210,6 +214,7 @@ void generateHigherOrderUnstrucuredMesh(UnstructuredMesh &msh, size_t order)
             e->setNodeID(2, nod_id);
         } else {
             //
+            std::cout << "***Error: order (" << order << ") is not supported in generateHigherOrderUnstrucuredMesh()" << std::endl;
         }
     }
 

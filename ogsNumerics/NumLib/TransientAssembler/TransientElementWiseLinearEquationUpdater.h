@@ -5,12 +5,14 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file GlobalEquationUpdatorWithLocalAssembler.h
+ * \file TransientElementWiseLinearEquationUpdater.h
  *
  * Created on 2012-08-03 by Norihiro Watanabe
  */
 
 #pragma once
+
+#include <vector>
 
 #include "MeshLib/Core/IElement.h"
 #include "DiscreteLib/Utils/DofEquationIdTable.h"
@@ -19,6 +21,11 @@
 namespace NumLib
 {
 
+/**
+ * \brief Element-wise updater for transient case
+ *
+ * \tparam T_LOCAL  Local assembler
+ */
 template <class T_LOCAL>
 class TransientElementWiseLinearEquationUpdater
 {
@@ -26,12 +33,31 @@ public:
     typedef T_LOCAL LocalAssemblerType;
     typedef DiscreteLib::IDiscreteVector<double> GlobalVector;
 
-    TransientElementWiseLinearEquationUpdater(const TimeStep* time, MeshLib::IMesh* msh, DiscreteLib::DofEquationIdTable* dofManager, const GlobalVector* u0, const GlobalVector* u1, LocalAssemblerType* a)
-    : _msh(msh), _dofManager(dofManager), _transient_e_assembler(new LocalAssemblerType(*a)), _timestep(time), _vec_u0(u0), _vec_u1(u1)
+    /**
+     *
+     * @param time          Time step
+     * @param msh           Mesh
+     * @param dofManager    Dof manager
+     * @param u0            Previous time step data
+     * @param u1            Current time step data (guess)
+     * @param a             Local assembler
+     */
+    TransientElementWiseLinearEquationUpdater   (
+            const TimeStep* time, MeshLib::IMesh* msh,
+            DiscreteLib::DofEquationIdTable* dofManager,
+            const GlobalVector* u0, const GlobalVector* u1,
+            LocalAssemblerType* a   )
+    : _msh(msh), _dofManager(dofManager),
+      _transient_e_assembler(new LocalAssemblerType(*a)), _timestep(time),
+      _vec_u0(u0), _vec_u1(u1)
     {
-
     }
 
+    /**
+     * Copy constructor
+     *
+     * @param obj
+     */
     TransientElementWiseLinearEquationUpdater(const TransientElementWiseLinearEquationUpdater<LocalAssemblerType> &obj)
     {
         _msh = obj._msh;
@@ -42,36 +68,54 @@ public:
         _vec_u1 = obj._vec_u1;
     }
 
+    /**
+     *
+     * @param obj
+     * @return
+     */
     TransientElementWiseLinearEquationUpdater<LocalAssemblerType> &operator=(const TransientElementWiseLinearEquationUpdater<LocalAssemblerType> &obj)
     {
         return * new TransientElementWiseLinearEquationUpdater<LocalAssemblerType>(obj);
     }
 
+    /**
+     *
+     */
     virtual ~TransientElementWiseLinearEquationUpdater()
     {
         BaseLib::releaseObject(_transient_e_assembler);
     }
 
-    template <class T_SOLVER>
-    void update(const MeshLib::IElement &e, T_SOLVER &eqs)
+    /**
+     * update a global equation for the given element
+     *
+     * @param e     mesh element
+     * @param eqs   global equation
+     */
+    template <class T_LINEAR_EQS>
+    void update(const MeshLib::IElement &e, T_LINEAR_EQS &eqs)
     {
-        std::vector<size_t> ele_node_ids, ele_node_size_order;
-        std::vector<size_t> local_dofmap_row;
-        //std::vector<size_t> local_dofmap_column;
+        std::vector<size_t> ele_node_ids;
+        std::vector<size_t> local_dofmap_row, local_dofmap_column;
         LocalEquation localEQS;
         LocalVector local_u_n1;
         LocalVector local_u_n;
 
         // get dof map
         e.getNodeIDList(e.getMaximumOrder(), ele_node_ids);
-        e.getListOfNumberOfNodesForAllOrders(ele_node_size_order);
-        _dofManager->mapEqsID(_msh->getID(), ele_node_ids, local_dofmap_row, DiscreteLib::DofNumberingType::BY_POINT); //TODO order
+        _dofManager->mapEqsIDreduced(_msh->getID(), ele_node_ids, local_dofmap_row, local_dofmap_column);
+
         // previous and current results
         DiscreteLib::getLocalVector(local_dofmap_row, *_vec_u1, local_u_n1);
         DiscreteLib::getLocalVector(local_dofmap_row, *_vec_u0, local_u_n);
+        
+        DiscreteLib::DofEquationIdTable localDofMap;
+        _dofManager->createLocalMappingTable(_msh->getID(), ele_node_ids, localDofMap);
+        
+        
         // local assembly
         localEQS.create(local_dofmap_row.size());
-        _transient_e_assembler->assembly(*_timestep, e, local_u_n1, local_u_n, localEQS);
+        _transient_e_assembler->assembly(*_timestep, e, localDofMap, local_u_n1, local_u_n, localEQS);
 
 //        if (i<3) {
 //            std::cout << "local A = \n" << *localEQS.getA();
@@ -79,7 +123,7 @@ public:
 //        }
 
         // update global
-        eqs.addAsub(local_dofmap_row, *localEQS.getA());
+        eqs.addAsub(local_dofmap_row, local_dofmap_column, *localEQS.getA());
         eqs.addRHSsub(local_dofmap_row, localEQS.getRHS());
     }
 

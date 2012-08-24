@@ -204,6 +204,8 @@ public:
         resetNodalValues(v0);
     }
 
+    PolynomialOrder::type getOrder() const {return _order;};
+
 private:
     /// Assign this object from the given object
     void assign(const MyClassType &org)
@@ -358,6 +360,8 @@ public:
         initialize(dis, order);
         resetNodalValues(v0);
     }
+
+    PolynomialOrder::type getOrder() const {return _order;};
 
 private:
     /// Assign this object from the given object

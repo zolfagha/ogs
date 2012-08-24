@@ -86,9 +86,9 @@ public:
     };
 
     /// solve linear equations discretized with FEM
-    /// @param u0    initial guess
-    /// @param u_n1 new results
-    void eval(const SolutionVector &/*u0*/, SolutionVector &u_n1);
+    /// @param u_k0    initial guess
+    /// @param u_k1    new results
+    void eval(const SolutionVector &u_k0, SolutionVector &u_k1);
 
 private:
     MyDiscreteSystem* _sys;
@@ -101,7 +101,7 @@ private:
 
 
 template <class T1, class T2, class T3>
-void TemplateTransientLinearFEMFunction<T1, T2, T3>::eval(const SolutionVector &/*u0*/, SolutionVector &u_n1)
+void TemplateTransientLinearFEMFunction<T1, T2, T3>::eval(const SolutionVector &u_k0, SolutionVector &u_k1)
 {
     // input, output
     const NumLib::TimeStep &t_n1 = *this->_t_n1;
@@ -116,19 +116,19 @@ void TemplateTransientLinearFEMFunction<T1, T2, T3>::eval(const SolutionVector &
         std::vector<double> var_bc_val;
         for (size_t j=0; j<var->getNumberOfDirichletBC(); j++) {
             FemDirichletBC* bc1 = var->getDirichletBC(j);
-            bc1->setup();
+            bc1->setup(var->getCurrentOrder());
             var_bc_id.insert(var_bc_id.end(), bc1->getListOfBCNodes().begin(), bc1->getListOfBCNodes().end());
             var_bc_val.insert(var_bc_val.end(), bc1->getListOfBCValues().begin(), bc1->getListOfBCValues().end());
         }
         _linear_eqs->setPrescribedDoF(i, var_bc_id, var_bc_val);
         for (size_t j=0; j<var->getNumberOfNeumannBC(); j++) {
-            var->getNeumannBC(j)->setup();
+            var->getNeumannBC(j)->setup(var->getCurrentOrder());
         }
     }
 
     // assembly
     MeshLib::IMesh* msh = _sys->getMesh();
-    MyUpdater updater(&t_n1, msh, _linear_eqs->getDofMapManger(), u_n, &u_n1, _local_assembler);
+    MyUpdater updater(&t_n1, msh, _linear_eqs->getDofMapManger(), u_n, &u_k1, _local_assembler);
     MyGlobalAssembler assembler(&updater);
     _linear_eqs->construct(assembler);
 
@@ -142,8 +142,9 @@ void TemplateTransientLinearFEMFunction<T1, T2, T3>::eval(const SolutionVector &
     }
 
     // solve
+    _linear_eqs->setX(u_k0);
     _linear_eqs->solve();
-    _linear_eqs->getX(u_n1);
+    _linear_eqs->getX(u_k1);
 }
 
 } //end

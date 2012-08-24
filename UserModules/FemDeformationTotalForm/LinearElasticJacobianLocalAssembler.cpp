@@ -22,6 +22,7 @@
 void FemLinearElasticJacobianLocalAssembler::assembly
     (   const NumLib::TimeStep &/*time*/,
         const MeshLib::IElement &e,
+        const DiscreteLib::DofEquationIdTable &localDofManager, 
         const NumLib::LocalVector &/*u1*/,
         const NumLib::LocalVector &/*u0*/,
         NumLib::LocalMatrix &localJ )
@@ -61,8 +62,8 @@ void FemLinearElasticJacobianLocalAssembler::assembly
         // set N,B
         NumLib::LocalMatrix &N = *fe->getBasisFunction();
         NumLib::LocalMatrix &dN = *fe->getGradBasisFunction();
-        setNu_Matrix(dim, nnodes, N, matN);
-        setB_Matrix(dim, nnodes, dN, matB);
+        setNu_Matrix_byPoint(dim, nnodes, N, matN);
+        setB_Matrix_byPoint(dim, nnodes, dN, matB);
 
         // K += B^T * D * B
         localJ.noalias() += fac * matB.transpose() * matD * matB;

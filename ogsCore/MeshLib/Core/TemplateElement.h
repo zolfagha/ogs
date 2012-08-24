@@ -99,7 +99,7 @@ public:
     /// get current order
     size_t getCurrentOrder() const { return _order; };
     /// set current order
-    void setCurrentOrder(size_t order) { _order = order; };
+    void setCurrentOrder(size_t order) const { _order = order; };
 
     ///
     bool hasNodeIds(const std::vector<size_t> &sorted_node_ids) const
@@ -210,7 +210,7 @@ public:
 
 private:
     size_t _element_id;
-    size_t _order;
+    mutable size_t _order;
     size_t _max_order;
     size_t _group_id;
     std::vector<size_t> _list_node_id;

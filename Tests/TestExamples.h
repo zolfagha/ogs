@@ -97,8 +97,7 @@ public:
             MeshLib::IElement *e = msh->getElemenet(i_e);
             FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
             const size_t &n_dof = fe->getNumberOfVariables();
-            localK.resize(n_dof, n_dof);
-            localK *= .0;
+            localK = NumLib::LocalVector::Zero(n_dof, n_dof);
             FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
             for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
                 q->getSamplingPoint(j, gp_x);

@@ -14,20 +14,43 @@
 #pragma once
 
 #include <string>
+#include "NumLib/DataType.h"
+
+inline size_t getNumberOfStrainComponents(size_t dim) {return (dim==2 ? 4 : 6);};
+
+inline NumLib::LocalMatrix get_m(const size_t dim)
+{
+    NumLib::LocalMatrix m = NumLib::LocalMatrix::Zero(getNumberOfStrainComponents(dim),1);
+    for (size_t i=0; i<dim; i++)
+        m(i,0) = 1.0;
+    return m;
+}
 
 template <class T_MATRIX>
-inline void setNu_Matrix(const size_t dim, const size_t nnodes, const T_MATRIX &N, T_MATRIX &matN)
+inline void setNu_Matrix_byPoint(const size_t dim, const size_t nnodes, const T_MATRIX &N, T_MATRIX &matN)
 {
     matN *= .0;
     for (size_t in=0; in<nnodes; in++) {
-        size_t offset = in*dim;
+        const size_t offset = in*dim;
         for (size_t k=0; k<dim; k++)
             matN(k,offset+k) = N(in);
     }
 }
 
 template <class T_MATRIX>
-inline void setB_Matrix(const size_t dim, const size_t nnodes, const T_MATRIX &dN, T_MATRIX &matB)
+inline void setNu_Matrix_byComponent(const size_t dim, const size_t nnodes, const T_MATRIX &N, T_MATRIX &matN, bool sort_by_point = true)
+{
+    matN *= .0;
+    for (size_t i_dim = 0; i_dim<dim; i_dim++) {
+        const size_t offset = i_dim*nnodes;
+        for (size_t in=0; in<nnodes; in++) {
+            matN(i_dim, offset + in) = N(in);
+        }
+    }
+}
+
+template <class T_MATRIX>
+inline void setB_Matrix_byPoint(const size_t dim, const size_t nnodes, const T_MATRIX &dN, T_MATRIX &matB)
 {
     matB *= .0;
     if (dim==2) {
@@ -55,6 +78,42 @@ inline void setB_Matrix(const size_t dim, const size_t nnodes, const T_MATRIX &d
             matB(4,offset+2) = dshape_dx;
             matB(5,offset+1) = dshape_dz;
             matB(5,offset+2) = dshape_dy;
+        }
+    }
+}
+
+template <class T_MATRIX>
+inline void setB_Matrix_byComponent(const size_t dim, const size_t nnodes, const T_MATRIX &dN, T_MATRIX &matB)
+{
+    matB *= .0;
+
+    if (dim==2) {
+        for (size_t i_dim=0; i_dim<dim; i_dim++) {
+            for (size_t in=0; in<nnodes; in++) {
+                const double dshape_dx = dN(0, in);
+                const double dshape_dy = dN(1, in);
+                matB(0,in) = dshape_dx;
+                matB(1,nnodes+in) = dshape_dy;
+                matB(3,in) = dshape_dy;
+                matB(3,nnodes+in) = dshape_dx;
+            }
+        }
+    } else if (dim==3) {
+        for (size_t i_dim=0; i_dim<dim; i_dim++) {
+            for (size_t in=0; in<nnodes; in++) {
+                const double dshape_dx = dN(0, in);
+                const double dshape_dy = dN(1, in);
+                const double dshape_dz = dN(2, in);
+                matB(0,in) = dshape_dx;
+                matB(1,nnodes+in) = dshape_dy;
+                matB(2,nnodes*2+in) = dshape_dz;
+                matB(3,in) = dshape_dy;
+                matB(3,nnodes+in) = dshape_dx;
+                matB(4,in) = dshape_dz;
+                matB(4,nnodes*2+in) = dshape_dx;
+                matB(5,nnodes+in) = dshape_dz;
+                matB(5,nnodes*2+in) = dshape_dy;
+            }
         }
     }
 }

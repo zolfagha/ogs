@@ -19,11 +19,12 @@ namespace SolutionLib
 {
 
 /// setup
-void FemSourceTerm::setup()
+void FemSourceTerm::setup(size_t order)
 {
     if (!_do_setup) return;
     if (!_is_transient) _do_setup = false;
 
+    _msh->setCurrentOrder(order);
     MeshLib::findNodesOnGeometry(_msh, _geo, &_vec_nodes);
     _vec_values.resize(_vec_nodes.size());
     for (size_t i=0; i<_vec_nodes.size(); i++) {

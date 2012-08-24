@@ -205,8 +205,7 @@ public:
         size_t ele_id = x.getId();
         IntegrationPointVectorType &gp_values = (*_values)[ele_id];
         if (gp_values.size()==0) return;
-        double val = gp_values[0];
-        val *= .0;
+        double val = .0;
         for (size_t i=0; i<gp_values.size(); i++)
             val += gp_values[i];
         val /= gp_values.size();

@@ -61,14 +61,14 @@ CMediumProperties::CMediumProperties() :
     selected = false;
     // GEO
     geo_area = 1.0;                       //OK
-    porosity_model = -1;
+    porosity_model = 1;
     porosity_model_values[0] = 0.1;
-    tortuosity_model = -1;
+    tortuosity_model = 1;
     tortuosity_model_values[0] = 1.;
     // flow
-    storage_model = -1;
+    storage_model = 1;
     storage_model_values[0] = 0.;
-    permeability_model = -1;
+    permeability_model = 1;
     permeability_tensor_type = 0;
     tortuosity_tensor_type = 0;
     permeability_tensor[0] = 1.e-13;

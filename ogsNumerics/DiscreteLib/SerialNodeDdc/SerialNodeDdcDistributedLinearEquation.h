@@ -183,6 +183,13 @@ public:
         for (size_t i=x.getRangeBegin(); i<x.getRangeEnd(); i++)
             x[i] = tmp_x[i];
     };
+    ///
+    virtual void setX(const GlobalVectorType &x)
+    {
+        double *tmp_x = _global_linear_solver->getX();
+        for (size_t i=x.getRangeBegin(); i<x.getRangeEnd(); i++)
+            tmp_x[i] = x[i];
+    };
     /// get a Dof map manager
     DofEquationIdTable* getDofMapManger() const
     {

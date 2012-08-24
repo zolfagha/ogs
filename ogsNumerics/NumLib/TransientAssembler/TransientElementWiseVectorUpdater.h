@@ -5,12 +5,14 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file GlobalEquationUpdatorWithLocalAssembler.h
+ * \file TransientElementWiseVectorUpdater.h
  *
  * Created on 2012-08-03 by Norihiro Watanabe
  */
 
 #pragma once
+
+#include <vector>
 
 #include "MeshLib/Core/IElement.h"
 #include "DiscreteLib/Utils/DofEquationIdTable.h"
@@ -50,21 +52,25 @@ public:
     void update(const MeshLib::IElement &e, GlobalVector &globalVec)
     {
         std::vector<size_t> ele_node_ids, ele_node_size_order;
-        std::vector<size_t> local_dofmap_row;
+        std::vector<size_t> local_dofmap_row, local_dofmap_column;
         LocalVector localVec;
         LocalVector local_u_n1;
         LocalVector local_u_n;
 
         e.getNodeIDList(e.getMaximumOrder(), ele_node_ids);
         e.getListOfNumberOfNodesForAllOrders(ele_node_size_order);
-        _dofManager->mapEqsID(_msh->getID(), ele_node_ids, local_dofmap_row, DiscreteLib::DofNumberingType::BY_POINT); //TODO order
+        _dofManager->mapEqsIDreduced(_msh->getID(), ele_node_ids, local_dofmap_row, local_dofmap_column);
+
         // previous and current results
         DiscreteLib::getLocalVector(local_dofmap_row, *_vec_u1, local_u_n1);
         DiscreteLib::getLocalVector(local_dofmap_row, *_vec_u0, local_u_n);
+        
+        DiscreteLib::DofEquationIdTable localDofMap;
+        _dofManager->createLocalMappingTable(_msh->getID(), ele_node_ids, localDofMap);
+        
         // local assembly
-        localVec.resize(local_dofmap_row.size());
-        localVec *= .0;
-        _transient_e_assembler->assembly(*_timestep, e, local_u_n1, local_u_n, localVec);
+        localVec = LocalVector::Zero(local_dofmap_row.size());
+        _transient_e_assembler->assembly(*_timestep, e, localDofMap, local_u_n1, local_u_n, localVec);
         // update global
         globalVec.addSubvector(local_dofmap_row, &localVec[0]);
 

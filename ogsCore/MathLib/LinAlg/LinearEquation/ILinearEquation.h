@@ -75,6 +75,15 @@ public:
         }
     }
 
+    virtual void addRHSsub(const std::vector<size_t> &vec_row_pos, LocalVector &sub_vector, double fkt=1.0)
+    {
+        for (size_t i=0; i<vec_row_pos.size(); i++) {
+            const size_t rowId = vec_row_pos[i];
+            if (rowId==BaseLib::index_npos) continue;
+            addRHS(rowId, sub_vector(i)*fkt);
+        }
+    }
+
     virtual double* getX() = 0;
 
     virtual void setKnownX(size_t row_id, double x) = 0;

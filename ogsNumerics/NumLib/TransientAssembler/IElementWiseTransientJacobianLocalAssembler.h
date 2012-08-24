@@ -19,6 +19,11 @@ namespace MeshLib
 class IElement;
 };
 
+namespace DiscreteLib
+{
+class DofEquationIdTable;
+}
+
 namespace NumLib
 {
 
@@ -38,7 +43,7 @@ public:
     /// @param local_u_n1    guess of current time step value
     /// @param local_u_n    previous time step value
     /// @param local_J        local Jacobian
-    virtual void assembly(const TimeStep &time,  const MeshLib::IElement &e, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalMatrix &local_J) = 0;
+    virtual void assembly(const TimeStep &time,  const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalMatrix &local_J) = 0;
 };
 
 
@@ -53,7 +58,7 @@ public:
     /// @param local_u_n1    guess of current time step value
     /// @param local_u_n    previous time step value
     /// @param local_J        local Jacobian
-    virtual void assembly(const TimeStep &,  const MeshLib::IElement &, const LocalVector &, const LocalVector &, LocalMatrix &) {};
+    virtual void assembly(const TimeStep &,  const MeshLib::IElement &, const DiscreteLib::DofEquationIdTable &, const LocalVector &, const LocalVector &, LocalMatrix &) {};
 };
 
 

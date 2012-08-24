@@ -107,6 +107,9 @@ bool FunctionDisplacement<T1,T2>::initialize(const BaseLib::Options &option)
     const BaseLib::Options* optNum = option.getSubGroup("Numerics");
     linear_solver->setOption(*optNum);
     _solution->getNonlinearSolver()->setOption(*optNum);
+    DiscreteLib::DofEquationIdTable* dofMapping = _solution->getDofEquationIdTable();
+    dofMapping->setNumberingType(DiscreteLib::DofNumberingType::BY_POINT);
+    dofMapping->setLocalNumberingType(DiscreteLib::DofNumberingType::BY_POINT);
 
     // create u variable which is vector
     NumLib::LocalVector tmp_u0(3);

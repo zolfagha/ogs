@@ -75,6 +75,7 @@ void convertPorousMediumProperty(const CMediumProperties &mmp, MaterialLib::Poro
 {
     if (mmp.permeability_model==1) {
         pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(mmp.permeability_tensor[0]);
+        pm.permeability = new NumLib::TXFunctionConstant(mmp.permeability_tensor[0]);
     }
 
     if (mmp.porosity_model==1) {
@@ -142,7 +143,7 @@ std::string convertLinearSolverPreconType(int ls_precon)
 }
 
 
-void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options &option)
+bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options &option)
 {
 
     // -------------------------------------------------------------------------
@@ -198,6 +199,10 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
     // -------------------------------------------------------------------------
     // Mesh
     // -------------------------------------------------------------------------
+    if (ogs5fem.list_mesh.size()==0) {
+        ERR("***Error: no mesh found in ogs5");
+        return false;
+    }
     for (size_t i=0; i<ogs5fem.list_mesh.size(); i++) {
         ogs6fem.list_mesh.push_back(ogs5fem.list_mesh[i]);
 //        ogs6fem.list_dis_sys.push_back(new DiscreteLib::DiscreteSystem(*ogs5fem.list_mesh[i]));
@@ -218,6 +223,10 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
     // PCS
     BaseLib::Options* optPcsData = option.addSubGroup("ProcessData");
     size_t masstransport_counter = 0;
+    if (ogs5fem.pcs_vector.size()==0) {
+        ERR("***Error: no PCS found in ogs5");
+        return false;
+    }
     for (size_t i=0; i<ogs5fem.pcs_vector.size(); i++)
     {
         CRFProcess* rfpcs = ogs5fem.pcs_vector[i];
@@ -367,6 +376,8 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
     }
 
     ogs6fem.outController.initialize(option, ogs6fem.output_dir, ogs6fem.project_name, ogs6fem.list_mesh, *ogs6fem.geo, ogs6fem.geo_unique_name);
+
+    return true;
 }
 
 };
