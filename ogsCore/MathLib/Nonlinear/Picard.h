@@ -51,15 +51,16 @@ public:
             dx = x_new;
             dx -= x_old;
             //printout(i, x_new, dx);
-            if (convergence->check(0, &dx, &x_new)) {
-                converged = true;
+            converged = convergence->check(0, &dx, &x_new);
+            INFO("-> Picard #%d: error=%1.3e", itr_cnt+1, convergence->getError());
+            if (converged) {
                 break;
             }
             x_old = x_new;
         }
 
         INFO("------------------------------------------------------------------");
-        INFO("*** PICARD nonlinear solver computation result");
+        INFO("*** PICARD nonlinear solver result");
         if (max_itr_count==1) {
             INFO("status    : iteration not required");
         } else {
