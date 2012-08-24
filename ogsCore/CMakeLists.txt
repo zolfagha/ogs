@@ -40,3 +40,12 @@ ELSE()
 	ENDIF()
 ENDIF ()
 
+IF(USE_PETSC)
+    TARGET_LINK_LIBRARIES( ogsCore  ${PETSC_LIBRARIES} )
+    IF (MSVC)
+        SET_TARGET_PROPERTIES(ogsCore PROPERTIES
+                LINK_FLAGS "
+            /NODEFAULTLIB:\"libcmt.lib\"
+                ")
+    ENDIF( MSVC)
+ENDIF(USE_PETSC)

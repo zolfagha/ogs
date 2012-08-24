@@ -70,6 +70,12 @@ IF (NOT USE_PETSC)
 		MathLib/LinAlg/LinearEquation/PETScLinearEquation.cpp
 	)
 ENDIF ()
+IF(NOT (USE_MPI AND USE_PETSC))
+    LIST(REMOVE_ITEM MathLib_LinAlg_LinearEquations_Files 
+        MathLib/LinAlg/LinearEquation/PETScMPILinearEquation.h
+        MathLib/LinAlg/LinearEquation/PETScMPILinearEquation.cpp
+    )
+ENDIF()
 SOURCE_GROUP( ogsCore\\MathLib\\LinAlg\\LinearEquations FILES ${MathLib_LinAlg_LinearEquations_Files})
 #Nonlinear/
 FILE(GLOB MathLib_Nonlinear_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 

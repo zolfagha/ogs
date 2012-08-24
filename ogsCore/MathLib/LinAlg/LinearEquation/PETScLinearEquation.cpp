@@ -1,386 +1,193 @@
-/*!
-   \brief Definition of member functions of class PETScLinearSolver
-
-   10~11.2011. WW
-
-*/
-
-#ifdef USE_PETSC
-
-#include<iostream>
+/**
+ * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.com)
+ *            Distributed under a Modified BSD License.
+ *              See accompanying file LICENSE.txt or
+ *              http://www.opengeosys.com/LICENSE.txt
+ *
+ *
+ * \file PETScLinearEquation.cpp
+ *
+ * Created on 2012-08-24 by Norihiro Watanabe
+ */
 
 #include "PETScLinearEquation.h"
+
+#include <iostream>
 
 namespace MathLib
 {
 
-PETScLinearSolver:: ~PETScLinearSolver()
+void PETScLinearEquation::initialize()
 {
-  VecDestroy(&b);
-  VecDestroy(&x);
-  MatDestroy(&A);
-  if(lsolver) KSPDestroy(&lsolver);
-  // if(prec) PCDestroy(&prec);
-
-  //PetscPrintf(PETSC_COMM_WORLD,"\n>>Number of Unknows: %d", m_size);
-  //PetscPrintf(PETSC_COMM_WORLD,"\n>>Elapsed time in linear solver: %fs\n", time_elapsed);
+    char help[] = "Using PETSc package\n";
+    int argc = 1;
+    char *argv[] = {"test\n"};
+    char **tmp = argv;
+    PetscInitialize(&argc, &tmp,(char *)0,help);
 }
 
-/*!
-  \brief KSP and PC type
-
- KSPRICHARDSON "richardson"
- KSPCHEBYCHEV  "chebychev"
- KSPCG         "cg"
- KSPCGNE       "cgne"
- KSPNASH       "nash"
- KSPSTCG       "stcg"
- KSPGLTR       "gltr"
- KSPGMRES      "gmres"
- KSPFGMRES     "fgmres" 
- KSPLGMRES     "lgmres"
- KSPDGMRES     "dgmres"
- KSPTCQMR      "tcqmr"
- KSPBCGS       "bcgs"
- KSPIBCGS        "ibcgs"
- KSPBCGSL        "bcgsl"
- KSPCGS        "cgs"
- KSPTFQMR      "tfqmr"
- KSPCR         "cr"
- KSPLSQR       "lsqr"
- KSPPREONLY    "preonly"
- KSPQCG        "qcg"
- KSPBICG       "bicg"
- KSPMINRES     "minres"
- KSPSYMMLQ     "symmlq"
- KSPLCD        "lcd"
- KSPPYTHON     "python"
- KSPBROYDEN    "broyden"
- KSPGCR        "gcr"
- KSPNGMRES     "ngmres"
- KSPSPECEST    "specest"
-
- PCNONE            "none"
- PCJACOBI          "jacobi"
- PCSOR             "sor"
- PCLU              "lu"
- PCSHELL           "shell"
- PCBJACOBI         "bjacobi"
- PCMG              "mg"
- PCEISENSTAT       "eisenstat"
- PCILU             "ilu"
- PCICC             "icc"
- PCASM             "asm"
- PCGASM            "gasm"
- PCKSP             "ksp"
- PCCOMPOSITE       "composite"
- PCREDUNDANT       "redundant"
- PCSPAI            "spai"
- PCNN              "nn"
- PCCHOLESKY        "cholesky"
- PCPBJACOBI        "pbjacobi"
- PCMAT             "mat"
- PCHYPRE           "hypre"
- PCPARMS           "parms"
- PCFIELDSPLIT      "fieldsplit"
- PCTFS             "tfs"
- PCML              "ml"
- PCPROMETHEUS      "prometheus"
- PCGALERKIN        "galerkin"
- PCEXOTIC          "exotic"
- PCHMPI            "hmpi"
- PCSUPPORTGRAPH    "supportgraph"
- PCASA             "asa"
- PCCP              "cp"
- PCBFBT            "bfbt"
- PCLSC             "lsc"
- PCPYTHON          "python"
- PCPFMG            "pfmg"
- PCSYSPFMG         "syspfmg"
- PCREDISTRIBUTE    "redistribute"
- PCSACUSP          "sacusp"
- PCSACUSPPOLY      "sacusppoly"
- PCBICGSTABCUSP    "bicgstabcusp"
- PCSVD             "svd"
- PCAINVCUSP        "ainvcusp"
- PCGAMG            "gamg"
-
-*/
-void PETScLinearSolver::Config(const float tol, const KSPType lsol, const PCType prec_type)
+void PETScLinearEquation::finalize()
 {
-   ltolerance = tol;
-   sol_type = lsol;
-   pc_type = prec_type; 
-
-   KSPCreate(PETSC_COMM_WORLD,&lsolver);
-   KSPSetOperators(lsolver, A, A,DIFFERENT_NONZERO_PATTERN);
-   KSPSetType(lsolver,lsol);
-
-   KSPGetPC(lsolver, &prec);
-   PCSetType(prec, prec_type); //  PCJACOBI); //PCNONE);
-   KSPSetTolerances(lsolver,ltolerance,PETSC_DEFAULT,PETSC_DEFAULT,PETSC_DEFAULT);
-   KSPSetFromOptions(lsolver);
-
-}
-//-----------------------------------------------------------------
-void PETScLinearSolver::VectorCreate(PetscInt m)
-{
-  //PetscErrorCode ierr;  // returned value from PETSc functions 
-  VecCreate(PETSC_COMM_WORLD, &b);
-  VecSetSizes(b, PETSC_DECIDE, m);
-  VecSetFromOptions(b);
-  VecDuplicate(b, &x);
+    PetscFinalize();
 }
 
-
-void PETScLinearSolver::MatrixCreate( PetscInt m, PetscInt n)
+PETScLinearEquation::~PETScLinearEquation()
 {
-  // Number of nonzeros per row in DIAGONAL portion of 
-  // local submatrix (same value is used for all local rows) 
-  int d_nz; 
-  // Number of nonzeros per row in the OFF-DIAGONAL portion of 
-  // local submatrix (same value is used for all local rows). 
-  int o_nz;     
-  // Number of nonzeros per row (same for all rows) 
-  int nz;
-
-  d_nz = 9; 
-  o_nz = 9; 
-  nz = 9;
-  //d_nz = 20; 
-  //o_nz = 20; 
-  //nz = 20;
-
-  MatCreate(PETSC_COMM_WORLD, &A);
-  MatSetSizes(A,PETSC_DECIDE,PETSC_DECIDE,m,n);
-  MatSetFromOptions(A);
-#ifdef USE_MPI
-  MatSetType(A,MATMPIAIJ);
-  MatMPIAIJSetPreallocation(A,d_nz,PETSC_NULL, o_nz,PETSC_NULL);
-#else
-  MatSetType(A,MATSEQAIJ);
-#endif
-  MatGetOwnershipRange(A,&i_start,&i_end);
-
-  //TEST
-  // std::cout<<"sub_a  "<<i_start<<";   sub_d "<<i_end<<std::endl;
 }
 
-
-void PETScLinearSolver::Solver()
+void PETScLinearEquation::setOption(const BaseLib::Options &option)
 {
+    const BaseLib::Options *op = option.getSubGroup("LinearSolver");
+    if (op==0) {
+        return;
+    }
 
-
-  //TEST
-  //PetscViewer viewer;
-  //PetscViewerASCIIOpen(PETSC_COMM_WORLD, "x.txt", &viewer);
-  //PetscViewerPushFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-  //PetscObjectSetName((PetscObject)x,"Solution");
-  //VecView(x, viewer);   
-
-   //EQSV_Viewer("petsc.log");
-
-
-   int its; 
-   PetscLogDouble v1,v2;
-   KSPConvergedReason reason;
-
-   PetscGetTime(&v1);
-
-   KSPSolve(lsolver, b, x);
-
-   //EQSV_Viewer("petsc.out.log");
-
-   KSPGetConvergedReason(lsolver,&reason); //CHKERRQ(ierr);
-   if (reason==KSP_DIVERGED_INDEFINITE_PC)
-   {
-     PetscPrintf(PETSC_COMM_WORLD,"\nDivergence because of indefinite preconditioner;\n");
-     PetscPrintf(PETSC_COMM_WORLD,"Run the executable again but with -pc_factor_shift_positive_definite option.\n");
-   }
-   else if (reason<0)
-   {
-     PetscPrintf(PETSC_COMM_WORLD,"\nOther kind of divergence: this should not happen.\n");
-   }
-   else 
-   {
-
-      PetscPrintf(PETSC_COMM_WORLD,"\n================================================");         
-      PetscPrintf(PETSC_COMM_WORLD, "\nLinear solver %s with %s preconditioner",
-                                    sol_type.c_str(), pc_type.c_str() );         
-      KSPGetIterationNumber(lsolver,&its); //CHKERRQ(ierr);
-      PetscPrintf(PETSC_COMM_WORLD,"\nConvergence in %d iterations.\n",(int)its);
-      PetscPrintf(PETSC_COMM_WORLD,"\n================================================");           }
-   PetscPrintf(PETSC_COMM_WORLD,"\n");
-
-   VecAssemblyBegin(x);
-   VecAssemblyEnd(x);
-
-   PetscGetTime(&v2);
-   time_elapsed += v2-v1;
-
-  /*
-  //TEST
-   PetscViewer viewer;
-   PetscViewerASCIIOpen(PETSC_COMM_WORLD, "x2.txt", &viewer);
-   PetscViewerPushFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-   PetscObjectSetName((PetscObject)x,"Solution");
-   VecView(x, viewer);   
-  */
-
-
+    if (op->hasOption("solver_type"))
+        _option.solver_type = _option.getSolverType(op->getOption("solver_type"));
+    if (op->hasOption("precon_type"))
+        _option.precon_type = _option.getPreconType(op->getOption("precon_type"));
+    if (op->hasOption("error_tolerance"))
+        _option.ls_error_tolerance = op->getOption<double>("error_tolerance");
+    if (op->hasOption("max_iteration_step"))
+        _option.ls_max_iterations = op->getOption<int>("max_iteration_step");
 }
 
-void PETScLinearSolver::AssembleRHS_PETSc()
+void PETScLinearEquation::solveEqs(CRSMatrix<double, signed> *A, double *b, double *x)
 {
-  VecAssemblyBegin(b);
-  VecAssemblyEnd(b);
-}
-void PETScLinearSolver::AssembleUnkowns_PETSc()
-{
-  VecAssemblyBegin(x);
-  VecAssemblyEnd(x);
-}
-void PETScLinearSolver::AssembleMatrixPETSc()
-{
-  MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
-  MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
+    long dimension = static_cast<long>(A->getNRows());
+
+    std::cout << "------------------------------------------------------------------" << std::endl;
+    std::cout << "*** PETSc solver computation" << std::endl;
+
+//    std::cout << "A=" << std::endl;
+//    A->printMat();
+//    std::cout << "b=" << std::endl;
+//    for (size_t i=0; i<A->getNRows(); i++)
+//        std::cout << b[i] << " ";
+//    std::cout << std::endl;
+
+    const int dim = A->getNRows();
+
+    //-------------------------------------------------------------------------
+    // create vector and matrix
+    VecCreate(PETSC_COMM_WORLD, &bb);
+    VecSetSizes(bb, PETSC_DECIDE, dim);
+    VecSetFromOptions(bb);
+    VecDuplicate(bb, &xx);
+
+    MatCreate(PETSC_COMM_WORLD, &AA);
+    MatSetSizes(AA,PETSC_DECIDE,PETSC_DECIDE,dim,dim);
+    MatSetFromOptions(AA);
+  #ifdef USE_MPI
+    MatSetType(AA,MATMPIAIJ);
+    MatMPIAIJSetPreallocation(AA,d_nz,PETSC_NULL, o_nz,PETSC_NULL);
+  #else
+    MatSetType(AA,MATSEQAIJ);
+  #endif
+    MatSetUp(AA);
+    MatGetOwnershipRange(AA,&i_start,&i_end);
+
+    //-------------------------------------------------------------------------
+    // set vector and matrix
+    for (int i=0; i < dimension; ++i)
+    {
+        VecSetValues(bb,1,&i,&b[i], INSERT_VALUES);
+        VecSetValues(xx,1,&i,&x[i], INSERT_VALUES);
+    }
+    VecAssemblyBegin(bb);
+    VecAssemblyEnd(bb);
+    VecAssemblyBegin(xx);
+    VecAssemblyEnd(xx);
+
+    //TODO can we directory pass pointer instead of copy all data?
+    const int* crs_row_ptr = A->getRowPtrArray();
+    const int* crs_col_id = A->getColIdxArray();
+    const double* crs_data = A->getEntryArray();
+    int k = 0;
+    for (int i=0; i<dim; i++) {
+        const int row_end = crs_row_ptr[i+1];
+        for (int j=crs_row_ptr[i]; j<row_end; j++) {
+            double val = crs_data[k++];
+            const int col = crs_col_id[j];
+            MatSetValue(AA, i, col , val, ADD_VALUES);
+        }
+    }
+    MatAssemblyBegin(AA, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(AA, MAT_FINAL_ASSEMBLY);
+
+    //-------------------------------------------------------------------------
+    // create solver
+    KSPCreate(PETSC_COMM_WORLD, &petsc_solver);
+    KSPSetOperators(petsc_solver, AA, AA, DIFFERENT_NONZERO_PATTERN);
+    KSPSetType(petsc_solver, _option.solver_type);
+    KSPGetPC(petsc_solver, &petsc_prec);
+    PCSetType(petsc_prec, _option.precon_type);
+    KSPSetTolerances(petsc_solver, _option.ls_error_tolerance, PETSC_DEFAULT,PETSC_DEFAULT,PETSC_DEFAULT);
+    KSPSetFromOptions(petsc_solver);
+
+    //-------------------------------------------------------------------------
+    // solve
+    PetscLogDouble v1,v2;
+
+    PetscGetTime(&v1);
+
+    KSPSolve(petsc_solver, bb, xx);
+
+    PetscGetTime(&v2);
+
+    //EQSV_Viewer("petsc.out.log");
+
+    //-------------------------------------------------------------------------
+    // check result
+    PetscPrintf(PETSC_COMM_WORLD, "solver    : %s\n", _option.solver_type);
+    PetscPrintf(PETSC_COMM_WORLD, "precon    : %s\n", _option.precon_type );
+    KSPConvergedReason reason;
+    KSPGetConvergedReason(petsc_solver,&reason); //CHKERRQ(ierr);
+    if (reason==KSP_DIVERGED_INDEFINITE_PC)
+    {
+        PetscPrintf(PETSC_COMM_WORLD, "status    : Divergence because of indefinite preconditioner. Run the executable again but with -pc_factor_shift_positive_definite option.");
+    }
+    else if (reason<0)
+    {
+        PetscPrintf(PETSC_COMM_WORLD, "status    : Other kind of divergence: this should not happen.\n");
+    }
+    else
+    {
+        PetscPrintf(PETSC_COMM_WORLD, "status    : converged\n");
+        int its;
+        double res;
+        KSPGetIterationNumber(petsc_solver,&its); //CHKERRQ(ierr);
+        KSPGetResidualNorm(petsc_solver, &res);
+        PetscPrintf(PETSC_COMM_WORLD, "iteration : %d/%d\n", (int)its, _option.ls_max_iterations);
+        PetscPrintf(PETSC_COMM_WORLD, "residual  : %e\n", res);
+    }
+    PetscPrintf(PETSC_COMM_WORLD,"\n");
+
+//    VecAssemblyBegin(xx);
+//    VecAssemblyEnd(xx);
+
+    //-------------------------------------------------------------------------
+    // Update the solution (answer) into the x vector
+     PetscScalar *xp;
+//     PetscInt low,high,otherlow;
+//     VecGetOwnershipRange(xx, &low, &high);
+
+     VecGetArray(xx, &xp);
+     PetscInt count;
+     VecGetLocalSize(xx, &count);
+     for(int i=0; i<count; i++) //TODO this shouldn't work with DDC
+       x[i] = xp[i];
+
+
+    // Clear memory
+     VecDestroy(&bb);
+     VecDestroy(&xx);
+     MatDestroy(&AA);
+     KSPDestroy(&petsc_solver);
+//     PCDestroy(&petsc_prec);
+
+     std::cout << "------------------------------------------------------------------" << std::endl;
 }
 
 
-void PETScLinearSolver::UpdateSolutions(PetscScalar *u0, PetscScalar *u1)
-{
-  int i, j;
-  PetscScalar *xp;
- 
-  int receivecount;
-  PetscInt low,high,otherlow;
-  MPI_Status status; 
-  PetscInt count;
-  int tag = 9999;
-  VecGetOwnershipRange(x, &low, &high);
-  VecGetLocalSize(x, &count);
-
-
-  VecGetArray(x, &xp);
-  for(i=0; i<count; i++)
-    u1[i] = xp[i];
-
-
-  double *u_temp = new double[m_size];
-
-
-  // Collect solution from processes.
-  for(j=0; j<count; j++)
-    u_temp[low+j] = u1[j];
-  for(i=0;i<mpi_size;i++) 
-  {
-     if(i != rank)
-     {
-
-       MPI_Sendrecv( &count, 1, MPI_INT, i,tag, 
-                     &receivecount,1,MPI_INT,i,tag, PETSC_COMM_WORLD ,&status);
-       MPI_Sendrecv( &low, 1, MPI_INT, i,tag,
-                 &otherlow,1,MPI_INT,i,tag,PETSC_COMM_WORLD,&status );
-       MPI_Sendrecv( u1, count, MPI_DOUBLE, i,tag,
-                     u0,receivecount,MPI_DOUBLE,i,tag, PETSC_COMM_WORLD,&status  );
-       for(j=0;j<receivecount;j++)
-         u_temp[otherlow+j] = u0[j];
-     }
-  }
-
-
-  //MPI_Barrier(PETSC_COMM_WORLD);
-  // Copy the collected solution to the array for the previous solution
-  for(i=0;i<m_size;i++)
-  {
-    u1[i] = u_temp[i];
-    u0[i] = u_temp[i];
-  }
- 
-
-  delete [] u_temp;
-
-  VecRestoreArray(x, &xp);
-
 }
-
-
-
-void PETScLinearSolver::set_bVectorEntry(const int i, const double value )
-{
-
-  VecSetValues(b,1,&i,&value,INSERT_VALUES);
-}
-void PETScLinearSolver::set_xVectorEntry(const int i, const double value)
-{
-
-  VecSetValues(x,1,&i,&value,INSERT_VALUES);
-}
-
-
-void PETScLinearSolver::add_bVectorEntry(const int i, const double value,InsertMode mode )
-{
-
-  VecSetValue(b, i, value, mode);
-}
-void PETScLinearSolver::add_xVectorEntry(const int i, const double value, InsertMode mode)
-{
-
-  VecSetValue(x, i, value,mode);
-}
-
-
-void PETScLinearSolver::Initialize( )
-{
-
-   VecSet(b, 0.0);
-   VecSet(x, 0.0);
-   MatZeroEntries(A);
-} 
-
-
-
-void PETScLinearSolver::addMatrixEntry(const int i, const int j, const double value)
-{
-
-  MatSetValue(A, i, j, value, ADD_VALUES);
-}
-
-void PETScLinearSolver::zeroRows_in_Matrix(const int nrows, const  PetscInt *rows)
-{
-  PetscScalar one = 1.0;
-  //MatZeroRows (A, nrows, rows, one, NULL, NULL);
-  MatZeroRowsColumns(A, nrows, rows, one, x, b);
-
-}
-
-void PETScLinearSolver::EQSV_Viewer(std::string file_name, PetscViewer viewer)
-{
-  std::string fname = file_name + "_eqs_dump.txt";
-  PetscViewerASCIIOpen(PETSC_COMM_WORLD, fname.c_str(), &viewer);
-  PetscViewerPushFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-  PetscObjectSetName((PetscObject)A,"Stiffness_matrix");
-  PetscObjectSetName((PetscObject)b,"RHS");
-  PetscObjectSetName((PetscObject)x,"Solution");
-  MatView(A,viewer);
-  VecView(b, viewer);
-  VecView(x, viewer);   
-}
-
-void PETScLinearSolver::EQSV_Viewer(std::string file_name)
-{
-    std::string fname = file_name + "_eqs_dump.txt";
-    PetscViewer viewer;
-    PetscViewerASCIIOpen(PETSC_COMM_WORLD, fname.c_str(), &viewer);
-    PetscViewerPushFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-    PetscObjectSetName((PetscObject)A,"Stiffness_matrix");
-    PetscObjectSetName((PetscObject)b,"RHS");
-    PetscObjectSetName((PetscObject)x,"Solution");
-    MatView(A,viewer);
-    VecView(b, viewer);
-    VecView(x, viewer);   
-}
-
-} //end
-
-#endif

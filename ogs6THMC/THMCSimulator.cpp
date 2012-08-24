@@ -20,6 +20,9 @@
 #ifdef USE_LIS
 #include "lis.h"
 #endif
+#ifdef USE_PETSC
+#include "petscksp.h"
+#endif
 
 // internal library
 #include "BaseLib/CodingTools.h"
@@ -66,6 +69,10 @@ void ogsInit(int argc, char* argv[])
 #ifdef USE_LIS
     lis_initialize((LIS_INT*)&argc, &argv);
 #endif
+#ifdef USE_PETSC
+    char petsc_help[] = "Using PETSc package\n";
+    PetscInitialize(&argc, &argv,(char *)0,petsc_help);
+#endif
 }
 
 void ogsExit()
@@ -75,6 +82,9 @@ void ogsExit()
 
 #ifdef USE_LIS
     lis_finalize();
+#endif
+#ifdef USE_PETSC
+    PetscFinalize();
 #endif
 
     INFO("exit ogs6.");
