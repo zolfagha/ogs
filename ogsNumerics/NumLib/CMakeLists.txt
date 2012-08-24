@@ -1,9 +1,9 @@
 #Source files grouped by a directory
 
+#./
 FILE(GLOB NumLib_Files 
 	NumLib/*.h NumLib/*.cpp)
 SOURCE_GROUP( ogsNumerics\\NumLib FILES ${NumLib_Files} )
-
 #TimeStepping/
 FILE(GLOB NumLib_TimeStepping_Files 
 	NumLib/TimeStepping/*.h NumLib/TimeStepping/*.cpp)
