@@ -99,5 +99,14 @@ ELSE()
 	ENDIF()
 ENDIF ()
 
+IF(USE_PETSC)
+        TARGET_LINK_LIBRARIES( ogs6THMC  ${PETSC_LIBRARIES} )
+    IF (MSVC)
+        SET_TARGET_PROPERTIES(ogs6THMC PROPERTIES
+                LINK_FLAGS "
+            /NODEFAULTLIB:\"libcmt.lib\"
+                ")
+    ENDIF(MSVC)
+ENDIF(USE_PETSC)
 
 

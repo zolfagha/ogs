@@ -18,7 +18,7 @@
 #include "MathLib/LinAlg/LinearEquation/LisLinearEquation.h"
 #endif
 #ifdef USE_PETSC
-#include "MathLib/LinAlg/LinearEquations/PETScLinearSolver.h"
+#include "MathLib/LinAlg/LinearEquation/PETScMPILinearEquation.h"
 #endif
 
 #include "TestUtil.h"
@@ -211,7 +211,7 @@ TEST(Math, LinearSolverLis1)
 
 #endif
 
-#ifdef USE_PETSC
+#if defined(USE_PETSC) && defined(USE_MPI)
 TEST(Math, LinearSolverPETsc)
 {
     // set problem
