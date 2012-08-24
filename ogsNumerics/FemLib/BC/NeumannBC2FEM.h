@@ -70,8 +70,7 @@ public:
                 fe_edge->getIntegrationMethod()->initialize(*e, 2);
                 //IFiniteElement *fe_edge = _var->getFiniteElement(*e);
                 LocalVector result(edge_nnodes);
-                LocalMatrix M(edge_nnodes, edge_nnodes);
-                M *= .0;
+                LocalMatrix M = LocalMatrix::Zero(edge_nnodes, edge_nnodes);
                 IFemNumericalIntegration *q = fe_edge->getIntegrationMethod();
                 double x_ref[3];
                 LocalMatrix fac(1,1);
