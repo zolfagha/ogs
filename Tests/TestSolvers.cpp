@@ -18,7 +18,7 @@
 #include "MathLib/LinAlg/LinearEquation/LisLinearEquation.h"
 #endif
 #ifdef USE_PETSC
-#include "MathLib/LinAlg/LinearEquations/PETScLinearSolver.h"
+#include "MathLib/LinAlg/LinearEquation/PETScLinearEquation.h"
 #endif
 
 #include "TestUtil.h"

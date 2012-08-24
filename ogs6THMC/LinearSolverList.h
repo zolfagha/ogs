@@ -20,9 +20,9 @@
 #include "MathLib/LinAlg/LinearEquation/LisLinearEquation.h"
 #endif
 #ifdef USE_PARDISO
-#include "MathLib/LinAlg/LinearEquations/PARDISOLinearEquation.h"
+#include "MathLib/LinAlg/LinearEquation/PARDISOLinearEquation.h"
 #endif
 #ifdef USE_PETSC
-#include "MathLib/LinAlg/LinearEquations/PETScLinearEquation.h"
+#include "MathLib/LinAlg/LinearEquation/PETScLinearEquation.h"
 #endif
 
