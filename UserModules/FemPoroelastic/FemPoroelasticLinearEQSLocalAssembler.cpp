@@ -105,8 +105,7 @@ void FemPoroelasticLinearEQSLocalAssembler::assembleComponents(
     // ------------------------------------------------------------------------
     // Body force
     // ------------------------------------------------------------------------
-    LocalVectorType body_force(dim);
-    body_force *= .0;
+    LocalVectorType body_force = LocalVectorType::Zero(dim);
     bool hasGravity = false;
     if (hasGravity) {
         body_force[dim-1] = rho_s * 9.81;
@@ -124,8 +123,8 @@ void FemPoroelasticLinearEQSLocalAssembler::assembleComponents(
     LocalVectorType Fp = LocalVectorType::Zero(nnodes_p);
 
     // temp matrix
-    LocalMatrixType B(n_strain_components, nnodes_u*dim);
-    LocalMatrixType Nuvw(dim, nnodes_u*dim);
+    LocalMatrixType B = LocalMatrixType::Zero(n_strain_components, nnodes_u*dim);
+    LocalMatrixType Nuvw = LocalMatrixType::Zero(dim, nnodes_u*dim);
     const LocalMatrixType m = get_m(dim);
 
     //
