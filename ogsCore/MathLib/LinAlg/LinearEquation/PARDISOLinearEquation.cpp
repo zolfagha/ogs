@@ -5,31 +5,22 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file PARDISOLinearEquation.h
+ * \file PARDISOLinearEquation.cpp
  *
  * Created on 2012-08-23 by Norihiro Watanabe
  */
 
 #ifdef USE_MKL_PARDISO
 
-#pragma once
-
-#include "AbstractCRSLinearEquation.h"
+#include "PARDISOLinearEquation.h"
 
 namespace MathLib
 {
 
-class PARDISOLinearEquation : public AbstractCRSLinearEquation<signed>
+void PARDISOLinearEquation::solveEqs(CRSMatrix<double, signed> *A, double *rhs, double *x)
 {
-public:
-    virtual ~PARDISOLinearEquation();
 
-    void setOption(const BaseLib::Options &/*option*/) {};
-
-protected:
-    void solveEqs(CRSMatrix<double, signed> *A, double *rhs, double *x);
-
-};
+}
 
 }
 
