@@ -5,7 +5,7 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file LinearElasticResidualLocalAssembler.cpp
+ * \file FemPoroelasticResidualLocalAssembler.cpp
  *
  * Created on 2012-07-13 by Norihiro Watanabe
  */
