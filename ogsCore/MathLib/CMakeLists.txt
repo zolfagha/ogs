@@ -76,6 +76,15 @@ IF(NOT (USE_MPI AND USE_PETSC))
         MathLib/LinAlg/LinearEquation/PETScMPILinearEquation.cpp
     )
 ENDIF()
+
+IF (NOT USE_PARDISO)
+    MESSAGE (STATUS "USE_PARDISO is OFF. Exclude Paridso files from a project.")
+    LIST(REMOVE_ITEM MathLib_LinAlg_LinearEquations_Files 
+        MathLib/LinAlg/LinearEquation/PARDISOLinearEquation.h
+        MathLib/LinAlg/LinearEquation/PARDISOLinearEquation.cpp
+    )
+ENDIF ()
+
 SOURCE_GROUP( ogsCore\\MathLib\\LinAlg\\LinearEquations FILES ${MathLib_LinAlg_LinearEquations_Files})
 #Nonlinear/
 FILE(GLOB MathLib_Nonlinear_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 

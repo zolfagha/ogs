@@ -5,10 +5,13 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file PARDISOInterface.h
+ * \file PARDISOLinearEquation.h
  *
- * Created on 2012-06-25 by Norihiro Watanabe
+ * Original work is by Chan-Hee Park
+ * Moved the work here by Norihiro Watanabe on 2012-08-23
  */
+
+#ifdef USE_PARDISO
 
 #pragma once
 
@@ -17,9 +20,24 @@
 namespace MathLib
 {
 
-class PARDISO_Solver : public AbstractCRSLinearEquation<signed>
+/**
+ * \brief Linear equation class using PARDISO solver
+ *
+ */
+class PARDISOLinearEquation
+: public AbstractCRSLinearEquation<signed>
 {
+public:
+    virtual ~PARDISOLinearEquation() {};
+
+    virtual void setOption(const BaseLib::Options &/*option*/) {};
+
+protected:
+    virtual void solveEqs(CRSMatrix<double, signed> *A, double *rhs, double *x);
 
 };
 
 }
+
+#endif
+

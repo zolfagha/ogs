@@ -28,9 +28,15 @@ OPTION(USE_LIS "Use LIS" ON)
 OPTION(USE_EXTERNAL_LIS "Use external LIS" OFF)
 OPTION(USE_BLAS_LAPACK "Use BLAS&LAPACK" OFF)
 OPTION(USE_PETSC "Use PETSc libs for parallel computing" OFF)
+OPTION(USE_MKL_PARDISO "Use PARDISO in MKL library" OFF)
+OPTION(USE_ORIGINAL_PARDISO "Use original PARDISO solver" OFF)
 OPTION(PYTHON_WRAP "Provide Python interface" OFF)
 OPTION(OGS_BUILD_INFO "Should build information be generated" ON)
 OPTION(BUILD_OGS_TEST "Should build test" OFF)
+
+IF(USE_MKL_PARDISO AND USE_ORIGINAL_PARDISO)
+    MESSAGE (FATAL_ERROR "Aborting: Please choose USE_MKL_PARDISO or USE_ORIGINAL_PARDISO. Selecting both is not supported.")
+ENDIF()
 
 ###########################################################################
 ### OGS version information. Adjust these if you release a new version. ###
@@ -45,6 +51,7 @@ SET (OGS_DATE "05.07.2012")
 
 
 ###########################################################################
+
 IF(USE_OPENMP)
 	FIND_PACKAGE( OpenMP REQUIRED )
 	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
@@ -96,18 +103,37 @@ ENDIF(USE_BLAS_LAPACK)
 
 IF(USE_PETSC)
 	MESSAGE (STATUS  "Configuring for PETSc" )
-
 	ADD_DEFINITIONS(-DUSE_PETSC)
-	IF(UNIX)
-		ADD_DEFINITIONS(-Wunused-parameter)
-	ENDIF(UNIX)
-
+#	IF(UNIX)
+#		ADD_DEFINITIONS(-Wunused-parameter)
+#	ENDIF(UNIX)
 	FIND_PACKAGE(PETSc REQUIRED)
 	IF (NOT USE_MPI)
 		set (PETSC_INCLUDES ${PETSC_DIR}/include/mpiuni ${PETSC_INCLUDES})
 	ENDIF (NOT USE_MPI)
 	INCLUDE_DIRECTORIES( ${PETSC_INCLUDES} )
 ENDIF(USE_PETSC)
+
+IF(USE_MKL_PARDISO)
+    SET(USE_MKL ON)
+    SET(USE_PARDISO ON)
+    ADD_DEFINITIONS(-DUSE_MKL_PARDISO)
+ENDIF(USE_MKL_PARDISO)
+
+IF(USE_ORIGINAL_PARDISO)
+    SET(USE_PARDISO ON)
+    ADD_DEFINITIONS(-DUSE_ORIGINAL_PARDISO)
+ENDIF(USE_ORIGINAL_PARDISO)
+
+IF (USE_PARDISO)
+    ADD_DEFINITIONS(-DUSE_PARDISO)
+ENDIF (USE_PARDISO)
+
+IF(USE_MKL)
+    MESSAGE (STATUS  "Configuring for MKL" )
+    FIND_PACKAGE(MKL REQUIRED)
+    INCLUDE_DIRECTORIES( ${MKL_INCLUDES} )
+ENDIF(USE_MKL)
 
 IF (PYTHON_WRAP)
 	FIND_PACKAGE(SWIG REQUIRED)
