@@ -13,9 +13,10 @@
 #pragma once
 
 #include <vector>
+#include "Eigen"
 
 #include "BaseLib/CodingTools.h"
-#include "MathLib/LinAlg/Dense/Matrix.h"
+#include "MathLib/DataType.h"
 #include "GeoLib/Point.h"
 
 #include "MeshLib/Core/IElementCoordinatesMapping.h"
@@ -35,25 +36,12 @@ class ElementCoordinatesMappingLocal : public IElementCoordinatesMapping
 {
 public:
     ///
-    ElementCoordinatesMappingLocal(const IMesh* msh, IElement &e, const CoordinateSystem &coordinate_system)
-    : _msh(msh), _matR2original(0)
-    {
-        assert (e.getDimension() <= coordinate_system.getDimension());
-
-        //if (e->getDimension()==coordinate_system->getDimension()) {
-        //    flip(e, coordinate_system);
-        ////} else if (e->getDimension() < coordinate_system->getDimension()) {
-        ////    rotate(e, coordinate_system);
-        //}
-        rotate(e, coordinate_system);
-    };
+    ElementCoordinatesMappingLocal(const IMesh* msh, IElement &e, const CoordinateSystem &coordinate_system);
 
     ///
     virtual ~ElementCoordinatesMappingLocal()
     {
         BaseLib::releaseObjectsInStdVector(_point_vec);
-        if (_matR2original!=0)
-            delete _matR2original;
     }
 
     ///
@@ -62,6 +50,8 @@ public:
         return _point_vec[node_id];
     }
 
+    const MathLib::LocalMatrix& getRotationMatrixToOriginal() const {return _matR2original;};
+    const MathLib::LocalMatrix& getRotationMatrixToLocal() const {return _matR2local;};
 private:
     ///
     void flip(IElement &e, const CoordinateSystem &coordinate_system);
@@ -73,8 +63,9 @@ private:
 private:
     const IMesh* _msh;
     std::vector<GeoLib::Point*> _point_vec;
-    MathLib::Matrix<double> *_matR2original;
-    MathLib::Matrix<double> *_matR2local;
+    MathLib::LocalMatrix _matR2original;
+    MathLib::LocalMatrix _matR2local;
+    bool _is_R2orig_set;
 };
 
 }
