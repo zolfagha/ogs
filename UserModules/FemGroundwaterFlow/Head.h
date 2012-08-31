@@ -21,8 +21,8 @@
 #include "SolutionLib/Fem/SingleStepFEM.h"
 #include "ProcessLib/AbstractTransientProcess.h"
 
-#include "GWTimeODELocalAssembler.h"
-#include "GWJacobianLocalAssembler.h"
+#include "HeadBasedGWTimeODELocalAssembler.h"
+#include "HeadBasedGWJacobianLocalAssembler.h"
 
 
 /**
@@ -46,9 +46,9 @@ public:
     typedef T_DISCRETE_SYSTEM MyDiscreteSystem;
     typedef T_LINEAR_SOLVER MyLinearSolver;
     // local assembler
-    typedef GroundwaterFlowTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler> MyLinearAssemblerType;
-    typedef GroundwaterFlowTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyResidualAssemblerType;
-    typedef GroundwaterFlowJacobianLocalAssembler MyJacobianAssemblerType;
+    typedef HeadBasedGWTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler> MyLinearAssemblerType;
+    typedef HeadBasedGWTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyResidualAssemblerType;
+    typedef HeadBasedGWJacobianLocalAssembler MyJacobianAssemblerType;
     // Equation definition
     typedef SolutionLib::TemplateFemEquation<
             MyDiscreteSystem,
