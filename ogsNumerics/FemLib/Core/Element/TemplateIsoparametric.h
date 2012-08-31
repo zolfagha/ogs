@@ -21,6 +21,7 @@
 
 #include "FemLib/Core/Extrapolation/FemExtrapolation.h"
 #include "FemLib/Core/CoordinatesMapping/FemNaturalCoordinates.h"
+#include "FemLib/Core/CoordinatesMapping/FemLowerDimension.h"
 #include "TemplateFeBase.h"
 
 namespace FemLib
@@ -30,20 +31,35 @@ namespace FemLib
  * \brief Template class for any isoparametric FE classes
  *
  * \tparam T_FETYPE
+ * \tparam N_DIM
  * \tparam N_VARIABLES
+ * \tparam N_ORDER
  * \tparam T_SHAPE
  * \tparam T_INTEGRAL
  * \tparam T_EXTRAPOLATE
  */
-template <FiniteElementType::type T_FETYPE, size_t N_VARIABLES, size_t N_ORDER, class T_SHAPE, class T_INTEGRAL, class T_EXTRAPOLATE>
+template <
+    FiniteElementType::type T_FETYPE,
+    size_t N_ELE_DIM,
+    size_t N_VARIABLES,
+    size_t N_ORDER,
+    class T_SHAPE,
+    class T_INTEGRAL,
+    class T_EXTRAPOLATE
+    >
 class TemplateIsoparametric : public TemplateFeBase<T_FETYPE, N_VARIABLES>
 {
 public:
     ///
-    explicit TemplateIsoparametric(MeshLib::IMesh &msh)
+    explicit TemplateIsoparametric(MeshLib::IMesh* msh)
     : TemplateFeBase<T_FETYPE, N_VARIABLES>(msh)
     {
-        _mapping = new FemNaturalCoordinates(new T_SHAPE());
+        const size_t mesh_dim = msh->getDimension();
+        if (mesh_dim == N_ELE_DIM)
+            _mapping = new FemNaturalCoordinates(new T_SHAPE());
+        else
+            _mapping = new FemLowerDimension(new T_SHAPE(), mesh_dim);
+
         _integration = new T_INTEGRAL();
         _is_basis_computed = false;
     };
@@ -58,29 +74,35 @@ public:
     ///
     virtual IFemNumericalIntegration* getIntegrationMethod() const {return _integration;};
 
+    ///
     size_t getOrder() const {return N_ORDER;};
 
     /// initialize object for given mesh elements
     virtual void configure( MeshLib::IElement &e )
     {
         e.setCurrentOrder(getOrder());
-        TemplateFeBase<T_FETYPE, N_VARIABLES>::setElement(e);
+        TemplateFeBase<T_FETYPE, N_VARIABLES>::setElement(&e);
         const MeshLib::IMesh* msh = TemplateFeBase<T_FETYPE, N_VARIABLES>::getMesh();
         msh->setCurrentOrder(getOrder());
-        if (e.getMappedCoordinates()==0) {
-            MeshLib::IElementCoordinatesMapping *ele_map = 0;
-            if (msh->getDimension() == e.getDimension()) {
+        if (e.getMappedCoordinates()==NULL) {
+            MeshLib::IElementCoordinatesMapping* ele_map;
+            size_t msh_dim = msh->getDimension();
+            size_t ele_dim = e.getDimension();
+            assert(msh_dim >= ele_dim);
+            if (msh_dim == ele_dim) {
                 ele_map = new MeshLib::ElementCoordinatesInvariant(msh, &e);
             } else {
                 ele_map = new MeshLib::ElementCoordinatesMappingLocal(msh, e, msh->getGeometricProperty()->getCoordinateSystem());
             }
             e.setMappedCoordinates(ele_map);
         }
+        // reset internal state
         _mapping->initialize(e);
         _integration->initialize(e, 2);
         _is_basis_computed = false;
     }
 
+    /// compute basis functions
     virtual void computeBasisFunctions(const double *x)
     {
         _mapping->getElement()->setCurrentOrder(getOrder());
@@ -96,18 +118,21 @@ public:
         _mapping->mapToPhysicalCoordinates(_mapping->getProperties(), x_real);
     }
 
+    ///
     virtual LocalMatrix* getBasisFunction()
     {
         assert(_is_basis_computed);
         return _mapping->getProperties()->shape_r;
     }
 
+    ///
     virtual LocalMatrix* getGradBasisFunction()
     {
         assert(_is_basis_computed);
         return _mapping->getProperties()->dshape_dx;
     }
 
+    ///
     virtual double getDetJ() const
     {
         assert(_is_basis_computed);
@@ -125,60 +150,6 @@ public:
             v+=N[i]*nodal_values[i];
         return v;
     }
-
-//    /// compute an matrix M = Int{W^T F N} dV
-//    virtual void integrateWxN(MathLib::SpatialFunctionScalar* f, LocalMatrix &mat)
-//    {
-//        const size_t n_gp = _integration->getNumberOfSamplingPoints();
-//        double x[3], ox[3];
-//        for (size_t i=0; i<n_gp; i++) {
-//            _integration->getSamplingPoint(i, x);
-//            _mapping->compute(x);
-//            _mapping->mapToPhysicalCoordinates(_mapping->getProperties(), ox);
-//            double fac = 1.0;
-//            if (f!=0) {
-//                double v;
-//                f->eval(ox, v);
-//                fac *= v;
-//            }
-//            integrateWxN(i, fac, mat);
-//        }
-//    }
-//
-//    /// compute an matrix M = Int{W^T F dN} dV
-//    virtual void integrateWxDN(MathLib::SpatialFunctionVector* f, LocalMatrix &mat)
-//    {
-//        const size_t n_gp = _integration->getNumberOfSamplingPoints();
-//        double x[3], ox[3];
-//        for (size_t i=0; i<n_gp; i++) {
-//            _integration->getSamplingPoint(i, x);
-//            _mapping->compute(x);
-//            _mapping->mapToPhysicalCoordinates(_mapping->getProperties(), ox);
-//            MathLib::Vector fac;
-//            if (f!=0)
-//                f->eval(ox, fac);
-//            integrateWxDN(i, fac, mat);
-//        }
-//    }
-//
-//    /// compute an matrix M = Int{dW^T F dN} dV
-//    virtual void integrateDWxDN(MathLib::SpatialFunctionScalar *f, LocalMatrix &mat)
-//    {
-//        const size_t n_gp = _integration->getNumberOfSamplingPoints();
-//        double x[3], ox[3];
-//        for (size_t i=0; i<n_gp; i++) {
-//            _integration->getSamplingPoint(i, x);
-//            const CoordinateMappingProperty *coord_prop = _mapping->compute(x);
-//            _mapping->mapToPhysicalCoordinates(coord_prop,  ox);
-//            double fac = 1.0;
-//            if (f!=0) {
-//                double v;
-//                f->eval(ox, v);
-//                fac *= v;
-//            }
-//            integrateDWxDN(i, fac, mat);
-//        }
-//    }
 
     /// compute an matrix M = Int{W^T F N} dV
     virtual void integrateWxN(size_t igp, LocalMatrix &f, LocalMatrix &mat)
@@ -203,10 +174,6 @@ public:
         LocalMatrix *dbasis = coord_prop->dshape_dx;
         LocalMatrix *test = coord_prop->shape_r;
         double fac = coord_prop->det_jacobian * _integration->getWeight(igp);
-//        test->transposeAndMultiply(*dbasis, &f[0], mat, fac);
-        //LocalMatrix temp2 = test->transpose();
-        //LocalMatrix temp3 = temp2 * temp;
-        //mat.noalias() += temp3 * fac;
         mat.noalias() += test->transpose() * (f * (*dbasis)) * fac;
     }
 
@@ -225,6 +192,7 @@ public:
         }
     }
 
+    ///
     void extrapolate(const std::vector<LocalVector> &gp_values, std::vector<LocalVector> &nodal_values)
     {
         T_EXTRAPOLATE extrapo;
@@ -232,7 +200,7 @@ public:
     }
 
 private:
-    FemNaturalCoordinates *_mapping;
+    FemNaturalCoordinates* _mapping;
     IFemNumericalIntegration* _integration;
     bool _is_basis_computed;
 };
