@@ -24,7 +24,7 @@ namespace FemLib
 class FemElementFactory
 {
 public:
-    static IFiniteElement* create(FiniteElementType::type fe_type, MeshLib::IMesh &msh)
+    static IFiniteElement* create(FiniteElementType::type fe_type, MeshLib::IMesh* msh)
     {
         switch (fe_type)
         {

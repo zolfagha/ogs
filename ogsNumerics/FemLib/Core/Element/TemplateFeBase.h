@@ -22,29 +22,45 @@ namespace FemLib
 
 /**
  * \brief Base class for implementation of finite element classes
+ *
+ * This class owns the following data
+ * - Mesh element object
+ * - Mesh object
+ *
+ * \tparam T_FETYPE         Finite element type
+ * \tparam N_VARIABLES      The number of variables
  */
 template <FiniteElementType::type T_FETYPE, size_t N_VARIABLES>
 class TemplateFeBase : public IFiniteElement
 {
 public:
-    explicit TemplateFeBase(MeshLib::IMesh &msh) : _msh(&msh), _ele(0) {};
+    /**
+     *
+     * @param msh
+     */
+    explicit TemplateFeBase(MeshLib::IMesh* msh) : _msh(msh), _ele(NULL) {};
+
+    ///
     virtual ~TemplateFeBase() {};
 
-    void setMesh(MeshLib::IMesh &msh) {_msh = &msh;};
+    ///
+    void setMesh(MeshLib::IMesh* msh) {_msh = msh;};
 
+    ///
     const MeshLib::IMesh* getMesh() const {return _msh;};
 
     /// return mesh element
-    MeshLib::IElement* getElement() const {return _ele;};
+    virtual MeshLib::IElement* getElement() const {return _ele;};
 
     /// return the number of variables
-    size_t getNumberOfVariables() const { return N_VARIABLES; };
+    virtual size_t getNumberOfVariables() const { return N_VARIABLES; };
 
     /// return finite element type
-    FiniteElementType::type getFeType() const { return T_FETYPE; };
+    virtual FiniteElementType::type getFeType() const { return T_FETYPE; };
 
 protected:
-    void setElement(MeshLib::IElement &e) {_ele = &e;};
+    ///
+    void setElement(MeshLib::IElement* e) {_ele = e;};
 
 private:
     MeshLib::IMesh* _msh;
