@@ -35,7 +35,6 @@ public:
     virtual void mapToPhysicalCoordinates(const double* natural_pt, double*) = 0;
     /// map physical coordinates to natural coordinates
     virtual void mapFromPhysicalCoordinates(const double* physical_pt, double*) = 0;
-
 };
 
 }
