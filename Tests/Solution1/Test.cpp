@@ -271,7 +271,7 @@ TEST(Solution, CouplingFem2D)
 
 }
 
-TEST(FEM, line)
+TEST(Solution, line)
 {
     try {
         const double len = 2.0;
@@ -477,7 +477,7 @@ TEST(Solution, CouplingFem2)
 }
 
 #if 1
-TEST(Fem, LinearElastic2D)
+TEST(Solution, LinearElastic2D)
 {
     try {
         MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
