@@ -21,18 +21,18 @@
  * \brief Local assembly class for time-ODE GW equation
  */
 template <class T>
-class GroundwaterFlowTimeODELocalAssembler: public T
+class HeadBasedGWTimeODELocalAssembler: public T
 {
 public:
     typedef NumLib::LocalVector LocalVector;
     typedef NumLib::LocalMatrix LocalMatrix;
 
-    explicit GroundwaterFlowTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects)
+    explicit HeadBasedGWTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects)
     : _feObjects(feObjects)
     {
     };
 
-    virtual ~GroundwaterFlowTimeODELocalAssembler() {};
+    virtual ~HeadBasedGWTimeODELocalAssembler() {};
 
 protected:
     virtual void assembleODE(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const LocalVector &/*u1*/, const LocalVector &/*u0*/, LocalMatrix &localM, LocalMatrix &localK, LocalVector &/*localF*/)
