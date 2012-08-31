@@ -77,7 +77,8 @@ IF(NOT (USE_MPI AND USE_PETSC))
     )
 ENDIF()
 
-IF (NOT USE_MKL_PARDISO)
+IF (NOT USE_PARDISO)
+    MESSAGE (STATUS "USE_PARDISO is OFF. Exclude Paridso files from a project.")
     LIST(REMOVE_ITEM MathLib_LinAlg_LinearEquations_Files 
         MathLib/LinAlg/LinearEquation/PARDISOLinearEquation.h
         MathLib/LinAlg/LinearEquation/PARDISOLinearEquation.cpp

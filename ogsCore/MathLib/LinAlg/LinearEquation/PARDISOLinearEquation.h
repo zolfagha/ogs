@@ -7,10 +7,11 @@
  *
  * \file PARDISOLinearEquation.h
  *
- * Created on 2012-08-23 by Norihiro Watanabe
+ * Original work is by Chan-Hee Park
+ * Moved the work here by Norihiro Watanabe on 2012-08-23
  */
 
-#ifdef USE_MKL_PARDISO
+#ifdef USE_PARDISO
 
 #pragma once
 
@@ -19,15 +20,20 @@
 namespace MathLib
 {
 
-class PARDISOLinearEquation : public AbstractCRSLinearEquation<signed>
+/**
+ * \brief Linear equation class using PARDISO solver
+ *
+ */
+class PARDISOLinearEquation
+: public AbstractCRSLinearEquation<signed>
 {
 public:
-    virtual ~PARDISOLinearEquation();
+    virtual ~PARDISOLinearEquation() {};
 
-    void setOption(const BaseLib::Options &/*option*/) {};
+    virtual void setOption(const BaseLib::Options &/*option*/) {};
 
 protected:
-    void solveEqs(CRSMatrix<double, signed> *A, double *rhs, double *x);
+    virtual void solveEqs(CRSMatrix<double, signed> *A, double *rhs, double *x);
 
 };
 
