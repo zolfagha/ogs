@@ -46,8 +46,12 @@ public:
     typedef T_DISCRETE_SYSTEM MyDiscreteSystem;
     typedef T_LINEAR_SOLVER MyLinearSolver;
     // local assembler
-    typedef HeadBasedGWTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler> MyLinearAssemblerType;
-    typedef HeadBasedGWTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyResidualAssemblerType;
+    typedef HeadBasedGWTimeODELocalAssembler<
+                NumLib::ElementWiseTimeEulerEQSLocalAssembler
+                > MyLinearAssemblerType;
+    typedef HeadBasedGWTimeODELocalAssembler<
+                NumLib::ElementWiseTimeEulerResidualLocalAssembler
+                > MyResidualAssemblerType;
     typedef HeadBasedGWJacobianLocalAssembler MyJacobianAssemblerType;
     // Equation definition
     typedef SolutionLib::TemplateFemEquation<
@@ -70,6 +74,9 @@ public:
             MyLinearSolver
             > MySolutionType;
 
+    typedef typename FemLib::FemNodalFunctionScalar<MyDiscreteSystem>::type MyNodalFunctionScalar;
+    typedef typename MyProblemType::MyVariable MyVariable;
+    
     ///
     FunctionHead() 
     : AbstractTransientProcess("GROUNDWATER_FLOW", 0, 1), _problem(0), _solution(0), _feObjects(0)
