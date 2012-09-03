@@ -29,6 +29,7 @@
 #include "rf_mmp_new.h"
 #include "rf_num_new.h"
 #include "Output.h"
+#include "rf_kinreact.h"
 
 namespace ogs5
 {
@@ -55,6 +56,12 @@ public:
     GeoLib::GEOObjects* geo_obj;
     std::string geo_unique_name;
     std::vector<MeshLib::IMesh*> list_mesh;
+	// this block is for kinetic reactions ----------------------------------------------------
+	std::vector<CKinReact*>     KinReact_vector;               // declare instance CKinReact_vector
+	std::vector<CKinReactData*> KinReactData_vector;
+    std::vector<CKinBlob*>      KinBlob_vector;    // declare extern instance of class Blob
+	// ----------------------------------------------------------------------------------------
+	
 };
 
 }
