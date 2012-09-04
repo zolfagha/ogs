@@ -29,13 +29,16 @@ bool Ogs5FemIO::read(const std::string &proj_path, Ogs5FemData &ogs5data)
     MFPRead(proj_path, ogs5data.mfp_vector);
     MSPRead(proj_path, ogs5data.msp_vector);
     MMPRead(proj_path, ogs5data.mmp_vector);
-    CPRead(proj_path, ogs5data.cp_vector);
-    BCRead(proj_path, ogs5data.bc_vector);
-    STRead(proj_path, ogs5data.st_vector);
-    ICRead(proj_path, ogs5data.ic_vector);
+    CPRead( proj_path, ogs5data.cp_vector);
+    BCRead( proj_path, ogs5data.bc_vector);
+    STRead( proj_path, ogs5data.st_vector);
+    ICRead( proj_path, ogs5data.ic_vector);
     OUTRead(proj_path, ogs5data.out_vector);
     TIMRead(proj_path, ogs5data.time_vector);
     NUMRead(proj_path, ogs5data.num_vector);
+	KRRead( proj_path, ogs5data.KinReact_vector, 
+		               ogs5data.KinReactData_vector, 
+					   ogs5data.KinBlob_vector); 
 
     // set primary variable name
     size_t mass_transport_count = 0;
@@ -58,6 +61,9 @@ bool Ogs5FemIO::read(const std::string &proj_path, Ogs5FemData &ogs5data)
         case FiniteElement::DEFORMATION:
             pcs->primary_variable_name = "DISPLACEMENT";
             break;
+		case FiniteElement::KIN_REACT_GIA:
+			pcs->primary_variable_name = "CONCENTRATION"; 
+			break; 
         }
     }
 

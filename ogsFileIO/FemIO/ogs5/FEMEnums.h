@@ -49,6 +49,7 @@ enum ProcessType
     /// H process, incompressible flow
     LIQUID_FLOW,                          //!< LIQUID_FLOW
     MASS_TRANSPORT,                       //!< MASS_TRANSPORT
+	KIN_REACT_GIA,                        //!< reactive transport kinetic reaction only. 
     MULTI_PHASE_FLOW,                     //!< MULTI_PHASE_FLOW
     NO_PCS,                               //!< NO_PCS
     /// H process, incompressible flow

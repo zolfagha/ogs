@@ -63,6 +63,45 @@ public:
 	double threshOrder;
 };
 
+//#ds Class for blob properties
+class CKinBlob
+{
+public:
+	CKinBlob();
+	~CKinBlob();
+	/**
+	 * read values from stream to initialize the CKinBlob object
+	 * @param in input file stream
+	 * @param geo_obj object of class GEOObjects that manages the geometric entities
+	 * @param unique_name the name of the project to access the right geometric entities
+	 * @return true (always) TODO
+	 */
+	// bool Read(std::ifstream* in, const GeoLib::GeoObject & geo_obj, const std::string& unique_name); // HS
+	bool Read(std::ifstream* in);
+	void Write(std::ostream & out) const;
+	const std::vector<size_t>& getBlobGeoID()
+	{
+		return BlobGeoID;
+	}
+
+	std::string name;
+	double d50;
+	double Sh_factor;
+	double Re_expo;
+	double Sc_expo;
+	double Geometry_expo;
+	double Mass;
+	double Volume;
+	double Masstransfer_k;
+	double current_Interfacial_area;
+	std::vector<double> Area_Value;
+	std::vector<double> Interfacial_area;
+	std::vector<std::string> BlobGeoType;
+	std::vector<std::string> BlobGeoName;
+private:
+	std::vector<size_t> BlobGeoID;
+};
+
 
 // C++ Class CKinReact
 class CKinReact
@@ -77,15 +116,16 @@ private:
 	 */
 	std::string type;
 
-	friend bool KRRead(std::string const & file_base_name,
-	                   GeoLib::GeoObject const & geo_obj, std::string const & unique_name);
-	friend void KRConfig(const GeoLib::GeoObject & geo_obj, const std::string& unique_name);
+	// friend bool KRRead(std::string const & file_base_name, GeoLib::GeoObject const & geo_obj, std::string const & unique_name); // HS
+	friend bool KRRead(std::string const & file_base_name, std::string const & unique_name);
+	// friend void KRConfig(const GeoLib::GeoObject & geo_obj, const std::string& unique_name);
 
 public:
 	CKinReact(void);                      // Constructor
 	~CKinReact(void);                     // Destructor
 
 	std::string const & getType () const { return type; }
+	std::string const & getName () const { return name; } 
 
 	int number;                           /* counter */
 	int number_reactionpartner;           /* Number of chemical species involved in reaction */
@@ -149,66 +189,27 @@ public:
 	 * @param unique_name the name of the project to access the right geometric entities
 	 * @return true (in every case) ToDo
 	 */
-	bool Read(std::ifstream* rfd_file, const GeoLib::GeoObject & geo_obj, const std::string& unique_name);
+	// bool Read(std::ifstream* rfd_file, const GeoLib::GeoObject & geo_obj, const std::string& unique_name);
+	bool Read(std::ifstream* rfd_file);
 
 	void Write(std::ofstream*);           /* Class Write Function */
 	void ReadReactionEquation(std::string); /* Read function for chemical equations */
-	int CheckReactionDataConsistency(void); /* check data set */
+	int CheckReactionDataConsistency(std::vector<CKinBlob*> & KinBlob_vector); /* check data set */
 	void TestWrite(void);                 // test output function
 
 	// CB isotope fractionation + higher order terms
 	double Monod(double, double, double, double);
 	double Inhibition(double, double);
-	double BacteriaGrowth ( int r, double* c, double sumX, int exclude );
+	// double BacteriaGrowth ( int r, double* c, double sumX, int exclude );
 	int     GetPhase(int );
 	//   double GetPorosity( int comp, long index );
 	// CB replaced by
 	double GetReferenceVolume( int comp, long index );
 	double GetDensity( int comp, long index );
 	double GetNodePoreVelocity( long node);
-	double GetPhaseVolumeAtNode(long node, double theta, int phase);
+	// double GetPhaseVolumeAtNode(long node, double theta, int phase);
 	// CB 19/10/09
 	long currentnode;                     // CB 19/10/09 This is eclusively for Brand model to allow porosity in Inhibition constant calculation
-};
-
-//#ds Class for blob properties
-class CKinBlob
-{
-public:
-	CKinBlob();
-	~CKinBlob();
-	/**
-	 * read values from stream to initialize the CKinBlob object
-	 * @param in input file stream
-	 * @param geo_obj object of class GEOObjects that manages the geometric entities
-	 * @param unique_name the name of the project to access the right geometric entities
-	 * @return true (always) TODO
-	 */
-	bool Read(std::ifstream* in,
-	          const GeoLib::GeoObject & geo_obj,
-	          const std::string& unique_name);
-	void Write(std::ostream & out) const;
-	const std::vector<size_t>& getBlobGeoID()
-	{
-		return BlobGeoID;
-	}
-
-	std::string name;
-	double d50;
-	double Sh_factor;
-	double Re_expo;
-	double Sc_expo;
-	double Geometry_expo;
-	double Mass;
-	double Volume;
-	double Masstransfer_k;
-	double current_Interfacial_area;
-	std::vector<double> Area_Value;
-	std::vector<double> Interfacial_area;
-	std::vector<std::string> BlobGeoType;
-	std::vector<std::string> BlobGeoName;
-private:
-	std::vector<size_t> BlobGeoID;
 };
 
 class CKinReactData
@@ -276,9 +277,8 @@ public:
 	 * @param unique_name the name of the project to access the right geometric entities
 	 * @return
 	 */
-	bool Read(std::ifstream* in,
-	          const GeoLib::GeoObject & geo_obj,
-	          const std::string& unique_name);
+	// bool Read(std::ifstream* in, const GeoLib::GeoObject & geo_obj, const std::string& unique_name); // HS
+	bool Read(std::ifstream* in); 
 	void Write(std::ofstream*);           /* Class Write Function */
 	void TestWrite(void);
 	void ExecuteKinReact(void);
@@ -294,9 +294,10 @@ public:
 	void Aromaticum(long nonodes);
 };
 
-extern std::vector <CKinReact*> KinReact_vector;          // declare extern instance of class CKinReact
-extern std::vector <CKinReactData*> KinReactData_vector;  // declare extern instance of class CKinReactData
-extern std::vector <CKinBlob*> KinBlob_vector;            // declare extern instance of class Blob
+// HS these vectors are moved to Ogs5FemIO.h
+// extern std::vector <CKinReact*> KinReact_vector;          // declare extern instance of class CKinReact
+// extern std::vector <CKinReactData*> KinReactData_vector;  // declare extern instance of class CKinReactData
+// extern std::vector <CKinBlob*> KinBlob_vector;            // declare extern instance of class Blob
 
 /**
  * read file for kinetic reaction
@@ -305,19 +306,24 @@ extern std::vector <CKinBlob*> KinBlob_vector;            // declare extern inst
  * @param unique_name unique name to access the geometric entities in geo_obj
  * @return false if file can not be opened, else true
  */
-bool KRRead(const std::string& file_base_name,
-            const GeoLib::GeoObject & geo_obj,
-            const std::string& unique_name);
+// bool KRRead(const std::string& file_base_name, const GeoLib::GeoObject & geo_obj, const std::string& unique_name); // HS
+bool KRRead(const std::string           &file_base_name, 
+	        std::vector<CKinReact*>     &KinReact_vector, 
+			std::vector<CKinReactData*> &KinReactData_vector,  
+			std::vector<CKinBlob*>      &KinBlob_vector); 
 
-extern bool KRWrite(std::string const&);
-extern void KRCDelete(void);
+extern bool KRWrite(std::string const           &prot_name, 
+	                std::vector<CKinReact*>     &KinReact_vector, 
+					std::vector<CKinReactData*> &KinReactData_vector,  
+					std::vector<CKinBlob*>      &KinBlob_vector);
+extern void KRCDelete(std::vector<CKinReact*> & KinReact_vector);
 
 /**
  * configure kinetic reaction
  * @param geo_obj object of class GEOObjects managing the geometric entities
  * @param unique_name unique name to access the geometric entities in geo_obj
  */
-void KRConfig(const GeoLib::GeoObject & geo_obj, const std::string& unique_name);
+// void KRConfig(const GeoLib::GeoObject & geo_obj, const std::string& unique_name);
 
 } // end of namespace
 

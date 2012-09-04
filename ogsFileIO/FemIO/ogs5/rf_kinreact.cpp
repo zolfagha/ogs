@@ -131,8 +131,11 @@ CKinReact::~CKinReact(void)
    Programing:
    02/2004 SB Implementation
 **************************************************************************/
-bool KRRead(const std::string &file_base_name,
-            const GeoLib::GeoObject & geo_obj, const std::string& unique_name)
+// bool KRRead(const std::string &file_base_name, const GeoLib::GeoObject & geo_obj, const std::string& unique_name) // HS
+bool KRRead(const std::string           &file_base_name, 
+	        std::vector<CKinReact*>     &KinReact_vector, 
+			std::vector<CKinReactData*> &KinReactData_vector,  
+			std::vector<CKinBlob*>      &KinBlob_vector)
 {
 	// File handling
 	std::string krc_file_name (file_base_name + KRC_FILE_EXTENSION);
@@ -152,7 +155,7 @@ bool KRRead(const std::string &file_base_name,
 	std::ios::pos_type position;
 	std::string m_name, sp_name;
 
-	KRCDelete();
+	KRCDelete(KinReact_vector);
 	//========================================================================
 	// Keyword loop
 	std::cout << "KinReact Read" << std::endl;
@@ -167,7 +170,8 @@ bool KRRead(const std::string &file_base_name,
 		if (line_string.find("#REACTION") != std::string::npos)
 		{
 			m_kr = new CKinReact();
-			m_kr->Read(&krc_file, geo_obj, unique_name);
+			// m_kr->Read(&krc_file, geo_obj, unique_name); // HS
+			m_kr->Read(&krc_file);
 			m_kr->number = (int) KinReact_vector.size();
 			KinReact_vector.push_back(m_kr);
 		}                         // keyword found
@@ -175,14 +179,16 @@ bool KRRead(const std::string &file_base_name,
 		if (line_string.find("#KINREACTIONDATA") != std::string::npos)
 		{
 			m_krd = new CKinReactData();
-			m_krd->Read(&krc_file, geo_obj, unique_name);
+			// m_krd->Read(&krc_file, geo_obj, unique_name); // HS
+			m_krd->Read(&krc_file); 
 			KinReactData_vector.push_back(m_krd);
 		}                         // keyword found
 		                          // keyword found  // Read BlobProperties
 		if (line_string.find("#BLOB_PROPERTIES") != std::string::npos)
 		{
 			m_bp = new CKinBlob();
-			m_bp->Read(&krc_file, geo_obj, unique_name);
+			// m_bp->Read(&krc_file, geo_obj, unique_name); // HS
+			m_bp->Read(&krc_file); 
 			KinBlob_vector.push_back(m_bp);
 		}                         // keyword found
 	}                                     // eof
@@ -191,8 +197,7 @@ bool KRRead(const std::string &file_base_name,
 
 	if (!m_krd)
 	{
-		std::cout << " No keyword #KINREACTIONDATA specified - setting defaults"
-		     << std::endl;
+		std::cout << " No keyword #KINREACTIONDATA specified - setting defaults" << std::endl;
 		m_krd = new CKinReactData();
 		KinReactData_vector.push_back(m_krd);
 	}
@@ -201,7 +206,7 @@ bool KRRead(const std::string &file_base_name,
 
 	/* Check, if data has to be completed from database file */
 	//  cout << "checking database" << endl;
-	if (!KinReact_vector.empty())
+	if ( !KinReact_vector.empty() )
 	{
 		// File handling, open reaction database file
 		database_file_name = "reactions.dbf";
@@ -214,7 +219,7 @@ bool KRRead(const std::string &file_base_name,
 		{
 			m_kr = KinReact_vector[i];
 			// if no type is given in input file, only name, then read from database file
-			if (m_kr->type == "NULL")
+			if (m_kr->getType() == "NULL")
 			{
 				found = 0;
 				dbf_file.seekg(0L, std::ios::beg); // rewind database file
@@ -228,11 +233,10 @@ bool KRRead(const std::string &file_base_name,
 					if (line_string.find("#REACTION") != std::string::npos)
 					{
 						m_kr1 = new CKinReact();
-						position = m_kr1->Read(&dbf_file,
-						                       geo_obj,
-						                       unique_name);
+						// position = m_kr1->Read(&dbf_file, geo_obj, unique_name);  // HS
+						position = m_kr1->Read(&dbf_file);
 						//check if this is the right one
-						if (m_kr->name == m_kr1->name)
+						if (m_kr->getName() == m_kr1->getName() )
 						{
 							// Insert in Reaction vector and remove old reaction (replacement)
 							KinReact_vector.insert(
@@ -252,7 +256,7 @@ bool KRRead(const std::string &file_base_name,
 				if (found == 0)
 				{
 					// reaction not complete in input file and also not specified in dbf_file
-					std::cout << " ERROR! Reaction " << m_kr->name
+					std::cout << " ERROR! Reaction " << m_kr->getName()
 					     << "  not found in database file" << std::endl;
 					std::cout << " Reaction removed from set of reaction " << std::endl;
 					// remove reaction from reaction vector
@@ -272,9 +276,9 @@ bool KRRead(const std::string &file_base_name,
 	for (size_t i = 0; i < length; i++)
 	{
 		m_kr = KinReact_vector[i];
-		if (!m_kr->CheckReactionDataConsistency())
+		if (!m_kr->CheckReactionDataConsistency(KinBlob_vector))
 		{
-			std::cout << " ERROR! Reaction " << m_kr->name
+			std::cout << " ERROR! Reaction " << m_kr->getName()
 			     << "  removed from set of reactions due to data inconsistency"
 			     << std::endl;
 			KinReact_vector.erase(KinReact_vector.begin() + i);
@@ -1082,7 +1086,7 @@ bool KRRead(const std::string &file_base_name,
    02/2006 SB Implementation
    last modified:
 **************************************************************************/
-void KRCDelete(void)
+void KRCDelete(std::vector<CKinReact*> & KinReact_vector)
 {
 	long i;
 	int no_krc = (int) KinReact_vector.size();
@@ -1099,7 +1103,8 @@ void KRCDelete(void)
    02/2006 SB New Class structure, IO, C++, FEM
    06/2010 TF formated, removed unused variables, changed signature for new GEOLIB data structures
 **************************************************************************/
-bool CKinReact::Read(std::ifstream* rfd_file, const GeoLib::GeoObject & geo_obj, const std::string& unique_name)
+// bool CKinReact::Read(std::ifstream* rfd_file, const GeoLib::GeoObject & geo_obj, const std::string& unique_name) 
+bool CKinReact::Read(std::ifstream* rfd_file)
 {
 	char line[MAX_ZEILE];
 	std::string line_string, line_str1;
@@ -1396,6 +1401,9 @@ bool CKinReact::Read(std::ifstream* rfd_file, const GeoLib::GeoObject & geo_obj,
 			in >> blob_name >> Csat_pure >> Density_NAPL;
 			in.clear();
 		}
+
+		// HS, 09.2012 disable this part, to be moved...
+		/*
 		//....................................................................
 		// subkeyword found
 		if (line_string.find("$SWITCH_OFF_GEOMETRY") != string::npos)
@@ -1422,8 +1430,7 @@ bool CKinReact::Read(std::ifstream* rfd_file, const GeoLib::GeoObject & geo_obj,
 				if (s_geo_type.find("POINT") != std::string::npos)
 					// TF 06/2010 - get the point vector and set the geo_obj_idx
 					if (!((geo_obj.getPointVecObj(unique_name))->
-					      getElementIDByName(
-					              s_geo_name, geo_obj_idx)))
+					      getElementIDByName(s_geo_name, geo_obj_idx)))
 					{
 						std::cerr
 						<<
@@ -1434,8 +1441,7 @@ bool CKinReact::Read(std::ifstream* rfd_file, const GeoLib::GeoObject & geo_obj,
 				if (s_geo_type.find("POLYLINE") != std::string::npos)
 					// TF 07/2010 - get the polyline vector and set the geo_obj_idx
 					if (!((geo_obj.getPolylineVecObj(unique_name))->
-					      getElementIDByName(
-					              s_geo_name, geo_obj_idx)))
+					      getElementIDByName(s_geo_name, geo_obj_idx)))
 					{
 						std::cerr
 						<<
@@ -1447,6 +1453,9 @@ bool CKinReact::Read(std::ifstream* rfd_file, const GeoLib::GeoObject & geo_obj,
 
 				in.clear();
 			}
+
+			*/ 
+			// end of disabling...// HS
 	}
 	return true;
 }
@@ -1459,7 +1468,7 @@ bool CKinReact::Read(std::ifstream* rfd_file, const GeoLib::GeoObject & geo_obj,
    02/2006 SB Implementation
    last modified:
 **************************************************************************/
-int CKinReact::CheckReactionDataConsistency()
+int CKinReact::CheckReactionDataConsistency(std::vector<CKinBlob*> & KinBlob_vector)
 {
 	int i, ok = 1, length;
 	bool found = false;
@@ -1847,16 +1856,15 @@ CKinBlob::~CKinBlob(void)
    Programing:
    02/2007 DS Implementation
 **************************************************************************/
-bool CKinBlob::Read(ifstream* rfd_file,
-                    const GeoLib::GeoObject & geo_obj,
-                    const std::string& unique_name)
+// bool CKinBlob::Read(ifstream* rfd_file, const GeoLib::GeoObject & geo_obj, const std::string& unique_name) // HS
+bool CKinBlob::Read(ifstream* rfd_file)
 {
 	char line[MAX_ZEILE];
 	string line_string, line_str1, s_geo_type, s_geo_name;
 	string hash("#"), dollar("$");
 	bool new_keyword = false, OK = true;
-	size_t index, index1;
-	double d_inivalue;
+	size_t index;
+	// double d_inivalue;
 	std::stringstream in;
 
 	//========================================================================
@@ -1907,6 +1915,9 @@ bool CKinBlob::Read(ifstream* rfd_file,
 			in >> Geometry_expo;
 			in.clear();
 		}
+
+		// HS 09.2012 disable this part, to be removed...
+		/*
 		// subkeyword found
 		if (line_string.find("$INTERFACIAL_AREA") != string::npos)
 			while (OK)
@@ -1971,6 +1982,9 @@ bool CKinBlob::Read(ifstream* rfd_file,
 				BlobGeoID.push_back(geo_obj_idx);
 				in.clear();
 			}
+
+			*/
+		    // end of disabling // HS
 	}                                     //end while keyword
 
 	return true;
@@ -2232,9 +2246,8 @@ CKinReactData::~CKinReactData(void)
    Programing:
    02/2006 SB New Class structure, IO, C++, FEM
 **************************************************************************/
-bool CKinReactData::Read(ifstream* rfd_file,
-                         const GeoLib::GeoObject & geo_obj,
-                         const std::string& unique_name)
+// bool CKinReactData::Read(ifstream* rfd_file, const GeoLib::GeoObject & geo_obj, const std::string& unique_name) // HS
+bool CKinReactData::Read(std::ifstream* rfd_file)
 {
 	char line[MAX_ZEILE];
 	string sub_line;
@@ -2334,6 +2347,9 @@ bool CKinReactData::Read(ifstream* rfd_file,
 		//in >> exSurface[surf_id];
 		//in.clear();
 		// }
+
+		// HS, disabling this part
+		/*
 		//....................................................................
 		// subkeyword found
 		if (line_string.find("$NO_REACTIONS") != string::npos)
@@ -2389,6 +2405,9 @@ bool CKinReactData::Read(ifstream* rfd_file,
 
 				in.clear();
 			}
+		*/
+		// end of disabling. // HS
+
 		//....................................................................
 		// subkeyword found
 		if (line_string.find("$REACTION_DEACTIVATION") != string::npos)
@@ -2496,7 +2515,10 @@ void CKinReactData::TestWrite(void)
    05/2004 SB Implementation
    02/2006 SB C++, IO
 **************************************************************************/
-bool KRWrite(std::string const & prot_name)
+bool KRWrite(std::string const           &prot_name, 
+	         std::vector<CKinReact*>     &KinReact_vector, 
+			 std::vector<CKinReactData*> &KinReactData_vector,  
+			 std::vector<CKinBlob*>      &KinBlob_vector)
 {
 	CKinReact* m_kr = NULL;
 	CKinReactData* m_krd = NULL;
@@ -3516,94 +3538,94 @@ bool KRWrite(std::string const & prot_name)
 /*                                                                        */
 /**************************************************************************/
 
-double CKinReact::BacteriaGrowth(int r, double* c, double sumX, int exclude)
-{
-	r = r;                                //OK411
-	int i, BacteriaNumber, MonodSpecies, InhibitionSpecies, Isotopespecies,
-	    NumberMonod, NumberInhibition;
-	double Growth, BacteriaMass, maxVelocity, maxkap;
-	double MonodConcentration, InhibitionConcentration, C;
-	double Ctot = 0;                      //CB Isotope fractionation
-	double MonodOrder;
-	CKinReactData* m_krd = NULL;
-
-	m_krd = KinReactData_vector[0];
-
-	BacteriaNumber = bacteria_number + 1;
-	maxVelocity = rateconstant;
-	BacteriaMass = c[BacteriaNumber];
-
-	Growth = maxVelocity * BacteriaMass;
-
-	/* Hemmung durch Bakteriendichte sumX nur bei Wachstum */
-	if ((sumX > 1.E-30) && (maxVelocity > 0.))
-	{
-		/* Max. Bakterienkapazit�t aus Datenstruktur auslesen */
-		maxkap = m_krd->maxBacteriaCapacity;
-		Growth = Growth * maxkap / (sumX + maxkap);
-	}
-
-	/*  FOR-Schleife �ber vorhandene Monodterme */
-
-	NumberMonod = number_monod;
-	for (i = 0; i < NumberMonod; i++)
-		/* M�glichkeit zum Weglassen Monodterm f�r partielle Ableitungen erforderlich */
-		if (i != exclude)
-		{
-			MonodSpecies = monod[i]->speciesnumber;
-			MonodConcentration = monod[i]->concentration;
-			MonodOrder = monod[i]->order; // CB higher order Monod terms
-			C = c[MonodSpecies + 1];
-			//Growth= Growth * Monod(MonodConcentration,C);  // old formulation without isotope fractionation
-			// CB Isotope fractionation: hier muss Ctot mit �bergeben werden
-			if ((typeflag_iso_fract == 1) && (monod[i]->isotopecouplenumber
-			                                  >= 0))
-			{
-				Isotopespecies = monod[i]->isotopecouplenumber;
-				Ctot = C + c[Isotopespecies + 1];
-				Growth = Growth
-				         * Monod(MonodConcentration, C, Ctot, MonodOrder);
-			}             // this is the standard case without fractionation
-			else
-			{
-				Growth = Growth * Monod(MonodConcentration, C, C, MonodOrder);
-				if (monod[i]->threshhold == true)
-				{
-					// now multiply by additional Threshhold Term, technically this is the same as a Monod term
-					MonodConcentration = monod[i]->threshConc;
-					MonodOrder = monod[i]->threshOrder; // CB higher order Monod terms
-					Growth = Growth * Monod(MonodConcentration, C, C,
-					                        MonodOrder);
-				}
-			}
-		}
-	//  for NumberMonod
-
-	/*	FOR-Schleife �ber vorhandene Inhibitionsterme */
-	NumberInhibition = number_inhibit;
-	for (i = 0; i < NumberInhibition; i++)
-	{
-		InhibitionSpecies = inhibit[i]->speciesnumber;
-		InhibitionConcentration = inhibit[i]->concentration;
-		// ATTENTION!!!
-		// CB 16/10/09 Hardcode fix of Fe3 inhibition concentration for Brand model,
-		// this parameter depends on porosity as in Min3P Fe3 is in solid phase
-		// and Inhibition concentrations are expressed in terms of Volume fraction
-		// Vol_Fe3/Vol_BulkAquifer [m?m�]
-		// while in Geosys, Fe3 is considered an immobile aqueous species
-		// and concentrations were converted to [mol/L_water] by
-		// C_gs = C_min3p * rho_Fe3 / molweight / porosity
-		// for inhibition concentrations, division by porosity is still required
-		if (inhibit[i]->species.compare("Fe3") == 0)
-			InhibitionConcentration *= 1 / GetPhaseVolumeAtNode(currentnode, 1,
-			                                                    0);
-		// CB  further changes in derivs (1), jacbn (2), class CKinReact{}
-		C = c[InhibitionSpecies + 1];
-		Growth = Growth * Inhibition(InhibitionConcentration, C);
-	}
-
-	return Growth;
-}
+//double CKinReact::BacteriaGrowth(int r, double* c, double sumX, int exclude)
+//{
+//	r = r;                                //OK411
+//	int i, BacteriaNumber, MonodSpecies, InhibitionSpecies, Isotopespecies,
+//	    NumberMonod, NumberInhibition;
+//	double Growth, BacteriaMass, maxVelocity, maxkap;
+//	double MonodConcentration, InhibitionConcentration, C;
+//	double Ctot = 0;                      //CB Isotope fractionation
+//	double MonodOrder;
+//	CKinReactData* m_krd = NULL;
+//
+//	m_krd = KinReactData_vector[0];
+//
+//	BacteriaNumber = bacteria_number + 1;
+//	maxVelocity = rateconstant;
+//	BacteriaMass = c[BacteriaNumber];
+//
+//	Growth = maxVelocity * BacteriaMass;
+//
+//	/* Hemmung durch Bakteriendichte sumX nur bei Wachstum */
+//	if ((sumX > 1.E-30) && (maxVelocity > 0.))
+//	{
+//		/* Max. Bakterienkapazit�t aus Datenstruktur auslesen */
+//		maxkap = m_krd->maxBacteriaCapacity;
+//		Growth = Growth * maxkap / (sumX + maxkap);
+//	}
+//
+//	/*  FOR-Schleife �ber vorhandene Monodterme */
+//
+//	NumberMonod = number_monod;
+//	for (i = 0; i < NumberMonod; i++)
+//		/* M�glichkeit zum Weglassen Monodterm f�r partielle Ableitungen erforderlich */
+//		if (i != exclude)
+//		{
+//			MonodSpecies = monod[i]->speciesnumber;
+//			MonodConcentration = monod[i]->concentration;
+//			MonodOrder = monod[i]->order; // CB higher order Monod terms
+//			C = c[MonodSpecies + 1];
+//			//Growth= Growth * Monod(MonodConcentration,C);  // old formulation without isotope fractionation
+//			// CB Isotope fractionation: hier muss Ctot mit �bergeben werden
+//			if ((typeflag_iso_fract == 1) && (monod[i]->isotopecouplenumber
+//			                                  >= 0))
+//			{
+//				Isotopespecies = monod[i]->isotopecouplenumber;
+//				Ctot = C + c[Isotopespecies + 1];
+//				Growth = Growth
+//				         * Monod(MonodConcentration, C, Ctot, MonodOrder);
+//			}             // this is the standard case without fractionation
+//			else
+//			{
+//				Growth = Growth * Monod(MonodConcentration, C, C, MonodOrder);
+//				if (monod[i]->threshhold == true)
+//				{
+//					// now multiply by additional Threshhold Term, technically this is the same as a Monod term
+//					MonodConcentration = monod[i]->threshConc;
+//					MonodOrder = monod[i]->threshOrder; // CB higher order Monod terms
+//					Growth = Growth * Monod(MonodConcentration, C, C,
+//					                        MonodOrder);
+//				}
+//			}
+//		}
+//	//  for NumberMonod
+//
+//	/*	FOR-Schleife �ber vorhandene Inhibitionsterme */
+//	NumberInhibition = number_inhibit;
+//	for (i = 0; i < NumberInhibition; i++)
+//	{
+//		InhibitionSpecies = inhibit[i]->speciesnumber;
+//		InhibitionConcentration = inhibit[i]->concentration;
+//		// ATTENTION!!!
+//		// CB 16/10/09 Hardcode fix of Fe3 inhibition concentration for Brand model,
+//		// this parameter depends on porosity as in Min3P Fe3 is in solid phase
+//		// and Inhibition concentrations are expressed in terms of Volume fraction
+//		// Vol_Fe3/Vol_BulkAquifer [m?m�]
+//		// while in Geosys, Fe3 is considered an immobile aqueous species
+//		// and concentrations were converted to [mol/L_water] by
+//		// C_gs = C_min3p * rho_Fe3 / molweight / porosity
+//		// for inhibition concentrations, division by porosity is still required
+//		if (inhibit[i]->species.compare("Fe3") == 0)
+//			InhibitionConcentration *= 1 / GetPhaseVolumeAtNode(currentnode, 1,
+//			                                                    0);
+//		// CB  further changes in derivs (1), jacbn (2), class CKinReact{}
+//		C = c[InhibitionSpecies + 1];
+//		Growth = Growth * Inhibition(InhibitionConcentration, C);
+//	}
+//
+//	return Growth;
+//}
 
 /**************************************************************************/
 /* ROCKFLOW - Funktion: Monod(MC, C)                                      */
@@ -4338,27 +4360,27 @@ void CKinReact::TestWrite(void)
    Programing:
    08/2008 CB Implementation
 **************************************************************************/
-bool KNaplDissCheck(void)
-{
-	int j;
-	CKinReact* m_kr = NULL;
-	//OK411 CKinReactData *m_krd = NULL;
-	int nreact;
-	bool NAPLdiss = false;
-
-	// check for NAPL dissolution
-	nreact = (int) KinReact_vector.size();
-	for (j = 0; j < nreact; j++)
-	{
-		m_kr = KinReact_vector[j];
-		if (m_kr->getType().compare("NAPLdissolution") == 0)
-		{
-			NAPLdiss = true;
-			break;
-		}
-	}
-	return NAPLdiss;
-}
+//bool KNaplDissCheck(void)
+//{
+//	int j;
+//	CKinReact* m_kr = NULL;
+//	//OK411 CKinReactData *m_krd = NULL;
+//	int nreact;
+//	bool NAPLdiss = false;
+//
+//	// check for NAPL dissolution
+//	nreact = (int) KinReact_vector.size();
+//	for (j = 0; j < nreact; j++)
+//	{
+//		m_kr = KinReact_vector[j];
+//		if (m_kr->getType().compare("NAPLdissolution") == 0)
+//		{
+//			NAPLdiss = true;
+//			break;
+//		}
+//	}
+//	return NAPLdiss;
+//}
 
 /**************************************************************************
    Reaction-Method:
