@@ -11,7 +11,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  MASS_TRANSPORT
+  KIN_REACT_GIA
  $PRIMARY_VARIABLE 
   Comp_A
  $GEO_TYPE
@@ -21,7 +21,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  MASS_TRANSPORT
+  KIN_REACT_GIA
  $PRIMARY_VARIABLE 
   Comp_B
  $GEO_TYPE
@@ -31,7 +31,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  MASS_TRANSPORT
+  KIN_REACT_GIA
  $PRIMARY_VARIABLE 
   Comp_C
  $GEO_TYPE
@@ -41,7 +41,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  MASS_TRANSPORT
+  KIN_REACT_GIA
  $PRIMARY_VARIABLE 
   Cons_Tracer
  $GEO_TYPE
@@ -51,7 +51,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  MASS_TRANSPORT
+  KIN_REACT_GIA
  $PRIMARY_VARIABLE 
   Biomass
  $GEO_TYPE
