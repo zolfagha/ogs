@@ -62,7 +62,7 @@ bool Ogs5FemIO::read(const std::string &proj_path, Ogs5FemData &ogs5data)
             pcs->primary_variable_name = "DISPLACEMENT";
             break;
 		case FiniteElement::KIN_REACT_GIA:
-			pcs->primary_variable_name = "CONCENTRATION"; 
+			pcs->primary_variable_name = "CONCENTRATIONS"; 
 			break; 
         }
     }

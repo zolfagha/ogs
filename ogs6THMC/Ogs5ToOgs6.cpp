@@ -322,6 +322,10 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             masstransport_counter++;
         }
 
+		// HS: add kinetic reactions
+
+
+
     }
 
 

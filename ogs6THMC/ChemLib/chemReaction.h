@@ -33,9 +33,8 @@ protected:
 	/**
       * virtual class, read from a reaction string 
       */
-	virtual void readReactionStr(std::string reaction_str); 
+	virtual void readReactionStr(std::string & reaction_str); 
 
-private:
 	/**
       * set the reactions 
       * @param pcomp is the pointer to an instance of chemical component
