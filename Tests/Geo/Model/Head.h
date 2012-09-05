@@ -49,6 +49,7 @@ class FunctionHead : public AbstractTransientMonolithicSystem
 {
     enum Out { Head=0 };
 public:
+
     typedef TemplateFemEquation<
             DiscreteSystem,
             T_LINEAR_SOLVER,
@@ -59,6 +60,7 @@ public:
             GWFemEquation;
 
     typedef FemIVBVProblem< DiscreteSystem, GWFemEquation > GWFemProblem;
+
     typedef SingleStepFEM
             <
                 GWFemProblem,
@@ -94,13 +96,12 @@ public:
 
     bool isAwake(const TimeStep &time) { return _solHead->isAwake(time);  }
 
-    void accept(const TimeStep &time)
-    {
-        _solHead->accept(time);
+    void accept(const TimeStep &time) { _solHead->accept(time); };
 
-        //std::cout << "Head=" << std::endl;
-        //_solHead->getCurrentSolution(0)->printout();
-    };
+
+
+    //std::cout << "Head=" << std::endl;
+    //_solHead->getCurrentSolution(0)->printout();
     NumLib::DiscreteDataConvergenceCheck _checker;
     virtual NumLib::IConvergenceCheck* getConvergenceChecker()
     {
