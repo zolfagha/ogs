@@ -3,7 +3,7 @@ GeoSys-OUT: Output ------------------------------------------------
  $PCS_TYPE
   GROUNDWATER_FLOW
  $TIME_STEPS
-  1  600
+  10  600
 ;  30  60
  $TIME_END
   1e+99
