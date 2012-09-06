@@ -19,7 +19,7 @@
 namespace ogsChem
 {
 
-class chemReactionKin : chemReaction
+class chemReactionKin : public chemReaction
 {
 public: 
 	/**

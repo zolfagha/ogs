@@ -28,6 +28,7 @@ chemReactionKin::~chemReactionKin(void)
 void chemReactionKin::readReactionStr(std::string & reaction_str)
 {
 	// TODO
+	std::string tmp_str;
 }
 
 void chemReactionKin::calcReactionRate(void)
@@ -44,9 +45,7 @@ void chemReactionKin::readReactionKRC(ogs5::CKinReact* KRC_reaction)
 	// to the local data structure
 	
 
-    // go through the stoichiometric matirx and convert it 
-	// to the local data structure
-
+    // copy the stoichiometric vector 
 	_vecStoi = KRC_reaction->stochmet;
 
 
