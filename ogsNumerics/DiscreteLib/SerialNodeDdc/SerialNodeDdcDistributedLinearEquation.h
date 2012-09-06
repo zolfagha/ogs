@@ -66,7 +66,7 @@ public:
 
     virtual ~SerialNodeDdcDistributedLinearEquation() 
     {
-        BaseLib::releaseObjectsInStdVector(_list_local_eq);
+        //BaseLib::releaseObjectsInStdVector(_list_local_eq);
     };
 
     /// initialize EQS
