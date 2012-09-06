@@ -76,7 +76,7 @@ public:
     ///
     virtual ~DiscreteSystem()
     {
-        BaseLib::releaseObject(_msh);
+        //BaseLib::releaseObject(_msh);
     };
 
     /// return this mesh
