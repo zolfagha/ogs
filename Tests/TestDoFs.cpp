@@ -64,7 +64,7 @@ TEST(Discrete, DoF_var2_byDof)
     DofEquationIdTable dofManagerB;
     size_t dofIdB1 = dofManagerB.addVariableDoFs(0, 0, 10);
     size_t dofIdB2 = dofManagerB.addVariableDoFs(0, 0, 10);
-    dofManagerB.construct();
+    dofManagerB.construct(DofNumberingType::BY_VARIABLE);
     ASSERT_EQ(2, dofManagerB.getNumberOfVariables());
     //ASSERT_EQ(dofManagerB.getTotalNumberOfDiscretePoints(), 20);
     ASSERT_EQ(0, dofManagerB.mapEqsID(dofIdB1, 0, 0));
