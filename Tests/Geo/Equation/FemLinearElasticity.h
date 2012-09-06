@@ -183,8 +183,8 @@ public:
         //
         LocalMatrixType &localK = *eqs.getA();
         LocalVectorType &localRHS = *eqs.getRHSAsVec();
-        LocalMatrixType matB = NumLib::LocalVector::Zero(n_strain_components, nnodes*dim);
-        LocalMatrixType matN = NumLib::LocalVector::Zero(dim, nnodes*dim);
+        LocalMatrixType matB = LocalMatrixType::Zero(n_strain_components, nnodes*dim);
+        LocalMatrixType matN = LocalMatrixType::Zero(dim, nnodes*dim);
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
         for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
