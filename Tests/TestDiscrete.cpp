@@ -165,6 +165,7 @@ TEST(Discrete, NDDCSSVec1)
 
     // discrete system
     SerialNodeDdcSharedDiscreteSystem dis(msh);
+    dis.initialize(ddc);
 
     // vector
     IDiscreteVector<double>* v = dis.createVector<double>(ddc->getTotalNumberOfDecomposedObjects());
