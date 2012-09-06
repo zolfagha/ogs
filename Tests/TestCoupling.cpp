@@ -235,10 +235,13 @@ BaseLib::Options* defineOption4SteadyCoupling()
     P2->addOptionAsNum("max_itr", 100);
     P2->addOptionAsNum("epsilon", 1.e-4);
     std::vector<std::string> out_var;
-    out_var.push_back("a");
-    out_var.push_back("b");
-    out_var.push_back("c");
-    P2->addOptionAsArray("out", out_var);
+//    out_var.push_back("a");
+//    out_var.push_back("b");
+//    out_var.push_back("c");
+//    P2->addOptionAsArray("out", out_var);
+    P2->addOption("out", "a");
+    P2->addOption("out", "b");
+    P2->addOption("out", "c");
     }
     BaseLib::Options* P2_sub = P2->addSubGroup("problems");
     BaseLib::Options* P1 = P2_sub->addSubGroup("P");
@@ -248,47 +251,59 @@ BaseLib::Options* defineOption4SteadyCoupling()
     P1->addOption("convergence", "MyConvergenceCheck");
     P1->addOptionAsNum("max_itr", 100);
     P1->addOptionAsNum("epsilon", 1.e-4);
-    std::vector<std::string> out_var;
-    out_var.push_back("a");
-    out_var.push_back("b");
-    std::vector<std::string> in_var;
-    in_var.push_back("c");
-    P1->addOptionAsArray("out", out_var);
-    P1->addOptionAsArray("in", in_var);
+//    std::vector<std::string> out_var;
+//    out_var.push_back("a");
+//    out_var.push_back("b");
+//    std::vector<std::string> in_var;
+//    in_var.push_back("c");
+//    P1->addOptionAsArray("out", out_var);
+//    P1->addOptionAsArray("in", in_var);
+    P1->addOption("out", "a");
+    P1->addOption("out", "b");
+    P1->addOption("in", "c");
     }
     BaseLib::Options* P1_sub = P1->addSubGroup("problems");
     BaseLib::Options* M1 = P1_sub->addSubGroup("M1");
     {
     M1->addOption("name", "EQS1");
-    std::vector<std::string> out_var;
-    out_var.push_back("a");
-    std::vector<std::string> in_var;
-    in_var.push_back("b");
-    in_var.push_back("c");
-    M1->addOptionAsArray("out", out_var);
-    M1->addOptionAsArray("in", in_var);
+//    std::vector<std::string> out_var;
+//    out_var.push_back("a");
+//    std::vector<std::string> in_var;
+//    in_var.push_back("b");
+//    in_var.push_back("c");
+//    M1->addOptionAsArray("out", out_var);
+//    M1->addOptionAsArray("in", in_var);
+    M1->addOption("out", "a");
+    M1->addOption("in", "b");
+    M1->addOption("in", "c");
     }
     BaseLib::Options* M2 = P1_sub->addSubGroup("M2");
     {
     M2->addOption("name", "EQS2");
-    std::vector<std::string> out_var;
-    out_var.push_back("b");
-    std::vector<std::string> in_var;
-    in_var.push_back("a");
-    in_var.push_back("c");
-    M2->addOptionAsArray("out", out_var);
-    M2->addOptionAsArray("in", in_var);
+//    std::vector<std::string> out_var;
+//    out_var.push_back("b");
+//    std::vector<std::string> in_var;
+//    in_var.push_back("a");
+//    in_var.push_back("c");
+//    M2->addOptionAsArray("out", out_var);
+//    M2->addOptionAsArray("in", in_var);
+    M2->addOption("out", "b");
+    M2->addOption("in", "a");
+    M2->addOption("in", "c");
     }
     BaseLib::Options* M3 = P2_sub->addSubGroup("M3");
     {
     M3->addOption("name", "EQS3");
-    std::vector<std::string> out_var;
-    out_var.push_back("c");
-    std::vector<std::string> in_var;
-    in_var.push_back("a");
-    in_var.push_back("b");
-    M3->addOptionAsArray("out", out_var);
-    M3->addOptionAsArray("in", in_var);
+//    std::vector<std::string> out_var;
+//    out_var.push_back("c");
+//    std::vector<std::string> in_var;
+//    in_var.push_back("a");
+//    in_var.push_back("b");
+//    M3->addOptionAsArray("out", out_var);
+//    M3->addOptionAsArray("in", in_var);
+    M3->addOption("out", "c");
+    M3->addOption("in", "a");
+    M3->addOption("in", "b");
     }
 
     return options;
@@ -332,7 +347,9 @@ TEST(Coupling, SteadyCouplingOption)
 
     const double epsilon = 1.e-3;
     double v1, v2, v3;
-    ((const MyFunction*)coupled_sys->getOutput(coupled_sys->getOutputParameterID("a")))->eval(v1);
+    size_t outId_A = coupled_sys->getOutputParameterID("a");
+    const MyFunction* f1 = (const MyFunction*)coupled_sys->getOutput(outId_A);
+    f1->eval(v1);
     ((const MyFunction*)coupled_sys->getOutput(coupled_sys->getOutputParameterID("b")))->eval(v2);
     ((const MyFunction*)coupled_sys->getOutput(coupled_sys->getOutputParameterID("c")))->eval(v3);
     ASSERT_NEAR(1., v1, epsilon);
