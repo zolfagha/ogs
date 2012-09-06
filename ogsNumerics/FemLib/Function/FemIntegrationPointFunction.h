@@ -118,6 +118,9 @@ public:
             }
             break;
         default:
+            if (_values->size() == 0) return;
+            if ((*_values)[0].size() == 0) return;
+            v = (*_values)[0][0];
             break;
         }
     };
