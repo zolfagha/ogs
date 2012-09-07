@@ -45,6 +45,12 @@ namespace ogsChem
          SS_PHASE_COMP    /* solid solution component       */
     };
 
+	enum Comp_Mobility {
+		MOBILE,           /* mobile components*/
+		SORPTION,         /* sorption components*/
+		MINERAL           /* mineral components*/
+	}; 
+
     // type of chemical reaction
     enum ReactionType {
         EQ_LOGK,     /* - equilibrium reaction with constant logK */

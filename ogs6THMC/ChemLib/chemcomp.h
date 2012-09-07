@@ -14,6 +14,8 @@
 #define CHEMCOMP_H
 
 #include "chemconst.h"
+#include "ogs6THMC/MaterialLib/Compound.h"
+#include "BaseLib/FileTools.h"
 
 namespace ogsChem
 {
@@ -30,6 +32,11 @@ public:
       * constructor of the class
       */
     ChemComp(void);
+	/**
+      * constructor of the class, using the Compound class
+      */
+	ChemComp(MaterialLib::Compound* mCompound);
+
     /**
       * distructor of the class
       */
@@ -68,6 +75,9 @@ public:
     void set_composition(std::string new_composition)
     {_composition = new_composition;}
 
+	void set_mobility(Comp_Mobility new_mobility)
+	{_Mobility = new_mobility; }
+
     std::string get_composition(void)
     {return _composition;}
 
@@ -82,6 +92,13 @@ public:
 
     ChemReaction* get_pReaction(void)
     {return _mReaction;}
+
+	size_t getIndex(void) {return _index;};
+	
+	void   setIndex(size_t new_index) {_index = new_index;};
+
+	Comp_Mobility getMobility(void)
+	{return _Mobility; }
 
 private:
     /**
@@ -130,10 +147,20 @@ private:
       */
     Comp_Type _mCompType;
 
+	/**
+      * whether this component is mobile, sorption or mineral component
+      */
+	Comp_Mobility _Mobility; 
+
     /**
       * negative gamma values
       */
     double neg_gamma_1, neg_gamma_2;
+
+	/**
+      * index of the component
+      */
+    size_t _index;
 
 };
 

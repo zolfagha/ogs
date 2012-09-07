@@ -41,14 +41,11 @@ void chemReactionKin::readReactionKRC(ogs5::CKinReact* KRC_reaction)
 	// local temperary variables
 	// size_t tmp_size, i; 
 
-	// go through the list of components and convert it
-	// to the local data structure
-	
+	// get the list of components 
+	_vecCompNames = KRC_reaction->reactionpartner; 
 
     // copy the stoichiometric vector 
 	_vecStoi = KRC_reaction->stochmet;
-
-
 
 }
 

@@ -22,6 +22,7 @@
 #include "SolutionLib/Fem/FemNeumannBC.h"
 #include "GeoProcessBuilder.h"
 #include "ChemLib\chemReactionKin.h"
+#include "ChemLib\chemReductionKin.h"
 
 using namespace ogs5;
 
@@ -324,15 +325,31 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         }
 
 		// HS: add kinetic reactions
-		size_t n_KinReactions; 
+		size_t n_KinReactions, n_Compound; 
 		n_KinReactions = ogs5fem.KinReact_vector.size(); 
 		if ( n_KinReactions > 0 ) {  // only create the "optKRC" option when there are kinetic reactions defined. 
-			// adding the kinetic reactions
-			BaseLib::Options* optKRC = optPcs->addSubGroup("KineticReactions");
-			// adding the number of kinetic reactions
-			optKRC->addOptionAsNum("Num_Kin_Reactions", n_KinReactions);
-			BaseLib::Options* optKinReact = optKRC->addSubGroup("KinReact");
+			// HS: convert all compounds to ChemComp data structure
+			n_Compound = ogs6fem.list_compound.size(); 
+			for ( size_t i=0; i < n_Compound ; i++ )
+			{
+				ogsChem::ChemComp* mChemComp = NULL; 
+				// directly use the type of constructor to initialize the ChemComp data structure
+				mChemComp = new ogsChem::ChemComp(); 
+				// set index
+				mChemComp->setIndex(i); 
+				// set name
+				mChemComp->set_name(ogs6fem.list_compound[i]->name); 
+				// set mobility
+				if ( ogs6fem.list_compound[i]->is_mobile )
+					mChemComp->set_mobility( ogsChem::Comp_Mobility::MOBILE  ); 
+				else 
+					mChemComp->set_mobility( ogsChem::Comp_Mobility::MINERAL );
 
+				ogs6fem.map_ChemComp.insert(ogs6fem.list_compound[i]->name, mChemComp); 
+				mChemComp = NULL; 
+			}
+
+			// adding the kinetic reactions one after another
 			for ( size_t i=0; i < n_KinReactions ; i++ )
 			{
 				// add reactions one after another
@@ -343,8 +360,14 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 				// convert the ogs5 KRC data structure into ogs6 Kinetic reactions
 				mKinReaction->readReactionKRC( rfKinReact ); 
 				// adding the instance of one single kinetic reaction
-				optKinReact->addOptionAsNum("SingleKinRaction", mKinReaction); 
+				ogs6fem.list_kin_reactions.push_back(mKinReaction); 
 			}  // end of for
+
+			// at last, initialize the reduction scheme 
+			ogsChem::chemReductionKin* mReductionScheme; 
+			mReductionScheme = new ogsChem::chemReductionKin(ogs6fem.map_ChemComp, ogs6fem.list_kin_reactions); 
+			ogs6fem.m_KinReductScheme = mReductionScheme; 
+			mReductionScheme = NULL;
 		}  // end of if ( n_KinReactions > 0 )
 
 

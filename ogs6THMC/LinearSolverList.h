@@ -17,7 +17,7 @@
 #include "MathLib/LinAlg/LinearEquation/SparseLinearEquation.h"
 #include "MathLib/LinAlg/LinearEquation/EigenDenseLinearEquation.h"
 #ifdef USE_LIS
-#include "MathLib/LinAlg/LinearEquation/LisLinearEquation.h"
+// #include "MathLib/LinAlg/LinearEquation/LisLinearEquation.h"
 #endif
 #ifdef USE_PARDISO
 #include "MathLib/LinAlg/LinearEquations/PARDISOLinearEquation.h"

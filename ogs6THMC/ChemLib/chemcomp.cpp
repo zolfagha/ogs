@@ -24,6 +24,15 @@ ChemComp::ChemComp(void):
     _mReaction = 0;
 }
 
+ChemComp::ChemComp(MaterialLib::Compound* mCompund):
+    _name(mCompund->name), _composition("NaN"), _mole_mass(0.0),
+    _charge(0.0), _G0(0.0)
+{
+    // set pointers to zero
+    _mPhase    = 0;
+    _mReaction = 0;
+}
+
 ChemComp::~ChemComp(void)
 {
 }

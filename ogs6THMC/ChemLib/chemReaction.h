@@ -29,11 +29,17 @@ public:
       */
     ~chemReaction(void); 
 
-protected:
 	/**
-      * virtual class, read from a reaction string 
+      * get the vector of component names 
       */
-	virtual void readReactionStr(std::string & reaction_str) {}; 
+    std::vector <std::string> get_vecCompNames(void)
+	{return _vecCompNames;};
+
+	/**
+      * get the vector of stoichiometric value 
+      */
+    std::vector<double> get_vecStoi(void)
+	{return _vecStoi;};
 
 	/**
       * set the reactions 
@@ -41,11 +47,22 @@ protected:
       * @param stoi  is the stoichiometric coefficient of coresponding component
       */
     void addComp( ChemComp* pComp, double stoi ); 
+
+protected:
+	/**
+      * virtual class, read from a reaction string 
+      */
+	virtual void readReactionStr(std::string & reaction_str) {}; 
     
 	/**
       * vector of components in this reaction
       */
     std::vector<ChemComp*> _vecComponents; 
+
+	/**
+      * vector of component names, used to read from old ogs5 data structure.
+      */
+	std::vector <std::string> _vecCompNames; 
 
     /**
       * vector of stoichiometric coefficient before the component
