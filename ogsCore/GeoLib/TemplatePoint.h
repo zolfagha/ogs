@@ -60,6 +60,25 @@ public:
         return pt_diff;
     }
 
+    inline TemplatePoint<T> operator+ (const TemplatePoint<T> &p) const
+    {
+
+        TemplatePoint<T> pt_add(_x[0]+p._x[0], _x[1]+p._x[1], _x[2]+p._x[2]);
+        return pt_add;
+    }
+
+    inline void operator-= (const TemplatePoint<T> &p)
+    {
+        for (size_t i=0; i<3; i++)
+            this->_x[i] -=  p._x[i];
+    }
+
+    inline void operator+= (const TemplatePoint<T> &p)
+    {
+        for (size_t i=0; i<3; i++)
+            this->_x[i] +=  p._x[i];
+    }
+
     /** check if the given object equals to this. */
     inline bool operator== (const TemplatePoint<T> &p) const;
 /*
