@@ -192,6 +192,7 @@ Geo::FemLinearElasticProblem* defineLinearElasticProblem(DiscreteSystem &dis, Ge
     u_y->addDirichletBC(new FemDirichletBC(dis.getMesh(), poly_bottom, new NumLib::TXFunctionConstant(.0)));
     u_y->addNeumannBC(new SolutionLib::FemNeumannBC(dis.getMesh(), _feObjects, _rec.getTop(), new NumLib::TXFunctionConstant((-1e+6)*(-1.))));
 
+
     return _problem;
 }
 
@@ -222,7 +223,7 @@ TEST(Solution, CouplingFem2D)
         pGW->setTimeSteppingFunction(tim);
         // options
         BaseLib::Options options;
-        BaseLib::Options* op_lis = options.addSubGroup("Lis");
+        BaseLib::Options* op_lis = options.addSubGroup("LinearSolver");
         op_lis->addOption("solver_type", "CG");
         op_lis->addOption("precon_type", "NONE");
         op_lis->addOptionAsNum("error_tolerance", 1e-10);
@@ -294,7 +295,7 @@ TEST(Solution, line)
         pGW->setTimeSteppingFunction(tim);
         // options
         BaseLib::Options options;
-        BaseLib::Options* op_lis = options.addSubGroup("Lis");
+        BaseLib::Options* op_lis = options.addSubGroup("LinearSolver");
         op_lis->addOption("solver_type", "CG");
         op_lis->addOption("precon_type", "NONE");
         op_lis->addOptionAsNum("error_tolerance", 1e-10);
@@ -375,7 +376,7 @@ TEST(Solution, CouplingFem2)
         pMass->setTimeSteppingFunction(tim);
         //options
         BaseLib::Options optionsGW;
-        BaseLib::Options* op_lis = optionsGW.addSubGroup("Lis");
+        BaseLib::Options* op_lis = optionsGW.addSubGroup("LinearSolver");
         op_lis->addOption("solver_type", "CG");
         op_lis->addOption("precon_type", "NONE");
         op_lis->addOptionAsNum("error_tolerance", 1e-10);
@@ -385,8 +386,8 @@ TEST(Solution, CouplingFem2)
         op_nl->addOptionAsNum("error_tolerance", 1e-6);
         op_nl->addOptionAsNum("max_iteration_step", 500);
         BaseLib::Options optionsMT;
-        op_lis = optionsMT.addSubGroup("Lis");
-        op_lis->addOption("solver_type", "BiCG");
+        op_lis = optionsMT.addSubGroup("LinearSolver");
+        op_lis->addOption("solver_type", "BICG");
         op_lis->addOption("precon_type", "NONE");
         op_lis->addOptionAsNum("error_tolerance", 1e-10);
         op_lis->addOptionAsNum("max_iteration_step", 1000);
@@ -504,7 +505,7 @@ TEST(Solution, LinearElastic2D)
         pDe->setTimeSteppingFunction(tim);
         // options
         BaseLib::Options options;
-        BaseLib::Options* op_lis = options.addSubGroup("Lis");
+        BaseLib::Options* op_lis = options.addSubGroup("LinearSolver");
         op_lis->addOption("solver_type", "CG");
         op_lis->addOption("precon_type", "NONE");
         op_lis->addOptionAsNum("error_tolerance", 1e-10);
