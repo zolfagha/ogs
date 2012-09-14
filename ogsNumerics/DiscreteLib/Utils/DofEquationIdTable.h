@@ -285,8 +285,9 @@ public:
                 } else {
                     pos = i_var + i_pt * n_dof_per_pt;
                 }
-                list_eqs_id[pos] = table->address(pt_id);
-                list_eqs_id_without_ghost[pos] = isGhostPoint(mesh_id, pt_id) ? BaseLib::index_npos : list_eqs_id[pos];
+                size_t this_eqs_id = table->address(pt_id);
+                list_eqs_id[pos] = isGhostPoint(mesh_id, pt_id) ? BaseLib::index_npos : this_eqs_id;
+                list_eqs_id_without_ghost[pos] = this_eqs_id;
             }
         }
     }
@@ -326,8 +327,9 @@ public:
                 for (size_t i_pt=0; i_pt<n_pt; i_pt++) {
                     const size_t pt_id = list_pt_id[i_pt];
                     if (!table->hasKey(pt_id)) continue;
-                    list_eqs_id.push_back(table->address(pt_id));
-                    list_eqs_id_without_ghost.push_back(isGhostPoint(mesh_id, pt_id) ? BaseLib::index_npos : list_eqs_id.back());
+                    size_t this_eqs_id = table->address(pt_id);
+                    list_eqs_id.push_back(isGhostPoint(mesh_id, pt_id) ? BaseLib::index_npos : this_eqs_id);
+                    list_eqs_id_without_ghost.push_back(this_eqs_id);
                 }
             }
         } else { // by point
@@ -339,8 +341,9 @@ public:
                     const size_t var_id = list_var[i_var];
                     const IEquationIdStorage* table = getPointEquationIdTable(var_id, mesh_id);
                     if (!table->hasKey(pt_id)) continue;
-                    list_eqs_id.push_back(table->address(pt_id));
-                    list_eqs_id_without_ghost.push_back(isGhostPoint(mesh_id, pt_id) ? BaseLib::index_npos : list_eqs_id.back());
+                    size_t this_eqs_id = table->address(pt_id);
+                    list_eqs_id.push_back(isGhostPoint(mesh_id, pt_id) ? BaseLib::index_npos : list_eqs_id.back());
+                    list_eqs_id_without_ghost.push_back(this_eqs_id);
                 }
             }
         }
