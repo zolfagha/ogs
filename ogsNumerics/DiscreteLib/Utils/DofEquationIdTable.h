@@ -342,7 +342,7 @@ public:
                     const IEquationIdStorage* table = getPointEquationIdTable(var_id, mesh_id);
                     if (!table->hasKey(pt_id)) continue;
                     size_t this_eqs_id = table->address(pt_id);
-                    list_eqs_id.push_back(isGhostPoint(mesh_id, pt_id) ? BaseLib::index_npos : list_eqs_id.back());
+                    list_eqs_id.push_back(isGhostPoint(mesh_id, pt_id) ? BaseLib::index_npos : this_eqs_id);
                     list_eqs_id_without_ghost.push_back(this_eqs_id);
                 }
             }
