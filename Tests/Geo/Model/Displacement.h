@@ -83,6 +83,9 @@ public:
         typename MySolution::LinearSolverType* linear_solver = _sol_u->getLinearEquationSolver();
         linear_solver->setOption(option);
         _sol_u->getNonlinearSolver()->setOption(option);
+        DiscreteLib::DofEquationIdTable* dofMapping = _sol_u->getDofEquationIdTable();
+        dofMapping->setNumberingType(DiscreteLib::DofNumberingType::BY_POINT);
+        dofMapping->setLocalNumberingType(DiscreteLib::DofNumberingType::BY_POINT);
         this->setOutput(u_x, problem_u->getVariable(0)->getIC());
         this->setOutput(u_y, problem_u->getVariable(1)->getIC());
 
