@@ -119,6 +119,7 @@ int FunctionPressureToElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &
             xx[2] = tmp_v[0];
             NumLib::TXPosition pos(&xx[0]);
 
+            //TODO casting cause zero q
             static_cast<NumLib::LocalVector>(q.head(msh->getDimension())) = (*dN) * local_p * (-1.0) * k_mu;
             //TODO grav
 
