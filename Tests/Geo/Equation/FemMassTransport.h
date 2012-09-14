@@ -49,8 +49,8 @@ protected:
         FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
         const size_t n_dim = e.getDimension();
 
-        LocalMatrixType matDiff(localK);
-        LocalMatrixType matAdv(localK);
+        LocalMatrixType matDiff = LocalMatrixType::Zero(localK.rows(), localK.cols());
+        LocalMatrixType matAdv = LocalMatrixType::Zero(localK.rows(), localK.cols());
         NumLib::TXCompositFunction<NumLib::ITXFunction, NumLib::ITXFunction, NumLib::Multiplication> f_diff_poro(*_cmp->molecular_diffusion, *_pm->porosity);
 
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
@@ -62,16 +62,18 @@ protected:
 
             double poro;
             _pm->porosity->eval(real_x, poro);
+            NumLib::LocalMatrix mat_poro(1,1);
+            mat_poro(0,0) = poro;
             double d_poro;
             f_diff_poro.eval(real_x, d_poro);
             NumLib::ITXFunction::DataType v;
             _vel->eval(real_x, v);
             NumLib::ITXFunction::DataType v2 = v.topRows(n_dim).transpose();
-            NumLib::LocalMatrix mat_poro(1,1);
-            mat_poro(0,0) = d_poro;
+            NumLib::LocalMatrix mat_dporo(1,1);
+            mat_dporo(0,0) = d_poro;
 
              fe->integrateWxN(j, mat_poro, localM);
-            fe->integrateDWxDN(j, mat_poro, matDiff);
+            fe->integrateDWxDN(j, mat_dporo, matDiff);
             fe->integrateWxDN(j, v2, matAdv);
         }
 
@@ -110,9 +112,9 @@ public:
     {
         FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
 
-        NumLib::LocalMatrix matM(localJ);
-        NumLib::LocalMatrix matDiff(localJ);
-        NumLib::LocalMatrix matAdv(localJ);
+        NumLib::LocalMatrix matM = NumLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
+        NumLib::LocalMatrix matDiff = NumLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
+        NumLib::LocalMatrix matAdv = NumLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
         NumLib::TXCompositFunction<NumLib::ITXFunction, NumLib::ITXFunction, NumLib::Multiplication> f_diff_poro(*_cmp->molecular_diffusion, *_pm->porosity);
 
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
@@ -124,15 +126,17 @@ public:
 
             double poro;
             _pm->porosity->eval(real_x, poro);
+            NumLib::LocalMatrix mat_poro(1,1);
+            mat_poro(0,0) = poro;
             double d_poro;
             f_diff_poro.eval(real_x, d_poro);
             NumLib::ITXFunction::DataType v;
             _vel->eval(real_x, v);
-            NumLib::LocalMatrix mat_poro(1,1);
-            mat_poro(0,0) = d_poro;
+            NumLib::LocalMatrix mat_dporo(1,1);
+            mat_dporo(0,0) = d_poro;
 
              fe->integrateWxN(j, mat_poro, matM);
-            fe->integrateDWxDN(j, mat_poro, matDiff);
+            fe->integrateDWxDN(j, mat_dporo, matDiff);
             fe->integrateWxDN(j, v, matAdv);
         }
 
