@@ -56,7 +56,7 @@ public:
 private:
     void translate(std::vector<GeoLib::Point*> &point_vec);
     ///
-    void flip(IElement &e, const CoordinateSystem &coordinate_system);
+    void flip(IElement &e, const CoordinateSystem &coordinate_system, const std::vector<GeoLib::Point*> &vec_pt);
     ///
     void rotate(IElement &e, const CoordinateSystem &coordinate_system, std::vector<GeoLib::Point*> &vec_pt);
     // x=Rx' where x is original coordinates and x' is local coordinates

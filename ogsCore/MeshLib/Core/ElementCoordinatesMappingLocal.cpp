@@ -31,13 +31,11 @@ ElementCoordinatesMappingLocal::ElementCoordinatesMappingLocal(const IMesh* msh,
         _point_vec.push_back(new GeoLib::Point((*p)[0], (*p)[1], (*p)[2]));
     }
 
-    //if (e->getDimension()==coordinate_system->getDimension()) {
-    //    flip(e, coordinate_system);
-    ////} else if (e->getDimension() < coordinate_system->getDimension()) {
-    ////    rotate(e, coordinate_system);
-    //}
-    translate(_point_vec);
-    rotate(e, coordinate_system, _point_vec);
+    flip(e, coordinate_system, _point_vec);
+    if (e.getDimension() < coordinate_system.getDimension()) {
+        translate(_point_vec);
+        rotate(e, coordinate_system, _point_vec);
+    }
 };
 
 void ElementCoordinatesMappingLocal::translate(std::vector<GeoLib::Point*> &vec_pt)
@@ -49,7 +47,7 @@ void ElementCoordinatesMappingLocal::translate(std::vector<GeoLib::Point*> &vec_
 }
 
 ///
-void ElementCoordinatesMappingLocal::flip(IElement &ele, const CoordinateSystem &coordinate_system)
+void ElementCoordinatesMappingLocal::flip(IElement &ele, const CoordinateSystem &coordinate_system, const std::vector<GeoLib::Point*> &vec_pt)
 {
     IElement* e = &ele;
     switch(coordinate_system.getType())
@@ -57,41 +55,49 @@ void ElementCoordinatesMappingLocal::flip(IElement &ele, const CoordinateSystem 
     case CoordinateSystemType::Y:
         {
             assert(e->getDimension()==1);
-            for(size_t i = 0; i < e->getNumberOfNodes(); i++)
+            for(size_t i = 0; i < vec_pt.size(); i++)
             {
-                const GeoLib::Point *p = _msh->getNodeCoordinatesRef(e->getNodeID(i));
-                _point_vec.push_back(new GeoLib::Point((*p)[1], (*p)[0], (*p)[2]));
+                double tmp_x = (*vec_pt[i])[0];
+                (*vec_pt[i])[0] = (*vec_pt[i])[1];
+                (*vec_pt[i])[1] = tmp_x;
             }
         }
         break;
     case CoordinateSystemType::Z:
         {
             assert(e->getDimension()==1);
-            for(size_t i = 0; i < e->getNumberOfNodes(); i++)
+            for(size_t i = 0; i < vec_pt.size(); i++)
             {
-                const GeoLib::Point *p = _msh->getNodeCoordinatesRef(e->getNodeID(i));
-                _point_vec.push_back(new GeoLib::Point((*p)[2], (*p)[1], (*p)[0]));
+                double tmp_x = (*vec_pt[i])[0];
+                (*vec_pt[i])[0] = (*vec_pt[i])[2];
+                (*vec_pt[i])[2] = tmp_x;
             }
         }
         break;
     case CoordinateSystemType::XZ:
         {
-            assert(e->getDimension()==2);
-            for(size_t i = 0; i < e->getNumberOfNodes(); i++)
+            assert(e->getDimension()<3);
+            for(size_t i = 0; i < vec_pt.size(); i++)
             {
-                const GeoLib::Point *p = _msh->getNodeCoordinatesRef(e->getNodeID(i));
-                _point_vec.push_back(new GeoLib::Point((*p)[0], (*p)[2], (*p)[1]));
+                double tmp_y = (*vec_pt[i])[1];
+                (*vec_pt[i])[1] = (*vec_pt[i])[2];
+                (*vec_pt[i])[2] = tmp_y;
+            }
+        }
+        break;
+    case CoordinateSystemType::YZ:
+        {
+            assert(e->getDimension()<3);
+            for(size_t i = 0; i < vec_pt.size(); i++)
+            {
+                double tmp_x = (*vec_pt[i])[0];
+                (*vec_pt[i])[0] = (*vec_pt[i])[1];
+                (*vec_pt[i])[1] = (*vec_pt[i])[2];
+                (*vec_pt[i])[2] = tmp_x;
             }
         }
         break;
     default:
-        {
-            for(size_t i = 0; i < e->getNumberOfNodes(); i++)
-            {
-                const GeoLib::Point *p = _msh->getNodeCoordinatesRef(e->getNodeID(i));
-                _point_vec.push_back(new GeoLib::Point(p->getData()));
-            }
-        }
         break;
     }
 }
@@ -134,7 +140,8 @@ void ElementCoordinatesMappingLocal::getRotationMatrixToOriginal(const IElement 
     if (global_dim == e->getDimension()) {
         for (size_t i=0; i<global_dim; i++)
             _matR2original(i,i) = 1.;
-    } else if (coordinate_system.getType() == CoordinateSystemType::XY && e->getDimension() == 1) {
+    } else if (coordinate_system.getDimension() == 2 && e->getDimension() == 1) {
+//    } else if (coordinate_system.getType() == CoordinateSystemType::XY && e->getDimension() == 1) {
         double const* const pnt0(vec_pt[0]->getData());
         double const* const pnt1(vec_pt[1]->getData());
         xx[0] = pnt1[0] - pnt0[0];
