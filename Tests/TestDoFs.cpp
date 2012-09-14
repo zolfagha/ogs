@@ -64,7 +64,8 @@ TEST(Discrete, DoF_var2_byDof)
     DofEquationIdTable dofManagerB;
     size_t dofIdB1 = dofManagerB.addVariableDoFs(0, 0, 10);
     size_t dofIdB2 = dofManagerB.addVariableDoFs(0, 0, 10);
-    dofManagerB.construct(DofNumberingType::BY_VARIABLE);
+    dofManagerB.setNumberingType(DofNumberingType::BY_VARIABLE);
+    dofManagerB.construct();
     ASSERT_EQ(2, dofManagerB.getNumberOfVariables());
     //ASSERT_EQ(dofManagerB.getTotalNumberOfDiscretePoints(), 20);
     ASSERT_EQ(0, dofManagerB.mapEqsID(dofIdB1, 0, 0));
@@ -78,7 +79,8 @@ TEST(Discrete, DoF_var2_byPoint)
     DofEquationIdTable dofManagerB;
     size_t dofIdB1 = dofManagerB.addVariableDoFs(0, 0, 10);
     size_t dofIdB2 = dofManagerB.addVariableDoFs(0, 0, 10);
-    dofManagerB.construct(DofNumberingType::BY_POINT);
+    dofManagerB.setNumberingType(DofNumberingType::BY_POINT);
+    dofManagerB.construct();
     ASSERT_EQ(2, dofManagerB.getNumberOfVariables());
     ASSERT_EQ(1, dofManagerB.getNumberOfMeshes());
     ASSERT_EQ(0, dofManagerB.mapEqsID(dofIdB1, 0, 0));
@@ -92,7 +94,8 @@ TEST(Discrete, DoF_inactive)
     DofEquationIdTable *dofManager = new DofEquationIdTable();
     size_t varId = dofManager->addVariableDoFs(0, 0, 9);
     dofManager->deactivateDoFs(varId, 0, 8);
-    dofManager->construct(DofNumberingType::BY_POINT);
+    dofManager->setNumberingType(DofNumberingType::BY_POINT);
+    dofManager->construct();
 
     ASSERT_EQ(1, dofManager->getNumberOfVariables());
     ASSERT_EQ(8, dofManager->getTotalNumberOfActiveDoFs());
@@ -111,7 +114,8 @@ TEST(Discrete, DoF_ghost_nodes)
         std::vector<size_t> vec_ghost_nodes(ghost_nodes, ghost_nodes+4);
         size_t varId = dofManager->addVariableDoFs(0, 0, 9);
         dofManager->setGhostPoints(0, vec_ghost_nodes);
-        dofManager->construct(DofNumberingType::BY_POINT);
+        dofManager->setNumberingType(DofNumberingType::BY_POINT);
+        dofManager->construct();
 
         ASSERT_EQ(1, dofManager->getNumberOfVariables());
         ASSERT_EQ(9, dofManager->getTotalNumberOfActiveDoFs());
@@ -128,7 +132,8 @@ TEST(Discrete, DoF_ghost_nodes)
         std::vector<size_t> vec_ghost_nodes(ghost_nodes, ghost_nodes+5);
         size_t varId = dofManager->addVariableDoFs(0, 0, 9);
         dofManager->setGhostPoints(0, vec_ghost_nodes);
-        dofManager->construct(DofNumberingType::BY_POINT);
+        dofManager->setNumberingType(DofNumberingType::BY_POINT);
+        dofManager->construct();
 
         ASSERT_EQ(1, dofManager->getNumberOfVariables());
         ASSERT_EQ(9, dofManager->getTotalNumberOfActiveDoFs());
