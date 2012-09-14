@@ -105,7 +105,7 @@ void TemplateTransientResidualFEMFunction<T1,T2>::eval(const SolutionVector &u_n
     MyUpdater updater(&t_n1, msh, _dofManager, u_n, &u_n1, _local_assembler);
     MyGlobalAssembler assembler(&updater);
     r = .0;
-    r.construct(assembler);
+    r.construct(*_dofManager, assembler);
 
 
     // add source/sink term (i.e. RHS in linear equation)

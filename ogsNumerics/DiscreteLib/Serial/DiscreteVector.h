@@ -23,6 +23,7 @@
 
 namespace DiscreteLib
 {
+class DofEquationIdTable;
 
 /**
  * \brief Vector container for single memory
@@ -88,9 +89,9 @@ public:
     }
 
     /// construct
-    virtual void construct(IDiscreteVectorAssembler<T>& assembler)
+    virtual void construct(const DofEquationIdTable &dofEquationIdTable, IDiscreteVectorAssembler<T>& assembler)
     {
-        assembler.assembly(*_msh, *this);
+        assembler.assembly(*_msh, dofEquationIdTable, *this);
     }
 
 protected:

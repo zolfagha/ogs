@@ -128,7 +128,7 @@ void TemplateTransientLinearFEMFunction<T1, T2, T3>::eval(const SolutionVector &
 
     // assembly
     MeshLib::IMesh* msh = _sys->getMesh();
-    MyUpdater updater(&t_n1, msh, _linear_eqs->getDofMapManger(), u_n, &u_k1, _local_assembler);
+    MyUpdater updater(&t_n1, msh, u_n, &u_k1, _local_assembler);
     MyGlobalAssembler assembler(&updater);
     _linear_eqs->construct(assembler);
 

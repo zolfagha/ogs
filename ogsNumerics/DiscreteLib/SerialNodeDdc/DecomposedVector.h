@@ -111,9 +111,9 @@ public:
     }
     
     /// construct
-    virtual void construct(IDiscreteVectorAssembler<T>& assembler)
+    virtual void construct(const DiscreteLib::DofEquationIdTable &dofManager, IDiscreteVectorAssembler<T>& assembler)
     {
-        assembler.assembly(*_msh, *this);
+        assembler.assembly(*_msh, dofManager, *this);
     }
 
 

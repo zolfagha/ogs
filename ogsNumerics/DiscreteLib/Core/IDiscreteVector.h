@@ -23,6 +23,7 @@ namespace DiscreteLib
 
 // forward declaration to avoid circular reference
 template <typename T> class IDiscreteVectorAssembler;
+class DofEquationIdTable;
 
 /**
  * \brief Super class for all discrete data 
@@ -102,7 +103,7 @@ public:
     }
 
     /// construct
-    virtual void construct(IDiscreteVectorAssembler<T>& assembler) = 0;
+    virtual void construct(const DofEquationIdTable &dofEquationIdTable, IDiscreteVectorAssembler<T>& assembler) = 0;
 
 };
 

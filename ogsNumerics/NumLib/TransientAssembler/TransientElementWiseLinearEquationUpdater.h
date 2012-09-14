@@ -44,10 +44,9 @@ public:
      */
     TransientElementWiseLinearEquationUpdater   (
             const TimeStep* time, MeshLib::IMesh* msh,
-            DiscreteLib::DofEquationIdTable* dofManager,
             const GlobalVector* u0, const GlobalVector* u1,
             LocalAssemblerType* a   )
-    : _msh(msh), _dofManager(dofManager),
+    : _msh(msh),
       _transient_e_assembler(new LocalAssemblerType(*a)), _timestep(time),
       _vec_u0(u0), _vec_u1(u1)
     {
@@ -61,7 +60,6 @@ public:
     TransientElementWiseLinearEquationUpdater(const TransientElementWiseLinearEquationUpdater<LocalAssemblerType> &obj)
     {
         _msh = obj._msh;
-        _dofManager = obj._dofManager;
         _transient_e_assembler = new LocalAssemblerType(*obj._transient_e_assembler);
         _timestep = obj._timestep;
         _vec_u0 = obj._vec_u0;
@@ -93,7 +91,7 @@ public:
      * @param eqs   global equation
      */
     template <class T_LINEAR_EQS>
-    void update(const MeshLib::IElement &e, T_LINEAR_EQS &eqs)
+    void update(const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &dofManager, T_LINEAR_EQS &eqs)
     {
         std::vector<size_t> ele_node_ids;
         std::vector<size_t> local_dofmap_row, local_dofmap_column;
@@ -103,14 +101,14 @@ public:
 
         // get dof map
         e.getNodeIDList(e.getMaximumOrder(), ele_node_ids);
-        _dofManager->mapEqsIDreduced(_msh->getID(), ele_node_ids, local_dofmap_row, local_dofmap_column);
+        dofManager.mapEqsIDreduced(_msh->getID(), ele_node_ids, local_dofmap_row, local_dofmap_column);
 
         // previous and current results
         DiscreteLib::getLocalVector(local_dofmap_row, *_vec_u1, local_u_n1);
         DiscreteLib::getLocalVector(local_dofmap_row, *_vec_u0, local_u_n);
         
         DiscreteLib::DofEquationIdTable localDofMap;
-        _dofManager->createLocalMappingTable(_msh->getID(), ele_node_ids, localDofMap);
+        dofManager.createLocalMappingTable(_msh->getID(), ele_node_ids, localDofMap);
         
         
         // local assembly
@@ -129,7 +127,6 @@ public:
 
 private:
     MeshLib::IMesh* _msh;
-    DiscreteLib::DofEquationIdTable* _dofManager;
     LocalAssemblerType* _transient_e_assembler;
     const TimeStep* _timestep;
     const GlobalVector* _vec_u0;

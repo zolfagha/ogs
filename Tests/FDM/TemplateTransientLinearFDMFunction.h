@@ -104,7 +104,7 @@ public:
 
         // assembly
         _linear_eqs->initialize();
-        StencilWiseTransientLinearEQSAssembler assembler(&t_n1, _linear_eqs->getDofMapManger(), &vec_un, &vec_un1, _local_assembler);
+        StencilWiseTransientLinearEQSAssembler assembler(&t_n1, &vec_un, &vec_un1, _local_assembler);
         _linear_eqs->construct(assembler);
 
         //apply BC1,2

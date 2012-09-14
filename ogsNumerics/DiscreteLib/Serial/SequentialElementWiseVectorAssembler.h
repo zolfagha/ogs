@@ -47,7 +47,7 @@ public:
     /// @param msh Mesh
     /// @param dofManager Dof map manager
     /// @param vec Discrete vector
-    virtual void assembly(const MeshLib::IMesh &msh, GlobalVectorType &globalVec);
+    virtual void assembly(const MeshLib::IMesh &msh, const DofEquationIdTable &dofEquationIdTable, GlobalVectorType &globalVec);
 
 private:
     UpdaterType* _e_assembler;
@@ -55,13 +55,13 @@ private:
 
 
 template<class T1, class T2>
-void SequentialElementWiseVectorAssembler<T1,T2>::assembly(const MeshLib::IMesh &msh, GlobalVectorType &globalVec)
+void SequentialElementWiseVectorAssembler<T1,T2>::assembly(const MeshLib::IMesh &msh, const DofEquationIdTable &dofEquationIdTable, GlobalVectorType &globalVec)
 {
     const size_t n_ele = msh.getNumberOfElements();
 
     for (size_t i=0; i<n_ele; i++) {
         MeshLib::IElement *e = msh.getElemenet(i);
-        _e_assembler->update(*e, globalVec);
+        _e_assembler->update(*e, dofEquationIdTable, globalVec);
     }
 };
 
