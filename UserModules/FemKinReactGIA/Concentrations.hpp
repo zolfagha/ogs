@@ -73,9 +73,9 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 
 	// first set up the linear problem for eta
 	// equations
-    MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_compound, _feObjects);
-    MyResidualAssemblerType* r_assembler = new MyResidualAssemblerType(_compound, _feObjects);
-    MyJacobianAssemblerType* j_eqs = new MyJacobianAssemblerType(_compound, _feObjects);
+    MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_feObjects);
+    MyResidualAssemblerType* r_assembler = new MyResidualAssemblerType(_feObjects);
+    MyJacobianAssemblerType* j_eqs = new MyJacobianAssemblerType(_feObjects);
 
 	// set up problem
 

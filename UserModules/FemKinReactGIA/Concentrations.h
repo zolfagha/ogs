@@ -21,6 +21,8 @@
 #include "SolutionLib/Fem/TemplateFemEquation.h"
 #include "SolutionLib/Fem/SingleStepFEM.h"
 #include "ProcessLib/AbstractTransientProcess.h"
+#include "LinearTransportTimeODELocalAssember.h"
+#include "LinearTransportJacobianLocalAssembler.h"
 
 
 template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER>
@@ -39,9 +41,9 @@ public:
 
     // local assembler
 	// for the linear systems, use the same settings as Mass_Transport
-    typedef MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler> MyLinearAssemblerType;          // TO BE CHANGED
-    typedef MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyResidualAssemblerType;   // TO BE CHANGED
-    typedef MassTransportJacobianLocalAssembler MyJacobianAssemblerType;                                                      // TO BE CHANGED
+    typedef LinearTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler> MyLinearAssemblerType;          // TO BE CHANGED
+    typedef LinearTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyResidualAssemblerType;   // TO BE CHANGED
+    typedef LinearTransportJacobianLocalAssembler MyJacobianAssemblerType;                                                      // TO BE CHANGED
 	// for the nonlinear part, use different settings
 	
 	// Equation definition
