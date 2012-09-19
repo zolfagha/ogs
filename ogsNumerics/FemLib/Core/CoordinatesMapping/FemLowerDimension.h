@@ -76,7 +76,8 @@ public:
         const LocalMatrix &matR = getRotationMatrix();
         LocalMatrix dshape_local = LocalMatrix::Zero(matR.rows(), prop->dshape_dx->cols());
         dshape_local.topLeftCorner(prop->dshape_dx->rows(), prop->dshape_dx->cols()) = (*prop->dshape_dx);
-        (*prop->dshape_dx) =  matR.transpose() * dshape_local;
+        (*prop->dshape_dx) =  matR * dshape_local;
+        //(*prop->dshape_dx) =  matR.transpose() * dshape_local;
 
         return prop;
     }
