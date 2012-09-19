@@ -85,6 +85,8 @@ void convertPorousMediumProperty(const CMediumProperties &mmp, MaterialLib::Poro
     if (mmp.storage_model==1) {
         pm.storage = new NumLib::TXFunctionConstant(mmp.storage_model_values[0]);
     }
+
+    pm.geo_area = new NumLib::TXFunctionConstant(mmp.geo_area);
 }
 
 void convertCompoundProperty(const CompProperties &mcp, MaterialLib::Compound &new_cp)
