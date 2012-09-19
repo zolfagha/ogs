@@ -23,7 +23,6 @@ namespace ogsChem
 class chemReductionKin
 {
 public:
-	
 	/**
       * constructor of the class
       */
@@ -50,6 +49,21 @@ public:
       */
 	bool IsInitialized(void) {return isInitialized;}; 
 
+	/**
+      * get the length of eta
+      */
+	size_t get_n_eta(void) {return _n_eta;}; 
+
+	/**
+      * get the length of eta
+      */
+	size_t get_n_eta_mob(void) {return _n_eta_mob;}; 
+
+	/**
+      * get the length of xi
+      */
+	size_t get_n_xi(void) {return _n_xi; }; 
+
 private:
 	/**
       * private flag indicating initialization
@@ -62,14 +76,24 @@ private:
 	LocalMatrix _matStoi; 
 
 	/**
-      * sub-matrixes of S
+      * sub-matrixes of S, 
       */	
 	LocalMatrix _matS_1, _matS_2, _matS_1_bar, _matS_2_bar; 
 
 	/**
       * complementary orthorgonal matrixes
       */
-	LocalMatrix _matS_1_ast, _matS_2_ast, _matS_1_bar_ast, _matS_2_bar_ast; 
+	LocalMatrix _mat_s_1, _mat_s_2, _matS_1_ast, _matS_2_ast, _matS_1_bar_ast, _matS_2_bar_ast; 
+
+	/**
+      * transformation matrixes
+      */
+	// LocalMatrix _c_mob_2_eta_mob, _c_mob_2_xi_mob; 
+
+	/**
+      * the size of eta and xi vector
+      */
+	size_t _n_eta, _n_xi, _n_eta_mob, _n_eta_immob, _n_xi_mob, _n_xi_immob; 
 
 	/**
       * _I is the number of components and _J is the number of reactions

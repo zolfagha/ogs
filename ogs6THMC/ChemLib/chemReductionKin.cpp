@@ -76,16 +76,16 @@ void chemReductionKin::buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 		}  // end of for i
 	}  // end of for j
 
+#ifdef _DEBUG
 	// debugging--------------------------
-	std::cout << "S: " << std::endl; 
+	std::cout << "Stoichiometric Matrix S: " << std::endl; 
 	std::cout << _matStoi << std::endl;
 	// end of debugging-------------------
+#endif
 }
 
 void chemReductionKin::update_reductionScheme(void)
 {
-	LocalMatrix _mat_s_1, _mat_s_2; 
-
 	// devide mobile and immobile parts
 	// S1 =S(1:I,:);
 	_matS_1 = _matStoi.topRows( _I_mob );
@@ -98,12 +98,12 @@ void chemReductionKin::update_reductionScheme(void)
 	Eigen::FullPivLU<LocalMatrix> lu_decomp_S2(_matS_2); 
 	_mat_s_2 = lu_decomp_S2.image(_matS_2); 
 
-	// debugging-----------------------------
-	//std::cout << "_mat_s_1: "    << std::endl; 
-	//std::cout << _mat_s_1 << std::endl;
-	//std::cout << "_mat_s_2: "    << std::endl; 
-	//std::cout << _mat_s_2 << std::endl;
-	// end of debugging----------------------
+#ifdef _DEBUG
+	std::cout << "_mat_s_1: "    << std::endl; 
+	std::cout << _mat_s_1 << std::endl;
+	std::cout << "_mat_s_2: "    << std::endl; 
+	std::cout << _mat_s_2 << std::endl;
+#endif
 
 	// Calculate the s1T = S_i^T matrix consisting of a max set of linearly
 	// independent columns that are orthogonal to each column of S_i^*.
@@ -112,12 +112,20 @@ void chemReductionKin::update_reductionScheme(void)
     // s2T = orthcomp(s2);
 	_matS_2_ast = orthcomp( _mat_s_2 );
 
-	// debugging-----------------------------
-	//std::cout << "s_1*: "    << std::endl; 
-	//std::cout << _matS_1_ast << std::endl;
-	//std::cout << "s_2*: "    << std::endl; 
-	//std::cout << _matS_2_ast << std::endl;
-	// end of debugging----------------------
+#ifdef _DEBUG
+	std::cout << "s_1*: "    << std::endl; 
+	std::cout << _matS_1_ast << std::endl;
+	std::cout << "s_2*: "    << std::endl; 
+	std::cout << _matS_2_ast << std::endl;
+#endif
+
+	// now store the corresponding size
+	this->_n_eta_mob   = _mat_s_1.cols(); 
+	this->_n_eta_immob = _mat_s_2.cols();
+	this->_n_xi_mob    = _matS_1_ast.cols(); 
+	this->_n_xi_immob  = _matS_2_ast.cols();
+	this->_n_eta       = _n_eta_mob + _n_eta_immob; 
+	this->_n_xi        = _n_xi_mob  + _n_xi_immob;
 }
 
 LocalMatrix chemReductionKin::orthcomp( LocalMatrix & inMat )

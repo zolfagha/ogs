@@ -22,9 +22,10 @@
 #include "SolutionLib/Fem/SingleStepFEM.h"
 #include "ProcessLib/AbstractTransientProcess.h"
 
+
 template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER>
 class FunctionConcentrations
-: public ProcessLib::AbstractTransientProcess
+	: public ProcessLib::Process
 {
 public:
     enum In { Velocity=0 };
@@ -33,43 +34,70 @@ public:
     typedef T_DISCRETE_SYSTEM MyDiscreteSystem;
     typedef T_LINEAR_SOLVER MyLinearSolver;
 
+    // memory for discretized concentration vector
+    typedef typename FemLib::FemNodalFunctionVector<MyDiscreteSystem>::type MyNodalFunctionVector;
+
     // local assembler
+	// for the linear systems, use the same settings as Mass_Transport
     typedef MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler> MyLinearAssemblerType;          // TO BE CHANGED
     typedef MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyResidualAssemblerType;   // TO BE CHANGED
     typedef MassTransportJacobianLocalAssembler MyJacobianAssemblerType;                                                      // TO BE CHANGED
-    // Equation definition
+	// for the nonlinear part, use different settings
+	
+	// Equation definition
     typedef SolutionLib::TemplateFemEquation<
             MyDiscreteSystem,
             MyLinearSolver,
             MyLinearAssemblerType,
             MyResidualAssemblerType,
             MyJacobianAssemblerType
-            >
-            MyEquationType;
+            > MyLinearEquationType;
     // IVBV problem definition
     typedef SolutionLib::FemIVBVProblem<
             MyDiscreteSystem,
-            MyEquationType
-            > MyProblemType;
+            MyLinearEquationType
+            > MyLinearTransportProblemType;
     // Solution algorithm definition
-    typedef SolutionLib::SingleStepFEM
-            <
-            MyProblemType,
+    typedef SolutionLib::SingleStepFEM<
+            MyLinearTransportProblemType,
             MyLinearSolver
-            > MySolutionType;
+            > MyLinearSolutionType;
+
+	// nonlinear coupled part
+	//// Equation definition
+	//   typedef SolutionLib::TemplateFemEquation<
+	//           MyDiscreteSystem,
+	//           MyLinearSolver,
+	//           MyLinearAssemblerType,
+	//           MyResidualAssemblerType,
+	//           MyJacobianAssemblerType
+	//           > MyLinearEquationType;
+	//   // IVBV problem definition
+	//   typedef SolutionLib::FemIVBVProblem<
+	//           MyDiscreteSystem,
+	//           MyLinearEquationType
+	//           > MyLinearTransportProblemType;
+	//   // Solution algorithm definition
+	//   typedef SolutionLib::SingleStepFEM<
+	//           MyLinearTransportProblemType,
+	//           MyLinearSolver
+	//           > MyLinearSolutionType;
 
     FunctionConcentrations() 
-        : AbstractTransientProcess("KIN_REACT_GIA", 1, 1),
-          _problem(0), _solution(0), _feObjects(0), _compound(0)
+        : Process("KIN_REACT_GIA", 1, 1),
+          _feObjects(0)
     {
         // set default parameter name
-        ProcessLib::AbstractTransientProcess::setInputParameterName(Velocity, "Velocity");
-        ProcessLib::AbstractTransientProcess::setOutputParameterName(Concentrations, "Concentrations");
+		ProcessLib::Process::setInputParameterName(Velocity, "Velocity");
+        ProcessLib::Process::setOutputParameterName(Concentrations, "Concentrations");
     };
 
     virtual ~FunctionConcentrations()
     {
-        BaseLib::releaseObject(_problem, _solution, _feObjects);
+        BaseLib::releaseObject(_feObjects);
+        BaseLib::releaseObject(_linear_problem, _linear_solution); 
+        BaseLib::releaseObject(_ReductionKin);
+        BaseLib::releaseObject(_concentrations, _eta, _xi);
     };
 
     /// initialize this process
@@ -83,12 +111,44 @@ public:
         return &_checker;
     }
 
+	virtual int solveTimeStep(const NumLib::TimeStep &time)
+    {
+		// TODO
+        //INFO("Solving %s...", getProcessName().c_str());
+        //initializeTimeStep(time);
+        //getSolution()->solveTimeStep(time);
+        //updateOutputParameter(time);
+        return 0;
+    }
+
+    /// 
+    virtual double suggestNext(const NumLib::TimeStep &time_current) 
+    {
+		// TODO: only one solution is enough. 
+        return getSolution()->suggestNext(time_current); 
+    }
+
+    ///
+    virtual bool isAwake(const NumLib::TimeStep &time) 
+    { 
+		// TODO: only one solution is enough
+        return getSolution()->isAwake(time);  
+    }
+
+    ///
+    virtual void accept(const NumLib::TimeStep &time)
+    {
+        output(time);
+		// TODO: call accept for all solutions. 
+        // getSolution()->accept(time);
+    };
+
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
 
     virtual void updateOutputParameter(const NumLib::TimeStep &time);
 
-    virtual MySolutionType* getSolution() {return _solution;};
+    virtual MyLinearSolutionType* getSolution() {return _linear_solution;};
 
     virtual void output(const NumLib::TimeStep &time);
 
@@ -96,11 +156,24 @@ private:
     DISALLOW_COPY_AND_ASSIGN(FunctionConcentrations);
 
 private:
-    MyProblemType* _problem;
-    MySolutionType* _solution;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
-    MaterialLib::Compound* _compound;
-    NumLib::DiscreteDataConvergenceCheck _checker;
+    // linear problem
+    MyLinearTransportProblemType* _linear_problem;
+    // linear solver
+    MyLinearSolutionType* _linear_solution;
+
+    FemLib::LagrangianFeObjectContainer* _feObjects; 
+    
+	NumLib::DiscreteDataConvergenceCheck _checker;
+
+    // pointer to the reduction scheme. 
+	ogsChem::chemReductionKin* _ReductionKin; 
+
+    // concentrations vector, including all components in the MCP data structure
+    MyNodalFunctionVector* _concentrations; 
+    // eta vector, including eta_mobile and eta_immobile
+    MyNodalFunctionVector* _eta;
+    // xi vector, including xi_mobile and xi_immobile parts
+    MyNodalFunctionVector* _xi; 
 }; 
 
 #include "Concentrations.hpp"

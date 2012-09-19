@@ -34,15 +34,68 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
     _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
 
-    // HS: this is not really necessary
-	//  Compound
-    size_t compound_id = option.getOption<size_t>("CompoundID");
-    if (femData->list_compound.size() < compound_id) {
-        ERR("***Error: compound data not found (compound id=%d)", compound_id);
-        return false;
-    }
-    _compound = femData->list_compound[compound_id];
+	// first get the number of components
+	size_t n_Comp = femData->map_ChemComp.size(); 
+	// add all concentrations to discretized memory space
+	NumLib::LocalVector local_conc(n_Comp);
+    local_conc *= .0;
+	_concentrations = new MyNodalFunctionVector(); 
+	_concentrations->initialize(*dis, FemLib::PolynomialOrder::Linear, local_conc);
+	
+	// get the transformation class instance here
+	this->_ReductionKin = femData->m_KinReductScheme; 
+	// make sure the reduction scheme is already initialized. 
+	if ( !(this->_ReductionKin->IsInitialized()) ) 
+	{
+		// error msg
+	    ERR("While initialize the Global Implicit Reactive Transport Process, the reduction scheme has not been correctly initialized! ");
+		// then stop the program
+		exit(1);
+	}
 
+	// tell me how many eta and how many xi we have
+	size_t n_eta, n_xi, n_eta_mob; 
+	// get n_eta and n_xi
+	n_eta     = this->_ReductionKin->get_n_eta();
+	n_eta_mob = this->_ReductionKin->get_n_eta_mob(); 
+	n_xi      = this->_ReductionKin->get_n_xi(); 
+	// based on the transformation class instance, add eta and xi to the discretized memory space
+	NumLib::LocalVector local_eta(n_eta), local_xi(n_xi);
+	local_eta *= .0; local_xi *= .0; 
+	this->_eta = new MyNodalFunctionVector(); 
+	this->_eta ->initialize( *dis, FemLib::PolynomialOrder::Linear, local_eta );
+    this->_xi  = new MyNodalFunctionVector(); 
+	this->_xi  ->initialize( *dis, FemLib::PolynomialOrder::Linear, local_xi  );
+
+	// eta goes to the linear problems
+
+	// xi  goes to the nonlinear problems
+
+	// first set up the linear problem for eta
+	// equations
+    MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_compound, _feObjects);
+    MyResidualAssemblerType* r_assembler = new MyResidualAssemblerType(_compound, _feObjects);
+    MyJacobianAssemblerType* j_eqs = new MyJacobianAssemblerType(_compound, _feObjects);
+
+	// set up problem
+
+	// set up variables
+
+	// IC
+
+	// BC
+
+	// ST
+
+	// set up solution
+
+	// set initial output
+
+	// initial output parameter
+
+
+
+	/*
     // equations
     MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_compound, _feObjects);
     MyResidualAssemblerType* r_assembler = new MyResidualAssemblerType(_compound, _feObjects);
@@ -53,8 +106,18 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
     MyEquationType* eqs = _problem->createEquation();
     eqs->initialize(linear_assembler, r_assembler, j_eqs);
     _problem->setTimeSteppingFunction(*tim);
-    // set up variable
-    typename MyProblemType::MyVariable* concentrations = _problem->addVariable("concentrations");
+
+    // set up variables
+	// in this case, the variables includes: \
+	// 1) concentrations of all components in the MCP data structure
+    // typename MyProblemType::MyVariable* concentrations = _problem->addVariable("concentrations");
+	for ( size_t i=0; i < n_Comp ; i++ )
+		_problem->addVariable( femData->map_ChemComp[i]->second->get_name() );
+	// 2) values of transformed eta
+
+	// 3) values of transformed xi
+
+
     // IC
     NumLib::TXFunctionBuilder f_builder;
     typename MyProblemType::MyVariable::MyNodalFunctionScalar* c0 = new typename MyProblemType::MyVariable::MyNodalFunctionScalar();
@@ -114,6 +177,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 
     // initial output parameter
     this->setOutput(Concentrations, concentrations->getIC());
+	*/
 
     return true;
 }
@@ -122,15 +186,19 @@ template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::initializeTimeStep(const NumLib::TimeStep &/*time*/)
 {
     const NumLib::ITXFunction *vel = this->getInput<NumLib::ITXFunction>(Velocity);
-    this->_problem->getEquation()->getLinearAssembler()->setVelocity(vel);
-    this->_problem->getEquation()->getResidualAssembler()->setVelocity(vel);
-    this->_problem->getEquation()->getJacobianAssembler()->setVelocity(vel);
+	// set velocity for linear problem
+	this->_linear_problem->getEquation()->getLinearAssembler()->setVelocity(vel);
+    this->_linear_problem->getEquation()->getResidualAssembler()->setVelocity(vel);
+    this->_linear_problem->getEquation()->getJacobianAssembler()->setVelocity(vel);
+	// set velocity for nonlinear problem as well
+	// TODO
 }
 
 template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::updateOutputParameter(const NumLib::TimeStep &/*time*/)
 {
-    setOutput(Concentrations, _solution->getCurrentSolution(0));
+	// TODO 
+    // setOutput(Concentrations, _solution->getCurrentSolution(0));
 }
 
 template <class T1, class T2>
@@ -138,6 +206,8 @@ void FunctionConcentrations<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    OutputVariableInfo var(this->getOutputParameterName(Concentrations), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
-    femData->outController.setOutput(var.name, var); 
+    
+	// TODO the following needs to be changed. 
+	// OutputVariableInfo var(this->getOutputParameterName(Concentrations), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
+    // femData->outController.setOutput(var.name, var); 
 };

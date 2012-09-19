@@ -54,7 +54,7 @@ public:
 
 	std::string species;                  // Name of species
 	int speciesnumber;                    // number of species;
-	double concentration;                 //Monod concentration
+	double concentration;                 // Monod concentration
 	double order;                         // Order of monod term
 	int isotopecouplenumber;              // CB isotope fractionation : specis number of isotope partner
 	// CB for Threshhold terms
