@@ -28,18 +28,24 @@ public:
     typedef NumLib::LocalVector LocalVector;
     typedef NumLib::LocalMatrix LocalMatrix;
 
-    explicit PressureBasedGWTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects)
-    : _feObjects(feObjects)
+    explicit PressureBasedGWTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, const MeshLib::CoordinateSystem &problem_coordinates)
+    : _feObjects(feObjects), _problem_coordinates(problem_coordinates)
     {
     };
 
     virtual ~PressureBasedGWTimeODELocalAssembler() {};
 
 protected:
-    virtual void assembleODE(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const LocalVector &/*u1*/, const LocalVector &/*u0*/, LocalMatrix &localM, LocalMatrix &localK, LocalVector &/*localF*/)
+    virtual void assembleODE(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const LocalVector &/*u1*/, const LocalVector &/*u0*/, LocalMatrix &localM, LocalMatrix &localK, LocalVector &localF)
     {
         FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
         const NumLib::TXPosition e_pos(NumLib::TXPosition::Element, e.getID());
+        const NumLib::LocalMatrix* matR = NULL;
+        if (e.getDimension() < _problem_coordinates.getDimension()) {
+            MeshLib::ElementCoordinatesMappingLocal* ele_local_coord;
+            ele_local_coord = (MeshLib::ElementCoordinatesMappingLocal*)e.getMappedCoordinates();
+            matR = &ele_local_coord->getRotationMatrixToOriginal();
+        }
 
         size_t mat_id = e.getGroupID();
         MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];
@@ -47,7 +53,13 @@ protected:
         double mu = .0;
         fluid->dynamic_viscosity->eval(e_pos, mu);
         double rho_f = .0;
-        fluid->density->eval(e_pos, rho_f);
+        LocalVector vec_g;
+        const bool hasGravityEffect = _problem_coordinates.hasZ();
+        if (hasGravityEffect) {
+            fluid->density->eval(e_pos, rho_f);
+            vec_g = LocalVector::Zero(_problem_coordinates.getDimension());
+            vec_g[_problem_coordinates.getIndexOfZ()] = -9.81;
+        }
 
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
@@ -65,16 +77,32 @@ protected:
             pm->storage->eval(real_x, s);
             double k_mu;
             k_mu = k / mu;
+            NumLib::LocalMatrix local_k_mu = NumLib::LocalMatrix::Identity(e.getDimension(), e.getDimension());
+            local_k_mu *= k_mu;
+            NumLib::LocalMatrix global_k_mu;
+            if (e.getDimension() < _problem_coordinates.getDimension()) {
+                NumLib::LocalMatrix local2 = NumLib::LocalMatrix::Zero(_problem_coordinates.getDimension(), _problem_coordinates.getDimension());
+                local2.topLeftCorner(local_k_mu.rows(), local_k_mu.cols()) = local_k_mu;
+                global_k_mu = (*matR) * local2 * matR->transpose();
+            } else {
+                global_k_mu = local_k_mu;
+            }
 
             // M_pp += Np^T * S * Np
             localM.noalias() += fac * Np.transpose() * s * Np;
 
             // K_pp += dNp^T * K * dNp
-            localK.noalias() += fac * dNp.transpose() * k_mu * dNp;
+            localK.noalias() += fac * dNp.transpose() * global_k_mu * dNp;
+
+            if (hasGravityEffect) {
+                // F += dNp^T * K * rho * gz
+                localF.noalias() += fac * dNp.transpose() * global_k_mu * rho_f * vec_g;
+            }
         }
     }
 
 private:
     FemLib::LagrangianFeObjectContainer _feObjects;
+    MeshLib::CoordinateSystem _problem_coordinates;
 };
 

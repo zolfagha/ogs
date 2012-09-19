@@ -39,7 +39,8 @@ bool FunctionPressureToElementVelocity<T>::initialize(const BaseLib::Options &op
     femData->outController.setOutput(var.name, var);
 
     // initial output parameter
-    this->setOutput(Velocity, _vel);
+    _vel_3d = new My3DIntegrationPointFunctionVector(_vel, msh->getGeometricProperty()->getCoordinateSystem());
+    this->setOutput(Velocity, _vel_3d);
 
     return true;
 }
@@ -51,7 +52,7 @@ void FunctionPressureToElementVelocity<T>::accept(const NumLib::TimeStep &/*time
     //_vel->printout();
     //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    OutputVariableInfo var(this->getOutputParameterName(Velocity), OutputVariableInfo::Element, OutputVariableInfo::Real, 3, _vel);
+    OutputVariableInfo var(this->getOutputParameterName(Velocity), OutputVariableInfo::Element, OutputVariableInfo::Real, 3, _vel_3d);
     femData->outController.setOutput(var.name, var);
 };
 
@@ -61,6 +62,7 @@ int FunctionPressureToElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &
     INFO("Calculating Darcy velocity within elements from fluid pressure...");
 
     const MeshLib::IMesh *msh = _dis->getMesh();
+    const MeshLib::CoordinateSystem coord = msh->getGeometricProperty()->getCoordinateSystem();
     MyNodalFunctionScalar *f_p = (MyNodalFunctionScalar*)getInput(Pressure);
     MyIntegrationPointFunctionVector *vel = _vel;;
 
@@ -71,18 +73,37 @@ int FunctionPressureToElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &
     for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
         MeshLib::IElement* e = msh->getElemenet(i_e);
         const NumLib::TXPosition e_pos(NumLib::TXPosition::Element, e->getID());
+        MeshLib::ElementCoordinatesMappingLocal* ele_local_coord;
+        ele_local_coord = (MeshLib::ElementCoordinatesMappingLocal*)e->getMappedCoordinates();
+        const NumLib::LocalMatrix &matR = ele_local_coord->getRotationMatrixToOriginal();
         size_t mat_id = e->getGroupID();
         MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];
         // fluid
         double mu = .0;
         fluidphase->dynamic_viscosity->eval(e_pos, mu);
         double rho_f = .0;
-        fluidphase->density->eval(e_pos, rho_f);
+        NumLib::LocalVector vec_g;
+        const bool hasGravityEffect = coord.hasZ();
+        if (hasGravityEffect) {
+            fluidphase->density->eval(e_pos, rho_f);
+            vec_g = NumLib::LocalVector::Zero(coord.getDimension());
+            vec_g[coord.getIndexOfZ()] = -9.81;
+        }
         // media
         double k;
         pm->permeability->eval(e_pos, k);
         double k_mu;
         k_mu = k / mu;
+        NumLib::LocalMatrix local_k_mu = NumLib::LocalMatrix::Identity(e->getDimension(), e->getDimension());
+        local_k_mu *= k_mu;
+        NumLib::LocalMatrix global_k_mu;
+        if (e->getDimension() < coord.getDimension()) {
+            NumLib::LocalMatrix local2 = NumLib::LocalMatrix::Zero(coord.getDimension(), coord.getDimension());
+            local2.topLeftCorner(local_k_mu.rows(), local_k_mu.cols()) = local_k_mu;
+            global_k_mu = matR * local2 * matR.transpose();
+        } else {
+            global_k_mu = local_k_mu;
+        }
 
         FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
         NumLib::LocalVector local_p(e->getNumberOfNodes());
@@ -93,37 +114,22 @@ int FunctionPressureToElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &
         double r[3] = {};
         const size_t n_gp = integral->getNumberOfSamplingPoints();
         vel->setNumberOfIntegationPoints(i_e, n_gp);
-        NumLib::LocalVector xi(e->getNumberOfNodes());
-        NumLib::LocalVector yi(e->getNumberOfNodes());
-        NumLib::LocalVector zi(e->getNumberOfNodes());
-        for (size_t i=0; i<e->getNumberOfNodes(); i++) {
-            const GeoLib::Point* pt = msh->getNodeCoordinatesRef(e->getNodeID(i));
-            xi[i] = (*pt)[0];
-            yi[i] = (*pt)[1];
-            zi[i] = (*pt)[2];
-        }
-        NumLib::LocalVector q(3);
+        NumLib::LocalVector local_q;
         for (size_t ip=0; ip<n_gp; ip++) {
-            q *= .0;
             integral->getSamplingPoint(ip, r);
             fe->computeBasisFunctions(r);
             const NumLib::LocalMatrix* dN = fe->getGradBasisFunction();
-            NumLib::LocalMatrix* N = fe->getBasisFunction();
-            std::vector<double> xx(3, .0);
-            NumLib::LocalVector tmp_v;
-            tmp_v = (*N) * xi;
-            xx[0] = tmp_v[0];
-            tmp_v = (*N) * yi;
-            xx[1] = tmp_v[0];
-            tmp_v = (*N) * zi;
-            xx[2] = tmp_v[0];
-            NumLib::TXPosition pos(&xx[0]);
+            //NumLib::LocalMatrix* N = fe->getBasisFunction();
 
             //TODO casting cause zero q
-            static_cast<NumLib::LocalVector>(q.head(msh->getDimension())) = (*dN) * local_p * (-1.0) * k_mu;
-            //TODO grav
+            //static_cast<NumLib::LocalVector>(q.head(msh->getDimension())) = (*dN) * local_p * (-1.0) * k_mu;
+            local_q = - global_k_mu * (*dN) * local_p;
+            if (hasGravityEffect) {
+                // F += dNp^T * K * rho * gz
+                local_q.noalias() += global_k_mu * rho_f * vec_g;
+            }
 
-            vel->setIntegrationPointValue(i_e, ip, q);
+            vel->setIntegrationPointValue(i_e, ip, local_q);
         }
     }
     setOutput(Velocity, vel);

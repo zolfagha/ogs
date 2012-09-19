@@ -35,8 +35,8 @@ bool FunctionLiquidPressure<T1,T2>::initialize(const BaseLib::Options &option)
     _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
 
     // local assemblers
-    MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(*_feObjects);
-    MyResidualAssemblerType* r_assembler = new MyResidualAssemblerType(*_feObjects);
+    MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(*_feObjects, msh->getGeometricProperty()->getCoordinateSystem());
+    MyResidualAssemblerType* r_assembler = new MyResidualAssemblerType(*_feObjects, msh->getGeometricProperty()->getCoordinateSystem());
     MyJacobianAssemblerType* j_eqs = new MyJacobianAssemblerType(*_feObjects);
 
     // set up problem
