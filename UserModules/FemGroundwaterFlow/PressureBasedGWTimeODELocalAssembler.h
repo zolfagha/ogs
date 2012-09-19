@@ -84,7 +84,8 @@ protected:
             NumLib::LocalMatrix global_k_mu;
             if (e.getDimension() < _problem_coordinates.getDimension()) {
                 NumLib::LocalMatrix local2 = NumLib::LocalMatrix::Zero(_problem_coordinates.getDimension(), _problem_coordinates.getDimension());
-                local2.topLeftCorner(local_k_mu.rows(), local_k_mu.cols()) = local_k_mu;
+                local2.block(0, 0, local_k_mu.rows(), local_k_mu.cols()) = local_k_mu.block(0, 0, local_k_mu.rows(), local_k_mu.cols());
+                //local2.topLeftCorner(local_k_mu.rows(), local_k_mu.cols()) = local_k_mu;
                 global_k_mu = (*matR) * local2 * matR->transpose();
             } else {
                 global_k_mu = local_k_mu;

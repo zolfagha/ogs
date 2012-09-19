@@ -99,7 +99,8 @@ int FunctionPressureToElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &
         NumLib::LocalMatrix global_k_mu;
         if (e->getDimension() < coord.getDimension()) {
             NumLib::LocalMatrix local2 = NumLib::LocalMatrix::Zero(coord.getDimension(), coord.getDimension());
-            local2.topLeftCorner(local_k_mu.rows(), local_k_mu.cols()) = local_k_mu;
+//            local2.topLeftCorner(local_k_mu.rows(), local_k_mu.cols()) = local_k_mu;
+            local2.block(0, 0, local_k_mu.rows(), local_k_mu.cols()) = local_k_mu.block(0, 0, local_k_mu.rows(), local_k_mu.cols());
             global_k_mu = matR * local2 * matR.transpose();
         } else {
             global_k_mu = local_k_mu;
