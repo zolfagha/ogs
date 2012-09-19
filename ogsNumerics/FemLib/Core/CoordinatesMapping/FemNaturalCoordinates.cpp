@@ -13,7 +13,7 @@
 #include "FemNaturalCoordinates.h"
 
 #include <iostream>
-
+#include <cassert>
 
 namespace FemLib
 {
@@ -21,7 +21,7 @@ namespace FemLib
 /// initialize element
 void FemNaturalCoordinates::initialize(MeshLib::IElement &ele)
 {
-    assert(ele.getMappedCoordinates()!=0);
+    assert(ele.getMappedCoordinates()!=NULL);
 
     _ele = &ele;
     const size_t dim = _ele->getDimension();

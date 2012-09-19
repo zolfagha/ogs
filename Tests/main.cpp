@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 {
     int ret = 0;
     LOGOG_INITIALIZE();
-    {
+    try {
         logog::Cout out;
         FormatterCustom custom_format;
         out.SetFormatter(custom_format);
@@ -52,12 +52,18 @@ int main(int argc, char *argv[])
     //argv[1] = "--gtest_filter=Math.Matrix*";
     //argv[1] = "--gtest_filter=Coupling.*";
     //argv[1] = "--gtest_filter=Math.SystemOfEqs*";
-    argv[1] = "--gtest_filter=Fem.LinearElastic2D";
+    //argv[1] = "--gtest_filter=FEM.LIE*";
     //argv[1] = "--gtest_filter=Solution.CouplingF*";
     //argv[1] = "--gtest_filter=*";
 #endif
         ::testing::InitGoogleTest(&argc, argv);
         ret = RUN_ALL_TESTS();
+    } catch (char* e) {
+        std::cerr << e << std::endl;
+    } catch (std::exception& e) {
+        std::cerr << e.what() << std::endl;
+    } catch (...) {
+        std::cerr << "Unknown exception occurred!" << std::endl;
     }
     LOGOG_SHUTDOWN();
 

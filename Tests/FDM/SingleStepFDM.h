@@ -104,6 +104,8 @@ public:
         this_t_n1.assign(t_n1);
         this_t_n1.setTimeStepSize(dt);
 
+        const size_t msh_id = _discrete_system->getMesh()->getID();
+
         // bc1
         std::vector<size_t> list_bc1_eqs_id;
         std::vector<double> list_bc1_val;
@@ -113,7 +115,6 @@ public:
             size_t varId = 0; //TODO var id
             std::vector<size_t> &list_bc_nodes = bc1->getListOfBCNodes();
             std::vector<double> &list_bc_values = bc1->getListOfBCValues();
-            const size_t msh_id = _discrete_system->getMesh()->getID();
             convertToEqsValues(_dofManager, varId, msh_id, list_bc_nodes, list_bc_values, list_bc1_eqs_id, list_bc1_val);
         }
 

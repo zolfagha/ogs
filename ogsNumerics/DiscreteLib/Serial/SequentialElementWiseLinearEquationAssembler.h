@@ -14,6 +14,7 @@
 
 #include "DiscreteLib/Core/IDiscreteLinearEquationAssembler.h"
 #include "DiscreteLib/Core/IElemenetWiseLinearEquationLocalAssembler.h"
+#include "DiscreteLib/Utils/DofEquationIdTable.h"
 
 namespace MeshLib 
 {
@@ -47,11 +48,11 @@ public:
     /// @param msh Mesh
     /// @param list_dofId List of Dof IDs used in this problem
     /// @param eqs Linear equation solver
-    void assembly(const MeshLib::IMesh &msh, SolverType &eqs);
+    void assembly(const MeshLib::IMesh &msh, const DofEquationIdTable &dofEquationIdTable, SolverType &eqs);
 
-    virtual void assembly(const MeshLib::IMesh &msh, MathLib::ILinearEquation &eqs)
+    virtual void assembly(const MeshLib::IMesh &msh, const DofEquationIdTable &dofEquationIdTable, MathLib::ILinearEquation &eqs)
     {
-        assembly(msh, *((SolverType*)&eqs));
+        assembly(msh, dofEquationIdTable, *((SolverType*)&eqs));
     }
 
 private:
@@ -59,12 +60,12 @@ private:
 };
 
 template <class T1, class T2>
-void SequentialElementWiseLinearEquationAssembler<T1, T2>::assembly(const MeshLib::IMesh &msh, SolverType &eqs)
+void SequentialElementWiseLinearEquationAssembler<T1, T2>::assembly(const MeshLib::IMesh &msh, const DofEquationIdTable &dofEquationIdTable, SolverType &eqs)
 {
     const size_t n_ele = msh.getNumberOfElements();
     for (size_t i=0; i<n_ele; i++) {
         MeshLib::IElement *e = msh.getElemenet(i);
-        _e_assembler->update(*e, eqs);
+        _e_assembler->update(*e, dofEquationIdTable, eqs);
     }
 };
 

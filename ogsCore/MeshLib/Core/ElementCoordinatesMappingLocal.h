@@ -13,9 +13,10 @@
 #pragma once
 
 #include <vector>
+#include "Eigen"
 
 #include "BaseLib/CodingTools.h"
-#include "MathLib/LinAlg/Dense/Matrix.h"
+#include "MathLib/DataType.h"
 #include "GeoLib/Point.h"
 
 #include "MeshLib/Core/IElementCoordinatesMapping.h"
@@ -35,25 +36,12 @@ class ElementCoordinatesMappingLocal : public IElementCoordinatesMapping
 {
 public:
     ///
-    ElementCoordinatesMappingLocal(const IMesh* msh, IElement &e, const CoordinateSystem &coordinate_system)
-    : _msh(msh), _matR2original(0)
-    {
-        assert (e.getDimension() <= coordinate_system.getDimension());
-
-        //if (e->getDimension()==coordinate_system->getDimension()) {
-        //    flip(e, coordinate_system);
-        ////} else if (e->getDimension() < coordinate_system->getDimension()) {
-        ////    rotate(e, coordinate_system);
-        //}
-        rotate(e, coordinate_system);
-    };
+    ElementCoordinatesMappingLocal(const IMesh* msh, IElement &e, const CoordinateSystem &coordinate_system);
 
     ///
     virtual ~ElementCoordinatesMappingLocal()
     {
         BaseLib::releaseObjectsInStdVector(_point_vec);
-        if (_matR2original!=0)
-            delete _matR2original;
     }
 
     ///
@@ -62,19 +50,25 @@ public:
         return _point_vec[node_id];
     }
 
+    const MathLib::LocalMatrix& getRotationMatrixToOriginal() const {return _matR2original;};
+    const MathLib::LocalMatrix& getRotationMatrixToLocal() const {return _matR2local;};
+    const GeoLib::Point& getTranslationVector() const {return _pt_translate;};
 private:
+    void translate(std::vector<GeoLib::Point*> &point_vec);
     ///
-    void flip(IElement &e, const CoordinateSystem &coordinate_system);
+    void flip(IElement &e, const CoordinateSystem &coordinate_system, const std::vector<GeoLib::Point*> &vec_pt);
     ///
-    void rotate(IElement &e, const CoordinateSystem &coordinate_system);
+    void rotate(IElement &e, const CoordinateSystem &coordinate_system, std::vector<GeoLib::Point*> &vec_pt);
     // x=Rx' where x is original coordinates and x' is local coordinates
-    void getRotationMatrixToOriginal(const IElement &e, const CoordinateSystem &coordinate_system, const std::vector<GeoLib::Point> &vec_pt);
+    void getRotationMatrixToOriginal(const IElement &e, const CoordinateSystem &coordinate_system, const std::vector<GeoLib::Point*> &vec_pt);
 
 private:
     const IMesh* _msh;
     std::vector<GeoLib::Point*> _point_vec;
-    MathLib::Matrix<double> *_matR2original;
-    MathLib::Matrix<double> *_matR2local;
+    GeoLib::Point _pt_translate;
+    MathLib::LocalMatrix _matR2original;
+    MathLib::LocalMatrix _matR2local;
+    bool _is_R2orig_set;
 };
 
 }

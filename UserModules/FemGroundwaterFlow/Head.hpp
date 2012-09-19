@@ -26,29 +26,29 @@ bool FunctionHead<T1,T2>::initialize(const BaseLib::Options &option)
     Ogs6FemData* femData = Ogs6FemData::getInstance();
     size_t msh_id = option.getOption<size_t>("MeshID");
     size_t time_id = option.getOption<size_t>("TimeGroupID");
-    NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
 
-    //mesh and FE objects
+    //--------------------------------------------------------------------------
+    // set up mesh and FE objects
+    //--------------------------------------------------------------------------
     MeshLib::IMesh* msh = femData->list_mesh[msh_id];
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
     _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
 
-    // local assemblers
-    MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(*_feObjects);
-    MyResidualAssemblerType* r_assembler = new MyResidualAssemblerType(*_feObjects);
-    MyJacobianAssemblerType* j_eqs = new MyJacobianAssemblerType(*_feObjects);
-
+    //--------------------------------------------------------------------------
     // set up problem
+    //--------------------------------------------------------------------------
     _problem = new MyProblemType(dis);
-    MyEquationType* eqs = _problem->createEquation();
-    eqs->initialize(linear_assembler, r_assembler, j_eqs);
+    NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
     _problem->setTimeSteppingFunction(*tim);
-    // set up variable
-    typename MyProblemType::MyVariable* head = _problem->addVariable("head"); //internal name
+
+    //--------------------------------------------------------------------------
+    // set up variables
+    //--------------------------------------------------------------------------
+    MyVariable* head = _problem->addVariable("head"); //internal name
     // IC
     NumLib::TXFunctionBuilder f_builder;
-    typename MyProblemType::MyVariable::MyNodalFunctionScalar* h0 = new typename MyProblemType::MyVariable::MyNodalFunctionScalar();
+    MyNodalFunctionScalar* h0 = new MyNodalFunctionScalar();
     h0->initialize(*dis, FemLib::PolynomialOrder::Linear, 0);
     h0->setFeObjectContainer(_feObjects);
     head->setIC(h0);
@@ -64,7 +64,6 @@ bool FunctionHead<T1,T2>::initialize(const BaseLib::Options &option)
         NumLib::ITXFunction* f_bc =  f_builder.create(dis_name, dis_v);
         head->addDirichletBC(new SolutionLib::FemDirichletBC(msh, geo_obj, f_bc));
     }
-
     // ST
     const BaseLib::Options* opSTList = option.getSubGroup("STList");
     for (const BaseLib::Options* opST = opSTList->getFirstSubGroup("ST"); opST!=0; opST = opSTList->getNextSubGroup())
@@ -91,19 +90,36 @@ bool FunctionHead<T1,T2>::initialize(const BaseLib::Options &option)
             WARN("Distribution type %s is specified but not found. Ignore this ST.", dis_name.c_str());
         }
     }
+    
+    //--------------------------------------------------------------------------
+    // set up equations
+    //--------------------------------------------------------------------------
+    // local assemblers
+    MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(*_feObjects);
+    MyResidualAssemblerType* r_assembler = new MyResidualAssemblerType(*_feObjects);
+    MyJacobianAssemblerType* j_eqs = new MyJacobianAssemblerType(*_feObjects);
+    // equations
+    MyEquationType* eqs = _problem->createEquation();
+    eqs->initialize(linear_assembler, r_assembler, j_eqs);
 
-    // set up solution
+    //--------------------------------------------------------------------------
+    // set up this solution algorithm
+    //--------------------------------------------------------------------------
     _solution = new MySolutionType(dis, _problem);
     typename MySolutionType::LinearSolverType* linear_solver = _solution->getLinearEquationSolver();
     const BaseLib::Options* optNum = option.getSubGroup("Numerics");
     linear_solver->setOption(*optNum);
     _solution->getNonlinearSolver()->setOption(*optNum);
 
-    // set initial output
+    //--------------------------------------------------------------------------
+    // set up data for output
+    //--------------------------------------------------------------------------
     OutputVariableInfo var(this->getOutputParameterName(Head), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput(var.name, var);
 
-    // initial output parameter
+    //--------------------------------------------------------------------------
+    // set initial output
+    //--------------------------------------------------------------------------
     this->setOutput(Head, head->getIC());
 
     return true;

@@ -370,6 +370,7 @@ private:
         initialize(*org._discrete_system, org._order);
         for (size_t i=org._nodal_values->getRangeBegin(); i<org._nodal_values->getRangeEnd(); ++i)
             (*_nodal_values)[i] = (*org._nodal_values)[i];
+        _feObjects = org._feObjects;
     }
 
 private:

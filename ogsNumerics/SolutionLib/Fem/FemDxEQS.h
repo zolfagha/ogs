@@ -124,7 +124,7 @@ void TemplateTransientDxFEMFunction<T1,T2,T3>::eval(const SolutionVector &u_n1, 
 
     // assembly
     //NumLib::ElementWiseTransientDxEQSAssembler<UserLocalJacobianAssembler> assembler(&t_n1, u_n, &u_n1, _local_assembler);
-    MyUpdater updater(&t_n1, _msh, _linear_eqs->getDofMapManger(), u_n, &u_n1, _local_assembler);
+    MyUpdater updater(&t_n1, _msh, u_n, &u_n1, _local_assembler);
     MyGlobalAssembler assembler(&updater);
     _linear_eqs->construct(assembler);
 

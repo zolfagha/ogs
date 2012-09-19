@@ -77,7 +77,7 @@ public:
     /// solve linear equations discretized with FEM
     /// @param u0    initial guess
     /// @param u_n1 new results
-    void eval(const MyFemVector &/*u0*/, MyFemVector &u_n1)
+    void eval(const MyFemVector &u0, MyFemVector &u_n1)
     {
         // input, output
         const NumLib::TimeStep &t_n1 = *this->_t_n1;
@@ -85,6 +85,9 @@ public:
 
         // prepare data
         UserFemProblem* pro = _problem;
+
+        //
+        _linear_eqs->initialize(); // should be called before BC
 
         // setup BC
         for (size_t i=0; i<pro->getNumberOfDirichletBC(); i++) {
@@ -103,8 +106,7 @@ public:
         vec_un1.push_back(const_cast<MyFemVector*>(&u_n1));
 
         // assembly
-        _linear_eqs->initialize();
-        StencilWiseTransientLinearEQSAssembler assembler(&t_n1, _linear_eqs->getDofMapManger(), &vec_un, &vec_un1, _local_assembler);
+        StencilWiseTransientLinearEQSAssembler assembler(&t_n1, &vec_un, &vec_un1, _local_assembler);
         _linear_eqs->construct(assembler);
 
         //apply BC1,2
@@ -115,6 +117,7 @@ public:
         }
 
         // solve
+        _linear_eqs->setX(u0);
         _linear_eqs->solve();
         _linear_eqs->getX(u_n1);
     }

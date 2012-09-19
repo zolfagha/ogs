@@ -39,5 +39,6 @@ public:
     virtual void accept(const NumLib::TimeStep &/*time*/) {};
 
 };
+
 }
 

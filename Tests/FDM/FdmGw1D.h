@@ -40,15 +40,16 @@ public:
         double k = .0;
         _pm->hydraulic_conductivity->eval(0, k);
 
-        if (center_point_id==0) {
+        if (center_point_id==0) { //Neuman BC
             eqs.addA(0, 0, k/_h);
             const std::vector<size_t> &neighbor_points = s.getSurroundingNodes();
             for(size_t i=0; i<neighbor_points.size(); i++)
             {
                 eqs.addA(0, i+1, -k/_h);
             }
-        } else if (center_point_id == 20) {
-//            eqs.addA(0, 0, 1.0);
+//        } else if (center_point_id == 4) {
+        } else if (center_point_id == 20) { // Dirichlet BC
+            eqs.addA(0, 0, 1.0);
         } else {
             eqs.addA(0, 0, 2.0*k/_h2);
             const std::vector<size_t> &neighbor_points = s.getSurroundingNodes();
@@ -58,6 +59,8 @@ public:
               eqs.addA(0, i+1, -k/_h2);
             }
         }
+
+//        std::cout << center_point_id << ":"; eqs.printout();
 
     }
 };

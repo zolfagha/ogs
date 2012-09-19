@@ -97,7 +97,7 @@ void gw1(double len, size_t div, std::vector<double> *x, std::vector<double> *re
     pGW->setTimeSteppingFunction(tim);
 
     Base::Options options;
-    Base::Options* op_lis = options.addSubGroup("Lis");
+    Base::Options* op_lis = options.addSubGroup("LinearSolver");
     op_lis->addOption("solver_type", "CG");
     op_lis->addOption("precon_type", "NONE");
     op_lis->addOptionAsNum("error_tolerance", 1e-10);

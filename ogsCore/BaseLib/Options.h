@@ -29,6 +29,7 @@ class IOptionNode
 public:
     virtual ~IOptionNode() {};
     virtual bool isValue() const = 0;
+    virtual bool isString() const {return false;};
 };
 
 /**
@@ -43,8 +44,13 @@ public:
     OptionLeaf(const T &str) : _value(str) {};
     virtual ~OptionLeaf() {};
     bool isValue() const {return true;};
+    virtual inline bool isString() const {return false;};
     const T& getValue() const {return _value;};
 };
+
+template <>
+inline bool OptionLeaf<std::string>::isString() const {return true;};
+
 
 /**
  * \brief Options represents a collection of key-value but with hierarchical data structure.
@@ -162,7 +168,7 @@ public:
         return (itr!=_dictionary.end() && itr->second->isValue());
     }
 
-    /// get value as number
+    /// get value as string
     template<typename T>
     const T getOption(const std::string &key) const
     {
@@ -175,6 +181,7 @@ public:
 //        return Base::str2number<T>(getOption(key));
     }
 
+    /// get raw data
     template<typename T>
     const T getOptionAsNum(const std::string &key) const
     {
@@ -182,7 +189,11 @@ public:
         if (itr==_dictionary.end() || !itr->second->isValue()) {
             return getDummy<T>();
         } else {
-            return BaseLib::str2number<T>(static_cast<OptionLeaf<std::string>*>(itr->second)->getValue());
+           if (itr->second->isString()) {
+                return BaseLib::str2number<T>(static_cast<OptionLeaf<std::string>*>(itr->second)->getValue());
+            } else {
+                return static_cast<OptionLeaf<T>*>(itr->second)->getValue();
+            }
         }
         //        return Base::str2number<T>(getOption(key));
     }

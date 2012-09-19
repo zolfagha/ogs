@@ -62,7 +62,9 @@ void EigenDenseLinearEquation::setKnownX(const std::vector<size_t> &vec_id, cons
 
 void EigenDenseLinearEquation::printout(std::ostream &os) const
 {
-    os << "not implemented yet." << std::endl;
+    os << "A=" << _A << std::endl;
+    os << "x=" << _x << std::endl;
+    os << "b=" << _b << std::endl;
 }
 
 void setOption(const BaseLib::Options &/*option*/) {};

@@ -12,16 +12,9 @@
 
 #pragma once
 
-#include <vector>
-
-#include "BaseLib/CodingTools.h"
-#include "MathLib/LinAlg/Dense/Matrix.h"
-#include "GeoLib/Point.h"
-
 #include "MeshLib/Core/IElementCoordinatesMapping.h"
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Core/IElement.h"
-#include "MeshLib/Core/CoordinateSystem.h"
 
 namespace MeshLib
 {
@@ -29,11 +22,16 @@ namespace MeshLib
 /**
  * \brief EleMapInvariant keep original coordinates.
  */
-class ElementCoordinatesInvariant : public IElementCoordinatesMapping
+class ElementCoordinatesInvariant
+: public IElementCoordinatesMapping
 {
 public:
-    ///
-    ElementCoordinatesInvariant(const IMesh* msh, IElement* e) : _msh(msh), _e(e) 
+    /**
+     *
+     * @param msh
+     * @param e
+     */
+    ElementCoordinatesInvariant(const IMesh* msh, const IElement* e) : _msh(msh), _e(e)
     {
     };
     
@@ -48,7 +46,7 @@ public:
 
 private:
     const IMesh* _msh;
-    IElement* _e;
+    const IElement* _e;
 };
 
 }

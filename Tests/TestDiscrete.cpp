@@ -165,6 +165,7 @@ TEST(Discrete, NDDCSSVec1)
 
     // discrete system
     SerialNodeDdcSharedDiscreteSystem dis(msh);
+    dis.initialize(ddc);
 
     // vector
     IDiscreteVector<double>* v = dis.createVector<double>(ddc->getTotalNumberOfDecomposedObjects());
@@ -209,18 +210,23 @@ TEST(Discrete, NDDCSSEqs2)
     // dof
     DofEquationIdTable dofManager;
     dofManager.addVariableDoFs(0, 0, ddc->getTotalNumberOfDecomposedObjects());
-    dofManager.construct(DofNumberingType::BY_VARIABLE);
+    dofManager.setNumberingType(DofNumberingType::BY_VARIABLE);
+    dofManager.construct();
     // eqs
     IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<LisLinearEquation, SparsityBuilderFromNodeConnectivity>(&lis, &dofManager);
     linear_eq->initialize();
     linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
     typedef typename DiscreteLib::ElementWiseLinearEquationUpdater<DiscreteExample1::TestElementAssembler,LisLinearEquation> MyUpdater;
     typedef typename SerialNodeDdcSharedDiscreteSystem::MyLinearEquationAssembler<MyUpdater,LisLinearEquation>::type MyGlobalAssembler;
-    MyUpdater updater(msh, &dofManager, &ele_assembler);
+    MyUpdater updater(msh, &ele_assembler);
     MyGlobalAssembler assembler(&updater);
     linear_eq->construct(assembler);
-    //linear_eq->getLinearEquation()->printout();
     linear_eq->solve();
+
+    std::cout << "expected = ";
+    for (size_t i=0; i<9; i++) std::cout << ex1.exH[i] << ", ";
+    std::cout << "actual = ";
+    for (size_t i=0; i<9; i++) std::cout << linear_eq->getLocalX()[i] << ", ";
 
     ASSERT_DOUBLE_ARRAY_EQ(&ex1.exH[0], linear_eq->getLocalX(), 9, 1.e-5);
 }
@@ -241,14 +247,15 @@ TEST(Discrete, NDDCSDEqs2)
     // dof
     DofEquationIdTable dofManager;
     dofManager.addVariableDoFs(0, 0, ddc->getTotalNumberOfDecomposedObjects());
-    dofManager.construct(DofNumberingType::BY_VARIABLE);
+    dofManager.setNumberingType(DofNumberingType::BY_VARIABLE);
+    dofManager.construct();
     // eqs
     IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<LisLinearEquation, SparsityBuilderFromNodeConnectivity>(&lis, &dofManager);
     linear_eq->initialize();
     linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
     typedef typename DiscreteLib::ElementWiseLinearEquationUpdater<DiscreteExample1::TestElementAssembler,LisLinearEquation> MyUpdater;
     typedef typename SerialNodeDdcSharedDiscreteSystem::MyLinearEquationAssembler<MyUpdater,LisLinearEquation>::type MyGlobalAssembler;
-    MyUpdater updater(msh, &dofManager, &ele_assembler);
+    MyUpdater updater(msh, &ele_assembler);
     MyGlobalAssembler assembler(&updater);
     linear_eq->construct(assembler);
     //linear_eq->getLinearEquation()->printout();
@@ -350,7 +357,7 @@ TEST(Discrete, Lis1)
         linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
         typedef typename DiscreteLib::ElementWiseLinearEquationUpdater<DiscreteExample1::TestElementAssembler,LisLinearEquation> MyUpdater;
         typedef typename SerialNodeDdcSharedDiscreteSystem::MyLinearEquationAssembler<MyUpdater,LisLinearEquation>::type MyGlobalAssembler;
-        MyUpdater updater(msh, &dofManager, &ele_assembler);
+        MyUpdater updater(msh, &ele_assembler);
         MyGlobalAssembler assembler(&updater);
         linear_eq->construct(assembler);
         //linear_eq->getLinearEquation()->printout();

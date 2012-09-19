@@ -12,7 +12,6 @@
 
 #pragma once
 
-//#include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Core/IElementCoordinatesMapping.h"
 #include "FemLib/Core/ShapeFunction/IFemShapeFunction.h"
@@ -86,6 +85,7 @@ public:
 
     ///
     MeshLib::IElement* getElement() const {return _ele;};
+
 
 private:
     CoordinateMappingProperty* _prop;

@@ -273,7 +273,7 @@ TEST(Solution, Fem1_Linear)
     NumLib::TXFunctionConstant K(1.e-11);
     // options
     BaseLib::Options options;
-    BaseLib::Options* op_lis = options.addSubGroup("Lis");
+    BaseLib::Options* op_lis = options.addSubGroup("LinearSolver");
     op_lis->addOption("solver_type", "CG");
     op_lis->addOption("precon_type", "NONE");
     op_lis->addOptionAsNum("error_tolerance", 1e-10);
@@ -307,7 +307,7 @@ TEST(Solution, Fem1_Picard)
     NumLib::TXFunctionConstant K(1.e-11);
     // options
     BaseLib::Options options;
-    BaseLib::Options* op_lis = options.addSubGroup("Lis");
+    BaseLib::Options* op_lis = options.addSubGroup("LinearSolver");
     op_lis->addOption("solver_type", "CG");
     op_lis->addOption("precon_type", "NONE");
     op_lis->addOptionAsNum("error_tolerance", 1e-10);
@@ -345,7 +345,7 @@ TEST(Solution, Fem1_Newton)
     NumLib::TXFunctionConstant K(1.e-11);
     // options
     BaseLib::Options options;
-    BaseLib::Options* op_lis = options.addSubGroup("Lis");
+    BaseLib::Options* op_lis = options.addSubGroup("LinearSolver");
     op_lis->addOption("solver_type", "CG");
     op_lis->addOption("precon_type", "NONE");
     op_lis->addOptionAsNum("error_tolerance", 1e-10);
@@ -383,7 +383,7 @@ TEST(Solution, Fem2)
     NumLib::TXFunctionConstant K(1.e-11);
     // options
     BaseLib::Options options;
-    BaseLib::Options* op_lis = options.addSubGroup("Lis");
+    BaseLib::Options* op_lis = options.addSubGroup("LinearSolver");
     op_lis->addOption("solver_type", "CG");
     op_lis->addOption("precon_type", "NONE");
     op_lis->addOptionAsNum("error_tolerance", 1e-10);

@@ -52,8 +52,8 @@ public:
     /// @param u0
     /// @param u1
     /// @param a
-    StencilWiseTransientLinearEQSAssembler(const NumLib::TimeStep* time, DiscreteLib::DofEquationIdTable* dofManager, const std::vector<DiscreteLib::IDiscreteVector<double>*>* u0, const std::vector<DiscreteLib::IDiscreteVector<double>*>* u1, IStencilWiseTransientLinearEQSLocalAssembler* a)
-        : _transient_e_assembler(a), _timestep(time), _dofManager(dofManager), _u0(u0), _u1(u1)
+    StencilWiseTransientLinearEQSAssembler(const NumLib::TimeStep* time, const std::vector<DiscreteLib::IDiscreteVector<double>*>* u0, const std::vector<DiscreteLib::IDiscreteVector<double>*>* u1, IStencilWiseTransientLinearEQSLocalAssembler* a)
+        : _transient_e_assembler(a), _timestep(time), _u0(u0), _u1(u1)
     { };
 
 
@@ -63,7 +63,7 @@ public:
     /// @param dofManager         Dof map manager
     /// @param list_dofId         List of Dof IDs used in this problem
     /// @param eqs                 Linear equation solver
-    void assembly(const MeshLib::IMesh &msh, MathLib::ILinearEquation &eqs)
+    void assembly(const MeshLib::IMesh &msh, const DiscreteLib::DofEquationIdTable &dofManager, MathLib::ILinearEquation &eqs)
     {
         const NumLib::TimeStep &time = *_timestep;
         LocalEquationType localEQS;
@@ -71,7 +71,6 @@ public:
         std::vector<size_t> local_dofmap;
         const size_t n_nod = msh.getNumberOfNodes();
         MeshLib::TopologyNode2NodesConnectedByEdges topo((MeshLib::IMesh*)&msh);
-        DiscreteLib::DofEquationIdTable &dofManager = *_dofManager;
 
         LocalVectorType local_u_n1;
         LocalVectorType local_u_n;
@@ -107,7 +106,6 @@ public:
 private:
     IStencilWiseTransientLinearEQSLocalAssembler* _transient_e_assembler;
     const NumLib::TimeStep* _timestep;
-    DiscreteLib::DofEquationIdTable* _dofManager;
     const std::vector<DiscreteLib::IDiscreteVector<double>*>* _u0;
     const std::vector<DiscreteLib::IDiscreteVector<double>*>* _u1;
 };

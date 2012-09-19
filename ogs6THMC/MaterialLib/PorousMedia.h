@@ -29,6 +29,7 @@ struct PorousMedia
     NumLib::ITXFunction* permeability;
     NumLib::ITXFunction* porosity;
     NumLib::ITXFunction* storage;
+    NumLib::ITXFunction* geo_area;
 
     PorousMedia()
     {
@@ -36,7 +37,8 @@ struct PorousMedia
                 hydraulic_conductivity,
                 permeability,
                 porosity,
-                storage
+                storage,
+                geo_area
                 );
     }
 
@@ -46,7 +48,8 @@ struct PorousMedia
                 hydraulic_conductivity,
                 permeability,
                 porosity,
-                storage
+                storage,
+                geo_area
                 );
     }
 };

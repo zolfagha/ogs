@@ -65,11 +65,12 @@ void OMPElementWiseLinearEquationAssembler<T1,T2>::assembly(const MeshLib::IMesh
     for (size_t i=0; i<n_ele; i++) {
         MeshLib::IElement *e = msh.getElemenet(i);
         assembler.update(*e, eqs);
+    }
+};
+
 //#ifdef _OPENMP
 //        int thread_id = omp_get_thread_num();
 //        std::cout << "thread " << thread_id << ": e_id = " << e->getID() << std::endl;
 //#endif
-    }
-};
 
 }

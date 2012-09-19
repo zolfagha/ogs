@@ -88,7 +88,7 @@ public:
     {
         assert(getDofMapManger()->getNumberOfVariables()>0);
 
-        assemler.assembly(*(MeshLib::IMesh*)getMesh(), *_eqs);
+        assemler.assembly(*(MeshLib::IMesh*)getMesh(), *AbstractMeshBasedDiscreteLinearEquation::getDofMapManger(), *_eqs);
 
         //apply 1st bc
         _eqs->setKnownX(_list_prescribed_dof_id, _list_prescribed_values);

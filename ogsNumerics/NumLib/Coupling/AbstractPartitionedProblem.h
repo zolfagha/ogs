@@ -44,12 +44,17 @@ public:
     /// check consistency
     virtual bool check() const
     {
-        bool flag = true;
+        bool pass_test = true;
+
+        if (_list_subproblems.size() == 0) {
+            ERR("***Error: No subproblems are defined in a partitioned problem.");
+            pass_test = false;
+        }
 
         // check for subproblems
         for (size_t i=0; i<_list_subproblems.size(); i++) {
             if (!_list_subproblems[i]->check())
-                flag = false;
+                pass_test = false;
         }
 
         if (!BaseClass::isValid()) return false;
@@ -79,11 +84,11 @@ public:
                     ERR("*** Error: Inconsistent parameter found in subproblem %d and param %d", i, list_diff[k]);
                 }
 
-                flag = false;
+                pass_test = false;
             }
         }
 
-        return flag;
+        return pass_test;
     }
 
     virtual NumLib::IConvergenceCheck* getConvergenceChecker()

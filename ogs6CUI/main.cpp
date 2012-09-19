@@ -20,12 +20,12 @@ int main ( int argc, char *argv[] )
     try {
         ogs6::THMCSimulator sim(argc, argv);
         returncode = sim.execute();
-    } catch (char* e) {
-        std::cerr << e << std::endl;
+    } catch (const char* e) {
+        std::cerr << "EXCEPTION: " << e << std::endl;
     } catch (std::exception& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << "EXCEPTION: " << e.what() << std::endl;
     } catch (...) {
-        std::cerr << "Unknown exception occurred!" << std::endl;
+        std::cerr << "EXCEPTION: Unknown exception occurred!" << std::endl;
     }
 
     return returncode;

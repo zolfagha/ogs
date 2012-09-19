@@ -38,8 +38,8 @@ public:
      * @param dofManager
      * @param a
      */
-    ElementWiseVectorUpdater(MeshLib::IMesh* msh, DofEquationIdTable* dofManager, LocalAssemblerType* a)
-    : _msh(msh), _dofManager(dofManager), _e_assembler(a)
+    ElementWiseVectorUpdater(MeshLib::IMesh* msh, LocalAssemblerType* a)
+    : _msh(msh), _e_assembler(a)
     {
 
     }
@@ -49,7 +49,7 @@ public:
      * @param e
      * @param globalVec
      */
-    void update(const MeshLib::IElement &e, GlobalVectorType &globalVec)
+    void update(const MeshLib::IElement &e, const DofEquationIdTable &dofManager, GlobalVectorType &globalVec)
     {
         LocalVector localVec;
         std::vector<size_t> ele_node_ids, ele_node_size_order;
@@ -59,7 +59,7 @@ public:
         // get dof map
         e.getNodeIDList(e.getMaximumOrder(), ele_node_ids);
         e.getListOfNumberOfNodesForAllOrders(ele_node_size_order);
-        _dofManager->mapEqsID(_msh->getID(), ele_node_ids, local_dofmap_row); //TODO order
+        dofManager.mapEqsID(_msh->getID(), ele_node_ids, local_dofmap_row); //TODO order
         // local assembly
         localVec.resize(local_dofmap_row.size(), .0);
         _e_assembler->assembly(*e, localVec);
@@ -69,7 +69,6 @@ public:
 
 private:
     MeshLib::IMesh* _msh;
-    DofEquationIdTable* _dofManager;
     LocalAssemblerType* _e_assembler;
 };
 

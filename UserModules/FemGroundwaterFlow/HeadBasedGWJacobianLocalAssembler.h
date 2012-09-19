@@ -18,11 +18,11 @@
 #include "MaterialLib/PorousMedia.h"
 
 
-class GroundwaterFlowJacobianLocalAssembler
+class HeadBasedGWJacobianLocalAssembler
 : public NumLib::IElementWiseTransientJacobianLocalAssembler
 {
 public:
-    explicit GroundwaterFlowJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects)
+    explicit HeadBasedGWJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects)
     : _feObjects(feObjects)
     {
     };

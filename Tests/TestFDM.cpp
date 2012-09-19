@@ -131,6 +131,7 @@ MyFunctionConcentration::MassFemProblem* defineMassTransportProblem(DiscreteSyst
     //IC
     MyFemNodalFunctionScalar* c0 = new MyFemNodalFunctionScalar();
     c0->initialize(dis, PolynomialOrder::Linear, 0);
+    c0->setFeObjectContainer(_feObjects);
     var->setIC(c0);
     //BC
     NumLib::TXFunctionConstant* f1 = new  NumLib::TXFunctionConstant(1.0);
@@ -155,8 +156,8 @@ TEST(Fdm, fdm1)
         pGW->setTimeSteppingFunction(tim);
         // options
         BaseLib::Options options;
-        BaseLib::Options* op_lis = options.addSubGroup("Lis");
-        op_lis->addOption("solver_type", "BiCG");
+        BaseLib::Options* op_lis = options.addSubGroup("LinearSolver");
+        op_lis->addOption("solver_type", "BICG");
         op_lis->addOption("precon_type", "NONE");
         op_lis->addOptionAsNum("error_tolerance", 1e-10);
         op_lis->addOptionAsNum("max_iteration_step", 500);
@@ -216,19 +217,20 @@ TEST(Fdm, fdm_fem1)
         GWFdmProblem* pGW = defineGWProblem4FDM(dis, h, line, pm);
         MyFunctionConcentration::MassFemProblem* pMass = defineMassTransportProblem(dis, line, pm, tracer);
 
+//        TimeStepFunctionConstant tim(.0, 1e+3, 1e+3);
         TimeStepFunctionConstant tim(.0, 1e+4, 1e+3);
         pGW->setTimeSteppingFunction(tim);
         pMass->setTimeSteppingFunction(tim);
         // options
         BaseLib::Options options;
-        BaseLib::Options* op_lis = options.addSubGroup("Lis");
-        op_lis->addOption("solver_type", "BiCG");
+        BaseLib::Options* op_lis = options.addSubGroup("LinearSolver");
+        op_lis->addOption("solver_type", "BICG");
         op_lis->addOption("precon_type", "NONE");
         op_lis->addOptionAsNum("error_tolerance", 1e-10);
         op_lis->addOptionAsNum("max_iteration_step", 500);
         BaseLib::Options optionsMT;
-        op_lis = optionsMT.addSubGroup("Lis");
-        op_lis->addOption("solver_type", "BiCG");
+        op_lis = optionsMT.addSubGroup("LinearSolver");
+        op_lis->addOption("solver_type", "BICG");
         op_lis->addOption("precon_type", "NONE");
         op_lis->addOptionAsNum("error_tolerance", 1e-10);
         op_lis->addOptionAsNum("max_iteration_step", 1000);
@@ -292,6 +294,7 @@ TEST(Fdm, fdm_fem1)
         std::vector<double> expectedC;
         expectedC.resize(div+1);
 
+#define OUTPUT_C
 #ifdef OUTPUT_C
         std::cout << std::endl << "expected C=";
 #endif

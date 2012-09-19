@@ -49,7 +49,8 @@ private:
                 std::vector<size_t> vec_ghosts(dom_ghosts->begin(), dom_ghosts->end());
                 local_dofManager->setGhostPoints(mesh_id, vec_ghosts);
             }
-            local_dofManager->construct(DofNumberingType::BY_POINT);
+            local_dofManager->setNumberingType(DofNumberingType::BY_POINT);
+            local_dofManager->construct();
             // create local EQS
             _list_local_eq.push_back(DiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>::createInstance(sys, dom->getLoalMesh(), local_solver, local_dofManager));
         }
@@ -66,7 +67,7 @@ public:
 
     virtual ~SerialNodeDdcDistributedLinearEquation() 
     {
-        BaseLib::releaseObjectsInStdVector(_list_local_eq);
+        //BaseLib::releaseObjectsInStdVector(_list_local_eq);
     };
 
     /// initialize EQS

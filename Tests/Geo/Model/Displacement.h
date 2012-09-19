@@ -83,6 +83,9 @@ public:
         typename MySolution::LinearSolverType* linear_solver = _sol_u->getLinearEquationSolver();
         linear_solver->setOption(option);
         _sol_u->getNonlinearSolver()->setOption(option);
+        DiscreteLib::DofEquationIdTable* dofMapping = _sol_u->getDofEquationIdTable();
+        dofMapping->setNumberingType(DiscreteLib::DofNumberingType::BY_POINT);
+        dofMapping->setLocalNumberingType(DiscreteLib::DofNumberingType::BY_POINT);
         this->setOutput(u_x, problem_u->getVariable(0)->getIC());
         this->setOutput(u_y, problem_u->getVariable(1)->getIC());
 
@@ -135,8 +138,8 @@ public:
             }
 
             // for each integration points
-            NumLib::LocalMatrix matB = NumLib::LocalVector::Zero(n_strain_components, nnodes*dim);
-            NumLib::LocalMatrix matN = NumLib::LocalVector::Zero(dim, nnodes*dim);
+            NumLib::LocalMatrix matB = NumLib::LocalMatrix::Zero(n_strain_components, nnodes*dim);
+            NumLib::LocalMatrix matN = NumLib::LocalMatrix::Zero(dim, nnodes*dim);
             double r[3] = {};
             double x[3] = {};
             for (size_t ip=0; ip<n_gp; ip++) {

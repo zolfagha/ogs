@@ -12,6 +12,9 @@
 
 #pragma once
 
+#include <cassert>
+#include <cstddef>
+
 namespace MeshLib
 {
 
@@ -67,9 +70,19 @@ public:
     }
 
     /// has z dimension
-    bool hasZ() const {
-        return (_type % 10 == 2);
-    }
+    bool hasX() const;
+
+    size_t getIndexOfX() const;
+
+    /// has z dimension
+    bool hasY() const;
+
+    size_t getIndexOfY() const;
+
+    /// has z dimension
+    bool hasZ() const;
+
+    size_t getIndexOfZ() const;
 
 private:
     CoordinateSystemType::type _type; 

@@ -10,12 +10,12 @@
  * Created on 2012-07-13 by Norihiro Watanabe
  */
 
-#include "GWJacobianLocalAssembler.h"
+#include "HeadBasedGWJacobianLocalAssembler.h"
 
 #include "NumLib/Function/TXFunction.h"
 #include "Ogs6FemData.h"
 
-void GroundwaterFlowJacobianLocalAssembler::assembly(const NumLib::TimeStep &ts, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/,  NumLib::LocalMatrix &localJ)
+void HeadBasedGWJacobianLocalAssembler::assembly(const NumLib::TimeStep &ts, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/,  NumLib::LocalMatrix &localJ)
 {
     FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
     size_t mat_id = e.getGroupID();

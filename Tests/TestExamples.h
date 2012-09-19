@@ -50,6 +50,16 @@ public:
     std::vector<double> vec_bc1_vals;
     std::vector<size_t> vec_bc2_nodes;
     std::vector<double> vec_bc2_vals;
+    FemLib::LagrangianFeObjectContainer* _feObjects;
+
+    ~GWFemTest()
+    {
+        delete rec;
+        delete _feObjects;
+        delete head;
+        delete vel;
+        delete dis;
+    }
 
     void define(MeshLib::IMesh *msh, NumLib::ITXFunction *K=0)
     {
@@ -61,16 +71,18 @@ public:
         //mesh
         this->msh = msh;
         dis = new DiscreteLib::DiscreteSystem(msh);
+        _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
         //discretization
         head = new MyNodalFunctionScalar();
         head->initialize(*dis, FemLib::PolynomialOrder::Linear);
+        head->setFeObjectContainer(_feObjects);
         vel = new MyIntegrationPointFunctionVector();
         vel->initialize(dis);
         //bc
         NumLib::TXFunctionConstant f_bc1(.0);
         FemLib::DirichletBC2FEM bc1(*msh, *poly_right, f_bc1, vec_bc1_nodes, vec_bc1_vals);
         NumLib::TXFunctionConstant f_bc2(-1e-5);
-        FemLib::NeumannBC2FEM bc2(*msh, *head->getFeObjectContainer(), *poly_left, f_bc2, vec_bc2_nodes, vec_bc2_vals);
+        FemLib::NeumannBC2FEM bc2(*msh, *_feObjects, *poly_left, f_bc2, vec_bc2_nodes, vec_bc2_vals);
         // mat
         _K = (K!=0) ? K : new NumLib::TXFunctionConstant(1.e-11);
     }
@@ -97,7 +109,7 @@ public:
             MeshLib::IElement *e = msh->getElemenet(i_e);
             FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
             const size_t &n_dof = fe->getNumberOfVariables();
-            localK = NumLib::LocalVector::Zero(n_dof, n_dof);
+            localK = NumLib::LocalMatrix::Zero(n_dof, n_dof);
             FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
             for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
                 q->getSamplingPoint(j, gp_x);

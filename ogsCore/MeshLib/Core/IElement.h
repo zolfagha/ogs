@@ -109,7 +109,7 @@ public:
     virtual void setGroupID(size_t id) = 0;
 
     /// get mapped coordinates
-    virtual IElementCoordinatesMapping* getMappedCoordinates() = 0;
+    virtual IElementCoordinatesMapping* getMappedCoordinates() const = 0;
     /// set mapped coordinates
     virtual void setMappedCoordinates(IElementCoordinatesMapping* mapping) = 0;
 
