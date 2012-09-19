@@ -50,6 +50,8 @@ protected:
         size_t mat_id = e.getGroupID();
         MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];
         MaterialLib::Fluid* fluid = Ogs6FemData::getInstance()->list_fluid[0];
+        double geo_area = 1.0;
+        pm->geo_area->eval(e_pos, geo_area);
         double mu = .0;
         fluid->dynamic_viscosity->eval(e_pos, mu);
         double rho_f = .0;
@@ -69,7 +71,7 @@ protected:
             LocalMatrix &Np = *fe->getBasisFunction();
             LocalMatrix &dNp = *fe->getGradBasisFunction();
             fe->getRealCoordinates(real_x);
-            double fac = fe->getDetJ() * q->getWeight(j);
+            double fac = geo_area * fe->getDetJ() * q->getWeight(j);
 
             double k;
             pm->permeability->eval(real_x, k);
