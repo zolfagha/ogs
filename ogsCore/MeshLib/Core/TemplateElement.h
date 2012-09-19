@@ -203,7 +203,7 @@ public:
         _coord_map = mapping;
     }
 
-    IElementCoordinatesMapping* getMappedCoordinates() 
+    IElementCoordinatesMapping* getMappedCoordinates() const
     {
         return _coord_map;
     };
