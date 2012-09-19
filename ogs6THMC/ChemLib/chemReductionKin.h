@@ -86,6 +86,11 @@ private:
 	LocalMatrix _mat_s_1, _mat_s_2, _matS_1_ast, _matS_2_ast, _matS_1_bar_ast, _matS_2_bar_ast; 
 
 	/**
+      * matrix for the calculation of right hand side rate transformation
+      */
+	LocalMatrix _matA1, _matA2; 
+
+	/**
       * transformation matrixes
       */
 	// LocalMatrix _c_mob_2_eta_mob, _c_mob_2_xi_mob; 

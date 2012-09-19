@@ -120,12 +120,23 @@ void chemReductionKin::update_reductionScheme(void)
 #endif
 
 	// now store the corresponding size
-	this->_n_eta_mob   = _mat_s_1.cols(); 
-	this->_n_eta_immob = _mat_s_2.cols();
-	this->_n_xi_mob    = _matS_1_ast.cols(); 
-	this->_n_xi_immob  = _matS_2_ast.cols();
+	this->_n_eta_mob   = _matS_1_ast.cols();
+	this->_n_eta_immob = _matS_2_ast.cols();
+	this->_n_xi_mob    = _mat_s_1.cols(); 
+	this->_n_xi_immob  = _mat_s_2.cols();
 	this->_n_eta       = _n_eta_mob + _n_eta_immob; 
 	this->_n_xi        = _n_xi_mob  + _n_xi_immob;
+
+	// now calculated A1 and A2
+	_matA1 = ( _mat_s_1.transpose() * _mat_s_1 ).fullPivHouseholderQr().solve(_mat_s_1.transpose()) * _matS_1 ; 
+	_matA2 = ( _mat_s_2.transpose() * _mat_s_2 ).fullPivHouseholderQr().solve(_mat_s_2.transpose()) * _matS_2 ; 
+
+#ifdef _DEBUG
+	std::cout << "A_1: "    << std::endl; 
+	std::cout << _matA1 << std::endl;
+	std::cout << "A_2: "    << std::endl; 
+	std::cout << _matA2 << std::endl;
+#endif
 }
 
 LocalMatrix chemReductionKin::orthcomp( LocalMatrix & inMat )
@@ -136,6 +147,12 @@ LocalMatrix chemReductionKin::orthcomp( LocalMatrix & inMat )
 	Eigen::FullPivLU<LocalMatrix> lu_decomp(inMat.transpose());
 
 	outMat = lu_decomp.kernel(); 
+
+	// notice that if the kernel has dimension zero, 
+	// then the returned matrix will be a column-vector filled with zeros
+	// therefore we do a saftety check
+	if ( outMat.cols() == 1 && outMat.col(0).norm() == 0.0 )
+		outMat = LocalMatrix::Zero(inMat.rows(), 0);
 
 	return outMat;
 }
