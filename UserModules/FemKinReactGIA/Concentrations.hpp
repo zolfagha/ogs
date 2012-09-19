@@ -54,32 +54,49 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	}
 
 	// tell me how many eta and how many xi we have
-	size_t n_eta, n_xi, n_eta_mob; 
+	size_t n_eta, n_xi, n_eta_mob, n_eta_immob; 
 	// get n_eta and n_xi
 	n_eta     = this->_ReductionKin->get_n_eta();
 	n_eta_mob = this->_ReductionKin->get_n_eta_mob(); 
+	n_eta_immob=n_eta - n_eta_mob; 
 	n_xi      = this->_ReductionKin->get_n_xi(); 
 	// based on the transformation class instance, add eta and xi to the discretized memory space
-	NumLib::LocalVector local_eta(n_eta), local_xi(n_xi);
-	local_eta *= .0; local_xi *= .0; 
-	this->_eta = new MyNodalFunctionVector(); 
-	this->_eta ->initialize( *dis, FemLib::PolynomialOrder::Linear, local_eta );
-    this->_xi  = new MyNodalFunctionVector(); 
-	this->_xi  ->initialize( *dis, FemLib::PolynomialOrder::Linear, local_xi  );
+	NumLib::LocalVector local_eta_mob(n_eta_mob), local_eta_immob(n_eta_immob), local_xi(n_xi);
+	local_eta_mob *= .0; local_eta_immob *= .0; local_xi *= .0; 
 
-	// eta goes to the linear problems
+	_eta_mob   = new MyNodalFunctionVector(); 
+	_eta_immob = new MyNodalFunctionVector(); 
+	_xi        = new MyNodalFunctionVector();  // xi contains both xi_mob and xi_immob
+	
+	_eta_mob   ->initialize( *dis, FemLib::PolynomialOrder::Linear, local_eta_mob );
+	_eta_immob ->initialize( *dis, FemLib::PolynomialOrder::Linear, local_eta_immob );
+    _xi        ->initialize( *dis, FemLib::PolynomialOrder::Linear, local_xi  );
 
-	// xi  goes to the nonlinear problems
-
+	// convert from concentrations to overwrite IC part
+	
+	// convert from concentrations to get BC part
+	
 	// first set up the linear problem for eta
 	// equations
     MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_feObjects);
-    MyResidualAssemblerType* r_assembler = new MyResidualAssemblerType(_feObjects);
-    MyJacobianAssemblerType* j_eqs = new MyJacobianAssemblerType(_feObjects);
+    MyLinearResidualAssemblerType* linear_r_assembler = new MyLinearResidualAssemblerType(_feObjects);
+    MyLinearJacobianAssemblerType* linear_j_eqs = new MyLinearJacobianAssemblerType(_feObjects);
 
 	// set up problem
+	_linear_problem = new MyLinearTransportProblemType(dis);
+    MyLinearEquationType* linear_eqs = _linear_problem->createEquation();
+    linear_eqs->initialize(linear_assembler, linear_r_assembler, linear_j_eqs);
+    _linear_problem->setTimeSteppingFunction(*tim);
 
 	// set up variables
+	// in this case, the variables includes: \
+	// concentrations of all eta_mobile 
+    for ( size_t i=0; i < n_eta_mob ; i++ )
+	{
+		std::stringstream str_tmp;
+		str_tmp << "eta_" << i ; 
+		_linear_problem->addVariable( str_tmp.str() );
+	}
 
 	// IC
 
@@ -96,26 +113,9 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 
 
 	/*
-    // equations
-    MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_compound, _feObjects);
-    MyResidualAssemblerType* r_assembler = new MyResidualAssemblerType(_compound, _feObjects);
-    MyJacobianAssemblerType* j_eqs = new MyJacobianAssemblerType(_compound, _feObjects);
-
-    // set up problem
-    _problem = new MyProblemType(dis);
-    MyEquationType* eqs = _problem->createEquation();
-    eqs->initialize(linear_assembler, r_assembler, j_eqs);
-    _problem->setTimeSteppingFunction(*tim);
 
     // set up variables
-	// in this case, the variables includes: \
-	// 1) concentrations of all components in the MCP data structure
-    // typename MyProblemType::MyVariable* concentrations = _problem->addVariable("concentrations");
-	for ( size_t i=0; i < n_Comp ; i++ )
-		_problem->addVariable( femData->map_ChemComp[i]->second->get_name() );
-	// 2) values of transformed eta
 
-	// 3) values of transformed xi
 
 
     // IC

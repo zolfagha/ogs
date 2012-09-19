@@ -148,9 +148,9 @@ LocalMatrix chemReductionKin::orthcomp( LocalMatrix & inMat )
 
 	outMat = lu_decomp.kernel(); 
 
-	// notice that if the kernel has dimension zero, 
+	// notice that if the kernel returns a matrix with dimension zero, 
 	// then the returned matrix will be a column-vector filled with zeros
-	// therefore we do a saftety check
+	// therefore we do a saftety check here, and set the number of columns to zero
 	if ( outMat.cols() == 1 && outMat.col(0).norm() == 0.0 )
 		outMat = LocalMatrix::Zero(inMat.rows(), 0);
 

@@ -41,9 +41,9 @@ public:
 
     // local assembler
 	// for the linear systems, use the same settings as Mass_Transport
-    typedef LinearTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler> MyLinearAssemblerType;          // TO BE CHANGED
-    typedef LinearTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyResidualAssemblerType;   // TO BE CHANGED
-    typedef LinearTransportJacobianLocalAssembler MyJacobianAssemblerType;                                                      // TO BE CHANGED
+    typedef LinearTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler> MyLinearAssemblerType;          
+    typedef LinearTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyLinearResidualAssemblerType; 
+    typedef LinearTransportJacobianLocalAssembler MyLinearJacobianAssemblerType;                                                      
 	// for the nonlinear part, use different settings
 	
 	// Equation definition
@@ -51,8 +51,8 @@ public:
             MyDiscreteSystem,
             MyLinearSolver,
             MyLinearAssemblerType,
-            MyResidualAssemblerType,
-            MyJacobianAssemblerType
+            MyLinearResidualAssemblerType,
+            MyLinearJacobianAssemblerType
             > MyLinearEquationType;
     // IVBV problem definition
     typedef SolutionLib::FemIVBVProblem<
@@ -99,7 +99,7 @@ public:
         BaseLib::releaseObject(_feObjects);
         BaseLib::releaseObject(_linear_problem, _linear_solution); 
         BaseLib::releaseObject(_ReductionKin);
-        BaseLib::releaseObject(_concentrations, _eta, _xi);
+        BaseLib::releaseObject(_concentrations, _eta_mob, _eta_immob, _xi);
     };
 
     /// initialize this process
@@ -173,7 +173,8 @@ private:
     // concentrations vector, including all components in the MCP data structure
     MyNodalFunctionVector* _concentrations; 
     // eta vector, including eta_mobile and eta_immobile
-    MyNodalFunctionVector* _eta;
+    MyNodalFunctionVector* _eta_mob; 
+	MyNodalFunctionVector* _eta_immob;
     // xi vector, including xi_mobile and xi_immobile parts
     MyNodalFunctionVector* _xi; 
 }; 
