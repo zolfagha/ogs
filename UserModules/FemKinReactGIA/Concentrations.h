@@ -18,6 +18,8 @@
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
 #include "NumLib/Function/DiscreteDataConvergenceCheck.h"
 #include "SolutionLib/Fem/FemIVBVProblem.h"
+#include "FemKinReduction.h"
+#include "SingleStepKinReduction.h"
 #include "SolutionLib/Fem/TemplateFemEquation.h"
 #include "SolutionLib/Fem/SingleStepFEM.h"
 #include "ProcessLib/AbstractTransientProcess.h"
@@ -38,6 +40,7 @@ public:
 
     // memory for discretized concentration vector
     typedef typename FemLib::FemNodalFunctionVector<MyDiscreteSystem>::type MyNodalFunctionVector;
+	typedef typename FemLib::FemNodalFunctionScalar<MyDiscreteSystem>::type MyNodalFunctionScalar;
 
     // local assembler
 	// for the linear systems, use the same settings as Mass_Transport
@@ -46,7 +49,7 @@ public:
     typedef LinearTransportJacobianLocalAssembler MyLinearJacobianAssemblerType;                                                      
 	// for the nonlinear part, use different settings
 	
-	// Equation definition
+	// linear Equation definition
     typedef SolutionLib::TemplateFemEquation<
             MyDiscreteSystem,
             MyLinearSolver,
@@ -54,12 +57,12 @@ public:
             MyLinearResidualAssemblerType,
             MyLinearJacobianAssemblerType
             > MyLinearEquationType;
-    // IVBV problem definition
+    // linear IVBV problem definition
     typedef SolutionLib::FemIVBVProblem<
             MyDiscreteSystem,
             MyLinearEquationType
             > MyLinearTransportProblemType;
-    // Solution algorithm definition
+    // linear equation solution algorithm definition
     typedef SolutionLib::SingleStepFEM<
             MyLinearTransportProblemType,
             MyLinearSolver
@@ -85,6 +88,10 @@ public:
 	//           MyLinearSolver
 	//           > MyLinearSolutionType;
 
+	// the general reduction problem part
+	typedef SolutionLib::FemKinReduction<MyDiscreteSystem> MyKinReductionProblemType; 
+	typedef SolutionLib::SingleStepKinReduction<MyKinReductionProblemType> MyKinReductionSolution; 
+
     FunctionConcentrations() 
         : Process("KIN_REACT_GIA", 1, 1),
           _feObjects(0)
@@ -97,9 +104,16 @@ public:
     virtual ~FunctionConcentrations()
     {
         BaseLib::releaseObject(_feObjects);
-        BaseLib::releaseObject(_linear_problem, _linear_solution); 
+        BaseLib::releaseObject(_linear_solution); 
         BaseLib::releaseObject(_ReductionKin);
-        BaseLib::releaseObject(_concentrations, _eta_mob, _eta_immob, _xi);
+        BaseLib::releaseObject(_xi);
+		size_t i; 
+		for (i=0; i<_concentrations.size(); i++)
+			BaseLib::releaseObject(_concentrations[i]);
+		for (i=0; i<_eta_mob.size(); i++)
+	        BaseLib::releaseObject(_eta_mob[i]); 
+	    for (i=0; i<_eta_immob.size(); i++)
+	        BaseLib::releaseObject(_eta_immob[i]);
     };
 
     /// initialize this process
@@ -158,10 +172,14 @@ private:
     DISALLOW_COPY_AND_ASSIGN(FunctionConcentrations);
 
 private:
-    // linear problem
-    MyLinearTransportProblemType* _linear_problem;
-    // linear solver
+    // linear problem and solution pointer
+	std::vector<MyLinearTransportProblemType*> _linear_problems;
     MyLinearSolutionType* _linear_solution;
+	// nonlinear problem and solution pointer
+	// TODO
+	// reduction problem and solution
+	MyKinReductionProblemType* _problem; 
+	MyKinReductionSolution*    _solution; 
 
     FemLib::LagrangianFeObjectContainer* _feObjects; 
     
@@ -171,10 +189,10 @@ private:
 	ogsChem::chemReductionKin* _ReductionKin; 
 
     // concentrations vector, including all components in the MCP data structure
-    MyNodalFunctionVector* _concentrations; 
+	std::vector<MyNodalFunctionScalar*> _concentrations; 
     // eta vector, including eta_mobile and eta_immobile
-    MyNodalFunctionVector* _eta_mob; 
-	MyNodalFunctionVector* _eta_immob;
+    std::vector<MyNodalFunctionScalar*> _eta_mob; 
+	std::vector<MyNodalFunctionScalar*> _eta_immob;
     // xi vector, including xi_mobile and xi_immobile parts
     MyNodalFunctionVector* _xi; 
 }; 

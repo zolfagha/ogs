@@ -224,7 +224,7 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
     {
         CRFProcess* rfpcs = ogs5fem.pcs_vector[i];
         std::string pcs_name = FiniteElement::convertProcessTypeToString(rfpcs->getProcessType());
-        std::string var_name = rfpcs->primary_variable_name;
+        std::vector<std::string>& var_name = rfpcs->primary_variable_name;
 
         BaseLib::Options* optPcs = optPcsData->addSubGroup(pcs_name);
 
@@ -239,16 +239,18 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         for (size_t i=0; i<ogs5fem.ic_vector.size(); i++)
         {
             CInitialCondition* rfic = ogs5fem.ic_vector[i];
-            std::string bc_pcs_name = FiniteElement::convertProcessTypeToString(rfic->getProcessType());
-            if (bc_pcs_name.compare(pcs_name)==0 && rfic->primaryvariable_name.find(var_name)!=std::string::npos) {
-                BaseLib::Options* optIc = optIcList->addSubGroup("IC");
-                optIc->addOption("Variable", rfic->primaryvariable_name);
-                optIc->addOption("GeometryType", rfic->geo_type_name);
-                optIc->addOption("GeometryName", rfic->geo_name);
-                optIc->addOption("DistributionType", FiniteElement::convertDisTypeToString(rfic->getProcessDistributionType()));
-                optIc->addOptionAsNum("DistributionValue", rfic->geo_node_value);
-            }
-        }
+            std::string ic_pcs_name = FiniteElement::convertProcessTypeToString(rfic->getProcessType());
+			if ( ic_pcs_name.compare(pcs_name)==0 )
+				for (size_t j=0; j<var_name.size(); j++)
+					if ( rfic->primaryvariable_name.find(var_name[j])!=std::string::npos) {
+						BaseLib::Options* optIc = optIcList->addSubGroup("IC");
+						optIc->addOption("Variable", rfic->primaryvariable_name);
+						optIc->addOption("GeometryType", rfic->geo_type_name);
+						optIc->addOption("GeometryName", rfic->geo_name);
+						optIc->addOption("DistributionType", FiniteElement::convertDisTypeToString(rfic->getProcessDistributionType()));
+						optIc->addOptionAsNum("DistributionValue", rfic->geo_node_value);
+					}  // end of if rfic
+        }  // end of for i
 
         // BC
         BaseLib::Options* optBcList = optPcs->addSubGroup("BCList");
@@ -256,15 +258,17 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         {
             CBoundaryCondition* rfbc = ogs5fem.bc_vector[i];
             std::string bc_pcs_name = FiniteElement::convertProcessTypeToString(rfbc->getProcessType());
-            if (bc_pcs_name.compare(pcs_name)==0 && rfbc->primaryvariable_name.find(var_name)!=std::string::npos) {
-                BaseLib::Options* optBc = optBcList->addSubGroup("BC");
-                optBc->addOption("Variable", rfbc->primaryvariable_name);
-                optBc->addOption("GeometryType", rfbc->geo_type_name);
-                optBc->addOption("GeometryName", rfbc->geo_name);
-                optBc->addOption("DistributionType", FiniteElement::convertDisTypeToString(rfbc->getProcessDistributionType()));
-                optBc->addOptionAsNum("DistributionValue", rfbc->geo_node_value);
-            }
-        }
+            if ( bc_pcs_name.compare(pcs_name)==0 )
+				for ( size_t j=0; j<var_name.size(); j++ )
+					if ( rfbc->primaryvariable_name.find(var_name[j])!=std::string::npos) {
+						BaseLib::Options* optBc = optBcList->addSubGroup("BC");
+						optBc->addOption("Variable", rfbc->primaryvariable_name);
+						optBc->addOption("GeometryType", rfbc->geo_type_name);
+						optBc->addOption("GeometryName", rfbc->geo_name);
+						optBc->addOption("DistributionType", FiniteElement::convertDisTypeToString(rfbc->getProcessDistributionType()));
+						optBc->addOptionAsNum("DistributionValue", rfbc->geo_node_value);
+					}  // end of if rfbc
+        }  // end of for i
 
         //ST
         BaseLib::Options* optStList = optPcs->addSubGroup("STList");
@@ -272,23 +276,25 @@ void convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         {
             CSourceTerm* rfst = ogs5fem.st_vector[i];
             std::string st_pcs_name = FiniteElement::convertProcessTypeToString(rfst->getProcessType());
-            if (st_pcs_name.compare(pcs_name)==0 && rfst->primaryvariable_name.find(var_name)!=std::string::npos) {
-                BaseLib::Options* optSt = optStList->addSubGroup("ST");
-                optSt->addOption("Variable", rfst->primaryvariable_name);
-                optSt->addOption("GeometryType", rfst->geo_type_name);
-                optSt->addOption("GeometryName", rfst->geo_name);
-                std::string ogs5distype = FiniteElement::convertDisTypeToString(rfst->getProcessDistributionType());
-                std::string ogs6distype = ogs5distype;
-                if (ogs5distype.find("_NEUMANN")!=std::string::npos) {
-                    optSt->addOption("STType", "NEUMANN");
-                    ogs6distype = BaseLib::replaceString("_NEUMANN", "", ogs6distype);
-                } else {
-                    optSt->addOption("STType", "SOURCESINK");
-                }
-                optSt->addOption("DistributionType", ogs6distype);
-                optSt->addOptionAsNum("DistributionValue", rfst->geo_node_value);
-            }
-        }
+            if (st_pcs_name.compare(pcs_name)==0 )
+				for (size_t j=0; j<var_name.size(); j++ )
+					if ( rfst->primaryvariable_name.find(var_name[j])!=std::string::npos) {
+						BaseLib::Options* optSt = optStList->addSubGroup("ST");
+						optSt->addOption("Variable", rfst->primaryvariable_name);
+						optSt->addOption("GeometryType", rfst->geo_type_name);
+						optSt->addOption("GeometryName", rfst->geo_name);
+						std::string ogs5distype = FiniteElement::convertDisTypeToString(rfst->getProcessDistributionType());
+						std::string ogs6distype = ogs5distype;
+						if (ogs5distype.find("_NEUMANN")!=std::string::npos) {
+							optSt->addOption("STType", "NEUMANN");
+							ogs6distype = BaseLib::replaceString("_NEUMANN", "", ogs6distype);
+						} else {
+							optSt->addOption("STType", "SOURCESINK");
+						}  // end of if-else
+						optSt->addOption("DistributionType", ogs6distype);
+						optSt->addOptionAsNum("DistributionValue", rfst->geo_node_value);
+					}  // end of if rfst
+		}  // end of for i
 
         // NUM
         BaseLib::Options* optNum = optPcs->addSubGroup("Numerics");

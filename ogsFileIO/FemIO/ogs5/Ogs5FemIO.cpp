@@ -46,23 +46,24 @@ bool Ogs5FemIO::read(const std::string &proj_path, Ogs5FemData &ogs5data)
         CRFProcess* pcs = ogs5data.pcs_vector[i];
         switch (pcs->getProcessType()) {
         case FiniteElement::GROUNDWATER_FLOW:
-            pcs->primary_variable_name = "HEAD";
+			pcs->primary_variable_name.push_back("HEAD");
             break;
         case FiniteElement::LIQUID_FLOW:
-            pcs->primary_variable_name = "PRESSURE1";
+            pcs->primary_variable_name.push_back("PRESSURE1");
             break;
         case FiniteElement::HEAT_TRANSPORT:
-            pcs->primary_variable_name = "TEMPERATURE1";
+            pcs->primary_variable_name.push_back("TEMPERATURE1");
             break;
         case FiniteElement::MASS_TRANSPORT:
-            pcs->primary_variable_name = ogs5data.cp_vector[mass_transport_count]->compname;
+			pcs->primary_variable_name.push_back(ogs5data.cp_vector[mass_transport_count]->compname);
             mass_transport_count++;
             break;
         case FiniteElement::DEFORMATION:
-            pcs->primary_variable_name = "DISPLACEMENT";
+            pcs->primary_variable_name.push_back("DISPLACEMENT");
             break;
 		case FiniteElement::KIN_REACT_GIA:
-			pcs->primary_variable_name = "CONCENTRATIONS"; 
+			for (size_t i=0; i<ogs5data.cp_vector.size() ; i++)
+				pcs->primary_variable_name.push_back( ogs5data.cp_vector[i]->compname); 
 			break; 
         }
     }

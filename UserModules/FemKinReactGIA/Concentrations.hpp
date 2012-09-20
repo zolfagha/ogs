@@ -23,6 +23,7 @@
 template <class T1, class T2>
 bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 {
+	size_t i;  // index
     Ogs6FemData* femData = Ogs6FemData::getInstance();
     size_t msh_id = option.getOption<size_t>("MeshID");
     size_t time_id = option.getOption<size_t>("TimeGroupID");
@@ -34,14 +35,6 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
     _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
 
-	// first get the number of components
-	size_t n_Comp = femData->map_ChemComp.size(); 
-	// add all concentrations to discretized memory space
-	NumLib::LocalVector local_conc(n_Comp);
-    local_conc *= .0;
-	_concentrations = new MyNodalFunctionVector(); 
-	_concentrations->initialize(*dis, FemLib::PolynomialOrder::Linear, local_conc);
-	
 	// get the transformation class instance here
 	this->_ReductionKin = femData->m_KinReductScheme; 
 	// make sure the reduction scheme is already initialized. 
@@ -53,6 +46,11 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 		exit(1);
 	}
 
+	// first get the number of components
+	size_t n_Comp = femData->map_ChemComp.size(); 
+	// add all concentrations to discretized memory space
+	
+
 	// tell me how many eta and how many xi we have
 	size_t n_eta, n_xi, n_eta_mob, n_eta_immob; 
 	// get n_eta and n_xi
@@ -61,86 +59,87 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	n_eta_immob=n_eta - n_eta_mob; 
 	n_xi      = this->_ReductionKin->get_n_xi(); 
 	// based on the transformation class instance, add eta and xi to the discretized memory space
-	NumLib::LocalVector local_eta_mob(n_eta_mob), local_eta_immob(n_eta_immob), local_xi(n_xi);
-	local_eta_mob *= .0; local_eta_immob *= .0; local_xi *= .0; 
+	NumLib::LocalVector local_xi(n_xi);
+	local_xi *= .0; 
 
-	_eta_mob   = new MyNodalFunctionVector(); 
-	_eta_immob = new MyNodalFunctionVector(); 
+	// initialize eta_mob, 
+	for (i=0; i<n_eta_mob ; i++)
+	{
+		MyNodalFunctionScalar* eta_i = new MyNodalFunctionScalar(); 
+		eta_i->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0 );
+	    _eta_mob.push_back(eta_i); 
+	}
+
+	// initialize eta_immob, 
+	for (i=0; i<n_eta_immob; i++)
+	{
+		MyNodalFunctionScalar* eta_i = new MyNodalFunctionScalar(); 
+	    eta_i->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0 );
+		_eta_immob.push_back(eta_i); 
+	}
+
+	// initialize xi
 	_xi        = new MyNodalFunctionVector();  // xi contains both xi_mob and xi_immob
-	
-	_eta_mob   ->initialize( *dis, FemLib::PolynomialOrder::Linear, local_eta_mob );
-	_eta_immob ->initialize( *dis, FemLib::PolynomialOrder::Linear, local_eta_immob );
-    _xi        ->initialize( *dis, FemLib::PolynomialOrder::Linear, local_xi  );
+	_xi        ->initialize( *dis, FemLib::PolynomialOrder::Linear, local_xi  );
 
-	// convert from concentrations to overwrite IC part
-	
-	// convert from concentrations to get BC part
-	
-	// first set up the linear problem for eta
-	// equations
+	// linear assemblers
     MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_feObjects);
     MyLinearResidualAssemblerType* linear_r_assembler = new MyLinearResidualAssemblerType(_feObjects);
     MyLinearJacobianAssemblerType* linear_j_eqs = new MyLinearJacobianAssemblerType(_feObjects);
 
-	// set up problem
-	_linear_problem = new MyLinearTransportProblemType(dis);
-    MyLinearEquationType* linear_eqs = _linear_problem->createEquation();
-    linear_eqs->initialize(linear_assembler, linear_r_assembler, linear_j_eqs);
-    _linear_problem->setTimeSteppingFunction(*tim);
-
-	// set up variables
-	// in this case, the variables includes: \
-	// concentrations of all eta_mobile 
-    for ( size_t i=0; i < n_eta_mob ; i++ )
+	// reduction problem
+	_problem = new MyKinReductionProblemType( dis, _ReductionKin ); 
+	_solution = new MyKinReductionSolution( dis, _problem ); 
+	// add variables
+	// for the KinReduction problem, variables are the concentrations of all chemical components
+	for ( i=0; i<n_Comp; i++ )
 	{
-		std::stringstream str_tmp;
-		str_tmp << "eta_" << i ; 
-		_linear_problem->addVariable( str_tmp.str() );
+		_problem->addVariable( femData->map_ChemComp[i]->second->get_name() );
 	}
 
-	// IC
+	// set IC for concentrations
+	NumLib::TXFunctionBuilder f_builder;
+	const BaseLib::Options* opICList = option.getSubGroup("ICList");
+    for (const BaseLib::Options* opIC = opICList->getFirstSubGroup("IC"); opIC!=0; opIC = opICList->getNextSubGroup())
+    {
+        std::string var_name = opIC->getOption("Variable");
+        std::string geo_type = opIC->getOption("GeometryType");
+        std::string geo_name = opIC->getOption("GeometryName");
+        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
+        std::string dis_name = opIC->getOption("DistributionType");
+        double dis_v = opIC->getOption<double>("DistributionValue");
+        NumLib::ITXFunction* f_ic =  f_builder.create(dis_name, dis_v);
+        // set IC
+		size_t comp_idx = femData->map_ChemComp.find( var_name )->second->getIndex();  
 
-	// BC
+		double v;
+		f_ic->eval( NULL, v); 
+		MyNodalFunctionScalar* one_comp_comp = new MyNodalFunctionScalar(); 
+	    one_comp_comp->initialize(*dis, FemLib::PolynomialOrder::Linear, v);
+		_problem->getVariable(comp_idx)->setIC( one_comp_comp ); 
+		_concentrations.push_back(one_comp_comp); 
+    }
 
-	// ST
-
-	// set up solution
-
-	// set initial output
-
-	// initial output parameter
-
-
-
-	/*
-
-    // set up variables
-
-
-
-    // IC
-    NumLib::TXFunctionBuilder f_builder;
-    typename MyProblemType::MyVariable::MyNodalFunctionScalar* c0 = new typename MyProblemType::MyVariable::MyNodalFunctionScalar();
-    c0->initialize(*dis, FemLib::PolynomialOrder::Linear, 0);
-    concentrations->setIC(c0);
-
-    // BC
-    const BaseLib::Options* opBCList = option.getSubGroup("BCList");
+	// set BC for concentrations
+	const BaseLib::Options* opBCList = option.getSubGroup("BCList");
     for (const BaseLib::Options* opBC = opBCList->getFirstSubGroup("BC"); opBC!=0; opBC = opBCList->getNextSubGroup())
     {
+		std::string var_name = opBC->getOption("Variable");
         std::string geo_type = opBC->getOption("GeometryType");
         std::string geo_name = opBC->getOption("GeometryName");
         const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
         std::string dis_name = opBC->getOption("DistributionType");
         double dis_v = opBC->getOption<double>("DistributionValue");
         NumLib::ITXFunction* f_bc =  f_builder.create(dis_name, dis_v);
-        concentrations->addDirichletBC(new SolutionLib::FemDirichletBC(msh, geo_obj, f_bc));
+		size_t comp_idx = femData->map_ChemComp.find( var_name )->second->getIndex();
+		_problem->getVariable(comp_idx)->addDirichletBC(new SolutionLib::FemDirichletBC(msh, geo_obj, f_bc));
     }
 
-    // ST
-    const BaseLib::Options* opSTList = option.getSubGroup("STList");
+	// set ST for concentrations
+	const BaseLib::Options* opSTList = option.getSubGroup("STList");
     for (const BaseLib::Options* opST = opSTList->getFirstSubGroup("ST"); opST!=0; opST = opSTList->getNextSubGroup())
     {
+		std::string var_name = opST->getOption("Variable");
         std::string geo_type = opST->getOption("GeometryType");
         std::string geo_name = opST->getOption("GeometryName");
         const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
@@ -158,11 +157,68 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
             } else if (st_type.compare("SOURCESINK")==0) {
                 femSt = new SolutionLib::FemSourceTerm(msh, geo_obj, f_st);
             }
-            concentrations->addNeumannBC(femSt);
+            size_t comp_idx = femData->map_ChemComp.find( var_name )->second->getIndex();
+			_problem->getVariable(comp_idx)->addNeumannBC(femSt);
         } else {
             WARN("Distribution type %s is specified but not found. Ignore this ST.", dis_name.c_str());
         }
     }
+
+
+
+	// for the linear transport problem, variables are eta_mobile
+	for ( i=0; i < n_eta_mob ; i++ )
+	{
+		// set up problem
+		MyLinearTransportProblemType* linear_problem = new MyLinearTransportProblemType(dis);
+		MyLinearEquationType* linear_eqs = linear_problem->createEquation();
+		linear_eqs->initialize(linear_assembler, linear_r_assembler, linear_j_eqs);
+		linear_problem->setTimeSteppingFunction(*tim);
+		
+		// set up variables
+		// in this case, the variables includes: eta_0, eta_1, eta_2......, 
+		// which are the concentrations of all eta_mobile 
+		std::stringstream str_tmp;
+		str_tmp << "eta_" << i ; 
+		linear_problem->addVariable( str_tmp.str() );
+		// IC
+		// BC
+		// ST
+		// set up solution
+		// set initial output
+		// initial output parameter
+		_linear_problems.push_back(linear_problem); 
+		
+	}
+	// for nonlinear coupled transport problem, variables are xi
+	// TODO
+
+
+	
+
+	
+
+	// calculate IC values from concentrations
+	
+	// calculate BC values from concentrations
+	
+
+
+
+	
+
+
+	
+
+
+
+	/*
+
+    // set up variables
+
+
+
+    // ST
 
     // set up solution
     _solution = new MySolutionType(dis, _problem);
@@ -186,10 +242,13 @@ template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::initializeTimeStep(const NumLib::TimeStep &/*time*/)
 {
     const NumLib::ITXFunction *vel = this->getInput<NumLib::ITXFunction>(Velocity);
+
 	// set velocity for linear problem
-	this->_linear_problem->getEquation()->getLinearAssembler()->setVelocity(vel);
-    this->_linear_problem->getEquation()->getResidualAssembler()->setVelocity(vel);
-    this->_linear_problem->getEquation()->getJacobianAssembler()->setVelocity(vel);
+	for (size_t i=0; i < _linear_problems.size(); i++ ) {
+		_linear_problems[i]->getEquation()->getLinearAssembler()->setVelocity(vel);
+		_linear_problems[i]->getEquation()->getResidualAssembler()->setVelocity(vel);
+		_linear_problems[i]->getEquation()->getJacobianAssembler()->setVelocity(vel);
+	}
 	// set velocity for nonlinear problem as well
 	// TODO
 }
