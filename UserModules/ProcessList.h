@@ -26,6 +26,7 @@
 //#include "FemDeformationTotalForm/ElementStressStrain.h"
 //#include "FemDeformationTotalForm/NodalStressStrain.h"
 //#include "FemPoroelastic/DisplacementPressure.h"
+#include "Xfem/Displacement.h"
 
 //#include "ProcessBuilder.h"
 
