@@ -137,6 +137,22 @@ void chemReductionKin::update_reductionScheme(void)
 	std::cout << "A_2: "    << std::endl; 
 	std::cout << _matA2 << std::endl;
 #endif
+
+	_mat_c_mob_2_eta_mob     = ( _matS_1_ast.transpose() * _matS_1_ast ).fullPivHouseholderQr().solve(_matS_1_ast.transpose()); 
+    _mat_c_immob_2_eta_immob = ( _matS_2_ast.transpose() * _matS_2_ast ).fullPivHouseholderQr().solve(_matS_2_ast.transpose()); 
+	_mat_c_mob_2_xi_mob      = ( _mat_s_1.transpose() * _mat_s_1 ).fullPivHouseholderQr().solve(_mat_s_1.transpose());
+	_mat_c_immob_2_xi_immob  = ( _mat_s_2.transpose() * _mat_s_2 ).fullPivHouseholderQr().solve(_mat_s_2.transpose()); 
+
+#ifdef _DEBUG
+	std::cout << "_mat_c_mob_2_eta_mob: "    << std::endl; 
+	std::cout << _mat_c_mob_2_eta_mob << std::endl;
+	std::cout << "_mat_c_immob_2_eta_immob: "    << std::endl; 
+	std::cout << _mat_c_immob_2_eta_immob << std::endl;
+	std::cout << "_mat_c_mob_2_xi_mob: "    << std::endl; 
+	std::cout << _mat_c_mob_2_xi_mob << std::endl;
+	std::cout << "_mat_c_immob_2_xi_immob: "    << std::endl; 
+	std::cout << _mat_c_immob_2_xi_immob << std::endl;
+#endif
 }
 
 LocalMatrix chemReductionKin::orthcomp( LocalMatrix & inMat )
@@ -183,5 +199,32 @@ void chemReductionKin::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 		}
 	}
 }
+
+
+void chemReductionKin::Conc2EtaXi(ogsChem::LocalVector &local_conc, 
+	                              ogsChem::LocalVector &local_eta_mob, 
+								  ogsChem::LocalVector &local_eta_immob, 
+								  ogsChem::LocalVector &local_xi)
+{
+	// declare local temp variable
+	ogsChem::LocalVector local_xi_mob, local_xi_immob, local_c_mob, local_c_immob; 
+
+	// divide c1 and c2
+	local_c_mob   = local_conc.topRows(    this->_I_mob );
+	local_c_immob = local_conc.bottomRows( this->_I_sorp + this->_I_min ); 
+
+	// convert eta_mob and xi_mob
+	local_eta_mob   = _mat_c_mob_2_eta_mob * local_c_mob; 
+	local_xi_mob    = _mat_c_mob_2_xi_mob  * local_c_mob; 
+
+	// convert eta_immob and xi_immob
+	local_eta_immob = _mat_c_immob_2_eta_immob * local_c_immob;  
+    local_xi_immob  = _mat_c_immob_2_xi_immob  * local_c_immob; 
+
+	// combine xi vector
+	local_xi.topRows( this->_n_xi_mob )      = local_xi_mob; 
+	local_xi.bottomRows( this->_n_xi_immob ) = local_xi_immob; 
+}
+
 
 }  // end of namespace

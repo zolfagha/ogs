@@ -25,7 +25,7 @@
 #include "ProcessLib/AbstractTransientProcess.h"
 #include "LinearTransportTimeODELocalAssember.h"
 #include "LinearTransportJacobianLocalAssembler.h"
-
+#include "DiscreteLib/Core/LocalDataType.h"
 
 template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER>
 class FunctionConcentrations
@@ -37,6 +37,10 @@ public:
 
     typedef T_DISCRETE_SYSTEM MyDiscreteSystem;
     typedef T_LINEAR_SOLVER MyLinearSolver;
+
+	// local matrix and vector
+	typedef DiscreteLib::LocalMatrix LocalMatrix;
+	typedef DiscreteLib::LocalVector LocalVector;
 
     // memory for discretized concentration vector
     typedef typename FemLib::FemNodalFunctionVector<MyDiscreteSystem>::type MyNodalFunctionVector;
@@ -172,6 +176,8 @@ private:
     DISALLOW_COPY_AND_ASSIGN(FunctionConcentrations);
 
 private:
+	virtual void convert_conc_to_eta_xi(void); 
+
     // linear problem and solution pointer
 	std::vector<MyLinearTransportProblemType*> _linear_problems;
     MyLinearSolutionType* _linear_solution;

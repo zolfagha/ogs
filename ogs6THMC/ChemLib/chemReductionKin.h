@@ -37,7 +37,10 @@ public:
     /**
       * convert concentration vector to eta and xi vector
       */
-	void Conc2EtaXi();
+	void Conc2EtaXi(ogsChem::LocalVector &local_conc, 
+	                ogsChem::LocalVector &local_eta_mob, 
+	     			ogsChem::LocalVector &local_eta_immob, 
+		    		ogsChem::LocalVector &local_xi);
 
 	/**
       * convert eta and xi vector to concentration vector
@@ -49,6 +52,11 @@ public:
       */
 	bool IsInitialized(void) {return isInitialized;}; 
 
+	/**
+      * get the number of components
+      */
+	size_t get_n_Comp(void) {return _I; }; 
+	
 	/**
       * get the length of eta
       */
@@ -89,6 +97,14 @@ private:
       * matrix for the calculation of right hand side rate transformation
       */
 	LocalMatrix _matA1, _matA2; 
+
+	/**
+      * transformation matrix for the calculation between eta, xi and concentrations
+      */
+	LocalMatrix _mat_c_mob_2_eta_mob,
+		        _mat_c_immob_2_eta_immob,   
+	            _mat_c_mob_2_xi_mob, 
+				_mat_c_immob_2_xi_immob;
 
 	/**
       * transformation matrixes

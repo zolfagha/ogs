@@ -12,6 +12,7 @@
 
 #include "logog.hpp"
 
+#include "DiscreteLib/Core/LocalDataType.h"
 #include "DiscreteLib/Utils/DiscreteSystemContainerPerMesh.h"
 #include "FemLib/Function/FemNodalFunction.h"
 #include "NumLib/Function/TXFunctionBuilder.h"
@@ -50,6 +51,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	size_t n_Comp = femData->map_ChemComp.size(); 
 	// add all concentrations to discretized memory space
 	
+
 
 	// tell me how many eta and how many xi we have
 	size_t n_eta, n_xi, n_eta_mob, n_eta_immob; 
@@ -97,6 +99,26 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 		_problem->addVariable( femData->map_ChemComp[i]->second->get_name() );
 	}
 
+	// for the linear transport problem, variables are eta_mobile
+	for ( i=0; i < n_eta_mob ; i++ )
+	{
+		// set up problem
+		MyLinearTransportProblemType* linear_problem = new MyLinearTransportProblemType(dis);
+		MyLinearEquationType* linear_eqs = linear_problem->createEquation();
+		linear_eqs->initialize(linear_assembler, linear_r_assembler, linear_j_eqs);
+		linear_problem->setTimeSteppingFunction(*tim);
+		
+		// set up variables
+		// in this case, the variables includes: eta_0, eta_1, eta_2......, 
+		// which are the concentrations of all eta_mobile 
+		std::stringstream str_tmp;
+		str_tmp << "eta_" << i ; 
+		linear_problem->addVariable( str_tmp.str() );
+		_linear_problems.push_back(linear_problem); 
+	}
+	// for nonlinear coupled transport problem, variables are xi
+	// TODO
+
 	// set IC for concentrations
 	NumLib::TXFunctionBuilder f_builder;
 	const BaseLib::Options* opICList = option.getSubGroup("ICList");
@@ -120,6 +142,16 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 		_concentrations.push_back(one_comp_comp); 
     }
 
+	// here is a potential bug. 
+	// all the components must be in the list
+	if ( _concentrations.size() != n_Comp )
+	{
+		ERR("IC are not set for all components!");	
+	}
+
+	// convert IC _concentrations to eta and xi
+	convert_conc_to_eta_xi();
+	
 	// set BC for concentrations
 	const BaseLib::Options* opBCList = option.getSubGroup("BCList");
     for (const BaseLib::Options* opBC = opBCList->getFirstSubGroup("BC"); opBC!=0; opBC = opBCList->getNextSubGroup())
@@ -181,14 +213,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 		std::stringstream str_tmp;
 		str_tmp << "eta_" << i ; 
 		linear_problem->addVariable( str_tmp.str() );
-		// IC
-		// BC
-		// ST
-		// set up solution
-		// set initial output
-		// initial output parameter
 		_linear_problems.push_back(linear_problem); 
-		
 	}
 	// for nonlinear coupled transport problem, variables are xi
 	// TODO
@@ -270,3 +295,57 @@ void FunctionConcentrations<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 	// OutputVariableInfo var(this->getOutputParameterName(Concentrations), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     // femData->outController.setOutput(var.name, var); 
 };
+
+template <class T1, class T2>
+void FunctionConcentrations<T1, T2>::convert_conc_to_eta_xi(void)
+{
+	size_t node_idx, i; 
+	size_t n_comp, n_eta_mob, n_eta_immob, n_xi; 
+
+	n_comp      = this->_ReductionKin->get_n_Comp();
+	n_eta_mob   = this->_ReductionKin->get_n_eta_mob(); 
+	n_eta_immob = this->_ReductionKin->get_n_eta() - this->_ReductionKin->get_n_eta_mob() ;
+	n_xi        = this->_ReductionKin->get_n_xi(); 
+	// only when the reduction scheme is fully initialized
+	if ( this->_ReductionKin->IsInitialized() )
+	{
+		// local vectors
+		LocalVector loc_eta_mob;
+		LocalVector loc_eta_immob;
+		LocalVector loc_xi;
+		LocalVector loc_conc; 
+		// allocate the memory for local vectors
+		loc_eta_mob     = LocalVector::Zero( this->_ReductionKin->get_n_eta_mob() ); 
+		loc_eta_immob   = LocalVector::Zero( this->_ReductionKin->get_n_eta() - this->_ReductionKin->get_n_eta_mob() ); 
+		loc_xi          = LocalVector::Zero( this->_ReductionKin->get_n_xi() ); 
+		loc_conc        = LocalVector::Zero( this->_ReductionKin->get_n_Comp() );
+
+		// for each nodes, 
+		for (node_idx=_concentrations[0]->getDiscreteData()->getRangeBegin(); 
+			 node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd(); 
+			 node_idx++ )
+		{
+			for (i=0; i < n_comp; i++)
+			{
+				// gether all the concentrations 
+				loc_conc[i] = _concentrations[i]->getValue(node_idx); 
+			}  // end of for i
+			
+			// pass them to the transform function in the reductionKin class
+			// and thet the loc_eta_mob, local_eta_immob and local_xi
+			this->_ReductionKin->Conc2EtaXi( loc_conc, loc_eta_mob, loc_eta_immob, loc_xi );
+			
+			// put the local eta and xi into the global vector
+			// fill in eta_mob
+			for (i=0; i < n_eta_mob; i++)
+				this->_eta_mob[i]->setValue(node_idx, loc_eta_mob[i]); 
+			// fill in eta_immob
+			for (i=0; i < n_eta_immob; i++)
+				this->_eta_immob[i]->setValue(node_idx, loc_eta_immob[i]); 
+			// fill in xi
+			// this->_xi->setNodalValues( &loc_xi, node_idx*n_xi, n_xi ); 
+			this->_xi->setValue(node_idx, loc_xi); 
+		}  // end of for node_idx
+	
+	}  // end of if _ReductionKin
+}
