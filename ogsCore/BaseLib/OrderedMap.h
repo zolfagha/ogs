@@ -50,7 +50,12 @@ public:
         _vec.clear();
     }
 
-    iterator operator[] (size_t idx)
+	iterator find(const T_KEY & key) 
+	{
+        return _map.find(key);
+    }
+		
+	iterator operator[] (size_t idx)
     {
         return _map.find(_vec[idx]);
     }

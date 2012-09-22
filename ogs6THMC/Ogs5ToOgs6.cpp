@@ -21,6 +21,8 @@
 #include "SolutionLib/Fem/FemDirichletBC.h"
 #include "SolutionLib/Fem/FemNeumannBC.h"
 #include "GeoProcessBuilder.h"
+#include "ChemLib\chemReactionKin.h"
+#include "ChemLib\chemReductionKin.h"
 
 using namespace ogs5;
 
@@ -233,7 +235,7 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
     {
         CRFProcess* rfpcs = ogs5fem.pcs_vector[i];
         std::string pcs_name = FiniteElement::convertProcessTypeToString(rfpcs->getProcessType());
-        std::string var_name = rfpcs->primary_variable_name;
+        std::vector<std::string>& var_name = rfpcs->primary_variable_name;
 
         BaseLib::Options* optPcs = optPcsData->addSubGroup(pcs_name);
 
@@ -248,16 +250,18 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         for (size_t i=0; i<ogs5fem.ic_vector.size(); i++)
         {
             CInitialCondition* rfic = ogs5fem.ic_vector[i];
-            std::string bc_pcs_name = FiniteElement::convertProcessTypeToString(rfic->getProcessType());
-            if (bc_pcs_name.compare(pcs_name)==0 && rfic->primaryvariable_name.find(var_name)!=std::string::npos) {
-                BaseLib::Options* optIc = optIcList->addSubGroup("IC");
-                optIc->addOption("Variable", rfic->primaryvariable_name);
-                optIc->addOption("GeometryType", rfic->geo_type_name);
-                optIc->addOption("GeometryName", rfic->geo_name);
-                optIc->addOption("DistributionType", FiniteElement::convertDisTypeToString(rfic->getProcessDistributionType()));
-                optIc->addOptionAsNum("DistributionValue", rfic->geo_node_value);
-            }
-        }
+            std::string ic_pcs_name = FiniteElement::convertProcessTypeToString(rfic->getProcessType());
+			if ( ic_pcs_name.compare(pcs_name)==0 )
+				for (size_t j=0; j<var_name.size(); j++)
+					if ( rfic->primaryvariable_name.find(var_name[j])!=std::string::npos) {
+						BaseLib::Options* optIc = optIcList->addSubGroup("IC");
+						optIc->addOption("Variable", rfic->primaryvariable_name);
+						optIc->addOption("GeometryType", rfic->geo_type_name);
+						optIc->addOption("GeometryName", rfic->geo_name);
+						optIc->addOption("DistributionType", FiniteElement::convertDisTypeToString(rfic->getProcessDistributionType()));
+						optIc->addOptionAsNum("DistributionValue", rfic->geo_node_value);
+					}  // end of if rfic
+        }  // end of for i
 
         // BC
         BaseLib::Options* optBcList = optPcs->addSubGroup("BCList");
@@ -265,15 +269,17 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         {
             CBoundaryCondition* rfbc = ogs5fem.bc_vector[i];
             std::string bc_pcs_name = FiniteElement::convertProcessTypeToString(rfbc->getProcessType());
-            if (bc_pcs_name.compare(pcs_name)==0 && rfbc->primaryvariable_name.find(var_name)!=std::string::npos) {
-                BaseLib::Options* optBc = optBcList->addSubGroup("BC");
-                optBc->addOption("Variable", rfbc->primaryvariable_name);
-                optBc->addOption("GeometryType", rfbc->geo_type_name);
-                optBc->addOption("GeometryName", rfbc->geo_name);
-                optBc->addOption("DistributionType", FiniteElement::convertDisTypeToString(rfbc->getProcessDistributionType()));
-                optBc->addOptionAsNum("DistributionValue", rfbc->geo_node_value);
-            }
-        }
+            if ( bc_pcs_name.compare(pcs_name)==0 )
+				for ( size_t j=0; j<var_name.size(); j++ )
+					if ( rfbc->primaryvariable_name.find(var_name[j])!=std::string::npos) {
+						BaseLib::Options* optBc = optBcList->addSubGroup("BC");
+						optBc->addOption("Variable", rfbc->primaryvariable_name);
+						optBc->addOption("GeometryType", rfbc->geo_type_name);
+						optBc->addOption("GeometryName", rfbc->geo_name);
+						optBc->addOption("DistributionType", FiniteElement::convertDisTypeToString(rfbc->getProcessDistributionType()));
+						optBc->addOptionAsNum("DistributionValue", rfbc->geo_node_value);
+					}  // end of if rfbc
+        }  // end of for i
 
         //ST
         BaseLib::Options* optStList = optPcs->addSubGroup("STList");
@@ -281,23 +287,25 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         {
             CSourceTerm* rfst = ogs5fem.st_vector[i];
             std::string st_pcs_name = FiniteElement::convertProcessTypeToString(rfst->getProcessType());
-            if (st_pcs_name.compare(pcs_name)==0 && rfst->primaryvariable_name.find(var_name)!=std::string::npos) {
-                BaseLib::Options* optSt = optStList->addSubGroup("ST");
-                optSt->addOption("Variable", rfst->primaryvariable_name);
-                optSt->addOption("GeometryType", rfst->geo_type_name);
-                optSt->addOption("GeometryName", rfst->geo_name);
-                std::string ogs5distype = FiniteElement::convertDisTypeToString(rfst->getProcessDistributionType());
-                std::string ogs6distype = ogs5distype;
-                if (ogs5distype.find("_NEUMANN")!=std::string::npos) {
-                    optSt->addOption("STType", "NEUMANN");
-                    ogs6distype = BaseLib::replaceString("_NEUMANN", "", ogs6distype);
-                } else {
-                    optSt->addOption("STType", "SOURCESINK");
-                }
-                optSt->addOption("DistributionType", ogs6distype);
-                optSt->addOptionAsNum("DistributionValue", rfst->geo_node_value);
-            }
-        }
+            if (st_pcs_name.compare(pcs_name)==0 )
+				for (size_t j=0; j<var_name.size(); j++ )
+					if ( rfst->primaryvariable_name.find(var_name[j])!=std::string::npos) {
+						BaseLib::Options* optSt = optStList->addSubGroup("ST");
+						optSt->addOption("Variable", rfst->primaryvariable_name);
+						optSt->addOption("GeometryType", rfst->geo_type_name);
+						optSt->addOption("GeometryName", rfst->geo_name);
+						std::string ogs5distype = FiniteElement::convertDisTypeToString(rfst->getProcessDistributionType());
+						std::string ogs6distype = ogs5distype;
+						if (ogs5distype.find("_NEUMANN")!=std::string::npos) {
+							optSt->addOption("STType", "NEUMANN");
+							ogs6distype = BaseLib::replaceString("_NEUMANN", "", ogs6distype);
+						} else {
+							optSt->addOption("STType", "SOURCESINK");
+						}  // end of if-else
+						optSt->addOption("DistributionType", ogs6distype);
+						optSt->addOptionAsNum("DistributionValue", rfst->geo_node_value);
+					}  // end of if rfst
+		}  // end of for i
 
         // NUM
         BaseLib::Options* optNum = optPcs->addSubGroup("Numerics");
@@ -332,9 +340,54 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             optPcs->addOptionAsNum("CompoundID", masstransport_counter);
             masstransport_counter++;
         }
+		
+    }  // end of for ogs5fem.pcs_vector.size()
 
-    }
+	// HS: add kinetic reactions
+	size_t n_KinReactions, n_Compound; 
+	n_KinReactions = ogs5fem.KinReact_vector.size(); 
+	if ( n_KinReactions > 0 ) {  // only create the "optKRC" option when there are kinetic reactions defined. 
+		// HS: convert all compounds to ChemComp data structure
+		n_Compound = ogs6fem.list_compound.size(); 
+		for ( size_t i=0; i < n_Compound ; i++ )
+		{
+			ogsChem::ChemComp* mChemComp = NULL; 
+			// directly use the type of constructor to initialize the ChemComp data structure
+			mChemComp = new ogsChem::ChemComp(); 
+			// set index
+			mChemComp->setIndex(i); 
+			// set name
+			mChemComp->set_name(ogs6fem.list_compound[i]->name); 
+			// set mobility
+			if ( ogs6fem.list_compound[i]->is_mobile )
+				mChemComp->set_mobility( ogsChem::Comp_Mobility::MOBILE  ); 
+			else 
+				mChemComp->set_mobility( ogsChem::Comp_Mobility::MINERAL );
 
+			ogs6fem.map_ChemComp.insert(ogs6fem.list_compound[i]->name, mChemComp); 
+			mChemComp = NULL; 
+		}
+
+		// adding the kinetic reactions one after another
+		for ( size_t i=0; i < n_KinReactions ; i++ )
+		{
+			// add reactions one after another
+			ogs5::CKinReact* rfKinReact = ogs5fem.KinReact_vector[i];
+			// creating reaction instance 
+			ogsChem::chemReactionKin* mKinReaction; 
+			mKinReaction = new ogsChem::chemReactionKin(); 
+			// convert the ogs5 KRC data structure into ogs6 Kinetic reactions
+			mKinReaction->readReactionKRC( rfKinReact ); 
+			// adding the instance of one single kinetic reaction
+			ogs6fem.list_kin_reactions.push_back(mKinReaction); 
+		}  // end of for
+
+		// at last, initialize the reduction scheme 
+		ogsChem::chemReductionKin* mReductionScheme; 
+		mReductionScheme = new ogsChem::chemReductionKin(ogs6fem.map_ChemComp, ogs6fem.list_kin_reactions); 
+		ogs6fem.m_KinReductScheme = mReductionScheme; 
+		mReductionScheme = NULL;
+	}  // end of if ( n_KinReactions > 0 )
 
     // -------------------------------------------------------------------------
     // Coupling

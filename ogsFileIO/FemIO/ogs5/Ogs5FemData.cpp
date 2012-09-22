@@ -32,6 +32,9 @@ Ogs5FemData::~Ogs5FemData()
     BaseLib::releaseObjectsInStdVector(time_vector);
     BaseLib::releaseObjectsInStdVector(num_vector);
     //geo, msh objects are passed
+	BaseLib::releaseObjectsInStdVector(KinReact_vector);
+	BaseLib::releaseObjectsInStdVector(KinReactData_vector);
+	BaseLib::releaseObjectsInStdVector(KinBlob_vector);
 }
 
 }
