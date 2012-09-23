@@ -29,7 +29,8 @@ enum GEOTYPE
     POLYLINE,  //!< POLYLINE
     POLYGON,   //!< POLYGON  
     SURFACE,   //!< SURFACE
-    VOLUME    //!< VOLUME
+    VOLUME,    //!< VOLUME
+    GEODOMAIN
 };
 
 GEOTYPE convertGeoType (const std::string& geo_type_str);
