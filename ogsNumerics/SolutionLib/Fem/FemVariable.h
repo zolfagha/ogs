@@ -17,6 +17,7 @@
 
 #include "FemLib/Core/PolynomialOrder.h"
 #include "FemLib/Function/FemNodalFunction.h"
+#include "FemIC.h"
 #include "FemDirichletBC.h"
 #include "FemNeumannBC.h"
 
@@ -48,14 +49,15 @@ public:
      * @param order     polynomial order
      */
     FemVariable(size_t id, const std::string &name, FemLib::PolynomialOrder::type initial_order = FemLib::PolynomialOrder::Linear)
-    : _id(id), _name(name), _f_ic(NULL), _current_order(initial_order)
+    : _id(id), _name(name), /* _f_ic(NULL)*/ _ic(NULL), _current_order(initial_order)
     {
     }
 
     ///
     ~FemVariable()
     {
-        BaseLib::releaseObject(_f_ic);
+        //BaseLib::releaseObject(_f_ic);
+        BaseLib::releaseObject(_ic);
         BaseLib::releaseObjectsInStdVector(_map_bc1);
         BaseLib::releaseObjectsInStdVector(_map_bc2);
     }
@@ -65,9 +67,11 @@ public:
     const std::string& getName() const { return _name;}
 
     //----------------------------------------------------------------------
-    void setIC(MyNodalFunctionScalar* ic) { _f_ic = ic; };
-    MyNodalFunctionScalar* getIC() const { return _f_ic; };
+//    void setIC(MyNodalFunctionScalar* ic) { _f_ic = ic; };
+//    MyNodalFunctionScalar* getIC() const { return _f_ic; };
 
+    void setIC(FemIC* ic) { _ic = ic; };
+    FemIC* getIC() const { return _ic; };
 
     //----------------------------------------------------------------------
     void addDirichletBC(FemDirichletBC* bc)
@@ -98,7 +102,8 @@ public:
 private:
     size_t _id;
     std::string _name;
-    MyNodalFunctionScalar* _f_ic;
+    FemIC* _ic;
+//    MyNodalFunctionScalar* _f_ic;
     std::vector<FemDirichletBC*> _map_bc1;
     std::vector<IFemNeumannBC*> _map_bc2;
     FemLib::PolynomialOrder::type _current_order;
