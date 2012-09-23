@@ -18,11 +18,11 @@
 //------------------------------------------------------------------------------
 #include "FemGroundwaterFlow/Head.h"
 #include "FemGroundwaterFlow/HeadToElementVelocity.h"
-#include "FemMassTransport/Concentration.h"
-#include "FemKinReactGIA/Concentrations.h"
-#include "FemDeformationTotalForm/Displacement.h"
-#include "FemDeformationTotalForm/ElementStressStrain.h"
-#include "FemDeformationTotalForm/NodalStressStrain.h"
+//#include "FemMassTransport/Concentration.h"
+//#include "FemKinReactGIA/Concentrations.h"
+//#include "FemDeformationTotalForm/Displacement.h"
+//#include "FemDeformationTotalForm/ElementStressStrain.h"
+//#include "FemDeformationTotalForm/NodalStressStrain.h"
 
 
 //#include "ProcessBuilder.h"
