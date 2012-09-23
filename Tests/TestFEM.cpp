@@ -272,8 +272,10 @@ TEST(FEM, LIE_LINE_IN_2D)
         ASSERT_EQ(0.5, N(0,1));
         ASSERT_EQ(0., dN(0,0));
         ASSERT_EQ(0., dN(0,1));
-        ASSERT_EQ(1., dN(1,0));
-        ASSERT_EQ(-1., dN(1,1));
+        ASSERT_EQ(-1., dN(1,0));
+        ASSERT_EQ(1., dN(1,1));
+//        ASSERT_EQ(1., dN(1,0));
+//        ASSERT_EQ(-1., dN(1,1));
         ASSERT_EQ(.5, det_j);
     }
     //--------------------------------------------------------------------------
@@ -300,8 +302,10 @@ TEST(FEM, LIE_LINE_IN_2D)
         ASSERT_NEAR(0.5, N(0,1), epsilon);
         ASSERT_NEAR(-0.5, dN(0,0), epsilon);
         ASSERT_NEAR(0.5, dN(0,1), epsilon);
-        ASSERT_NEAR(0.5, dN(1,0), epsilon);
-        ASSERT_NEAR(-0.5, dN(1,1), epsilon);
+        ASSERT_NEAR(-0.5, dN(1,0), epsilon);
+        ASSERT_NEAR(0.5, dN(1,1), epsilon);
+//        ASSERT_NEAR(0.5, dN(1,0), epsilon);
+//        ASSERT_NEAR(-0.5, dN(1,1), epsilon);
         ASSERT_NEAR(.7071, det_j, epsilon);
     }
 

@@ -19,6 +19,7 @@
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/LinAlg/LinearEquation/LisLinearEquation.h"
 #include "GeoLib/Rectangle.h"
+#include "GeoLib/GeoDomain.h"
 
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "MeshLib/Core/IMesh.h"
@@ -220,9 +221,12 @@ public:
         // var
         typename GWFemProblem::MyVariable* _head = _problem->addVariable("head");
         //IC
-        typename GWFemProblem::MyVariable::MyNodalFunctionScalar* h0 = new typename GWFemProblem::MyVariable::MyNodalFunctionScalar();
-        h0->initialize(dis, PolynomialOrder::Linear, .0);
-        _head->setIC(h0);
+        SolutionLib::FemIC* var_ic = new SolutionLib::FemIC(dis.getMesh());
+        var_ic->add(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
+        _head->setIC(var_ic);
+//        typename GWFemProblem::MyVariable::MyNodalFunctionScalar* h0 = new typename GWFemProblem::MyVariable::MyNodalFunctionScalar();
+//        h0->initialize(dis, PolynomialOrder::Linear, .0);
+//        _head->setIC(h0);
         //BC
         _rec = new GeoLib::Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
         GeoLib::Polyline* poly_left = _rec->getLeft();

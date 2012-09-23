@@ -18,6 +18,7 @@
 #include "MathLib/Vector.h"
 #include "MathLib/LinAlg/LinearEquation/LisLinearEquation.h"
 #include "GeoLib/Line.h"
+#include "GeoLib/GeoDomain.h"
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "NumLib/TimeStepping/TimeSteppingController.h"
@@ -112,15 +113,17 @@ Geo::GWFemProblem* defineGWProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec,
     // var
     Geo::GWFemProblem::MyVariable* head = _problem->addVariable("head");
     // IC
-    MyNodalFunctionScalar* h0 = new MyNodalFunctionScalar();
-    h0->initialize(dis, PolynomialOrder::Linear, 0);
-    h0->setFeObjectContainer(feObjects);
-    head->setIC(h0);
+//    MyNodalFunctionScalar* h0 = new MyNodalFunctionScalar();
+//    h0->initialize(dis, PolynomialOrder::Linear, 0);
+//    h0->setFeObjectContainer(feObjects);
+    SolutionLib::FemIC* var_ic = new SolutionLib::FemIC(dis.getMesh());
+    var_ic->add(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
+    head->setIC(var_ic);
     //BC
     GeoLib::Polyline* poly_left = _rec.getLeft();
     GeoLib::Polyline* poly_right = _rec.getRight();
     head->addDirichletBC(new FemDirichletBC(dis.getMesh(), poly_right, new NumLib::TXFunctionConstant(.0)));
-    head->addNeumannBC(new FemNeumannBC(dis.getMesh(), h0->getFeObjectContainer(), poly_left, new NumLib::TXFunctionConstant(-1e-5)));
+    head->addNeumannBC(new FemNeumannBC(dis.getMesh(), feObjects, poly_left, new NumLib::TXFunctionConstant(-1e-5)));
 
     return _problem;
 }
@@ -131,13 +134,16 @@ Geo::GWFemProblem* defineGWProblem1D(DiscreteSystem &dis, GeoLib::Line &line, Ge
     // var
     Geo::GWFemProblem::MyVariable* head = _problem->addVariable("head");
     // IC
-    MyNodalFunctionScalar* h0 = new MyNodalFunctionScalar();
-    h0->initialize(dis, PolynomialOrder::Linear, 0);
-    h0->setFeObjectContainer(feObjects);
-    head->setIC(h0);
+//    MyNodalFunctionScalar* h0 = new MyNodalFunctionScalar();
+//    h0->initialize(dis, PolynomialOrder::Linear, 0);
+//    h0->setFeObjectContainer(feObjects);
+//    head->setIC(h0);
+    SolutionLib::FemIC* var_ic = new SolutionLib::FemIC(dis.getMesh());
+    var_ic->add(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
+    head->setIC(var_ic);
     //BC
     head->addDirichletBC(new FemDirichletBC(dis.getMesh(), line.getPoint2(), new NumLib::TXFunctionConstant(.0)));
-    head->addNeumannBC(new FemNeumannBC(dis.getMesh(), h0->getFeObjectContainer(), line.getPoint1(), new NumLib::TXFunctionConstant(-1e-5)));
+    head->addNeumannBC(new FemNeumannBC(dis.getMesh(), feObjects, line.getPoint1(), new NumLib::TXFunctionConstant(-1e-5)));
 
     return _problem;
 }
@@ -156,10 +162,13 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Rec
     // var
     Geo::MassFemProblem::MyVariable* c = _problem->addVariable("c");
     // IC
-    MyNodalFunctionScalar* c0 = new MyNodalFunctionScalar();
-    c0->initialize(dis, PolynomialOrder::Linear, 0);
-    c0->setFeObjectContainer(feObjects);
-    c->setIC(c0);
+//    MyNodalFunctionScalar* c0 = new MyNodalFunctionScalar();
+//    c0->initialize(dis, PolynomialOrder::Linear, 0);
+//    c0->setFeObjectContainer(feObjects);
+//    c->setIC(c0);
+    SolutionLib::FemIC* var_ic = new SolutionLib::FemIC(dis.getMesh());
+    var_ic->add(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
+    c->setIC(var_ic);
     //BC
     GeoLib::Polyline* poly_left = _rec.getLeft();
     c->addDirichletBC(new FemDirichletBC(dis.getMesh(), poly_left, new NumLib::TXFunctionConstant(1.0)));
@@ -182,11 +191,15 @@ Geo::FemLinearElasticProblem* defineLinearElasticProblem(DiscreteSystem &dis, Ge
     Geo::FemLinearElasticProblem::MyVariable* u_x = _problem->addVariable("u_x");
     Geo::FemLinearElasticProblem::MyVariable* u_y = _problem->addVariable("u_y");
     // IC
-    MyNodalFunctionScalar* u0 = new MyNodalFunctionScalar();
-    u0->initialize(dis, PolynomialOrder::Linear, 0);
-    u0->setFeObjectContainer(feObjects);
-    u_x->setIC(u0);
-    u_y->setIC(u0);
+//    MyNodalFunctionScalar* u0 = new MyNodalFunctionScalar();
+//    u0->initialize(dis, PolynomialOrder::Linear, 0);
+//    u0->setFeObjectContainer(feObjects);
+//    u_x->setIC(u0);
+//    u_y->setIC(u0);
+    SolutionLib::FemIC* var_ic = new SolutionLib::FemIC(dis.getMesh());
+    var_ic->add(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
+    u_x->setIC(var_ic);
+    u_y->setIC(var_ic);
     //BC
     GeoLib::Polyline* poly_bottom = _rec.getBottom();
     u_y->addDirichletBC(new FemDirichletBC(dis.getMesh(), poly_bottom, new NumLib::TXFunctionConstant(.0)));

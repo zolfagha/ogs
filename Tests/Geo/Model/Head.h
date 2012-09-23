@@ -82,7 +82,7 @@ public:
         typename SolutionForHead::LinearSolverType* linear_solver = _solHead->getLinearEquationSolver();
         linear_solver->setOption(option);
         _solHead->getNonlinearSolver()->setOption(option);
-        this->setOutput(Head, problem->getVariable(0)->getIC());
+        this->setOutput(Head, _solHead->getCurrentSolution(0));
     }
 
     int solveTimeStep(const TimeStep &time)
