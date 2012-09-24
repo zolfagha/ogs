@@ -222,7 +222,7 @@ public:
         typename GWFemProblem::MyVariable* _head = _problem->addVariable("head");
         //IC
         SolutionLib::FemIC* var_ic = new SolutionLib::FemIC(dis.getMesh());
-        var_ic->add(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
+        var_ic->addDistribution(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
         _head->setIC(var_ic);
 //        typename GWFemProblem::MyVariable::MyNodalFunctionScalar* h0 = new typename GWFemProblem::MyVariable::MyNodalFunctionScalar();
 //        h0->initialize(dis, PolynomialOrder::Linear, .0);
@@ -249,7 +249,7 @@ public:
         //vel = new FEMIntegrationPointFunctionVector2d(msh);
     }
 
-    typename GWFemProblem::MyVariable::MyNodalFunctionScalar* getCurrentHead()
+    FemLib::FemNodalFunctionScalar<DiscreteSystem>::type* getCurrentHead()
     {
         return _head;
     }
@@ -258,7 +258,7 @@ private:
     GWFemProblem* _problem;
     SolutionForHead* _solHead; 
     GeoLib::Rectangle *_rec;
-    typename GWFemProblem::MyVariable::MyNodalFunctionScalar *_head;
+    FemLib::FemNodalFunctionScalar<DiscreteSystem>::type *_head;
     LagrangianFeObjectContainer* _feObjects;
 
     DISALLOW_COPY_AND_ASSIGN(GWFemTestSystem);

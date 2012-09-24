@@ -117,7 +117,7 @@ Geo::GWFemProblem* defineGWProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec,
 //    h0->initialize(dis, PolynomialOrder::Linear, 0);
 //    h0->setFeObjectContainer(feObjects);
     SolutionLib::FemIC* var_ic = new SolutionLib::FemIC(dis.getMesh());
-    var_ic->add(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
+    var_ic->addDistribution(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
     head->setIC(var_ic);
     //BC
     GeoLib::Polyline* poly_left = _rec.getLeft();
@@ -139,7 +139,7 @@ Geo::GWFemProblem* defineGWProblem1D(DiscreteSystem &dis, GeoLib::Line &line, Ge
 //    h0->setFeObjectContainer(feObjects);
 //    head->setIC(h0);
     SolutionLib::FemIC* var_ic = new SolutionLib::FemIC(dis.getMesh());
-    var_ic->add(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
+    var_ic->addDistribution(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
     head->setIC(var_ic);
     //BC
     head->addDirichletBC(new FemDirichletBC(dis.getMesh(), line.getPoint2(), new NumLib::TXFunctionConstant(.0)));
@@ -167,7 +167,7 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Rec
 //    c0->setFeObjectContainer(feObjects);
 //    c->setIC(c0);
     SolutionLib::FemIC* var_ic = new SolutionLib::FemIC(dis.getMesh());
-    var_ic->add(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
+    var_ic->addDistribution(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
     c->setIC(var_ic);
     //BC
     GeoLib::Polyline* poly_left = _rec.getLeft();
@@ -197,7 +197,7 @@ Geo::FemLinearElasticProblem* defineLinearElasticProblem(DiscreteSystem &dis, Ge
 //    u_x->setIC(u0);
 //    u_y->setIC(u0);
     SolutionLib::FemIC* var_ic = new SolutionLib::FemIC(dis.getMesh());
-    var_ic->add(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
+    var_ic->addDistribution(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
     u_x->setIC(var_ic);
     u_y->setIC(var_ic);
     //BC

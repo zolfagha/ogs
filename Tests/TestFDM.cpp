@@ -131,7 +131,7 @@ MyFunctionConcentration::MassFemProblem* defineMassTransportProblem(DiscreteSyst
     MyFunctionConcentration::MassFemProblem::MyVariable* var = _problem->addVariable("concentration");
     //IC
     SolutionLib::FemIC* var_ic = new SolutionLib::FemIC(dis.getMesh());
-    var_ic->add(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
+    var_ic->addDistribution(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
     var->setIC(var_ic);
 //    MyFemNodalFunctionScalar* c0 = new MyFemNodalFunctionScalar();
 //    c0->initialize(dis, PolynomialOrder::Linear, 0);
