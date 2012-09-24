@@ -170,11 +170,11 @@ THMCSimulator::~THMCSimulator()
 bool THMCSimulator::checkInputFiles(const std::string& proj_path)
 {
     // meanwhile OGS5 files are default
-    if(!BaseLib::IsFileExisting(proj_path+".pcs"))
-    {
-        ERR("Cannot find a PCS file - %s.pcs", proj_path.c_str());
-        return false;
-    }
+//    if(!BaseLib::IsFileExisting(proj_path+".pcs"))
+//    {
+//        ERR("Cannot find a PCS file - %s.pcs", proj_path.c_str());
+//        return false;
+//    }
     if(!BaseLib::IsFileExisting(proj_path+ ".prop"))
     {
         ERR("Cannot find a property file - %s.prop", proj_path.c_str());
@@ -200,10 +200,14 @@ int THMCSimulator::execute()
     INFO("->Reading input files...");
     // ogs5fem
     ogs5::Ogs5FemData ogs5femdata;
-    ogs5::Ogs5FemIO::read(proj_path, ogs5femdata);
-    if (!Ogs5ToOgs6::convert(ogs5femdata, *ogs6fem, op)) {
-        ERR("***Error: Failure during conversion of ogs5 to ogs6.");
-        return 0;
+    if (BaseLib::IsFileExisting(proj_path+".pcs")) {
+        ogs5::Ogs5FemIO::read(proj_path, ogs5femdata);
+        if (!Ogs5ToOgs6::convert(ogs5femdata, *ogs6fem, op)) {
+            ERR("***Error: Failure during conversion of ogs5 to ogs6.");
+            return 0;
+        }
+    } else {
+        INFO("PCS file not found - %s.pcs", proj_path.c_str());
     }
 
     // coupling
@@ -260,7 +264,10 @@ int THMCSimulator::execute()
         for (size_t j=0; j<pcs->getNumberOfOutputParameters(); j++)
             INFO("* OUT %d: %s", j, pcs->getOutputParameterName(j).c_str());
         ogs6fem->list_pcs.insert(pcs_name, pcs);
-        const BaseLib::Options* opPCS = op.getSubGroup("ProcessData")->getSubGroup(pcs_name);
+        const BaseLib::Options* opPCS = NULL;
+        if (op.getSubGroup("ProcessData")!=NULL) {
+            opPCS = op.getSubGroup("ProcessData")->getSubGroup(pcs_name);
+        }
         bool isPcsReady = pcs->initialize(opPCS!=NULL ? *opPCS : op);
         if (!isPcsReady) {
             ERR("***Error while setting up processes");
@@ -275,9 +282,15 @@ int THMCSimulator::execute()
     //TODO the following calculation should be done in TimeSteppingController
     double t_start = std::numeric_limits<double>::max();
     double t_end = -1 * std::numeric_limits<double>::max();
-    for (size_t i=0; i<ogs6fem->list_tim.size(); i++) {
-        t_start = std::min(t_start, ogs6fem->list_tim[i]->getBeginning());
-        t_end = std::max(t_end, ogs6fem->list_tim[i]->getEnd());
+    if (ogs6fem->list_tim.size() > 0) {
+        for (size_t i=0; i<ogs6fem->list_tim.size(); i++) {
+            t_start = std::min(t_start, ogs6fem->list_tim[i]->getBeginning());
+            t_end = std::max(t_end, ogs6fem->list_tim[i]->getEnd());
+        }
+    } else {
+        INFO("Time step configuration not found.");
+        t_start = 0.0;
+        t_end = 1.0;
     }
 
     INFO("->Outputting the initial values...");

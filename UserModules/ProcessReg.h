@@ -11,4 +11,4 @@ OGS_ADD_PROCESS_SYS(PRESSURE_TO_ELEMENT_VELOCITY, FunctionPressureToElementVeloc
 //OGS_ADD_PROCESS_SYS(ELEMENT_STRESS_STRAIN, FunctionElementStressStrain, DiscreteLib::DiscreteSystem);
 //OGS_ADD_PROCESS_SYS(NODAL_STRESS_STRAIN, FunctionNodalStressStrain, DiscreteLib::DiscreteSystem);
 //OGS_ADD_PROCESS_SYS_SOLVER(DEFORMATION_FLOW, FunctionDisplacementPressure, DiscreteLib::DiscreteSystem, MathLib::LisLinearEquation);
-OGS_ADD_PROCESS_SYS_SOLVER(XFEM_CRACK, xfem::FunctionDisplacement, DiscreteLib::DiscreteSystem, MathLib::LisLinearEquation);
+OGS_ADD_PROCESS_SYS_SOLVER(XFEM_EXAMPLE_CRACK1, xfem::FunctionDisplacement, DiscreteLib::DiscreteSystem, MathLib::LisLinearEquation);

@@ -12,8 +12,11 @@
 
 #include <cmath>
 #include <limits>
+#include <vector>
+
 #include "logog.hpp"
 
+#include "MeshLib/Tools/MeshGenerator.h"
 #include "FemLib/Function/FemNodalFunction.h"
 #include "NumLib/Function/TXFunctionBuilder.h"
 #include "OutputIO/OutputBuilder.h"
@@ -24,146 +27,21 @@
 #include "Ogs6FemData.h"
 
 #include "../FemDeformationTotalForm/FemLinearElasticTools.h"
+#include "matlab_functions.h"
 
-void exactSol_Mode1(double xx, double yy, double k1, double kappa, double mu, double lambda, double uu, double vv)
+namespace xfem
 {
-    const static double pi = 4*atan(1.0);
-
-    double rr = sqrt(xx*xx+yy*yy); // Crack tip is at (0, 0).
-    double drrdx = xx/rr;
-    double drrdy = yy/rr;
-
-    double dthdx = -yy/(xx*xx+yy*yy);
-    double dthdy = 0;
-    if (xx == 0.)
-        dthdy = 0;
-    else
-        dthdy = 1/(xx+yy*yy/xx);
-
-    double th = 0;
-    if (xx == 0) {
-        if (yy == 0) {
-            INFO("Theta is undetermined for (x,y) = (0,0)!");
-            th = 0;
-        } else if (yy > 0) {
-            th = 0.5*pi;
-        } else {
-            th = 1.5*pi;
-        }
-    } else if (yy == 0) {
-        if (xx > 0)
-            th = 0;
-        else
-            th = pi;
-    } else if (xx > 0) {
-        th = atan(yy/xx);
-    } else if (xx < 0) {
-        th = pi+atan(yy/xx);
-    } else {
-        INFO("Internal error!");
-    }
-
-    if (th > pi) // This is important due to the multiplication with 1/2 below!!!
-        th = th-2*pi;
-
-    // Get exact solution.
-    uu = k1/(2*mu)*sqrt(rr/(2*pi))*cos(0.5*th)*(kappa-1+2*sin(0.5*th)*sin(0.5*th));
-    vv = k1/(2*mu)*sqrt(rr/(2*pi))*sin(0.5*th)*(kappa+1-2*cos(0.5*th)*cos(0.5*th));
-
-//    duudrr = 1/8*k1*2^(1/2)*cos(1/2*th)*(kappa+1-2*cos(1/2*th)^2)/mu/pi^(1/2)/rr^(1/2);
-//    duudth = -1/8*k1*2^(1/2)/pi^(1/2)*rr^(1/2)*sin(1/2*th)*(kappa+1-6*cos(1/2*th)^2)/mu;
-//    duudx = duudrr * drrdx + duudth * dthdx;
-//    duudy = duudrr * drrdy + duudth * dthdy;
-//
-//    dvvdrr = 1/8*k1/mu*2^(1/2)/pi^(1/2)/rr^(1/2)*sin(1/2*th)*(kappa+1-2*cos(1/2*th)^2);
-//    dvvdth = 1/8*k1*2^(1/2)/pi^(1/2)*rr^(1/2)*cos(1/2*th)*(kappa+5-6*cos(1/2*th)^2)/mu;
-//    dvvdx = dvvdrr * drrdx + dvvdth * dthdx;
-//    dvvdy = dvvdrr * drrdy + dvvdth * dthdy;
-//
-//    Sigma11 = k1/sqrt(2*pi*rr)*cos(0.5*th)*(1-sin(0.5*th)*sin(1.5*th));
-//    Sigma22 = k1/sqrt(2*pi*rr)*cos(0.5*th)*(1+sin(0.5*th)*sin(1.5*th));
-//    Sigma12 = k1/sqrt(2*pi*rr)*cos(0.5*th)*(sin(0.5*th)*cos(1.5*th));
-//
-//    % Sigma = [Sigma11 Sigma12; Sigma12 Sigma22];
-//    % Eps = -0.25*lambda/(mu*(lambda+mu))*trace(Sigma)*[1 0; 0 1] + 1/(2*mu)*Sigma;
-//    % Eps11 = Eps(1,1);
-//    % Eps12 = Eps(1,2);
-//    % Eps22 = Eps(2,2);
-//
-//    Eps11 = duudx;
-//    Eps12 = 0.5 * (duudy + dvvdx);
-//    Eps22 = dvvdy;
-}
-
-void searchMinMaxNodes(const MeshLib::IMesh &msh, std::vector<size_t> &found_nodes)
-{
-    double x_min=1e+99, x_max = -1e+99;
-    double y_min=1e+99, y_max = -1e+99;
-    double pt[3];
-    //search x min/max
-    for (size_t i=0; i<msh.getNumberOfNodes(); i++) {
-      const GeoLib::Point *pt = msh.getNodeCoordinatesRef(i);
-      if ((*pt)[0]<x_min) x_min = (*pt)[0];
-      if ((*pt)[0]>x_max) x_max = (*pt)[0];
-      if ((*pt)[1]<y_min) y_min = (*pt)[1];
-      if ((*pt)[1]>y_max) y_max = (*pt)[1];
-    }
-
-    //search nodes on min/max
-    for (size_t i=0; i<msh.getNumberOfNodes(); i++) {
-        const GeoLib::Point *pt = msh.getNodeCoordinatesRef(i);
-      if (abs((*pt)[0]-x_min)<std::numeric_limits<double>::epsilon()) {
-          found_nodes.push_back(i);
-      } else if (abs((*pt)[0]-x_max)<std::numeric_limits<double>::epsilon()) {
-          found_nodes.push_back(i);
-      } else if (abs((*pt)[1]-y_min)<std::numeric_limits<double>::epsilon()) {
-          found_nodes.push_back(i);
-      } else if (abs((*pt)[1]-y_max)<std::numeric_limits<double>::epsilon()) {
-          found_nodes.push_back(i);
-      }
-    }
-}
-
-void getEnrichedNodesElems(const MeshLib::IMesh &msh, const std::vector<double> &ff, std::vector<size_t> &ElemsEnriched, std::vector<size_t> &NodesEnriched)
-{
-    // Get cut elements and correspoding nodes.
-
-    for (size_t i=0; i<msh.getNumberOfElements(); i++) {
-        MeshLib::IElement* e = msh.getElemenet(i);
-        bool hasNegativeNode = false;
-        bool hasNonNegativeNode = false;
-        size_t cnt = 0;
-        for (size_t j=0; j<e->getNumberOfNodes(); j++) {
-            if (ff[e->getNodeID(j)] < .0) hasNegativeNode = true;
-            else hasNonNegativeNode = true;
-            if (msh.getNodeCoordinatesRef(e->getNodeID(j))->getData()[0]<.0) {
-                cnt++;
-            }
-        }
-        if (hasNegativeNode && hasNonNegativeNode && cnt==e->getNumberOfNodes())
-            ElemsEnriched.push_back(i);
-    }
-
-    std::set<size_t> set_nodes;
-    for (size_t i=0; i<ElemsEnriched.size(); i++) {
-        MeshLib::IElement* e = msh.getElemenet(ElemsEnriched[i]);
-        for (size_t j=0; j<e->getNumberOfNodes(); j++) {
-            set_nodes.insert(e->getNodeID(j));
-        }
-    }
-    NodesEnriched.assign(set_nodes.begin(), set_nodes.end());
-}
 
 template <class T1, class T2>
 bool FunctionDisplacement<T1,T2>::initialize(const BaseLib::Options &option)
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    size_t msh_id = option.getOption<size_t>("MeshID");
-    size_t time_id = option.getOption<size_t>("TimeGroupID");
-    NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
+//    size_t msh_id = option.getOption<size_t>("MeshID");
+//    size_t time_id = option.getOption<size_t>("TimeGroupID");
+//    NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
 
     //mesh and FE objects
-    _msh = femData->list_mesh[msh_id];
+    _msh = MeshLib::MeshGenerator::generateRegularQuadMesh(2., 19, -1., -1., .0);
     _dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(_msh);
     _feObjects = new FemLib::LagrangianFeObjectContainer(*_msh);
 
@@ -238,6 +116,7 @@ bool FunctionDisplacement<T1,T2>::initialize(const BaseLib::Options &option)
     return true;
 }
 
+
 template <class T1, class T2>
 int FunctionDisplacement<T1,T2>::solveTimeStep(const NumLib::TimeStep &/*time*/)
 {
@@ -245,15 +124,15 @@ int FunctionDisplacement<T1,T2>::solveTimeStep(const NumLib::TimeStep &/*time*/)
     const size_t ElemNum = _msh->getNumberOfElements();
 
     // define test case parameters
-    double k1 = 1.0;
-    double EE = 10000.;
-    double nu = 0.3;
-    double fx = 0, fy = 0;
-    double mu = EE/(2.*(1.+nu));
+    const double k1 = 1.0;
+    const double EE = 10000.;
+    const double nu = 0.3;
+    const double fx = 0, fy = 0;
+    const double mu = EE/(2.*(1.+nu));
     //lambda = EE*nu/((1+nu)*(1-2*nu)); % plane strain
     //kappa = 3-4*nu; % plane strain
-    double lambda = EE*nu/(1.-nu*nu); // plane stress
-    double kappa  = (3.-nu)/(1.+nu); // plane stress
+    const double lambda = EE*nu/(1.-nu*nu); // plane stress
+    const double kappa  = (3.-nu)/(1.+nu); // plane stress
 
     // get level-set function
     std::vector<double> ff(NodeNum);
@@ -270,8 +149,10 @@ int FunctionDisplacement<T1,T2>::solveTimeStep(const NumLib::TimeStep &/*time*/)
     // define Dirichlet BC
     std::vector<size_t> Bound;
     searchMinMaxNodes(*_msh, Bound);
-    std::vector<double> uDirValues;
-    std::vector<double> vDirValues;
+    std::vector<size_t> uDirNodes(Bound), vDirNodes(Bound);
+    for (size_t i=0; i<vDirNodes.size(); i++)
+        vDirNodes[i] += NodeNum;
+    std::vector<double> uDirValues(Bound.size()), vDirValues(Bound.size());
     for (size_t i=0; i<Bound.size(); i++) {
         uDirValues[i] = uuExact[Bound[i]];
         vDirValues[i] = vvExact[Bound[i]];
@@ -280,6 +161,8 @@ int FunctionDisplacement<T1,T2>::solveTimeStep(const NumLib::TimeStep &/*time*/)
     // Get enriched elements and nodes.
     std::vector<size_t> ElemsEnriched, NodesEnriched;
     getEnrichedNodesElems(*_msh, ff, ElemsEnriched, NodesEnriched);
+    std::set<size_t> SetNodesEnriched;
+    SetNodesEnriched.insert(NodesEnriched.begin(), NodesEnriched.end());
 
     // initialize LinearEQS
     MathLib::DenseLinearEquation leqs;
@@ -288,7 +171,73 @@ int FunctionDisplacement<T1,T2>::solveTimeStep(const NumLib::TimeStep &/*time*/)
     // domain integration
     for (size_t i=0; i<ElemNum; i++) {
 
+        MeshLib::IElement* e = _msh->getElement(i);
+        const size_t n_ele_nodes = e->getNumberOfNodes();
+        NumLib::LocalVector Nodes(n_ele_nodes);
+        FemLib::IFiniteElement* fe = _feObjects->getFeObject(*e);
+        NumLib::LocalVector xxElem, yyElem;
+        NumLib::LocalVector ffEle(n_ele_nodes);
+        for (size_t j=0; j<n_ele_nodes; j++) {
+            Nodes(i) = e->getNodeID(j);
+            xxElem(i) = _msh->getNodeCoordinatesRef(e->getNodeID(j))->getData()[0];
+            yyElem(i) = _msh->getNodeCoordinatesRef(e->getNodeID(j))->getData()[1];
+            ffEle(i) = ff[e->getNodeID(j)];
+        }
+
+        // activate nodes are enriched
+        NumLib::LocalVector NodesAct(n_ele_nodes);
+        for (size_t i=0; i<n_ele_nodes; i++) {
+            NodesAct(i) = (SetNodesEnriched.count(Nodes(i))>0 ? 1 : 0);
+        }
+
+        // set integration points in the reference element
+        FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
+        const size_t nQnQ = q->getNumberOfSamplingPoints();
+        std::vector<GeoLib::Point> vec_int_ref_xx(nQnQ);
+        std::vector<double> vec_int_ref_w(nQnQ);
+        for (size_t j=0; j<nQnQ; j++) {
+            q->getSamplingPoint(j, vec_int_ref_xx[j].getData());
+            vec_int_ref_w[j] = q->getWeight(j);
+        }
+        NumLib::LocalVector xxIntRef, yyIntRef, wwIntRef;
+        IntPoints2DLevelSet(ffEle, vec_int_ref_xx, vec_int_ref_w, xxIntRef, yyIntRef, wwIntRef);
+        const size_t Curr_nQ = xxIntRef.rows();
+
+        // get shape functions
+        NumLib::LocalMatrix N, dNdx, dNdy;
+        NumLib::LocalMatrix M, dMdx, dMdy;
+        NumLib::LocalVector xxInt, yyInt, wwInt, ffInt;
+        ShapeFctsXFEMSign(
+                xxElem, yyElem, ffEle, NodesAct, xxIntRef, yyIntRef, wwIntRef,
+                Curr_nQ,
+                N, dNdx, dNdy, M, dMdx, dMdy, xxInt, yyInt, wwInt, ffInt);
+
+        // integrate
+        BuildMatRhs_Hooke(
+                N, dNdx, dNdy, M, dMdx, dMdy,
+                xxInt, yyInt, wwInt, ffInt, Nodes,
+                lambda, lambda, mu, mu, fx, fy, Curr_nQ, NodeNum,
+                leqs);
     }
+
+    // Insert Dirichlet BCs.
+    leqs.setKnownX(uDirNodes, uDirValues);
+    leqs.setKnownX(vDirNodes, vDirValues);
+
+//    // Reduce system of equations.
+//    Pos = [[1:1:2*NodeNum]'; NodesEnriched+2*NodeNum; NodesEnriched+3*NodeNum];
+//    MAT = MAT(Pos, Pos);
+//    RHS = RHS(Pos);
+
+    //disp(sprintf('Condition number of final system         : %15.5e', condest(MAT)))
+
+    // Solve system of equations for solution.
+    leqs.solve();
+    double *x = leqs.getX();
+
+    leqs.printout(std::cout);
+//    uuTotal = Sol(1:NodeNum);
+//    vvTotal = Sol(NodeNum+1:2*NodeNum);
 
     return 0;
 }
@@ -332,3 +281,4 @@ void FunctionDisplacement<T1,T2>::output(const NumLib::TimeStep &/*time*/)
     }
 };
 
+}

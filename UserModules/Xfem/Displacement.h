@@ -14,7 +14,9 @@
 
 #include <string>
 #include "BaseLib/CodingTools.h"
+#include "MeshLib/Core/IMesh.h"
 #include "FemLib/Function/FemIntegrationPointFunction.h"
+#include "FemLib/Tools/LagrangeFeObjectContainer.h"
 #include "NumLib/Function/TXVectorFunctionAsColumnData.h"
 
 #include "ProcessLib/AbstractTimeIndependentProcess.h"
@@ -92,6 +94,7 @@ private:
 
 };
 
+}
+
 #include "Displacement.hpp"
 
-}
