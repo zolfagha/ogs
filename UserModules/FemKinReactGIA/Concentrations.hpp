@@ -16,6 +16,7 @@
 #include "DiscreteLib/Utils/DiscreteSystemContainerPerMesh.h"
 #include "FemLib/Function/FemNodalFunction.h"
 #include "NumLib/Function/TXFunctionBuilder.h"
+#include "NumLib/Function/TXFunctionDirect.h"
 #include "OutputIO/OutputBuilder.h"
 #include "OutputIO/OutputTimingBuilder.h"
 #include "SolutionLib/Fem/FemSourceTerm.h"
@@ -57,9 +58,6 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	n_eta_mob = this->_ReductionKin->get_n_eta_mob(); 
 	n_eta_immob=n_eta - n_eta_mob; 
 	n_xi      = this->_ReductionKin->get_n_xi(); 
-	// based on the transformation class instance, add eta and xi to the discretized memory space
-	NumLib::LocalVector local_xi(n_xi);
-	local_xi *= .0; 
 
 	// initialize eta_mob, 
 	for (i=0; i<n_eta_mob ; i++)
@@ -78,8 +76,12 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	}
 
 	// initialize xi
-	_xi        = new MyNodalFunctionVector();  // xi contains both xi_mob and xi_immob
-	_xi        ->initialize( *dis, FemLib::PolynomialOrder::Linear, local_xi  );
+	for (i=0; i<n_xi ; i++)
+	{
+		MyNodalFunctionScalar* xi_tmp       = new MyNodalFunctionScalar();  // xi contains both xi_mob and xi_immob
+		xi_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
+		_xi.push_back(xi_tmp); 
+	}
 
 	// linear assemblers
     MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_feObjects);
@@ -113,7 +115,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	_non_linear_eqs     = _non_linear_problem->createEquation(); 
 	_non_linear_eqs->initialize( non_linear_assembler, non_linear_r_assembler, non_linear_j_eqs ); 
 	_non_linear_problem->setTimeSteppingFunction(*tim); 
-	// for nonlinear coupled transport problem, variables are xi
+	// for nonlinear coupled transport problem, variables are xi, including both mobile and immobile
 	for ( i=0; i < n_xi ; i++ )
 	{
 		std::stringstream str_tmp;
@@ -136,6 +138,8 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	const BaseLib::Options* opICList = option.getSubGroup("ICList");
     for (const BaseLib::Options* opIC = opICList->getFirstSubGroup("IC"); opIC!=0; opIC = opICList->getNextSubGroup())
     {
+		
+		SolutionLib::FemIC* conc_ic = new SolutionLib::FemIC(msh);
         std::string var_name = opIC->getOption("Variable");
         std::string geo_type = opIC->getOption("GeometryType");
         std::string geo_name = opIC->getOption("GeometryName");
@@ -144,35 +148,49 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
         double dis_v = opIC->getOption<double>("DistributionValue");
         NumLib::ITXFunction* f_ic =  f_builder.create(dis_name, dis_v);
         // set IC
+		conc_ic->addDistribution( geo_obj, f_ic ); 
 		size_t comp_idx = femData->map_ChemComp.find( var_name )->second->getIndex();  
+		_problem->getVariable(comp_idx)->setIC( conc_ic ); 
+	}
 
-		double v;
-		f_ic->eval( NULL, v); 
-		MyNodalFunctionScalar* one_comp_comp = new MyNodalFunctionScalar(); 
-	    one_comp_comp->initialize(*dis, FemLib::PolynomialOrder::Linear, v);
-		_problem->getVariable(comp_idx)->setIC( one_comp_comp ); 
-		_concentrations.push_back(one_comp_comp); 
-    }
-
-	// here is a potential bug. 
-	// all the components must be in the list
-	if ( _concentrations.size() != n_Comp )
+	// backward flushing global vector of concentrations
+	MyNodalFunctionScalar* tmp_conc; 
+	for (i=0; i < n_Comp; i++)
 	{
-		ERR("IC are not set for all components!");	
+		SolutionLib::FemIC* femIC = _problem->getVariable(i)->getIC();
+	    tmp_conc = new MyNodalFunctionScalar();
+		if ( femIC )
+		{
+			// FemIC vector is not empty
+			tmp_conc->initialize(*dis, _problem->getVariable(i)->getCurrentOrder(), 0.0);
+			femIC->setup(*tmp_conc);
+		}
+		else
+		{
+			// FemIC vector is empty
+			// initialize the vector with zeros
+			tmp_conc->initialize(*dis, _problem->getVariable(i)->getCurrentOrder(), 0.0);
+		}	
+		_concentrations.push_back( tmp_conc ); 
 	}
 
 	// convert IC _concentrations to eta and xi
 	convert_conc_to_eta_xi();
 
-	// set IC for eta
+	// set IC for eta_mob
 	for ( i=0; i < n_eta_mob; i++ )
 	{
-		_linear_problems[i]->getVariable(0)->setIC( _eta_mob[i] ); 
+		SolutionLib::FemIC* eta_ic = new SolutionLib::FemIC(msh);
+		eta_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _eta_mob[i]->getDiscreteData() ) ); 
+		_linear_problems[i]->getVariable(0)->setIC( eta_ic ); 
 	}
 	// set IC for xi
-	// TODO: check data structure consistency!!!
-	// _non_linear_problem->getVariable(0)->setIC( _xi[i] ); 
-	
+	for ( i=0; i < n_xi; i++ )
+	{
+		SolutionLib::FemIC* xi_ic = new SolutionLib::FemIC(msh); 
+		xi_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _xi[i]->getDiscreteData() ) ); 
+		_non_linear_problem->getVariable(i)->setIC( xi_ic ); 
+	}
 	// set BC for concentrations
 	const BaseLib::Options* opBCList = option.getSubGroup("BCList");
     for (const BaseLib::Options* opBC = opBCList->getFirstSubGroup("BC"); opBC!=0; opBC = opBCList->getNextSubGroup())
@@ -341,8 +359,8 @@ void FunctionConcentrations<T1, T2>::convert_conc_to_eta_xi(void)
 			for (i=0; i < n_eta_immob; i++)
 				this->_eta_immob[i]->setValue(node_idx, loc_eta_immob[i]); 
 			// fill in xi
-			// this->_xi->setNodalValues( &loc_xi, node_idx*n_xi, n_xi ); 
-			this->_xi->setValue(node_idx, loc_xi); 
+			for (i=0; i < n_xi; i++)
+				this->_xi[i]->setValue(node_idx, loc_xi[i]); 
 		}  // end of for node_idx
 	
 	}  // end of if _ReductionKin
@@ -387,9 +405,9 @@ void FunctionConcentrations<T1, T2>::convert_eta_xi_to_conc(void)
 				loc_eta_immob[i] = this->_eta_immob[i]->getValue(node_idx); 
 			// fill in xi
 			// this->_xi->setNodalValues( &loc_xi, node_idx*n_xi, n_xi ); 
-			loc_xi = this->_xi->getValue(node_idx); 
+			for (i=0; i < n_xi; i++)
+				loc_xi[i] = this->_xi[i]->getValue(node_idx); 
 
-	
 			// pass them to the transform function in the reductionKin class
 			// and thet the loc_eta_mob, local_eta_immob and local_xi
 			this->_ReductionKin->EtaXi2Conc(loc_eta_mob, loc_eta_immob, loc_xi, loc_conc);

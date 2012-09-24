@@ -39,7 +39,7 @@ class FemKinReduction : public TimeSteppingProblem
 {
 public:
     typedef T_DIS_SYS MyDiscreteSystem;
-    typedef FemVariable<T_DIS_SYS> MyVariable;
+    typedef FemVariable MyVariable;
 
     ///
     explicit FemKinReduction(MyDiscreteSystem* dis, ogsChem::chemReductionKin* myReductionKin )

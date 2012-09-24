@@ -99,7 +99,7 @@ public:
 
 	// the general reduction problem part
 	typedef SolutionLib::FemKinReduction<MyDiscreteSystem> MyKinReductionProblemType; 
-	typedef SolutionLib::SingleStepKinReduction<MyKinReductionProblemType> MyKinReductionSolution; 
+	typedef SolutionLib::SingleStepKinReduction<MyKinReductionProblemType, MyLinearSolver> MyKinReductionSolution; 
 
     FunctionConcentrations() 
         : Process("KIN_REACT_GIA", 1, 1),
@@ -115,14 +115,15 @@ public:
         BaseLib::releaseObject(_feObjects);
         BaseLib::releaseObject(_linear_solution); 
         BaseLib::releaseObject(_ReductionKin);
-        BaseLib::releaseObject(_xi);
 		size_t i; 
-		for (i=0; i<_concentrations.size(); i++)
+		for (i=0; i < _concentrations.size(); i++)
 			BaseLib::releaseObject(_concentrations[i]);
-		for (i=0; i<_eta_mob.size(); i++)
+		for (i=0; i < _eta_mob.size(); i++)
 	        BaseLib::releaseObject(_eta_mob[i]); 
-	    for (i=0; i<_eta_immob.size(); i++)
+	    for (i=0; i < _eta_immob.size(); i++)
 	        BaseLib::releaseObject(_eta_immob[i]);
+		for (i=0; i < _xi.size(); i++)
+			BaseLib::releaseObject(_xi[i]); 
     };
 
     /// initialize this process
@@ -207,7 +208,7 @@ private:
     std::vector<MyNodalFunctionScalar*> _eta_mob; 
 	std::vector<MyNodalFunctionScalar*> _eta_immob;
     // xi vector, including xi_mobile and xi_immobile parts
-    MyNodalFunctionVector* _xi; 
+    std::vector<MyNodalFunctionScalar*> _xi; 
 }; 
 
 #include "Concentrations.hpp"
