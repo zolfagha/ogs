@@ -98,7 +98,7 @@ int FunctionElementStressStrain<T>::solveTimeStep(const NumLib::TimeStep &/*time
     for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++)
     {
         // element setup
-        MeshLib::IElement* e = msh->getElemenet(i_e);
+        MeshLib::IElement* e = msh->getElement(i_e);
         const size_t nnodes = e->getNumberOfNodes();
         FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
         FemLib::IFemNumericalIntegration *integral = fe->getIntegrationMethod();

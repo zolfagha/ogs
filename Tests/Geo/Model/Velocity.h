@@ -66,7 +66,7 @@ public:
         FemLib::LagrangianFeObjectContainer* feObjects = head->getFeObjectContainer();
         //calculate vel (vel=f(h))
         for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
-            MeshLib::IElement* e = msh->getElemenet(i_e);
+            MeshLib::IElement* e = msh->getElement(i_e);
             FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
             NumLib::LocalVector local_h(e->getNumberOfNodes());
             for (size_t j=0; j<e->getNumberOfNodes(); j++)

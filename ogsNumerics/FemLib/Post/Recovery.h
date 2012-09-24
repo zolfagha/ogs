@@ -36,7 +36,7 @@ public:
 
         std::vector<double> vec_dN_gp(msh->getNumberOfElements());
         for (size_t i=0; i<msh->getNumberOfElements(); i++) {
-            MeshLib::IElement* e = msh->getElemenet(i);
+            MeshLib::IElement* e = msh->getElement(i);
             double *gp = 0; //gravity center of the element
             IFiniteElement* fe = u->getFiniteElement(e);
             double *local_ui = 0;

@@ -65,7 +65,7 @@ void MeshIOLegacyVtk::WriteVTKCells(std::fstream &vtk_file, const MeshLib::IMesh
     long numAllPoints =0;
     for(size_t i=0; i < numCells; i++)
     {
-        IElement* ele = mesh.getElemenet(i);
+        IElement* ele = mesh.getElement(i);
         numAllPoints = numAllPoints + (ele->getNumberOfNodes()) + 1;
     }
 
@@ -73,7 +73,7 @@ void MeshIOLegacyVtk::WriteVTKCells(std::fstream &vtk_file, const MeshLib::IMesh
     vtk_file << "CELLS " << numCells << " " << numAllPoints << std::endl;
     for(size_t i=0; i < numCells; i++)
     {
-        IElement* ele = mesh.getElemenet(i);
+        IElement* ele = mesh.getElement(i);
 
         // Write number of points per cell
         switch(ele->getShapeType())
@@ -109,7 +109,7 @@ void MeshIOLegacyVtk::WriteVTKCells(std::fstream &vtk_file, const MeshLib::IMesh
 
     for(size_t i=0; i < numCells; i++)
     {
-        IElement* ele = mesh.getElemenet(i);
+        IElement* ele = mesh.getElement(i);
 
         // Write vtk cell type number (see vtkCellType.h)
         switch(ele->getShapeType())
@@ -146,7 +146,7 @@ void MeshIOLegacyVtk::WriteVTKMaterialID(std::fstream &vtk_file, const IMesh &me
     vtk_file << "SCALARS " << "GroupID" << " int 1" << std::endl;
     vtk_file << "LOOKUP_TABLE default" << std::endl;
     for (size_t i = 0; i < mesh.getNumberOfElements(); i++) {
-        IElement* e = mesh.getElemenet(i);
+        IElement* e = mesh.getElement(i);
         vtk_file << e->getGroupID() << std::endl;
     }
 }

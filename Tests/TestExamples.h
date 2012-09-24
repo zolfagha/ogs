@@ -106,7 +106,7 @@ public:
         std::vector<size_t> e_node_id_list;
         double gp_x[3], real_x[3];
         for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
-            MeshLib::IElement *e = msh->getElemenet(i_e);
+            MeshLib::IElement *e = msh->getElement(i_e);
             FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
             const size_t &n_dof = fe->getNumberOfVariables();
             localK = NumLib::LocalMatrix::Zero(n_dof, n_dof);
@@ -151,7 +151,7 @@ public:
         FemLib::LagrangianFeObjectContainer* feObjects = gw.head->getFeObjectContainer();
         //calculate vel (vel=f(h))
         for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
-            MeshLib::IElement* e = msh->getElemenet(i_e);
+            MeshLib::IElement* e = msh->getElement(i_e);
             FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
             NumLib::LocalVector local_h(e->getNumberOfNodes());
             for (size_t j=0; j<e->getNumberOfNodes(); j++)

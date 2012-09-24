@@ -110,7 +110,7 @@ public:
 
     size_t getNumberOfElements(ElementShape::type ele_type) const;
 
-    IElement* getElemenet( size_t element_id ) const 
+    IElement* getElement( size_t element_id ) const 
     {
         assert(element_id<_list_elements.size());
         IElement* e = _list_elements[element_id];

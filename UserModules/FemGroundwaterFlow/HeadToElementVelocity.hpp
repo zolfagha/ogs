@@ -68,7 +68,7 @@ int FunctionHeadToElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &/*ti
     FemLib::LagrangianFeObjectContainer* feObjects = _feObjects;
     //calculate vel (vel=f(h))
     for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
-        MeshLib::IElement* e = msh->getElemenet(i_e);
+        MeshLib::IElement* e = msh->getElement(i_e);
         size_t mat_id = e->getGroupID();
         MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];
 

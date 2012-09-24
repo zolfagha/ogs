@@ -64,7 +64,7 @@ void OMPElementWiseVectorAssembler<T1,T2>::assembly(const MeshLib::IMesh &msh, G
 
     #pragma omp parallel for default(none), shared(msh, globalVec), firstprivate(assembler)
     for (size_t i=0; i<n_ele; i++) {
-        MeshLib::IElement *e = msh.getElemenet(i);
+        MeshLib::IElement *e = msh.getElement(i);
         assembler.update(*e, globalVec);
     }
 };
