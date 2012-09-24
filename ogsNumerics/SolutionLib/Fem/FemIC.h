@@ -46,9 +46,12 @@ public:
     {
     }
 
-    ///
-    void add(const GeoLib::GeoObject* geo, const NumLib::ITXFunction* ic_func);
-    
+    /// add a distribution
+    void addDistribution(const GeoLib::GeoObject* geo, const NumLib::ITXFunction* ic_func);
+
+    /// return the number of registered distributions
+    size_t getNumberOfDistributions() const {return _vec_geo.size();};
+
     /// setup 
     void setup(NumLib::ITXDiscreteFunction<double> &u0) const;
 

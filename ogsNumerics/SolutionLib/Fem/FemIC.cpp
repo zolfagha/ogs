@@ -12,13 +12,14 @@
 
 #include "FemIC.h"
 
+#include "logog.hpp"
 #include "FemLib/BC/IC2FEM.h"
 
 namespace SolutionLib
 {
 
 ///
-void FemIC::add(const GeoLib::GeoObject* geo, const NumLib::ITXFunction* ic_func)
+void FemIC::addDistribution(const GeoLib::GeoObject* geo, const NumLib::ITXFunction* ic_func)
 {
     _vec_geo.push_back(geo);
     _vec_func.push_back(ic_func);
@@ -28,6 +29,10 @@ void FemIC::add(const GeoLib::GeoObject* geo, const NumLib::ITXFunction* ic_func
 void FemIC::setup(NumLib::ITXDiscreteFunction<double> &u0) const
 {
     DiscreteLib::IDiscreteVector<double> *u0_array = u0.getDiscreteData();
+
+    if (_vec_geo.size()==0)
+        WARN("***WARN: IC not found.");
+
     for (size_t i=0; i<_vec_geo.size(); i++) {
         std::vector<size_t> vec_node_id;
         std::vector<double> vec_node_value;
