@@ -59,6 +59,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	n_eta_immob=n_eta - n_eta_mob; 
 	n_xi      = this->_ReductionKin->get_n_xi(); 
 
+	// creating local memory space to store IC and BC
 	// initialize eta_mob, 
 	for (i=0; i<n_eta_mob ; i++)
 	{
@@ -66,7 +67,6 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 		eta_i->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0 );
 	    _eta_mob.push_back(eta_i); 
 	}
-
 	// initialize eta_immob, 
 	for (i=0; i<n_eta_immob; i++)
 	{
@@ -74,7 +74,6 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	    eta_i->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0 );
 		_eta_immob.push_back(eta_i); 
 	}
-
 	// initialize xi
 	for (i=0; i<n_xi ; i++)
 	{
@@ -137,8 +136,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	NumLib::TXFunctionBuilder f_builder;
 	const BaseLib::Options* opICList = option.getSubGroup("ICList");
     for (const BaseLib::Options* opIC = opICList->getFirstSubGroup("IC"); opIC!=0; opIC = opICList->getNextSubGroup())
-    {
-		
+    {		
 		SolutionLib::FemIC* conc_ic = new SolutionLib::FemIC(msh);
         std::string var_name = opIC->getOption("Variable");
         std::string geo_type = opIC->getOption("GeometryType");
@@ -235,35 +233,27 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
         }
     }
 
-	// for the linear transport problem, variables are eta_mobile
-	for ( i=0; i < n_eta_mob ; i++ )
+    // set up linear solution
+	for ( i=0; i < n_eta_mob; i++ )
 	{
-		// set up problem
-		MyLinearTransportProblemType* linear_problem = new MyLinearTransportProblemType(dis);
-		MyLinearEquationType* linear_eqs = linear_problem->createEquation();
-		linear_eqs->initialize(linear_assembler, linear_r_assembler, linear_j_eqs);
-		linear_problem->setTimeSteppingFunction(*tim);
-		
-		// set up variables
-		// in this case, the variables includes: eta_0, eta_1, eta_2......, 
-		// which are the concentrations of all eta_mobile 
-		std::stringstream str_tmp;
-		str_tmp << "eta_" << i ; 
-		linear_problem->addVariable( str_tmp.str() );
-		_linear_problems.push_back(linear_problem); 
+		MyLinearSolutionType* linear_solution = new MyLinearSolutionType( dis, this->_linear_problems[i] ); 
+		MyLinearSolver* linear_solver = linear_solution->getLinearEquationSolver();
+		const BaseLib::Options* optNum = option.getSubGroup("Numerics");
+		linear_solver->setOption(*optNum);
+		this->_linear_solutions.push_back( linear_solution ); 
 	}
-	// for nonlinear coupled transport problem, variables are xi
-	// TODO
-
-    // set up solution
-    _solution = new MyKinReductionSolution(dis, _problem);
-	MyLinearSolver* linear_solver = _linear_solution->getLinearEquationSolver();
-    const BaseLib::Options* optNum = option.getSubGroup("Numerics");
-    linear_solver->setOption(*optNum);
+	
+	// set up non-linear solution
+	this->_non_linear_solution = new MyNonLinearSolutionType( dis, this->_non_linear_problem ); 
+	const BaseLib::Options* optNum = option.getSubGroup("Numerics");
+	MyLinearSolver* linear_solver = this->_non_linear_solution->getLinearEquationSolver(); 
+	linear_solver->setOption(*optNum);
 	// set nonlinear solver options
-	// TODO
-    // _solution->getNonlinearSolver()->setOption(*optNum);
+	this->_non_linear_solution->getNonlinearSolver()->setOption(*optNum);
 
+	// set up solution
+    _solution = new MyKinReductionSolution(dis, _problem);
+	
     // set initial output
     OutputVariableInfo var(this->getOutputParameterName(Concentrations), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput(var.name, var); 

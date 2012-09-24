@@ -113,17 +113,21 @@ public:
     virtual ~FunctionConcentrations()
     {
         BaseLib::releaseObject(_feObjects);
-        BaseLib::releaseObject(_linear_solution); 
         BaseLib::releaseObject(_ReductionKin);
 		size_t i; 
 		for (i=0; i < _concentrations.size(); i++)
 			BaseLib::releaseObject(_concentrations[i]);
 		for (i=0; i < _eta_mob.size(); i++)
+		{
+			BaseLib::releaseObject(_linear_problems[i]); 
+			BaseLib::releaseObject(_linear_solutions[i]); 
 	        BaseLib::releaseObject(_eta_mob[i]); 
+		}
 	    for (i=0; i < _eta_immob.size(); i++)
 	        BaseLib::releaseObject(_eta_immob[i]);
 		for (i=0; i < _xi.size(); i++)
 			BaseLib::releaseObject(_xi[i]); 
+
     };
 
     /// initialize this process
@@ -186,7 +190,7 @@ private:
 
     // linear problem and solution pointer
 	std::vector<MyLinearTransportProblemType*> _linear_problems;
-    MyLinearSolutionType* _linear_solution;
+    std::vector<MyLinearSolutionType*>         _linear_solutions;
 	// nonlinear equation, problem and solution pointer
 	MyNonLinearEquationType* _non_linear_eqs; 
 	MyNonLinearReactiveTransportProblemType* _non_linear_problem;
