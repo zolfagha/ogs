@@ -38,7 +38,7 @@ class FemIVBVProblem : public TimeSteppingProblem
 {
 public:
     typedef T_DIS_SYS MyDiscreteSystem;
-    typedef FemVariable<T_DIS_SYS> MyVariable;
+    typedef FemVariable MyVariable;
     typedef T_FEM_EQUATION EquationType;
 
     ///

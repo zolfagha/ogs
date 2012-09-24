@@ -21,8 +21,8 @@
 #include "SolutionLib/Fem/FemDirichletBC.h"
 #include "SolutionLib/Fem/FemNeumannBC.h"
 #include "GeoProcessBuilder.h"
-#include "ChemLib\chemReactionKin.h"
-#include "ChemLib\chemReductionKin.h"
+#include "ChemLib/chemReactionKin.h"
+#include "ChemLib/chemReductionKin.h"
 
 using namespace ogs5;
 
@@ -251,8 +251,8 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         {
             CInitialCondition* rfic = ogs5fem.ic_vector[i];
             std::string ic_pcs_name = FiniteElement::convertProcessTypeToString(rfic->getProcessType());
-			if ( ic_pcs_name.compare(pcs_name)==0 )
-				for (size_t j=0; j<var_name.size(); j++)
+			if ( ic_pcs_name.compare(pcs_name)==0 ) {
+				for (size_t j=0; j<var_name.size(); j++) {
 					if ( rfic->primaryvariable_name.find(var_name[j])!=std::string::npos) {
 						BaseLib::Options* optIc = optIcList->addSubGroup("IC");
 						optIc->addOption("Variable", rfic->primaryvariable_name);
@@ -261,6 +261,8 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 						optIc->addOption("DistributionType", FiniteElement::convertDisTypeToString(rfic->getProcessDistributionType()));
 						optIc->addOptionAsNum("DistributionValue", rfic->geo_node_value);
 					}  // end of if rfic
+				}
+			}
         }  // end of for i
 
         // BC

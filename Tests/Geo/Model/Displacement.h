@@ -86,8 +86,8 @@ public:
         DiscreteLib::DofEquationIdTable* dofMapping = _sol_u->getDofEquationIdTable();
         dofMapping->setNumberingType(DiscreteLib::DofNumberingType::BY_POINT);
         dofMapping->setLocalNumberingType(DiscreteLib::DofNumberingType::BY_POINT);
-        this->setOutput(u_x, problem_u->getVariable(0)->getIC());
-        this->setOutput(u_y, problem_u->getVariable(1)->getIC());
+        this->setOutput(u_x, _sol_u->getCurrentSolution(0));
+        this->setOutput(u_y, _sol_u->getCurrentSolution(1));
 
         _strain = new MyIntegrationPointFunctionVector();
         _strain->initialize(dis);

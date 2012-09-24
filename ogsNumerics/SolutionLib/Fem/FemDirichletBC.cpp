@@ -12,6 +12,8 @@
 
 #include "FemDirichletBC.h"
 
+#include "logog.hpp"
+
 #include "FemLib/BC/DirichletBC2FEM.h"
 
 namespace SolutionLib
@@ -25,6 +27,9 @@ void FemDirichletBC::setup(size_t order)
 
     _msh->setCurrentOrder(order);
     FemLib::DirichletBC2FEM convert(*_msh, *_geo, *_bc_func, _vec_nodes, _vec_values);
+
+    if (_vec_nodes.size()==0)
+        INFO("***INFO: No Dirichlet BC found in FemDirichletBC::setup()");
 
     if (!_is_transient)
         _do_setup = false;
