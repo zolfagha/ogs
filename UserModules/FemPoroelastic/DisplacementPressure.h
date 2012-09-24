@@ -105,6 +105,7 @@ protected:
 
 private:
     MyVariable* getDisplacementComponent(MyVariable *u_x, MyVariable* u_y, MyVariable* u_z, const std::string &var_name);
+    size_t getDisplacementComponentIndex(const std::string &var_name) const;
     //void calculateStressStrain();
 
     DISALLOW_COPY_AND_ASSIGN(FunctionDisplacementPressure);

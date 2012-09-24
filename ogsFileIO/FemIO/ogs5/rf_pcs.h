@@ -72,7 +72,7 @@ public:
     std::string simulator_model_path;     // path to exclipse input data file (*.data), with extension
     std::string simulator_well_path;      // path to well schedule ( *.well), with extension
     std::string file_name_base;           //OK
-    std::string primary_variable_name;    //OK
+    std::vector<std::string> primary_variable_name;    //OK // HS
     std::string num_type_name;
     int rwpt_app;
     std::string tim_type_name;            //OK

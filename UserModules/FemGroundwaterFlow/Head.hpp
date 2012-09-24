@@ -18,6 +18,7 @@
 #include "OutputIO/OutputBuilder.h"
 #include "OutputIO/OutputTimingBuilder.h"
 #include "SolutionLib/Fem/FemSourceTerm.h"
+#include "SolutionLib/Fem/FemIC.h"
 #include "Ogs6FemData.h"
 
 template <class T1, class T2>
@@ -46,12 +47,24 @@ bool FunctionHead<T1,T2>::initialize(const BaseLib::Options &option)
     // set up variables
     //--------------------------------------------------------------------------
     MyVariable* head = _problem->addVariable("head"); //internal name
-    // IC
     NumLib::TXFunctionBuilder f_builder;
-    MyNodalFunctionScalar* h0 = new MyNodalFunctionScalar();
-    h0->initialize(*dis, FemLib::PolynomialOrder::Linear, 0);
-    h0->setFeObjectContainer(_feObjects);
-    head->setIC(h0);
+    // IC
+    SolutionLib::FemIC* head_ic = new SolutionLib::FemIC(msh);
+    const BaseLib::Options* opICList = option.getSubGroup("ICList");
+    for (const BaseLib::Options* opIC = opICList->getFirstSubGroup("IC"); opIC!=0; opIC = opICList->getNextSubGroup())
+    {
+        std::string geo_type = opIC->getOption("GeometryType");
+        std::string geo_name = opIC->getOption("GeometryName");
+        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
+        std::string dis_name = opIC->getOption("DistributionType");
+        double dis_v = opIC->getOption<double>("DistributionValue");
+        NumLib::ITXFunction* f_ic =  f_builder.create(dis_name, dis_v);
+        head_ic->addDistribution(geo_obj, f_ic);
+//        MyNodalFunctionScalar* h0 = new MyNodalFunctionScalar();
+//        h0->initialize(*dis, FemLib::PolynomialOrder::Linear, 0);
+//        h0->setFeObjectContainer(_feObjects);
+    }
+    head->setIC(head_ic);
     // BC
     const BaseLib::Options* opBCList = option.getSubGroup("BCList");
     for (const BaseLib::Options* opBC = opBCList->getFirstSubGroup("BC"); opBC!=0; opBC = opBCList->getNextSubGroup())
@@ -120,7 +133,7 @@ bool FunctionHead<T1,T2>::initialize(const BaseLib::Options &option)
     //--------------------------------------------------------------------------
     // set initial output
     //--------------------------------------------------------------------------
-    this->setOutput(Head, head->getIC());
+    this->setOutput(Head, _solution->getCurrentSolution(0));
 
     return true;
 }

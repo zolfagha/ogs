@@ -211,7 +211,9 @@ std::ios::pos_type CRFProcess::Read(std::ifstream* pcs_file)
         // subkeyword found
         if (line_string.find("$PRIMARY_VARIABLE") != string::npos)
         {
-            *pcs_file >> primary_variable_name;
+			std::string pri_var_str_tmp;
+            *pcs_file >> pri_var_str_tmp;  
+			primary_variable_name.push_back(pri_var_str_tmp);
             pcs_file->ignore(MAX_ZEILE, '\n');
             continue;
         }

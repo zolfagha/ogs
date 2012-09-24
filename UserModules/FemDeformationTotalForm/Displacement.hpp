@@ -55,10 +55,20 @@ bool FunctionDisplacement<T1,T2>::initialize(const BaseLib::Options &option)
     MyVariable* u_y = _problem->addVariable("u_y");
     // IC
     NumLib::TXFunctionBuilder f_builder;
-    MyNodalFunctionScalar* u0 = new MyNodalFunctionScalar();
-    u0->initialize(*dis, FemLib::PolynomialOrder::Linear, 0);
-    u_x->setIC(u0);
-    u_y->setIC(u0);
+    SolutionLib::FemIC* u_ic = new SolutionLib::FemIC(msh);
+    const BaseLib::Options* opICList = option.getSubGroup("ICList");
+    for (const BaseLib::Options* opIC = opICList->getFirstSubGroup("IC"); opIC!=0; opIC = opICList->getNextSubGroup())
+    {
+        std::string geo_type = opIC->getOption("GeometryType");
+        std::string geo_name = opIC->getOption("GeometryName");
+        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
+        std::string dis_name = opIC->getOption("DistributionType");
+        double dis_v = opIC->getOption<double>("DistributionValue");
+        NumLib::ITXFunction* f_ic =  f_builder.create(dis_name, dis_v);
+        u_ic->addDistribution(geo_obj, f_ic);
+    }
+    u_x->setIC(u_ic);
+    u_y->setIC(u_ic);
     // BC
     const BaseLib::Options* opBCList = option.getSubGroup("BCList");
     for (const BaseLib::Options* opBC = opBCList->getFirstSubGroup("BC"); opBC!=0; opBC = opBCList->getNextSubGroup())

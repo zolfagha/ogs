@@ -23,6 +23,9 @@
 #include "MaterialLib/Solid.h"
 #include "MaterialLib/Fluid.h"
 #include "MaterialLib/Compound.h"
+#include "ChemLib/chemReactionKin.h"
+#include "ChemLib/chemReductionKin.h"
+#include "ChemLib/chemcomp.h"
 #include "SolutionLib/Fem/FemDirichletBC.h"
 #include "SolutionLib/Fem/FemNeumannBC.h"
 #include "GeoLib/GEOObjects.h"
@@ -50,13 +53,17 @@ public:
     std::vector<MaterialLib::Solid*> list_solid;
     std::vector<MaterialLib::Fluid*> list_fluid;
     std::vector<MaterialLib::Compound*> list_compound;
-    //geometric data
+    // geometric data
     std::string geo_unique_name;
     GeoLib::GEOObjects* geo;
-    //mesh data
+    // mesh data
     std::vector<MeshLib::IMesh*> list_mesh;
-    //time group data
+    // time group data
     std::vector<NumLib::ITimeStepFunction*> list_tim;
+	// kinetic reactions // HS 09.2012
+	BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> map_ChemComp; 
+	std::vector<ogsChem::chemReactionKin*> list_kin_reactions; 
+	ogsChem::chemReductionKin* m_KinReductScheme; 
     //process
     BaseLib::OrderedMap<std::string, ProcessLib::Process*> list_pcs;
     //
@@ -76,5 +83,8 @@ public:
         BaseLib::releaseObjectsInStdVector(list_tim);
         //BaseLib::releaseObjectsInStdVector(list_dis_sys);
         BaseLib::releaseObjectsInStdMap(list_pcs);
+		BaseLib::releaseObjectsInStdMap(map_ChemComp); 
+		BaseLib::releaseObjectsInStdVector(list_kin_reactions);
+		BaseLib::releaseObject(m_KinReductScheme); 
     }
 };
