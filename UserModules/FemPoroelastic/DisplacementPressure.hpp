@@ -28,6 +28,18 @@ typename FunctionDisplacementPressure<T1,T2>::MyVariable* FunctionDisplacementPr
 }
 
 template <class T1, class T2>
+size_t FunctionDisplacementPressure<T1,T2>::getDisplacementComponentIndex(const std::string &var_name) const
+{
+    if (var_name.find("_X")!=std::string::npos) {
+        return 0;
+    } else if (var_name.find("_Y")!=std::string::npos) {
+        return 1;
+    } else {
+        return 2;
+    }
+}
+
+template <class T1, class T2>
 bool FunctionDisplacementPressure<T1,T2>::initialize(const BaseLib::Options &option)
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
@@ -62,13 +74,37 @@ bool FunctionDisplacementPressure<T1,T2>::initialize(const BaseLib::Options &opt
     _var_p_id = p->getID();
     // IC
     NumLib::TXFunctionBuilder f_builder;
-    MyNodalFunctionScalar* u0 = new MyNodalFunctionScalar();
-    u0->initialize(*dis, u_x->getCurrentOrder(), 0);
-    u_x->setIC(u0);
-    u_y->setIC(u0);
-    MyNodalFunctionScalar* p0 = new MyNodalFunctionScalar();
-    p0->initialize(*dis, p->getCurrentOrder(), 0);
-    p->setIC(p0);
+//    MyNodalFunctionScalar* u0 = new MyNodalFunctionScalar();
+//    u0->initialize(*dis, u_x->getCurrentOrder(), 0);
+//    u_x->setIC(u0);
+//    u_y->setIC(u0);
+//    MyNodalFunctionScalar* p0 = new MyNodalFunctionScalar();
+//    p0->initialize(*dis, p->getCurrentOrder(), 0);
+//    p->setIC(p0);
+    std::vector<SolutionLib::FemIC*> vec_u_ic(msh->getDimension());
+    for (size_t i=0; i<msh->getDimension(); i++)
+        vec_u_ic[i] = new SolutionLib::FemIC(msh);
+    SolutionLib::FemIC* p_ic = new SolutionLib::FemIC(msh);
+    const BaseLib::Options* opICList = option.getSubGroup("ICList");
+    for (const BaseLib::Options* opIC = opICList->getFirstSubGroup("IC"); opIC!=0; opIC = opICList->getNextSubGroup())
+    {
+        std::string var_name = opIC->getOption("Variable");
+        std::string geo_type = opIC->getOption("GeometryType");
+        std::string geo_name = opIC->getOption("GeometryName");
+        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
+        std::string dis_name = opIC->getOption("DistributionType");
+        double dis_v = opIC->getOption<double>("DistributionValue");
+        NumLib::ITXFunction* f_ic =  f_builder.create(dis_name, dis_v);
+        if (var_name.find(this->getOutputParameterName(Displacement))!=std::string::npos) {
+            size_t u_i = getDisplacementComponentIndex(var_name);
+            vec_u_ic[u_i]->addDistribution(geo_obj, f_ic);
+        } else if (var_name.find(this->getOutputParameterName(Pressure))!=std::string::npos) {
+            p_ic->addDistribution(geo_obj, f_ic);
+        }
+    }
+    u_x->setIC(vec_u_ic[0]);
+    u_y->setIC(vec_u_ic[1]);
+    p->setIC(p_ic);
     // BC
     const BaseLib::Options* opBCList = option.getSubGroup("BCList");
     for (const BaseLib::Options* opBC = opBCList->getFirstSubGroup("BC"); opBC!=0; opBC = opBCList->getNextSubGroup())
@@ -149,7 +185,7 @@ bool FunctionDisplacementPressure<T1,T2>::initialize(const BaseLib::Options &opt
     NumLib::LocalVector tmp_u0(3);
     tmp_u0 *= .0;
     _displacement = new MyNodalFunctionVector();
-    _displacement->initialize(*dis, u0->getOrder(), tmp_u0);
+    _displacement->initialize(*dis, u_x->getCurrentOrder(), tmp_u0);
     for (size_t i=0; i<_displacement->getNumberOfNodes(); i++) {
         _displacement->getValue(i)(0) = _solution->getCurrentSolution(0)->getValue(i);
         _displacement->getValue(i)(1) = _solution->getCurrentSolution(1)->getValue(i);

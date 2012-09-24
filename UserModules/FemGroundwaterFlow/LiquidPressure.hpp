@@ -48,10 +48,22 @@ bool FunctionLiquidPressure<T1,T2>::initialize(const BaseLib::Options &option)
     typename MyProblemType::MyVariable* head = _problem->addVariable("pressure"); //internal name
     // IC
     NumLib::TXFunctionBuilder f_builder;
-    typename MyProblemType::MyVariable::MyNodalFunctionScalar* h0 = new typename MyProblemType::MyVariable::MyNodalFunctionScalar();
-    h0->initialize(*dis, FemLib::PolynomialOrder::Linear, 0);
-    h0->setFeObjectContainer(_feObjects);
-    head->setIC(h0);
+    SolutionLib::FemIC* head_ic = new SolutionLib::FemIC(msh);
+    const BaseLib::Options* opICList = option.getSubGroup("ICList");
+    for (const BaseLib::Options* opIC = opICList->getFirstSubGroup("IC"); opIC!=0; opIC = opICList->getNextSubGroup())
+    {
+        std::string geo_type = opIC->getOption("GeometryType");
+        std::string geo_name = opIC->getOption("GeometryName");
+        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
+        std::string dis_name = opIC->getOption("DistributionType");
+        double dis_v = opIC->getOption<double>("DistributionValue");
+        NumLib::ITXFunction* f_ic =  f_builder.create(dis_name, dis_v);
+        head_ic->addDistribution(geo_obj, f_ic);
+//        MyNodalFunctionScalar* h0 = new MyNodalFunctionScalar();
+//        h0->initialize(*dis, FemLib::PolynomialOrder::Linear, 0);
+//        h0->setFeObjectContainer(_feObjects);
+    }
+    head->setIC(head_ic);
     // BC
     const BaseLib::Options* opBCList = option.getSubGroup("BCList");
     for (const BaseLib::Options* opBC = opBCList->getFirstSubGroup("BC"); opBC!=0; opBC = opBCList->getNextSubGroup())
@@ -104,7 +116,7 @@ bool FunctionLiquidPressure<T1,T2>::initialize(const BaseLib::Options &option)
     femData->outController.setOutput(var.name, var);
 
     // initial output parameter
-    this->setOutput(Pressure, head->getIC());
+    this->setOutput(Pressure, _solution->getCurrentSolution(head->getID()));
 
     return true;
 }

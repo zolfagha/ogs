@@ -59,7 +59,7 @@ bool FunctionHead<T1,T2>::initialize(const BaseLib::Options &option)
         std::string dis_name = opIC->getOption("DistributionType");
         double dis_v = opIC->getOption<double>("DistributionValue");
         NumLib::ITXFunction* f_ic =  f_builder.create(dis_name, dis_v);
-        head_ic->add(geo_obj, f_ic);
+        head_ic->addDistribution(geo_obj, f_ic);
 //        MyNodalFunctionScalar* h0 = new MyNodalFunctionScalar();
 //        h0->initialize(*dis, FemLib::PolynomialOrder::Linear, 0);
 //        h0->setFeObjectContainer(_feObjects);
