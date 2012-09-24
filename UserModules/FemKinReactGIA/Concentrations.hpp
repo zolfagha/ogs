@@ -86,16 +86,9 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
     MyLinearResidualAssemblerType* linear_r_assembler = new MyLinearResidualAssemblerType(_feObjects);
     MyLinearJacobianAssemblerType* linear_j_eqs = new MyLinearJacobianAssemblerType(_feObjects);
 
-	// reduction problem
-	_problem = new MyKinReductionProblemType( dis, _ReductionKin ); 
-	_solution = new MyKinReductionSolution( dis, _problem ); 
-	// add variables
-	// for the KinReduction problem, variables are the concentrations of all chemical components
-	// add all concentrations to discretized memory space
-	for ( i=0; i<n_Comp; i++ )
-	{
-		_problem->addVariable( femData->map_ChemComp[i]->second->get_name() );
-	}
+    MyNonLinearAssemblerType* non_linear_assembler = new MyNonLinearAssemblerType(_feObjects);
+    MyNonLinearResidualAssemblerType* non_linear_r_assembler = new MyNonLinearResidualAssemblerType(_feObjects);
+    MyNonLinearJacobianAssemblerType* non_linear_j_eqs = new MyNonLinearJacobianAssemblerType(_feObjects);
 
 	// for the linear transport problem, variables are eta_mobile
 	for ( i=0; i < n_eta_mob ; i++ )
@@ -114,8 +107,29 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 		linear_problem->addVariable( str_tmp.str() );
 		_linear_problems.push_back(linear_problem); 
 	}
+	
+	// define nonlinear problem
+	_non_linear_problem = new MyNonLinearReactiveTransportProblemType(dis);  
+	_non_linear_eqs     = _non_linear_problem->createEquation(); 
+	_non_linear_eqs->initialize( non_linear_assembler, non_linear_r_assembler, non_linear_j_eqs ); 
+	_non_linear_problem->setTimeSteppingFunction(*tim); 
 	// for nonlinear coupled transport problem, variables are xi
-	// TODO
+	for ( i=0; i < n_xi ; i++ )
+	{
+		std::stringstream str_tmp;
+		str_tmp << "xi_" << i ;
+		_non_linear_problem->addVariable( str_tmp.str() );  	
+	}
+
+	// reduction problem
+	_problem = new MyKinReductionProblemType( dis, _ReductionKin ); 
+	// add variables to the KinReduction problem class
+	// for the KinReduction problem, variables are the concentrations of all chemical components
+	// add all concentrations to discretized memory space
+	for ( i=0; i<n_Comp; i++ )
+	{
+		_problem->addVariable( femData->map_ChemComp[i]->second->get_name() );
+	}
 
 	// set IC for concentrations
 	NumLib::TXFunctionBuilder f_builder;
@@ -155,6 +169,9 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	{
 		_linear_problems[i]->getVariable(0)->setIC( _eta_mob[i] ); 
 	}
+	// set IC for xi
+	// TODO: check data structure consistency!!!
+	// _non_linear_problem->getVariable(0)->setIC( _xi[i] ); 
 	
 	// set BC for concentrations
 	const BaseLib::Options* opBCList = option.getSubGroup("BCList");
@@ -243,16 +260,20 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::initializeTimeStep(const NumLib::TimeStep &/*time*/)
 {
+	size_t i; 
     const NumLib::ITXFunction *vel = this->getInput<NumLib::ITXFunction>(Velocity);
 
 	// set velocity for linear problem
-	for (size_t i=0; i < _linear_problems.size(); i++ ) {
+	for ( i=0; i < _linear_problems.size(); i++ ) {
 		_linear_problems[i]->getEquation()->getLinearAssembler()->setVelocity(vel);
 		_linear_problems[i]->getEquation()->getResidualAssembler()->setVelocity(vel);
 		_linear_problems[i]->getEquation()->getJacobianAssembler()->setVelocity(vel);
 	}
 	// set velocity for nonlinear problem as well
-	// TODO
+	_non_linear_problem->getEquation()->getLinearAssembler()->setVelocity(vel); 
+    _non_linear_problem->getEquation()->getResidualAssembler()->setVelocity(vel); 
+	_non_linear_problem->getEquation()->getJacobianAssembler()->setVelocity(vel); 
+	
 }
 
 template <class T1, class T2>

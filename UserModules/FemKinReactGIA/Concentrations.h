@@ -186,7 +186,8 @@ private:
     // linear problem and solution pointer
 	std::vector<MyLinearTransportProblemType*> _linear_problems;
     MyLinearSolutionType* _linear_solution;
-	// nonlinear problem and solution pointer
+	// nonlinear equation, problem and solution pointer
+	MyNonLinearEquationType* _non_linear_eqs; 
 	MyNonLinearReactiveTransportProblemType* _non_linear_problem;
 	MyNonLinearSolutionType* _non_linear_solution; 
 	// reduction problem and solution
