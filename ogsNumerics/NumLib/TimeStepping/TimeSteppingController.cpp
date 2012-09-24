@@ -31,6 +31,10 @@ size_t TimeSteppingController::solve(double time_end)
             ERR("error - the suggested next time step is invalid.");
             break;
         }
+        if (time_next > time_end) {
+            time_next = time_end;
+        }
+        
         TimeStep t_n1(time_current, time_next);
         INFO("\n#############################################################");
         INFO("Time step %d: t=%f s, dt=%f s ", t_n1.getTimeStepCount(), time_next, t_n1.getTimeStepSize());
