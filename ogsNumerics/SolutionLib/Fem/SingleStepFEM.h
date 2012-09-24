@@ -183,7 +183,7 @@ SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER>::SingleStepFEM(MyDiscreteSyste
     // copy values of each variable to one solution vector
     for (size_t i=0; i<n_var; i++) {
         SolutionVector* vec_var = _vec_u_n1[i]->getDiscreteData();
-        DiscreteLib::setGlobalVector(_dofManager, i, msh->getID(), *vec_var, *_x_n1);
+        DiscreteLib::setGlobalVector(_dofManager, i, msh->getID(), *vec_var, *_x_n0);
     }
 
     // create linear equation systems
