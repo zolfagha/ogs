@@ -175,13 +175,13 @@ int FunctionDisplacement<T1,T2>::solveTimeStep(const NumLib::TimeStep &/*time*/)
         const size_t n_ele_nodes = e->getNumberOfNodes();
         NumLib::LocalVector Nodes(n_ele_nodes);
         FemLib::IFiniteElement* fe = _feObjects->getFeObject(*e);
-        NumLib::LocalVector xxElem, yyElem;
+        NumLib::LocalVector xxElem(n_ele_nodes), yyElem(n_ele_nodes);
         NumLib::LocalVector ffEle(n_ele_nodes);
         for (size_t j=0; j<n_ele_nodes; j++) {
-            Nodes(i) = e->getNodeID(j);
-            xxElem(i) = _msh->getNodeCoordinatesRef(e->getNodeID(j))->getData()[0];
-            yyElem(i) = _msh->getNodeCoordinatesRef(e->getNodeID(j))->getData()[1];
-            ffEle(i) = ff[e->getNodeID(j)];
+            Nodes(j) = e->getNodeID(j);
+            xxElem(j) = _msh->getNodeCoordinatesRef(e->getNodeID(j))->getData()[0];
+            yyElem(j) = _msh->getNodeCoordinatesRef(e->getNodeID(j))->getData()[1];
+            ffEle(j) = ff[e->getNodeID(j)];
         }
 
         // activate nodes are enriched

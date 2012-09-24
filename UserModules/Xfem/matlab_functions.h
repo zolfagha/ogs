@@ -149,11 +149,12 @@ void ShapeFctsStrdFEM(
 {
     // Compute standard bi-linear shape functions at integration points in
     // the real element.
+    const size_t n_ele_nodes = 4;
 
     // Initialization.
-    N     = NumLib::LocalMatrix::Zero(4, nQ);
-    dNdx  = NumLib::LocalMatrix::Zero(4, nQ);
-    dNdy  = NumLib::LocalMatrix::Zero(4, nQ);
+    N     = NumLib::LocalMatrix::Zero(n_ele_nodes, nQ);
+    dNdx  = NumLib::LocalMatrix::Zero(n_ele_nodes, nQ);
+    dNdy  = NumLib::LocalMatrix::Zero(n_ele_nodes, nQ);
 
     xxInt = NumLib::LocalVector::Zero(nQ);
     yyInt = NumLib::LocalVector::Zero(nQ);
@@ -164,35 +165,41 @@ void ShapeFctsStrdFEM(
     Eigen::ArrayXd N2 = 0.25*(1+xxIntRef.array())*(1-yyIntRef.array());
     Eigen::ArrayXd N3 = 0.25*(1+xxIntRef.array())*(1+yyIntRef.array());
     Eigen::ArrayXd N4 = 0.25*(1-xxIntRef.array())*(1+yyIntRef.array());
-
     Eigen::ArrayXd dN1dr = -0.25*(1-yyIntRef.array());
     Eigen::ArrayXd dN2dr = +0.25*(1-yyIntRef.array());
     Eigen::ArrayXd dN3dr = +0.25*(1+yyIntRef.array());
     Eigen::ArrayXd dN4dr = -0.25*(1+yyIntRef.array());
-
     Eigen::ArrayXd dN1ds = -0.25*(1-xxIntRef.array());
     Eigen::ArrayXd dN2ds = -0.25*(1+xxIntRef.array());
     Eigen::ArrayXd dN3ds = +0.25*(1+xxIntRef.array());
     Eigen::ArrayXd dN4ds = +0.25*(1-xxIntRef.array());
 
-    Eigen::MatrixXd NN(4, N1.cols());
-    NN  << N1, N2, N3,  N4;
-    Eigen::MatrixXd dNNdr(4, dN1dr.cols());
-    dNNdr << dN1dr, dN2dr, dN3dr, dN4dr;
-    Eigen::MatrixXd dNNds(4, dN1ds.cols());
-    dNNds << dN1ds, dN2ds, dN3ds, dN4ds;
+    Eigen::MatrixXd NN(n_ele_nodes, nQ); //MatrixXd is column-base
+    NN  << N1.transpose(), N2.transpose(), N3.transpose(),  N4.transpose();
+    Eigen::MatrixXd dNNdr(n_ele_nodes, nQ);
+    dNNdr << dN1dr.transpose(), dN2dr.transpose(), dN3dr.transpose(), dN4dr.transpose();
+    Eigen::MatrixXd dNNds(n_ele_nodes, nQ);
+    dNNds << dN1ds.transpose(), dN2ds.transpose(), dN3ds.transpose(), dN4ds.transpose();
+//    std::cout << "N1=" << N1;
+//    std::cout << "dN1dr=" << dN1dr;
+//    std::cout << "dN1ds=" << dN1ds;
+//    std::cout << "NN=" << NN;
+//    std::cout << "dNNdr=" << dNNdr;
+//    std::cout << "dNNds=" << dNNds;
+//    std::flush(std::cout);
 
     // Define N, dNdx, dNdy at the integration points in the REAL element.
     N = NN;
 
     for (size_t i=0; i<nQ; i++) {
-        double dxdr = xxElem.transpose()*dNNdr.col(i); // J11
-        double dydr = yyElem.transpose()*dNNdr.col(i); // J12
-        double dxds = xxElem.transpose()*dNNds.col(i); // J21
-        double dyds = yyElem.transpose()*dNNds.col(i); // J22
+        double dxdr = dNNdr.col(i).transpose()*xxElem; // J11
+        double dydr = dNNdr.col(i).transpose()*yyElem; // J12
+        double dxds = dNNds.col(i).transpose()*xxElem; // J21
+        double dyds = dNNds.col(i).transpose()*yyElem; // J22
 
         // det(J) = J11*J22 - J21*J12
         double detJ = dxdr*dyds - dxds*dydr;
+        assert(detJ>.0);
         wwInt(i) = wwIntRef(i) * detJ;
 
         dNdx.col(i) = ( dyds*dNNdr.col(i) - dydr*dNNds.col(i)) / detJ;
@@ -200,8 +207,8 @@ void ShapeFctsStrdFEM(
     }
 
     // Map integration points from reference to real element.
-    xxInt = xxElem.transpose() * NN;
-    yyInt = yyElem.transpose() * NN;
+    xxInt = NN.transpose() * xxElem;
+    yyInt = NN.transpose() * yyElem;
 
 }
 
@@ -439,7 +446,7 @@ void ShapeFctsXFEMSign(
 
     // Get standard FE shape functions and level-set values at int.points.
     ShapeFctsStrdFEM(xxElem, yyElem, xxIntRef, yyIntRef, wwIntRef, nQ, N, dNdx, dNdy, xxInt, yyInt, wwInt);
-    ffInt = N * ffElem;
+    ffInt = N.transpose() * ffElem;
 
     // Define the enrichment functions M, dMdx, dMdy for enr. element nodes.
     M     = NumLib::LocalMatrix::Zero(4, nQ);
@@ -512,9 +519,9 @@ void BuildMatRhs_Hooke(
         NumLib::LocalVector Mx = dMdxMat.col(i);
         NumLib::LocalVector My = dMdyMat.col(i);
 
-        NumLib::LocalMatrix NxMx(2, Nx.rows());
+        NumLib::LocalVector NxMx(2*Nx.rows());
         NxMx << Nx, Mx;
-        NumLib::LocalMatrix NyMy(2, Ny.rows());
+        NumLib::LocalVector NyMy(2*Ny.rows());
         NxMx << Ny, My;
         NumLib::LocalMatrix NxNxT = NxMx * NxMx.transpose();
         NumLib::LocalMatrix NxNyT = NxMx * NyMy.transpose();
@@ -528,7 +535,7 @@ void BuildMatRhs_Hooke(
         ElemMAT22 += wwInt(i) * ( (lambda+2*mu) * NyNyT + mu * NxNxT );
 
         // Compute right hand side.
-        NumLib::LocalMatrix NM(2, N.rows());
+        NumLib::LocalVector NM(2*N.rows());
         NM << N, M;
         ElemRHS1 += wwInt(i) * ( NM * fx );
         ElemRHS2 += wwInt(i) * ( NM * fy );
@@ -538,12 +545,12 @@ void BuildMatRhs_Hooke(
     // Add element contribution to global matrix.
 //    uuNodes = [Nodes          Nodes+2*NodeNum];
 //    vvNodes = [Nodes+NodeNum  Nodes+3*NodeNum];
-    std::vector<size_t> uuNodes(2*NodeNum), vvNodes(2*NodeNum);
-    for (size_t i=0; i<NodeNum; i++) {
+    std::vector<size_t> uuNodes(2*4), vvNodes(2*4);
+    for (size_t i=0; i<4; i++) {
         uuNodes[i] = Nodes[i];
-        uuNodes[i+NodeNum] = Nodes[i] + 2*NodeNum;
+        uuNodes[i+4] = Nodes[i] + 2*NodeNum;
         vvNodes[i] = Nodes[i] + NodeNum;
-        vvNodes[i+NodeNum] = Nodes[i] + 3*NodeNum;
+        vvNodes[i+4] = Nodes[i] + 3*NodeNum;
     }
     leqs.addAsub(uuNodes, uuNodes, ElemMAT11);
     leqs.addAsub(uuNodes, vvNodes, ElemMAT12);
