@@ -21,8 +21,8 @@
 #include "SolutionLib/Fem/FemDirichletBC.h"
 #include "SolutionLib/Fem/FemNeumannBC.h"
 #include "GeoProcessBuilder.h"
-#include "ChemLib\chemReactionKin.h"
-#include "ChemLib\chemReductionKin.h"
+#include "ChemLib/chemReactionKin.h"
+#include "ChemLib/chemReductionKin.h"
 
 using namespace ogs5;
 

@@ -30,7 +30,7 @@
 #include <vector>
 
 // GEOLIB
-#include "GeoLib\GEOObjects.h"
+#include "GeoLib/GEOObjects.h"
 
 namespace ogs5
 {

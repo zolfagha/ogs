@@ -14,7 +14,7 @@
 #define CHEM_REACTION_KIN_H
 
 #include "chemReaction.h"
-#include "ogsFileIO\FemIO\ogs5\rf_kinreact.h"
+#include "ogsFileIO/FemIO/ogs5/rf_kinreact.h"
 
 namespace ogsChem
 {
