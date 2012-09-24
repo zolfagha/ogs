@@ -1,5 +1,5 @@
 
-OGS_ADD_PROCESS_SYS_SOLVER(GROUNDWATER_FLOW, FunctionHead, DiscreteLib::DiscreteSystem, MathLib::DenseLinearEquation);
+OGS_ADD_PROCESS_SYS_SOLVER(GROUNDWATER_FLOW, FunctionHead, DiscreteLib::DiscreteSystem, MathLib::LisLinearEquation);
 //OGS_ADD_PROCESS_SYS_SOLVER(GROUNDWATER_FLOW, FunctionHead, DiscreteLib::OMPDiscreteSystem, MathLib::LisLinearEquation);
 OGS_ADD_PROCESS_SYS_SOLVER(LIQUID_FLOW, FunctionLiquidPressure, DiscreteLib::DiscreteSystem, MathLib::DenseLinearEquation);
 OGS_ADD_PROCESS_SYS(HEAD_TO_ELEMENT_VELOCITY, FunctionHeadToElementVelocity, DiscreteLib::DiscreteSystem);
