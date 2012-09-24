@@ -45,7 +45,10 @@ public:
 	/**
       * convert eta and xi vector to concentration vector
       */
-	void EtaXi2Conc(); 
+	void EtaXi2Conc(ogsChem::LocalVector &local_eta_mob, 
+	     			ogsChem::LocalVector &local_eta_immob, 
+		    		ogsChem::LocalVector &local_xi, 
+					ogsChem::LocalVector &local_conc); 
 
     /**
       * whether the reduction scheme has been initialized

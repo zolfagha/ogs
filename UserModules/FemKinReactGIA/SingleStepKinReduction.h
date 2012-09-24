@@ -114,10 +114,10 @@ private:
     // UserResidualFunction* _f_r;
     // UserDxFunction* _f_dx;
     // NonlinearSolverType* _f_nonlinear;
-    SolutionVector *_x_n0;
-    SolutionVector *_x_n1_0;
-    SolutionVector *_x_n1;
-    SolutionVector *_x_st;
+    SolutionVector *_x_n0;  // previous time step solution
+    SolutionVector *_x_n1_0;// the initial guess for the current solution
+    SolutionVector *_x_n1;  // the updated sotluon
+    SolutionVector *_x_st;  // source term 
 };
 
 template <class T_USER_FEM_PROBLEM>
@@ -125,38 +125,38 @@ SingleStepKinReduction<T_USER_FEM_PROBLEM>::SingleStepKinReduction(MyDiscreteSys
     : AbstractTimeSteppingAlgorithm(*problem->getTimeSteppingFunction()),
       _problem(problem), _discrete_system(dis)
 {
-    //const size_t n_var = problem->getNumberOfVariables();
-    //MeshLib::IMesh* msh = dis->getMesh();
+    const size_t n_var = problem->getNumberOfVariables();
+    MeshLib::IMesh* msh = dis->getMesh();
 
-    //// create dof map
-    //for (size_t i=0; i<n_var; i++) {
-    //    size_t n_dof_per_var = msh->getNumberOfNodes();
-    //    _dofManager.addVariableDoFs(msh->getID(), 0, n_dof_per_var);
-    //}
-    //_dofManager.construct(DiscreteLib::DofNumberingType::BY_POINT);
-    //const size_t n_total_dofs = _dofManager.getTotalNumberOfActiveDoFs();
+    // create dof map
+    for (size_t i=0; i<n_var; i++) {
+        size_t n_dof_per_var = msh->getNumberOfNodes();
+        _dofManager.addVariableDoFs(msh->getID(), 0, n_dof_per_var);
+    }
+    _dofManager.construct(DiscreteLib::DofNumberingType::BY_POINT);
+    const size_t n_total_dofs = _dofManager.getTotalNumberOfActiveDoFs();
 
-    //// initialize vectors for each variable
-    //_vec_u_n1.resize(n_var, 0);
-    //for (size_t i=0; i<n_var; i++) {
-    //    _vec_u_n1[i] = problem->getVariable(i)->getIC()->clone();
-    //}
+    // initialize vectors for each variable
+    _vec_u_n1.resize(n_var, 0);
+    for (size_t i=0; i<n_var; i++) {
+        _vec_u_n1[i] = problem->getVariable(i)->getIC()->clone();
+    }
 
-    //// initialize vectors for solution, ST
-    //_x_n0 = dis->template createVector<double>(n_total_dofs);
-    //_x_n1 = dis->template createVector<double>(n_total_dofs);
-    //_x_n1_0 = dis->template createVector<double>(n_total_dofs);
-    //_x_st = dis->template createVector<double>(n_total_dofs);
+    // initialize vectors for solution, ST
+    _x_n0 = dis->template createVector<double>(n_total_dofs);
+    _x_n1 = dis->template createVector<double>(n_total_dofs);
+    _x_n1_0 = dis->template createVector<double>(n_total_dofs);
+    _x_st = dis->template createVector<double>(n_total_dofs);
 
-    //// copy values of each variable to one solution vector
-    //for (size_t i=0; i<n_var; i++) {
-    //    SolutionVector* vec_var = problem->getVariable(i)->getIC()->getDiscreteData();
-    //    DiscreteLib::setGlobalVector(_dofManager, i, msh->getID(), *vec_var, *_x_n1);
-    //}
+    // copy values of each variable to one solution vector
+    for (size_t i=0; i<n_var; i++) {
+        SolutionVector* vec_var = problem->getVariable(i)->getIC()->getDiscreteData();
+        DiscreteLib::setGlobalVector(_dofManager, i, msh->getID(), *vec_var, *_x_n1);
+    }
 
-    //// create linear equation systems
-    //_linear_solver = new LinearSolverType();
-    //_linear_eqs = _discrete_system->template createLinearEquation
+    // create linear equation systems
+    // _linear_solver = new LinearSolverType();
+    // _linear_eqs = _discrete_system->template createLinearEquation
     //        <   LinearSolverType,
     //            DiscreteLib::SparsityBuilderFromNodeConnectivity
     //        >(_linear_solver, &_dofManager);

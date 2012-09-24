@@ -42,16 +42,13 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	if ( !(this->_ReductionKin->IsInitialized()) ) 
 	{
 		// error msg
-	    ERR("While initialize the Global Implicit Reactive Transport Process, the reduction scheme has not been correctly initialized! ");
+	    ERR("While initialize the Global Implicit Reactive Transport Process, the reduction class has not been correctly initialized! ");
 		// then stop the program
 		exit(1);
 	}
 
 	// first get the number of components
 	size_t n_Comp = femData->map_ChemComp.size(); 
-	// add all concentrations to discretized memory space
-	
-
 
 	// tell me how many eta and how many xi we have
 	size_t n_eta, n_xi, n_eta_mob, n_eta_immob; 
@@ -94,6 +91,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	_solution = new MyKinReductionSolution( dis, _problem ); 
 	// add variables
 	// for the KinReduction problem, variables are the concentrations of all chemical components
+	// add all concentrations to discretized memory space
 	for ( i=0; i<n_Comp; i++ )
 	{
 		_problem->addVariable( femData->map_ChemComp[i]->second->get_name() );
@@ -151,6 +149,12 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 
 	// convert IC _concentrations to eta and xi
 	convert_conc_to_eta_xi();
+
+	// set IC for eta
+	for ( i=0; i < n_eta_mob; i++ )
+	{
+		_linear_problems[i]->getVariable(0)->setIC( _eta_mob[i] ); 
+	}
 	
 	// set BC for concentrations
 	const BaseLib::Options* opBCList = option.getSubGroup("BCList");
@@ -196,8 +200,6 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
         }
     }
 
-
-
 	// for the linear transport problem, variables are eta_mobile
 	for ( i=0; i < n_eta_mob ; i++ )
 	{
@@ -218,47 +220,22 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	// for nonlinear coupled transport problem, variables are xi
 	// TODO
 
-
-	
-
-	
-
-	// calculate IC values from concentrations
-	
-	// calculate BC values from concentrations
-	
-
-
-
-	
-
-
-	
-
-
-
-	/*
-
-    // set up variables
-
-
-
-    // ST
-
     // set up solution
-    _solution = new MySolutionType(dis, _problem);
-    MyLinearSolver* linear_solver = _solution->getLinearEquationSolver();
+    _solution = new MyKinReductionSolution(dis, _problem);
+	MyLinearSolver* linear_solver = _linear_solution->getLinearEquationSolver();
     const BaseLib::Options* optNum = option.getSubGroup("Numerics");
     linear_solver->setOption(*optNum);
-    _solution->getNonlinearSolver()->setOption(*optNum);
+	// set nonlinear solver options
+	// TODO
+    // _solution->getNonlinearSolver()->setOption(*optNum);
 
     // set initial output
     OutputVariableInfo var(this->getOutputParameterName(Concentrations), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput(var.name, var); 
 
     // initial output parameter
-    this->setOutput(Concentrations, concentrations->getIC());
-	*/
+	// TODO
+    // this->setOutput(Concentrations, Concentrations->getIC());
 
     return true;
 }
@@ -348,4 +325,63 @@ void FunctionConcentrations<T1, T2>::convert_conc_to_eta_xi(void)
 		}  // end of for node_idx
 	
 	}  // end of if _ReductionKin
+}
+
+
+template <class T1, class T2>
+void FunctionConcentrations<T1, T2>::convert_eta_xi_to_conc(void)
+{
+	size_t node_idx, i; 
+	size_t n_comp, n_eta_mob, n_eta_immob, n_xi; 
+
+	n_comp      = this->_ReductionKin->get_n_Comp();
+	n_eta_mob   = this->_ReductionKin->get_n_eta_mob(); 
+	n_eta_immob = this->_ReductionKin->get_n_eta() - this->_ReductionKin->get_n_eta_mob() ;
+	n_xi        = this->_ReductionKin->get_n_xi(); 
+	// only when the reduction scheme is fully initialized
+	if ( this->_ReductionKin->IsInitialized() )
+	{
+		// local vectors
+		LocalVector loc_eta_mob;
+		LocalVector loc_eta_immob;
+		LocalVector loc_xi;
+		LocalVector loc_conc; 
+		// allocate the memory for local vectors
+		loc_eta_mob     = LocalVector::Zero( this->_ReductionKin->get_n_eta_mob() ); 
+		loc_eta_immob   = LocalVector::Zero( this->_ReductionKin->get_n_eta() - this->_ReductionKin->get_n_eta_mob() ); 
+		loc_xi          = LocalVector::Zero( this->_ReductionKin->get_n_xi() ); 
+		loc_conc        = LocalVector::Zero( this->_ReductionKin->get_n_Comp() );
+
+		// for each nodes, 
+		for (node_idx=_concentrations[0]->getDiscreteData()->getRangeBegin(); 
+			 node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd(); 
+			 node_idx++ )
+		{
+			// put the local eta and xi into the global vector
+			// fill in eta_mob
+			for (i=0; i < n_eta_mob; i++)
+				loc_eta_mob[i] = this->_eta_mob[i]->getValue(node_idx); 
+			// fill in eta_immob
+			for (i=0; i < n_eta_immob; i++)
+				loc_eta_immob[i] = this->_eta_immob[i]->getValue(node_idx); 
+			// fill in xi
+			// this->_xi->setNodalValues( &loc_xi, node_idx*n_xi, n_xi ); 
+			loc_xi = this->_xi->getValue(node_idx); 
+
+	
+			// pass them to the transform function in the reductionKin class
+			// and thet the loc_eta_mob, local_eta_immob and local_xi
+			this->_ReductionKin->EtaXi2Conc(loc_eta_mob, loc_eta_immob, loc_xi, loc_conc);
+
+			for (i=0; i < n_comp; i++)
+			{
+				// gether all the concentrations 
+				_concentrations[i]->setValue(node_idx, loc_conc[i]); 
+			}  // end of for i
+
+		}  // end of for node_idx
+	
+	}  // end of if _ReductionKin
+
+
 }

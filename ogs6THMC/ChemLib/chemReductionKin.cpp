@@ -226,5 +226,25 @@ void chemReductionKin::Conc2EtaXi(ogsChem::LocalVector &local_conc,
 	local_xi.bottomRows( this->_n_xi_immob ) = local_xi_immob; 
 }
 
+void chemReductionKin::EtaXi2Conc(ogsChem::LocalVector &local_eta_mob, 
+	                              ogsChem::LocalVector &local_eta_immob, 
+								  ogsChem::LocalVector &local_xi, 
+								  ogsChem::LocalVector &local_conc)
+{
+	// declare local temp variable
+	ogsChem::LocalVector local_xi_mob, local_xi_immob, local_c_mob, local_c_immob; 
+
+	// combine xi vector
+	local_xi_mob = local_xi.topRows( this->_n_xi_mob ); 
+	local_xi_immob = local_xi.bottomRows( this->_n_xi_immob ); 
+
+	local_c_mob   = _matS_1_ast * local_xi_mob   + _mat_s_1 * local_eta_mob; 
+	local_c_immob = _matS_2_ast * local_xi_immob + _mat_s_2 * local_eta_immob; 
+
+	local_conc.topRows( this->_I_mob ) = local_c_mob; 
+	local_conc.bottomRows( this->_I_sorp + this->_I_min ) = local_c_immob; 
+
+}
+
 
 }  // end of namespace

@@ -25,6 +25,8 @@
 #include "ProcessLib/AbstractTransientProcess.h"
 #include "LinearTransportTimeODELocalAssember.h"
 #include "LinearTransportJacobianLocalAssembler.h"
+#include "NonLinearReactiveTransportTimeODELocalAssembler.h"
+#include "NonLinearReactiveTransportJacabianLocalAssembler.h"
 #include "DiscreteLib/Core/LocalDataType.h"
 
 template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER>
@@ -52,6 +54,9 @@ public:
     typedef LinearTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyLinearResidualAssemblerType; 
     typedef LinearTransportJacobianLocalAssembler MyLinearJacobianAssemblerType;                                                      
 	// for the nonlinear part, use different settings
+	typedef NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler> MyNonLinearAssemblerType; 
+	typedef NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyNonLinearResidualAssemblerType; 
+	typedef NonLinearReactiveTransportJacobianLocalAssembler MyNonLinearJacobianAssemblerType; 
 	
 	// linear Equation definition
     typedef SolutionLib::TemplateFemEquation<
@@ -72,25 +77,25 @@ public:
             MyLinearSolver
             > MyLinearSolutionType;
 
-	// nonlinear coupled part
-	//// Equation definition
-	//   typedef SolutionLib::TemplateFemEquation<
-	//           MyDiscreteSystem,
-	//           MyLinearSolver,
-	//           MyLinearAssemblerType,
-	//           MyResidualAssemblerType,
-	//           MyJacobianAssemblerType
-	//           > MyLinearEquationType;
-	//   // IVBV problem definition
-	//   typedef SolutionLib::FemIVBVProblem<
-	//           MyDiscreteSystem,
-	//           MyLinearEquationType
-	//           > MyLinearTransportProblemType;
-	//   // Solution algorithm definition
-	//   typedef SolutionLib::SingleStepFEM<
-	//           MyLinearTransportProblemType,
-	//           MyLinearSolver
-	//           > MyLinearSolutionType;
+	// nonlinear coupled part solving xi
+	// Equation definition
+	typedef SolutionLib::TemplateFemEquation<
+		    MyDiscreteSystem,
+			MyLinearSolver,
+			MyNonLinearAssemblerType,
+			MyNonLinearResidualAssemblerType,
+			MyNonLinearJacobianAssemblerType
+	        > MyNonLinearEquationType;
+	// IVBV problem definition
+	typedef SolutionLib::FemIVBVProblem<
+		    MyDiscreteSystem,
+	        MyNonLinearEquationType
+	        > MyNonLinearReactiveTransportProblemType;
+	// Solution algorithm definition
+	typedef SolutionLib::SingleStepFEM<
+			MyNonLinearReactiveTransportProblemType,
+			MyLinearSolver
+			> MyNonLinearSolutionType;
 
 	// the general reduction problem part
 	typedef SolutionLib::FemKinReduction<MyDiscreteSystem> MyKinReductionProblemType; 
@@ -133,11 +138,10 @@ public:
 
 	virtual int solveTimeStep(const NumLib::TimeStep &time)
     {
-		// TODO
-        //INFO("Solving %s...", getProcessName().c_str());
-        //initializeTimeStep(time);
-        //getSolution()->solveTimeStep(time);
-        //updateOutputParameter(time);
+		INFO("Solving %s...", getProcessName().c_str());
+        initializeTimeStep(time);
+        getSolution()->solveTimeStep(time);
+        updateOutputParameter(time);
         return 0;
     }
 
@@ -160,7 +164,7 @@ public:
     {
         output(time);
 		// TODO: call accept for all solutions. 
-        // getSolution()->accept(time);
+        getSolution()->accept(time);
     };
 
 protected:
@@ -168,7 +172,7 @@ protected:
 
     virtual void updateOutputParameter(const NumLib::TimeStep &time);
 
-    virtual MyLinearSolutionType* getSolution() {return _linear_solution;};
+    virtual MyKinReductionSolution* getSolution() {return _solution;};
 
     virtual void output(const NumLib::TimeStep &time);
 
@@ -177,12 +181,14 @@ private:
 
 private:
 	virtual void convert_conc_to_eta_xi(void); 
+	virtual void convert_eta_xi_to_conc(void); 
 
     // linear problem and solution pointer
 	std::vector<MyLinearTransportProblemType*> _linear_problems;
     MyLinearSolutionType* _linear_solution;
 	// nonlinear problem and solution pointer
-	// TODO
+	MyNonLinearReactiveTransportProblemType* _non_linear_problem;
+	MyNonLinearSolutionType* _non_linear_solution; 
 	// reduction problem and solution
 	MyKinReductionProblemType* _problem; 
 	MyKinReductionSolution*    _solution; 
