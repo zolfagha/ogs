@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<coupling>
+	<M name="XFEM_EXAMPLE_CRACK1">
+		<out>DISPLACEMENT</out>
+	</M>
+</coupling>
+
