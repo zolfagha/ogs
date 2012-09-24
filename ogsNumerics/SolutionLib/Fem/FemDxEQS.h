@@ -41,7 +41,7 @@ template <
 class TemplateTransientDxFEMFunction
 {
 public:
-    typedef FemVariable<T_DIS_SYS> MyVariable;
+    typedef FemVariable MyVariable;
     typedef T_LINEAR_SOLVER LinearSolverType;
     typedef T_LOCAL_JACOBIAN_ASSEMBLER UserLocalJacobianAssembler;
     typedef typename NumLib::TransientElementWiseMatrixUpdater<UserLocalJacobianAssembler> MyUpdater;

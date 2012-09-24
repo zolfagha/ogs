@@ -23,7 +23,7 @@
 #include "PolylineVec.h"
 #include "Surface.h"
 #include "SurfaceVec.h"
-
+#include "GeoDomain.h"
 
 namespace GeoLib
 {
@@ -173,6 +173,12 @@ public:
      */
     const SurfaceVec* getSurfaceVecObj(const std::string &name) const;
 
+    /**
+     * Returns a pointer to a GeoDomain object
+     * @return GeoDomain object
+     */
+    const GeoDomain* getDomainObj() const {return &_geo_domain;};
+
     /// Returns the names of all geometry vectors.
     void getGeometryNames (std::vector<std::string>& names) const;
 
@@ -183,7 +189,13 @@ public:
      */
     void mergeGeometries (std::vector<std::string> const & names, std::string &merged_geo_name);
 
-    /// Returns geometric object with the given name
+    /**
+     * Returns geometric object with the given name
+     * @param unique_geo_name   the project name
+     * @param geo_type_name     the geometry type name
+     * @param geo_name          the geometry name
+     * @return a pointer to a geometric object
+     */
     const GeoObject* searchGeoByName(const std::string &unique_geo_name, const std::string &geo_type_name, const std::string &geo_name) const;
 
     /** constructor */
@@ -213,6 +225,9 @@ protected:
     std::vector<PolylineVec*> _ply_vecs;
     /** vector manages pointers to SurfaceVec objects */
     std::vector<SurfaceVec*> _sfc_vecs;
+
+    /** domain object */
+    GeoDomain _geo_domain;
 };
 
 } // end namespace

@@ -456,7 +456,7 @@ const GeoObject* GEOObjects::searchGeoByName(const std::string &unique_geo_name,
 
     else if (geo_type_name.find("DOMAIN") != std::string::npos)
     {
-        return NULL;
+        return getDomainObj();
     }
 
     return NULL;

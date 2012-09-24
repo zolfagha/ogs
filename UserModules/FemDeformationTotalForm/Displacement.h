@@ -57,10 +57,9 @@ public:
             MyEquationType
             > MyProblemType;
     // Solution algorithm definition
-    typedef SolutionLib::SingleStepFEM
-            <
-                MyProblemType,
-                MyLinearSolver
+    typedef SolutionLib::SingleStepFEM<
+		    MyProblemType,
+            MyLinearSolver
             > MySolutionType;
 
     typedef typename FemLib::FemNodalFunctionScalar<MyDiscreteSystem>::type MyNodalFunctionScalar;
