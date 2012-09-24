@@ -36,11 +36,11 @@ namespace ogs5
 {
 
 /* residual for linearisation of critical functions */
-#define residual 1.E-20
-#define maxMonod 5
-#define maxInhibition 5
-#define maxBioReactions 30
-#define maxNumber_of_Components 30
+//#define residual 1.E-20
+//#define maxMonod 5
+//#define maxInhibition 5
+//#define maxBioReactions 30
+//#define maxNumber_of_Components 30
 
 #define KRC_FILE_EXTENSION ".krc"
 
