@@ -41,7 +41,7 @@ class TemplateTransientResidualFEMFunction
 {
 public:
     typedef T_DIS_SYS MyDiscreteSystem;
-    typedef FemVariable<T_DIS_SYS> MyVariable;
+    typedef FemVariable MyVariable;
     typedef T_LOCAL_RESIDUAL_ASSEMBLER UserLocalResidualAssembler;
     typedef typename NumLib::TransientElementWiseVectorUpdater<UserLocalResidualAssembler> MyUpdater;
     typedef typename T_DIS_SYS::template MyVectorAssembler<double, MyUpdater>::type MyGlobalAssembler;

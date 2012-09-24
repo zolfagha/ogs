@@ -36,12 +36,9 @@ namespace SolutionLib
  * - IC
  * - BC1, 2
  */
-template <class T_DIS_SYS>
 class FemVariable
 {
 public:
-    typedef typename FemLib::FemNodalFunctionScalar<T_DIS_SYS>::type MyNodalFunctionScalar;
-
     /**
      *
      * @param id        variable id
@@ -67,9 +64,6 @@ public:
     const std::string& getName() const { return _name;}
 
     //----------------------------------------------------------------------
-//    void setIC(MyNodalFunctionScalar* ic) { _f_ic = ic; };
-//    MyNodalFunctionScalar* getIC() const { return _f_ic; };
-
     void setIC(FemIC* ic) { _ic = ic; };
     FemIC* getIC() const { return _ic; };
 
@@ -103,7 +97,6 @@ private:
     size_t _id;
     std::string _name;
     FemIC* _ic;
-//    MyNodalFunctionScalar* _f_ic;
     std::vector<FemDirichletBC*> _map_bc1;
     std::vector<IFemNeumannBC*> _map_bc2;
     FemLib::PolynomialOrder::type _current_order;

@@ -50,7 +50,7 @@ class TemplateTransientLinearFEMFunction
 public:
     typedef T_DIS_SYS MyDiscreteSystem;
     typedef T_LINEAR_SOLVER LinearSolverType;
-    typedef FemVariable<T_DIS_SYS> MyVariable;
+    typedef FemVariable MyVariable;
     typedef T_LOCAL_ASSEMBLER UserLocalAssembler;
     typedef typename NumLib::TransientElementWiseLinearEquationUpdater<UserLocalAssembler> MyUpdater;
     typedef typename T_DIS_SYS::template MyLinearEquationAssembler<MyUpdater,LinearSolverType>::type MyGlobalAssembler;
