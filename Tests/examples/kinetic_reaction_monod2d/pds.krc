@@ -1,0 +1,63 @@
+GeoSys Kinetic Reactions
+#KINREACTIONDATA      
+ $SOLVER_TYPE
+	1                ; Solver type
+ $RELATIVE_ERROR	
+	1.e-6		 ; rel. Error
+ $MIN_TIMESTEP	
+	1.e-6		; min Timestep
+ $INITIAL_TIMESTEP	
+	1.e-4       ; init Timestep
+ $BACTERIACAPACITY
+  100.0
+ $NO_REACTIONS
+   POLYLINE PLY_BC_LEFT
+
+#REACTION ; 
+ $NAME
+   DoubleMonod ;
+ $TYPE
+   monod;
+ $BACTERIANAME
+   Biomass
+ $EQUATION
+  1 Comp_A + 1 Comp_B =  1 Comp_C; 
+ $RATECONSTANT
+ 1.15741e-5  1.0   ; max growth rate my_max , exponent
+ $GROWTH
+    1
+ $MONODTERMS
+  ;2   ; Number of monod terms in kinetic equation
+  Comp_A   8.33e-5  1.0 ; for each monod term: species concentration order
+  Comp_B   3.13e-5  1.0
+ $INHIBITIONTERMS
+  ;0
+ $PRODUCTIONSTOCH
+  ;2
+  Comp_A  -1.0
+  Comp_B  -1.0
+  Comp_C  +1.0
+  
+#REACTION ; 
+ $NAME
+   DoubleMonodDecay ;
+ $TYPE
+   monod;
+ $BACTERIANAME
+  Biomass
+ $EQUATION
+  Biomass =  Biomass ; 
+ $RATECONSTANT
+     -1.15741e-6  1.0   ; first- order rate , exponent
+ $GROWTH
+    1
+ $MONODTERMS
+  ;0   ; Number of monod terms in kinetic equation
+ $INHIBITIONTERMS
+  ;0
+ $PRODUCTIONTERMS
+  ;0
+  
+#STOP
+
+

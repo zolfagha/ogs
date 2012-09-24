@@ -23,6 +23,7 @@
 
 //#include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "DiscreteLib/Core/IDiscreteVector.h"
+#include "DiscreteLib/Core/LocalDataType.h"
 
 #include "NumLib/Function/TXFunction.h"
 #include "NumLib/Function/ITXDiscreteFunction.h"
@@ -318,7 +319,7 @@ public:
         *_nodal_values = x;
     }
 
-    /// reset nodal values with the given value
+	/// reset nodal values with the given value
     void resetNodalValues (double v)
     {
         *_nodal_values = v;

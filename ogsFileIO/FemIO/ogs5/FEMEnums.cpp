@@ -43,7 +43,9 @@ ProcessType convertProcessType ( const std::string& pcs_type_string )
         return DEFORMATION_DYNAMIC;
     if (pcs_type_string.compare ("MASS_TRANSPORT") == 0)
         return MASS_TRANSPORT;
-    if (pcs_type_string.compare ("MULTI_PHASE_FLOW") == 0)
+	if (pcs_type_string.compare ("KIN_REACT_GIA") == 0)  // HS 09.2012
+        return KIN_REACT_GIA;
+	if (pcs_type_string.compare ("MULTI_PHASE_FLOW") == 0)
         return MULTI_PHASE_FLOW;
     if (pcs_type_string.compare ("DEFORMATION_H2") == 0)
         return DEFORMATION_H2;
@@ -91,6 +93,8 @@ std::string convertProcessTypeToString ( ProcessType pcs_type )
         return "DEFORMATION_DYNAMIC";
     if (pcs_type == MASS_TRANSPORT)
         return "MASS_TRANSPORT";
+	if (pcs_type == KIN_REACT_GIA)  // HS 09.2012
+		return "KIN_REACT_GIA";  
     if (pcs_type == MULTI_PHASE_FLOW)
         return "MULTI_PHASE_FLOW";
     if (pcs_type == DEFORMATION_H2)

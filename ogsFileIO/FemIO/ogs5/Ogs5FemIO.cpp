@@ -29,13 +29,16 @@ bool Ogs5FemIO::read(const std::string &proj_path, Ogs5FemData &ogs5data)
     MFPRead(proj_path, ogs5data.mfp_vector);
     MSPRead(proj_path, ogs5data.msp_vector);
     MMPRead(proj_path, ogs5data.mmp_vector);
-    CPRead(proj_path, ogs5data.cp_vector);
-    BCRead(proj_path, ogs5data.bc_vector);
-    STRead(proj_path, ogs5data.st_vector);
-    ICRead(proj_path, ogs5data.ic_vector);
+    CPRead( proj_path, ogs5data.cp_vector);
+    BCRead( proj_path, ogs5data.bc_vector);
+    STRead( proj_path, ogs5data.st_vector);
+    ICRead( proj_path, ogs5data.ic_vector);
     OUTRead(proj_path, ogs5data.out_vector);
     TIMRead(proj_path, ogs5data.time_vector);
     NUMRead(proj_path, ogs5data.num_vector);
+	KRRead( proj_path, ogs5data.KinReact_vector, 
+		               ogs5data.KinReactData_vector, 
+					   ogs5data.KinBlob_vector); 
 
     // set primary variable name
     size_t mass_transport_count = 0;
@@ -43,21 +46,29 @@ bool Ogs5FemIO::read(const std::string &proj_path, Ogs5FemData &ogs5data)
         CRFProcess* pcs = ogs5data.pcs_vector[i];
         switch (pcs->getProcessType()) {
         case FiniteElement::GROUNDWATER_FLOW:
-            pcs->primary_variable_name = "HEAD";
+			pcs->primary_variable_name.push_back("HEAD");
             break;
         case FiniteElement::LIQUID_FLOW:
-            pcs->primary_variable_name = "PRESSURE1";
+            pcs->primary_variable_name.push_back("PRESSURE1");
             break;
         case FiniteElement::HEAT_TRANSPORT:
-            pcs->primary_variable_name = "TEMPERATURE1";
+            pcs->primary_variable_name.push_back("TEMPERATURE1");
             break;
         case FiniteElement::MASS_TRANSPORT:
-            pcs->primary_variable_name = ogs5data.cp_vector[mass_transport_count]->compname;
+			pcs->primary_variable_name.push_back(ogs5data.cp_vector[mass_transport_count]->compname);
             mass_transport_count++;
             break;
         case FiniteElement::DEFORMATION:
-            pcs->primary_variable_name = "DISPLACEMENT";
+            pcs->primary_variable_name.push_back("DISPLACEMENT");
             break;
+        case FiniteElement::DEFORMATION_FLOW:
+            pcs->primary_variable_name.push_back("DISPLACEMENT");
+            pcs->primary_variable_name.push_back("PRESSURE1");
+            break;
+		case FiniteElement::KIN_REACT_GIA:
+			for (size_t i=0; i<ogs5data.cp_vector.size() ; i++)
+				pcs->primary_variable_name.push_back( ogs5data.cp_vector[i]->compname); 
+			break; 
         }
     }
 

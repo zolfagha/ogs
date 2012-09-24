@@ -52,6 +52,11 @@ void findNodesOnGeometry(IMesh const* msh, GeoLib::GeoObject const* obj, std::ve
         case GeoLib::POLYLINE:
             findNodesOnPolyline(msh, static_cast<GeoLib::Polyline const*>(obj), vec_nodes);
             break;
+        case GeoLib::GEODOMAIN:
+            vec_nodes->resize(msh->getNumberOfNodes());
+            for (size_t i=0; i<vec_nodes->size(); i++)
+                (*vec_nodes)[i] = i;
+            break;
         default:
             throw "This geo type is not supported in MeshLib::findNodesOnGeometry()";
             break;

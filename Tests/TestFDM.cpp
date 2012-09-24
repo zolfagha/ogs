@@ -19,6 +19,7 @@
 #include "GeoLib/Polyline.h"
 #include "GeoLib/Line.h"
 #include "GeoLib/Rectangle.h"
+#include "GeoLib/GeoDomain.h"
 #include "DiscreteLib/Serial/DiscreteSystem.h"
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "NumLib/Function/TXFunction.h"
@@ -129,10 +130,13 @@ MyFunctionConcentration::MassFemProblem* defineMassTransportProblem(DiscreteSyst
     // var
     MyFunctionConcentration::MassFemProblem::MyVariable* var = _problem->addVariable("concentration");
     //IC
-    MyFemNodalFunctionScalar* c0 = new MyFemNodalFunctionScalar();
-    c0->initialize(dis, PolynomialOrder::Linear, 0);
-    c0->setFeObjectContainer(_feObjects);
-    var->setIC(c0);
+    SolutionLib::FemIC* var_ic = new SolutionLib::FemIC(dis.getMesh());
+    var_ic->addDistribution(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
+    var->setIC(var_ic);
+//    MyFemNodalFunctionScalar* c0 = new MyFemNodalFunctionScalar();
+//    c0->initialize(dis, PolynomialOrder::Linear, 0);
+//    c0->setFeObjectContainer(_feObjects);
+//    var_ic->setup(*c0);
     //BC
     NumLib::TXFunctionConstant* f1 = new  NumLib::TXFunctionConstant(1.0);
     var->addDirichletBC(new FemDirichletBC(dis.getMesh(), line.getPoint1(), f1));
