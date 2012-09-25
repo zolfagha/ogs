@@ -229,8 +229,13 @@ int SingleStepKinReduction<T_USER_FEM_PROBLEM, T_USER_LINEAR_SOLUTION, T_USER_NO
 	size_t i; 
 	// solving linear problems one after the other
 	for (i=0; i<_lin_solutions.size(); i++)
+	{
+		// TODO, print information
+		INFO("--Solving linear equation for eta_%d...", i ); 
 		_lin_solutions[i]->solveTimeStep( t_n1 );
+	}
 	// solving the non-linear problem
+	INFO("--Solving non-linear equations for xi..."); 
 	_nlin_solution->solveTimeStep( t_n1 ); 
 
 	// getting result
