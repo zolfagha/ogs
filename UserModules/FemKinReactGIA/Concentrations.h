@@ -99,7 +99,9 @@ public:
 
 	// the general reduction problem part
 	typedef SolutionLib::FemKinReduction<MyDiscreteSystem> MyKinReductionProblemType; 
-	typedef SolutionLib::SingleStepKinReduction<MyKinReductionProblemType, MyLinearSolver> MyKinReductionSolution; 
+	typedef SolutionLib::SingleStepKinReduction<MyKinReductionProblemType,
+		                                        MyLinearSolutionType, 
+	                                            MyNonLinearSolutionType> MyKinReductionSolution; 
 
     FunctionConcentrations() 
         : Process("KIN_REACT_GIA", 1, 1),

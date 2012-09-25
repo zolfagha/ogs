@@ -50,13 +50,16 @@ namespace SolutionLib
  */
 template <
     class T_USER_FEM_PROBLEM,
-    class T_LINEAR_SOLVER
+    class T_USER_LINEAR_SOLUTION, 
+	class T_USER_NON_LINEAR_SOLUTION 
     >
 class SingleStepKinReduction
     : public AbstractTimeSteppingAlgorithm
 {
 public:
     typedef T_USER_FEM_PROBLEM UserFemProblem;
+	typedef T_USER_LINEAR_SOLUTION UserLinearSolution; 
+	typedef T_USER_NON_LINEAR_SOLUTION UserNonLinearSolution; 
     typedef typename UserFemProblem::MyDiscreteSystem MyDiscreteSystem;
     typedef typename UserFemProblem::MyVariable MyVariable;
     // typedef typename UserFemProblem::EquationType::LinearEQSType UserLinearFunction;
@@ -71,7 +74,10 @@ public:
     /// - set up DoFs and equation index
     /// - prepare linear equation and solver
     /// - prepare linear functions
-    SingleStepKinReduction(MyDiscreteSystem* dis, UserFemProblem* problem);
+    SingleStepKinReduction(MyDiscreteSystem* dis, 
+		                   UserFemProblem* problem, 
+						   std::vector<UserLinearSolution*> linear_solutions, 
+						   UserNonLinearSolution* non_linear_solution);
 
     ///
     virtual ~SingleStepKinReduction()
@@ -132,15 +138,24 @@ private:
     SolutionVector *_x_n1;
     SolutionVector *_x_st;
     FemLib::LagrangianFeObjectContainer* _feObjects;
+
+	std::vector<UserLinearSolution*> _lin_solutions; 
+	UserNonLinearSolution* _nlin_solution; 
 };
 
 template <
     class T_USER_FEM_PROBLEM,
-    class T_LINEAR_SOLVER
+    class T_USER_LINEAR_SOLUTION, 
+	class T_USER_NON_LINEAR_SOLUTION 
     >
-SingleStepKinReduction<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER>::SingleStepKinReduction(MyDiscreteSystem* dis, UserFemProblem* problem)
+SingleStepKinReduction<T_USER_FEM_PROBLEM,T_USER_LINEAR_SOLUTION, T_USER_NON_LINEAR_SOLUTION>
+    ::SingleStepKinReduction(MyDiscreteSystem* dis, 
+	                         UserFemProblem* problem, 
+							 std::vector<UserLinearSolution*> linear_solutions, 
+							 UserNonLinearSolution* non_linear_solution)
     : AbstractTimeSteppingAlgorithm(*problem->getTimeSteppingFunction()),
-      _problem(problem), _discrete_system(dis)
+      _problem(problem), _discrete_system(dis), 
+	  _lin_solutions(linear_solutions), _nlin_solution(non_linear_solution)
 {
     INFO("->setting up a solution algorithm SingleStepKinReduction");
 
@@ -206,69 +221,83 @@ SingleStepKinReduction<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER>::SingleStepKinReducti
 
 template <
     class T_USER_FEM_PROBLEM,
-    class T_LINEAR_SOLVER
+    class T_USER_LINEAR_SOLUTION, 
+	class T_USER_NON_LINEAR_SOLUTION 
     >
-int SingleStepKinReduction<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER>::solveTimeStep(const NumLib::TimeStep &t_n1)
+int SingleStepKinReduction<T_USER_FEM_PROBLEM, T_USER_LINEAR_SOLUTION, T_USER_NON_LINEAR_SOLUTION>::solveTimeStep(const NumLib::TimeStep &t_n1)
 {
-    // time step
-    double dt = t_n1.getTime() - AbstractTimeSteppingAlgorithm::getTimeStepFunction()->getPrevious();
-    NumLib::TimeStep this_t_n1;
-    this_t_n1.assign(t_n1);
-    this_t_n1.setTimeStepSize(dt);
+	size_t i; 
+	// solving linear problems one after the other
+	for (i=0; i<_lin_solutions.size(); i++)
+		_lin_solutions[i]->solveTimeStep( t_n1 );
+	// solving the non-linear problem
+	_nlin_solution->solveTimeStep( t_n1 ); 
 
-    const size_t n_var = _problem->getNumberOfVariables();
-    const size_t msh_id = _discrete_system->getMesh()->getID();
-    // bc1
-    std::vector<size_t> list_bc1_eqs_id;
-    std::vector<double> list_bc1_val;
-    for (size_t i_var=0; i_var<n_var; i_var++) {
-        MyVariable* var = _problem->getVariable(i_var);
-        for (size_t i=0; i<var->getNumberOfDirichletBC(); i++) {
-            SolutionLib::FemDirichletBC *bc1 = var->getDirichletBC(i);
-            bc1->setup(var->getCurrentOrder());
-            std::vector<size_t> &list_bc_nodes = bc1->getListOfBCNodes();
-            std::vector<double> &list_bc_values = bc1->getListOfBCValues();
-            DiscreteLib::convertToEqsValues(_dofManager, i_var, msh_id, list_bc_nodes, list_bc_values, list_bc1_eqs_id, list_bc1_val);
-        }
-    }
+	// getting result
+	
 
-    // st
-    std::vector<size_t> list_st_eqs_id;
-    std::vector<double> list_st_val;
-    for (size_t i_var=0; i_var<n_var; i_var++) {
-        MyVariable* var = _problem->getVariable(i_var);
-        for (size_t i=0; i<var->getNumberOfNeumannBC(); i++) {
-            SolutionLib::IFemNeumannBC *bc2 = var->getNeumannBC(i);
-            bc2->setup(var->getCurrentOrder());
-            std::vector<size_t> &list_bc_nodes = bc2->getListOfBCNodes();
-            std::vector<double> &list_bc_values = bc2->getListOfBCValues();
-            DiscreteLib::convertToEqsValues(_dofManager, i_var, msh_id, list_bc_nodes, list_bc_values, list_st_eqs_id, list_st_val);
-        }
-    }
-    (*_x_st) = .0;
-    for (size_t i=0; i<list_st_eqs_id.size(); i++) {
-        (*_x_st)[list_st_eqs_id[i]] = list_st_val[i];
-    }
+
+
+    //// time step
+    //double dt = t_n1.getTime() - AbstractTimeSteppingAlgorithm::getTimeStepFunction()->getPrevious();
+    //NumLib::TimeStep this_t_n1;
+    //this_t_n1.assign(t_n1);
+    //this_t_n1.setTimeStepSize(dt);
+
+    //const size_t n_var = _problem->getNumberOfVariables();
+    //const size_t msh_id = _discrete_system->getMesh()->getID();
+
+    //// bc1
+    //std::vector<size_t> list_bc1_eqs_id;
+    //std::vector<double> list_bc1_val;
+    //for (size_t i_var=0; i_var<n_var; i_var++) {
+    //    MyVariable* var = _problem->getVariable(i_var);
+    //    for (size_t i=0; i<var->getNumberOfDirichletBC(); i++) {
+    //        SolutionLib::FemDirichletBC *bc1 = var->getDirichletBC(i);
+    //        bc1->setup(var->getCurrentOrder());
+    //        std::vector<size_t> &list_bc_nodes = bc1->getListOfBCNodes();
+    //        std::vector<double> &list_bc_values = bc1->getListOfBCValues();
+    //        DiscreteLib::convertToEqsValues(_dofManager, i_var, msh_id, list_bc_nodes, list_bc_values, list_bc1_eqs_id, list_bc1_val);
+    //    }
+    //}
+
+    //// st
+    //std::vector<size_t> list_st_eqs_id;
+    //std::vector<double> list_st_val;
+    //for (size_t i_var=0; i_var<n_var; i_var++) {
+    //    MyVariable* var = _problem->getVariable(i_var);
+    //    for (size_t i=0; i<var->getNumberOfNeumannBC(); i++) {
+    //        SolutionLib::IFemNeumannBC *bc2 = var->getNeumannBC(i);
+    //        bc2->setup(var->getCurrentOrder());
+    //        std::vector<size_t> &list_bc_nodes = bc2->getListOfBCNodes();
+    //        std::vector<double> &list_bc_values = bc2->getListOfBCValues();
+    //        DiscreteLib::convertToEqsValues(_dofManager, i_var, msh_id, list_bc_nodes, list_bc_values, list_st_eqs_id, list_st_val);
+    //    }
+    //}
+    //(*_x_st) = .0;
+    //for (size_t i=0; i<list_st_eqs_id.size(); i++) {
+    //    (*_x_st)[list_st_eqs_id[i]] = list_st_val[i];
+    //}
 
     // setup functions
     //_f_linear->reset(&t_n1, _x_n0);
     //_f_r->reset(&t_n1, _x_n0, _x_st);
     //_f_dx->reset(&t_n1, _x_n0);
 
-    // initial guess
-    *_x_n1_0 = *_x_n0;
-    for (size_t i=0; i<list_bc1_eqs_id.size(); i++) {
-        (*_x_n1_0)[list_bc1_eqs_id[i]] = list_bc1_val[i];
-    }
+    //// initial guess
+    //*_x_n1_0 = *_x_n0;
+    //for (size_t i=0; i<list_bc1_eqs_id.size(); i++) {
+    //    (*_x_n1_0)[list_bc1_eqs_id[i]] = list_bc1_val[i];
+    //}
 
     // solve
     //_f_nonlinear->solve(*_x_n1_0, *_x_n1);
 
-    // distribute solution vector to local vector for each variable
-    for (size_t i=0; i<n_var; i++) {
-        //SolutionVector* vec_var = _problem->getVariable(i)->getIC()->getNodalValues();
-        DiscreteLib::setLocalVector(_dofManager, i, msh_id, *_x_n1, *_vec_u_n1[i]->getDiscreteData());
-    }
+    //// distribute solution vector to local vector for each variable
+    //for (size_t i=0; i<n_var; i++) {
+    //    //SolutionVector* vec_var = _problem->getVariable(i)->getIC()->getNodalValues();
+    //    DiscreteLib::setLocalVector(_dofManager, i, msh_id, *_x_n1, *_vec_u_n1[i]->getDiscreteData());
+    //}
 
     return 0;
 }
