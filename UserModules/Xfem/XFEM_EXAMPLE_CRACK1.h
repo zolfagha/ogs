@@ -12,50 +12,46 @@
 
 #pragma once
 
-#include <string>
 #include "BaseLib/CodingTools.h"
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/Serial/DiscreteSystem.h"
-#include "FemLib/Function/FemNodalFunction.h"
-//#include "FemLib/Function/FemIntegrationPointFunction.h"
-#include "FemLib/Tools/LagrangeFeObjectContainer.h"
-//#include "NumLib/Function/TXVectorFunctionAsColumnData.h"
 #include "NumLib/Function/DiscreteDataConvergenceCheck.h"
+#include "FemLib/Function/FemNodalFunction.h"
+#include "FemLib/Tools/LagrangeFeObjectContainer.h"
 #include "ProcessLib/AbstractTimeIndependentProcess.h"
 
 namespace xfem
 {
 
 /**
+ * \brief XFEM example: 2D-XFEM with sign-enrichment along crack
  *
+ * 2D-XFEM problem with sign-enrichment along crack (NO branch-enrichment at crack-tip)
+ * at y=0 in a square domain (x [-1,1], y [-1, 1]).
+ * This example is created based on a MATLAB script (XFEM2dCrack_SignEnr.m)
+ * provided by Thomas-Peter Fries, RWTH Aachen University. His license statement
+ * is included in License.txt.
  */
-//template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER>
 class FunctionXFEM_EXAMPLE_CRACK1
 : public ProcessLib::AbstractTimeIndependentProcess
 {
 public:
-    //enum Out { Displacement=0 };
 
     typedef DiscreteLib::DiscreteSystem MyDiscreteSystem;
-//    //typedef T_LINEAR_SOLVER MyLinearSolver;
-//
-//    typedef typename FemLib::FemNodalFunctionScalar<MyDiscreteSystem>::type MyNodalFunctionScalar;
     typedef typename FemLib::FemNodalFunctionVector<MyDiscreteSystem>::type MyNodalFunctionVector;
-//    typedef typename NumLib::TXVectorFunctionAsColumnData<MyNodalFunctionVector> NodalPointScalarWrapper;
 
     ///
     FunctionXFEM_EXAMPLE_CRACK1()
-    : ProcessLib::AbstractTimeIndependentProcess("XFEM_DEFORMATION", 0, 0),
-      _feObjects(0) //, _displacement(0)//, _strain(0), _stress(0)
+    : ProcessLib::AbstractTimeIndependentProcess("XFEM_EXAMPLE_CRACK1", 0, 0),
+      _feObjects(NULL), _displacement(NULL), _exact_displacement(NULL), _msh(NULL), _dis(NULL)
     {
         // set default parameter name
-        //this->setOutputParameterName(Displacement, "Displacement");
     };
 
     ///
     virtual ~FunctionXFEM_EXAMPLE_CRACK1()
     {
-        BaseLib::releaseObject(_feObjects /*, _displacement , _strain, _stress*/);
+        BaseLib::releaseObject(_feObjects, _displacement , _exact_displacement);
     }
 
     /// initialize this process
@@ -75,13 +71,9 @@ public:
     void accept(const NumLib::TimeStep &/*time*/);
 
 protected:
-    virtual void updateOutputParameter(const NumLib::TimeStep &time);
-
-    virtual void output(const NumLib::TimeStep &time);
+    virtual void updateOutputParameter(const NumLib::TimeStep &/*time*/) {};
 
 private:
-    //void calculateStressStrain();
-
     DISALLOW_COPY_AND_ASSIGN(FunctionXFEM_EXAMPLE_CRACK1);
 
 private:
@@ -89,15 +81,10 @@ private:
     NumLib::DiscreteDataConvergenceCheck _checker;
     MyNodalFunctionVector* _displacement;
     MyNodalFunctionVector* _exact_displacement;
-//    std::vector<NodalPointScalarWrapper*> _vec_u_components;
-//    FemLib::FEMIntegrationPointFunctionVector* _strain;
-//    FemLib::FEMIntegrationPointFunctionVector* _stress;
     MeshLib::IMesh* _msh;
     MyDiscreteSystem* _dis;
 
 };
 
 }
-
-//#include "Displacement.hpp"
 
