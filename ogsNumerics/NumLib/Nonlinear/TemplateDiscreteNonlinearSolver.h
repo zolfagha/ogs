@@ -48,9 +48,9 @@ public:
         if (op->hasOption("solver_type"))
             _option.solver_type = _option.getSolverType(op->getOption("solver_type"));
         if (op->hasOption("error_tolerance"))
-            _option.error_tolerance = op->getOption<double>("error_tolerance");
+            _option.error_tolerance = op->getOptionAsNum<double>("error_tolerance");
         if (op->hasOption("max_iteration_step"))
-            _option.max_iteration = op->getOption<int>("max_iteration_step");
+            _option.max_iteration = op->getOptionAsNum<int>("max_iteration_step");
     }
 
     void setOption(const NonlinerSolverOption &option) { _option = option; }

@@ -45,27 +45,31 @@ public:
         OutputBuilder outBuilder;
         OutputTimingBuilder outTimBuilder;
 
-        const BaseLib::Options* opOutList = option.getSubGroup("OutputList");
-        for (const BaseLib::Options* op = opOutList->getFirstSubGroup("Output"); op!=0; op = opOutList->getNextSubGroup())
+        const BaseLib::Options* opOutList = option.getSubGroup("outputList");
+        for (const BaseLib::Options* op = opOutList->getFirstSubGroup("output"); op!=0; op = opOutList->getNextSubGroup())
         {
-            std::string data_type = op->getOption("DataType");
+            std::string data_type = op->getOption("dataType");
             IOutput* out = outBuilder.create(data_type);
             out->setOutputPath(output_dir, project_name);
 
-            size_t msh_id = 0; //TODO
+            size_t msh_id = op->getOptionAsNum<size_t>("meshID");
             out->setMesh(list_mesh[msh_id]);
 
-            std::string time_type = op->getOption("TimeType");
-            size_t out_steps = op->getOption<size_t>("TimeSteps");
+            std::string time_type = op->getOption("timeType");
+            size_t out_steps = op->getOptionAsNum<size_t>("timeSteps");
             out->setOutputTiming(outTimBuilder.create(time_type, out_steps));
 
-            const std::vector<std::string>* nod_var_name = op->getOptionAsArray<std::string>("NodalVariables");
-            out->addNodalVariable(*nod_var_name);
-            const std::vector<std::string>* ele_var_name = op->getOptionAsArray<std::string>("ElementalVariables");
-            out->addElementalVariable(*ele_var_name);
+            std::vector<std::string> nod_var_name;
+            for (const BaseLib::Options* opVal = op->getFirstSubGroup("nodeValue"); opVal!=NULL; opVal = op->getNextSubGroup())
+                nod_var_name.push_back(opVal->getOption("name"));
+            out->addNodalVariable(nod_var_name);
+            std::vector<std::string> ele_var_name;
+            for (const BaseLib::Options* opVal = op->getFirstSubGroup("elementValue"); opVal!=NULL; opVal = op->getNextSubGroup())
+                ele_var_name.push_back(opVal->getOption("name"));
+            out->addElementalVariable(ele_var_name);
 
-            std::string geo_type = op->getOption("GeometryType");
-            std::string geo_name = op->getOption("GeometryName");
+            std::string geo_type = op->getOption("geoType");
+            std::string geo_name = op->getOption("geoName");
             const GeoLib::GeoObject* geo_obj = geo.searchGeoByName(geo_unique_name, geo_type, geo_name);
             out->setGeometry(geo_obj);
 
