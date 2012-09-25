@@ -59,66 +59,14 @@ bool FunctionXFEM_EXAMPLE_CRACK1::initialize(const BaseLib::Options &option)
     _displacement = new MyNodalFunctionVector();
     NumLib::LocalVector tmp_u0 = NumLib::LocalVector::Zero(2);
     _displacement->initialize(*_dis, FemLib::PolynomialOrder::Linear, tmp_u0);
-
-#if 0
-    // set up problem
-    _problem = new MyProblemType(_dis);
-    _problem->setTimeSteppingFunction(*tim);
-    // set up variable
-    MyVariable* u_x = _problem->addVariable("u_x");
-    MyVariable* u_y = _problem->addVariable("u_y");
-    // IC
-    NumLib::TXFunctionBuilder f_builder;
-    MyNodalFunctionScalar* u0 = new MyNodalFunctionScalar();
-    u0->initialize(*_dis, FemLib::PolynomialOrder::Linear, 0);
-    u_x->setIC(u0);
-    u_y->setIC(u0);
-    // BC
-    const BaseLib::Options* opBCList = option.getSubGroup("BCList");
-    for (const BaseLib::Options* opBC = opBCList->getFirstSubGroup("BC"); opBC!=0; opBC = opBCList->getNextSubGroup())
-    {
-        std::string var_name = opBC->getOption("Variable");
-        std::string geo_type = opBC->getOption("GeometryType");
-        std::string geo_name = opBC->getOption("GeometryName");
-        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
-        std::string dis_name = opBC->getOption("DistributionType");
-        double dis_v = opBC->getOption<double>("DistributionValue");
-        NumLib::ITXFunction* f_bc =  f_builder.create(dis_name, dis_v);
-        getDisplacementComponent(u_x, u_y, 0, var_name)->addDirichletBC(new SolutionLib::FemDirichletBC(_msh, geo_obj, f_bc));
-    }
-
-    // ST
-    const BaseLib::Options* opSTList = option.getSubGroup("STList");
-    for (const BaseLib::Options* opST = opSTList->getFirstSubGroup("ST"); opST!=0; opST = opSTList->getNextSubGroup())
-    {
-        std::string var_name = opST->getOption("Variable");
-        std::string geo_type = opST->getOption("GeometryType");
-        std::string geo_name = opST->getOption("GeometryName");
-        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
-        std::string st_type = opST->getOption("STType");
-        std::string dis_name = opST->getOption("DistributionType");
-        double dis_v = opST->getOption<double>("DistributionValue");
-        if (st_type.compare("NEUMANN")==0) {
-            dis_v *= -1; //TODO
-        }
-        NumLib::ITXFunction* f_st =  f_builder.create(dis_name, dis_v);
-        if (f_st!=NULL) {
-            SolutionLib::IFemNeumannBC *femSt = 0;
-            if (st_type.compare("NEUMANN")==0) {
-                femSt = new SolutionLib::FemNeumannBC(_msh, _feObjects, geo_obj, f_st);
-            } else if (st_type.compare("SOURCESINK")==0) {
-                femSt = new SolutionLib::FemSourceTerm(_msh, geo_obj, f_st);
-            }
-            getDisplacementComponent(u_x, u_y, 0, var_name)->addNeumannBC(femSt);
-        } else {
-            WARN("Distribution type %s is specified but not found. Ignore this ST.", dis_name.c_str());
-        }
-    }
-#endif
+    _exact_displacement = new MyNodalFunctionVector();
+    _exact_displacement->initialize(*_dis, FemLib::PolynomialOrder::Linear, tmp_u0);
 
     // set initial output
     OutputVariableInfo var("DISPLACEMENT", OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
     femData->outController.setOutput(var.name, var);
+    OutputVariableInfo var_eu("EXACT_U", OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _exact_displacement);
+    femData->outController.setOutput(var_eu.name, var_eu);
 //    for (size_t i=0; i<_vec_u_components.size(); i++) {
 //        OutputVariableInfo var1(this->getOutputParameterName(Displacement) + getDisplacementComponentPostfix(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_u_components[i]);
 //        femData->outController.setOutput(var1.name, var1);
@@ -160,6 +108,8 @@ int FunctionXFEM_EXAMPLE_CRACK1::solveTimeStep(const NumLib::TimeStep &/*time*/)
     for (size_t i=0; i<NodeNum; i++) {
         const GeoLib::Point *pt = _msh->getNodeCoordinatesRef(i);
         exactSol_Mode1((*pt)[0], (*pt)[1], k1, kappa, mu, lambda, uuExact[i], vvExact[i]);
+        _exact_displacement->getValue(i)(0) = uuExact[i];
+        _exact_displacement->getValue(i)(1) = vvExact[i];
     }
 
     // define Dirichlet BC
@@ -299,6 +249,8 @@ void FunctionXFEM_EXAMPLE_CRACK1::accept(const NumLib::TimeStep &/*time*/)
 //    }
     OutputVariableInfo var("DISPLACEMENT", OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
     femData->outController.setOutput(var.name, var);
+    OutputVariableInfo var_eu("EXACT_U", OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _exact_displacement);
+    femData->outController.setOutput(var_eu.name, var_eu);
 }
 
 //template <class T1, class T2>

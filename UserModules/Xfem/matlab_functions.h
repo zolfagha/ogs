@@ -10,7 +10,10 @@
 //namespace xfem
 //{
 
-void exactSol_Mode1(double xx, double yy, double k1, double kappa, double mu, double lambda, double uu, double vv)
+void exactSol_Mode1(
+        const double xx, const double yy,
+        const double k1, const double kappa, const double mu, const double lambda,
+        double &uu, double &vv)
 {
     const static double pi = 4*atan(1.0);
 
@@ -224,7 +227,7 @@ void IntPoints2DRealElemQuad(
     ShapeFctsStrdFEM(xxElem, yyElem, xxIntRef, yyIntRef, wwIntRef, nQ, N, dNdx, dNdy, xxInt, yyInt, wwInt);
 }
 
-void IntPoints2DLevelSet(const NumLib::LocalVector &ff, const std::vector<GeoLib::Point> &vec_int_ref_xx, const std::vector<double> &vec_int_ref_w, NumLib::LocalVector &xxIntTotal, NumLib::LocalVector &yyIntTotal, NumLib::LocalVector &wwIntTotal)
+void IntPoints2DLevelSet(const NumLib::LocalVector &ff, const std::vector<GeoLib::Point> &vec_int_ref_xx, const std::vector<double> &vec_int_ref_w, const size_t nQnQ, NumLib::LocalVector &xxIntTotal, NumLib::LocalVector &yyIntTotal, NumLib::LocalVector &wwIntTotal)
 {
     const size_t n_ele_nodes = ff.rows();
     std::vector<double> SignVect(n_ele_nodes);
@@ -296,7 +299,6 @@ void IntPoints2DLevelSet(const NumLib::LocalVector &ff, const std::vector<GeoLib
 //        FemLib::FemIntegrationGaussQuad int_q;
 //        int_q.initialize(q1, 2);
 //        int_q.getNumberOfSamplingPoints()
-        const size_t nQnQ = 4;
         NumLib::LocalVector xxIntRef(vec_int_ref_xx.size()), yyIntRef(vec_int_ref_xx.size()), wwIntRef(vec_int_ref_xx.size());
         for (size_t i=0; i<vec_int_ref_xx.size(); i++) {
             xxIntRef(i) = vec_int_ref_xx[i].getData()[0];
@@ -324,11 +326,11 @@ void IntPoints2DLevelSet(const NumLib::LocalVector &ff, const std::vector<GeoLib
         IntPoints2DRealElemQuad(xxElem4, yyElem4, nQnQ, xxIntRef, yyIntRef, wwIntRef, xxInt4, yyInt4, wwInt4);
         IntPoints2DRealElemQuad(xxElem5, yyElem5, nQnQ, xxIntRef, yyIntRef, wwIntRef, xxInt5, yyInt5, wwInt5);
 
-        NumLib::LocalVector xxEleTotal(4*5);
-        NumLib::LocalVector yyEleTotal(4*5);
-        NumLib::LocalVector wwEleTotal(4*5);
-        xxEleTotal << xxElem1, xxElem2, xxElem3, xxElem4, xxElem5;
-        yyEleTotal << yyElem1, yyElem2, yyElem3, yyElem4, yyElem5;
+        NumLib::LocalVector xxEleTotal(xxInt1.rows()*5);
+        NumLib::LocalVector yyEleTotal(yyInt1.rows()*5);
+        NumLib::LocalVector wwEleTotal(wwInt1.rows()*5);
+        xxEleTotal << xxInt1, xxInt2, xxInt3, xxInt4, xxInt5;
+        yyEleTotal << yyInt1, yyInt2, yyInt3, yyInt4, yyInt5;
         wwEleTotal << wwInt1, wwInt2, wwInt3, wwInt4, wwInt5;
 
 
@@ -345,7 +347,7 @@ void IntPoints2DLevelSet(const NumLib::LocalVector &ff, const std::vector<GeoLib
 //    %     plot(xxInt5, yyInt5, 'k*')
 
         // Rotate integration points according to which of the nodes is really on the other side.
-        Eigen::MatrixX2d T;
+        NumLib::LocalMatrix T(2,2);
         if (Pos == 1)
             T << 0, 1, -1, 0; // Rotation -90 degree.
         else if (Pos == 2)
@@ -355,11 +357,11 @@ void IntPoints2DLevelSet(const NumLib::LocalVector &ff, const std::vector<GeoLib
         else if (Pos == 4)
             T << -1, 0, 0, -1; // Rotation 180 degree.
 
-        Eigen::MatrixXd xxyyIntTotal(2, xxEleTotal.rows());
-        xxyyIntTotal << xxEleTotal, yyEleTotal;
-        Eigen::MatrixXd HelpMat = T * xxyyIntTotal;
-        xxIntTotal = HelpMat.row(1).transpose();
-        yyIntTotal = HelpMat.row(2).transpose();
+        NumLib::LocalMatrix xxyyIntTotal(2, xxEleTotal.rows());
+        xxyyIntTotal << xxEleTotal.transpose(), yyEleTotal.transpose();
+        NumLib::LocalMatrix HelpMat = T * xxyyIntTotal;
+        xxIntTotal = HelpMat.row(0).transpose();
+        yyIntTotal = HelpMat.row(1).transpose();
         wwIntTotal = wwEleTotal;
     } else {
         // Treatment of Type-3-elements (two level function values are on the other side than the other two).
@@ -393,7 +395,6 @@ void IntPoints2DLevelSet(const NumLib::LocalVector &ff, const std::vector<GeoLib
         yA =-1; yB = 1;
 
         // Project integration points into sub-elements.
-        const size_t nQnQ = 4;
         NumLib::LocalVector xxIntRef(vec_int_ref_xx.size()), yyIntRef(vec_int_ref_xx.size()), wwIntRef(vec_int_ref_xx.size());
         for (size_t i=0; i<vec_int_ref_xx.size(); i++) {
             xxIntRef(i) = vec_int_ref_xx[i].getData()[0];
@@ -409,25 +410,25 @@ void IntPoints2DLevelSet(const NumLib::LocalVector &ff, const std::vector<GeoLib
         IntPoints2DRealElemQuad(xxElem1, yyElem1, nQnQ, xxIntRef, yyIntRef, wwIntRef, xxInt1, yyInt1, wwInt1);
         IntPoints2DRealElemQuad(xxElem2, yyElem2, nQnQ, xxIntRef, yyIntRef, wwIntRef, xxInt2, yyInt2, wwInt2);
 
-        NumLib::LocalVector xxEleTotal(4*5);
-        NumLib::LocalVector yyEleTotal(4*5);
-        NumLib::LocalVector wwEleTotal(4*5);
-        xxEleTotal << xxElem1, xxElem2;
-        yyEleTotal << yyElem1, yyElem2;
+        NumLib::LocalVector xxEleTotal(xxInt1.rows()*2);
+        NumLib::LocalVector yyEleTotal(yyInt1.rows()*2);
+        NumLib::LocalVector wwEleTotal(wwInt1.rows()*2);
+        xxEleTotal << xxInt1, xxInt2;
+        yyEleTotal << yyInt1, yyInt2;
         wwEleTotal << wwInt1, wwInt2;
 
         // Rotate integration points according to which of the nodes is really on the other side.
-        Eigen::MatrixX2d T;
+        NumLib::LocalMatrix T(2,2);
         if (Pos == 1)
             T << 0, 1, -1, 0; // Rotation -90 degree.
         else if (Pos == 2)
             T << 1, 0, 0, 1; // Nothing to do.
 
-        Eigen::MatrixXd xxyyIntTotal(2, xxEleTotal.rows());
-        xxyyIntTotal << xxEleTotal, yyEleTotal;
-        Eigen::MatrixXd HelpMat = T * xxyyIntTotal;
-        xxIntTotal = HelpMat.row(1).transpose();
-        yyIntTotal = HelpMat.row(2).transpose();
+        NumLib::LocalMatrix xxyyIntTotal(2, xxEleTotal.rows());
+        xxyyIntTotal << xxEleTotal.transpose(), yyEleTotal.transpose();
+        NumLib::LocalMatrix HelpMat = T * xxyyIntTotal;
+        xxIntTotal = HelpMat.row(0).transpose();
+        yyIntTotal = HelpMat.row(1).transpose();
         wwIntTotal = wwEleTotal;
     }
 }
@@ -462,13 +463,13 @@ void ShapeFctsXFEMSign(
         NumLib::LocalVector NyInt = dNdy.col(i);
         // Sign(Levelset) at int. point. and nodes.
         NumLib::LocalVector PsiElem = ffElem.array() / ffElem.array().abs(); //sign(ffElem)
-        NumLib::LocalVector PsiInt = ffInt.array() / ffInt.array().abs(); //sign(ffInt(i));
+        double PsiInt = ffInt(i) / ffInt.array().abs()(i); //sign(ffInt(i));
         double dPsidxInt = 0;
         double dPsidyInt = 0;
         // Enrichment function at int. point.
-        M.col(i)    = NInt.array()*(PsiInt-PsiElem).array();
-        dMdx.col(i) = NxInt.array()*(PsiInt-PsiElem).array() + NInt.array()*dPsidxInt;
-        dMdy.col(i) = NyInt.array()*(PsiInt-PsiElem).array() + NInt.array()*dPsidyInt;
+        M.col(i)    = NInt.array()*(PsiInt-PsiElem.array()).array();
+        dMdx.col(i) = NxInt.array()*(PsiInt-PsiElem.array()).array() + NInt.array()*dPsidxInt;
+        dMdy.col(i) = NyInt.array()*(PsiInt-PsiElem.array()).array() + NInt.array()*dPsidyInt;
     }
 
     NumLib::LocalVector Pos;
@@ -489,7 +490,7 @@ void BuildMatRhs_Hooke(
         const NumLib::LocalVector &ffInt, const NumLib::LocalVector &Nodes,
         double lambda1, double lambda2, double mu1, double mu2,
         double fx, double fy, size_t nQ, size_t NodeNum,
-        MathLib::DenseLinearEquation &leqs)
+        MathLib::ILinearEquation &leqs)
 {
     // Initialization.
     NumLib::LocalMatrix ElemMAT11 = NumLib::LocalMatrix::Zero(8, 8);

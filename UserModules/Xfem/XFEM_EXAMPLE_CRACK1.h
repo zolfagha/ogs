@@ -88,6 +88,7 @@ private:
     FemLib::LagrangianFeObjectContainer* _feObjects;
     NumLib::DiscreteDataConvergenceCheck _checker;
     MyNodalFunctionVector* _displacement;
+    MyNodalFunctionVector* _exact_displacement;
 //    std::vector<NodalPointScalarWrapper*> _vec_u_components;
 //    FemLib::FEMIntegrationPointFunctionVector* _strain;
 //    FemLib::FEMIntegrationPointFunctionVector* _stress;
