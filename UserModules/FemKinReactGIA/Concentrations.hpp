@@ -124,7 +124,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 
 	// reduction problem
 	_problem = new MyKinReductionProblemType( dis, _ReductionKin ); 
-	_problem->setTimeSteppingFunction(*tim);
+	_problem->setTimeSteppingFunction(*tim);  // applying the same time stepping function for all linear, non-linear and reduction problems
 	// add variables to the KinReduction problem class
 	// for the KinReduction problem, variables are the concentrations of all chemical components
 	// add all concentrations to discretized memory space

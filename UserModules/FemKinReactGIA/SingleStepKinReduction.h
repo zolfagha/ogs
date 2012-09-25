@@ -227,6 +227,30 @@ template <
 int SingleStepKinReduction<T_USER_FEM_PROBLEM, T_USER_LINEAR_SOLUTION, T_USER_NON_LINEAR_SOLUTION>::solveTimeStep(const NumLib::TimeStep &t_n1)
 {
 	size_t i; 
+
+	// getting the boundary conditions of concentrations for all components, 
+	const size_t n_var = _problem->getNumberOfVariables();
+    const size_t msh_id = _discrete_system->getMesh()->getID();
+    std::vector<size_t> list_bc1_eqs_id;
+    std::vector<double> list_bc1_val;
+    for (size_t i_var=0; i_var<n_var; i_var++) {
+        MyVariable* var = _problem->getVariable(i_var);
+        for (size_t i=0; i<var->getNumberOfDirichletBC(); i++) {
+            SolutionLib::FemDirichletBC *bc1 = var->getDirichletBC(i);
+            bc1->setup(var->getCurrentOrder());
+            std::vector<size_t> &list_bc_nodes = bc1->getListOfBCNodes();
+            std::vector<double> &list_bc_values = bc1->getListOfBCValues();
+            DiscreteLib::convertToEqsValues(_dofManager, i_var, msh_id, list_bc_nodes, list_bc_values, list_bc1_eqs_id, list_bc1_val);
+        }
+    }
+
+	// transform these concentrations to eta and xi values
+
+	// set these values as boundary conditions in eta and xi
+
+
+
+
 	// solving linear problems one after the other
 	for (i=0; i<_lin_solutions.size(); i++)
 	{
