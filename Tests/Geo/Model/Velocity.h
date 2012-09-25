@@ -41,7 +41,13 @@ public:
     {
         AbstractTransientMonolithicSystem::resizeInputParameter(1);
         AbstractTransientMonolithicSystem::resizeOutputParameter(1);
+        BaseLib::zeroObject(_feObjects);
     };
+
+    virtual ~FunctionVelocity()
+    {
+        BaseLib::releaseObject(_feObjects);
+    }
 
     void define(DiscreteLib::DiscreteSystem &dis, PorousMedia &pm)
     {
@@ -49,6 +55,7 @@ public:
         _K = pm.hydraulic_conductivity;
         _vel = new MyIntegrationPointFunctionVector();
         _vel->initialize(&dis);
+        _feObjects = new FemLib::LagrangianFeObjectContainer(*dis.getMesh());
         //this->setOutput(Velocity, _vel);
     }
     NumLib::DiscreteDataConvergenceCheck _checker;
@@ -63,7 +70,7 @@ public:
         MyNodalFunctionScalar *head = (MyNodalFunctionScalar*)getInput(Head);
         MyIntegrationPointFunctionVector *vel = _vel;;
 
-        FemLib::LagrangianFeObjectContainer* feObjects = head->getFeObjectContainer();
+        FemLib::LagrangianFeObjectContainer* feObjects = _feObjects;
         //calculate vel (vel=f(h))
         for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
             MeshLib::IElement* e = msh->getElement(i_e);
@@ -133,6 +140,7 @@ private:
     DiscreteLib::DiscreteSystem* _dis;
     MyIntegrationPointFunctionVector* _vel;
     NumLib::ITXFunction* _K;
+    FemLib::LagrangianFeObjectContainer* _feObjects;
 
     DISALLOW_COPY_AND_ASSIGN(FunctionVelocity);
 };
