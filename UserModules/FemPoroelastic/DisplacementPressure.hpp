@@ -43,8 +43,8 @@ template <class T1, class T2>
 bool FunctionDisplacementPressure<T1,T2>::initialize(const BaseLib::Options &option)
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    size_t msh_id = option.getOption<size_t>("MeshID");
-    size_t time_id = option.getOption<size_t>("TimeGroupID");
+    size_t msh_id = option.getOptionAsNum<size_t>("MeshID");
+    size_t time_id = option.getOptionAsNum<size_t>("TimeGroupID");
 
     //--------------------------------------------------------------------------
     // set up mesh and FE objects
@@ -93,7 +93,7 @@ bool FunctionDisplacementPressure<T1,T2>::initialize(const BaseLib::Options &opt
         std::string geo_name = opIC->getOption("GeometryName");
         const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
         std::string dis_name = opIC->getOption("DistributionType");
-        double dis_v = opIC->getOption<double>("DistributionValue");
+        double dis_v = opIC->getOptionAsNum<double>("DistributionValue");
         NumLib::ITXFunction* f_ic =  f_builder.create(dis_name, dis_v);
         if (var_name.find(this->getOutputParameterName(Displacement))!=std::string::npos) {
             size_t u_i = getDisplacementComponentIndex(var_name);
@@ -114,7 +114,7 @@ bool FunctionDisplacementPressure<T1,T2>::initialize(const BaseLib::Options &opt
         std::string geo_name = opBC->getOption("GeometryName");
         const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
         std::string dis_name = opBC->getOption("DistributionType");
-        double dis_v = opBC->getOption<double>("DistributionValue");
+        double dis_v = opBC->getOptionAsNum<double>("DistributionValue");
         NumLib::ITXFunction* f_bc =  f_builder.create(dis_name, dis_v);
         if (var_name.find(this->getOutputParameterName(Displacement))!=std::string::npos) {
             getDisplacementComponent(u_x, u_y, 0, var_name)->addDirichletBC(new SolutionLib::FemDirichletBC(msh, geo_obj, f_bc));
@@ -132,7 +132,7 @@ bool FunctionDisplacementPressure<T1,T2>::initialize(const BaseLib::Options &opt
         const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
         std::string st_type = opST->getOption("STType");
         std::string dis_name = opST->getOption("DistributionType");
-        double dis_v = opST->getOption<double>("DistributionValue");
+        double dis_v = opST->getOptionAsNum<double>("DistributionValue");
         if (st_type.compare("NEUMANN")==0) {
             dis_v *= -1; //TODO
         }

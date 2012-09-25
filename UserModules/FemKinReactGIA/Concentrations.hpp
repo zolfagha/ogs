@@ -26,8 +26,8 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 {
 	size_t i;  // index
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    size_t msh_id = option.getOption<size_t>("MeshID");
-    size_t time_id = option.getOption<size_t>("TimeGroupID");
+    size_t msh_id = option.getOptionAsNum<size_t>("MeshID");
+    size_t time_id = option.getOptionAsNum<size_t>("TimeGroupID");
     NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
 
     //mesh and FE objects
@@ -129,7 +129,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
         std::string geo_name = opIC->getOption("GeometryName");
         const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
         std::string dis_name = opIC->getOption("DistributionType");
-        double dis_v = opIC->getOption<double>("DistributionValue");
+        double dis_v = opIC->getOptionAsNum<double>("DistributionValue");
         NumLib::ITXFunction* f_ic =  f_builder.create(dis_name, dis_v);
         // set IC
 		size_t comp_idx = femData->map_ChemComp.find( var_name )->second->getIndex();  
@@ -161,7 +161,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
         std::string geo_name = opBC->getOption("GeometryName");
         const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
         std::string dis_name = opBC->getOption("DistributionType");
-        double dis_v = opBC->getOption<double>("DistributionValue");
+        double dis_v = opBC->getOptionAsNum<double>("DistributionValue");
         NumLib::ITXFunction* f_bc =  f_builder.create(dis_name, dis_v);
 		size_t comp_idx = femData->map_ChemComp.find( var_name )->second->getIndex();
 		_problem->getVariable(comp_idx)->addDirichletBC(new SolutionLib::FemDirichletBC(msh, geo_obj, f_bc));
@@ -177,7 +177,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
         const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
         std::string st_type = opST->getOption("STType");
         std::string dis_name = opST->getOption("DistributionType");
-        double dis_v = opST->getOption<double>("DistributionValue");
+        double dis_v = opST->getOptionAsNum<double>("DistributionValue");
         if (st_type.compare("NEUMANN")==0) {
             dis_v *= -1; // user set inflow as positive sign but internally negative
         }
