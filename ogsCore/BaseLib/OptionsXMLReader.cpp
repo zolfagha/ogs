@@ -18,9 +18,9 @@
 namespace BaseLib
 {
 
-void addXMLtoOptions(tinyxml2::XMLElement* e_root, BaseLib::Options &properties)
+void addXMLtoOptions(tinyxml2::XMLElement* e_root, BaseLib::OptionGroup &properties)
 {
-    BaseLib::Options* optRoot = properties.addSubGroup(e_root->Name());
+    BaseLib::OptionGroup* optRoot = properties.addSubGroup(e_root->Name());
 
     // attributes
     for (const tinyxml2::XMLAttribute* att = e_root->FirstAttribute(); att != 0; att = att->Next())

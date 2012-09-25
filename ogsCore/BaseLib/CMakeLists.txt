@@ -14,4 +14,3 @@ SOURCE_GROUP( ogsCore\\BaseLib FILES ${BaseLib_Files} )
 #INCLUDE_DIRECTORIES(
 #        .
 #)
-
