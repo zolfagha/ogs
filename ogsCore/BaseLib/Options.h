@@ -15,6 +15,9 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <ostream>
+#include <sstream>
+#include <limits>
 
 #include "StringTools.h"
 
@@ -24,19 +27,21 @@ namespace BaseLib
 /**
  * \brief Abstract class of nodes in Options tree
  */
-class IOptionNode 
+class OptionNode 
 {
 public:
-    virtual ~IOptionNode() {};
+    virtual ~OptionNode() {};
     virtual bool isValue() const = 0;
     virtual bool isString() const {return false;};
+    virtual std::string getText() const = 0;
+    virtual void printout(std::ostream &os, size_t depth=0) const = 0;
 };
 
 /**
  * \brief Leaf in Options tree
  */
 template <class T>
-class OptionLeaf : public IOptionNode
+class OptionLeaf : public OptionNode
 {
 private:
     T _value;
@@ -46,20 +51,46 @@ public:
     bool isValue() const {return true;};
     virtual inline bool isString() const {return false;};
     const T& getValue() const {return _value;};
+    virtual inline std::string getText() const
+    {
+        std::stringstream ss;
+        ss << _value;
+        return ss.str();
+    };
+    virtual inline void printout(std::ostream &/*os*/, size_t /*depth*/) const {};
 };
 
 template <>
 inline bool OptionLeaf<std::string>::isString() const {return true;};
 
+template <>
+inline std::string OptionLeaf<std::string>::getText() const {return _value;};
+
+template <>
+inline void OptionLeaf<std::string>::printout(std::ostream &os, size_t depth) const
+{
+    for (size_t i=0; i<depth; i++)
+        os << "\t";
+    os << "value: " << _value << std::endl;
+};
+
+template <>
+inline std::string OptionLeaf<double>::getText() const
+{
+    std::stringstream ss;
+    ss.precision(std::numeric_limits<double>::digits10);
+    ss << std::scientific << _value;
+    return ss.str();
+};
 
 /**
  * \brief Options represents a collection of key-value but with hierarchical data structure.
  */
-class Options : public IOptionNode
+class Options : public OptionNode
 {
 private:
-    typedef std::multimap<std::string, IOptionNode*> DictionaryType;
-    typedef std::pair<std::string, IOptionNode*> PairType;
+    typedef std::multimap<std::string, OptionNode*> DictionaryType;
+    typedef std::pair<std::string, OptionNode*> PairType;
     typedef std::pair<DictionaryType::iterator, DictionaryType::iterator> pair_of_iterator;
     typedef std::pair<DictionaryType::const_iterator, DictionaryType::const_iterator> const_pair_of_iterator;
     DictionaryType _dictionary;
@@ -128,6 +159,16 @@ public:
     }
 
     /// get option with the given key if it exists.
+    Options* getSubGroup(const std::string &key)
+    {
+       DictionaryType::const_iterator itr = _dictionary.find(key);
+       if (itr==_dictionary.end() || itr->second->isValue())
+           return 0;
+       else
+           return static_cast<Options*>(itr->second);
+    }
+
+    /// get option with the given key if it exists.
     const Options* getSubGroup(const std::string &key) const
     {
        DictionaryType::const_iterator itr = _dictionary.find(key);
@@ -169,16 +210,14 @@ public:
     }
 
     /// get value as string
-    template<typename T>
-    const T getOption(const std::string &key) const
+    const std::string getOption(const std::string &key) const
     {
         DictionaryType::const_iterator itr = _dictionary.find(key);
         if (itr==_dictionary.end() || !itr->second->isValue()) {
-            return getDummy<T>();
+            return _dummy;
         } else {
-            return static_cast<OptionLeaf<T>*>(itr->second)->getValue();
+            return itr->second->getText();
         }
-//        return Base::str2number<T>(getOption(key));
     }
 
     /// get raw data
@@ -198,16 +237,16 @@ public:
         //        return Base::str2number<T>(getOption(key));
     }
 
-    /// get the option value
-    template<typename T>
-    const std::vector<T>* getOptionAsArray(const std::string &key) const
-    {
-        DictionaryType::const_iterator itr = _dictionary.find(key);
-        if (itr==_dictionary.end() || !itr->second->isValue())
-            return 0;
-        else
-            return &static_cast<OptionLeaf<std::vector<T> >*>(itr->second)->getValue();
-    }
+//    /// get the option value
+//    template<typename T>
+//    const std::vector<T>* getOptionAsArray(const std::string &key) const
+//    {
+//        DictionaryType::const_iterator itr = _dictionary.find(key);
+//        if (itr==_dictionary.end() || !itr->second->isValue())
+//            return 0;
+//        else
+//            return &static_cast<OptionLeaf<std::vector<T> >*>(itr->second)->getValue();
+//    }
 
     template<typename T>
     const T getFirstOption(const std::string &key) const
@@ -233,11 +272,11 @@ public:
             return static_cast<OptionLeaf<T>*>(_leaf_itr->second)->getValue();
     }
 
-    /// get the option value
-    const std::string getOption(const std::string &key) const
-    {
-        return getOption<std::string>(key);
-    }
+//    /// get the option value
+//    const std::string getOption(const std::string &key) const
+//    {
+//        return getOption<std::string>(key);
+//    }
 
     /// add new option
     void addOption(const std::string &key, const std::string &v)
@@ -252,18 +291,32 @@ public:
         _dictionary.insert(PairType(key, new OptionLeaf<T>(v)));
     }
 
-    template <class T>
-    void addOptionAsArray(const std::string &key, const std::vector<T> &v)
+//    template <class T>
+//    void addOptionAsArray(const std::string &key, const std::vector<T> &v)
+//    {
+//        _dictionary.insert(PairType(key, new OptionLeaf<std::vector<T> >(v)));
+//    }
+
+    virtual inline std::string getText() const {return "";};
+
+    virtual void printout (std::ostream &os, size_t depth=0) const
     {
-        _dictionary.insert(PairType(key, new OptionLeaf<std::vector<T> >(v)));
+        DictionaryType::const_iterator itr = _dictionary.begin();
+        for (; itr!=_dictionary.end(); ++itr) {
+            for (size_t i=0; i<depth; i++)
+                os << "\t";
+            os << "tag: " << itr->first << std::endl;
+            //os << ", is_value: " << (itr->second->isValue() ? "yes" : "no") << std::endl;
+            itr->second->printout(os, depth+1);
+        }
+
     }
-
 };
 
-template<>
-inline std::string Options::getDummy<std::string>() const
-{
-    return _dummy;
-};
+//template<>
+//inline std::string Options::getDummy<std::string>() const
+//{
+//    return _dummy;
+//};
 
 }
