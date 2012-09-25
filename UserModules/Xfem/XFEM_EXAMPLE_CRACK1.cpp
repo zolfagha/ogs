@@ -5,25 +5,30 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file Displacement.hpp
+ * \file XFEM_EXAMPLE_CRACK1.cpp
  *
  * Created on 2012-09-20 by Norihiro Watanabe
  */
 
+#include "XFEM_EXAMPLE_CRACK1.h"
+
 #include <cmath>
 #include <limits>
 #include <vector>
+#include <set>
 
 #include "logog.hpp"
 
+#include "MathLib/LinAlg/LinearEquation/EigenDenseLinearEquation.h"
 #include "MeshLib/Tools/MeshGenerator.h"
-#include "FemLib/Function/FemNodalFunction.h"
-#include "NumLib/Function/TXFunctionBuilder.h"
+#include "DiscreteLib/Utils/DiscreteSystemContainerPerMesh.h"
+//#include "FemLib/Function/FemNodalFunction.h"
+//#include "NumLib/Function/TXFunctionBuilder.h"
 #include "OutputIO/OutputBuilder.h"
 #include "OutputIO/OutputTimingBuilder.h"
-#include "SolutionLib/Fem/FemSourceTerm.h"
-#include "MaterialLib/PorousMedia.h"
-#include "MaterialLib/Solid.h"
+//#include "SolutionLib/Fem/FemSourceTerm.h"
+//#include "MaterialLib/PorousMedia.h"
+//#include "MaterialLib/Solid.h"
 #include "Ogs6FemData.h"
 
 #include "../FemDeformationTotalForm/FemLinearElasticTools.h"
@@ -32,18 +37,28 @@
 namespace xfem
 {
 
-template <class T1, class T2>
-bool FunctionDisplacement<T1,T2>::initialize(const BaseLib::Options &option)
+//template <class T1, class T2>
+bool FunctionXFEM_EXAMPLE_CRACK1::initialize(const BaseLib::Options &option)
 {
+    option.printout(std::cout);
+
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-//    size_t msh_id = option.getOption<size_t>("MeshID");
-//    size_t time_id = option.getOption<size_t>("TimeGroupID");
-//    NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
+    size_t msh_id = option.getOptionAsNum<size_t>("MeshID");
+    size_t time_id = option.getOptionAsNum<size_t>("TimeGroupID");
+    NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
 
     //mesh and FE objects
-    _msh = MeshLib::MeshGenerator::generateRegularQuadMesh(2., 19, -1., -1., .0);
+//    _msh = MeshLib::MeshGenerator::generateRegularQuadMesh(2., 3, -1., -1., .0);
+//    INFO("Mesh:");
+//    INFO("* Nr. of nodes = %d", _msh->getNumberOfNodes());
+//    INFO("* Nr. of elements = %d", _msh->getNumberOfElements());
+    _msh = femData->list_mesh[msh_id];
     _dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(_msh);
     _feObjects = new FemLib::LagrangianFeObjectContainer(*_msh);
+
+    _displacement = new MyNodalFunctionVector();
+    NumLib::LocalVector tmp_u0 = NumLib::LocalVector::Zero(2);
+    _displacement->initialize(*_dis, FemLib::PolynomialOrder::Linear, tmp_u0);
 
 #if 0
     // set up problem
@@ -101,14 +116,14 @@ bool FunctionDisplacement<T1,T2>::initialize(const BaseLib::Options &option)
     }
 #endif
 
-//    // set initial output
-//    OutputVariableInfo var(this->getOutputParameterName(Displacement), OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
-//    femData->outController.setOutput(var.name, var);
+    // set initial output
+    OutputVariableInfo var("DISPLACEMENT", OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
+    femData->outController.setOutput(var.name, var);
 //    for (size_t i=0; i<_vec_u_components.size(); i++) {
 //        OutputVariableInfo var1(this->getOutputParameterName(Displacement) + getDisplacementComponentPostfix(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_u_components[i]);
 //        femData->outController.setOutput(var1.name, var1);
 //    }
-//
+
 //    // initial output parameter
 //    this->setOutput(Displacement, _displacement);
 
@@ -117,9 +132,10 @@ bool FunctionDisplacement<T1,T2>::initialize(const BaseLib::Options &option)
 }
 
 
-template <class T1, class T2>
-int FunctionDisplacement<T1,T2>::solveTimeStep(const NumLib::TimeStep &/*time*/)
+//template <class T1, class T2>
+int FunctionXFEM_EXAMPLE_CRACK1::solveTimeStep(const NumLib::TimeStep &/*time*/)
 {
+    INFO("-> solve %s", this->getProcessName().c_str());
     const size_t NodeNum = _msh->getNumberOfNodes();
     const size_t ElemNum = _msh->getNumberOfElements();
 
@@ -165,10 +181,12 @@ int FunctionDisplacement<T1,T2>::solveTimeStep(const NumLib::TimeStep &/*time*/)
     SetNodesEnriched.insert(NodesEnriched.begin(), NodesEnriched.end());
 
     // initialize LinearEQS
-    MathLib::DenseLinearEquation leqs;
+    MathLib::EigenDenseLinearEquation leqs;
     leqs.create(4*NodeNum);
+    INFO("* Nr. of DoFs = %d", 4*NodeNum);
 
     // domain integration
+    INFO("* start Domain integration");
     for (size_t i=0; i<ElemNum; i++) {
 
         MeshLib::IElement* e = _msh->getElement(i);
@@ -200,13 +218,14 @@ int FunctionDisplacement<T1,T2>::solveTimeStep(const NumLib::TimeStep &/*time*/)
             vec_int_ref_w[j] = q->getWeight(j);
         }
         NumLib::LocalVector xxIntRef, yyIntRef, wwIntRef;
-        IntPoints2DLevelSet(ffEle, vec_int_ref_xx, vec_int_ref_w, xxIntRef, yyIntRef, wwIntRef);
+        IntPoints2DLevelSet(ffEle, vec_int_ref_xx, vec_int_ref_w, nQnQ, xxIntRef, yyIntRef, wwIntRef);
         const size_t Curr_nQ = xxIntRef.rows();
 
         // get shape functions
         NumLib::LocalMatrix N, dNdx, dNdy;
         NumLib::LocalMatrix M, dMdx, dMdy;
-        NumLib::LocalVector xxInt, yyInt, wwInt, ffInt;
+        NumLib::LocalVector xxInt, yyInt, wwInt;
+        NumLib::LocalVector ffInt;
         ShapeFctsXFEMSign(
                 xxElem, yyElem, ffEle, NodesAct, xxIntRef, yyIntRef, wwIntRef,
                 Curr_nQ,
@@ -221,8 +240,20 @@ int FunctionDisplacement<T1,T2>::solveTimeStep(const NumLib::TimeStep &/*time*/)
     }
 
     // Insert Dirichlet BCs.
+    INFO("* insert Dirichlet BCs.");
     leqs.setKnownX(uDirNodes, uDirValues);
     leqs.setKnownX(vDirNodes, vDirValues);
+    std::vector<size_t> uNonEnrichedNodes, vNonEnrichedNodes;
+    for (size_t i=0; i<NodeNum; i++) {
+        if (SetNodesEnriched.count(i) ==0) {
+            uNonEnrichedNodes.push_back(i+NodeNum*2);
+            vNonEnrichedNodes.push_back(i+NodeNum*3);
+        }
+    }
+    std::vector<double> zeroEnrichedValue(uNonEnrichedNodes.size(), .0);
+    leqs.setKnownX(uNonEnrichedNodes, zeroEnrichedValue);
+    leqs.setKnownX(vNonEnrichedNodes, zeroEnrichedValue);
+
 
 //    // Reduce system of equations.
 //    Pos = [[1:1:2*NodeNum]'; NodesEnriched+2*NodeNum; NodesEnriched+3*NodeNum];
@@ -232,53 +263,60 @@ int FunctionDisplacement<T1,T2>::solveTimeStep(const NumLib::TimeStep &/*time*/)
     //disp(sprintf('Condition number of final system         : %15.5e', condest(MAT)))
 
     // Solve system of equations for solution.
+    INFO("* solve system of equations");
     leqs.solve();
-    double *x = leqs.getX();
 
-    leqs.printout(std::cout);
+    double *x = leqs.getX();
+    for (size_t i=0; i<_displacement->getNumberOfNodes(); i++) {
+        _displacement->getValue(i)(0) = x[i];
+        _displacement->getValue(i)(1) = x[i+NodeNum];
+    }
+
+
+//    std::cout << "x = ";
+//    for (size_t i=0; i<leqs.getDimension(); i++)
+//        std::cout << x[i] << " ";
+//    std::cout << std::endl;
+//
+//    leqs.printout(std::cout);
 //    uuTotal = Sol(1:NodeNum);
 //    vvTotal = Sol(NodeNum+1:2*NodeNum);
 
     return 0;
 }
 
-template <class T1, class T2>
-void FunctionDisplacement<T1,T2>::accept(const NumLib::TimeStep &/*time*/)
+//template <class T1, class T2>
+void FunctionXFEM_EXAMPLE_CRACK1::accept(const NumLib::TimeStep &/*time*/)
 {
 //    //update data for output
 //    const size_t n_strain_components = getNumberOfStrainComponents();
-//    Ogs6FemData* femData = Ogs6FemData::getInstance();
+    Ogs6FemData* femData = Ogs6FemData::getInstance();
 //    for (size_t i=0; i<n_strain_components; i++) {
 //        OutputVariableInfo var1(this->getOutputParameterName(NodStrain) + getStressStrainComponentPostfix(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_nodal_strain_components[i]);
 //        femData->outController.setOutput(var1.name, var1);
 //        OutputVariableInfo var2(this->getOutputParameterName(NodStress) + getStressStrainComponentPostfix(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_nodal_stress_components[i]);
 //        femData->outController.setOutput(var2.name, var2);
 //    }
+    OutputVariableInfo var("DISPLACEMENT", OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
+    femData->outController.setOutput(var.name, var);
 }
 
-template <class T1, class T2>
-void FunctionDisplacement<T1,T2>::updateOutputParameter(const NumLib::TimeStep &/*time*/)
+//template <class T1, class T2>
+void FunctionXFEM_EXAMPLE_CRACK1::updateOutputParameter(const NumLib::TimeStep &/*time*/)
 {
 //    for (size_t i=0; i<_displacement->getNumberOfNodes(); i++) {
 //        _displacement->getValue(i)(0) = _solution->getCurrentSolution(0)->getValue(i);
 //        _displacement->getValue(i)(1) = _solution->getCurrentSolution(1)->getValue(i);
 //    }
-    setOutput(Displacement, _displacement);
+    //setOutput(Displacement, _displacement);
 
     //calculateStressStrain();
 }
 
-template <class T1, class T2>
-void FunctionDisplacement<T1,T2>::output(const NumLib::TimeStep &/*time*/)
+//template <class T1, class T2>
+void FunctionXFEM_EXAMPLE_CRACK1::output(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
-    Ogs6FemData* femData = Ogs6FemData::getInstance();
-    OutputVariableInfo var(this->getOutputParameterName(Displacement), OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
-    femData->outController.setOutput(var.name, var);
-    for (size_t i=0; i<_vec_u_components.size(); i++) {
-        OutputVariableInfo var1(this->getOutputParameterName(Displacement) + getDisplacementComponentPostfix(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_u_components[i]);
-        femData->outController.setOutput(var1.name, var1);
-    }
 };
 
 }
