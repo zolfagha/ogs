@@ -31,9 +31,9 @@ void addXMLtoOptions(tinyxml2::XMLElement* e_root, BaseLib::Options &properties)
     // element
     for (tinyxml2::XMLElement* e=e_root->FirstChildElement(); e!=0; e=e->NextSiblingElement())
     {
-        if (e->FirstChildElement()!=0) {
+        if (e->FirstChildElement()!=0 || e->FirstAttribute()!=0) {
             addXMLtoOptions(e, *optRoot);
-        } else {
+        } else if (e->GetText() != 0){
             optRoot->addOption(e->Name(), e->GetText());
         }
     }
