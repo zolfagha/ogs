@@ -38,6 +38,10 @@ public:
     T_I* build(const BaseLib::Options *option, T_EQS_FACTORY &eqs_fac)
     {
         const BaseLib::Options* op_cpl = option->getSubGroup("coupling");
+        if (op_cpl==0) {
+            INFO("tag<coupling> not found.");
+            return NULL;
+        }
         if (op_cpl->hasSubGroup("M")) {
             const BaseLib::Options* op_sub = op_cpl->getSubGroup("M");
             T_M *sys = buildMonolithicSystem(op_sub, eqs_fac);
@@ -47,7 +51,7 @@ public:
             T_P *sys = buildPartitionedSystem(op_sub, eqs_fac);
             return sys;
         }
-        return 0;
+        return NULL;
     }
 
     std::vector<T_M*>& getListOfMonolithicSystem()

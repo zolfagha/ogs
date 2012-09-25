@@ -31,7 +31,7 @@ bool FunctionElementStressStrain<T>::initialize(const BaseLib::Options &option)
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
 
-    size_t msh_id = option.getOption<size_t>("MeshID");
+    size_t msh_id = option.getOptionAsNum<size_t>("MeshID");
     MeshLib::IMesh* msh = femData->list_mesh[msh_id];
     _dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
     const size_t n_strain_components = getNumberOfStrainComponents();
@@ -98,7 +98,7 @@ int FunctionElementStressStrain<T>::solveTimeStep(const NumLib::TimeStep &/*time
     for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++)
     {
         // element setup
-        MeshLib::IElement* e = msh->getElemenet(i_e);
+        MeshLib::IElement* e = msh->getElement(i_e);
         const size_t nnodes = e->getNumberOfNodes();
         FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
         FemLib::IFemNumericalIntegration *integral = fe->getIntegrationMethod();

@@ -35,7 +35,7 @@ void SparseLinearEquation::setOption(const BaseLib::Options &option)
     if (op->hasOption("precon_type"))
         _option.precon_type = _option.getPreconType(op->getOption("precon_type"));
     if (op->hasOption("error_tolerance"))
-        _option.error_tolerance = op->getOption<double>("error_tolerance");
+        _option.error_tolerance = op->getOptionAsNum<double>("error_tolerance");
     if (op->hasOption("max_iteration_step"))
         _option.max_iteration_step = op->getOption<int>("max_iteration_step");
 }

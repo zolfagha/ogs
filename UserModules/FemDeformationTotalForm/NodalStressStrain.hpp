@@ -33,7 +33,7 @@ bool FunctionNodalStressStrain<T>::initialize(const BaseLib::Options &option)
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
 
-    size_t msh_id = option.getOption<size_t>("MeshID");
+    size_t msh_id = option.getOptionAsNum<size_t>("MeshID");
     MeshLib::IMesh* msh = femData->list_mesh[msh_id];
     _dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
     const size_t n_strain_components = getNumberOfStrainComponents();

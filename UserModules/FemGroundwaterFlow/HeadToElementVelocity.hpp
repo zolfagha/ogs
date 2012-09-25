@@ -24,7 +24,7 @@ bool FunctionHeadToElementVelocity<T>::initialize(const BaseLib::Options &option
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
 
-    size_t msh_id = option.getOption<size_t>("MeshID");
+    size_t msh_id = option.getOptionAsNum<size_t>("MeshID");
     MeshLib::IMesh* msh = femData->list_mesh[msh_id];
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
@@ -68,7 +68,7 @@ int FunctionHeadToElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &/*ti
     FemLib::LagrangianFeObjectContainer* feObjects = _feObjects;
     //calculate vel (vel=f(h))
     for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
-        MeshLib::IElement* e = msh->getElemenet(i_e);
+        MeshLib::IElement* e = msh->getElement(i_e);
         size_t mat_id = e->getGroupID();
         MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];
 

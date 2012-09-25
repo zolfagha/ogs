@@ -113,11 +113,9 @@ BaseLib::Options* defineCouplingM3()
     BaseLib::Options* options = new BaseLib::Options();
     BaseLib::Options* coupling = options->addSubGroup("coupling");
     BaseLib::Options* M1 = coupling->addSubGroup("M1");
-    std::vector<std::string> var;
-    var.push_back("p");
-    var.push_back("T");
-    var.push_back("c");
-    M1->addOptionAsArray("variable", var);
+    M1->addOption("variable", "p");
+    M1->addOption("variable", "T");
+    M1->addOption("variable", "c");
 
     return options;
 };
@@ -137,13 +135,9 @@ BaseLib::Options* defineCouplingP1_M2M1()
     BaseLib::Options* P1_sub = P1->addSubGroup("problems");
     BaseLib::Options* M1 = P1_sub->addSubGroup("M1");
     BaseLib::Options* M2 = P1_sub->addSubGroup("M2");
-    std::vector<std::string> var1;
-    var1.push_back("p");
-    var1.push_back("T");
-    M1->addOptionAsArray("variable", var1);
-    std::vector<std::string> var2;
-    var2.push_back("c");
-    M2->addOptionAsArray("variable", var2);
+    M1->addOption("variable", "p");
+    M1->addOption("variable", "T");
+    M2->addOption("variable", "c");
 
     return options;
 };
@@ -165,15 +159,9 @@ BaseLib::Options* defineCouplingP1_3M1()
     BaseLib::Options* M2 = P1_sub->addSubGroup("M2");
     BaseLib::Options* M3 = P1_sub->addSubGroup("M3");
 
-    std::vector<std::string> var1;
-    var1.push_back("p");
-    M1->addOptionAsArray("variable", var1);
-    std::vector<std::string> var2;
-    var2.push_back("T");
-    M2->addOptionAsArray("variable", var2);
-    std::vector<std::string> var3;
-    var3.push_back("c");
-    M3->addOptionAsArray("variable", var3);
+    M1->addOption("variable", "p");
+    M2->addOption("variable", "T");
+    M3->addOption("variable", "c");
 
     return options;
 };
@@ -204,15 +192,9 @@ BaseLib::Options* defineCouplingP1_P2M1()
     BaseLib::Options* M2 = P1_sub->addSubGroup("M2");
     BaseLib::Options* M3 = P2_sub->addSubGroup("M3");
 
-    std::vector<std::string> var1;
-    var1.push_back("p");
-    M1->addOptionAsArray("variable", var1);
-    std::vector<std::string> var2;
-    var2.push_back("T");
-    M2->addOptionAsArray("variable", var2);
-    std::vector<std::string> var3;
-    var3.push_back("c");
-    M3->addOptionAsArray("variable", var3);
+    M1->addOption("variable", "p");
+    M2->addOption("variable", "T");
+    M3->addOption("variable", "c");
 
     return options;
 };

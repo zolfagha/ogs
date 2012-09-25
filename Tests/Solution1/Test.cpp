@@ -269,7 +269,7 @@ TEST(Solution, CouplingFem2D)
 
         //const double epsilon = 1.e-3;
         timestepping.setBeginning(.0);
-        timestepping.solve(1.0);
+        timestepping.solve(tim.getEnd());
 
         const MyNodalFunctionScalar* r_f_head = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("h"));
         const MyIntegrationPointFunctionVector* r_f_v = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
@@ -337,7 +337,7 @@ TEST(Solution, line)
 
         //const double epsilon = 1.e-3;
         timestepping.setBeginning(.0);
-        timestepping.solve(1.0);
+        timestepping.solve(tim.getEnd());
 
         const MyNodalFunctionScalar* r_f_head = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("h"));
         const MyIntegrationPointFunctionVector* r_f_v = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
@@ -553,7 +553,7 @@ TEST(Solution, LinearElastic2D)
 
         //const double epsilon = 1.e-3;
         timestepping.setBeginning(.0);
-        timestepping.solve(1.0);
+        timestepping.solve(tim.getEnd());
 
         const MyNodalFunctionScalar* r_f_ux = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("u_x"));
         const MyNodalFunctionScalar* r_f_uy = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("u_y"));
