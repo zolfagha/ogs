@@ -66,9 +66,14 @@ public:
 	size_t get_n_eta(void) {return _n_eta;}; 
 
 	/**
-      * get the length of eta
+      * get the length of eta_mob
       */
 	size_t get_n_eta_mob(void) {return _n_eta_mob;}; 
+
+	/**
+      * get the length of eta_immob
+      */
+	size_t get_n_eta_immob(void) {return _n_eta - _n_eta_mob;}; 
 
 	/**
       * get the length of xi

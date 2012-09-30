@@ -14,6 +14,7 @@
 #define SINGLE_STEP_KIN_REDUCTION_H
 
 #include <vector>
+#include <map>
 #include "logog.hpp"
 
 #include "BaseLib/CodingTools.h"
@@ -30,6 +31,9 @@
 #include "SolutionLib/Fem/FemDirichletBC.h"
 #include "SolutionLib/Fem/FemNeumannBC.h"
 
+#include "ReductionKinNodeInfo.h"
+
+class ReductionKinNodeInfo; 
 
 namespace SolutionLib
 {
@@ -57,6 +61,7 @@ class SingleStepKinReduction
     : public AbstractTimeSteppingAlgorithm
 {
 public:
+
     typedef T_USER_FEM_PROBLEM UserFemProblem;
 	typedef T_USER_LINEAR_SOLUTION UserLinearSolution; 
 	typedef T_USER_NON_LINEAR_SOLUTION UserNonLinearSolution; 
@@ -141,6 +146,8 @@ private:
 
 	std::vector<UserLinearSolution*> _lin_solutions; 
 	UserNonLinearSolution* _nlin_solution; 
+
+	std::map<size_t, ReductionKinNodeInfo*> _bc_info; 
 };
 
 template <
@@ -240,16 +247,49 @@ int SingleStepKinReduction<T_USER_FEM_PROBLEM, T_USER_LINEAR_SOLUTION, T_USER_NO
             bc1->setup(var->getCurrentOrder());
             std::vector<size_t> &list_bc_nodes = bc1->getListOfBCNodes();
             std::vector<double> &list_bc_values = bc1->getListOfBCValues();
-            DiscreteLib::convertToEqsValues(_dofManager, i_var, msh_id, list_bc_nodes, list_bc_values, list_bc1_eqs_id, list_bc1_val);
-        }
+            
+	        // now loop over this vector
+		    for ( size_t j=0; j < list_bc_nodes.size(); j++ )
+		    {
+				size_t node_id = list_bc_nodes[j]; 
+				double node_value = list_bc_values[j]; 
+                std::map<size_t, ReductionKinNodeInfo*>::iterator my_bc; 
+				my_bc = _bc_info.find( node_id ); 
+                // now check whether this node has already been in the BC info
+                if ( my_bc != _bc_info.end() )
+                {   // this node is already there
+					my_bc->second->set_comp_conc(i_var, node_value); 	             
+                }
+                else  // create a new structure and fill it in 
+				{
+					my_bc = _bc_info.begin(); 
+					ReductionKinNodeInfo* bc_node = new ReductionKinNodeInfo( node_id, 
+						                                                      this->_problem->getReductionScheme()->get_n_Comp(), 
+						                                                      this->_problem->getReductionScheme()->get_n_eta_mob(), 
+																			  this->_problem->getReductionScheme()->get_n_eta_immob(), 
+																			  this->_problem->getReductionScheme()->get_n_xi(), 
+																			  this->_problem->getReductionScheme() ); 
+					bc_node->set_comp_conc( i_var, node_value ); 
+					_bc_info.insert( my_bc, std::pair<size_t, ReductionKinNodeInfo*>(node_id, bc_node) ); 
+				}  // end of if else
+	        }  // end of for j
+        }  // end of for i
+    }  // end of for i_var
+
+
+    // loop over all the boundary nodes, and 
+	// transform these concentrations to eta and xi values
+    std::map<size_t, ReductionKinNodeInfo*>::iterator bc_node_it; 
+    for ( bc_node_it = _bc_info.begin(); bc_node_it != _bc_info.end(); bc_node_it++ )
+    {
+        bc_node_it->second->transform(); 
     }
 
-	// transform these concentrations to eta and xi values
-
-	// set these values as boundary conditions in eta and xi
-
-
-
+	// form global vectors of bc values
+    std::vector<size_t> list_bc_nodes;
+    std::vector<std::vector<double>> list_eta_mob_values;
+    std::vector<std::vector<double>> list_eta_immob_values;
+    std::vector<std::vector<double>> list_xi_values;
 
 	// solving linear problems one after the other
 	for (i=0; i<_lin_solutions.size(); i++)
