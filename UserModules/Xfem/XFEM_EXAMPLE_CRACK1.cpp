@@ -115,7 +115,7 @@ int FunctionXFEM_EXAMPLE_CRACK1::solveTimeStep(const NumLib::TimeStep &/*time*/)
 
         MeshLib::IElement* e = _msh->getElement(i);
         const size_t n_ele_nodes = e->getNumberOfNodes();
-        NumLib::LocalVector Nodes(n_ele_nodes);
+        Eigen::VectorXi Nodes(n_ele_nodes);
         FemLib::IFiniteElement* fe = _feObjects->getFeObject(*e);
         NumLib::LocalVector xxElem(n_ele_nodes), yyElem(n_ele_nodes);
         NumLib::LocalVector ffEle(n_ele_nodes);

@@ -87,7 +87,7 @@ void searchMinMaxNodes(const MeshLib::IMesh &msh, std::vector<size_t> &found_nod
 {
     double x_min=1e+99, x_max = -1e+99;
     double y_min=1e+99, y_max = -1e+99;
-    double pt[3];
+    //double pt[3];
     //search x min/max
     for (size_t i=0; i<msh.getNumberOfNodes(); i++) {
       const GeoLib::Point *pt = msh.getNodeCoordinatesRef(i);
@@ -487,7 +487,7 @@ void BuildMatRhs_Hooke(
         const NumLib::LocalMatrix &NMat, const NumLib::LocalMatrix &dNdxMat, const NumLib::LocalMatrix &dNdyMat,
         const NumLib::LocalMatrix &MMat, const NumLib::LocalMatrix &dMdxMat, const NumLib::LocalMatrix &dMdyMat,
         const NumLib::LocalVector &xxInt, const NumLib::LocalVector &yyInt, const NumLib::LocalVector &wwInt,
-        const NumLib::LocalVector &ffInt, const NumLib::LocalVector &Nodes,
+        const NumLib::LocalVector &ffInt, const Eigen::VectorXi &Nodes,
         double lambda1, double lambda2, double mu1, double mu2,
         double fx, double fy, size_t nQ, size_t NodeNum,
         MathLib::ILinearEquation &leqs)
