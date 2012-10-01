@@ -13,11 +13,7 @@
 #pragma once
 
 #include "BaseLib/CodingTools.h"
-
-namespace NumLib
-{
-class ITXFunction;
-}
+#include "NumLib/Function/TXFunction.h"
 
 namespace MaterialLib
 {

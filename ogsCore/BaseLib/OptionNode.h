@@ -27,6 +27,11 @@ public:
     /**
      *
      */
+    OptionNode() {};
+
+    /**
+     *
+     */
     virtual ~OptionNode() {};
 
     /**
