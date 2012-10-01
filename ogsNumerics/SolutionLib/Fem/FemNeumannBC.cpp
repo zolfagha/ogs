@@ -19,6 +19,31 @@
 namespace SolutionLib
 {
 
+FemNeumannBC::FemNeumannBC(const MeshLib::IMesh *msh, FemLib::LagrangianFeObjectContainer* feObjects, const GeoLib::GeoObject *geo, NumLib::ITXFunction *func)
+: _msh(msh), _feObjects(feObjects), _geo(geo), _bc_func(func->clone())
+{
+    _is_transient = false;
+    _do_setup = true;
+}
+
+FemNeumannBC::FemNeumannBC(const std::vector<size_t> &vec_node_id, const std::vector<double> &vec_node_values)
+: _msh(NULL), _feObjects(NULL), _geo(NULL), _bc_func(NULL), _vec_nodes(vec_node_id), _vec_values(vec_node_values)
+{
+    _is_transient = false;
+    _do_setup = false;
+}
+
+FemNeumannBC* FemNeumannBC::clone() const
+{
+    FemNeumannBC* f = NULL;
+    if (_msh!=NULL)
+        f = new FemNeumannBC(_msh, _feObjects, _geo, _bc_func);
+    else 
+        f = new FemNeumannBC(_vec_nodes, _vec_values);
+
+    return f;
+}
+
 /// setup BC.
 void FemNeumannBC::setup(size_t order)
 {

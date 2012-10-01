@@ -33,26 +33,21 @@ class FemDirichletBC
 public:
     /**
      *
-     * @param msh
-     * @param geo
-     * @param bc_func
+     * @param msh       Pointer to a mesh object
+     * @param geo       Pointer to a geometric object representing locations of a boundary condition
+     * @param bc_func   Pointer to a temporal-spatial function giving boundary values
      */
-    FemDirichletBC(const MeshLib::IMesh* msh, const GeoLib::GeoObject* geo, NumLib::ITXFunction* bc_func)
-    {
-        _msh = msh;
-        //_order = 1;
-        _geo = geo;
-        _bc_func = bc_func;
-        _is_transient = !bc_func->isTemporallyConst();
-        _do_setup = true;
-    }
+    FemDirichletBC(const MeshLib::IMesh* msh, const GeoLib::GeoObject* geo, NumLib::ITXFunction* bc_func);
+
+    /**
+     * 
+     * @param vec_node_id
+     * @param vec_node_values
+     */
+    FemDirichletBC(const std::vector<size_t> &vec_node_id, const std::vector<double> &vec_node_values);
 
     ///
-    virtual ~FemDirichletBC()
-    {
-    }
-
-    //void setOrder(size_t order) {_order = order;};
+    virtual ~FemDirichletBC() {};
 
     /// setup B.C.
     void setup(size_t order);
@@ -68,7 +63,6 @@ public:
 
 private:
     const MeshLib::IMesh* _msh;
-    //size_t _order;
     const GeoLib::GeoObject* _geo;
     NumLib::ITXFunction* _bc_func;
     std::vector<size_t> _vec_nodes;
