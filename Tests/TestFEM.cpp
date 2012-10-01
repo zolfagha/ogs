@@ -220,8 +220,8 @@ TEST(FEM, LIE_LINE_IN_2D)
         fe_line.configure(*e_line1);
         double natural_x[2] = {.0, .0};
         fe_line.computeBasisFunctions(natural_x);
-        LocalMatrix &N = *fe_line.getBasisFunction();
-        LocalMatrix &dN = *fe_line.getGradBasisFunction();
+        NumLib::LocalMatrix &N = *fe_line.getBasisFunction();
+        NumLib::LocalMatrix &dN = *fe_line.getGradBasisFunction();
         double det_j = fe_line.getDetJ();
 
 //        std::cout << "N=\n" << N << std::endl;
@@ -255,8 +255,8 @@ TEST(FEM, LIE_LINE_IN_2D)
         fe_line.configure(*e_line2);
         double natural_x[2] = {.0, .0};
         fe_line.computeBasisFunctions(natural_x);
-        LocalMatrix &N = *fe_line.getBasisFunction();
-        LocalMatrix &dN = *fe_line.getGradBasisFunction();
+        NumLib::LocalMatrix &N = *fe_line.getBasisFunction();
+        NumLib::LocalMatrix &dN = *fe_line.getGradBasisFunction();
         double det_j = fe_line.getDetJ();
 
 //        std::cout << "N=\n" << N << std::endl;
@@ -284,8 +284,8 @@ TEST(FEM, LIE_LINE_IN_2D)
     {
         double natural_x[2] = {.0, .0};
         fe_line.computeBasisFunctions(natural_x);
-        LocalMatrix &N = *fe_line.getBasisFunction();
-        LocalMatrix &dN = *fe_line.getGradBasisFunction();
+        NumLib::LocalMatrix &N = *fe_line.getBasisFunction();
+        NumLib::LocalMatrix &dN = *fe_line.getGradBasisFunction();
         double det_j = fe_line.getDetJ();
 
 //        std::cout << "N=\n" << N << std::endl;

@@ -225,7 +225,9 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
     // Individual process and IVBV
     // -------------------------------------------------------------------------
     // PCS
-    BaseLib::Options* optPcsData = option.addSubGroup("ProcessData");
+    BaseLib::Options* optPcsData = option.getSubGroup("processList");
+    if (optPcsData==NULL)
+        optPcsData = option.addSubGroup("processList");
     size_t masstransport_counter = 0;
     if (ogs5fem.pcs_vector.size()==0) {
         ERR("***Error: no PCS found in ogs5");
@@ -237,7 +239,9 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         std::string pcs_name = FiniteElement::convertProcessTypeToString(rfpcs->getProcessType());
         std::vector<std::string>& var_name = rfpcs->primary_variable_name;
 
-        BaseLib::Options* optPcs = optPcsData->addSubGroup(pcs_name);
+        BaseLib::Options* optPcs = optPcsData->addSubGroup("process");
+        optPcs->addOption("type", pcs_name);
+        optPcs->addOption("name", pcs_name);
 
         //Mesh
         optPcs->addOptionAsNum("MeshID", rfpcs->mesh_id);
@@ -362,9 +366,9 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 			mChemComp->set_name(ogs6fem.list_compound[i]->name); 
 			// set mobility
 			if ( ogs6fem.list_compound[i]->is_mobile )
-				mChemComp->set_mobility( ogsChem::Comp_Mobility::MOBILE  ); 
+				mChemComp->set_mobility( ogsChem::MOBILE  ); 
 			else 
-				mChemComp->set_mobility( ogsChem::Comp_Mobility::MINERAL );
+				mChemComp->set_mobility( ogsChem::MINERAL );
 
 			ogs6fem.map_ChemComp.insert(ogs6fem.list_compound[i]->name, mChemComp); 
 			mChemComp = NULL; 
@@ -400,7 +404,7 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
     // -------------------------------------------------------------------------
 
     // OUT
-    BaseLib::Options* optOut = option.addSubGroup("OutputList");
+    BaseLib::Options* optOut = option.addSubGroup("outputList");
     for (size_t i=0; i<ogs5fem.out_vector.size(); i++)
     {
         COutput* rfout = ogs5fem.out_vector[i];
@@ -420,16 +424,23 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             }
         }
 
-        BaseLib::Options* opt = optOut->addSubGroup("Output");
-        opt->addOption("DataType", rfout->dat_type_name);
-        opt->addOption("GeometryType", rfout->geo_type);
-        opt->addOption("GeometryName", rfout->geo_name);
-        opt->addOption("TimeType", rfout->tim_type_name);
-        opt->addOptionAsNum("TimeSteps", rfout->nSteps);
-        opt->addOptionAsArray("NodalVariables", rfout->_nod_value_vector);
-        opt->addOptionAsArray("ElementalVariables", rfout->_ele_value_vector);
-        opt->addOptionAsArray("MMPValues", rfout->mmp_value_vector);
-        opt->addOptionAsArray("MFPValues", rfout->mfp_value_vector);
+        BaseLib::Options* opt = optOut->addSubGroup("output");
+        opt->addOption("dataType", rfout->dat_type_name);
+        opt->addOption("meshID", "0"); //TODO
+        opt->addOption("geoType", rfout->geo_type);
+        opt->addOption("geoName", rfout->geo_name);
+        opt->addOption("timeType", rfout->tim_type_name);
+        opt->addOptionAsNum("timeSteps", rfout->nSteps);
+        for (size_t j=0; j<rfout->_nod_value_vector.size(); j++) {
+            BaseLib::Options* optVal = opt->addSubGroup("nodeValue");
+            optVal->addOption("name", rfout->_nod_value_vector[j]);
+        }
+        for (size_t j=0; j<rfout->_ele_value_vector.size(); j++) {
+            BaseLib::Options* optVal = opt->addSubGroup("elementValue");
+            optVal->addOption("name", rfout->_ele_value_vector[j]);
+        }
+//        opt->addOptionAsArray("MMPValues", rfout->mmp_value_vector);
+//        opt->addOptionAsArray("MFPValues", rfout->mfp_value_vector);
     }
 
     ogs6fem.outController.initialize(option, ogs6fem.output_dir, ogs6fem.project_name, ogs6fem.list_mesh, *ogs6fem.geo, ogs6fem.geo_unique_name);

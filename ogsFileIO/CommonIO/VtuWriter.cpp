@@ -461,7 +461,7 @@ bool VtuWriter::writeCellConnectivity(std::fstream &fin,
         if (!_useBinary)
             for (long i = 0; i < (long)msh.getNumberOfElements(); i++)
             {
-                ele = msh.getElemenet(i);
+                ele = msh.getElement(i);
                 fin << "          ";
                 for (size_t j = 0; j < ele->getNumberOfNodes(); j++)
                     fin << ele->getNodeID(j) << " ";
@@ -472,7 +472,7 @@ bool VtuWriter::writeCellConnectivity(std::fstream &fin,
             BaseLib::write_value_binary<unsigned int>(fin, sizeof(long) * sum_ele_components);
             for (long i = 0; i < (long)msh.getNumberOfElements(); i++)
             {
-                ele = msh.getElemenet(i);
+                ele = msh.getElement(i);
                 for (size_t j = 0; j < ele->getNumberOfNodes(); j++)
                     BaseLib::write_value_binary<long>(fin, ele->getNodeID(j));
             }
@@ -483,7 +483,7 @@ bool VtuWriter::writeCellConnectivity(std::fstream &fin,
         sum_ele_components = 0;
         MeshLib::IElement* ele = NULL;
         for (size_t i = 0; i < msh.getNumberOfElements(); i++) {
-            ele = msh.getElemenet(i);
+            ele = msh.getElement(i);
             sum_ele_components += ele->getNumberOfNodes();
         }
         offset += sum_ele_components * sizeof(long) + SIZE_OF_BLOCK_LENGTH_TAG;
@@ -504,7 +504,7 @@ bool VtuWriter::writeCellOffset(std::fstream &fin, bool output_data, IMesh& msh,
             long ele_offset = 0;
             for (long i = 0; i < (long)msh.getNumberOfElements(); i++)
             {
-                ele = msh.getElemenet(i);
+                ele = msh.getElement(i);
                 ele_offset += ele->getNumberOfNodes();
                 fin << ele_offset << " ";
             }
@@ -518,7 +518,7 @@ bool VtuWriter::writeCellOffset(std::fstream &fin, bool output_data, IMesh& msh,
             long ele_offset = 0;
             for (long i = 0; i < (long)msh.getNumberOfElements(); i++)
             {
-                ele = msh.getElemenet(i);
+                ele = msh.getElement(i);
                 ele_offset += ele->getNumberOfNodes();
                 BaseLib::write_value_binary(fin, ele_offset);
             }
@@ -542,7 +542,7 @@ bool VtuWriter::writeCellType(std::fstream &fin, bool output_data, IMesh& msh, l
             fin << "          ";
             for(long i = 0; i < (long)msh.getNumberOfElements(); i++)
             {
-                ele = msh.getElemenet(i);
+                ele = msh.getElement(i);
                 fin << (int)this->getVTKCellType(ele->getShapeType()) << " ";
             }
             fin << std::endl;
@@ -555,7 +555,7 @@ bool VtuWriter::writeCellType(std::fstream &fin, bool output_data, IMesh& msh, l
                     (long)msh.getNumberOfElements());
             for(long i = 0; i < (long)msh.getNumberOfElements(); i++)
             {
-                ele = msh.getElemenet(i);
+                ele = msh.getElement(i);
                 BaseLib::write_value_binary(fin, this->getVTKCellType(ele->getShapeType()));
             }
         }

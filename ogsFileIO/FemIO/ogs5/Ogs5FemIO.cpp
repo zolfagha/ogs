@@ -80,14 +80,14 @@ bool Ogs5FemIO::read(const std::string &proj_path, Ogs5FemData &ogs5data)
         ERR(" Error when reading GLI");
         for (size_t i=0; i<geo_errors.size(); i++)
             ERR(" -> %s", geo_errors[i].c_str());
-        return false;
+//        return false;
     }
 
     // mesh
     MeshIoOgs5::readMesh(proj_path+".msh", ogs5data.list_mesh);
     if (ogs5data.list_mesh.size()==0) {
         ERR(" Error: Cannot find mesh - %s.msh", proj_path.c_str());
-        return false;
+//        return false;
     }
 
     return true;

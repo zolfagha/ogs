@@ -170,14 +170,14 @@ THMCSimulator::~THMCSimulator()
 bool THMCSimulator::checkInputFiles(const std::string& proj_path)
 {
     // meanwhile OGS5 files are default
-    if(!BaseLib::IsFileExisting(proj_path+".pcs"))
+//    if(!BaseLib::IsFileExisting(proj_path+".pcs"))
+//    {
+//        ERR("Cannot find a PCS file - %s.pcs", proj_path.c_str());
+//        return false;
+//    }
+    if(!BaseLib::IsFileExisting(proj_path+ ".pro"))
     {
-        ERR("Cannot find a PCS file - %s.pcs", proj_path.c_str());
-        return false;
-    }
-    if(!BaseLib::IsFileExisting(proj_path+ ".prop"))
-    {
-        ERR("Cannot find a property file - %s.prop", proj_path.c_str());
+        ERR("Cannot find a property file - %s.pro", proj_path.c_str());
         return false;
     }
 
@@ -188,7 +188,7 @@ int THMCSimulator::execute()
 {
     if (!_sim_info) return 0;
 
-    BaseLib::Options op;
+    BaseLib::Options opAll;
     Ogs6FemData* ogs6fem = Ogs6FemData::getInstance();
     const std::string proj_path = _sim_info->getProjectPath();
     ogs6fem->project_name = _sim_info->getProjectName();
@@ -197,17 +197,26 @@ int THMCSimulator::execute()
     //-------------------------------------------------------------------------
     // Read files
     //-------------------------------------------------------------------------
-    INFO("->Reading input files...");
-    // ogs5fem
-    ogs5::Ogs5FemData ogs5femdata;
-    ogs5::Ogs5FemIO::read(proj_path, ogs5femdata);
-    if (!Ogs5ToOgs6::convert(ogs5femdata, *ogs6fem, op)) {
-        ERR("***Error: Failure during conversion of ogs5 to ogs6.");
+    INFO("->Reading a property file...");
+    // coupling
+    BaseLib::addXMLtoOptions(proj_path+".pro", opAll);
+    BaseLib::Options* opOgs6 = opAll.getSubGroup("ogs6");
+    if (opOgs6 == NULL) {
+        ERR("***Error: tag <ogs6> was not found in the property file.");
         return 0;
     }
+    // ogs5fem
+    if (BaseLib::IsFileExisting(proj_path+".pcs")) {
+        INFO("->Reading OGS5 input files...");
+        ogs5::Ogs5FemData ogs5femdata;
+        ogs5::Ogs5FemIO::read(proj_path, ogs5femdata);
+        if (!Ogs5ToOgs6::convert(ogs5femdata, *ogs6fem, *opOgs6)) {
+            ERR("***Error: Failure during conversion of ogs5 to ogs6.");
+            return 0;
+        }
+    }
+    opOgs6->printout(std::cout);
 
-    // coupling
-    BaseLib::addXMLtoOptions(proj_path+".prop", op);
 
     // ddc
 
@@ -234,10 +243,9 @@ int THMCSimulator::execute()
         NumLib::TransientPartitionedAlgorithmFactory
         > CoupledProcessStrucutreBuilder;
 
-    //NumLib::TransientCoulplingStrucutreBuilder cpl_builder;
     CoupledProcessStrucutreBuilder cpl_builder;
     if (_cpl_system!=NULL) delete _cpl_system;
-    _cpl_system = cpl_builder.build(&op, *GeoProcessBuilder::getInstance());
+    _cpl_system = cpl_builder.build(opOgs6, *GeoProcessBuilder::getInstance());
     std::vector<std::string> &list_mono_system_name = cpl_builder.getListOfMonolithicSystemName();
     if (list_mono_system_name.size()==0) {
         ERR("***Error: no active process is selected.");
@@ -260,8 +268,16 @@ int THMCSimulator::execute()
         for (size_t j=0; j<pcs->getNumberOfOutputParameters(); j++)
             INFO("* OUT %d: %s", j, pcs->getOutputParameterName(j).c_str());
         ogs6fem->list_pcs.insert(pcs_name, pcs);
-        const BaseLib::Options* opPCS = op.getSubGroup("ProcessData")->getSubGroup(pcs_name);
-        bool isPcsReady = pcs->initialize(opPCS!=NULL ? *opPCS : op);
+        const BaseLib::Options* opPCSList = opOgs6->getSubGroup("processList");
+        const BaseLib::Options* opPCS = NULL;
+        if (opPCSList!=NULL) {
+            for (const BaseLib::Options* opVal = opPCSList->getFirstSubGroup("process"); opVal!=NULL; opVal = opPCSList->getNextSubGroup()) {
+                if (opVal->getOption("name").compare(pcs_name)==0)
+                    opPCS = opVal;
+            }
+        }
+        if (opPCS==NULL) INFO("* Process option not found.");
+        bool isPcsReady = pcs->initialize(opPCS!=NULL ? *opPCS : *opOgs6);
         if (!isPcsReady) {
             ERR("***Error while setting up processes");
             return 0;
@@ -275,9 +291,15 @@ int THMCSimulator::execute()
     //TODO the following calculation should be done in TimeSteppingController
     double t_start = std::numeric_limits<double>::max();
     double t_end = -1 * std::numeric_limits<double>::max();
-    for (size_t i=0; i<ogs6fem->list_tim.size(); i++) {
-        t_start = std::min(t_start, ogs6fem->list_tim[i]->getBeginning());
-        t_end = std::max(t_end, ogs6fem->list_tim[i]->getEnd());
+    if (ogs6fem->list_tim.size() > 0) {
+        for (size_t i=0; i<ogs6fem->list_tim.size(); i++) {
+            t_start = std::min(t_start, ogs6fem->list_tim[i]->getBeginning());
+            t_end = std::max(t_end, ogs6fem->list_tim[i]->getEnd());
+        }
+    } else {
+        INFO("Time step configuration not found.");
+        t_start = 0.0;
+        t_end = 1.0;
     }
 
     INFO("->Outputting the initial values...");

@@ -65,7 +65,7 @@ public:
     /// get the number of elements of the given type
     virtual size_t getNumberOfElements(ElementShape::type ele_type) const = 0;
     /// get an element
-    virtual IElement* getElemenet( size_t element_id ) const = 0;
+    virtual IElement* getElement( size_t element_id ) const = 0;
 
     //--- edges ---
     /// get the number of edges

@@ -25,7 +25,7 @@ TopologySequentialNodes2Elements::TopologySequentialNodes2Elements(const IMesh &
     _node2conn_eles.resize(msh.getNumberOfNodes());
     const size_t nr_ele = msh.getNumberOfElements();
     for (size_t i=0; i<nr_ele; i++) {
-        const IElement* e = msh.getElemenet(i);
+        const IElement* e = msh.getElement(i);
         for (size_t j=0; j<e->getNumberOfNodes(); j++) {
             _node2conn_eles[e->getNodeID(j)].push_back(i);
         }
@@ -35,7 +35,7 @@ TopologySequentialNodes2Elements::TopologySequentialNodes2Elements(const IMesh &
 TopologyRandomNodes2Elements::TopologyRandomNodes2Elements(const IMesh &msh, const std::vector<size_t> &nodes) 
 {
     for (size_t i=0; i<msh.getNumberOfElements(); i++) {
-        IElement* e = msh.getElemenet(i);
+        IElement* e = msh.getElement(i);
         for (size_t j=0; j<e->getNumberOfNodes(); j++) {
             if (std::find(nodes.begin(), nodes.end(), e->getNodeID(j))!=nodes.end()) {
                 _map_node2conn_eles[e->getID()].push_back(i);
@@ -50,7 +50,7 @@ TopologyNode2NodesConnectedByEdges::TopologyNode2NodesConnectedByEdges(IMesh *ms
     _node2conn_nodes.resize(msh->getNumberOfNodes());
     const size_t nr_ele = msh->getNumberOfElements();
     for (size_t i=0; i<nr_ele; i++) {
-        const IElement* e = msh->getElemenet(i);
+        const IElement* e = msh->getElement(i);
         const size_t e_nnodes = e->getNumberOfNodes();
         for (size_t j=0; j<e_nnodes; j++) {
             std::set<size_t> &set_conn_nodes = _node2conn_nodes[e->getNodeID(j)];
@@ -67,7 +67,7 @@ TopologyNode2NodesConnectedByElements::TopologyNode2NodesConnectedByElements(IMe
     _node2conn_nodes.resize(msh->getNumberOfNodes());
     const size_t nr_ele = msh->getNumberOfElements();
     for (size_t i=0; i<nr_ele; i++) {
-        const IElement* e = msh->getElemenet(i);
+        const IElement* e = msh->getElement(i);
         const size_t e_nnodes = e->getNumberOfNodes();
         for (size_t j=0; j<e_nnodes; j++) {
             std::set<size_t> &set_conn_nodes = _node2conn_nodes[e->getNodeID(j)];

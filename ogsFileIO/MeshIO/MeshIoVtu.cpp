@@ -162,7 +162,7 @@ bool MeshIoVtu::WriteElementGroupID(std::fstream &fin,
             fin << "          ";
             for(long i = 0; i < (long)msh.getNumberOfElements(); i++)
             {
-                ele = msh.getElemenet(i);
+                ele = msh.getElement(i);
                 fin << ele->getGroupID() << " ";
             }
             fin << endl;
@@ -174,7 +174,7 @@ bool MeshIoVtu::WriteElementGroupID(std::fstream &fin,
                     sizeof(int) *
                     (long)msh.getNumberOfElements());
             for (long i = 0; i < (long)msh.getNumberOfElements(); i++)
-                BaseLib::write_value_binary(fin, msh.getElemenet(i)->getGroupID());
+                BaseLib::write_value_binary(fin, msh.getElement(i)->getGroupID());
         }
     }
     else

@@ -42,18 +42,18 @@ FOREACH(dir ${List_subdir})
     IF(EXISTS ../UserModules/${dir}/CMakeLists.txt)
         INCLUDE(../UserModules/${dir}/CMakeLists.txt)
     ENDIF()
-    FILE(GLOB TempProcessLib_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ../UserModules/${dir}/*.h ../UserModules/${dir}/*.hpp ../UserModules/${dir}/*.cpp)
+    FILE(GLOB TempProcessLib_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ../UserModules/${dir}/*.h ../UserModules/${dir}/*.hpp ../UserModules/${dir}/*.cpp ../UserModules/${dir}/*.txt ../UserModules/${dir}/*.cmake)
     SOURCE_GROUP( ogs6THMC\\UserModules\\${dir} FILES ${TempProcessLib_Files} )
     LIST(APPEND THMC_Files ${TempProcessLib_Files}) 
 ENDFOREACH()
 
 # ./
-FILE(GLOB TempProcessLib_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.h *.cpp)
+FILE(GLOB TempProcessLib_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.h *.cpp *.txt *.cmake)
 SOURCE_GROUP( ogs6THMC FILES ${TempProcessLib_Files} )
 LIST(APPEND THMC_Files ${TempProcessLib_Files}) 
 
 # ./modules
-FILE(GLOB TempProcessLib_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ../UserModules/*.h ../UserModules/*.cpp ../UserModules/*.txt)
+FILE(GLOB TempProcessLib_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ../UserModules/*.h ../UserModules/*.cpp ../UserModules/*.txt ../UserModules/*.cmake)
 SOURCE_GROUP( ogs6THMC\\UserModules FILES ${TempProcessLib_Files} )
 LIST(APPEND THMC_Files ${TempProcessLib_Files}) 
 

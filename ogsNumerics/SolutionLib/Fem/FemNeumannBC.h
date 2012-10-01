@@ -27,57 +27,32 @@ namespace SolutionLib
 {
 
 /**
- * \brief Neumann BC
+ * \brief Neumann BC class for a variable
+ *
  */
 class FemNeumannBC : public IFemNeumannBC
 {
 public:
     /// 
-    FemNeumannBC(const MeshLib::IMesh *msh, FemLib::LagrangianFeObjectContainer* feObjects, const GeoLib::GeoObject *geo, NumLib::ITXFunction *func)
-    {
-        _msh = msh;
-        _feObjects = feObjects;
-        _geo = geo;
-        _bc_func = func->clone();
-        _is_transient = false;
-        _do_setup = true;
-        //_order = 1;
-    }
+    FemNeumannBC(const MeshLib::IMesh *msh, FemLib::LagrangianFeObjectContainer* feObjects, const GeoLib::GeoObject *geo, NumLib::ITXFunction *func);
 
-//    virtual void setOrder(size_t order)
-//    {
-//        _order = order;
-//    }
+    ///
+    FemNeumannBC(const std::vector<size_t> &vec_node_id, const std::vector<double> &vec_node_values);
 
-    /// setup BC. 
-    void setup(size_t order);
+    /// clone this object
+    FemNeumannBC* clone() const;
 
-    size_t getNumberOfConditions() const
-    {
-        return _vec_nodes.size();
-    }
+    /// setup B.C.
+    /// \param order Polynomial order
+    virtual void setup(size_t order);
 
-    size_t getConditionDoF( size_t i ) const
-    {
-        return _vec_nodes[i];
-    }
+    /// get a list of boundary condition nodes
+    virtual std::vector<size_t>& getListOfBCNodes() {return _vec_nodes;};
 
-    double getConditionValue( size_t i ) const
-    {
-        return _vec_values[i];
-    }
-
-    FemNeumannBC* clone() const
-    {
-        FemNeumannBC *f = new FemNeumannBC(_msh, _feObjects, _geo, _bc_func);
-        return f;
-    }
-
-    std::vector<size_t>& getListOfBCNodes() {return _vec_nodes;};
-    std::vector<double>& getListOfBCValues() {return _vec_values;};
+    /// get a list of boundary condition values
+    virtual std::vector<double>& getListOfBCValues() {return _vec_values;};
 
 private:
-    // node id, var id, value
     const MeshLib::IMesh* _msh;
     FemLib::LagrangianFeObjectContainer* _feObjects;
     const GeoLib::GeoObject *_geo;
@@ -86,7 +61,6 @@ private:
     std::vector<double> _vec_values;
     bool _is_transient;
     bool _do_setup;
-    //size_t _order;
 
 };
 

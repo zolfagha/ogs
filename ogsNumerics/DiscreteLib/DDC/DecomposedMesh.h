@@ -84,7 +84,7 @@ public:
     /// get the number of elements of the given type
     virtual size_t getNumberOfElements(MeshLib::ElementShape::type ele_type) const {return _msh0->getNumberOfElements(ele_type);};
     /// get an element
-    virtual MeshLib::IElement* getElemenet( size_t element_id ) const {return _msh0->getElemenet(element_id);};
+    virtual MeshLib::IElement* getElement( size_t element_id ) const {return _msh0->getElement(element_id);};
 
     //--- edges ---
     /// get the number of edges

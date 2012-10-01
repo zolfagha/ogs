@@ -108,7 +108,7 @@ void MeshGenerator::generateSubMesh(const MeshLib::IMesh &src, const std::vector
     MeshLib::UnstructuredMesh* new_msh = new MeshLib::UnstructuredMesh(src.getGeometricProperty()->getCoordinateSystem().getType());
     std::set<size_t> list_nodes_subset;
     for (size_t i=0; i<list_e.size(); i++) {
-        const MeshLib::IElement *e = src.getElemenet(list_e[i]);
+        const MeshLib::IElement *e = src.getElement(list_e[i]);
         for (size_t j=0; j<e->getNumberOfNodes(); j++) {
             list_nodes_subset.insert(e->getNodeID(j));
         }
@@ -122,7 +122,7 @@ void MeshGenerator::generateSubMesh(const MeshLib::IMesh &src, const std::vector
     }
 
     for (size_t i=0; i<list_e.size(); i++) {
-        const MeshLib::IElement *e = src.getElemenet(list_e[i]);
+        const MeshLib::IElement *e = src.getElement(list_e[i]);
         MeshLib::IElement *new_e = e->clone();
         for (size_t j=0; j<e->getNumberOfNodes(); j++) {
             new_e->setNodeID(j, map_global2local.mapAtoB(e->getNodeID(j)));
