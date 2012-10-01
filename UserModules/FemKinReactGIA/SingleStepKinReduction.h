@@ -334,10 +334,12 @@ int SingleStepKinReduction<T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBLEM, T_USER_LIN
     }
 
     // imposing BC for eta
-    // for ( i=0; i < _linear_problem.size(); i++ )
-    // 	_linear_problem->getVariable(0)
+    for ( i=0; i < _linear_problem.size(); i++ )
+     	_linear_problem[i]->getVariable(0)->addDirichletBC( new SolutionLib::FemDirichletBC( vec_bc_node_idx,  vec_node_eta_values[i] ) ); 
 
     // imposing BC for xi
+	for ( i=0; i < _non_linear_problem->getNumberOfVariables(); i++ )
+		_non_linear_problem->getVariable(i)->addDirichletBC( new SolutionLib::FemDirichletBC( vec_bc_node_idx,  vec_node_xi_values[i] ) ); 
 
 
 	// solving linear problems one after the other

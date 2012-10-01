@@ -22,7 +22,7 @@ chemReactionKin::chemReactionKin(void)
 	
 	_rate_constant = 0.0; 
     
-	_rate_constant_order - 0.0; 
+	_rate_constant_order = 1.0; 
 }
 
 chemReactionKin::~chemReactionKin(void)
@@ -37,7 +37,7 @@ void chemReactionKin::readReactionStr(std::string & reaction_str)
 
 void chemReactionKin::calcReactionRate(ogsChem::LocalVector & vec_Comp_Conc)
 {
-	if ( this->_kinReactType == KinReactType::Monod )
+	if ( this->_kinReactType == ogsChem::Monod )
 		this->_rate = calcReactionRateMonod(vec_Comp_Conc); 
 	
 }
@@ -88,7 +88,7 @@ void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::
 	// read the rate parameters
 	if ( KRC_reaction->getType() == "monod" )
 	{
-		this->_kinReactType = KinReactType::Monod; 
+		this->_kinReactType = ogsChem::Monod; 
 
 		// loop over the monod term, 
 		for (size_t i=0; i < KRC_reaction->monod.size(); i++ )
@@ -119,7 +119,7 @@ void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::
 	}  // end of if KRC_reaction
 	else
 	{
-		this->_kinReactType = KinReactType::NoType; 
+		this->_kinReactType = ogsChem::NoType; 
 	}
 
 	// read the rate constant

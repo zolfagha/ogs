@@ -4,8 +4,9 @@ OGS_ADD_PROCESS_SYS_SOLVER(GROUNDWATER_FLOW, FunctionHead, DiscreteLib::Discrete
 OGS_ADD_PROCESS_SYS_SOLVER(LIQUID_FLOW, FunctionLiquidPressure, DiscreteLib::DiscreteSystem, MathLib::DenseLinearEquation);
 OGS_ADD_PROCESS_SYS(HEAD_TO_ELEMENT_VELOCITY, FunctionHeadToElementVelocity, DiscreteLib::DiscreteSystem);
 OGS_ADD_PROCESS_SYS(PRESSURE_TO_ELEMENT_VELOCITY, FunctionPressureToElementVelocity, DiscreteLib::DiscreteSystem);
-OGS_ADD_PROCESS_SYS(PRESSURE_TO_HEAD, FunctionPressureToHead, DiscreteLib::DiscreteSystem);
-OGS_ADD_PROCESS_SYS_SOLVER(MASS_TRANSPORT, FunctionConcentration,  DiscreteLib::DiscreteSystem, MathLib::DenseLinearEquation);
+//OGS_ADD_PROCESS_SYS(PRESSURE_TO_HEAD, FunctionPressureToHead, DiscreteLib::DiscreteSystem);
+// OGS_ADD_PROCESS_SYS_SOLVER(MASS_TRANSPORT, FunctionConcentration,  DiscreteLib::DiscreteSystem, MathLib::DenseLinearEquation);
+OGS_ADD_PROCESS_SYS_SOLVER(MASS_TRANSPORT, FunctionConcentration,  DiscreteLib::DiscreteSystem, MathLib::LisLinearEquation);
 // OGS_ADD_PROCESS_SYS_SOLVER(KIN_REACT_GIA,  FunctionConcentrations, DiscreteLib::DiscreteSystem, MathLib::DenseLinearEquation  );
 OGS_ADD_PROCESS_SYS_SOLVER(KIN_REACT_GIA,  FunctionConcentrations, DiscreteLib::DiscreteSystem, MathLib::LisLinearEquation  );
 //OGS_ADD_PROCESS_SYS_SOLVER(DEFORMATION, FunctionDisplacement, DiscreteLib::DiscreteSystem, MathLib::DenseLinearEquation);
