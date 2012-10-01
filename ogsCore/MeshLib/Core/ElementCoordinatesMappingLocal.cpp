@@ -116,14 +116,15 @@ void ElementCoordinatesMappingLocal::rotate(IElement &ele, const CoordinateSyste
     }
 
     double const* const coords_node_0 (vec_pt[0]->getData());
-    MathLib::LocalVector dx(global_dim), x_new(global_dim);
+    MathLib::LocalVector dx = MathLib::LocalVector::Zero(global_dim);
+    MathLib::LocalVector x_new = MathLib::LocalVector::Zero(3);
     for(size_t i = 0; i < e->getNumberOfNodes(); i++)
     {
         double const* const coords_node_i (vec_pt[i]->getData());
         for (size_t j=0; j<global_dim; j++)
             dx[j] = (coords_node_i[j] - coords_node_0[j]);
 
-        x_new = _matR2local * dx;
+        x_new.head(global_dim) = _matR2local * dx;
         _point_vec[i] = new GeoLib::Point(x_new.data());
     }
 };
