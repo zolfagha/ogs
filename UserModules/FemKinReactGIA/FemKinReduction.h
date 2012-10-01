@@ -20,6 +20,7 @@
 #include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "SolutionLib/Core/TimeSteppingProblem.h"
 #include "SolutionLib/Fem/FemVariable.h"
+#include "ChemLib/chemReductionKin.h"
 
 namespace SolutionLib
 {
@@ -69,6 +70,9 @@ public:
 
     /// get the number of variables
     size_t getNumberOfVariables() const { return _variables.size(); }
+
+	// get the pointer to reduction scheme
+	ogsChem::chemReductionKin* getReductionScheme() const { return _ReductionKin; }
 
 private:
     DISALLOW_COPY_AND_ASSIGN(FemKinReduction);

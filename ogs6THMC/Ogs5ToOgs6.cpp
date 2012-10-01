@@ -383,7 +383,7 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 			ogsChem::chemReactionKin* mKinReaction; 
 			mKinReaction = new ogsChem::chemReactionKin(); 
 			// convert the ogs5 KRC data structure into ogs6 Kinetic reactions
-			mKinReaction->readReactionKRC( rfKinReact ); 
+			mKinReaction->readReactionKRC( ogs6fem.map_ChemComp, rfKinReact ); 
 			// adding the instance of one single kinetic reaction
 			ogs6fem.list_kin_reactions.push_back(mKinReaction); 
 		}  // end of for

@@ -124,6 +124,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 
 	// reduction problem
 	_problem = new MyKinReductionProblemType( dis, _ReductionKin ); 
+	_problem->setTimeSteppingFunction(*tim);  // applying the same time stepping function for all linear, non-linear and reduction problems
 	// add variables to the KinReduction problem class
 	// for the KinReduction problem, variables are the concentrations of all chemical components
 	// add all concentrations to discretized memory space
@@ -252,7 +253,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	this->_non_linear_solution->getNonlinearSolver()->setOption(*optNum);
 
 	// set up solution
-    _solution = new MyKinReductionSolution(dis, _problem);
+    _solution = new MyKinReductionSolution(dis, _problem, _linear_problems, _linear_solutions, _non_linear_problem, _non_linear_solution);
 	
     // set initial output
     OutputVariableInfo var(this->getOutputParameterName(Concentrations), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
