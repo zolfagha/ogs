@@ -100,7 +100,9 @@ public:
 	// the general reduction problem part
 	typedef SolutionLib::FemKinReduction<MyDiscreteSystem> MyKinReductionProblemType; 
 	typedef SolutionLib::SingleStepKinReduction<MyKinReductionProblemType,
+		                                        MyLinearTransportProblemType, 
 		                                        MyLinearSolutionType, 
+												MyNonLinearReactiveTransportProblemType, 
 	                                            MyNonLinearSolutionType> MyKinReductionSolution; 
 
     FunctionConcentrations() 

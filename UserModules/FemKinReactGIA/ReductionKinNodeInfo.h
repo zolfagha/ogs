@@ -30,6 +30,12 @@ public:
 
 	size_t get_node_id(void) { return _node_id; }
 
+	double get_eta_mob_value( size_t eta_mob_idx ) { return _eta_mob(eta_mob_idx); }
+
+	double get_eta_immob_value( size_t eta_immob_idx ) { return _eta_immob(eta_immob_idx); }
+
+	double get_xi_value( size_t xi_idx ) { return _xi(xi_idx); }
+
 	void transform(void); 
 
 protected: 
@@ -42,10 +48,10 @@ private:
 	const size_t _n_eta_immob; 
 	const size_t _n_xi; 
 
-	DiscreteLib::LocalVector Comp_Conc; 
-	DiscreteLib::LocalVector eta_mob; 
-	DiscreteLib::LocalVector eta_immob; 
-	DiscreteLib::LocalVector xi; 
+	DiscreteLib::LocalVector _Comp_Conc; 
+	DiscreteLib::LocalVector _eta_mob; 
+	DiscreteLib::LocalVector _eta_immob; 
+	DiscreteLib::LocalVector _xi; 
 
 	ogsChem::chemReductionKin* _ReductionKin;
 }; 

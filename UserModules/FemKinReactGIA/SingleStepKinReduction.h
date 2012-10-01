@@ -54,7 +54,9 @@ namespace SolutionLib
  */
 template <
     class T_USER_FEM_PROBLEM,
-    class T_USER_LINEAR_SOLUTION, 
+    class T_USER_LINEAR_PROBLEM,
+    class T_USER_LINEAR_SOLUTION,
+    class T_USER_NON_LINEAR_PROBLEM, 
 	class T_USER_NON_LINEAR_SOLUTION 
     >
 class SingleStepKinReduction
@@ -62,8 +64,10 @@ class SingleStepKinReduction
 {
 public:
 
-    typedef T_USER_FEM_PROBLEM UserFemProblem;
-	typedef T_USER_LINEAR_SOLUTION UserLinearSolution; 
+    typedef T_USER_FEM_PROBLEM         UserFemProblem;
+    typedef T_USER_LINEAR_PROBLEM      UserLinearProblem; 
+	typedef T_USER_LINEAR_SOLUTION     UserLinearSolution;
+    typedef T_USER_NON_LINEAR_PROBLEM  UserNonLinearProblem; 
 	typedef T_USER_NON_LINEAR_SOLUTION UserNonLinearSolution; 
     typedef typename UserFemProblem::MyDiscreteSystem MyDiscreteSystem;
     typedef typename UserFemProblem::MyVariable MyVariable;
@@ -79,10 +83,12 @@ public:
     /// - set up DoFs and equation index
     /// - prepare linear equation and solver
     /// - prepare linear functions
-    SingleStepKinReduction(MyDiscreteSystem* dis, 
-		                   UserFemProblem* problem, 
-						   std::vector<UserLinearSolution*> linear_solutions, 
-						   UserNonLinearSolution* non_linear_solution);
+    SingleStepKinReduction(MyDiscreteSystem*                dis, 
+		                   UserFemProblem*                  problem, 
+                           std::vector<UserLinearProblem*>  linear_problem,
+						   std::vector<UserLinearSolution*> linear_solutions,
+                           UserNonLinearProblem*            non_linear_problem,
+						   UserNonLinearSolution*           non_linear_solution);
 
     ///
     virtual ~SingleStepKinReduction()
@@ -143,26 +149,34 @@ private:
     SolutionVector *_x_n1;
     SolutionVector *_x_st;
     FemLib::LagrangianFeObjectContainer* _feObjects;
-
+    
+    std::vector<UserLinearProblem*>  _linear_problem;
 	std::vector<UserLinearSolution*> _lin_solutions; 
-	UserNonLinearSolution* _nlin_solution; 
+
+	UserNonLinearProblem*            _non_linear_problem;
+    UserNonLinearSolution*           _nlin_solution; 
 
 	std::map<size_t, ReductionKinNodeInfo*> _bc_info; 
 };
 
 template <
     class T_USER_FEM_PROBLEM,
-    class T_USER_LINEAR_SOLUTION, 
+    class T_USER_LINEAR_PROBLEM,
+    class T_USER_LINEAR_SOLUTION,
+    class T_USER_NON_LINEAR_PROBLEM, 
 	class T_USER_NON_LINEAR_SOLUTION 
     >
-SingleStepKinReduction<T_USER_FEM_PROBLEM,T_USER_LINEAR_SOLUTION, T_USER_NON_LINEAR_SOLUTION>
-    ::SingleStepKinReduction(MyDiscreteSystem* dis, 
-	                         UserFemProblem* problem, 
-							 std::vector<UserLinearSolution*> linear_solutions, 
-							 UserNonLinearSolution* non_linear_solution)
+SingleStepKinReduction<T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBLEM, T_USER_LINEAR_SOLUTION, T_USER_NON_LINEAR_PROBLEM, T_USER_NON_LINEAR_SOLUTION>
+    ::SingleStepKinReduction(MyDiscreteSystem*                dis, 
+                             UserFemProblem*                  problem, 
+                             std::vector<UserLinearProblem*>  linear_problem,
+						     std::vector<UserLinearSolution*> linear_solutions,
+                             UserNonLinearProblem*            non_linear_problem,
+						     UserNonLinearSolution*           non_linear_solution)
     : AbstractTimeSteppingAlgorithm(*problem->getTimeSteppingFunction()),
       _problem(problem), _discrete_system(dis), 
-	  _lin_solutions(linear_solutions), _nlin_solution(non_linear_solution)
+      _linear_problem(linear_problem), _lin_solutions(linear_solutions), 
+      _non_linear_problem(non_linear_problem), _nlin_solution(non_linear_solution)
 {
     INFO("->setting up a solution algorithm SingleStepKinReduction");
 
@@ -228,10 +242,13 @@ SingleStepKinReduction<T_USER_FEM_PROBLEM,T_USER_LINEAR_SOLUTION, T_USER_NON_LIN
 
 template <
     class T_USER_FEM_PROBLEM,
-    class T_USER_LINEAR_SOLUTION, 
+    class T_USER_LINEAR_PROBLEM,
+    class T_USER_LINEAR_SOLUTION,
+    class T_USER_NON_LINEAR_PROBLEM, 
 	class T_USER_NON_LINEAR_SOLUTION 
     >
-int SingleStepKinReduction<T_USER_FEM_PROBLEM, T_USER_LINEAR_SOLUTION, T_USER_NON_LINEAR_SOLUTION>::solveTimeStep(const NumLib::TimeStep &t_n1)
+int SingleStepKinReduction<T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBLEM, T_USER_LINEAR_SOLUTION, T_USER_NON_LINEAR_PROBLEM, T_USER_NON_LINEAR_SOLUTION>
+    ::solveTimeStep(const NumLib::TimeStep &t_n1)
 {
 	size_t i; 
 
@@ -280,21 +297,53 @@ int SingleStepKinReduction<T_USER_FEM_PROBLEM, T_USER_LINEAR_SOLUTION, T_USER_NO
     // loop over all the boundary nodes, and 
 	// transform these concentrations to eta and xi values
     std::map<size_t, ReductionKinNodeInfo*>::iterator bc_node_it; 
+    std::vector<size_t> vec_bc_node_idx; 
+    std::vector<std::vector<double>> vec_node_eta_values;
+    std::vector<std::vector<double>> vec_node_xi_values; 
+
+    for ( i=0; i < _linear_problem.size(); i++ )
+    {
+        std::vector<double> vec_eta_mob; 
+        vec_node_eta_values.push_back(vec_eta_mob); 
+    }
+    
+    for ( i=0; i < _non_linear_problem->getNumberOfVariables(); i++ )
+    {
+        std::vector<double> vec_xi;
+        vec_node_xi_values.push_back(vec_xi); 
+    }
+
+
     for ( bc_node_it = _bc_info.begin(); bc_node_it != _bc_info.end(); bc_node_it++ )
     {
         bc_node_it->second->transform(); 
+        size_t node_idx = bc_node_it->second->get_node_id(); 
+        vec_bc_node_idx.push_back(node_idx);
+
+        for ( i=0; i < _linear_problem.size(); i++ )
+        {
+            double eta_mob_value = bc_node_it->second->get_eta_mob_value(i);
+            vec_node_eta_values[i].push_back(eta_mob_value); 
+        }
+
+        for ( i=0; i < _non_linear_problem->getNumberOfVariables(); i++ )
+        {
+            double xi_value = bc_node_it->second->get_xi_value(i);
+            vec_node_xi_values[i].push_back(xi_value); 
+        }
     }
 
-	// form global vectors of bc values
-    std::vector<size_t> list_bc_nodes;
-    std::vector<std::vector<double>> list_eta_mob_values;
-    std::vector<std::vector<double>> list_eta_immob_values;
-    std::vector<std::vector<double>> list_xi_values;
+    // imposing BC for eta
+    // for ( i=0; i < _linear_problem.size(); i++ )
+    // 	_linear_problem->getVariable(0)
+
+    // imposing BC for xi
+
 
 	// solving linear problems one after the other
 	for (i=0; i<_lin_solutions.size(); i++)
 	{
-		// TODO, print information
+		// print solving information
 		INFO("--Solving linear equation for eta_%d...", i ); 
 		_lin_solutions[i]->solveTimeStep( t_n1 );
 	}
