@@ -184,13 +184,13 @@ void chemReductionKin::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 	{
 		switch ( it->second->getMobility() )
 		{
-		case ogsChem::Comp_Mobility::MOBILE: 
+		case ogsChem::MOBILE:
 			_I_mob++; 
 			break;
-		case ogsChem::Comp_Mobility::SORPTION: 
+		case ogsChem::SORPTION:
 			_I_sorp++;
 			break;
-		case ogsChem::Comp_Mobility::MINERAL: 
+		case ogsChem::MINERAL:
 			_I_min++;
 			break;
 		default:
