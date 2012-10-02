@@ -39,11 +39,11 @@ private:
     double a[3], b[3], c[3];
     double A;
     FemIntegrationAnalytical _integration;
-    LocalMatrix _shape, _dshape;
+    MathLib::LocalMatrix _shape, _dshape;
     double x_cp[3];
 
     void computeBasisFunction(const double *x,  double *shape);
-    void computeGradBasisFunction(const double *x,  LocalMatrix &mat);
+    void computeGradBasisFunction(const double *x,  MathLib::LocalMatrix &mat);
 public:
     explicit TRI3CONST(MeshLib::IMesh* msh)
     : TemplateFeBase<FiniteElementType::TRI3CONST, 3>(msh), _shape(1,3), _dshape(2,3) {};
@@ -55,8 +55,8 @@ public:
     void computeBasisFunctions(const double *x);
     /// compute real coordinates from the given position in reference coordinates
     virtual void getRealCoordinates(double* x_real);
-    LocalMatrix* getBasisFunction();
-    LocalMatrix* getGradBasisFunction();
+    MathLib::LocalMatrix* getBasisFunction();
+    MathLib::LocalMatrix* getGradBasisFunction();
     virtual double getDetJ() const {return 1.0;}
 
 
@@ -73,18 +73,18 @@ public:
 //    void integrateDWxDN(MathLib::SpatialFunctionScalar *f, LocalMatrix &mat);
 
     /// compute an matrix M = Int{W^T F N} dV
-    virtual void integrateWxN(size_t igp, LocalMatrix &f, LocalMatrix &mat);
+    virtual void integrateWxN(size_t igp, MathLib::LocalMatrix &f, MathLib::LocalMatrix &mat);
 
     /// compute an matrix M = Int{W^T F dN} dV
-    virtual void integrateWxDN(size_t igp, LocalMatrix &f, LocalMatrix &mat);
+    virtual void integrateWxDN(size_t igp, MathLib::LocalMatrix &f, MathLib::LocalMatrix &mat);
 
     /// compute an matrix M = Int{dW^T F dN} dV
-    virtual void integrateDWxDN(size_t igp, LocalMatrix &f, LocalMatrix &mat);
+    virtual void integrateDWxDN(size_t igp, MathLib::LocalMatrix &f, MathLib::LocalMatrix &mat);
 
     /// get the integration method
     IFemNumericalIntegration* getIntegrationMethod() const {return (IFemNumericalIntegration*)&_integration;};
 
-    void extrapolate(const std::vector<LocalVector> &gp_values, std::vector<LocalVector> &nodal_values);
+    void extrapolate(const std::vector<MathLib::LocalVector> &gp_values, std::vector<MathLib::LocalVector> &nodal_values);
 };
 
 }

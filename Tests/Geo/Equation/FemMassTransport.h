@@ -27,8 +27,8 @@ template <class T>
 class MassTransportTimeODELocalAssembler: public T
 {
 public:
-    typedef NumLib::LocalVector LocalVectorType;
-    typedef NumLib::LocalMatrix LocalMatrixType;
+    typedef MathLib::LocalVector LocalVectorType;
+    typedef MathLib::LocalMatrix LocalMatrixType;
 
     MassTransportTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, PorousMedia &pm, Compound &cmp)
     : _pm(&pm), _cmp(&cmp), _feObjects(&feObjects)
@@ -62,14 +62,14 @@ protected:
 
             double poro;
             _pm->porosity->eval(real_x, poro);
-            NumLib::LocalMatrix mat_poro(1,1);
+            MathLib::LocalMatrix mat_poro(1,1);
             mat_poro(0,0) = poro;
             double d_poro;
             f_diff_poro.eval(real_x, d_poro);
             NumLib::ITXFunction::DataType v;
             _vel->eval(real_x, v);
             NumLib::ITXFunction::DataType v2 = v.topRows(n_dim).transpose();
-            NumLib::LocalMatrix mat_dporo(1,1);
+            MathLib::LocalMatrix mat_dporo(1,1);
             mat_dporo(0,0) = d_poro;
 
              fe->integrateWxN(j, mat_poro, localM);
@@ -108,13 +108,13 @@ public:
         _vel = const_cast<NumLib::ITXFunction*>(vel);
     }
 
-    void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/, NumLib::LocalMatrix &localJ)
+    void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const MathLib::LocalVector &/*u1*/, const MathLib::LocalVector &/*u0*/, MathLib::LocalMatrix &localJ)
     {
         FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
 
-        NumLib::LocalMatrix matM = NumLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
-        NumLib::LocalMatrix matDiff = NumLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
-        NumLib::LocalMatrix matAdv = NumLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
+        MathLib::LocalMatrix matM = MathLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
+        MathLib::LocalMatrix matDiff = MathLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
+        MathLib::LocalMatrix matAdv = MathLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
         NumLib::TXCompositFunction<NumLib::ITXFunction, NumLib::ITXFunction, NumLib::Multiplication> f_diff_poro(*_cmp->molecular_diffusion, *_pm->porosity);
 
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
@@ -126,13 +126,13 @@ public:
 
             double poro;
             _pm->porosity->eval(real_x, poro);
-            NumLib::LocalMatrix mat_poro(1,1);
+            MathLib::LocalMatrix mat_poro(1,1);
             mat_poro(0,0) = poro;
             double d_poro;
             f_diff_poro.eval(real_x, d_poro);
             NumLib::ITXFunction::DataType v;
             _vel->eval(real_x, v);
-            NumLib::LocalMatrix mat_dporo(1,1);
+            MathLib::LocalMatrix mat_dporo(1,1);
             mat_dporo(0,0) = d_poro;
 
              fe->integrateWxN(j, mat_poro, matM);

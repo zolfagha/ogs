@@ -25,7 +25,7 @@
 #include "ProcessLib/AbstractTransientProcess.h"
 #include "LinearTransportTimeODELocalAssember.h"
 #include "LinearTransportJacobianLocalAssembler.h"
-#include "DiscreteLib/Core/LocalDataType.h"
+#include "MathLib/DataType.h"
 
 template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER>
 class FunctionConcentrations
@@ -39,8 +39,8 @@ public:
     typedef T_LINEAR_SOLVER MyLinearSolver;
 
 	// local matrix and vector
-	typedef DiscreteLib::LocalMatrix LocalMatrix;
-	typedef DiscreteLib::LocalVector LocalVector;
+	typedef MathLib::LocalMatrix LocalMatrix;
+	typedef MathLib::LocalVector LocalVector;
 
     // memory for discretized concentration vector
     typedef typename FemLib::FemNodalFunctionVector<MyDiscreteSystem>::type MyNodalFunctionVector;

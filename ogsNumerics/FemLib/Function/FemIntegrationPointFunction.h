@@ -17,7 +17,7 @@
 
 #include "MathLib/Vector.h"
 #include "MeshLib/Core/IMesh.h"
-#include "FemLib/Core/DataType.h"
+#include "MathLib/DataType.h"
 #include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "DiscreteLib/Core/IDiscreteVector.h"
 #include "NumLib/Function/TXFunction.h"
@@ -370,7 +370,7 @@ struct FEMIntegrationPointFunctionScalar
 template <class T_DIS_SYS>
 struct FEMIntegrationPointFunctionVector
 {
-    typedef TemplateFEMIntegrationPointFunction<T_DIS_SYS, NumLib::LocalVector> type;
+    typedef TemplateFEMIntegrationPointFunction<T_DIS_SYS, MathLib::LocalVector> type;
 };
 
 //typedef TemplateFEMIntegrationPointFunction<LocalVector> FEMIntegrationPointFunctionVector;

@@ -16,6 +16,7 @@
 namespace BaseLib
 {
 
+/// return if this system supports little endian or not
 inline bool IsLittleEndian()
 {
     int x = 0x00000001;

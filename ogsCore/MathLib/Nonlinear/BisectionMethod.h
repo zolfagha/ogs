@@ -12,18 +12,37 @@
 
 #pragma once
 
+#include "NRCheckConvergence.h"
+#include "NRErrorNorm1Residual.h"
 
 namespace MathLib
 {
 
 /**
- * \brief Bisection method
+ * \brief Bisection nonlinear solver
  */
 class BisectionMethod
 {
 public:
+    /**
+     * solve the given nonlinear problem
+     *
+     * \tparam F_PROBLEM        Function class evaluating residuals
+     * \tparam T_VALUE          Value type
+     * \tparam T_CONVERGENCE    Convergence check class
+     *
+     * \param f_residuals
+     * \param x_a
+     * \param x_c
+     * \param x_b
+     * \param r_a
+     * \param r_b
+     * \param r_c
+     * \param max_itr_count
+     * \param convergence
+     */
     template<class F_PROBLEM, class T_VALUE, class T_CONVERGENCE>
-    int solve(F_PROBLEM &f_residuals,  T_VALUE &x_a, T_VALUE &x_c, T_VALUE &x_b, T_VALUE &r_a, T_VALUE &r_b, T_VALUE &r_c, size_t max_itr_count=100, T_CONVERGENCE* convergence=0)
+    int solve(F_PROBLEM &f_residuals,  T_VALUE &x_a, T_VALUE &x_c, T_VALUE &x_b, T_VALUE &r_a, T_VALUE &r_b, T_VALUE &r_c, size_t max_itr_count=100, T_CONVERGENCE* convergence=NULL)
     {
         T_CONVERGENCE _default_convergence;
         if (convergence==0) convergence = &_default_convergence;

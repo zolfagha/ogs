@@ -47,7 +47,7 @@ public:
 
     MatrixType* getA() { return &_A; }
 
-    double getA(size_t rowId, size_t colId)
+    double getA(size_t rowId, size_t colId) const
     {
         return _A(rowId, colId);
     }
@@ -62,7 +62,7 @@ public:
         _A(rowId, colId) += v;
     }
 
-    double getRHS(size_t rowId)
+    double getRHS(size_t rowId) const
     {
         return _b[rowId];
     }

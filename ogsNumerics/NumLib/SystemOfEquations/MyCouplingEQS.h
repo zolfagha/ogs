@@ -28,7 +28,7 @@ template <class T_CONVERGENCE>
 class MyCouplingEQS : public AbstractMonolithicSystem<ICoupledSystem>
 {
 public:
-    typedef NumLib::LocalVector ArrayType;
+    typedef MathLib::LocalVector ArrayType;
     typedef MyArrayFunction<ArrayType > ParameterType;
 
     MyCouplingEQS(const std::vector<Variable*> &variables, const std::vector<LinearEquation*> &equations)
@@ -61,7 +61,7 @@ public:
             inactive_x[para_id] = *p->getArray();
         }
 
-        NumLib::LocalEquation eqs1;
+        MathLib::LocalEquation eqs1;
         _f->eval(inactive_x, eqs1);
         eqs1.solve();
         double *u1 = eqs1.getX();

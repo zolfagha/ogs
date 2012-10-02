@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "NumLib/DataType.h"
+#include "MathLib/DataType.h"
 
 
 namespace MeshLib
@@ -41,7 +41,7 @@ public:
     /// @param M        mass matrix
     /// @param K        laplace matrix
     /// @param F        source/sink terms
-    virtual void assembly(const TimeStep &time, MeshLib::IElement &e, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalMatrix &M, LocalMatrix &K, LocalVector &F)  = 0;
+    virtual void assembly(const TimeStep &time, MeshLib::IElement &e, const MathLib::LocalVector &local_u_n1, const MathLib::LocalVector &local_u_n, MathLib::LocalMatrix &M, MathLib::LocalMatrix &K, MathLib::LocalVector &F)  = 0;
 };
 
 } //end

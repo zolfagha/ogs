@@ -41,7 +41,7 @@ bool FunctionXFEM_EXAMPLE_CRACK1::initialize(const BaseLib::Options &option)
 
     // initialize node values for simulated and exact displacements
     _displacement = new MyNodalFunctionVector();
-    NumLib::LocalVector tmp_u0 = NumLib::LocalVector::Zero(2);
+    MathLib::LocalVector tmp_u0 = MathLib::LocalVector::Zero(2);
     _displacement->initialize(*_dis, FemLib::PolynomialOrder::Linear, tmp_u0);
     _exact_displacement = new MyNodalFunctionVector();
     _exact_displacement->initialize(*_dis, FemLib::PolynomialOrder::Linear, tmp_u0);
@@ -117,8 +117,8 @@ int FunctionXFEM_EXAMPLE_CRACK1::solveTimeStep(const NumLib::TimeStep &/*time*/)
         const size_t n_ele_nodes = e->getNumberOfNodes();
         Eigen::VectorXi Nodes(n_ele_nodes);
         FemLib::IFiniteElement* fe = _feObjects->getFeObject(*e);
-        NumLib::LocalVector xxElem(n_ele_nodes), yyElem(n_ele_nodes);
-        NumLib::LocalVector ffEle(n_ele_nodes);
+        MathLib::LocalVector xxElem(n_ele_nodes), yyElem(n_ele_nodes);
+        MathLib::LocalVector ffEle(n_ele_nodes);
         for (size_t j=0; j<n_ele_nodes; j++) {
             Nodes(j) = e->getNodeID(j);
             xxElem(j) = _msh->getNodeCoordinatesRef(e->getNodeID(j))->getData()[0];
@@ -127,7 +127,7 @@ int FunctionXFEM_EXAMPLE_CRACK1::solveTimeStep(const NumLib::TimeStep &/*time*/)
         }
 
         // activate nodes are enriched
-        NumLib::LocalVector NodesAct(n_ele_nodes);
+        MathLib::LocalVector NodesAct(n_ele_nodes);
         for (size_t i=0; i<n_ele_nodes; i++) {
             NodesAct(i) = (SetNodesEnriched.count(Nodes(i))>0 ? 1 : 0);
         }
@@ -141,17 +141,17 @@ int FunctionXFEM_EXAMPLE_CRACK1::solveTimeStep(const NumLib::TimeStep &/*time*/)
             q->getSamplingPoint(j, vec_int_ref_xx[j].getData());
             vec_int_ref_w[j] = q->getWeight(j);
         }
-        NumLib::LocalVector xxIntRef, yyIntRef, wwIntRef;
+        MathLib::LocalVector xxIntRef, yyIntRef, wwIntRef;
         IntPoints2DLevelSet(
                 ffEle, vec_int_ref_xx, vec_int_ref_w, nQnQ,
                 xxIntRef, yyIntRef, wwIntRef);
         const size_t Curr_nQ = xxIntRef.rows();
 
         // get shape functions
-        NumLib::LocalMatrix N, dNdx, dNdy;
-        NumLib::LocalMatrix M, dMdx, dMdy;
-        NumLib::LocalVector xxInt, yyInt, wwInt;
-        NumLib::LocalVector ffInt;
+        MathLib::LocalMatrix N, dNdx, dNdy;
+        MathLib::LocalMatrix M, dMdx, dMdy;
+        MathLib::LocalVector xxInt, yyInt, wwInt;
+        MathLib::LocalVector ffInt;
         ShapeFctsXFEMSign(
                 xxElem, yyElem, ffEle, NodesAct, xxIntRef, yyIntRef, wwIntRef,
                 Curr_nQ,

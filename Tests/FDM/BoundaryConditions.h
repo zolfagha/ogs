@@ -34,7 +34,7 @@ class FdmDirichletBC //: IFdmBC, public NumLib::ITXFunction
 {
 public:
     ///
-    FdmDirichletBC(TemplateFDMFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, NumLib::ITXFunction *bc_func)
+    FdmDirichletBC(TemplateFDMFunction<Tval> *var, const GeoLib::GeoObject *geo, bool is_transient, NumLib::ITXFunction *bc_func)
     {
         _var = var;
         _geo = geo;
@@ -90,7 +90,7 @@ public:
 
 private:
     TemplateFDMFunction<Tval> *_var;
-    GeoLib::GeoObject *_geo;
+    const GeoLib::GeoObject *_geo;
     NumLib::ITXFunction *_bc_func;
     std::vector<size_t> _vec_nodes;
     std::vector<Tval> _vec_values;
@@ -104,7 +104,7 @@ class FdmNeumannBC //: IFdmBC, public NumLib::TemplateSpatialFunction<Tflux>
 {
 public:
     ///
-    FdmNeumannBC(TemplateFDMFunction<Tval> *var, GeoLib::GeoObject *geo, bool is_transient, NumLib::ITXFunction *func)
+    FdmNeumannBC(TemplateFDMFunction<Tval> *var, const GeoLib::GeoObject *geo, bool is_transient, NumLib::ITXFunction *func)
     {
         _var = var;
         _geo = geo;
@@ -198,7 +198,7 @@ public:
 private:
     // node id, var id, value
     TemplateFDMFunction<Tval> *_var;
-    GeoLib::GeoObject *_geo;
+    const GeoLib::GeoObject *_geo;
     NumLib::ITXFunction *_bc_func;
     std::vector<size_t> _vec_nodes;
     std::vector<Tval> _vec_values;

@@ -15,7 +15,7 @@
 
 #include "MeshLib/Core/IElement.h"
 #include "DiscreteLib/Utils/DofEquationIdTable.h"
-#include "NumLib/DataType.h"
+#include "MathLib/DataType.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "IElementWiseTransientLinearEQSLocalAssembler.h"
 
@@ -26,8 +26,8 @@ class ElementWiseTransientCoupledLinearEQSLocalAssembler
 : public IElementWiseTransientLinearEQSLocalAssembler
 {
 public:
-    typedef LocalVector LocalVectorType;
-    typedef LocalMatrix LocalMatrixType;
+    typedef MathLib::LocalVector LocalVectorType;
+    typedef MathLib::LocalMatrix LocalMatrixType;
 
     ElementWiseTransientCoupledLinearEQSLocalAssembler(size_t n_var, const std::vector<size_t> &vec_order)
     : _n_var(n_var), _vec_order(vec_order)
@@ -41,7 +41,7 @@ public:
                             const DiscreteLib::DofEquationIdTable &localDofManager,
                             const LocalVectorType &local_u_n1,
                             const LocalVectorType &local_u_n,
-                            NumLib::LocalEquation &eqs
+                            MathLib::LocalEquation &eqs
                             );
 
 

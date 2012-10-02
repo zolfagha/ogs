@@ -15,7 +15,7 @@
 #include "NumLib/Function/TXFunction.h"
 #include "Ogs6FemData.h"
 
-void PressureBasedGWJacobianLocalAssembler::assembly(const NumLib::TimeStep &ts, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/,  NumLib::LocalMatrix &localJ)
+void PressureBasedGWJacobianLocalAssembler::assembly(const NumLib::TimeStep &ts, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const MathLib::LocalVector &/*u1*/, const MathLib::LocalVector &/*u0*/,  MathLib::LocalMatrix &localJ)
 {
     FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
     const NumLib::TXPosition e_pos(NumLib::TXPosition::Element, e.getID());
@@ -27,8 +27,8 @@ void PressureBasedGWJacobianLocalAssembler::assembly(const NumLib::TimeStep &ts,
     double rho_f = .0;
     fluid->density->eval(e_pos, rho_f);
 
-    NumLib::LocalMatrix localM = NumLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
-    NumLib::LocalMatrix localK = NumLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
+    MathLib::LocalMatrix localM = MathLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
+    MathLib::LocalMatrix localK = MathLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
 
     FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
     double gp_x[3], real_x[3];
@@ -36,8 +36,8 @@ void PressureBasedGWJacobianLocalAssembler::assembly(const NumLib::TimeStep &ts,
         q->getSamplingPoint(j, gp_x);
         fe->computeBasisFunctions(gp_x);
         fe->getRealCoordinates(real_x);
-        NumLib::LocalMatrix &Np = *fe->getBasisFunction();
-        NumLib::LocalMatrix &dNp = *fe->getGradBasisFunction();
+        MathLib::LocalMatrix &Np = *fe->getBasisFunction();
+        MathLib::LocalMatrix &dNp = *fe->getGradBasisFunction();
         fe->getRealCoordinates(real_x);
         double fac = fe->getDetJ() * q->getWeight(j);
 

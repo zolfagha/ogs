@@ -21,7 +21,7 @@ void ElementWiseTransientCoupledResidualLocalAssembler::assembly(  const NumLib:
                         const DiscreteLib::DofEquationIdTable &localDofManager,
                         const LocalVectorType &local_u_n1,
                         const LocalVectorType &local_u_n,
-                        LocalVector &local_r
+                        LocalVectorType &local_r
                         )
 {
     // parameters need to be passed

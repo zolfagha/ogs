@@ -13,6 +13,7 @@
 #include "AbstractCRSLinearEquation.h"
 
 #include <algorithm>
+#include "MathLib/LinAlg/Sparse/SparseTableCRS.h"
 
 namespace MathLib
 {

@@ -182,7 +182,7 @@ bool FunctionDisplacementPressure<T1,T2>::initialize(const BaseLib::Options &opt
     // set up data for output
     //--------------------------------------------------------------------------
     // create u variable which is vector
-    NumLib::LocalVector tmp_u0(3);
+    MathLib::LocalVector tmp_u0(3);
     tmp_u0 *= .0;
     _displacement = new MyNodalFunctionVector();
     _displacement->initialize(*dis, u_x->getCurrentOrder(), tmp_u0);

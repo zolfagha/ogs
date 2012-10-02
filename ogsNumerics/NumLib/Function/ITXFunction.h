@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "NumLib/DataType.h"
+#include "MathLib/DataType.h"
 #include "NumLib/Function/IFunction.h"
 #include "TXPosition.h"
 
@@ -34,7 +34,7 @@ namespace NumLib
 class ITXFunction : public IClonable
 {
 public:
-    typedef LocalMatrix DataType;
+    typedef MathLib::LocalMatrix DataType;
     
     ///
     ITXFunction() : _is_const(false), _is_temporally_const(false), _is_spatially_const(false) {};

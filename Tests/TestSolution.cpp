@@ -53,8 +53,8 @@ template <class T>
 class GWTimeODEAssembler: public T
 {
 public:
-    typedef NumLib::LocalVector LocalVectorType;
-    typedef NumLib::LocalMatrix LocalMatrixType;
+    typedef MathLib::LocalVector LocalVectorType;
+    typedef MathLib::LocalMatrix LocalMatrixType;
 
     GWTimeODEAssembler(FemLib::LagrangianFeObjectContainer &feObjects, NumLib::ITXFunction &mat)
     : _matK(&mat), _feObjects(&feObjects)
@@ -91,8 +91,8 @@ class GWJacobianAssembler : public NumLib::IElementWiseTransientJacobianLocalAss
 private:
     NumLib::ITXFunction* _matK;
     FemLib::LagrangianFeObjectContainer* _feObjects;
-    typedef NumLib::LocalMatrix LocalMatrixType;
-    typedef NumLib::LocalVector LocalVectorType;
+    typedef MathLib::LocalMatrix LocalMatrixType;
+    typedef MathLib::LocalVector LocalVectorType;
 public:
     GWJacobianAssembler(FemLib::LagrangianFeObjectContainer &feObjects, NumLib::ITXFunction &mat)
     : _matK(&mat), _feObjects(&feObjects)
@@ -123,7 +123,7 @@ public:
             q->getSamplingPoint(j, gp_x);
             fe->computeBasisFunctions(gp_x);
             fe->getRealCoordinates(real_x);
-            NumLib::LocalMatrix k;
+            MathLib::LocalMatrix k;
             _matK->eval(real_x, k);
             fe->integrateDWxDN(j, k, localK);
         }
@@ -229,11 +229,11 @@ public:
 //        _head->setIC(h0);
         //BC
         _rec = new GeoLib::Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
-        GeoLib::Polyline* poly_left = _rec->getLeft();
-        GeoLib::Polyline* poly_right = _rec->getRight();
+        const GeoLib::Polyline &poly_left = _rec->getLeft();
+        const GeoLib::Polyline &poly_right = _rec->getRight();
         //_head->setIC();
-        _head->addDirichletBC(new SolutionLib::FemDirichletBC(msh, poly_right,  new NumLib::TXFunctionConstant(.0)));
-        _head->addNeumannBC(new SolutionLib::FemNeumannBC(msh, _feObjects, poly_left, new NumLib::TXFunctionConstant(-1e-5)));
+        _head->addDirichletBC(new SolutionLib::FemDirichletBC(msh, &poly_right,  new NumLib::TXFunctionConstant(.0)));
+        _head->addNeumannBC(new SolutionLib::FemNeumannBC(msh, _feObjects, &poly_left, new NumLib::TXFunctionConstant(-1e-5)));
         //transient
         TimeStepFunctionConstant tim(.0, 100.0, 10.0);
         _problem->setTimeSteppingFunction(tim);

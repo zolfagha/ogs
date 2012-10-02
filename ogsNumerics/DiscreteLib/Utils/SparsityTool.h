@@ -14,7 +14,7 @@
 
 #include "MathLib/LinAlg/Sparse/Sparsity.h"
 
-#include "MeshLib/Topology/Topology.h"
+#include "MeshLib/Topology/ITopologyNode2Nodes.h"
 
 #include "DiscreteLib/Utils/DofEquationIdTable.h"
 #include "DiscreteLib/DDC/IGlobaLocalMappingTable.h"

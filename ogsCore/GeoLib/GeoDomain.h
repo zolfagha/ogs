@@ -15,13 +15,17 @@
 namespace GeoLib
 {
 
+/**
+ * \brief Domain class representing entire space
+ */
 class GeoDomain : public GeoObject
 {
 public:
+    ///
     virtual ~GeoDomain() {}
 
+    /// return the geometric type
     virtual GEOTYPE getGeoType() const {return GeoLib::GEODOMAIN;};
-    
 };
     
 } //end

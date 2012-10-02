@@ -16,7 +16,7 @@
 
 #include "MathLib/LinAlg/Sparse/SparseTableCRS.h"
 
-#include "MeshLib/Topology/Topology.h"
+#include "MeshLib/Topology/TopologyNode2NodesConnectedByElements.h"
 
 #include "DiscreteLib/Utils/DofEquationIdTable.h"
 #include "DiscreteLib/DDC/DecomposedDomain.h"
@@ -41,7 +41,7 @@ class SparsityBuilderFromNodeConnectivityWithGhostDoFs
 public:
     SparsityBuilderFromNodeConnectivityWithGhostDoFs(MeshLib::IMesh &msh, DofEquationIdTable &dofManager, MathLib::RowMajorSparsity &sparse)
     {
-        MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes(&msh);
+        MeshLib::TopologyNode2NodesConnectedByElements topo_node2nodes(msh);
         if (dofManager.getNumberOfVariables()==1) {
             SparsityTool::createRowMajorSparsityFromNodeConnectivity(topo_node2nodes, sparse);
         } else {
