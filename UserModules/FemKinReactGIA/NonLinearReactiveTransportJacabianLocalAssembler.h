@@ -96,6 +96,8 @@ private:
     FemLib::LagrangianFeObjectContainer _feObjects;
     NumLib::ITXFunction* _vel;
 	ogsChem::chemReductionKin* _reductionKin; 
+
+
 };
 
 #endif  // end of ifndef

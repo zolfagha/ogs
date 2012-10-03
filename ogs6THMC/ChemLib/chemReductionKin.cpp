@@ -235,19 +235,20 @@ void chemReductionKin::EtaXi2Conc(ogsChem::LocalVector &local_eta_mob,
 	// declare local temp variable
 	ogsChem::LocalVector local_c_mob, local_c_immob; 
 
-	local_c_mob   = _matS_1_ast * local_xi_mob   + _mat_s_1 * local_eta_mob; 
-	local_c_immob = _matS_2_ast * local_xi_immob + _mat_s_2 * local_eta_immob; 
+	local_c_mob   = _mat_s_1 * local_xi_mob   + _matS_1_ast * local_eta_mob; 
+	local_c_immob = _mat_s_2 * local_xi_immob + _matS_2_ast * local_eta_immob; 
 
 	local_conc.topRows( this->_I_mob ) = local_c_mob; 
 	local_conc.bottomRows( this->_I_sorp + this->_I_min ) = local_c_immob; 
 
 }
 
-void chemReductionKin::Calc_Xi_mob_Rate(ogsChem::LocalVector &local_eta_mob, 
-	                                    ogsChem::LocalVector &local_eta_immob, 
-										ogsChem::LocalVector &local_xi_mob,
-										ogsChem::LocalVector &local_xi_immob, 
-										ogsChem::LocalVector &xi_mob_rate)
+void chemReductionKin::Calc_Xi_Rate(ogsChem::LocalVector &local_eta_mob, 
+	                                ogsChem::LocalVector &local_eta_immob, 
+									ogsChem::LocalVector &local_xi_mob,
+									ogsChem::LocalVector &local_xi_immob, 
+									ogsChem::LocalVector &xi_mob_rate, 
+									ogsChem::LocalVector &xi_immob_rate )
 {
 	size_t i; 
 
@@ -271,8 +272,9 @@ void chemReductionKin::Calc_Xi_mob_Rate(ogsChem::LocalVector &local_eta_mob,
 		vec_rates(i) = this->_list_kin_reactions[i]->getRate(); 
 	}
 
-	// multiply the rate vector with the A matrix to get rate for xi_mob
-	xi_mob_rate = _matA1 * vec_rates; 
+	// multiply the rate vector with the A matrix to get rate for xi_mob and xi_immob
+	xi_mob_rate   = _matA1 * vec_rates; 
+	xi_immob_rate = _matA2 * vec_rates; 
 }
 
 

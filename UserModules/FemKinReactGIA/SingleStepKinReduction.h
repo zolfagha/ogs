@@ -53,6 +53,7 @@ namespace SolutionLib
  * \tparam T_LINEAR_SOLVER         Linear equation solver class
  */
 template <
+	class T_USER_FUNCTION_DATA, 
     class T_USER_FEM_PROBLEM,
     class T_USER_LINEAR_PROBLEM,
     class T_USER_LINEAR_SOLUTION,
@@ -64,6 +65,7 @@ class SingleStepKinReduction
 {
 public:
 
+	typedef T_USER_FUNCTION_DATA       UserFunctionData; 
     typedef T_USER_FEM_PROBLEM         UserFemProblem;
     typedef T_USER_LINEAR_PROBLEM      UserLinearProblem; 
 	typedef T_USER_LINEAR_SOLUTION     UserLinearSolution;
@@ -85,6 +87,7 @@ public:
     /// - prepare linear functions
     SingleStepKinReduction(MyDiscreteSystem*                dis, 
 		                   UserFemProblem*                  problem, 
+						   UserFunctionData*                function_data, 
                            std::vector<UserLinearProblem*>  linear_problem,
 						   std::vector<UserLinearSolution*> linear_solutions,
                            UserNonLinearProblem*            non_linear_problem,
@@ -156,25 +159,29 @@ private:
 	UserNonLinearProblem*            _non_linear_problem;
     UserNonLinearSolution*           _nlin_solution; 
 
+	UserFunctionData*                _function_data; 
+
 	std::map<size_t, ReductionKinNodeInfo*> _bc_info; 
 };
 
 template <
+	class T_USER_FUNCTION_DATA, 
     class T_USER_FEM_PROBLEM,
     class T_USER_LINEAR_PROBLEM,
     class T_USER_LINEAR_SOLUTION,
     class T_USER_NON_LINEAR_PROBLEM, 
 	class T_USER_NON_LINEAR_SOLUTION 
     >
-SingleStepKinReduction<T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBLEM, T_USER_LINEAR_SOLUTION, T_USER_NON_LINEAR_PROBLEM, T_USER_NON_LINEAR_SOLUTION>
+SingleStepKinReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBLEM, T_USER_LINEAR_SOLUTION, T_USER_NON_LINEAR_PROBLEM, T_USER_NON_LINEAR_SOLUTION>
     ::SingleStepKinReduction(MyDiscreteSystem*                dis, 
                              UserFemProblem*                  problem, 
+							 UserFunctionData*                function_data, 
                              std::vector<UserLinearProblem*>  linear_problem,
 						     std::vector<UserLinearSolution*> linear_solutions,
                              UserNonLinearProblem*            non_linear_problem,
 						     UserNonLinearSolution*           non_linear_solution)
     : AbstractTimeSteppingAlgorithm(*problem->getTimeSteppingFunction()),
-      _problem(problem), _discrete_system(dis), 
+      _problem(problem), _discrete_system(dis), _function_data(function_data), 
       _linear_problem(linear_problem), _lin_solutions(linear_solutions), 
       _non_linear_problem(non_linear_problem), _nlin_solution(non_linear_solution)
 {
@@ -241,13 +248,14 @@ SingleStepKinReduction<T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBLEM, T_USER_LINEAR_
 };
 
 template <
+	class T_USER_FUNCTION_DATA, 
     class T_USER_FEM_PROBLEM,
     class T_USER_LINEAR_PROBLEM,
     class T_USER_LINEAR_SOLUTION,
     class T_USER_NON_LINEAR_PROBLEM, 
 	class T_USER_NON_LINEAR_SOLUTION 
     >
-int SingleStepKinReduction<T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBLEM, T_USER_LINEAR_SOLUTION, T_USER_NON_LINEAR_PROBLEM, T_USER_NON_LINEAR_SOLUTION>
+int SingleStepKinReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBLEM, T_USER_LINEAR_SOLUTION, T_USER_NON_LINEAR_PROBLEM, T_USER_NON_LINEAR_SOLUTION>
     ::solveTimeStep(const NumLib::TimeStep &t_n1)
 {
 	size_t i, j, i_var; 
@@ -349,7 +357,14 @@ int SingleStepKinReduction<T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBLEM, T_USER_LIN
 		// print solving information
 		INFO("--Solving linear equation for eta_%d: ", i ); 
 		_lin_solutions[i]->solveTimeStep( t_n1 );
+
+		// if solution is accepted, 
+		// if ( _lin_solutions[i]->accepted() )
+		_function_data->set_eta_mob_node_values( i, _lin_solutions[i]->getCurrentSolution(0) ); 
 	}
+	// calcuate the reaction rates on each node
+	_function_data->update_node_kin_reaction_rates(); 
+
 	// solving the non-linear problem
 	INFO("--Solving non-linear equations for xi:"); 
 	_nlin_solution->solveTimeStep( t_n1 ); 

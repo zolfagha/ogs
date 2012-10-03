@@ -78,16 +78,22 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	// initialize xi_mob
 	for ( i=0; i < n_xi_mob ; i++ )
 	{
-		MyNodalFunctionScalar* xi_mob_tmp       = new MyNodalFunctionScalar();  // only xi_mob
-		xi_mob_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
+		MyNodalFunctionScalar* xi_mob_tmp       = new MyNodalFunctionScalar();  // xi_mob
+        MyNodalFunctionScalar* xi_mob_rates_tmp = new MyNodalFunctionScalar();  // xi_mob_rates
+		xi_mob_tmp->initialize(       *dis, FemLib::PolynomialOrder::Linear, 0.0  );
+        xi_mob_rates_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
 		_xi_mob.push_back(xi_mob_tmp); 
+        _xi_mob_rates.push_back(xi_mob_rates_tmp); 
 	}
 	// initialize xi_mob
 	for ( i=0; i < n_xi_immob ; i++ )
 	{
-		MyNodalFunctionScalar* xi_immob_tmp     = new MyNodalFunctionScalar();  // only xi_mob
+		MyNodalFunctionScalar* xi_immob_tmp     = new MyNodalFunctionScalar();  // xi_immob
+        MyNodalFunctionScalar* xi_immob_rates_tmp = new MyNodalFunctionScalar();  // xi_mob_rates
 		xi_immob_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
+        xi_immob_rates_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
 		_xi_immob.push_back(xi_immob_tmp); 
+        _xi_immob_rates.push_back(xi_immob_rates_tmp); 
 	}
 
 	// linear assemblers
@@ -261,7 +267,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	this->_non_linear_solution->getNonlinearSolver()->setOption(*optNum);
 
 	// set up solution
-    _solution = new MyKinReductionSolution(dis, _problem, _linear_problems, _linear_solutions, _non_linear_problem, _non_linear_solution);
+    _solution = new MyKinReductionSolution(dis, _problem, this, _linear_problems, _linear_solutions, _non_linear_problem, _non_linear_solution);
 	
     // set initial output
     OutputVariableInfo var(this->getOutputParameterName(Concentrations), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
@@ -295,8 +301,11 @@ void FunctionConcentrations<T1, T2>::initializeTimeStep(const NumLib::TimeStep &
 
 template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::updateOutputParameter(const NumLib::TimeStep &/*time*/)
-{
-	// TODO 
+{ 
+	// first use the eta and xi values to calculate comp concentrations
+	// TODO
+	// then update the output
+	// TODO
     // setOutput(Concentrations, _solution->getCurrentSolution(0));
 }
 
@@ -426,10 +435,104 @@ void FunctionConcentrations<T1, T2>::convert_eta_xi_to_conc(void)
 				// gether all the concentrations 
 				_concentrations[i]->setValue(node_idx, loc_conc[i]); 
 			}  // end of for i
+		}  // end of for node_idx
+	}  // end of if _ReductionKin
+}
+
+template <class T1, class T2>
+void FunctionConcentrations<T1, T2>::set_eta_mob_node_values( size_t eta_mob_idx, MyNodalFunctionScalar* new_eta_mob_node_values )
+{
+	this->_eta_mob[eta_mob_idx] = new_eta_mob_node_values; 
+}
+
+template <class T1, class T2>
+void FunctionConcentrations<T1, T2>::set_eta_immob_node_values( size_t eta_immob_idx, MyNodalFunctionScalar* new_eta_immob_node_values )
+{
+	this->_eta_immob[eta_immob_idx] = new_eta_immob_node_values; 
+}
+
+template <class T1, class T2>
+void FunctionConcentrations<T1, T2>::set_xi_mob_node_values( size_t xi_mob_idx, MyNodalFunctionScalar* new_xi_mob_node_values )
+{
+	this->_xi_mob[xi_mob_idx] = new_xi_mob_node_values; 
+}
+
+template <class T1, class T2>
+void FunctionConcentrations<T1, T2>::set_xi_immob_node_values( size_t xi_immob_idx, MyNodalFunctionScalar* new_xi_immob_node_values ) 
+{
+	this->_xi_immob[xi_immob_idx] = new_xi_immob_node_values; 
+}
+
+template <class T1, class T2>
+void FunctionConcentrations<T1, T2>::update_node_kin_reaction_rates(void)
+{
+	size_t node_idx, i; 
+	size_t n_comp, n_eta_mob, n_eta_immob, n_xi_mob, n_xi_immob; 
+
+	n_comp      = this->_ReductionKin->get_n_Comp();
+	n_eta_mob   = this->_ReductionKin->get_n_eta_mob(); 
+	n_eta_immob = this->_ReductionKin->get_n_eta() - this->_ReductionKin->get_n_eta_mob() ;
+	n_xi_mob    = this->_ReductionKin->get_n_xi_mob(); 
+	n_xi_immob    = this->_ReductionKin->get_n_xi_immob(); 
+	// only when the reduction scheme is fully initialized
+	if ( this->_ReductionKin->IsInitialized() )
+	{
+		// local vectors
+		LocalVector loc_eta_mob;
+		LocalVector loc_eta_immob;
+		LocalVector loc_xi_mob;
+		LocalVector loc_xi_immob;
+		LocalVector loc_conc; 
+        LocalVector loc_xi_mob_rates; 
+        LocalVector loc_xi_immob_rates; 
+
+		// allocate the memory for local vectors
+		loc_eta_mob        = LocalVector::Zero( n_eta_mob ); 
+		loc_eta_immob      = LocalVector::Zero( n_eta_immob ); 
+		loc_xi_mob         = LocalVector::Zero( n_xi_mob ); 
+		loc_xi_immob       = LocalVector::Zero( n_xi_immob ); 
+		loc_conc           = LocalVector::Zero( n_comp );
+        loc_xi_mob_rates   = LocalVector::Zero( n_xi_mob );
+        loc_xi_immob_rates = LocalVector::Zero( n_xi_immob );
+
+		// for each nodes, 
+		for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin(); 
+			 node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd()  ; 
+			 node_idx++ )
+		{
+			// put the local eta and xi into the global vector
+			// fill in eta_mob
+			for (i=0; i < n_eta_mob; i++)
+				loc_eta_mob[i] = this->_eta_mob[i]->getValue(node_idx); 
+			// fill in eta_immob
+			for (i=0; i < n_eta_immob; i++)
+				loc_eta_immob[i] = this->_eta_immob[i]->getValue(node_idx); 
+			// fill in xi
+			// this->_xi->setNodalValues( &loc_xi, node_idx*n_xi, n_xi ); 
+			for (i=0; i < n_xi_mob; i++)
+				loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
+		    for (i=0; i < n_xi_immob; i++)
+				loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
+
+            // calculate rates; 
+            this->_ReductionKin->Calc_Xi_Rate( loc_eta_mob, 
+                                               loc_eta_immob, 
+                                               loc_xi_mob, 
+                                               loc_xi_immob, 
+                                               loc_xi_mob_rates,
+                                               loc_xi_immob_rates );
+
+            // write the rates into the global nodal vector
+            for (i=0; i < n_xi_mob; i++)
+                this->_xi_mob_rates[i]->setValue( node_idx, loc_xi_mob_rates[i] ); 
+
+            for (i=0; i < n_xi_immob; i++)
+                this->_xi_mob_rates[i]->setValue( node_idx, loc_xi_immob_rates[i] );
 
 		}  // end of for node_idx
-	
 	}  // end of if _ReductionKin
-
-
 }
+
+
+
+
