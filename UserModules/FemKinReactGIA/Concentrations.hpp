@@ -52,34 +52,42 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	size_t n_Comp = femData->map_ChemComp.size(); 
 
 	// tell me how many eta and how many xi we have
-	size_t n_eta, n_xi, n_eta_mob, n_eta_immob; 
+	size_t n_eta, n_xi_mob, n_xi_immob, n_eta_mob, n_eta_immob; 
 	// get n_eta and n_xi
-	n_eta     = this->_ReductionKin->get_n_eta();
-	n_eta_mob = this->_ReductionKin->get_n_eta_mob(); 
-	n_eta_immob=n_eta - n_eta_mob; 
-	n_xi      = this->_ReductionKin->get_n_xi(); 
+	n_eta       = this->_ReductionKin->get_n_eta();
+	n_eta_mob   = this->_ReductionKin->get_n_eta_mob(); 
+	n_eta_immob = n_eta - n_eta_mob; 
+	n_xi_mob    = this->_ReductionKin->get_n_xi_mob(); 
+	n_xi_immob  = this->_ReductionKin->get_n_xi_immob(); 
 
 	// creating local memory space to store IC and BC
 	// initialize eta_mob, 
-	for (i=0; i<n_eta_mob ; i++)
+	for ( i=0; i < n_eta_mob ; i++ )
 	{
 		MyNodalFunctionScalar* eta_i = new MyNodalFunctionScalar(); 
 		eta_i->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0 );
 	    _eta_mob.push_back(eta_i); 
 	}
 	// initialize eta_immob, 
-	for (i=0; i<n_eta_immob; i++)
+	for ( i=0; i < n_eta_immob; i++ )
 	{
 		MyNodalFunctionScalar* eta_i = new MyNodalFunctionScalar(); 
 	    eta_i->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0 );
 		_eta_immob.push_back(eta_i); 
 	}
-	// initialize xi
-	for (i=0; i<n_xi ; i++)
+	// initialize xi_mob
+	for ( i=0; i < n_xi_mob ; i++ )
 	{
-		MyNodalFunctionScalar* xi_tmp       = new MyNodalFunctionScalar();  // xi contains both xi_mob and xi_immob
-		xi_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
-		_xi.push_back(xi_tmp); 
+		MyNodalFunctionScalar* xi_mob_tmp       = new MyNodalFunctionScalar();  // only xi_mob
+		xi_mob_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
+		_xi_mob.push_back(xi_mob_tmp); 
+	}
+	// initialize xi_mob
+	for ( i=0; i < n_xi_immob ; i++ )
+	{
+		MyNodalFunctionScalar* xi_immob_tmp     = new MyNodalFunctionScalar();  // only xi_mob
+		xi_immob_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
+		_xi_immob.push_back(xi_immob_tmp); 
 	}
 
 	// linear assemblers
@@ -87,9 +95,9 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
     MyLinearResidualAssemblerType* linear_r_assembler = new MyLinearResidualAssemblerType(_feObjects);
     MyLinearJacobianAssemblerType* linear_j_eqs = new MyLinearJacobianAssemblerType(_feObjects);
 
-    MyNonLinearAssemblerType* non_linear_assembler = new MyNonLinearAssemblerType(_feObjects);
-    MyNonLinearResidualAssemblerType* non_linear_r_assembler = new MyNonLinearResidualAssemblerType(_feObjects);
-    MyNonLinearJacobianAssemblerType* non_linear_j_eqs = new MyNonLinearJacobianAssemblerType(_feObjects);
+	MyNonLinearAssemblerType* non_linear_assembler = new MyNonLinearAssemblerType(_feObjects, this->_ReductionKin );
+	MyNonLinearResidualAssemblerType* non_linear_r_assembler = new MyNonLinearResidualAssemblerType(_feObjects, this->_ReductionKin );
+	MyNonLinearJacobianAssemblerType* non_linear_j_eqs = new MyNonLinearJacobianAssemblerType(_feObjects, this->_ReductionKin );
 
 	// for the linear transport problem, variables are eta_mobile
 	for ( i=0; i < n_eta_mob ; i++ )
@@ -114,11 +122,11 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	_non_linear_eqs     = _non_linear_problem->createEquation(); 
 	_non_linear_eqs->initialize( non_linear_assembler, non_linear_r_assembler, non_linear_j_eqs ); 
 	_non_linear_problem->setTimeSteppingFunction(*tim); 
-	// for nonlinear coupled transport problem, variables are xi, including both mobile and immobile
-	for ( i=0; i < n_xi ; i++ )
+	// for nonlinear coupled transport problem, variables are xi_mobile species
+	for ( i=0; i < n_xi_mob ; i++ )
 	{
 		std::stringstream str_tmp;
-		str_tmp << "xi_" << i ;
+		str_tmp << "xi_mob_" << i ;
 		_non_linear_problem->addVariable( str_tmp.str() );  	
 	}
 
@@ -183,12 +191,12 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 		eta_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _eta_mob[i]->getDiscreteData() ) ); 
 		_linear_problems[i]->getVariable(0)->setIC( eta_ic ); 
 	}
-	// set IC for xi
-	for ( i=0; i < n_xi; i++ )
+	// set IC for xi_mob
+	for ( i=0; i < n_xi_mob; i++ )
 	{
-		SolutionLib::FemIC* xi_ic = new SolutionLib::FemIC(msh); 
-		xi_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _xi[i]->getDiscreteData() ) ); 
-		_non_linear_problem->getVariable(i)->setIC( xi_ic ); 
+		SolutionLib::FemIC* xi_mob_ic = new SolutionLib::FemIC(msh); 
+		xi_mob_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _xi_mob[i]->getDiscreteData() ) ); 
+		_non_linear_problem->getVariable(i)->setIC( xi_mob_ic ); 
 	}
 	// set BC for concentrations
 	const BaseLib::Options* opBCList = option.getSubGroup("BCList");
@@ -307,24 +315,27 @@ template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::convert_conc_to_eta_xi(void)
 {
 	size_t node_idx, i; 
-	size_t n_comp, n_eta_mob, n_eta_immob, n_xi; 
+	size_t n_comp, n_eta_mob, n_eta_immob, n_xi_mob, n_xi_immob; 
 
 	n_comp      = this->_ReductionKin->get_n_Comp();
 	n_eta_mob   = this->_ReductionKin->get_n_eta_mob(); 
 	n_eta_immob = this->_ReductionKin->get_n_eta() - this->_ReductionKin->get_n_eta_mob() ;
-	n_xi        = this->_ReductionKin->get_n_xi(); 
+	n_xi_mob    = this->_ReductionKin->get_n_xi_mob(); 
+	n_xi_immob  = this->_ReductionKin->get_n_xi_immob(); 
 	// only when the reduction scheme is fully initialized
 	if ( this->_ReductionKin->IsInitialized() )
 	{
 		// local vectors
 		LocalVector loc_eta_mob;
 		LocalVector loc_eta_immob;
-		LocalVector loc_xi;
+		LocalVector loc_xi_mob;
+		LocalVector loc_xi_immob;
 		LocalVector loc_conc; 
 		// allocate the memory for local vectors
 		loc_eta_mob     = LocalVector::Zero( this->_ReductionKin->get_n_eta_mob() ); 
 		loc_eta_immob   = LocalVector::Zero( this->_ReductionKin->get_n_eta() - this->_ReductionKin->get_n_eta_mob() ); 
-		loc_xi          = LocalVector::Zero( this->_ReductionKin->get_n_xi() ); 
+		loc_xi_mob      = LocalVector::Zero( this->_ReductionKin->get_n_xi_mob() ); 
+		loc_xi_immob    = LocalVector::Zero( this->_ReductionKin->get_n_xi_immob() ); 
 		loc_conc        = LocalVector::Zero( this->_ReductionKin->get_n_Comp() );
 
 		// for each nodes, 
@@ -340,7 +351,7 @@ void FunctionConcentrations<T1, T2>::convert_conc_to_eta_xi(void)
 			
 			// pass them to the transform function in the reductionKin class
 			// and thet the loc_eta_mob, local_eta_immob and local_xi
-			this->_ReductionKin->Conc2EtaXi( loc_conc, loc_eta_mob, loc_eta_immob, loc_xi );
+			this->_ReductionKin->Conc2EtaXi( loc_conc, loc_eta_mob, loc_eta_immob, loc_xi_mob, loc_xi_immob );
 			
 			// put the local eta and xi into the global vector
 			// fill in eta_mob
@@ -349,9 +360,11 @@ void FunctionConcentrations<T1, T2>::convert_conc_to_eta_xi(void)
 			// fill in eta_immob
 			for (i=0; i < n_eta_immob; i++)
 				this->_eta_immob[i]->setValue(node_idx, loc_eta_immob[i]); 
-			// fill in xi
-			for (i=0; i < n_xi; i++)
-				this->_xi[i]->setValue(node_idx, loc_xi[i]); 
+			// fill in xi_mob
+			for (i=0; i < n_xi_mob; i++)
+				this->_xi_mob[i]->setValue(node_idx, loc_xi_mob[i]); 
+			for (i=0; i < n_xi_immob; i++)
+				this->_xi_immob[i]->setValue(node_idx, loc_xi_immob[i]); 
 		}  // end of for node_idx
 	
 	}  // end of if _ReductionKin
@@ -362,29 +375,32 @@ template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::convert_eta_xi_to_conc(void)
 {
 	size_t node_idx, i; 
-	size_t n_comp, n_eta_mob, n_eta_immob, n_xi; 
+	size_t n_comp, n_eta_mob, n_eta_immob, n_xi_mob, n_xi_immob; 
 
 	n_comp      = this->_ReductionKin->get_n_Comp();
 	n_eta_mob   = this->_ReductionKin->get_n_eta_mob(); 
 	n_eta_immob = this->_ReductionKin->get_n_eta() - this->_ReductionKin->get_n_eta_mob() ;
-	n_xi        = this->_ReductionKin->get_n_xi(); 
+	n_xi_mob    = this->_ReductionKin->get_n_xi_mob(); 
+	n_xi_immob    = this->_ReductionKin->get_n_xi_immob(); 
 	// only when the reduction scheme is fully initialized
 	if ( this->_ReductionKin->IsInitialized() )
 	{
 		// local vectors
 		LocalVector loc_eta_mob;
 		LocalVector loc_eta_immob;
-		LocalVector loc_xi;
+		LocalVector loc_xi_mob;
+		LocalVector loc_xi_immob;
 		LocalVector loc_conc; 
 		// allocate the memory for local vectors
 		loc_eta_mob     = LocalVector::Zero( this->_ReductionKin->get_n_eta_mob() ); 
 		loc_eta_immob   = LocalVector::Zero( this->_ReductionKin->get_n_eta() - this->_ReductionKin->get_n_eta_mob() ); 
-		loc_xi          = LocalVector::Zero( this->_ReductionKin->get_n_xi() ); 
+		loc_xi_mob      = LocalVector::Zero( this->_ReductionKin->get_n_xi_mob() ); 
+		loc_xi_immob    = LocalVector::Zero( this->_ReductionKin->get_n_xi_immob() ); 
 		loc_conc        = LocalVector::Zero( this->_ReductionKin->get_n_Comp() );
 
 		// for each nodes, 
-		for (node_idx=_concentrations[0]->getDiscreteData()->getRangeBegin(); 
-			 node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd(); 
+		for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin(); 
+			 node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd()  ; 
 			 node_idx++ )
 		{
 			// put the local eta and xi into the global vector
@@ -396,12 +412,14 @@ void FunctionConcentrations<T1, T2>::convert_eta_xi_to_conc(void)
 				loc_eta_immob[i] = this->_eta_immob[i]->getValue(node_idx); 
 			// fill in xi
 			// this->_xi->setNodalValues( &loc_xi, node_idx*n_xi, n_xi ); 
-			for (i=0; i < n_xi; i++)
-				loc_xi[i] = this->_xi[i]->getValue(node_idx); 
+			for (i=0; i < n_xi_mob; i++)
+				loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
+		    for (i=0; i < n_xi_immob; i++)
+				loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
 
 			// pass them to the transform function in the reductionKin class
 			// and thet the loc_eta_mob, local_eta_immob and local_xi
-			this->_ReductionKin->EtaXi2Conc(loc_eta_mob, loc_eta_immob, loc_xi, loc_conc);
+			this->_ReductionKin->EtaXi2Conc(loc_eta_mob, loc_eta_immob, loc_xi_mob, loc_xi_immob, loc_conc);
 
 			for (i=0; i < n_comp; i++)
 			{

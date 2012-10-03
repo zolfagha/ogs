@@ -20,6 +20,7 @@
 #include "NumLib/TransientAssembler/IElementWiseTransientJacobianLocalAssembler.h"
 #include "MaterialLib/PorousMedia.h"
 #include "MaterialLib/Compound.h"
+#include "ChemLib/chemReductionKin.h"
 
 #include "Ogs6FemData.h"
 
@@ -36,8 +37,8 @@ public:
     typedef NumLib::LocalVector LocalVectorType;
     typedef NumLib::LocalMatrix LocalMatrixType;
 
-    NonLinearReactiveTransportTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
-        : _feObjects(*feObjects), _vel(NULL)
+    NonLinearReactiveTransportTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects, ogsChem::chemReductionKin* ReductionScheme)
+        : _feObjects(*feObjects), _vel(NULL), _reductionKin(ReductionScheme)
     {
     };
 
@@ -49,7 +50,7 @@ public:
     }
 
 protected:
-    virtual void assembleODE(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/, LocalMatrixType &localM, LocalMatrixType &localK, LocalVectorType &/*localF*/)
+    virtual void assembleODE(const NumLib::TimeStep & time, const MeshLib::IElement &e, const LocalVectorType & u1, const LocalVectorType & u0, LocalMatrixType & localM, LocalMatrixType & localK, LocalVectorType & localF)
     {
         FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
         const size_t n_dim = e.getDimension();
@@ -92,6 +93,7 @@ protected:
 private:
     FemLib::LagrangianFeObjectContainer _feObjects;
     NumLib::ITXFunction* _vel;
+	ogsChem::chemReductionKin* _reductionKin; 
 };
 
 

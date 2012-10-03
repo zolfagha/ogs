@@ -27,14 +27,15 @@
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "MaterialLib/PorousMedia.h"
 #include "MaterialLib/Compound.h"
+#include "ChemLib/chemReductionKin.h"
 
 #include "Ogs6FemData.h"
 
 class NonLinearReactiveTransportJacobianLocalAssembler: public NumLib::IElementWiseTransientJacobianLocalAssembler
 {
 public:
-    NonLinearReactiveTransportJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
-        : _feObjects(*feObjects), _vel(NULL)
+	NonLinearReactiveTransportJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects, ogsChem::chemReductionKin* ReductionScheme)
+        : _feObjects(*feObjects), _vel(NULL), _reductionKin(ReductionScheme)
     {
     };
 
@@ -94,6 +95,7 @@ public:
 private:
     FemLib::LagrangianFeObjectContainer _feObjects;
     NumLib::ITXFunction* _vel;
+	ogsChem::chemReductionKin* _reductionKin; 
 };
 
 #endif  // end of ifndef

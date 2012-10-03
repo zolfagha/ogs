@@ -129,8 +129,10 @@ public:
 		}
 	    for (i=0; i < _eta_immob.size(); i++)
 	        BaseLib::releaseObject(_eta_immob[i]);
-		for (i=0; i < _xi.size(); i++)
-			BaseLib::releaseObject(_xi[i]); 
+		for (i=0; i < _xi_mob.size(); i++)
+			BaseLib::releaseObject(_xi_mob[i]); 
+        for (i=0; i < _xi_immob.size(); i++)
+			BaseLib::releaseObject(_xi_immob[i]); 
 
     };
 
@@ -215,8 +217,9 @@ private:
     // eta vector, including eta_mobile and eta_immobile
     std::vector<MyNodalFunctionScalar*> _eta_mob; 
 	std::vector<MyNodalFunctionScalar*> _eta_immob;
-    // xi vector, including xi_mobile and xi_immobile parts
-    std::vector<MyNodalFunctionScalar*> _xi; 
+    // xi_mobile and xi_immobile
+    std::vector<MyNodalFunctionScalar*> _xi_mob; 
+    std::vector<MyNodalFunctionScalar*> _xi_immob; 
 }; 
 
 #include "Concentrations.hpp"

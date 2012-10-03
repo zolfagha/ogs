@@ -178,7 +178,7 @@ SingleStepKinReduction<T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBLEM, T_USER_LINEAR_
       _linear_problem(linear_problem), _lin_solutions(linear_solutions), 
       _non_linear_problem(non_linear_problem), _nlin_solution(non_linear_solution)
 {
-    INFO("->setting up a solution algorithm SingleStepKinReduction");
+    INFO("->Setting up a solution algorithm SingleStepKinReduction");
 
     const size_t n_var = problem->getNumberOfVariables();
     MeshLib::IMesh* msh = dis->getMesh();
@@ -250,23 +250,23 @@ template <
 int SingleStepKinReduction<T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBLEM, T_USER_LINEAR_SOLUTION, T_USER_NON_LINEAR_PROBLEM, T_USER_NON_LINEAR_SOLUTION>
     ::solveTimeStep(const NumLib::TimeStep &t_n1)
 {
-	size_t i; 
+	size_t i, j, i_var; 
 
 	// getting the boundary conditions of concentrations for all components, 
 	const size_t n_var = _problem->getNumberOfVariables();
     const size_t msh_id = _discrete_system->getMesh()->getID();
     std::vector<size_t> list_bc1_eqs_id;
     std::vector<double> list_bc1_val;
-    for (size_t i_var=0; i_var<n_var; i_var++) {
+    for ( i_var=0; i_var < n_var; i_var++ ) {
         MyVariable* var = _problem->getVariable(i_var);
-        for (size_t i=0; i<var->getNumberOfDirichletBC(); i++) {
+        for ( i=0; i < var->getNumberOfDirichletBC(); i++ ) {
             SolutionLib::FemDirichletBC *bc1 = var->getDirichletBC(i);
             bc1->setup(var->getCurrentOrder());
             std::vector<size_t> &list_bc_nodes = bc1->getListOfBCNodes();
             std::vector<double> &list_bc_values = bc1->getListOfBCValues();
             
 	        // now loop over this vector
-		    for ( size_t j=0; j < list_bc_nodes.size(); j++ )
+		    for ( j=0; j < list_bc_nodes.size(); j++ )
 		    {
 				size_t node_id = list_bc_nodes[j]; 
 				double node_value = list_bc_values[j]; 
@@ -284,7 +284,8 @@ int SingleStepKinReduction<T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBLEM, T_USER_LIN
 						                                                      this->_problem->getReductionScheme()->get_n_Comp(), 
 						                                                      this->_problem->getReductionScheme()->get_n_eta_mob(), 
 																			  this->_problem->getReductionScheme()->get_n_eta_immob(), 
-																			  this->_problem->getReductionScheme()->get_n_xi(), 
+																			  this->_problem->getReductionScheme()->get_n_xi_mob(), 
+																			  this->_problem->getReductionScheme()->get_n_xi_immob(), 
 																			  this->_problem->getReductionScheme() ); 
 					bc_node->set_comp_conc( i_var, node_value ); 
 					_bc_info.insert( my_bc, std::pair<size_t, ReductionKinNodeInfo*>(node_id, bc_node) ); 
@@ -328,7 +329,7 @@ int SingleStepKinReduction<T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBLEM, T_USER_LIN
 
         for ( i=0; i < _non_linear_problem->getNumberOfVariables(); i++ )
         {
-            double xi_value = bc_node_it->second->get_xi_value(i);
+			double xi_value = bc_node_it->second->get_xi_mob_value(i);
             vec_node_xi_values[i].push_back(xi_value); 
         }
     }
@@ -343,14 +344,14 @@ int SingleStepKinReduction<T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBLEM, T_USER_LIN
 
 
 	// solving linear problems one after the other
-	for (i=0; i<_lin_solutions.size(); i++)
+	for ( i=0; i < _lin_solutions.size(); i++)
 	{
 		// print solving information
-		INFO("--Solving linear equation for eta_%d...", i ); 
+		INFO("--Solving linear equation for eta_%d: ", i ); 
 		_lin_solutions[i]->solveTimeStep( t_n1 );
 	}
 	// solving the non-linear problem
-	INFO("--Solving non-linear equations for xi..."); 
+	INFO("--Solving non-linear equations for xi:"); 
 	_nlin_solution->solveTimeStep( t_n1 ); 
 
 	// getting result

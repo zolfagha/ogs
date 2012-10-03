@@ -18,11 +18,12 @@ namespace ogsChem
 
 chemReductionKin::chemReductionKin(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp, 
 	                               std::vector<ogsChem::chemReactionKin*> & list_kin_reactions)
+    : _list_kin_reactions(list_kin_reactions)
 {
 	// by default, the class is not yet initialized
 	isInitialized = false; 
 
-	if ( map_chemComp.size() > 0 && list_kin_reactions.size() > 0 )
+	if ( map_chemComp.size() > 0 && _list_kin_reactions.size() > 0 )
 	{   // if there are reactions. 
 		// cout how many mobile and how many immobile components
 		countComp(map_chemComp); 
@@ -184,13 +185,13 @@ void chemReductionKin::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 	{
 		switch ( it->second->getMobility() )
 		{
-		case ogsChem::Comp_Mobility::MOBILE: 
+		case ogsChem::MOBILE: 
 			_I_mob++; 
 			break;
-		case ogsChem::Comp_Mobility::SORPTION: 
+		case ogsChem::SORPTION: 
 			_I_sorp++;
 			break;
-		case ogsChem::Comp_Mobility::MINERAL: 
+		case ogsChem::MINERAL: 
 			_I_min++;
 			break;
 		default:
@@ -204,10 +205,11 @@ void chemReductionKin::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 void chemReductionKin::Conc2EtaXi(ogsChem::LocalVector &local_conc, 
 	                              ogsChem::LocalVector &local_eta_mob, 
 								  ogsChem::LocalVector &local_eta_immob, 
-								  ogsChem::LocalVector &local_xi)
+								  ogsChem::LocalVector &local_xi_mob, 
+								  ogsChem::LocalVector &local_xi_immob )
 {
 	// declare local temp variable
-	ogsChem::LocalVector local_xi_mob, local_xi_immob, local_c_mob, local_c_immob; 
+	ogsChem::LocalVector local_c_mob, local_c_immob; 
 
 	// divide c1 and c2
 	local_c_mob   = local_conc.topRows(    this->_I_mob );
@@ -221,22 +223,17 @@ void chemReductionKin::Conc2EtaXi(ogsChem::LocalVector &local_conc,
 	local_eta_immob = _mat_c_immob_2_eta_immob * local_c_immob;  
     local_xi_immob  = _mat_c_immob_2_xi_immob  * local_c_immob; 
 
-	// combine xi vector
-	local_xi.topRows( this->_n_xi_mob )      = local_xi_mob; 
-	local_xi.bottomRows( this->_n_xi_immob ) = local_xi_immob; 
+
 }
 
 void chemReductionKin::EtaXi2Conc(ogsChem::LocalVector &local_eta_mob, 
 	                              ogsChem::LocalVector &local_eta_immob, 
-								  ogsChem::LocalVector &local_xi, 
-								  ogsChem::LocalVector &local_conc)
+								  ogsChem::LocalVector &local_xi_mob, 
+								  ogsChem::LocalVector &local_xi_immob,
+								  ogsChem::LocalVector &local_conc )
 {
 	// declare local temp variable
-	ogsChem::LocalVector local_xi_mob, local_xi_immob, local_c_mob, local_c_immob; 
-
-	// combine xi vector
-	local_xi_mob = local_xi.topRows( this->_n_xi_mob ); 
-	local_xi_immob = local_xi.bottomRows( this->_n_xi_immob ); 
+	ogsChem::LocalVector local_c_mob, local_c_immob; 
 
 	local_c_mob   = _matS_1_ast * local_xi_mob   + _mat_s_1 * local_eta_mob; 
 	local_c_immob = _matS_2_ast * local_xi_immob + _mat_s_2 * local_eta_immob; 
@@ -244,6 +241,38 @@ void chemReductionKin::EtaXi2Conc(ogsChem::LocalVector &local_eta_mob,
 	local_conc.topRows( this->_I_mob ) = local_c_mob; 
 	local_conc.bottomRows( this->_I_sorp + this->_I_min ) = local_c_immob; 
 
+}
+
+void chemReductionKin::Calc_Xi_mob_Rate(ogsChem::LocalVector &local_eta_mob, 
+	                                    ogsChem::LocalVector &local_eta_immob, 
+										ogsChem::LocalVector &local_xi_mob,
+										ogsChem::LocalVector &local_xi_immob, 
+										ogsChem::LocalVector &xi_mob_rate)
+{
+	size_t i; 
+
+	// the size of vec_rates is equal to the number of kinetic equations
+	ogsChem::LocalVector vec_rates = ogsChem::LocalVector::Zero(_J); 
+	// the local temp concentration vector
+	ogsChem::LocalVector vec_conc = ogsChem::LocalVector::Zero(_I); 
+
+	// first convert these eta and xi to concentrations
+	EtaXi2Conc( local_eta_mob, 
+		        local_eta_immob, 
+				local_xi_mob, 
+				local_xi_immob, 
+				vec_conc ); 
+
+	// then calculate the rates and fill them in the rate vector
+	for ( i=0; i < _J; i++ )
+	{
+		// get to the particular kin equation and calculate its rate
+		this->_list_kin_reactions[i]->calcReactionRate( vec_conc ); 
+		vec_rates(i) = this->_list_kin_reactions[i]->getRate(); 
+	}
+
+	// multiply the rate vector with the A matrix to get rate for xi_mob
+	xi_mob_rate = _matA1 * vec_rates; 
 }
 
 

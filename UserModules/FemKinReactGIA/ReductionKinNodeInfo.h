@@ -20,9 +20,10 @@ class ReductionKinNodeInfo
 public: 
 	ReductionKinNodeInfo(size_t node_id, 
 		                 size_t n_comp, 
-		                 size_t n_eta_mob, 
+	                     size_t n_eta_mob, 
 						 size_t n_eta_immob, 
-						 size_t n_xi, 
+						 size_t n_xi_mob,
+						 size_t n_xi_immob,
 						 ogsChem::chemReductionKin* ReductionKin); 
 	~ReductionKinNodeInfo(); 
 
@@ -34,7 +35,9 @@ public:
 
 	double get_eta_immob_value( size_t eta_immob_idx ) { return _eta_immob(eta_immob_idx); }
 
-	double get_xi_value( size_t xi_idx ) { return _xi(xi_idx); }
+	double get_xi_mob_value( size_t xi_mob_idx ) { return _xi_mob(xi_mob_idx); }
+
+	double get_xi_immob_value( size_t xi_immob_idx ) { return _xi_immob(xi_immob_idx); }
 
 	void transform(void); 
 
@@ -46,12 +49,14 @@ private:
 	const size_t _n_comp; 
 	const size_t _n_eta_mob; 
 	const size_t _n_eta_immob; 
-	const size_t _n_xi; 
+	const size_t _n_xi_mob; 
+	const size_t _n_xi_immob; 
 
 	DiscreteLib::LocalVector _Comp_Conc; 
 	DiscreteLib::LocalVector _eta_mob; 
 	DiscreteLib::LocalVector _eta_immob; 
-	DiscreteLib::LocalVector _xi; 
+	DiscreteLib::LocalVector _xi_mob; 
+	DiscreteLib::LocalVector _xi_immob; 
 
 	ogsChem::chemReductionKin* _ReductionKin;
 }; 
