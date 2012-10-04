@@ -296,7 +296,14 @@ void FunctionConcentrations<T1, T2>::initializeTimeStep(const NumLib::TimeStep &
 	_non_linear_problem->getEquation()->getLinearAssembler()->setVelocity(vel); 
     _non_linear_problem->getEquation()->getResidualAssembler()->setVelocity(vel); 
 	_non_linear_problem->getEquation()->getJacobianAssembler()->setVelocity(vel); 
-	
+
+	_non_linear_problem->getEquation()->getLinearAssembler()->set_xi_mob_rates( &_xi_mob_rates ); 
+	_non_linear_problem->getEquation()->getResidualAssembler()->set_xi_mob_rates( &_xi_mob_rates ); 
+	_non_linear_problem->getEquation()->getJacobianAssembler()->set_xi_mob_rates( &_xi_mob_rates ); 
+
+	_non_linear_problem->getEquation()->getLinearAssembler()->set_xi_immob_rates( &_xi_mob_rates ); 
+	_non_linear_problem->getEquation()->getResidualAssembler()->set_xi_immob_rates( &_xi_mob_rates ); 
+	_non_linear_problem->getEquation()->getJacobianAssembler()->set_xi_immob_rates( &_xi_mob_rates ); 
 }
 
 template <class T1, class T2>

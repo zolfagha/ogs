@@ -55,9 +55,9 @@ public:
     typedef LinearTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyLinearResidualAssemblerType; 
     typedef LinearTransportJacobianLocalAssembler MyLinearJacobianAssemblerType;                                                      
 	// for the nonlinear part, use different settings
-	typedef NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler> MyNonLinearAssemblerType; 
-	typedef NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyNonLinearResidualAssemblerType; 
-	typedef NonLinearReactiveTransportJacobianLocalAssembler MyNonLinearJacobianAssemblerType; 
+	typedef NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler, MyNodalFunctionScalar> MyNonLinearAssemblerType; 
+	typedef NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler, MyNodalFunctionScalar> MyNonLinearResidualAssemblerType; 
+	typedef NonLinearReactiveTransportJacobianLocalAssembler<MyNodalFunctionScalar> MyNonLinearJacobianAssemblerType; 
 	
 	// linear Equation definition
     typedef SolutionLib::TemplateFemEquation<

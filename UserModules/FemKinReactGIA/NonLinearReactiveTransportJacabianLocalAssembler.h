@@ -28,14 +28,15 @@
 #include "MaterialLib/PorousMedia.h"
 #include "MaterialLib/Compound.h"
 #include "ChemLib/chemReductionKin.h"
-
+#include "Concentrations.h"
 #include "Ogs6FemData.h"
 
+template <class T_NODAL_FUNCTION_SCALAR>
 class NonLinearReactiveTransportJacobianLocalAssembler: public NumLib::IElementWiseTransientJacobianLocalAssembler
 {
 public:
 	NonLinearReactiveTransportJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects, ogsChem::chemReductionKin* ReductionScheme)
-        : _feObjects(*feObjects), _vel(NULL), _reductionKin(ReductionScheme)
+        : _feObjects(*feObjects), _vel(NULL), _reductionKin(ReductionScheme), _xi_mob_rates(NULL), _xi_immob_rates(NULL)
     {
     };
 
@@ -46,7 +47,17 @@ public:
         _vel = const_cast<NumLib::ITXFunction*>(vel);
     }
 
-    void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/, NumLib::LocalMatrix &localJ)
+	void set_xi_mob_rates(   std::vector<T_NODAL_FUNCTION_SCALAR*> * xi_mob_rates )
+	{
+	    _xi_mob_rates = xi_mob_rates; 
+	}
+    
+	void set_xi_immob_rates( std::vector<T_NODAL_FUNCTION_SCALAR*> * xi_immob_rates )
+	{
+	    _xi_immob_rates = xi_immob_rates; 
+	}
+
+	void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &, const NumLib::LocalVector & u1, const NumLib::LocalVector & u0, NumLib::LocalMatrix & localJ)
     {
         FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
         size_t mat_id = e.getGroupID();
@@ -97,7 +108,8 @@ private:
     NumLib::ITXFunction* _vel;
 	ogsChem::chemReductionKin* _reductionKin; 
 
-
+	std::vector<T_NODAL_FUNCTION_SCALAR*> * _xi_mob_rates;
+    std::vector<T_NODAL_FUNCTION_SCALAR*> * _xi_immob_rates;
 };
 
 #endif  // end of ifndef
