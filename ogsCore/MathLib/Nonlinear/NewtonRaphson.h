@@ -34,11 +34,11 @@ public:
     /// @tparam F_DX
     /// @tparam T_VALUE
     /// @tparam T_CONVERGENCE
-    template<class F_RESIDUALS, class F_DX, class T_VALUE, class T_CONVERGENCE>
-    int solve(F_RESIDUALS &f_residuals, F_DX &f_dx, const T_VALUE &x0, T_VALUE &x_new, T_VALUE &r, T_VALUE &dx, size_t max_itr_count=100, T_CONVERGENCE* convergence=0)
+    template<class F_RESIDUALS, class F_DX, class T_VALUE, class T_CONVERGENCE, class T_PREPOST>
+    int solve(F_RESIDUALS &f_residuals, F_DX &f_dx, const T_VALUE &x0, T_VALUE &x_new, T_VALUE &r, T_VALUE &dx, size_t max_itr_count=100, T_CONVERGENCE* convergence=NULL, T_PREPOST* pre_post=NULL)
     {
         T_CONVERGENCE _default_convergence;
-        if (convergence==0) convergence = &_default_convergence;
+        if (convergence==NULL) convergence = &_default_convergence;
         r = .0;
         x_new = x0;
 
@@ -51,6 +51,7 @@ public:
             for (itr_cnt=0; itr_cnt<max_itr_count; itr_cnt++) {
                 f_dx.eval(x_new, r, dx);
                 x_new += dx;
+                if (pre_post) pre_post->doit(dx, x_new, f_residuals, f_dx);
                 f_residuals.eval(x_new, r);
                 //printout(itr_cnt, x_new, r, dx);
                 if (convergence->check(&r, &dx, &x_new)) {
@@ -83,8 +84,14 @@ public:
     {
         NewtonFunctionDXScalar<F_JACOBIAN> f_dx(f_jac);
         double r, dx;
-        NRCheckConvergence<double,NRErrorAbsResMNormOrRelDxMNorm> check(error);
-        return solve(f_residuals, f_dx, x0, x_new, r, dx, max_itr_count, &check);
+        typedef NRCheckConvergence<double,NRErrorAbsResMNormOrRelDxMNorm> MyConvergence;
+        MyConvergence check(error);
+        return solve<   F_RESIDUALS, 
+                        NewtonFunctionDXScalar<F_JACOBIAN>, 
+                        double, 
+                        MyConvergence, 
+                        NRIterationStepInitializerDummy
+                >(f_residuals, f_dx, x0, x_new, r, dx, max_itr_count, &check);
     }
 
     /// solve vector problems using a direct linear solver
@@ -96,7 +103,12 @@ public:
         MathLib::DenseLinearEquation dense;
         dense.create(n);
         NewtonFunctionDXVector<F_JACOBIAN, MathLib::DenseLinearEquation> f_dx(f_jac, dense);
-        return solve(f_residuals, f_dx, x0, x_new, r, dx, max_itr_count, check_error);
+        return solve<   F_RESIDUALS, 
+                        NewtonFunctionDXVector<F_JACOBIAN, MathLib::DenseLinearEquation>, 
+                        T_V, 
+                        T_CONVERGENCE, 
+                        NRIterationStepInitializerDummy
+                >(f_residuals, f_dx, x0, x_new, r, dx, max_itr_count, check_error);
     }
 
     /// solve vector problems using a direct linear solver
