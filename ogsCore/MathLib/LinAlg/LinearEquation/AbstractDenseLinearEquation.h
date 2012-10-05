@@ -23,7 +23,7 @@ namespace MathLib
 {
 
 /**
- * \brief 
+ * \brief Abstract class to any linear equation based on a dense matrix
  */
 class AbstractDenseLinearEquation : public ILinearEquation
 {
@@ -31,32 +31,36 @@ public:
     typedef Matrix<double> MatrixType;
     typedef std::valarray<double> VectorType;
 
-    AbstractDenseLinearEquation() : _A(0) {};
+    ///
+    AbstractDenseLinearEquation() : _A(NULL) {};
 
+    ///
     virtual ~AbstractDenseLinearEquation()
     {
         if (_A) delete _A;
     }
 
-    void create(size_t length, RowMajorSparsity* /*sp*/=0)
+    ///
+    virtual void create(size_t length, RowMajorSparsity* /*sp*/=0)
     {
         resize(length);
     }
 
-    bool isCreated() const { return _A!=0; };
+    ///
+    virtual bool isCreated() const { return _A!=0; };
 
-
+    ///
     void resize(size_t length);
 
-
-    void reset()
+    ///
+    virtual void reset()
     {
         (*_A) = .0;
         _b.resize(_b.size(), .0);
         _x.resize(_x.size(), .0);
     }
 
-    size_t getDimension() const
+    virtual size_t getDimension() const
     {
         return _A->getNRows();
     }
@@ -66,44 +70,44 @@ public:
         return _A;
     }
 
-    double getA(size_t rowId, size_t colId)
+    virtual double getA(size_t rowId, size_t colId) const
     {
         return (*_A)(rowId, colId);
     }
 
-    void setA(size_t rowId, size_t colId, double v)
+    virtual void setA(size_t rowId, size_t colId, double v)
     {
         (*_A)(rowId, colId) = v;
     }
 
-    void addA(size_t rowId, size_t colId, double v)
+    virtual void addA(size_t rowId, size_t colId, double v)
     {
         (*_A)(rowId, colId) += v;
     }
 
-    double getRHS(size_t rowId)
+    virtual double getRHS(size_t rowId) const
     {
         return _b[rowId];
     }
 
-    double* getRHS()
+    virtual double* getRHS()
     {
         return &_b[0];
     }
 
     VectorType* getRHSAsStdVec() {return &_b;};
 
-    void setRHS(size_t rowId, double v)
+    virtual void setRHS(size_t rowId, double v)
     {
         _b[rowId] = v;
     }
 
-    void addRHS(size_t rowId, double v)
+    virtual void addRHS(size_t rowId, double v)
     {
         _b[rowId] += v;
     }
 
-    double* getX()
+    virtual double* getX()
     {
         return &_x[0];
     }
@@ -111,15 +115,15 @@ public:
     VectorType* getXAsStdVec() {return &_x;};
 
 
-    void setKnownX(size_t row_id, double x);
+    virtual void setKnownX(size_t row_id, double x);
 
-    void setKnownX(const std::vector<size_t> &vec_id, const std::vector<double> &vec_x)
+    virtual void setKnownX(const std::vector<size_t> &vec_id, const std::vector<double> &vec_x)
     {
         for (size_t i=0; i<vec_id.size(); ++i)
             setKnownX(vec_id[i], vec_x[i]);
     }
 
-    void printout(std::ostream &os=std::cout) const
+    virtual void printout(std::ostream &os=std::cout) const
     {
         os << "not implemented yet." << std::endl;
     }

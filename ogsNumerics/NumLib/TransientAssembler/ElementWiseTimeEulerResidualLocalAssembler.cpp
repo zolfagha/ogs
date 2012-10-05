@@ -16,20 +16,20 @@
 namespace NumLib
 {
 
-void ElementWiseTimeEulerResidualLocalAssembler::assembly(const TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &/*localDofManager*/, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalVector &local_r)
+void ElementWiseTimeEulerResidualLocalAssembler::assembly(const TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &/*localDofManager*/, const MathLib::LocalVector  &local_u_n1, const MathLib::LocalVector  &local_u_n, MathLib::LocalVector  &local_r)
 {
     const double delta_t = time.getTimeStepSize();
     const size_t n_dof = local_r.size();
 
-    LocalMatrix M = LocalMatrix::Zero(n_dof, n_dof);
-    LocalMatrix K = LocalMatrix::Zero(n_dof, n_dof);
-    LocalVector F = LocalVector::Zero(n_dof);
+    MathLib::LocalMatrix M = MathLib::LocalMatrix::Zero(n_dof, n_dof);
+    MathLib::LocalMatrix K = MathLib::LocalMatrix::Zero(n_dof, n_dof);
+    MathLib::LocalVector  F = MathLib::LocalVector ::Zero(n_dof);
 
     // get M,K,F in M du/dt + K = F
     assembleODE(time, e, local_u_n1, local_u_n, M, K, F);
 
-    LocalMatrix TMP_M(n_dof, n_dof);
-    //LocalVector TMP_V(n_dof);
+    MathLib::LocalMatrix TMP_M(n_dof, n_dof);
+    //MathLib::LocalVector  TMP_V(n_dof);
 
     // evaluate r: r = (1/dt M + theta K) * u1 -(1/dt M - (1-theta) K) * u0 - F
     // r = (1/dt M + theta K) * u1

@@ -190,7 +190,7 @@ bool VtuWriter::writePointData(std::fstream &fin,
             } else {
                 BaseLib::write_value_binary<unsigned int> (fin, bin_data_length);
             }
-            NumLib::LocalMatrix v;
+            MathLib::LocalMatrix v;
             for (size_t j = 0; j < msh.getNumberOfNodes(); j++) {
                 pt_data.f->eval(NumLib::TXPosition(NumLib::TXPosition::Node, j, msh.getNodeCoordinatesRef(j)->getData()), v);
                 if (!_useBinary) {
@@ -243,7 +243,7 @@ bool VtuWriter::writeCellData(std::fstream &fin,
             if (!_useBinary)
             {
                 fin << "          ";
-                NumLib::LocalMatrix v;
+                MathLib::LocalMatrix v;
                 for (size_t j=0; j<msh.getNumberOfElements(); j++) {
                     pt_data.f->eval(NumLib::TXPosition(NumLib::TXPosition::Element, j), v);
                     if (v.array().size()>=(int)pt_data.nr_of_components) {
@@ -259,7 +259,7 @@ bool VtuWriter::writeCellData(std::fstream &fin,
             else
             {
                 BaseLib::write_value_binary<unsigned int> (fin, bin_data_length);
-                NumLib::LocalMatrix v;
+                MathLib::LocalMatrix v;
                 for (long j = 0; j < (long) msh.getNumberOfElements(); j++) {
                     pt_data.f->eval(NumLib::TXPosition(NumLib::TXPosition::Element, j), v);
                     if (v.array().size()>=(int)pt_data.nr_of_components) {

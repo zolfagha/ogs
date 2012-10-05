@@ -16,7 +16,7 @@
 #include <valarray>
 
 #include "BaseLib/CodingTools.h"
-#include "NumLib/DataType.h"
+#include "MathLib/DataType.h"
 #include "Variable.h"
 
 
@@ -25,9 +25,9 @@ namespace NumLib
 
 struct TimeODEComponent
 {
-    LocalMatrix* mass;
-    LocalMatrix* stiffness;
-    LocalVector* source;
+    MathLib::LocalMatrix* mass;
+    MathLib::LocalMatrix* stiffness;
+    MathLib::LocalVector* source;
 };
 
 struct TimeODE
@@ -51,10 +51,10 @@ struct TimeODE
 
 struct LinearComponent
 {
-    LocalMatrix* stiffness;
-    LocalVector* source;
+    MathLib::LocalMatrix* stiffness;
+    MathLib::LocalVector* source;
 
-    LinearComponent(LocalMatrix* m, LocalVector* v = 0) : stiffness(m), source(v) {};
+    LinearComponent(MathLib::LocalMatrix* m, MathLib::LocalVector* v = 0) : stiffness(m), source(v) {};
 };
 
 struct LinearEquation

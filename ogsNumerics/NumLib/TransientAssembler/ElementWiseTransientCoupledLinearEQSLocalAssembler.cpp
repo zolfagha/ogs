@@ -21,7 +21,7 @@ void ElementWiseTransientCoupledLinearEQSLocalAssembler::assembly(  const NumLib
                         const DiscreteLib::DofEquationIdTable &localDofManager,
                         const LocalVectorType &local_u_n1,
                         const LocalVectorType &local_u_n,
-                        NumLib::LocalEquation &eqs
+                        MathLib::LocalEquation &eqs
                         )
 {
     // parameters need to be passed

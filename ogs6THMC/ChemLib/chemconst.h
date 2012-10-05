@@ -15,7 +15,7 @@
 
 #include <string>
 #include <vector>
-#include "FemLib/Core/DataType.h"
+#include "MathLib/DataType.h"
 
 namespace ogsChem
 {
@@ -61,8 +61,9 @@ namespace ogsChem
 
 	// type of kinetic reactions
 	enum KinReactType {
-		Monod,       /* - monod reaction with decay term */ 
-		NoType       /* - uninitialized type */ 
+		Monod,             /* - monod reaction */ 
+		DoubleMonodDecay,  /* - double monod reaction with decay term */ 
+		NoType             /* - uninitialized type */ 
 	}; 
 
     // different thermodynamic databases
@@ -80,8 +81,8 @@ namespace ogsChem
 
 
 	// type definitions
-	typedef DiscreteLib::LocalMatrix LocalMatrix;
-	typedef DiscreteLib::LocalVector LocalVector;
+	typedef MathLib::LocalMatrix LocalMatrix;
+	typedef MathLib::LocalVector LocalVector;
 }
 
 #endif // CHEMCONST_H

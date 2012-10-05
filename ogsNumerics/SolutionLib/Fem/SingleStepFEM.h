@@ -23,6 +23,7 @@
 #include "DiscreteLib/Utils/SparsityBuilderFromNodeConnectivity.h"
 #include "FemLib/Function/FemFunction.h"
 #include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
+#include "NumLib/Nonlinear/DiscreteNonlinearSolverFactory.h"
 
 #include "SolutionLib/DataType.h"
 #include "SolutionLib/Core/AbstractTimeSteppingAlgorithm.h"
@@ -47,10 +48,12 @@ namespace SolutionLib
  *
  * \tparam T_USER_FEM_PROBLEM      FEM problem class
  * \tparam T_LINEAR_SOLVER         Linear equation solver class
+ * \tparam T_NL_SOLVER_FACTORY     Nonlinear solver factory
  */
 template <
     class T_USER_FEM_PROBLEM,
-    class T_LINEAR_SOLVER
+    class T_LINEAR_SOLVER,
+    class T_NL_SOLVER_FACTORY=NumLib::DiscreteNonlinearSolverFactory
     >
 class SingleStepFEM
     : public AbstractTimeSteppingAlgorithm
@@ -62,7 +65,8 @@ public:
     typedef typename UserFemProblem::EquationType::LinearEQSType UserLinearFunction;
     typedef typename UserFemProblem::EquationType::ResidualEQSType UserResidualFunction;
     typedef typename UserFemProblem::EquationType::DxEQSType UserDxFunction;
-    typedef NumLib::TemplateDiscreteNonlinearSolver<MyDiscreteSystem, UserLinearFunction, UserResidualFunction, UserDxFunction> NonlinearSolverType;
+    typedef T_NL_SOLVER_FACTORY MyNonlinearSolverFactory;
+    typedef NumLib::TemplateDiscreteNonlinearSolver<MyDiscreteSystem, UserLinearFunction, UserResidualFunction, UserDxFunction, MyNonlinearSolverFactory> NonlinearSolverType;
     typedef T_LINEAR_SOLVER LinearSolverType;
     typedef typename FemLib::FemNodalFunctionScalar<MyDiscreteSystem>::type MyNodalFunctionScalar;
 
@@ -71,7 +75,7 @@ public:
     /// - set up DoFs and equation index
     /// - prepare linear equation and solver
     /// - prepare linear functions
-    SingleStepFEM(MyDiscreteSystem* dis, UserFemProblem* problem);
+    SingleStepFEM(MyDiscreteSystem* dis, UserFemProblem* problem, MyNonlinearSolverFactory* nl_solver_factory=NULL);
 
     ///
     virtual ~SingleStepFEM()
@@ -137,9 +141,10 @@ private:
 
 template <
     class T_USER_FEM_PROBLEM,
-    class T_LINEAR_SOLVER
+    class T_LINEAR_SOLVER,
+    class T_NL_SOLVER_FACTORY
     >
-SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER>::SingleStepFEM(MyDiscreteSystem* dis, UserFemProblem* problem)
+SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY>::SingleStepFEM(MyDiscreteSystem* dis, UserFemProblem* problem, MyNonlinearSolverFactory* nl_solver_factory)
     : AbstractTimeSteppingAlgorithm(*problem->getTimeSteppingFunction()),
       _problem(problem), _discrete_system(dis)
 {
@@ -201,14 +206,15 @@ SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER>::SingleStepFEM(MyDiscreteSyste
     _f_dx = new UserDxFunction(dis->getMesh(), list_var, problem->getEquation()->getJacobianAssembler(), _linear_eqs);
 
     // setup nonlinear solver
-    _f_nonlinear = new NonlinearSolverType(dis, _f_linear, _f_r, _f_dx);
+    _f_nonlinear = new NonlinearSolverType(dis, _f_linear, _f_r, _f_dx, nl_solver_factory);
 };
 
 template <
     class T_USER_FEM_PROBLEM,
-    class T_LINEAR_SOLVER
+    class T_LINEAR_SOLVER,
+    class T_NL_SOLVER_FACTORY
     >
-int SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER>::solveTimeStep(const NumLib::TimeStep &t_n1)
+int SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY>::solveTimeStep(const NumLib::TimeStep &t_n1)
 {
     // time step
     double dt = t_n1.getTime() - AbstractTimeSteppingAlgorithm::getTimeStepFunction()->getPrevious();

@@ -15,72 +15,13 @@
 #include "logog.hpp"
 
 #include "MathLib/LinAlg/LinearEquation/DenseLinearEquation.h"
-#include "Convergence.h"
+#include "NRCheckConvergence.h"
+#include "NRErrorAbsResMNormOrRelDxMNorm.h"
+#include "NewtonFunctionDXVector.h"
+#include "NewtonFunctionDXScalar.h"
 
 namespace MathLib
 {
-
-
-template<class F_JACOBIAN, class T_LINEAR_SOLVER>
-class NewtonFunctionDXVector
-{
-private:
-    F_JACOBIAN* _f_j;
-    T_LINEAR_SOLVER* _linear_solver;
-    typedef typename T_LINEAR_SOLVER::MatrixType JacobianType;
-public:
-    NewtonFunctionDXVector(F_JACOBIAN &f, T_LINEAR_SOLVER &linear_solver)
-        : _f_j(&f), _linear_solver(&linear_solver) {};
-
-    template<class T_VALUE>
-    void eval(const T_VALUE &x, const T_VALUE &r, T_VALUE &dx)
-    {
-        const size_t n_rows = _linear_solver->getDimension();
-        JacobianType* jac = _linear_solver->getA();
-        _f_j->eval(x, *jac);
-        //if (!check_jac(jac)) return false;
-
-        // rhs = -r
-        for (size_t i=0; i<n_rows; ++i)
-            _linear_solver->setRHS(i, -1.*r[i]);
-
-        // solve J dx = -r
-        _linear_solver->solve();
-
-        // get dx
-        double *u = _linear_solver->getX();
-        for (size_t i=0; i<n_rows; ++i)
-            dx[i] = u[i];
-    }
-
-private:
-    inline bool check_jac(JacobianType &jac)
-    {
-        const size_t n = _linear_solver->getDimension();
-        for (size_t i=0; i<n; i++)
-            for (size_t j=0; j<n; j++)
-                if (jac(i,j)!=.0) return true;
-        return false;
-    }
-};
-
-template<class F_JACOBIAN>
-class NewtonFunctionDXScalar
-{
-private:
-    F_JACOBIAN* _f_j;
-public:
-    NewtonFunctionDXScalar(F_JACOBIAN &f) : _f_j(&f) {};
-
-    void eval(const double &x, const double &r, double &dx)
-    {
-        double j;
-        _f_j->eval(x, j);
-        if (j==0) return; //TODO error
-        dx = -r / j;
-    }
-};
-
 
 /**
  * \brief Newton-Raphson method
@@ -93,11 +34,11 @@ public:
     /// @tparam F_DX
     /// @tparam T_VALUE
     /// @tparam T_CONVERGENCE
-    template<class F_RESIDUALS, class F_DX, class T_VALUE, class T_CONVERGENCE>
-    int solve(F_RESIDUALS &f_residuals, F_DX &f_dx, const T_VALUE &x0, T_VALUE &x_new, T_VALUE &r, T_VALUE &dx, size_t max_itr_count=100, T_CONVERGENCE* convergence=0)
+    template<class F_RESIDUALS, class F_DX, class T_VALUE, class T_CONVERGENCE, class T_PREPOST>
+    int solve(F_RESIDUALS &f_residuals, F_DX &f_dx, const T_VALUE &x0, T_VALUE &x_new, T_VALUE &r, T_VALUE &dx, size_t max_itr_count=100, T_CONVERGENCE* convergence=NULL, T_PREPOST* pre_post=NULL)
     {
         T_CONVERGENCE _default_convergence;
-        if (convergence==0) convergence = &_default_convergence;
+        if (convergence==NULL) convergence = &_default_convergence;
         r = .0;
         x_new = x0;
 
@@ -110,6 +51,7 @@ public:
             for (itr_cnt=0; itr_cnt<max_itr_count; itr_cnt++) {
                 f_dx.eval(x_new, r, dx);
                 x_new += dx;
+                if (pre_post) pre_post->doit(dx, x_new, f_residuals, f_dx);
                 f_residuals.eval(x_new, r);
                 //printout(itr_cnt, x_new, r, dx);
                 if (convergence->check(&r, &dx, &x_new)) {
@@ -142,8 +84,14 @@ public:
     {
         NewtonFunctionDXScalar<F_JACOBIAN> f_dx(f_jac);
         double r, dx;
-        NRCheckConvergence<double,NRErrorAbsResMNormOrRelDxMNorm> check(error);
-        return solve(f_residuals, f_dx, x0, x_new, r, dx, max_itr_count, &check);
+        typedef NRCheckConvergence<double,NRErrorAbsResMNormOrRelDxMNorm> MyConvergence;
+        MyConvergence check(error);
+        return solve<   F_RESIDUALS, 
+                        NewtonFunctionDXScalar<F_JACOBIAN>, 
+                        double, 
+                        MyConvergence, 
+                        NRIterationStepInitializerDummy
+                >(f_residuals, f_dx, x0, x_new, r, dx, max_itr_count, &check);
     }
 
     /// solve vector problems using a direct linear solver
@@ -155,7 +103,12 @@ public:
         MathLib::DenseLinearEquation dense;
         dense.create(n);
         NewtonFunctionDXVector<F_JACOBIAN, MathLib::DenseLinearEquation> f_dx(f_jac, dense);
-        return solve(f_residuals, f_dx, x0, x_new, r, dx, max_itr_count, check_error);
+        return solve<   F_RESIDUALS, 
+                        NewtonFunctionDXVector<F_JACOBIAN, MathLib::DenseLinearEquation>, 
+                        T_V, 
+                        T_CONVERGENCE, 
+                        NRIterationStepInitializerDummy
+                >(f_residuals, f_dx, x0, x_new, r, dx, max_itr_count, check_error);
     }
 
     /// solve vector problems using a direct linear solver

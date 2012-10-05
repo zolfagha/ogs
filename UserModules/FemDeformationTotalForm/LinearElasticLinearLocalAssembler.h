@@ -21,8 +21,8 @@
 class FemLinearElasticLinearLocalAssembler: public NumLib::IElementWiseTransientLinearEQSLocalAssembler
 {
 public:
-    typedef NumLib::LocalVector LocalVectorType;
-    typedef NumLib::LocalMatrix LocalMatrixType;
+    typedef MathLib::LocalVector LocalVectorType;
+    typedef MathLib::LocalMatrix LocalMatrixType;
 
     explicit FemLinearElasticLinearLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
     : _feObjects(*feObjects)
@@ -31,7 +31,7 @@ public:
 
     virtual ~FemLinearElasticLinearLocalAssembler() {};
 
-    virtual void assembly(const NumLib::TimeStep &/*time*/,  const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const LocalVectorType &/*local_u_n1*/, const LocalVectorType &/*local_u_n*/, NumLib::LocalEquation &eqs);
+    virtual void assembly(const NumLib::TimeStep &/*time*/,  const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const LocalVectorType &/*local_u_n1*/, const LocalVectorType &/*local_u_n*/, MathLib::LocalEquation &eqs);
 
 private:
     FemLib::LagrangianFeObjectContainer _feObjects;

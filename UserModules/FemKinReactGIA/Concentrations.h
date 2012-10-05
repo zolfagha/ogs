@@ -25,9 +25,10 @@
 #include "ProcessLib/AbstractTransientProcess.h"
 #include "LinearTransportTimeODELocalAssember.h"
 #include "LinearTransportJacobianLocalAssembler.h"
+#include "MathLib/DataType.h"
 #include "NonLinearReactiveTransportTimeODELocalAssembler.h"
 #include "NonLinearReactiveTransportJacabianLocalAssembler.h"
-#include "DiscreteLib/Core/LocalDataType.h"
+
 
 template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER>
 class FunctionConcentrations
@@ -37,12 +38,13 @@ public:
     enum In { Velocity=0 };
     enum Out { Concentrations = 0 };
 
+	typedef FunctionConcentrations MyFunctionData; 
     typedef T_DISCRETE_SYSTEM MyDiscreteSystem;
     typedef T_LINEAR_SOLVER MyLinearSolver;
 
 	// local matrix and vector
-	typedef DiscreteLib::LocalMatrix LocalMatrix;
-	typedef DiscreteLib::LocalVector LocalVector;
+	typedef MathLib::LocalMatrix LocalMatrix;
+	typedef MathLib::LocalVector LocalVector;
 
     // memory for discretized concentration vector
     typedef typename FemLib::FemNodalFunctionVector<MyDiscreteSystem>::type MyNodalFunctionVector;
@@ -54,9 +56,9 @@ public:
     typedef LinearTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyLinearResidualAssemblerType; 
     typedef LinearTransportJacobianLocalAssembler MyLinearJacobianAssemblerType;                                                      
 	// for the nonlinear part, use different settings
-	typedef NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler> MyNonLinearAssemblerType; 
-	typedef NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyNonLinearResidualAssemblerType; 
-	typedef NonLinearReactiveTransportJacobianLocalAssembler MyNonLinearJacobianAssemblerType; 
+	typedef NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler, MyNodalFunctionScalar> MyNonLinearAssemblerType; 
+	typedef NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler, MyNodalFunctionScalar> MyNonLinearResidualAssemblerType; 
+	typedef NonLinearReactiveTransportJacobianLocalAssembler<MyNodalFunctionScalar> MyNonLinearJacobianAssemblerType; 
 	
 	// linear Equation definition
     typedef SolutionLib::TemplateFemEquation<
@@ -99,7 +101,8 @@ public:
 
 	// the general reduction problem part
 	typedef SolutionLib::FemKinReduction<MyDiscreteSystem> MyKinReductionProblemType; 
-	typedef SolutionLib::SingleStepKinReduction<MyKinReductionProblemType,
+	typedef SolutionLib::SingleStepKinReduction<MyFunctionData, 
+		                                        MyKinReductionProblemType,
 		                                        MyLinearTransportProblemType, 
 		                                        MyLinearSolutionType, 
 												MyNonLinearReactiveTransportProblemType, 
@@ -129,8 +132,10 @@ public:
 		}
 	    for (i=0; i < _eta_immob.size(); i++)
 	        BaseLib::releaseObject(_eta_immob[i]);
-		for (i=0; i < _xi.size(); i++)
-			BaseLib::releaseObject(_xi[i]); 
+		for (i=0; i < _xi_mob.size(); i++)
+			BaseLib::releaseObject(_xi_mob[i]); 
+        for (i=0; i < _xi_immob.size(); i++)
+			BaseLib::releaseObject(_xi_immob[i]); 
 
     };
 
@@ -176,6 +181,15 @@ public:
         getSolution()->accept(time);
     };
 
+	// set values function
+	void set_eta_mob_node_values  ( size_t eta_mob_idx,   MyNodalFunctionScalar* new_eta_mob_node_values   ); 
+	void set_eta_immob_node_values( size_t eta_immob_idx, MyNodalFunctionScalar* new_eta_immob_node_values ); 
+	void set_xi_mob_node_values   ( size_t xi_mob_idx,    MyNodalFunctionScalar* new_xi_mob_node_values    ); 
+	void set_xi_immob_node_values ( size_t xi_immob_idx,  MyNodalFunctionScalar* new_xi_immob_node_values  ); 
+
+	// calculate the rates on each node
+	void update_node_kin_reaction_rates(void); 
+	
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
 
@@ -195,10 +209,12 @@ private:
     // linear problem and solution pointer
 	std::vector<MyLinearTransportProblemType*> _linear_problems;
     std::vector<MyLinearSolutionType*>         _linear_solutions;
+
 	// nonlinear equation, problem and solution pointer
 	MyNonLinearEquationType* _non_linear_eqs; 
 	MyNonLinearReactiveTransportProblemType* _non_linear_problem;
 	MyNonLinearSolutionType* _non_linear_solution; 
+	
 	// reduction problem and solution
 	MyKinReductionProblemType* _problem; 
 	MyKinReductionSolution*    _solution; 
@@ -215,8 +231,12 @@ private:
     // eta vector, including eta_mobile and eta_immobile
     std::vector<MyNodalFunctionScalar*> _eta_mob; 
 	std::vector<MyNodalFunctionScalar*> _eta_immob;
-    // xi vector, including xi_mobile and xi_immobile parts
-    std::vector<MyNodalFunctionScalar*> _xi; 
+    // xi_mobile and xi_immobile
+    std::vector<MyNodalFunctionScalar*> _xi_mob; 
+    std::vector<MyNodalFunctionScalar*> _xi_immob; 
+	// nodal reaction rates
+	std::vector<MyNodalFunctionScalar*> _xi_mob_rates;
+    std::vector<MyNodalFunctionScalar*> _xi_immob_rates;
 }; 
 
 #include "Concentrations.hpp"

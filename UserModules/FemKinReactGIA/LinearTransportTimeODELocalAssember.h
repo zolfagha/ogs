@@ -33,8 +33,8 @@ template <class T>
 class LinearTransportTimeODELocalAssembler: public T
 {
 public:
-    typedef NumLib::LocalVector LocalVectorType;
-    typedef NumLib::LocalMatrix LocalMatrixType;
+    typedef MathLib::LocalVector LocalVectorType;
+    typedef MathLib::LocalMatrix LocalMatrixType;
 
     LinearTransportTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
         : _feObjects(*feObjects), _vel(NULL)
@@ -63,8 +63,8 @@ protected:
 
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
-        NumLib::LocalMatrix poro(1,1);
-        NumLib::LocalMatrix d_poro(1,1);
+        MathLib::LocalMatrix poro(1,1);
+        MathLib::LocalMatrix d_poro(1,1);
         NumLib::ITXFunction::DataType v;
         for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
             q->getSamplingPoint(j, gp_x);

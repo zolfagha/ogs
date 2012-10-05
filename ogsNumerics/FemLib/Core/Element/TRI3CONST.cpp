@@ -12,7 +12,6 @@
 
 #include "TRI3CONST.h"
 
-#include "MathLib/LinAlg/Dense/Matrix.h"
 #include "GeoLib/Point.h"
 #include "NumLib/Function/Function.h"
 
@@ -65,12 +64,12 @@ void TRI3CONST::getRealCoordinates(double* x_real)
         x_real[i] = x_cp[i];
 };
 
-LocalMatrix* TRI3CONST::getBasisFunction()
+MathLib::LocalMatrix* TRI3CONST::getBasisFunction()
 {
     return &_shape;
 }
 
-LocalMatrix* TRI3CONST::getGradBasisFunction()
+MathLib::LocalMatrix* TRI3CONST::getGradBasisFunction()
 {
     return &_dshape;
 }
@@ -81,7 +80,7 @@ void TRI3CONST::computeBasisFunction(const double *x,  double *shape)
         shape[i] = a[i]+b[i]*x[0]+c[i]*x[1];
 }
 
-void TRI3CONST::computeGradBasisFunction(const double*,  LocalMatrix &dshape)
+void TRI3CONST::computeGradBasisFunction(const double*,  MathLib::LocalMatrix &dshape)
 {
     for (size_t i=0; i<3; i++) {
         dshape(0,i) = b[i];
@@ -100,7 +99,7 @@ double TRI3CONST::interpolate(double *x, double *nodal_values)
 }
 
 ///// compute an matrix M = Int{W^T F N} dV
-//void TRI3CONST::integrateWxN( MathLib::SpatialFunctionScalar* f, LocalMatrix &mat)
+//void TRI3CONST::integrateWxN( MathLib::SpatialFunctionScalar* f, MathLib::LocalMatrix &mat)
 //{
 //    double v = .0;
 //    f->eval(0, v);
@@ -118,7 +117,7 @@ double TRI3CONST::interpolate(double *x, double *nodal_values)
 //}
 //
 ///// compute an matrix M = Int{W^T F dN} dV
-//void TRI3CONST::integrateWxDN( MathLib::SpatialFunctionVector* f, LocalMatrix &mat)
+//void TRI3CONST::integrateWxDN( MathLib::SpatialFunctionVector* f, MathLib::LocalMatrix &mat)
 //{
 //    MathLib::Vector v;
 //    f->eval(0, v);
@@ -129,7 +128,7 @@ double TRI3CONST::interpolate(double *x, double *nodal_values)
 //}
 //
 ///// compute an matrix M = Int{dW^T F dN} dV
-//void TRI3CONST::integrateDWxDN( MathLib::SpatialFunctionScalar *f, LocalMatrix &mat)
+//void TRI3CONST::integrateDWxDN( MathLib::SpatialFunctionScalar *f, MathLib::LocalMatrix &mat)
 //{
 //    double v;
 //    f->eval(0, v);
@@ -147,7 +146,7 @@ double TRI3CONST::interpolate(double *x, double *nodal_values)
 //}
 
 /// compute an matrix M = Int{W^T F N} dV
-void TRI3CONST::integrateWxN(size_t igp, LocalMatrix &v, LocalMatrix &mat)
+void TRI3CONST::integrateWxN(size_t igp, MathLib::LocalMatrix &v, MathLib::LocalMatrix &mat)
 {
     assert(igp==0);
 
@@ -165,7 +164,7 @@ void TRI3CONST::integrateWxN(size_t igp, LocalMatrix &v, LocalMatrix &mat)
 }
 
 /// compute an matrix M = Int{W^T F dN} dV
-void TRI3CONST::integrateWxDN(size_t igp, LocalMatrix &v, LocalMatrix &mat)
+void TRI3CONST::integrateWxDN(size_t igp, MathLib::LocalMatrix &v, MathLib::LocalMatrix &mat)
 {
     assert(igp==0);
 
@@ -176,7 +175,7 @@ void TRI3CONST::integrateWxDN(size_t igp, LocalMatrix &v, LocalMatrix &mat)
 }
 
 /// compute an matrix M = Int{dW^T F dN} dV
-void TRI3CONST::integrateDWxDN(size_t igp, LocalMatrix &v, LocalMatrix &mat)
+void TRI3CONST::integrateDWxDN(size_t igp, MathLib::LocalMatrix &v, MathLib::LocalMatrix &mat)
 {
     assert(igp==0);
 
@@ -193,10 +192,10 @@ void TRI3CONST::integrateDWxDN(size_t igp, LocalMatrix &v, LocalMatrix &mat)
             mat(i,j) = mat(j,i);
 }
 
-void TRI3CONST::extrapolate(const std::vector<LocalVector> &gp_values, std::vector<LocalVector> &nodal_values)
+void TRI3CONST::extrapolate(const std::vector<MathLib::LocalVector> &gp_values, std::vector<MathLib::LocalVector> &nodal_values)
 {
     // gp_values are all same
-    LocalVector v = gp_values[0];
+    MathLib::LocalVector v = gp_values[0];
     for (size_t i=0; i<nodal_values.size(); i++) {
         nodal_values[i] = v;
     }

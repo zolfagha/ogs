@@ -173,7 +173,7 @@ public:
                 xi[i] = (*pt)[0];
                 yi[i] = (*pt)[1];
             }
-            NumLib::LocalVector q(2);
+            MathLib::LocalVector q(2);
             q[0] = .0;
             q[1] = .0;
             double k;

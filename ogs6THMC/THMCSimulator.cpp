@@ -215,7 +215,7 @@ int THMCSimulator::execute()
             return 0;
         }
     }
-    opOgs6->printout(std::cout);
+    // opOgs6->printout(std::cout); // HS
 
 
     // ddc

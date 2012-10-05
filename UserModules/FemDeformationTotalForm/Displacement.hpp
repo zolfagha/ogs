@@ -122,7 +122,7 @@ bool FunctionDisplacement<T1,T2>::initialize(const BaseLib::Options &option)
     dofMapping->setLocalNumberingType(DiscreteLib::DofNumberingType::BY_POINT);
 
     // create u variable which is vector
-    NumLib::LocalVector tmp_u0(3);
+    MathLib::LocalVector tmp_u0(3);
     tmp_u0 *= .0;
     _displacement = new MyNodalFunctionVector();
     _displacement->initialize(*dis, FemLib::PolynomialOrder::Linear, tmp_u0);
