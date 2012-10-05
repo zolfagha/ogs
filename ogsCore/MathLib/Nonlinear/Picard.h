@@ -14,7 +14,8 @@
 
 #include "logog.hpp"
 
-#include "Convergence.h"
+#include "NRCheckConvergence.h"
+#include "NRErrorNorm1DX.h"
 
 namespace MathLib
 {

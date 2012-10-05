@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "FemLib/Core/DataType.h"
+#include "MathLib/DataType.h"
 
 namespace FemLib
 {
@@ -25,25 +25,25 @@ struct CoordinateMappingProperty
     ///// mapping locations in computed coordinates
     //double r[3];
     /// shape function N(r)
-    LocalMatrix *shape_r;
+    MathLib::LocalMatrix *shape_r;
     /// gradient of shape functions, dN(r)/dr
-    LocalMatrix *dshape_dr;
+    MathLib::LocalMatrix *dshape_dr;
     /// gradient of shape functions, dN(r)/dx
-    LocalMatrix *dshape_dx;
+    MathLib::LocalMatrix *dshape_dx;
     /// Jacobian matrix, J=dx/dr
-    LocalMatrix *jacobian_dxdr;
+    MathLib::LocalMatrix *jacobian_dxdr;
     /// determinant of the Jacobian
     double det_jacobian;
     /// inverse of the Jacobian
-    LocalMatrix *inv_jacobian_drdx;
+    MathLib::LocalMatrix *inv_jacobian_drdx;
 
     CoordinateMappingProperty()
     {
-        shape_r = new LocalMatrix();
-        dshape_dr = new LocalMatrix();
-        dshape_dx = new LocalMatrix();
-        jacobian_dxdr = new LocalMatrix();
-        inv_jacobian_drdx = new LocalMatrix();
+        shape_r = new MathLib::LocalMatrix();
+        dshape_dr = new MathLib::LocalMatrix();
+        dshape_dx = new MathLib::LocalMatrix();
+        jacobian_dxdr = new MathLib::LocalMatrix();
+        inv_jacobian_drdx = new MathLib::LocalMatrix();
     }
 
     ~CoordinateMappingProperty()

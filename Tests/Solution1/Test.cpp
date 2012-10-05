@@ -40,7 +40,7 @@
 typedef FemLib::FEMIntegrationPointFunctionVector<DiscreteSystem>::type MyIntegrationPointFunctionVector;
 typedef FemLib::FemNodalFunctionScalar<DiscreteSystem>::type MyNodalFunctionScalar;
 //typedef NumLib::ITXDiscreteFunction<double> MyNodalFunctionScalar;
-//typedef NumLib::ITXDiscreteFunction<MathLib::TemplateVectorX<NumLib::LocalVector> > MyIntegrationPointFunctionVector;
+//typedef NumLib::ITXDiscreteFunction<MathLib::TemplateVectorX<MathLib::LocalVector> > MyIntegrationPointFunctionVector;
 
 //class DiscreteDataConvergenceCheck : public IConvergenceCheck
 //{
@@ -64,7 +64,7 @@ typedef FemLib::FemNodalFunctionScalar<DiscreteSystem>::type MyNodalFunctionScal
 //                const MyIntegrationPointFunctionVector* f_fem_prev = vars_prev.get<MyIntegrationPointFunctionVector>(i);
 //                const MyIntegrationPointFunctionVector* f_fem_cur = vars_current.get<MyIntegrationPointFunctionVector>(i);
 //                //v_diff = f_fem_cur->norm_diff(*f_fem_prev);
-//                NumLib::NormOfDiscreteDataFunction<MathLib::TemplateVectorX<NumLib::LocalVector> > _norm;
+//                NumLib::NormOfDiscreteDataFunction<MathLib::TemplateVectorX<MathLib::LocalVector> > _norm;
 //                v_diff = _norm(*f_fem_prev, *f_fem_cur);
 //            }
 //#endif
@@ -120,10 +120,10 @@ Geo::GWFemProblem* defineGWProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec,
     var_ic->addDistribution(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
     head->setIC(var_ic);
     //BC
-    GeoLib::Polyline* poly_left = _rec.getLeft();
-    GeoLib::Polyline* poly_right = _rec.getRight();
-    head->addDirichletBC(new FemDirichletBC(dis.getMesh(), poly_right, new NumLib::TXFunctionConstant(.0)));
-    head->addNeumannBC(new FemNeumannBC(dis.getMesh(), feObjects, poly_left, new NumLib::TXFunctionConstant(-1e-5)));
+    const GeoLib::Polyline &poly_left = _rec.getLeft();
+    const GeoLib::Polyline &poly_right = _rec.getRight();
+    head->addDirichletBC(new FemDirichletBC(dis.getMesh(), &poly_right, new NumLib::TXFunctionConstant(.0)));
+    head->addNeumannBC(new FemNeumannBC(dis.getMesh(), feObjects, &poly_left, new NumLib::TXFunctionConstant(-1e-5)));
 
     return _problem;
 }
@@ -142,8 +142,8 @@ Geo::GWFemProblem* defineGWProblem1D(DiscreteSystem &dis, GeoLib::Line &line, Ge
     var_ic->addDistribution(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
     head->setIC(var_ic);
     //BC
-    head->addDirichletBC(new FemDirichletBC(dis.getMesh(), line.getPoint2(), new NumLib::TXFunctionConstant(.0)));
-    head->addNeumannBC(new FemNeumannBC(dis.getMesh(), feObjects, line.getPoint1(), new NumLib::TXFunctionConstant(-1e-5)));
+    head->addDirichletBC(new FemDirichletBC(dis.getMesh(), &line.getPoint2(), new NumLib::TXFunctionConstant(.0)));
+    head->addNeumannBC(new FemNeumannBC(dis.getMesh(), feObjects, &line.getPoint1(), new NumLib::TXFunctionConstant(-1e-5)));
 
     return _problem;
 }
@@ -170,8 +170,8 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Rec
     var_ic->addDistribution(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
     c->setIC(var_ic);
     //BC
-    GeoLib::Polyline* poly_left = _rec.getLeft();
-    c->addDirichletBC(new FemDirichletBC(dis.getMesh(), poly_left, new NumLib::TXFunctionConstant(1.0)));
+    const GeoLib::Polyline &poly_left = _rec.getLeft();
+    c->addDirichletBC(new FemDirichletBC(dis.getMesh(), &poly_left, new NumLib::TXFunctionConstant(1.0)));
 
     return _problem;
 }
@@ -201,9 +201,9 @@ Geo::FemLinearElasticProblem* defineLinearElasticProblem(DiscreteSystem &dis, Ge
     u_x->setIC(var_ic);
     u_y->setIC(var_ic);
     //BC
-    GeoLib::Polyline* poly_bottom = _rec.getBottom();
-    u_y->addDirichletBC(new FemDirichletBC(dis.getMesh(), poly_bottom, new NumLib::TXFunctionConstant(.0)));
-    u_y->addNeumannBC(new SolutionLib::FemNeumannBC(dis.getMesh(), _feObjects, _rec.getTop(), new NumLib::TXFunctionConstant((-1e+6)*(-1.))));
+    const GeoLib::Polyline &poly_bottom = _rec.getBottom();
+    u_y->addDirichletBC(new FemDirichletBC(dis.getMesh(), &poly_bottom, new NumLib::TXFunctionConstant(.0)));
+    u_y->addNeumannBC(new SolutionLib::FemNeumannBC(dis.getMesh(), _feObjects, &_rec.getTop(), new NumLib::TXFunctionConstant((-1e+6)*(-1.))));
 
 
     return _problem;
@@ -569,8 +569,8 @@ TEST(Solution, LinearElastic2D)
 //        r_f_strain->printout();
 //        r_f_stress->printout();
 
-        const NumLib::LocalVector &strain1 = (*vec_strain)[0][0];
-        const NumLib::LocalVector &stress1 = (*vec_stress)[0][0];
+        const MathLib::LocalVector &strain1 = (*vec_strain)[0][0];
+        const MathLib::LocalVector &stress1 = (*vec_stress)[0][0];
         double E = solid.Youngs_modulus;
         double nu = solid.poisson_ratio;
         double sx = .0; //E/((1.+nu)*(1-2*nu))*((1-nu)*ex+nu*ey);

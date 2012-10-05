@@ -47,7 +47,7 @@ public:
             if (isScalar) {
                 v_diff = calculateDifference<double>(vars_prev, vars_current, i);
             } else if (isIntegrationPointVector) {
-                v_diff = calculateDifference<MathLib::TemplateVectorX<NumLib::LocalVector> >(vars_prev, vars_current, i);
+                v_diff = calculateDifference<MathLib::TemplateVectorX<MathLib::LocalVector> >(vars_prev, vars_current, i);
             }
 
             if (v_diff>eps) {

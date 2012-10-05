@@ -23,16 +23,16 @@ namespace MathLib
 {
 
 /**
- * Compressible row storage
+ * \brief Compressible row storage
  */
 template <class T>
 struct SparseTableCRS 
 {
     size_t dimension; 
     size_t nonzero;
-    T *row_ptr;
-    T *col_idx;
-    double *data;
+    T* row_ptr;
+    T* col_idx;
+    double* data;
 };
 
 typedef struct SparseTableCRS<unsigned> CRSUnsigned;

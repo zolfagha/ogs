@@ -39,7 +39,7 @@ public:
         _vel = const_cast<NumLib::ITXFunction*>(vel);
     }
 
-    void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &/*localDofManager*/, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/, NumLib::LocalMatrix &localJ)
+    void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &/*localDofManager*/, const MathLib::LocalVector &/*u1*/, const MathLib::LocalVector &/*u0*/, MathLib::LocalMatrix &localJ)
     {
         FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
         const size_t n_dim = e.getDimension();
@@ -48,12 +48,12 @@ public:
         double cmp_mol_diffusion = .0;
         _cmp->molecular_diffusion->eval(0, cmp_mol_diffusion);
 
-        NumLib::LocalMatrix matM = NumLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
-        NumLib::LocalMatrix matDiff = NumLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
-        NumLib::LocalMatrix matAdv = NumLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
+        MathLib::LocalMatrix matM = MathLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
+        MathLib::LocalMatrix matDiff = MathLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
+        MathLib::LocalMatrix matAdv = MathLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
 
-        NumLib::LocalMatrix poro(1,1);
-        NumLib::LocalMatrix d_poro(1,1);
+        MathLib::LocalMatrix poro(1,1);
+        MathLib::LocalMatrix d_poro(1,1);
         NumLib::ITXFunction::DataType v;
 
         double gp_x[3], real_x[3];

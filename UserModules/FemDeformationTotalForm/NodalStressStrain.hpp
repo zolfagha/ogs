@@ -40,7 +40,7 @@ bool FunctionNodalStressStrain<T>::initialize(const BaseLib::Options &option)
     _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
 
     // create strain, stress vectors
-    NumLib::LocalVector v0(n_strain_components);
+    MathLib::LocalVector v0(n_strain_components);
     v0 *= .0;
 
     // set initial output
@@ -88,7 +88,7 @@ int FunctionNodalStressStrain<T>::solveTimeStep(const NumLib::TimeStep &/*time*/
     MyIntegrationPointFunctionVector* strain = (MyIntegrationPointFunctionVector*)getInput(GpStrain);
     MyIntegrationPointFunctionVector* stress = (MyIntegrationPointFunctionVector*)getInput(GpStress);
 
-    FemLib::FemExtrapolationAverage<MyDiscreteSystem, NumLib::LocalVector> extrapo;
+    FemLib::FemExtrapolationAverage<MyDiscreteSystem, MathLib::LocalVector> extrapo;
     _nodal_strain->setFeObjectContainer(_feObjects);
     _nodal_stress->setFeObjectContainer(_feObjects);
     extrapo.extrapolate(*strain, *_nodal_strain);

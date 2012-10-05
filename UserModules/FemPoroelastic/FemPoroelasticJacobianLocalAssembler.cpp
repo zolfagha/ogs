@@ -63,8 +63,8 @@ void FemPoroelasticJacobianLocalAssembler::assembleComponents
     if (solidphase->density!=NULL)
         solidphase->density->eval(e_pos, rho_s);
     LocalMatrixType De = LocalMatrixType::Zero(n_strain_components, n_strain_components);
-    NumLib::LocalMatrix nv(1,1);
-    NumLib::LocalMatrix E(1,1);
+    MathLib::LocalMatrix nv(1,1);
+    MathLib::LocalMatrix E(1,1);
     solidphase->poisson_ratio->eval(e_pos, nv);
     solidphase->Youngs_modulus->eval(e_pos, E);
     double Lambda, G, K;

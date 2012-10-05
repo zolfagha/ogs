@@ -21,7 +21,7 @@ void ElementWiseTransientCoupledJacobianLocalAssembler::assembly(  const NumLib:
                         const DiscreteLib::DofEquationIdTable &localDofManager,
                         const LocalVectorType &local_u_n1,
                         const LocalVectorType &local_u_n,
-                        LocalMatrix &local_J
+                        LocalMatrixType &local_J
                         )
 {
     // parameters need to be passed

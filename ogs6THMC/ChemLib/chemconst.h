@@ -15,7 +15,7 @@
 
 #include <string>
 #include <vector>
-#include "FemLib/Core/DataType.h"
+#include "MathLib/DataType.h"
 
 namespace ogsChem
 {
@@ -81,8 +81,8 @@ namespace ogsChem
 
 
 	// type definitions
-	typedef DiscreteLib::LocalMatrix LocalMatrix;
-	typedef DiscreteLib::LocalVector LocalVector;
+	typedef MathLib::LocalMatrix LocalMatrix;
+	typedef MathLib::LocalVector LocalVector;
 }
 
 #endif // CHEMCONST_H

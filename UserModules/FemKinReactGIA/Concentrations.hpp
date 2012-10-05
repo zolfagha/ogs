@@ -12,7 +12,7 @@
 
 #include "logog.hpp"
 
-#include "DiscreteLib/Core/LocalDataType.h"
+#include "MathLib/DataType.h"
 #include "DiscreteLib/Utils/DiscreteSystemContainerPerMesh.h"
 #include "FemLib/Function/FemNodalFunction.h"
 #include "NumLib/Function/TXFunctionBuilder.h"
@@ -59,6 +59,9 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	n_eta_immob = n_eta - n_eta_mob; 
 	n_xi_mob    = this->_ReductionKin->get_n_xi_mob(); 
 	n_xi_immob  = this->_ReductionKin->get_n_xi_immob(); 
+	// based on the transformation class instance, add eta and xi to the discretized memory space
+	MathLib::LocalVector local_xi(n_xi);
+	local_xi *= .0; 
 
 	// creating local memory space to store IC and BC
 	// initialize eta_mob, 

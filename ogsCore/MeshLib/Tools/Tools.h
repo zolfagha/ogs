@@ -55,9 +55,6 @@ void createEdgeElements(IMesh * msh, const std::vector<size_t> &selected_ele, st
 /// get a list of edge elements of given elements
 void createEdgeElements(IMesh * msh);
 
-/// generate higher order mesh
-void generateHigherOrderUnstrucuredMesh(UnstructuredMesh &msh, size_t order);
-
 /// calculate geometric properties of an unstructured mesh
 void calculateMeshGeometricProperties(UnstructuredMesh &msh);
 

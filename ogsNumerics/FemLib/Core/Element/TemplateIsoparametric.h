@@ -119,14 +119,14 @@ public:
     }
 
     ///
-    virtual LocalMatrix* getBasisFunction()
+    virtual MathLib::LocalMatrix* getBasisFunction()
     {
         assert(_is_basis_computed);
         return _mapping->getProperties()->shape_r;
     }
 
     ///
-    virtual LocalMatrix* getGradBasisFunction()
+    virtual MathLib::LocalMatrix* getGradBasisFunction()
     {
         assert(_is_basis_computed);
         return _mapping->getProperties()->dshape_dx;
@@ -152,12 +152,12 @@ public:
     }
 
     /// compute an matrix M = Int{W^T F N} dV
-    virtual void integrateWxN(size_t igp, LocalMatrix &f, LocalMatrix &mat)
+    virtual void integrateWxN(size_t igp, MathLib::LocalMatrix &f, MathLib::LocalMatrix &mat)
     {
         assert(_is_basis_computed);
         const CoordinateMappingProperty *coord_prop = _mapping->getProperties();
-        LocalMatrix *basis = coord_prop->shape_r;
-        LocalMatrix *test = coord_prop->shape_r;
+        MathLib::LocalMatrix *basis = coord_prop->shape_r;
+        MathLib::LocalMatrix *test = coord_prop->shape_r;
         double fac = coord_prop->det_jacobian * _integration->getWeight(igp);
         if (f.rows()==1) {
             mat.noalias() += test->transpose() * f(0,0) * (*basis) * fac;
@@ -167,23 +167,23 @@ public:
     }
 
     /// compute an matrix M = Int{W^T F dN} dV
-    virtual void integrateWxDN(size_t igp, LocalMatrix &f, LocalMatrix &mat)
+    virtual void integrateWxDN(size_t igp, MathLib::LocalMatrix &f, MathLib::LocalMatrix &mat)
     {
         assert(_is_basis_computed);
         const CoordinateMappingProperty *coord_prop = _mapping->getProperties();
-        LocalMatrix *dbasis = coord_prop->dshape_dx;
-        LocalMatrix *test = coord_prop->shape_r;
+        MathLib::LocalMatrix *dbasis = coord_prop->dshape_dx;
+        MathLib::LocalMatrix *test = coord_prop->shape_r;
         double fac = coord_prop->det_jacobian * _integration->getWeight(igp);
         mat.noalias() += test->transpose() * (f * (*dbasis)) * fac;
     }
 
     /// compute an matrix M = Int{dW^T F dN} dV
-    virtual void integrateDWxDN(size_t igp, LocalMatrix &f, LocalMatrix &mat)
+    virtual void integrateDWxDN(size_t igp, MathLib::LocalMatrix &f, MathLib::LocalMatrix &mat)
     {
         assert(_is_basis_computed);
         const CoordinateMappingProperty *coord_prop = _mapping->getProperties();
-        LocalMatrix *dbasis = coord_prop->dshape_dx;
-        LocalMatrix *dtest = coord_prop->dshape_dx;
+        MathLib::LocalMatrix *dbasis = coord_prop->dshape_dx;
+        MathLib::LocalMatrix *dtest = coord_prop->dshape_dx;
         double fac = coord_prop->det_jacobian * _integration->getWeight(igp);
         if (f.rows()==1) {
             mat.noalias() += dtest->transpose() * f(0,0) * (*dbasis) * fac;
@@ -193,7 +193,7 @@ public:
     }
 
     ///
-    void extrapolate(const std::vector<LocalVector> &gp_values, std::vector<LocalVector> &nodal_values)
+    void extrapolate(const std::vector<MathLib::LocalVector> &gp_values, std::vector<MathLib::LocalVector> &nodal_values)
     {
         T_EXTRAPOLATE extrapo;
         extrapo.extrapolate(*this, gp_values, nodal_values);

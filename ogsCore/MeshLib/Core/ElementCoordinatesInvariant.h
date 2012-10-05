@@ -20,7 +20,7 @@ namespace MeshLib
 {
 
 /**
- * \brief EleMapInvariant keep original coordinates.
+ * \brief This class keep original coordinates of element nodes
  */
 class ElementCoordinatesInvariant
 : public IElementCoordinatesMapping

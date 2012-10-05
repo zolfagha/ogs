@@ -16,7 +16,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "NumLib/DataType.h"
+#include "MathLib/DataType.h"
 #include "NumLib/Function/IFunction.h"
 
 #include "SystemOfEquations.h"
@@ -25,13 +25,13 @@
 namespace NumLib
 {
 
-class MyFunction : public TemplateFunction<std::map<size_t, LocalVector >, LocalEquation >
+class MyFunction : public TemplateFunction<std::map<size_t, MathLib::LocalVector >, MathLib::LocalEquation >
 {
 public:
     MyFunction(const std::vector<Variable*> &variables, const std::vector<LinearEquation*> &equations) : _variables(variables), _equations(equations) {};
     virtual ~MyFunction() {};
 
-    virtual void eval(const std::map<size_t, LocalVector > &inactive_x, LocalEquation &eqs)
+    virtual void eval(const std::map<size_t, MathLib::LocalVector > &inactive_x, MathLib::LocalEquation &eqs)
     {
         size_t n_dof = 0;
         for (size_t i=0; i<_variables.size(); i++) n_dof += _variables[i]->n_dof;
@@ -40,7 +40,7 @@ public:
 
 //        Matrix<double> A(n_dof, n_dof);
 //        std::valarray<double> b(n_dof);
-        LocalMatrix* A = eqs.getA();
+        MathLib::LocalMatrix* A = eqs.getA();
         double* b = eqs.getRHS();
 
         size_t row_offset = 0;
@@ -63,11 +63,11 @@ public:
                     }
                     col_offset += n_local_col_dof;
                 } else {
-                    std::map<size_t, LocalVector >::const_iterator itr = inactive_x.find(var->id);
+                    std::map<size_t, MathLib::LocalVector >::const_iterator itr = inactive_x.find(var->id);
                     if (itr!=inactive_x.end()) {
-                        const LocalVector &x = itr->second;
+                        const MathLib::LocalVector &x = itr->second;
                         if (comp->stiffness!=0) {
-                            LocalVector vec(n_local_row_dof);
+                            MathLib::LocalVector vec(n_local_row_dof);
                             //comp->stiffness->axpy(1.0, &((std::valarray<double>)x)[0], .0, &vec[0]);
                             vec = (*comp->stiffness) * x;
                             for (size_t k=0; k<n_local_row_dof; k++)

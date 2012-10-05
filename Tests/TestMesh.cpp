@@ -19,7 +19,7 @@
 #include "MeshLib/Core/UnstructuredMesh.h"
 #include "MeshLib/Core/IElementCoordinatesMapping.h"
 #include "MeshLib/Core/ElementCoordinatesMappingLocal.h"
-#include "MeshLib/Topology/Topology.h"
+#include "MeshLib/Topology/TopologyNode2NodesConnectedByEdges.h"
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "MeshLib/Tools/Tools.h"
 
@@ -32,7 +32,7 @@ using namespace MeshLib;
 TEST(Mesh, topoN2N)
 {
     IMesh* msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
-    TopologyNode2NodesConnectedByEdges topo_node2nodes(msh);
+    TopologyNode2NodesConnectedByEdges topo_node2nodes(*msh);
 
     ASSERT_EQ(topo_node2nodes.getNumberOfNodes(), msh->getNumberOfNodes());
 //    size_t expected_conn_nodes0[] = {1,3};
@@ -323,7 +323,7 @@ TEST(Mesh, HigherOrderLine1)
     std::vector<IElement*> vec_edge;
     createEdgeElements(msh);
     ASSERT_EQ(1, msh->getNumberOfEdges());
-    generateHigherOrderUnstrucuredMesh(*msh, 2);
+    MeshGenerator::generateHigherOrderUnstrucuredMesh(*msh, 2);
 
     IElement* e = 0;
     ASSERT_EQ(2, msh->getNumberOfNodes(1));
@@ -355,7 +355,7 @@ TEST(Mesh, HigherOrderTriangle1)
     std::vector<IElement*> vec_edge;
     createEdgeElements(msh);
     ASSERT_EQ(3, msh->getNumberOfEdges());
-    generateHigherOrderUnstrucuredMesh(*msh, 2);
+    MeshGenerator::generateHigherOrderUnstrucuredMesh(*msh, 2);
 
     IElement* e = 0;
     ASSERT_EQ(3, msh->getNumberOfNodes(1));
@@ -401,7 +401,7 @@ TEST(Mesh, HigherOrderQuadUnstructure)
     std::vector<IElement*> vec_edge;
     createEdgeElements(msh);
     ASSERT_EQ(12, msh->getNumberOfEdges());
-    generateHigherOrderUnstrucuredMesh(*msh, 2);
+    MeshGenerator::generateHigherOrderUnstrucuredMesh(*msh, 2);
 
     IElement* e = 0;
     ASSERT_EQ(9, msh->getNumberOfNodes(1));

@@ -14,10 +14,10 @@
 
 #include <vector>
 
+#include "MathLib/DataType.h"
 #include "MeshLib/Core/IElement.h"
 #include "NumLib/Function/Function.h"
 
-#include "FemLib/Core/DataType.h"
 #include "FemLib/Core/Integration/Integration.h"
 #include "FemLib/Core/ShapeFunction/ShapeFunction.h"
 #include "FiniteElementType.h"
@@ -57,10 +57,10 @@ public:
     virtual void getRealCoordinates(double* x_real) = 0;
 
     /// get evaluated basis functions \f$ \mathbf{N}_e \f$. 
-    virtual LocalMatrix* getBasisFunction() = 0;
+    virtual MathLib::LocalMatrix* getBasisFunction() = 0;
 
     /// get evaluated gradient of basis functions \f$ {\nabla}_x \mathbf{N}_e \f$. 
-    virtual LocalMatrix* getGradBasisFunction() = 0;
+    virtual MathLib::LocalMatrix* getGradBasisFunction() = 0;
 
     /// get evaluated determinant of the Jacobian matrix for coordinate transformation
     virtual double getDetJ() const = 0;
@@ -69,18 +69,18 @@ public:
     virtual double interpolate(double *pt, double *nodal_values) = 0;
 
     /// compute an matrix M = Int{W^T F N} dV
-    virtual void integrateWxN(size_t igp, LocalMatrix &f, LocalMatrix &mat) = 0;
+    virtual void integrateWxN(size_t igp, MathLib::LocalMatrix &f, MathLib::LocalMatrix &mat) = 0;
 
     /// compute an matrix M = Int{W^T F dN} dV
-    virtual void integrateWxDN(size_t igp, LocalMatrix &f, LocalMatrix &mat) = 0;
+    virtual void integrateWxDN(size_t igp, MathLib::LocalMatrix &f, MathLib::LocalMatrix &mat) = 0;
 
     /// compute an matrix M = Int{dW^T F dN} dV
-    virtual void integrateDWxDN(size_t igp, LocalMatrix &f, LocalMatrix &mat) = 0;
+    virtual void integrateDWxDN(size_t igp, MathLib::LocalMatrix &f, MathLib::LocalMatrix &mat) = 0;
 
     /// get the integration method
     virtual IFemNumericalIntegration* getIntegrationMethod() const = 0;
 
-    virtual void extrapolate(const std::vector<LocalVector> &gp_values, std::vector<LocalVector> &nodal_values) = 0;
+    virtual void extrapolate(const std::vector<MathLib::LocalVector> &gp_values, std::vector<MathLib::LocalVector> &nodal_values) = 0;
 };
 
 

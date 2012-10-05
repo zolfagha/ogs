@@ -95,9 +95,9 @@ public:
     {
         std::vector<size_t> ele_node_ids;
         std::vector<size_t> local_dofmap_row, local_dofmap_column;
-        LocalEquation localEQS;
-        LocalVector local_u_n1;
-        LocalVector local_u_n;
+        MathLib::LocalEquation localEQS;
+        MathLib::LocalVector local_u_n1;
+        MathLib::LocalVector local_u_n;
 
         // get dof map
         e.getNodeIDList(e.getMaximumOrder(), ele_node_ids);

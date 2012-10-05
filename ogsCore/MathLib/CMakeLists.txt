@@ -85,7 +85,7 @@ IF (NOT USE_PARDISO)
     )
 ENDIF ()
 
-SOURCE_GROUP( ogsCore\\MathLib\\LinAlg\\LinearEquations FILES ${MathLib_LinAlg_LinearEquations_Files})
+SOURCE_GROUP( ogsCore\\MathLib\\LinAlg\\LinearEquation FILES ${MathLib_LinAlg_LinearEquations_Files})
 #Nonlinear/
 FILE(GLOB MathLib_Nonlinear_Files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
 	MathLib/Nonlinear/*.h 
