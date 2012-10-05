@@ -28,9 +28,9 @@ namespace MeshLib
 {
 
 /**
- * \brief Template class for element
+ * \brief Template class for various mesh element types
  * 
- * \tparam T_TOPO topological rule
+ * \tparam T_TOPO   topological rule of this element
  */
 template <typename T_TOPO>
 class TemplateElement : public IElement

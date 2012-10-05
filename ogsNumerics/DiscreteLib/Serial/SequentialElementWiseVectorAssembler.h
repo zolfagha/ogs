@@ -16,7 +16,7 @@
 
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/Utils/DofEquationIdTable.h"
-#include "DiscreteLib/Core/LocalDataType.h"
+#include "MathLib/DataType.h"
 #include "DiscreteLib/Core/IDiscreteVectorAssembler.h"
 #include "DiscreteLib/Core/IElemenetWiseVectorLocalAssembler.h"
 

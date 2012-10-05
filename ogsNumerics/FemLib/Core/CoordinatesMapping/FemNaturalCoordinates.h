@@ -91,7 +91,7 @@ private:
     CoordinateMappingProperty* _prop;
     IFemShapeFunction* _shape;
     MeshLib::IElement* _ele;
-    LocalMatrix x;
+    MathLib::LocalMatrix x;
 
 };
 

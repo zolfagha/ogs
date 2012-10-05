@@ -73,7 +73,7 @@ int FunctionHeadToElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &/*ti
         MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];
 
         FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
-        NumLib::LocalVector local_h(e->getNumberOfNodes());
+        MathLib::LocalVector local_h(e->getNumberOfNodes());
         for (size_t j=0; j<e->getNumberOfNodes(); j++)
             local_h[j] = head->getValue(e->getNodeID(j));
         // for each integration points
@@ -81,24 +81,24 @@ int FunctionHeadToElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &/*ti
         double r[3] = {};
         const size_t n_gp = integral->getNumberOfSamplingPoints();
         vel->setNumberOfIntegationPoints(i_e, n_gp);
-        NumLib::LocalVector xi(e->getNumberOfNodes());
-        NumLib::LocalVector yi(e->getNumberOfNodes());
-        NumLib::LocalVector zi(e->getNumberOfNodes());
+        MathLib::LocalVector xi(e->getNumberOfNodes());
+        MathLib::LocalVector yi(e->getNumberOfNodes());
+        MathLib::LocalVector zi(e->getNumberOfNodes());
         for (size_t i=0; i<e->getNumberOfNodes(); i++) {
             const GeoLib::Point* pt = msh->getNodeCoordinatesRef(e->getNodeID(i));
             xi[i] = (*pt)[0];
             yi[i] = (*pt)[1];
             zi[i] = (*pt)[2];
         }
-        NumLib::LocalVector q(3);
+        MathLib::LocalVector q(3);
         for (size_t ip=0; ip<n_gp; ip++) {
             q *= .0;
             integral->getSamplingPoint(ip, r);
             fe->computeBasisFunctions(r);
-            const NumLib::LocalMatrix* dN = fe->getGradBasisFunction();
-            NumLib::LocalMatrix* N = fe->getBasisFunction();
+            const MathLib::LocalMatrix* dN = fe->getGradBasisFunction();
+            MathLib::LocalMatrix* N = fe->getBasisFunction();
             std::vector<double> xx(3, .0);
-            NumLib::LocalVector tmp_v;
+            MathLib::LocalVector tmp_v;
             tmp_v = (*N) * xi;
             xx[0] = tmp_v[0];
             tmp_v = (*N) * yi;
@@ -107,12 +107,12 @@ int FunctionHeadToElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &/*ti
             xx[2] = tmp_v[0];
             NumLib::TXPosition pos(&xx[0]);
 
-            NumLib::LocalMatrix k;
+            MathLib::LocalMatrix k;
             pm->hydraulic_conductivity->eval(pos, k);
             if (k.rows()==1) {
-                static_cast<NumLib::LocalVector>(q.head(msh->getDimension())) = (*dN) * local_h * (-1.0 * k(0,0));
+                static_cast<MathLib::LocalVector>(q.head(msh->getDimension())) = (*dN) * local_h * (-1.0 * k(0,0));
             } else {
-                static_cast<NumLib::LocalVector>(q.head(msh->getDimension())) = (*dN) * k * local_h * (-1.0);
+                static_cast<MathLib::LocalVector>(q.head(msh->getDimension())) = (*dN) * k * local_h * (-1.0);
             }
             vel->setIntegrationPointValue(i_e, ip, q);
         }

@@ -18,6 +18,7 @@
 
 #include "MathLib/LinAlg/Dense/Matrix.h"
 #include "MathLib/LinAlg/LinearEquation/LisLinearEquation.h"
+#include "MathLib/Nonlinear/NRIterationStepInitializerDummy.h"
 #include "GeoLib/Rectangle.h"
 #include "GeoLib/GeoDomain.h"
 
@@ -33,6 +34,7 @@
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
 #include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
+#include "NumLib/Nonlinear/DiscreteNRSolverWithStepInitFactory.h"
 
 #include "SolutionLib/Fem/FemDirichletBC.h"
 #include "SolutionLib/Fem/FemNeumannBC.h"
@@ -53,8 +55,8 @@ template <class T>
 class GWTimeODEAssembler: public T
 {
 public:
-    typedef NumLib::LocalVector LocalVectorType;
-    typedef NumLib::LocalMatrix LocalMatrixType;
+    typedef MathLib::LocalVector LocalVectorType;
+    typedef MathLib::LocalMatrix LocalMatrixType;
 
     GWTimeODEAssembler(FemLib::LagrangianFeObjectContainer &feObjects, NumLib::ITXFunction &mat)
     : _matK(&mat), _feObjects(&feObjects)
@@ -91,8 +93,8 @@ class GWJacobianAssembler : public NumLib::IElementWiseTransientJacobianLocalAss
 private:
     NumLib::ITXFunction* _matK;
     FemLib::LagrangianFeObjectContainer* _feObjects;
-    typedef NumLib::LocalMatrix LocalMatrixType;
-    typedef NumLib::LocalVector LocalVectorType;
+    typedef MathLib::LocalMatrix LocalMatrixType;
+    typedef MathLib::LocalVector LocalVectorType;
 public:
     GWJacobianAssembler(FemLib::LagrangianFeObjectContainer &feObjects, NumLib::ITXFunction &mat)
     : _matK(&mat), _feObjects(&feObjects)
@@ -123,7 +125,7 @@ public:
             q->getSamplingPoint(j, gp_x);
             fe->computeBasisFunctions(gp_x);
             fe->getRealCoordinates(real_x);
-            NumLib::LocalMatrix k;
+            MathLib::LocalMatrix k;
             _matK->eval(real_x, k);
             fe->integrateDWxDN(j, k, localK);
         }
@@ -136,6 +138,36 @@ public:
 
         local_J = localK;
     }
+
+    void setTest(double v) {test = v;};
+private:
+    double test;
+};
+
+class NRIterationStepInitializerTest
+{
+public:
+    /// Default setting
+    NRIterationStepInitializerTest(
+            GWTimeODEAssembler<ElementWiseTimeEulerResidualLocalAssembler>* assemblerR, 
+            GWJacobianAssembler *assemblerJ) 
+            : _assemblerR(assemblerR), _assemblerJ(assemblerJ) {};
+
+    /**
+     * do pre-post processing
+     *
+     * \param dx        solution increment
+     * \param x_new     new solution
+     */
+    template<class T_X, class F_RESIDUALS, class F_DX>
+    void doit(const T_X &/*dx*/, const T_X &/*x_new*/, F_RESIDUALS &/*f_residuals*/, F_DX &/*f_dx*/)
+    {
+        _assemblerJ->setTest(1.0);
+    }
+
+private:
+    GWTimeODEAssembler<ElementWiseTimeEulerResidualLocalAssembler>* _assemblerR;
+    GWJacobianAssembler* _assemblerJ;
 };
 
 template <
@@ -169,7 +201,11 @@ class GWFemTestSystem : public NumLib::ITransientSystem
     typedef SingleStepFEM
             <
                 GWFemProblem,
-                T_LINEAR_SOLVER
+                T_LINEAR_SOLVER,
+                NumLib::DiscreteNRSolverWithStepInitFactory
+                <
+                    NRIterationStepInitializerTest
+                >
             > SolutionForHead;
 
 public:
@@ -229,16 +265,19 @@ public:
 //        _head->setIC(h0);
         //BC
         _rec = new GeoLib::Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
-        GeoLib::Polyline* poly_left = _rec->getLeft();
-        GeoLib::Polyline* poly_right = _rec->getRight();
+        const GeoLib::Polyline &poly_left = _rec->getLeft();
+        const GeoLib::Polyline &poly_right = _rec->getRight();
         //_head->setIC();
-        _head->addDirichletBC(new SolutionLib::FemDirichletBC(msh, poly_right,  new NumLib::TXFunctionConstant(.0)));
-        _head->addNeumannBC(new SolutionLib::FemNeumannBC(msh, _feObjects, poly_left, new NumLib::TXFunctionConstant(-1e-5)));
+        _head->addDirichletBC(new SolutionLib::FemDirichletBC(msh, &poly_right,  new NumLib::TXFunctionConstant(.0)));
+        _head->addNeumannBC(new SolutionLib::FemNeumannBC(msh, _feObjects, &poly_left, new NumLib::TXFunctionConstant(-1e-5)));
         //transient
         TimeStepFunctionConstant tim(.0, 100.0, 10.0);
         _problem->setTimeSteppingFunction(tim);
         //solution algorithm
-        _solHead = new SolutionForHead(&dis, _problem);
+        //MathLib::NRIterationStepInitializerDummy* nl_step_init(new MathLib::NRIterationStepInitializerDummy());
+        NRIterationStepInitializerTest* nl_step_init(new NRIterationStepInitializerTest(local_r, local_J));
+        DiscreteNRSolverWithStepInitFactory<NRIterationStepInitializerTest>* nl_factory(new DiscreteNRSolverWithStepInitFactory<NRIterationStepInitializerTest>(nl_step_init));
+        _solHead = new SolutionForHead(&dis, _problem, nl_factory);
         //_solHead->getTimeODEAssembler()->setTheta(1.0);
         typename SolutionForHead::LinearSolverType* linear_solver = _solHead->getLinearEquationSolver();
         linear_solver->setOption(option);

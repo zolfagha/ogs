@@ -22,6 +22,11 @@ namespace MeshLib
 
 /**
  * \brief Mesh geometric property
+ *
+ * This class contains the following geometric information of a particular mesh
+ * - coordinate system
+ * - boundign box
+ * - minimum edge length
  */
 class MeshGeometricProperty
 {

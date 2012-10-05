@@ -107,9 +107,9 @@ GWFdmProblem* defineGWProblem4FDM(DiscreteSystem &dis, double h, GeoLib::Line &l
     FdmFunctionScalar* _head = _problem->getField(headId);
     _problem->setIC(headId, *_head);
     TXFunctionConstant f1(.0);
-    _problem->addDirichletBC(headId, *line.getPoint2(), false, f1);
+    _problem->addDirichletBC(headId, line.getPoint2(), false, f1);
     TXFunctionConstant f2(-1e-5);
-    _problem->addNeumannBC(headId, *line.getPoint1(), false, f2);
+    _problem->addNeumannBC(headId, line.getPoint1(), false, f2);
 
     return _problem;
 }
@@ -139,7 +139,7 @@ MyFunctionConcentration::MassFemProblem* defineMassTransportProblem(DiscreteSyst
 //    var_ic->setup(*c0);
     //BC
     NumLib::TXFunctionConstant* f1 = new  NumLib::TXFunctionConstant(1.0);
-    var->addDirichletBC(new FemDirichletBC(dis.getMesh(), line.getPoint1(), f1));
+    var->addDirichletBC(new FemDirichletBC(dis.getMesh(), &line.getPoint1(), f1));
 
     return _problem;
 }

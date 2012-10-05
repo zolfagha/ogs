@@ -18,7 +18,7 @@
 #endif
 
 #include "MeshLib/Core/IMesh.h"
-#include "DiscreteLib/Core/LocalDataType.h"
+#include "MathLib/DataType.h"
 #include "DiscreteLib/Core/IDiscreteVectorAssembler.h"
 
 namespace MeshLib 

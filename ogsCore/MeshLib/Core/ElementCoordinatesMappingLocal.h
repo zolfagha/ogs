@@ -28,15 +28,20 @@ namespace MeshLib
 {
 
 /**
- * \brief Mapping local coordinates of elements.
+ * \brief This classs mapps coordinates of element nodes to their intrinsic coordinates which is lower dimension
  *
- * 
+ * For example, a triangle element in 2.5D is mapped into 2D.
  */
 class ElementCoordinatesMappingLocal : public IElementCoordinatesMapping 
 {
 public:
-    ///
-    ElementCoordinatesMappingLocal(const IMesh* msh, IElement &e, const CoordinateSystem &coordinate_system);
+    /**
+     * 
+     * \param msh                   Pointer to a mesh object
+     * \param e                     Mesh element
+     * \param org_coord_system      Original coordinate system
+     */
+    ElementCoordinatesMappingLocal(const IMesh* msh, IElement &e, const CoordinateSystem &org_coord_system);
 
     ///
     virtual ~ElementCoordinatesMappingLocal()
@@ -44,16 +49,23 @@ public:
         BaseLib::releaseObjectsInStdVector(_point_vec);
     }
 
-    ///
+    /// return mapped coordinates of the node
     virtual GeoLib::Point* getNodePoint(size_t node_id) 
     {
         return _point_vec[node_id];
     }
 
+    /// return a rotation matrix converting to orinal coordinates
     const MathLib::LocalMatrix& getRotationMatrixToOriginal() const {return _matR2original;};
+
+    /// return a rotation matrix converting to local coordinates
     const MathLib::LocalMatrix& getRotationMatrixToLocal() const {return _matR2local;};
+
+    /// return a translation vector
     const GeoLib::Point& getTranslationVector() const {return _pt_translate;};
+
 private:
+    ///
     void translate(std::vector<GeoLib::Point*> &point_vec);
     ///
     void flip(IElement &e, const CoordinateSystem &coordinate_system, const std::vector<GeoLib::Point*> &vec_pt);

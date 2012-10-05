@@ -28,7 +28,7 @@ public:
     ///
     virtual ~IElementCoordinatesMapping() {};
     
-    /// get mapped coordinates of nodes
+    /// get mapped coordinates of the node
     virtual GeoLib::Point* getNodePoint(size_t node_id) = 0;
 };
 

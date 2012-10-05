@@ -23,9 +23,9 @@ void FemLinearElasticJacobianLocalAssembler::assembly
     (   const NumLib::TimeStep &/*time*/,
         const MeshLib::IElement &e,
         const DiscreteLib::DofEquationIdTable &localDofManager, 
-        const NumLib::LocalVector &/*u1*/,
-        const NumLib::LocalVector &/*u0*/,
-        NumLib::LocalMatrix &localJ )
+        const MathLib::LocalVector &/*u1*/,
+        const MathLib::LocalVector &/*u0*/,
+        MathLib::LocalMatrix &localJ )
 {
     FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
     size_t mat_id = e.getGroupID();
@@ -40,8 +40,8 @@ void FemLinearElasticJacobianLocalAssembler::assembly
 
     // set D
     Eigen::MatrixXd matD = Eigen::MatrixXd::Zero(n_strain_components, n_strain_components);
-    NumLib::LocalMatrix nv(1,1);
-    NumLib::LocalMatrix E(1,1);
+    MathLib::LocalMatrix nv(1,1);
+    MathLib::LocalMatrix E(1,1);
     solidphase->poisson_ratio->eval(e_pos, nv);
     solidphase->Youngs_modulus->eval(e_pos, E);
     double Lambda, G, K;
@@ -49,8 +49,8 @@ void FemLinearElasticJacobianLocalAssembler::assembly
     MaterialLib::setElasticConsitutiveTensor(dim, Lambda, G, matD);
 
     //
-    NumLib::LocalMatrix matB(n_strain_components, nnodes*dim);
-    NumLib::LocalMatrix matN(dim, nnodes*dim);
+    MathLib::LocalMatrix matB(n_strain_components, nnodes*dim);
+    MathLib::LocalMatrix matN(dim, nnodes*dim);
     FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
     double gp_x[3], real_x[3];
     for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
@@ -60,8 +60,8 @@ void FemLinearElasticJacobianLocalAssembler::assembly
         double fac = fe->getDetJ() * q->getWeight(j);
 
         // set N,B
-        NumLib::LocalMatrix &N = *fe->getBasisFunction();
-        NumLib::LocalMatrix &dN = *fe->getGradBasisFunction();
+        MathLib::LocalMatrix &N = *fe->getBasisFunction();
+        MathLib::LocalMatrix &dN = *fe->getGradBasisFunction();
         setNu_Matrix_byPoint(dim, nnodes, N, matN);
         setB_Matrix_byPoint(dim, nnodes, dN, matB);
 

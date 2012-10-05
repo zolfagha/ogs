@@ -366,7 +366,7 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 			mChemComp->set_name(ogs6fem.list_compound[i]->name); 
 			// set mobility
 			if ( ogs6fem.list_compound[i]->is_mobile )
-				mChemComp->set_mobility( ogsChem::MOBILE  );
+				mChemComp->set_mobility( ogsChem::MOBILE  ); 
 			else 
 				mChemComp->set_mobility( ogsChem::MINERAL );
 

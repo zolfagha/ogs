@@ -17,8 +17,11 @@
 
 namespace MathLib
 {
+/// Local linear equation type
 typedef MathLib::EigenDenseLinearEquation LocalEquation;
+/// Local dense matrix type (row-majored)
 typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> LocalMatrix;
+/// Local dense vector type
 typedef Eigen::VectorXd LocalVector;
 
 }

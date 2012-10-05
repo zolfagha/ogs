@@ -38,7 +38,7 @@ class FunctionXFEM_EXAMPLE_CRACK1
 public:
 
     typedef DiscreteLib::DiscreteSystem MyDiscreteSystem;
-    typedef typename FemLib::FemNodalFunctionVector<MyDiscreteSystem>::type MyNodalFunctionVector;
+    typedef FemLib::FemNodalFunctionVector<MyDiscreteSystem>::type MyNodalFunctionVector;
 
     ///
     FunctionXFEM_EXAMPLE_CRACK1()

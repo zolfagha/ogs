@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "LocalDataType.h"
+#include "MathLib/DataType.h"
 
 namespace MeshLib
 {
@@ -32,7 +32,7 @@ public:
     virtual ~IElemenetWiseVectorLocalAssembler() {};
 
     /// assemble a local linear equation for the given element
-    virtual void assembly(const MeshLib::IElement &e, LocalVector &local_v) = 0;
+    virtual void assembly(const MeshLib::IElement &e, MathLib::LocalVector &local_v) = 0;
 };
 
 } //end

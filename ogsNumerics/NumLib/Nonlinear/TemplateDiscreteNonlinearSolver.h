@@ -19,11 +19,18 @@
 #include "DiscreteLib/Core/IDiscreteVector.h"
 #include "NonlinearSolver.h"
 #include "NonlinearSolverOption.h"
+#include "DiscreteNonlinearSolverFactory.h"
 
 namespace NumLib
 {
 
-template <class T_DIS_SYS, class F_LINEAR, class F_R, class F_DX>
+template <
+    class T_DIS_SYS, 
+    class F_LINEAR, 
+    class F_R, 
+    class F_DX, 
+    class T_NL_FACTORY=DiscreteNonlinearSolverFactory
+>
 class TemplateDiscreteNonlinearSolver
 {
 public:
@@ -31,13 +38,19 @@ public:
     typedef DiscreteLib::IDiscreteVector<double> VectorType;
 
     TemplateDiscreteNonlinearSolver(MyDiscreteSystem* dis_sys, F_LINEAR* f_l, F_R* f_r, F_DX* f_dx)
-    : _dis_sys(dis_sys), _f_l(f_l), _f_r(f_r), _f_dx(f_dx), _solver(0)
+    : _dis_sys(dis_sys), _f_l(f_l), _f_r(f_r), _f_dx(f_dx), _solver(NULL), _nl_factory(new T_NL_FACTORY)
     {
     }
 
+    TemplateDiscreteNonlinearSolver(MyDiscreteSystem* dis_sys, F_LINEAR* f_l, F_R* f_r, F_DX* f_dx, T_NL_FACTORY* nl_factory)
+    : _dis_sys(dis_sys), _f_l(f_l), _f_r(f_r), _f_dx(f_dx), _solver(NULL), _nl_factory(nl_factory)
+    {
+    }
+
+
     virtual ~TemplateDiscreteNonlinearSolver()
     {
-        BaseLib::releaseObject(_solver);
+        BaseLib::releaseObject(_solver, _nl_factory);
     }
 
     void setOption(const BaseLib::Options &option)
@@ -60,34 +73,12 @@ public:
     void solve(const VectorType &x_0, VectorType &x_new)
     {
         if (_solver==0)
-            _solver = create(_option.solver_type);
+            _solver = _nl_factory->create(_option, _dis_sys, _f_l, _f_r, _f_dx);
         _solver->solve(x_0, x_new);
     }
 
 private:
     DISALLOW_COPY_AND_ASSIGN(TemplateDiscreteNonlinearSolver);
-
-    INonlinearSolver* create(NonlinerSolverOption::SolverType type)
-    {
-        INonlinearSolver* solver = 0;
-        switch (type)
-        {
-        case NonlinerSolverOption::LINEAR:
-            solver = new Linear<F_LINEAR>(_f_l);
-            break;
-        case NonlinerSolverOption::PICARD:
-            solver = new Picard<MyDiscreteSystem, F_LINEAR>(_dis_sys, _f_l);
-            break;
-        case NonlinerSolverOption::NEWTON:
-            solver = new NewtonRaphson<MyDiscreteSystem, F_R, F_DX>(_dis_sys, _f_r, _f_dx);
-            break;
-        default:
-            break;
-        }
-        solver->setOption(_option);
-        return solver;
-    }
-
 
 private:
     NonlinerSolverOption _option;
@@ -96,6 +87,7 @@ private:
     F_R* _f_r;
     F_DX* _f_dx;
     INonlinearSolver* _solver;
+    T_NL_FACTORY* _nl_factory;
 };
 
 } //end

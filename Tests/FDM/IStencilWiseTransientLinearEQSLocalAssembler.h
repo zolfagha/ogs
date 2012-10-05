@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "NumLib/DataType.h"
+#include "MathLib/DataType.h"
 
 namespace NumLib
 {
@@ -27,7 +27,7 @@ class IStencil;
 class IStencilWiseTransientLinearEQSLocalAssembler
 {
 public:
-    typedef NumLib::LocalEquation LocalEquationType;
+    typedef MathLib::LocalEquation LocalEquationType;
     typedef LocalEquationType::MatrixType LocalMatrixType;
     typedef LocalEquationType::VectorType LocalVectorType;
 

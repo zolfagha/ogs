@@ -122,11 +122,11 @@ TEST(FEM, ExtrapolateAverage1)
     MyNodalFunctionVector nodal_vel;
     nodal_vel.initialize(*gw.dis, PolynomialOrder::Linear);
     nodal_vel.setFeObjectContainer(gw._feObjects);
-    FemExtrapolationAverage<DiscreteLib::DiscreteSystem, NumLib::LocalVector> extrapo;
+    FemExtrapolationAverage<DiscreteLib::DiscreteSystem, MathLib::LocalVector> extrapo;
     extrapo.extrapolate(*gw.vel, nodal_vel);
 
-    DiscreteLib::IDiscreteVector<NumLib::LocalVector> *v = nodal_vel.getDiscreteData();
-    NumLib::LocalVector expected(2);
+    DiscreteLib::IDiscreteVector<MathLib::LocalVector> *v = nodal_vel.getDiscreteData();
+    MathLib::LocalVector expected(2);
     expected[0] = 1.e-5;
     expected[1] = .0;
     ASSERT_DOUBLE_ARRAY_EQ(expected, (*v)[0], expected.size());
@@ -156,7 +156,7 @@ TEST(FEM, ExtrapolateAverage2)
     NumLib::TXFunctionConstant f_bc2(2.e+6);
     std::vector<size_t> bc2_nodes;
     std::vector<double> bc2_vals;
-    FemLib::DirichletBC2FEM bc2(*msh, *gw.rec->getLeft(), f_bc2, bc2_nodes, bc2_vals);
+    FemLib::DirichletBC2FEM bc2(*msh, gw.rec->getLeft(), f_bc2, bc2_nodes, bc2_vals);
     gw.vec_bc1_nodes.insert(gw.vec_bc1_nodes.end(), bc2_nodes.begin(), bc2_nodes.end());
     gw.vec_bc1_vals.insert(gw.vec_bc1_vals.end(), bc2_vals.begin(), bc2_vals.end());
     gw.vec_bc2_nodes.clear();
@@ -168,7 +168,7 @@ TEST(FEM, ExtrapolateAverage2)
     MyNodalFunctionVector nodal_vel;
     nodal_vel.initialize(*gw.dis, PolynomialOrder::Linear);
     nodal_vel.setFeObjectContainer(gw._feObjects);
-    FemExtrapolationAverage<DiscreteLib::DiscreteSystem, NumLib::LocalVector> extrapo;
+    FemExtrapolationAverage<DiscreteLib::DiscreteSystem, MathLib::LocalVector> extrapo;
     extrapo.extrapolate(*gw.vel, nodal_vel);
 
     std::vector<double> exH(9);
@@ -181,8 +181,8 @@ TEST(FEM, ExtrapolateAverage2)
     DiscreteLib::IDiscreteVector<double> *h = gw.head->getDiscreteData();
     ASSERT_DOUBLE_ARRAY_EQ(&exH[0], &(*h)[0], gw.head->getNumberOfNodes(), 10);
 
-    DiscreteLib::IDiscreteVector<NumLib::LocalVector> *v = nodal_vel.getDiscreteData();
-    NumLib::LocalVector expected(2);
+    DiscreteLib::IDiscreteVector<MathLib::LocalVector> *v = nodal_vel.getDiscreteData();
+    MathLib::LocalVector expected(2);
     expected[0] = 4./3.*1.e-5;
     expected[1] = .0;
     ASSERT_DOUBLE_ARRAY_EQ(expected, (*v)[0], expected.size());
@@ -220,8 +220,8 @@ TEST(FEM, LIE_LINE_IN_2D)
         fe_line.configure(*e_line1);
         double natural_x[2] = {.0, .0};
         fe_line.computeBasisFunctions(natural_x);
-        LocalMatrix &N = *fe_line.getBasisFunction();
-        LocalMatrix &dN = *fe_line.getGradBasisFunction();
+        MathLib::LocalMatrix &N = *fe_line.getBasisFunction();
+        MathLib::LocalMatrix &dN = *fe_line.getGradBasisFunction();
         double det_j = fe_line.getDetJ();
 
 //        std::cout << "N=\n" << N << std::endl;
@@ -255,8 +255,8 @@ TEST(FEM, LIE_LINE_IN_2D)
         fe_line.configure(*e_line2);
         double natural_x[2] = {.0, .0};
         fe_line.computeBasisFunctions(natural_x);
-        LocalMatrix &N = *fe_line.getBasisFunction();
-        LocalMatrix &dN = *fe_line.getGradBasisFunction();
+        MathLib::LocalMatrix &N = *fe_line.getBasisFunction();
+        MathLib::LocalMatrix &dN = *fe_line.getGradBasisFunction();
         double det_j = fe_line.getDetJ();
 
 //        std::cout << "N=\n" << N << std::endl;
@@ -284,8 +284,8 @@ TEST(FEM, LIE_LINE_IN_2D)
     {
         double natural_x[2] = {.0, .0};
         fe_line.computeBasisFunctions(natural_x);
-        LocalMatrix &N = *fe_line.getBasisFunction();
-        LocalMatrix &dN = *fe_line.getGradBasisFunction();
+        MathLib::LocalMatrix &N = *fe_line.getBasisFunction();
+        MathLib::LocalMatrix &dN = *fe_line.getGradBasisFunction();
         double det_j = fe_line.getDetJ();
 
 //        std::cout << "N=\n" << N << std::endl;

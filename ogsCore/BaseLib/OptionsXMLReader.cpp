@@ -12,8 +12,13 @@
 
 #include "OptionsXMLReader.h"
 
+#include <map>
+#include <vector>
+
 #include "logog.hpp"
 #include "tinyxml2.h"
+
+#include "StringTools.h"
 
 namespace BaseLib
 {

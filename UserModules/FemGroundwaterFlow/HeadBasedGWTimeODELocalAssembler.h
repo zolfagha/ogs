@@ -24,8 +24,8 @@ template <class T>
 class HeadBasedGWTimeODELocalAssembler: public T
 {
 public:
-    typedef NumLib::LocalVector LocalVector;
-    typedef NumLib::LocalMatrix LocalMatrix;
+    typedef MathLib::LocalVector LocalVector;
+    typedef MathLib::LocalMatrix LocalMatrix;
 
     explicit HeadBasedGWTimeODELocalAssembler(
                 FemLib::LagrangianFeObjectContainer &feObjects)

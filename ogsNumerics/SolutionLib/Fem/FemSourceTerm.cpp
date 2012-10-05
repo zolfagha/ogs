@@ -18,6 +18,31 @@
 namespace SolutionLib
 {
 
+FemSourceTerm::FemSourceTerm(const MeshLib::IMesh *msh, const GeoLib::GeoObject *geo, NumLib::ITXFunction *func)
+: _msh(msh), _geo(geo), _bc_func(func->clone())
+{
+    _is_transient = false;
+    _do_setup = true;
+}
+
+FemSourceTerm::FemSourceTerm(const std::vector<size_t> &vec_node_id, const std::vector<double> &vec_node_values)
+: _msh(NULL), _geo(NULL), _bc_func(NULL), _vec_nodes(vec_node_id), _vec_values(vec_node_values)
+{
+    _is_transient = false;
+    _do_setup = false;
+}
+
+FemSourceTerm* FemSourceTerm::clone() const
+{
+    FemSourceTerm* f = NULL;
+    if (_msh!=NULL)
+        f = new FemSourceTerm(_msh, _geo, _bc_func);
+    else
+        f = new FemSourceTerm(_vec_nodes, _vec_values);
+
+    return f;
+}
+
 /// setup
 void FemSourceTerm::setup(size_t order)
 {
