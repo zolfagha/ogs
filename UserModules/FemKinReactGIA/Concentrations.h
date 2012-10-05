@@ -28,7 +28,7 @@
 #include "MathLib/DataType.h"
 #include "NonLinearReactiveTransportTimeODELocalAssembler.h"
 #include "NonLinearReactiveTransportJacabianLocalAssembler.h"
-#include "DiscreteLib/Core/LocalDataType.h"
+
 
 template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER>
 class FunctionConcentrations

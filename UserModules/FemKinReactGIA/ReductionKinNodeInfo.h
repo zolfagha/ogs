@@ -52,11 +52,11 @@ private:
 	const size_t _n_xi_mob; 
 	const size_t _n_xi_immob; 
 
-	DiscreteLib::LocalVector _Comp_Conc; 
-	DiscreteLib::LocalVector _eta_mob; 
-	DiscreteLib::LocalVector _eta_immob; 
-	DiscreteLib::LocalVector _xi_mob; 
-	DiscreteLib::LocalVector _xi_immob; 
+	MathLib::LocalVector _Comp_Conc; 
+	MathLib::LocalVector _eta_mob; 
+	MathLib::LocalVector _eta_immob; 
+	MathLib::LocalVector _xi_mob; 
+	MathLib::LocalVector _xi_immob; 
 
 	ogsChem::chemReductionKin* _ReductionKin;
 }; 

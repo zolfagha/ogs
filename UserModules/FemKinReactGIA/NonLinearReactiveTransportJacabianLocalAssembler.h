@@ -57,7 +57,7 @@ public:
 	    _xi_immob_rates = xi_immob_rates; 
 	}
 
-	void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &, const NumLib::LocalVector & u1, const NumLib::LocalVector & u0, NumLib::LocalMatrix & localJ)
+	void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &, const MathLib::LocalVector & u1, const MathLib::LocalVector & u0, MathLib::LocalMatrix & localJ)
     {
         FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
         size_t mat_id = e.getGroupID();
@@ -65,14 +65,14 @@ public:
         double cmp_mol_diffusion = .0;
         // _cmp->molecular_diffusion->eval(0, cmp_mol_diffusion);
 
-        NumLib::LocalMatrix matM(localJ);
-        NumLib::LocalMatrix matDiff(localJ);
-        NumLib::LocalMatrix matAdv(localJ);
+        MathLib::LocalMatrix matM(localJ);
+        MathLib::LocalMatrix matDiff(localJ);
+        MathLib::LocalMatrix matAdv(localJ);
 
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
-        NumLib::LocalMatrix poro(1,1);
-        NumLib::LocalMatrix d_poro(1,1);
+        MathLib::LocalMatrix poro(1,1);
+        MathLib::LocalMatrix d_poro(1,1);
         NumLib::ITXFunction::DataType v;
 
         for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {

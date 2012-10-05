@@ -35,8 +35,8 @@ template <class T, class T_NODAL_FUNCTION_SCALAR>
 class NonLinearReactiveTransportTimeODELocalAssembler: public T
 {
 public:
-    typedef NumLib::LocalVector LocalVectorType;
-    typedef NumLib::LocalMatrix LocalMatrixType;
+    typedef MathLib::LocalVector LocalVectorType;
+    typedef MathLib::LocalMatrix LocalMatrixType;
 
     NonLinearReactiveTransportTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects, ogsChem::chemReductionKin* ReductionScheme)
         : _feObjects(*feObjects), _vel(NULL), _reductionKin(ReductionScheme), _xi_mob_rates(NULL), _xi_immob_rates(NULL)
@@ -80,8 +80,8 @@ protected:
 
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
-        NumLib::LocalMatrix poro(1,1);
-        NumLib::LocalMatrix d_poro(1,1);
+        MathLib::LocalMatrix poro(1,1);
+        MathLib::LocalMatrix d_poro(1,1);
         NumLib::ITXFunction::DataType v;
 
 		// getting node xi_mob rate values

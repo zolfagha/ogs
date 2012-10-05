@@ -22,11 +22,11 @@ ReductionKinNodeInfo::ReductionKinNodeInfo(size_t node_id,
     : _node_id(node_id), _n_comp(n_comp), _n_eta_mob(n_eta_mob), 
 	  _n_eta_immob(n_eta_immob), _n_xi_mob(n_xi_mob), _n_xi_immob(n_xi_immob), _ReductionKin(ReductionKin)
 {
-	_Comp_Conc = DiscreteLib::LocalVector::Zero( _n_comp ); 
-	_eta_mob   = DiscreteLib::LocalVector::Zero( _n_eta_mob ); ; 
-	_eta_immob = DiscreteLib::LocalVector::Zero( _n_eta_immob ); ; 
-	_xi_mob    = DiscreteLib::LocalVector::Zero( _n_xi_mob ); 
-	_xi_immob  = DiscreteLib::LocalVector::Zero( _n_xi_immob ); 
+	_Comp_Conc = MathLib::LocalVector::Zero( _n_comp ); 
+	_eta_mob   = MathLib::LocalVector::Zero( _n_eta_mob ); ; 
+	_eta_immob = MathLib::LocalVector::Zero( _n_eta_immob ); ; 
+	_xi_mob    = MathLib::LocalVector::Zero( _n_xi_mob ); 
+	_xi_immob  = MathLib::LocalVector::Zero( _n_xi_immob ); 
 }
 
 void ReductionKinNodeInfo::set_comp_conc( size_t comp_idx, double val )
