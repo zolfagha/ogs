@@ -40,6 +40,11 @@ public:
 	double calcReactionRateMonod(ogsChem::LocalVector & vec_Comp_Conc); 
 
 	/**
+      * calculate the reaction rate with monod kinetics
+      */
+	double calcReactionRateDoubleMonodDecay(ogsChem::LocalVector & vec_Comp_Conc); 
+
+	/**
       * return the rate of current reaction. 
       */
 	double getRate(void) { return _rate; }

@@ -63,15 +63,17 @@ public:
 protected:
     virtual void assembleODE(const NumLib::TimeStep & time, const MeshLib::IElement &e, const LocalVectorType & u1, const LocalVectorType & u0, LocalMatrixType & localM, LocalMatrixType & localK, LocalVectorType & localF)
     {
-		size_t i, j, k, node_idx, n_xi_mob, n_nodes, n_sp;
+		size_t i, j, k, node_idx, n_xi_mob, n_nodes, n_sp, n_rows_localK, n_cols_localK;
         FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
         const size_t n_dim = e.getDimension();
         size_t mat_id = e.getGroupID();
         MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];
 
-        LocalMatrixType localDispersion(localK);
-        LocalMatrixType localAdvection(localK);
-		LocalMatrixType rate_xi_mob_gp;  // HS
+		n_rows_localK = localK.rows(); 
+		n_cols_localK = localK.cols(); 
+		LocalMatrixType localDispersion = LocalMatrixType::Zero( n_rows_localK, n_cols_localK ); 
+        LocalMatrixType localAdvection  = LocalMatrixType::Zero( n_rows_localK, n_cols_localK ); 
+		LocalMatrixType rate_xi_mob_gp  = LocalMatrixType::Zero( 1            , 1             );  // HS
 
 		double cmp_mol_diffusion = .0;
         // _cmp->molecular_diffusion->eval(0, cmp_mol_diffusion);  // HS
@@ -94,10 +96,10 @@ protected:
 			    node_xi_mob_values( i, k ) = _xi_mob_rates->at(k)->getValue( node_idx ); 
 		} // end of for i
 
-        LocalMatrixType localDispersion_tmp(n_nodes, n_nodes); 
-        LocalMatrixType localAdvection_tmp(n_nodes, n_nodes); 
-        LocalMatrixType localM_tmp(n_nodes, n_nodes); 
-        LocalMatrixType localK_tmp(n_nodes, n_nodes); 
+        LocalMatrixType localDispersion_tmp = LocalMatrixType::Zero(n_nodes, n_nodes); 
+        LocalMatrixType localAdvection_tmp  = LocalMatrixType::Zero(n_nodes, n_nodes); 
+        LocalMatrixType localM_tmp          = LocalMatrixType::Zero(n_nodes, n_nodes); 
+        LocalMatrixType localK_tmp          = LocalMatrixType::Zero(n_nodes, n_nodes); 
 
     	for (j=0; j<n_sp; j++) 
         {

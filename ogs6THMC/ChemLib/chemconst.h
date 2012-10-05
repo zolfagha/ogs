@@ -61,8 +61,9 @@ namespace ogsChem
 
 	// type of kinetic reactions
 	enum KinReactType {
-		Monod,       /* - monod reaction with decay term */ 
-		NoType       /* - uninitialized type */ 
+		Monod,             /* - monod reaction */ 
+		DoubleMonodDecay,  /* - double monod reaction with decay term */ 
+		NoType             /* - uninitialized type */ 
 	}; 
 
     // different thermodynamic databases
