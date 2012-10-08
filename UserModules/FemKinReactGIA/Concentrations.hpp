@@ -21,6 +21,7 @@
 #include "OutputIO/OutputTimingBuilder.h"
 #include "SolutionLib/Fem/FemSourceTerm.h"
 #include "Ogs6FemData.h"
+#include "NestedOdeNRIterationStepInitializer.h"
 
 template <class T1, class T2>
 bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
@@ -85,6 +86,13 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 		_xi_mob.push_back(xi_mob_tmp); 
         _xi_mob_rates.push_back(xi_mob_rates_tmp); 
 	}
+	// initialize drates_dxi
+	for ( i=0; i < n_xi_mob ; i++ )
+	{
+		MyNodalFunctionScalar* drate_dxi_tmp = new MyNodalFunctionScalar();  // drate_dxi instances
+		drate_dxi_tmp->initialize(       *dis, FemLib::PolynomialOrder::Linear, 0.0  );
+		_xi_mob_drates_dxi.push_back(drate_dxi_tmp); 
+	}
 	// initialize xi_mob
 	for ( i=0; i < n_xi_immob ; i++ )
 	{
@@ -103,7 +111,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 
 	MyNonLinearAssemblerType* non_linear_assembler = new MyNonLinearAssemblerType(_feObjects, this->_ReductionKin );
 	MyNonLinearResidualAssemblerType* non_linear_r_assembler = new MyNonLinearResidualAssemblerType(_feObjects, this->_ReductionKin );
-	MyNonLinearJacobianAssemblerType* non_linear_j_eqs = new MyNonLinearJacobianAssemblerType(_feObjects, this->_ReductionKin );
+	MyNonLinearJacobianAssemblerType* non_linear_j_assembler = new MyNonLinearJacobianAssemblerType(_feObjects, this->_ReductionKin, this);
 
 	// for the linear transport problem, variables are eta_mobile
 	for ( i=0; i < n_eta_mob ; i++ )
@@ -126,7 +134,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	// define nonlinear problem
 	_non_linear_problem = new MyNonLinearReactiveTransportProblemType(dis);  
 	_non_linear_eqs     = _non_linear_problem->createEquation(); 
-	_non_linear_eqs->initialize( non_linear_assembler, non_linear_r_assembler, non_linear_j_eqs ); 
+	_non_linear_eqs->initialize( non_linear_assembler, non_linear_r_assembler, non_linear_j_assembler ); 
 	_non_linear_problem->setTimeSteppingFunction(*tim); 
 	// for nonlinear coupled transport problem, variables are xi_mobile species
 	for ( i=0; i < n_xi_mob ; i++ )
@@ -259,7 +267,12 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	}
 	
 	// set up non-linear solution
-	this->_non_linear_solution = new MyNonLinearSolutionType( dis, this->_non_linear_problem ); 
+	// NRIterationStepInitializer
+	MyNRIterationStepInitializer* myNRIterator = new MyNRIterationStepInitializer(non_linear_r_assembler, non_linear_j_assembler); 
+	MyDiscreteNonlinearSolverFactory* myNSolverFactory = new MyDiscreteNonlinearSolverFactory( myNRIterator ); 
+	this->_non_linear_solution = new MyNonLinearSolutionType( dis, this->_non_linear_problem, myNSolverFactory ); 
+    this->_non_linear_solution->getDofEquationIdTable()->setNumberingType(DiscreteLib::DofNumberingType::BY_POINT);  // global order
+    this->_non_linear_solution->getDofEquationIdTable()->setLocalNumberingType(DiscreteLib::DofNumberingType::BY_VARIABLE);  // local order
 	const BaseLib::Options* optNum = option.getSubGroup("Numerics");
 	MyLinearSolver* linear_solver = this->_non_linear_solution->getLinearEquationSolver(); 
 	linear_solver->setOption(*optNum);
@@ -325,7 +338,7 @@ void FunctionConcentrations<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 	// TODO the following needs to be changed. 
 	// OutputVariableInfo var(this->getOutputParameterName(Concentrations), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     // femData->outController.setOutput(var.name, var); 
-};
+}
 
 template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::convert_conc_to_eta_xi(void)
@@ -540,6 +553,91 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_rates(void)
 	}  // end of if _ReductionKin
 }
 
+
+template <class T1, class T2>
+void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
+{
+	const double epsilon = 1.0e-6;
+
+    size_t node_idx, i, j;
+	size_t n_eta_mob, n_eta_immob, n_xi_mob, n_xi_immob; 
+
+	LocalVector loc_eta_mob;
+	LocalVector loc_eta_immob;
+	LocalVector loc_xi_mob;
+	LocalVector loc_xi_mob_tmp;  // used for xi increment
+	LocalVector loc_xi_immob;
+	LocalVector loc_xi_mob_rates_base; 
+    LocalVector loc_xi_mob_rates_new; 
+    LocalVector loc_xi_immob_rates; 
+
+	n_eta_mob   = this->_ReductionKin->get_n_eta_mob(); 
+	n_eta_immob = this->_ReductionKin->get_n_eta() - this->_ReductionKin->get_n_eta_mob() ;
+	n_xi_mob    = this->_ReductionKin->get_n_xi_mob(); 
+	n_xi_immob    = this->_ReductionKin->get_n_xi_immob(); 
+
+	// initialize the local vector
+	loc_eta_mob           = LocalVector::Zero( n_eta_mob ); 
+	loc_eta_immob         = LocalVector::Zero( n_eta_immob ); 
+	loc_xi_mob            = LocalVector::Zero( n_xi_mob ); 
+	loc_xi_immob          = LocalVector::Zero( n_xi_immob );
+    loc_xi_mob_rates_base = LocalVector::Zero( n_xi_mob );
+    loc_xi_mob_rates_new  = LocalVector::Zero( n_xi_mob );
+    loc_xi_immob_rates    = LocalVector::Zero( n_xi_immob );
+
+	// loop over all nodes
+	for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin(); 
+	     node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd()  ; 
+		 node_idx++)
+	{
+        // read the local values
+        for (i=0; i < n_eta_mob; i++)
+			loc_eta_mob[i] = this->_eta_mob[i]->getValue(node_idx); 
+		// fill in eta_immob
+		for (i=0; i < n_eta_immob; i++)
+			loc_eta_immob[i] = this->_eta_immob[i]->getValue(node_idx); 
+		for (i=0; i < n_xi_mob; i++)
+			loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
+	    for (i=0; i < n_xi_immob; i++)
+			loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
+        
+        // calculate rates; 
+        this->_ReductionKin->Calc_Xi_Rate( loc_eta_mob, 
+                                           loc_eta_immob, 
+                                           loc_xi_mob, 
+                                           loc_xi_immob, 
+                                           loc_xi_mob_rates_base,
+                                           loc_xi_immob_rates );
+		// loop over all xi
+		for (i=0; i < n_xi_mob; i++)
+		{
+            // loop over each xi_mob, 
+            for (j=0; j < n_xi_mob; j++)
+            {
+                // get a clean copy of the origiinal xi_mob
+                loc_xi_mob_tmp = loc_xi_mob; 
+
+    			// give an increment to the xi value
+                loc_xi_mob_tmp(j) += epsilon * loc_xi_mob_tmp(j);
+
+    			// calculate the new rate
+                this->_ReductionKin->Calc_Xi_Rate( loc_eta_mob, 
+                                                   loc_eta_immob, 
+                                                   loc_xi_mob, 
+                                                   loc_xi_immob, 
+                                                   loc_xi_mob_rates_new,
+                                                   loc_xi_immob_rates );
+
+    			// divide the rate value by delta_xi to get derivative
+                _xi_mob_drates_dxi[i*n_xi_mob+j]->setValue( node_idx, ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) / epsilon * loc_xi_mob_tmp(j) ); 
+	
+            }  // end of for j
+		}  // end of for i
+	}  // end of for node_idx
+
+    // setting the rates 
+    _non_linear_problem->getEquation()->getJacobianAssembler()->set_xi_mob_drate_dxi( &_xi_mob_drates_dxi );
+}
 
 
 

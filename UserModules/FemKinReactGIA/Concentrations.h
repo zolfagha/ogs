@@ -28,6 +28,8 @@
 #include "MathLib/DataType.h"
 #include "NonLinearReactiveTransportTimeODELocalAssembler.h"
 #include "NonLinearReactiveTransportJacabianLocalAssembler.h"
+#include "NestedOdeNRIterationStepInitializer.h"
+#include "NumLib/Nonlinear/DiscreteNRSolverWithStepInitFactory.h"
 
 
 template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER>
@@ -56,9 +58,11 @@ public:
     typedef LinearTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyLinearResidualAssemblerType; 
     typedef LinearTransportJacobianLocalAssembler MyLinearJacobianAssemblerType;                                                      
 	// for the nonlinear part, use different settings
-	typedef NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler, MyNodalFunctionScalar> MyNonLinearAssemblerType; 
+	typedef NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler, MyNodalFunctionScalar>      MyNonLinearAssemblerType; 
 	typedef NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler, MyNodalFunctionScalar> MyNonLinearResidualAssemblerType; 
-	typedef NonLinearReactiveTransportJacobianLocalAssembler<MyNodalFunctionScalar> MyNonLinearJacobianAssemblerType; 
+	typedef NonLinearReactiveTransportJacobianLocalAssembler<MyNodalFunctionScalar, MyFunctionData>                                    MyNonLinearJacobianAssemblerType; 
+	typedef NestedOdeNRIterationStepInitializer<MyNodalFunctionScalar, MyFunctionData>                                                 MyNRIterationStepInitializer;
+	typedef NumLib::DiscreteNRSolverWithStepInitFactory<MyNRIterationStepInitializer>                                                  MyDiscreteNonlinearSolverFactory; 
 	
 	// linear Equation definition
     typedef SolutionLib::TemplateFemEquation<
@@ -96,7 +100,8 @@ public:
 	// Solution algorithm definition
 	typedef SolutionLib::SingleStepFEM<
 			MyNonLinearReactiveTransportProblemType,
-			MyLinearSolver
+			MyLinearSolver, 
+			MyDiscreteNonlinearSolverFactory
 			> MyNonLinearSolutionType;
 
 	// the general reduction problem part
@@ -189,6 +194,8 @@ public:
 
 	// calculate the rates on each node
 	void update_node_kin_reaction_rates(void); 
+
+	void update_node_kin_reaction_drates_dxi(void); 
 	
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
@@ -236,6 +243,7 @@ private:
     std::vector<MyNodalFunctionScalar*> _xi_immob; 
 	// nodal reaction rates
 	std::vector<MyNodalFunctionScalar*> _xi_mob_rates;
+	std::vector<MyNodalFunctionScalar*> _xi_mob_drates_dxi; 
     std::vector<MyNodalFunctionScalar*> _xi_immob_rates;
 }; 
 

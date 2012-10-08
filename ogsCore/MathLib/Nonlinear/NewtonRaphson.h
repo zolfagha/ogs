@@ -49,9 +49,17 @@ public:
         //printout(0, x_new, r, dx);
         if (!convergence->check(&r, &dx, &x_new)) {
             for (itr_cnt=0; itr_cnt<max_itr_count; itr_cnt++) {
+				// preprocessing
+				if (pre_post) 
+					pre_post->pre_process(dx, x_new, f_residuals, f_dx); 
+				// Jacobian
                 f_dx.eval(x_new, r, dx);
+				// x increment
                 x_new += dx;
-                if (pre_post) pre_post->doit(dx, x_new, f_residuals, f_dx);
+				// post processing
+                if (pre_post) 
+					pre_post->post_process(dx, x_new, f_residuals, f_dx);
+				// update residual
                 f_residuals.eval(x_new, r);
                 //printout(itr_cnt, x_new, r, dx);
                 if (convergence->check(&r, &dx, &x_new)) {
