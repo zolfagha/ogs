@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <vector>
 
 #include "GeoLib/GeoObject.h"
@@ -35,7 +36,7 @@ public:
     FemSourceTerm(const MeshLib::IMesh *msh, const GeoLib::GeoObject *geo, NumLib::ITXFunction *func);
 
     ///
-    FemSourceTerm::FemSourceTerm(const std::vector<size_t> &vec_node_id, const std::vector<double> &vec_node_values);
+    FemSourceTerm(const std::vector<size_t> &vec_node_id, const std::vector<double> &vec_node_values);
 
     /// clone this object
     FemSourceTerm* clone() const;
