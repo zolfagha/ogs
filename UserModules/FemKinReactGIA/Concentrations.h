@@ -30,6 +30,7 @@
 #include "NonLinearReactiveTransportJacabianLocalAssembler.h"
 #include "NestedOdeNRIterationStepInitializer.h"
 #include "NumLib/Nonlinear/DiscreteNRSolverWithStepInitFactory.h"
+#include "Local_ODE_Xi_immob.h"
 
 
 template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER>
@@ -126,6 +127,8 @@ public:
     {
         BaseLib::releaseObject(_feObjects);
         BaseLib::releaseObject(_ReductionKin);
+		BaseLib::releaseObject(_local_ode_xi_immob); 
+
 		size_t i; 
 		for (i=0; i < _concentrations.size(); i++)
 			BaseLib::releaseObject(_concentrations[i]);
@@ -195,7 +198,11 @@ public:
 	// calculate the rates on each node
 	void update_node_kin_reaction_rates(void); 
 
+	// update the change of kinetic reaction rate over the change of xi_mob
 	void update_node_kin_reaction_drates_dxi(void); 
+
+	// calculate nodal local ode problem of xi_immob
+	void calc_nodal_xi_immob_ode(double dt);
 	
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
@@ -221,6 +228,7 @@ private:
 	MyNonLinearEquationType* _non_linear_eqs; 
 	MyNonLinearReactiveTransportProblemType* _non_linear_problem;
 	MyNonLinearSolutionType* _non_linear_solution; 
+	Local_ODE_Xi_immob* _local_ode_xi_immob; 
 	
 	// reduction problem and solution
 	MyKinReductionProblemType* _problem; 

@@ -69,7 +69,7 @@ public:
 
 	void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &, const MathLib::LocalVector & u1, const MathLib::LocalVector & u0, MathLib::LocalMatrix & localJ)
     {
-		size_t i, j, k, m, n, node_idx; 
+		size_t j, k, m, n, node_idx; 
   		size_t n_nodes = e.getNumberOfNodes(); 
 		size_t n_xi_mob = _xi_mob_rates->size(); 
         size_t mat_id  = e.getGroupID(); 

@@ -36,6 +36,10 @@ public:
     {
 		// calculate change of rates over change of xi_mob
 		_assemblerJ->get_function_data()->update_node_kin_reaction_drates_dxi(); 
+
+		// local ode problem
+		_assemblerJ->get_function_data()->calc_nodal_xi_immob_ode( 1.0/*  TODO add dt here */); 
+
     };
 
     template<class T_X, class F_RESIDUALS, class F_DX>

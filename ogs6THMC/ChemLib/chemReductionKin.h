@@ -60,12 +60,27 @@ public:
 	/**
       * calculate the reaction rates of xi_mob
       */
+	void Calc_Xi_mob_Rate(ogsChem::LocalVector &local_eta_mob, 
+		                  ogsChem::LocalVector &local_eta_immob, 
+					      ogsChem::LocalVector &local_xi_mob,
+					      ogsChem::LocalVector &local_xi_immob, 
+					      ogsChem::LocalVector &xi_mob_rate ); 
+
+    /**
+      * calculate the reaction rates of xi_mob
+      */
+	void Calc_Xi_immob_Rate(ogsChem::LocalVector &local_eta_mob, 
+		                    ogsChem::LocalVector &local_eta_immob, 
+					        ogsChem::LocalVector &local_xi_mob,
+					        ogsChem::LocalVector &local_xi_immob, 
+					        ogsChem::LocalVector &xi_immob_rate ); 
+
 	void Calc_Xi_Rate(ogsChem::LocalVector &local_eta_mob, 
-		              ogsChem::LocalVector &local_eta_immob, 
-					  ogsChem::LocalVector &local_xi_mob,
+	                  ogsChem::LocalVector &local_eta_immob, 
+	                  ogsChem::LocalVector &local_xi_mob,
 					  ogsChem::LocalVector &local_xi_immob, 
 					  ogsChem::LocalVector &xi_mob_rate, 
-					  ogsChem::LocalVector &xi_immob_rate ); 
+					  ogsChem::LocalVector &xi_immob_rate);
 
 	/**
       * get the number of components

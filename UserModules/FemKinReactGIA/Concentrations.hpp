@@ -22,6 +22,7 @@
 #include "SolutionLib/Fem/FemSourceTerm.h"
 #include "Ogs6FemData.h"
 #include "NestedOdeNRIterationStepInitializer.h"
+#include "MathLib/ODE/RungeKutta4.h"
 
 template <class T1, class T2>
 bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
@@ -112,6 +113,8 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	MyNonLinearAssemblerType* non_linear_assembler = new MyNonLinearAssemblerType(_feObjects, this->_ReductionKin );
 	MyNonLinearResidualAssemblerType* non_linear_r_assembler = new MyNonLinearResidualAssemblerType(_feObjects, this->_ReductionKin );
 	MyNonLinearJacobianAssemblerType* non_linear_j_assembler = new MyNonLinearJacobianAssemblerType(_feObjects, this->_ReductionKin, this);
+
+	_local_ode_xi_immob = new Local_ODE_Xi_immob( this->_ReductionKin ); 
 
 	// for the linear transport problem, variables are eta_mobile
 	for ( i=0; i < n_eta_mob ; i++ )
@@ -572,7 +575,7 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
     LocalVector loc_xi_immob_rates; 
 
 	n_eta_mob   = this->_ReductionKin->get_n_eta_mob(); 
-	n_eta_immob = this->_ReductionKin->get_n_eta() - this->_ReductionKin->get_n_eta_mob() ;
+	n_eta_immob = this->_ReductionKin->get_n_eta_immob();
 	n_xi_mob    = this->_ReductionKin->get_n_xi_mob(); 
 	n_xi_immob    = this->_ReductionKin->get_n_xi_immob(); 
 
@@ -640,4 +643,64 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
 }
 
 
+template <class T1, class T2>
+void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
+{
+	size_t i; 
+	
+	// initialize the local vector
+	MathLib::LocalVector loc_eta_mob; 
+	MathLib::LocalVector loc_eta_immob; 
+	MathLib::LocalVector loc_xi_mob; 
+	MathLib::LocalVector loc_xi_immob;
+	MathLib::LocalVector loc_xi_immob_new; 
 
+	// parameter initialization
+	size_t node_idx; 
+	size_t n_eta_mob   = this->_ReductionKin->get_n_eta_mob(); 
+	size_t n_eta_immob = this->_ReductionKin->get_n_eta_immob();
+	size_t n_xi_mob    = this->_ReductionKin->get_n_xi_mob(); 
+	size_t n_xi_immob  = this->_ReductionKin->get_n_xi_immob(); 
+
+	// initialize the local vector
+	loc_eta_mob           = LocalVector::Zero( n_eta_mob ); 
+	loc_eta_immob         = LocalVector::Zero( n_eta_immob ); 
+	loc_xi_mob            = LocalVector::Zero( n_xi_mob ); 
+	loc_xi_immob          = LocalVector::Zero( n_xi_immob );
+	loc_xi_immob_new      = LocalVector::Zero( n_xi_immob );
+
+	// delta_t
+
+
+	// initialize the ODE Runge-Kutta solution class
+	MathLib::RungeKutta4<Local_ODE_Xi_immob>* rk4 = new MathLib::RungeKutta4<Local_ODE_Xi_immob>(); 
+
+	// loop over all the nodes
+	for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin(); 
+	     node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd(); 
+		 node_idx++ )
+	{
+		// on each node, get the right start value
+		// get the right set of eta and xi
+        for (i=0; i < n_eta_mob; i++)
+			loc_eta_mob[i] = this->_eta_mob[i]->getValue(node_idx); 
+		// fill in eta_immob
+		for (i=0; i < n_eta_immob; i++)
+			loc_eta_immob[i] = this->_eta_immob[i]->getValue(node_idx); 
+		for (i=0; i < n_xi_mob; i++)
+			loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
+	    for (i=0; i < n_xi_immob; i++)
+			loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
+		
+		// get the right reference values to ODE RHS function
+		this->_local_ode_xi_immob->update_eta_xi( loc_eta_mob, loc_eta_immob, loc_xi_mob, loc_xi_immob); 
+
+		// solve the local ODE problem using RK
+		rk4->solve( *_local_ode_xi_immob, 0.0, dt, loc_xi_immob, loc_xi_immob_new); 
+		
+		// collect the new xi_immob_new
+		// TODO
+
+	}  // end of for node_idx
+
+}
