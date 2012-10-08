@@ -15,7 +15,7 @@
 namespace MathLib
 {
 
-double NewtonCotes::middpoint(double (*fun)(double), double a, double b, size_t n) {
+double NewtonCotes::middpoint(double (*fun)(double), double a, double b, std::size_t n) {
     double h = (b-a) / (double)n;
     double val = .0;
     double x = a + 0.5*h;
@@ -27,7 +27,7 @@ double NewtonCotes::middpoint(double (*fun)(double), double a, double b, size_t 
     return val;
 };
 
-double NewtonCotes::trapezoid(double (*fun)(double), double a, double b, size_t n) {
+double NewtonCotes::trapezoid(double (*fun)(double), double a, double b, std::size_t n) {
     double h = (b-a) / (double)n;
     double val = 0.5*(fun(a) + fun(b));
     double x = a;
@@ -39,7 +39,7 @@ double NewtonCotes::trapezoid(double (*fun)(double), double a, double b, size_t 
     return val;
 };
 
-double NewtonCotes::simpson(double (*fun)(double), double a, double b, size_t n) {
+double NewtonCotes::simpson(double (*fun)(double), double a, double b, std::size_t n) {
     double h = (b-a) / (double)n;
     double val = fun(a) + 4*fun(b-0.5*h) + fun(b);
     double x = a;
