@@ -22,7 +22,7 @@ namespace MathLib
     * \param point_id          point index
     * \return x
     */
-double GaussLegendre::getPoint(size_t n_sample_points, size_t point_id) {
+double GaussLegendre::getPoint(std::size_t n_sample_points, std::size_t point_id) {
     switch (n_sample_points)
     {
     case 1:
@@ -64,7 +64,7 @@ double GaussLegendre::getPoint(size_t n_sample_points, size_t point_id) {
     return 0.0;
 }
 
-double GaussLegendre::getWeight(size_t n_sample_points, size_t point_id)
+double GaussLegendre::getWeight(std::size_t n_sample_points, std::size_t point_id)
 {
     switch (n_sample_points)
     {
