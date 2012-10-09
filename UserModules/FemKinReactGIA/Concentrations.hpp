@@ -53,6 +53,10 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	// first get the number of components
 	size_t n_Comp = femData->map_ChemComp.size(); 
 
+	// set concentrations of all components as output
+	for ( i=0; i < n_Comp; i++ )
+		this->setOutputParameterName( i, femData->map_ChemComp[i]->second->get_name() ); 
+
 	// tell me how many eta and how many xi we have
 	size_t n_eta, n_xi_mob, n_xi_immob, n_eta_mob, n_eta_immob; 
 	// get n_eta and n_xi
@@ -289,8 +293,8 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
     _solution = new MyKinReductionSolution(dis, _problem, this, _linear_problems, _linear_solutions, _non_linear_problem, _non_linear_solution);
 	
     // set initial output
-    OutputVariableInfo var(this->getOutputParameterName(Concentrations), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
-    femData->outController.setOutput(var.name, var); 
+    // OutputVariableInfo var(this->getOutputParameterName(Concentrations), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
+    // femData->outController.setOutput(var.name, var); 
 
     // initial output parameter
 	// TODO
@@ -338,12 +342,17 @@ void FunctionConcentrations<T1, T2>::updateOutputParameter(const NumLib::TimeSte
 template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 {
-    //update data for output
+    // update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    
-	// TODO the following needs to be changed. 
-	// OutputVariableInfo var(this->getOutputParameterName(Concentrations), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
-    // femData->outController.setOutput(var.name, var); 
+
+	// convert eta and xi back to concentrations
+    convert_eta_xi_to_conc(); 
+
+	// set the new output
+	for (size_t i=0; i<_concentrations.size(); i++) {
+		OutputVariableInfo var1(this->getOutputParameterName(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
+        femData->outController.setOutput(var1.name, var1);
+    }
 }
 
 template <class T1, class T2>
@@ -683,30 +692,31 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 	     node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd(); 
 		 node_idx++ )
 	{
-		// TODO, skip the boundary nodes
-
-
-		// on each node, get the right start value
-		// get the right set of eta and xi
-        for (i=0; i < n_eta_mob; i++)
-			loc_eta_mob[i] = this->_eta_mob[i]->getValue(node_idx); 
-		// fill in eta_immob
-		for (i=0; i < n_eta_immob; i++)
-			loc_eta_immob[i] = this->_eta_immob[i]->getValue(node_idx); 
-		for (i=0; i < n_xi_mob; i++)
-			loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
-	    for (i=0; i < n_xi_immob; i++)
-			loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
+		// skip the boundary nodes
+		if ( ! this->_solution->isBCNode(node_idx) )
+		{
+			// on each node, get the right start value
+			// get the right set of eta and xi
+			for (i=0; i < n_eta_mob; i++)
+				loc_eta_mob[i] = this->_eta_mob[i]->getValue(node_idx); 
+			// fill in eta_immob
+			for (i=0; i < n_eta_immob; i++)
+				loc_eta_immob[i] = this->_eta_immob[i]->getValue(node_idx); 
+			for (i=0; i < n_xi_mob; i++)
+				loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
+			for (i=0; i < n_xi_immob; i++)
+				loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
 		
-		// get the right reference values to ODE RHS function
-		this->_local_ode_xi_immob->update_eta_xi( loc_eta_mob, loc_eta_immob, loc_xi_mob, loc_xi_immob); 
+			// get the right reference values to ODE RHS function
+			this->_local_ode_xi_immob->update_eta_xi( loc_eta_mob, loc_eta_immob, loc_xi_mob, loc_xi_immob); 
 
-		// solve the local ODE problem using RK
-		rk4->solve( *_local_ode_xi_immob, 0.0, dt, loc_xi_immob, loc_xi_immob_new); 
+			// solve the local ODE problem using RK
+			rk4->solve( *_local_ode_xi_immob, 0.0, dt, loc_xi_immob, loc_xi_immob_new); 
 		
-		// collect the new xi_immob_new
-		for (i=0; i < n_xi_immob; i++)
-			_xi_immob_new[i]->setValue(node_idx, loc_xi_immob_new[i]); 
+			// collect the new xi_immob_new
+			for (i=0; i < n_xi_immob; i++)
+				_xi_immob_new[i]->setValue(node_idx, loc_xi_immob_new[i]); 
+		} // end of if
 
 	}  // end of for node_idx
 

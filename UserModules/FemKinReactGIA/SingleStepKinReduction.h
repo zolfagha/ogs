@@ -133,6 +133,8 @@ public:
         *_x_n0 = *_x_n1; //copy current value to previous value
     };
 
+	bool isBCNode(size_t node_idx); 
+
 private:
     DISALLOW_COPY_AND_ASSIGN(SingleStepKinReduction);
 
@@ -436,6 +438,24 @@ int SingleStepKinReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINE
     //}
 
     return 0;
+}
+
+
+template <
+	class T_USER_FUNCTION_DATA, 
+    class T_USER_FEM_PROBLEM,
+    class T_USER_LINEAR_PROBLEM,
+    class T_USER_LINEAR_SOLUTION,
+    class T_USER_NON_LINEAR_PROBLEM, 
+	class T_USER_NON_LINEAR_SOLUTION 
+    >
+bool SingleStepKinReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBLEM, T_USER_LINEAR_SOLUTION, T_USER_NON_LINEAR_PROBLEM, T_USER_NON_LINEAR_SOLUTION>
+    :: isBCNode(size_t node_idx)
+{    
+	if ( _bc_info.find( node_idx ) != _bc_info.end() )
+		return true;  // is BC node
+	else
+		return false;  // not BC node
 }
 
 }

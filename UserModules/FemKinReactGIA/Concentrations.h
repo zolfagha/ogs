@@ -39,7 +39,7 @@ class FunctionConcentrations
 {
 public:
     enum In { Velocity=0 };
-    enum Out { Concentrations = 0 };
+    enum Out { };
 
 	typedef FunctionConcentrations MyFunctionData; 
     typedef T_DISCRETE_SYSTEM MyDiscreteSystem;
@@ -115,12 +115,12 @@ public:
 	                                            MyNonLinearSolutionType> MyKinReductionSolution; 
 
     FunctionConcentrations() 
-        : Process("KIN_REACT_GIA", 1, 1),
+        : Process("KIN_REACT_GIA", 1, 0),
           _feObjects(0)
     {
         // set default parameter name
 		ProcessLib::Process::setInputParameterName(Velocity, "Velocity");
-        ProcessLib::Process::setOutputParameterName(Concentrations, "Concentrations");
+        // ProcessLib::Process::setOutputParameterName(Concentrations, "Concentrations");
     };
 
     virtual ~FunctionConcentrations()
