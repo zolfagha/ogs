@@ -97,12 +97,15 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	// initialize xi_mob
 	for ( i=0; i < n_xi_immob ; i++ )
 	{
-		MyNodalFunctionScalar* xi_immob_tmp     = new MyNodalFunctionScalar();  // xi_immob
+		MyNodalFunctionScalar* xi_immob_tmp       = new MyNodalFunctionScalar();  // xi_immob
         MyNodalFunctionScalar* xi_immob_rates_tmp = new MyNodalFunctionScalar();  // xi_mob_rates
+		MyNodalFunctionScalar* xi_immob_new_tmp   = new MyNodalFunctionScalar();  // xi_mob_rates
 		xi_immob_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
         xi_immob_rates_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
+		xi_immob_new_tmp->initialize(*dis, FemLib::PolynomialOrder::Linear, 0.0  );
 		_xi_immob.push_back(xi_immob_tmp); 
         _xi_immob_rates.push_back(xi_immob_rates_tmp); 
+		_xi_immob_new.push_back(xi_immob_new_tmp); 
 	}
 
 	// linear assemblers
@@ -669,11 +672,11 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 	loc_xi_immob          = LocalVector::Zero( n_xi_immob );
 	loc_xi_immob_new      = LocalVector::Zero( n_xi_immob );
 
-	// delta_t
+	// signal, solving local ODEs of xi_immob
 
 
 	// initialize the ODE Runge-Kutta solution class
-	MathLib::RungeKutta4<Local_ODE_Xi_immob>* rk4 = new MathLib::RungeKutta4<Local_ODE_Xi_immob>(); 
+	MathLib::RungeKutta4<Local_ODE_Xi_immob, MathLib::LocalVector>* rk4 = new MathLib::RungeKutta4<Local_ODE_Xi_immob, MathLib::LocalVector>(); 
 
 	// loop over all the nodes
 	for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin(); 
@@ -699,7 +702,8 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 		rk4->solve( *_local_ode_xi_immob, 0.0, dt, loc_xi_immob, loc_xi_immob_new); 
 		
 		// collect the new xi_immob_new
-		// TODO
+		for (i=0; i < n_xi_immob; i++)
+			_xi_immob_new[i]->setValue(node_idx, loc_xi_immob_new[i]); 
 
 	}  // end of for node_idx
 

@@ -81,6 +81,11 @@ public:
     /// @param r residual
     void eval(const SolutionVector &u_n1, SolutionVector &r);
 
+	double getTimeStepSize(void)
+	{
+		return _t_n1->getTimeStepSize(); 	
+	}
+
 private:
     MyDiscreteSystem *_dis_sys;
     UserLocalResidualAssembler *_local_assembler;

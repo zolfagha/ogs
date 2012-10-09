@@ -18,15 +18,15 @@
 class Local_ODE_Xi_immob
 {
 public: 
-	typedef MathLib::LocalVector MyVector; 
+	
     Local_ODE_Xi_immob(ogsChem::chemReductionKin* reductionKin)
 		: _reductionKin(reductionKin)
     {
-		_vec_eta_mob      = MyVector::Zero( _reductionKin->get_n_eta_mob() ); 
-	    _vec_eta_immob    = MyVector::Zero( _reductionKin->get_n_eta_immob() ); 
-	    _vec_xi_mob       = MyVector::Zero( _reductionKin->get_n_xi_mob() ); 
-	    _vec_xi_immob     = MyVector::Zero( _reductionKin->get_n_xi_immob() ); 
-		_vec_dxi_immob_dt = MyVector::Zero( _reductionKin->get_n_xi_immob() ); 	 
+		_vec_eta_mob      = MathLib::LocalVector::Zero( _reductionKin->get_n_eta_mob() ); 
+	    _vec_eta_immob    = MathLib::LocalVector::Zero( _reductionKin->get_n_eta_immob() ); 
+	    _vec_xi_mob       = MathLib::LocalVector::Zero( _reductionKin->get_n_xi_mob() ); 
+	    _vec_xi_immob     = MathLib::LocalVector::Zero( _reductionKin->get_n_xi_immob() ); 
+		_vec_dxi_immob_dt = MathLib::LocalVector::Zero( _reductionKin->get_n_xi_immob() ); 	 
 	}
 	 
 	~Local_ODE_Xi_immob()
@@ -34,10 +34,10 @@ public:
         _reductionKin = NULL; 
     }
 
-	void update_eta_xi( MyVector & vec_eta_mob, 
-		                MyVector & vec_eta_immob, 
-						MyVector & vec_xi_mob, 
-						MyVector & vec_xi_immob  )
+	void update_eta_xi( MathLib::LocalVector & vec_eta_mob, 
+		                MathLib::LocalVector & vec_eta_immob, 
+						MathLib::LocalVector & vec_xi_mob, 
+						MathLib::LocalVector & vec_xi_immob  )
 	{
 		_vec_eta_mob   = vec_eta_mob; 
 		_vec_eta_immob = vec_eta_immob; 
@@ -45,7 +45,7 @@ public:
 	    _vec_xi_immob  = vec_xi_immob;
 	}
 
-	MyVector operator() (double & time, MyVector & y )
+	MathLib::LocalVector operator() (double time, MathLib::LocalVector y )
 	{
 	    _vec_xi_immob = y; 
 		this->_reductionKin->Calc_Xi_immob_Rate( _vec_eta_mob, _vec_eta_immob, _vec_xi_mob, _vec_xi_immob, _vec_dxi_immob_dt); 
@@ -55,11 +55,11 @@ public:
 
 private:     
 	ogsChem::chemReductionKin* _reductionKin; 
-	MyVector _vec_eta_mob; 
-	MyVector _vec_eta_immob; 
-	MyVector _vec_xi_mob; 
-	MyVector _vec_xi_immob;
-	MyVector _vec_dxi_immob_dt; 
+	MathLib::LocalVector _vec_eta_mob; 
+	MathLib::LocalVector _vec_eta_immob; 
+	MathLib::LocalVector _vec_xi_mob; 
+	MathLib::LocalVector _vec_xi_immob;
+	MathLib::LocalVector _vec_dxi_immob_dt; 
  
 }; 
  

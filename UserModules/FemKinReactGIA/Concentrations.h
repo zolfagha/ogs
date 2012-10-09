@@ -143,7 +143,10 @@ public:
 		for (i=0; i < _xi_mob.size(); i++)
 			BaseLib::releaseObject(_xi_mob[i]); 
         for (i=0; i < _xi_immob.size(); i++)
+		{
 			BaseLib::releaseObject(_xi_immob[i]); 
+			BaseLib::releaseObject(_xi_immob_new[i]); 
+		}
 
     };
 
@@ -249,6 +252,7 @@ private:
     // xi_mobile and xi_immobile
     std::vector<MyNodalFunctionScalar*> _xi_mob; 
     std::vector<MyNodalFunctionScalar*> _xi_immob; 
+	std::vector<MyNodalFunctionScalar*> _xi_immob_new; 
 	// nodal reaction rates
 	std::vector<MyNodalFunctionScalar*> _xi_mob_rates;
 	std::vector<MyNodalFunctionScalar*> _xi_mob_drates_dxi; 
