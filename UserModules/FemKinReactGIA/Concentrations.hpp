@@ -477,25 +477,42 @@ void FunctionConcentrations<T1, T2>::convert_eta_xi_to_conc(void)
 template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::set_eta_mob_node_values( size_t eta_mob_idx, MyNodalFunctionScalar* new_eta_mob_node_values )
 {
-	this->_eta_mob[eta_mob_idx] = new_eta_mob_node_values; 
+    size_t node_idx; 
+    for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin(); 
+	     node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd(); 
+		 node_idx++ )
+        this->_eta_mob[eta_mob_idx]->setValue( node_idx, new_eta_mob_node_values->getValue( node_idx ) ); 
 }
 
 template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::set_eta_immob_node_values( size_t eta_immob_idx, MyNodalFunctionScalar* new_eta_immob_node_values )
 {
-	this->_eta_immob[eta_immob_idx] = new_eta_immob_node_values; 
+    size_t node_idx; 
+    for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin(); 
+	     node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd(); 
+		 node_idx++ )
+        this->_eta_immob[eta_immob_idx]->setValue( node_idx, new_eta_immob_node_values->getValue( node_idx ) ); 
 }
 
 template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::set_xi_mob_node_values( size_t xi_mob_idx, MyNodalFunctionScalar* new_xi_mob_node_values )
 {
-	this->_xi_mob[xi_mob_idx] = new_xi_mob_node_values; 
+    size_t node_idx; 
+    for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin(); 
+	     node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd(); 
+		 node_idx++ )
+        this->_xi_mob[xi_mob_idx]->setValue( node_idx, new_xi_mob_node_values->getValue( node_idx ) ); 
 }
 
 template <class T1, class T2>
-void FunctionConcentrations<T1, T2>::set_xi_immob_node_values( size_t xi_immob_idx, MyNodalFunctionScalar* new_xi_immob_node_values ) 
+void FunctionConcentrations<T1, T2>::update_xi_immob_node_values( void ) 
 {
-	this->_xi_immob[xi_immob_idx] = new_xi_immob_node_values; 
+    size_t i, node_idx; 
+    for ( i=0; i < _xi_immob.size() ; i++ )
+    for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin(); 
+	     node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd(); 
+		 node_idx++ )
+    	this->_xi_immob[i]->setValue( node_idx, _xi_immob_new[i]->getValue( node_idx ) ); 
 }
 
 template <class T1, class T2>
