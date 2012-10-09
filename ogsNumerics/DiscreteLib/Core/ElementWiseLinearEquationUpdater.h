@@ -14,6 +14,7 @@
 
 #include <vector>
 
+#include "MathLib/DataType.h"
 #include "MeshLib/Core/IElement.h"
 #include "DiscreteLib/Utils/DofEquationIdTable.h"
 
@@ -53,7 +54,7 @@ public:
         std::vector<size_t> ele_node_ids, ele_node_size_order;
         std::vector<size_t> local_dofmap_row;
         std::vector<size_t> local_dofmap_column;
-        LocalEquation localEQS;
+        MathLib::LocalEquation localEQS;
 
         // get dof map
         e.getNodeIDList(e.getMaximumOrder(), ele_node_ids);
