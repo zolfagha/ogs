@@ -111,6 +111,16 @@ public:
 
     /// solve 
     int solveTimeStep(const NumLib::TimeStep &t_n1);
+    
+    //
+    virtual void accept(const NumLib::TimeStep &t)
+    {
+        AbstractTimeSteppingAlgorithm::accept(t);
+        // *_x_n0 = *_x_n1; //copy current value to previous value
+        for (size_t i=0; i < _lin_solutions.size(); i++ )
+            _lin_solutions[i]->accept(t); 
+        _nlin_solution->accept(t); 
+    }
 
     /// get the current solution
     MyNodalFunctionScalar* getCurrentSolution(size_t var_id) { return _vec_u_n1[var_id]; }
@@ -125,13 +135,6 @@ public:
     // NonlinearSolverType* getNonlinearSolver() { return _f_nonlinear;};
 
     DiscreteLib::DofEquationIdTable* getDofEquationIdTable() {return &_dofManager;};
-
-    ///
-    virtual void accept(const NumLib::TimeStep &t)
-    {
-        AbstractTimeSteppingAlgorithm::accept(t);
-        *_x_n0 = *_x_n1; //copy current value to previous value
-    };
 
 	bool isBCNode(size_t node_idx); 
 

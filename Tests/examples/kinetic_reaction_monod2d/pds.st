@@ -7,7 +7,7 @@ GeoSys-ST: Source Terms ------------------------------------------------
  $GEO_TYPE
   POLYLINE PLY_OUT1
  $DIS_TYPE
-  CONSTANT_GEO  -8.75112917795845E-07 ; q=0.5m/d
+  CONSTANT_NEUMANN  -8.75112917795845E-07 ; q=0.5m/d
 #SOURCE_TERM
  $PCS_TYPE
   GROUNDWATER_FLOW
@@ -16,7 +16,7 @@ GeoSys-ST: Source Terms ------------------------------------------------
  $GEO_TYPE
   POLYLINE PLY_OUT2
  $DIS_TYPE
-  CONSTANT_GEO -2.82294489611563E-07 ; q=0.5m/d
+  CONSTANT_NEUMANN -2.82294489611563E-07 ; q=0.5m/d
 
 #STOP
 

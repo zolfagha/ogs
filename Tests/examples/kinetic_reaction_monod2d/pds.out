@@ -7,12 +7,14 @@ GeoSys-OUT: Output ------------------------------------------------
   Comp_B
   Comp_C
   Biomass
+ $ELE_VALUES
+  VELOCITY
  $GEO_TYPE
   DOMAIN
  $DAT_TYPE
-  TECPLOT
+  PVD
  $TIM_TYPE
-  STEPS 20000   
+  STEPS 1   
 
 #OUTPUT // profile
  $NOD_VALUES
@@ -25,8 +27,8 @@ GeoSys-OUT: Output ------------------------------------------------
  $GEO_TYPE
   POLYLINE PLY_4
  $DAT_TYPE
-  TECPLOT
+  PVD
  $TIM_TYPE
-  STEPS 20000  
+  STEPS 1  
 #STOP
 
