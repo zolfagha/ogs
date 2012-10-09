@@ -69,10 +69,11 @@ public:
 
 	void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &, const MathLib::LocalVector & u1, const MathLib::LocalVector & u0, MathLib::LocalMatrix & localJ)
     {
-		size_t j, k, m, n, node_idx; 
+		size_t i, j, k, m, n, node_idx; 
   		size_t n_nodes = e.getNumberOfNodes(); 
 		size_t n_xi_mob = _xi_mob_rates->size(); 
         size_t mat_id  = e.getGroupID(); 
+		const size_t n_dim = e.getDimension();
  
         // clear the local Jacobian matrix
         localJ = MathLib::LocalMatrix::Zero(n_nodes*n_xi_mob, n_nodes*n_xi_mob);
@@ -99,8 +100,14 @@ public:
         MathLib::LocalMatrix d_rate(1,1); 
         MathLib::LocalMatrix localJ_tmp = MathLib::LocalMatrix::Zero(n_nodes, n_nodes);
         NumLib::ITXFunction::DataType v;
+		NumLib::ITXFunction::DataType v2;
 		
-        for (k=0; k<n_xi_mob; k++) {
+        for (i=0; i<n_xi_mob; i++) {
+
+			matM    = MathLib::LocalMatrix::Zero(n_nodes, n_nodes);
+			matDiff = MathLib::LocalMatrix::Zero(n_nodes, n_nodes);
+			matAdv  = MathLib::LocalMatrix::Zero(n_nodes, n_nodes);
+
 			for (j=0; j<n_sp; j++) {
 				q->getSamplingPoint(j, gp_x);
 				fe->computeBasisFunctions(gp_x);
@@ -109,10 +116,11 @@ public:
 				pm->porosity->eval(real_x, poro);
 				d_poro(0,0) = cmp_mol_diffusion * poro(0,0);
 				_vel->eval(real_x, v);
+				v2 = v.topRows(n_dim).transpose();
 
 				fe->integrateWxN(j, poro, matM);
 				fe->integrateDWxDN(j, d_poro, matDiff);
-				fe->integrateWxDN(j, v, matAdv); 
+				fe->integrateWxDN(j, v2, matAdv); 
             
 				// now dealing with the rate change terms
 				// each location has n_xi_mob * n_xi_mob dR/dxi entries
@@ -125,7 +133,7 @@ public:
                			for (k=0; k<n_nodes; k++)
              			{
 							node_idx = e.getNodeID( k ); 
-             				vec_drates_dxi_value( k ) = _drates_dxi->at(m*n_xi_mob+n)->getValue( node_idx ); 
+             				vec_drates_dxi_value( k ) = _drates_dxi->at(i*n_xi_mob*n_xi_mob + m*n_xi_mob+n)->getValue( node_idx ); 
 						}  // end of for k<n_nodes
 						// get the mean value
 						d_rate(0,0) = vec_drates_dxi_value.mean(); 
@@ -143,9 +151,9 @@ public:
 			localJ_tmp += matDiff;
 			localJ_tmp += matAdv;
             
-            localJ.block(n_nodes*k,n_nodes*k,n_nodes,n_nodes) += localJ_tmp;
+            localJ.block(n_nodes*i,n_nodes*i,n_nodes,n_nodes) += localJ_tmp;
 
-        }  // end of for k
+        }  // end of for i
 
 
         //std::cout << "M="; localM.write(std::cout); std::cout << std::endl;

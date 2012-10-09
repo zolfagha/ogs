@@ -673,7 +673,7 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 	loc_xi_immob_new      = LocalVector::Zero( n_xi_immob );
 
 	// signal, solving local ODEs of xi_immob
-
+	INFO("--Solving local ODE problem of xi_immob...");
 
 	// initialize the ODE Runge-Kutta solution class
 	MathLib::RungeKutta4<Local_ODE_Xi_immob, MathLib::LocalVector>* rk4 = new MathLib::RungeKutta4<Local_ODE_Xi_immob, MathLib::LocalVector>(); 
@@ -683,6 +683,9 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 	     node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd(); 
 		 node_idx++ )
 	{
+		// TODO, skip the boundary nodes
+
+
 		// on each node, get the right start value
 		// get the right set of eta and xi
         for (i=0; i < n_eta_mob; i++)
