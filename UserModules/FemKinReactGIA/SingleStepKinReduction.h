@@ -49,7 +49,7 @@ namespace SolutionLib
  * - Linear EQS
  * - Linear solver
  *
- * \tparam T_USER_FEM_PROBLEM      FEM problem class
+ * \tparam T_USER_FEM_PROBLEM      the FEM problem class
  * \tparam T_LINEAR_SOLVER         Linear equation solver class
  */
 template <
@@ -71,20 +71,18 @@ public:
 	typedef T_USER_LINEAR_SOLUTION     UserLinearSolution;
     typedef T_USER_NON_LINEAR_PROBLEM  UserNonLinearProblem; 
 	typedef T_USER_NON_LINEAR_SOLUTION UserNonLinearSolution; 
-    typedef typename UserFemProblem::MyDiscreteSystem MyDiscreteSystem;
+
+	typedef typename UserFemProblem::MyDiscreteSystem MyDiscreteSystem;
     typedef typename UserFemProblem::MyVariable MyVariable;
-    // typedef typename UserFemProblem::EquationType::LinearEQSType UserLinearFunction;
-    // typedef typename UserFemProblem::EquationType::ResidualEQSType UserResidualFunction;
-    // typedef typename UserFemProblem::EquationType::DxEQSType UserDxFunction;
-    // typedef NumLib::TemplateDiscreteNonlinearSolver<MyDiscreteSystem, UserLinearFunction, UserResidualFunction, UserDxFunction> NonlinearSolverType;
-    // typedef T_LINEAR_SOLVER LinearSolverType;
     typedef typename FemLib::FemNodalFunctionScalar<MyDiscreteSystem>::type MyNodalFunctionScalar;
 
-    /// constructor
-    /// - initialize solution vectors
-    /// - set up DoFs and equation index
-    /// - prepare linear equation and solver
-    /// - prepare linear functions
+    /** 
+      * constructor, including the following tasks
+      * - initialize solution vectors
+      * - set up DoFs and equation index
+      * - prepare linear and nonlinear equations
+      * - prepare linear and nonlinear solutions
+      */
     SingleStepKinReduction(MyDiscreteSystem*                dis, 
 		                   UserFemProblem*                  problem, 
 						   UserFunctionData*                function_data, 
@@ -93,79 +91,126 @@ public:
                            UserNonLinearProblem*            non_linear_problem,
 						   UserNonLinearSolution*           non_linear_solution);
 
-    ///
+    /**
+      * destructor, reclaiming the memory
+      */ 
     virtual ~SingleStepKinReduction()
     {
-        // _discrete_system->deleteLinearEquation(_linear_eqs);
+        size_t i; 
         _discrete_system->deleteVector(_x_n0);
         _discrete_system->deleteVector(_x_n1);
         _discrete_system->deleteVector(_x_n1_0);
         _discrete_system->deleteVector(_x_st);
-        // BaseLib::releaseObject(_linear_solver);
-        // BaseLib::releaseObject(_f_linear);
-        // BaseLib::releaseObject(_f_r);
-        // BaseLib::releaseObject(_f_dx);
-        // BaseLib::releaseObject(_f_nonlinear);
+
         BaseLib::releaseObject(_feObjects);
+        BaseLib::releaseObject(_non_linear_problem);
+        BaseLib::releaseObject(_nlin_solution);
+        BaseLib::releaseObject(_function_data);
+        for ( i=0; i < _linear_problem.size(); i++ )
+            BaseLib::releaseObject( _linear_problem[i] );
+        for ( i=0; i < _lin_solutions.size(); i++ )
+            BaseLib::releaseObject( _lin_solutions[i] );
+
     }
 
-    /// solve 
+    /**
+      * solve the time step
+      */ 
     int solveTimeStep(const NumLib::TimeStep &t_n1);
     
-    //
+    /**
+	  * called when this solution is accepted
+	  */
     virtual void accept(const NumLib::TimeStep &t)
     {
+        // this solution itself
         AbstractTimeSteppingAlgorithm::accept(t);
-        // *_x_n0 = *_x_n1; //copy current value to previous value
+        // call all linear solutions
         for (size_t i=0; i < _lin_solutions.size(); i++ )
             _lin_solutions[i]->accept(t); 
+        // the non-linear solution
         _nlin_solution->accept(t); 
     }
 
-    /// get the current solution
+    /** 
+      * get the corresponding solution pointer
+      */ 
     MyNodalFunctionScalar* getCurrentSolution(size_t var_id) { return _vec_u_n1[var_id]; }
 
-    ///
+    /**
+      * get the pointer to the problem class
+      */ 
     UserFemProblem* getProblem() {return _problem;};
 
-    /// get a linear solver
-    // LinearSolverType* getLinearEquationSolver() { return _linear_solver; };
-
-    /// get a nonlinear solver
-    // NonlinearSolverType* getNonlinearSolver() { return _f_nonlinear;};
-
+    /** 
+      * get the domain of freedom equation ID table
+      */ 
     DiscreteLib::DofEquationIdTable* getDofEquationIdTable() {return &_dofManager;};
 
+    /**
+      * tell whether a particular node is a boundary node
+      */ 
 	bool isBCNode(size_t node_idx); 
 
 private:
     DISALLOW_COPY_AND_ASSIGN(SingleStepKinReduction);
 
 private:
+    /**
+      * DOF table
+      */ 
     DiscreteLib::DofEquationIdTable _dofManager;
+
+    /**
+      * pointer to the problem
+      */ 
     UserFemProblem* _problem;
-    // LinearSolverType* _linear_solver;
+
+    /**
+      * pointer to discretization
+      */ 
     MyDiscreteSystem *_discrete_system;
-    // DiscreteLib::IDiscreteLinearEquation* _linear_eqs;
+
+
     std::vector<MyNodalFunctionScalar*> _vec_u_n1;
-    // UserLinearFunction* _f_linear;
-    // UserResidualFunction* _f_r;
-    // UserDxFunction* _f_dx;
-    // NonlinearSolverType* _f_nonlinear;
     SolutionVector *_x_n0;
     SolutionVector *_x_n1_0;
     SolutionVector *_x_n1;
     SolutionVector *_x_st;
+
+    /**
+      * pointer to FEM object
+      */ 
     FemLib::LagrangianFeObjectContainer* _feObjects;
     
+    /**
+      * pointer to linear problems
+      */ 
     std::vector<UserLinearProblem*>  _linear_problem;
+
+    /**
+      * pointer to linear solutions
+      */ 
 	std::vector<UserLinearSolution*> _lin_solutions; 
 
+    /**
+      * pointer to non-linear problem
+      */ 
 	UserNonLinearProblem*            _non_linear_problem;
+
+    /**
+      * pointer to non-linear solution
+      */ 
     UserNonLinearSolution*           _nlin_solution; 
 
+    /**
+      * pointer to the function concentrations
+      */ 
 	UserFunctionData*                _function_data; 
 
+    /**
+      * boundary condition values
+      */ 
 	std::map<size_t, ReductionKinNodeInfo*> _bc_info; 
 };
 
@@ -209,7 +254,7 @@ SingleStepKinReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
 
     _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
 
-    // setup IC
+    // set up initial condition
     _vec_u_n1.resize(n_var, 0);
     for (size_t i=0; i<n_var; i++) {
         MyVariable* femVar = problem->getVariable(i);
@@ -222,7 +267,7 @@ SingleStepKinReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
         _vec_u_n1[i] = u0; //u0->clone()
     }
 
-    // initialize vectors for solution, ST
+    // initialize vectors for solution and ST
     _x_n0 = dis->template createVector<double>(n_total_dofs);
     _x_n1 = dis->template createVector<double>(n_total_dofs);
     _x_n1_0 = dis->template createVector<double>(n_total_dofs);
@@ -340,7 +385,7 @@ template <
 int SingleStepKinReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBLEM, T_USER_LINEAR_SOLUTION, T_USER_NON_LINEAR_PROBLEM, T_USER_NON_LINEAR_SOLUTION>
     ::solveTimeStep(const NumLib::TimeStep &t_n1)
 {
-	size_t i, i_var; 
+	size_t i; 
 
 	// solving linear problems one after the other
 	for ( i=0; i < _lin_solutions.size(); i++)

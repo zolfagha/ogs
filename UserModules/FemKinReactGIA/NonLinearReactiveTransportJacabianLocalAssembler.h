@@ -40,7 +40,16 @@ public:
     {
     };
 
-    virtual ~NonLinearReactiveTransportJacobianLocalAssembler() {};
+    virtual ~NonLinearReactiveTransportJacobianLocalAssembler()
+    {
+        _vel              = NULL;
+        _reductionKin     = NULL; 
+        _concentrations   = NULL;
+        _xi_mob_rates     = NULL;
+        _xi_mob_rates_old = NULL;
+        _xi_immob_rates   = NULL;
+        _drates_dxi       = NULL;
+    };
 
     void setVelocity(const NumLib::ITXFunction *vel)
     {
@@ -155,23 +164,48 @@ public:
 
         }  // end of for i
 
-
-        //std::cout << "M="; localM.write(std::cout); std::cout << std::endl;
-        //std::cout << "L="; matDiff.write(std::cout); std::cout << std::endl;
-        //std::cout << "A="; matAdv.write(std::cout); std::cout << std::endl;
     }  // end of function assembly
 
 private:
+    /**
+      * FEM object
+      */ 
     FemLib::LagrangianFeObjectContainer _feObjects;
+
+    /**
+      * velocity function
+      */ 
     NumLib::ITXFunction* _vel;
+
+    /**
+      * pointer to the reduction scheme
+      */ 
 	ogsChem::chemReductionKin* _reductionKin; 
 
+    /**
+      * concentration data
+      */ 
 	T_FUNCTION_DATA* _concentrations; 
 
+    /**
+      * nodal xi_mob rate values
+      */ 
 	std::vector<T_NODAL_FUNCTION_SCALAR*> * _xi_mob_rates;
-	std::vector<T_NODAL_FUNCTION_SCALAR*> * _xi_mob_rates_old;
+
+    /**
+      * nodal xi_mob rate old values
+      */ 
+    std::vector<T_NODAL_FUNCTION_SCALAR*> * _xi_mob_rates_old;
+    
+    /**
+      * nodal xi_immob rate values
+      */ 
     std::vector<T_NODAL_FUNCTION_SCALAR*> * _xi_immob_rates;
-	std::vector<T_NODAL_FUNCTION_SCALAR*> * _drates_dxi;
+	
+    /**
+      * nodal drates over dxi values
+      */ 
+    std::vector<T_NODAL_FUNCTION_SCALAR*> * _drates_dxi;
 };
 
 #endif  // end of ifndef

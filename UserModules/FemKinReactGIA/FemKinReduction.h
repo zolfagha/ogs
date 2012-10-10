@@ -52,7 +52,8 @@ public:
     virtual ~FemKinReduction()
     {
         BaseLib::releaseObjectsInStdVector(_variables);
-        // BaseLib::releaseObject(_eqs);
+        _ReductionKin = NULL;
+        _discrete_system = NULL;
     }
 
     /// get this discrete system
@@ -78,8 +79,19 @@ private:
     DISALLOW_COPY_AND_ASSIGN(FemKinReduction);
 
 private:
+    /**
+      * discretization 
+      */ 
     MyDiscreteSystem* _discrete_system;
+
+    /**
+      * vector of variables
+      */ 
     std::vector<MyVariable*> _variables;
+
+    /**
+      * pointer to reduction scheme
+      */ 
 	ogsChem::chemReductionKin* _ReductionKin;
 
 };

@@ -50,7 +50,14 @@ public:
     };
 
 private:
+    /**
+      * pointer to assemblerR
+      */ 
     NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler, T_NODAL_FUNCTION_SCALAR>* _assemblerR;
+
+    /**
+      * pointer to assemblerJ
+      */ 
     NonLinearReactiveTransportJacobianLocalAssembler<T_NODAL_FUNCTION_SCALAR, T_FUNCTION_DATA>* _assemblerJ;
 };
 

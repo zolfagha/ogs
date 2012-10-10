@@ -38,13 +38,22 @@ public:
     {
     };
 
-    virtual ~LinearTransportJacobianLocalAssembler() {};
+    virtual ~LinearTransportJacobianLocalAssembler() 
+    {
+        BaseLib::releaseObject(_vel);
+    };
 
+    /**
+      * set the velocity
+      */ 
     void setVelocity(const NumLib::ITXFunction *vel)
     {
         _vel = const_cast<NumLib::ITXFunction*>(vel);
     }
 
+    /**
+      * assemble the Jacobian matrix
+      */ 
     void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &, const MathLib::LocalVector &/*u1*/, const MathLib::LocalVector &/*u0*/, MathLib::LocalMatrix &localJ)
     {
         FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
@@ -85,14 +94,17 @@ public:
         localJ = matM;
         localJ += matDiff;
         localJ += matAdv;
-
-        //std::cout << "M="; localM.write(std::cout); std::cout << std::endl;
-        //std::cout << "L="; matDiff.write(std::cout); std::cout << std::endl;
-        //std::cout << "A="; matAdv.write(std::cout); std::cout << std::endl;
     }
 
-private:
+private: 
+    /**
+      * FEM object
+      */ 
     FemLib::LagrangianFeObjectContainer _feObjects;
+
+    /**
+      * velocity function
+      */ 
     NumLib::ITXFunction* _vel;
 };
 

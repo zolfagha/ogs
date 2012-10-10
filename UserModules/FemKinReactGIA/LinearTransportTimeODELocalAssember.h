@@ -36,19 +36,35 @@ public:
     typedef MathLib::LocalVector LocalVectorType;
     typedef MathLib::LocalMatrix LocalMatrixType;
 
+    /**
+      * constructor
+      */ 
     LinearTransportTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
         : _feObjects(*feObjects), _vel(NULL)
     {
     };
 
-    virtual ~LinearTransportTimeODELocalAssembler() {};
+    /**
+      * destructor
+      */ 
+    virtual ~LinearTransportTimeODELocalAssembler() 
+    {
+        BaseLib::releaseObject(_vel);
+    };
 
+    /**
+      * set the velocity
+      */ 
     void setVelocity(const NumLib::ITXFunction *vel)
     {
         _vel = const_cast<NumLib::ITXFunction*>(vel);
     }
 
 protected:
+
+    /**
+      * assemble local Mass, Advection and Dispersion matrix
+      */ 
     virtual void assembleODE(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/, LocalMatrixType &localM, LocalMatrixType &localK, LocalVectorType &/*localF*/)
     {
         FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
@@ -83,14 +99,17 @@ protected:
         }
 
         localK = localDispersion + localAdvection;
-
-        //std::cout << "M="; localM.write(std::cout); std::cout << std::endl;
-        //std::cout << "L="; matDiff.write(std::cout); std::cout << std::endl;
-        //std::cout << "A="; matAdv.write(std::cout); std::cout << std::endl;
     }
 
 private:
+    /**
+      * FEM object
+      */ 
     FemLib::LagrangianFeObjectContainer _feObjects;
+    
+    /**
+      * velocity function
+      */ 
     NumLib::ITXFunction* _vel;
 };
 

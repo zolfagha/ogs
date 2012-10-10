@@ -18,7 +18,10 @@
 class Local_ODE_Xi_immob
 {
 public: 
-	
+
+	/**
+      * constructor
+      */ 
     Local_ODE_Xi_immob(ogsChem::chemReductionKin* reductionKin)
 		: _reductionKin(reductionKin)
     {
@@ -29,11 +32,17 @@ public:
 		_vec_dxi_immob_dt = MathLib::LocalVector::Zero( _reductionKin->get_n_xi_immob() ); 	 
 	}
 	 
+    /**
+      * destructor
+      */ 
 	~Local_ODE_Xi_immob()
     {
         _reductionKin = NULL; 
     }
 
+    /**
+      * update the eta and xi values
+      */ 
 	void update_eta_xi( MathLib::LocalVector & vec_eta_mob, 
 		                MathLib::LocalVector & vec_eta_immob, 
 						MathLib::LocalVector & vec_xi_mob, 
@@ -45,20 +54,46 @@ public:
 	    _vec_xi_immob  = vec_xi_immob;
 	}
 
-	MathLib::LocalVector operator() (double time, MathLib::LocalVector y )
+    /**
+      * evaluate the change of xi_immob over time
+      */ 
+	MathLib::LocalVector operator() (double time, MathLib::LocalVector vec_xi_immob )
 	{
-	    _vec_xi_immob = y; 
+	    _vec_xi_immob = vec_xi_immob; 
 		this->_reductionKin->Calc_Xi_immob_Rate( _vec_eta_mob, _vec_eta_immob, _vec_xi_mob, _vec_xi_immob, _vec_dxi_immob_dt); 
 		return _vec_dxi_immob_dt; 
 	}
 
+private: 
 
-private:     
+    /**
+      * pointer to reduction scheme class
+      */ 
 	ogsChem::chemReductionKin* _reductionKin; 
-	MathLib::LocalVector _vec_eta_mob; 
-	MathLib::LocalVector _vec_eta_immob; 
-	MathLib::LocalVector _vec_xi_mob; 
+	
+    /**
+      * local vector of eta_mob
+      */ 
+    MathLib::LocalVector _vec_eta_mob; 
+
+    /**
+      * local vector of eta_immob
+      */ 
+    MathLib::LocalVector _vec_eta_immob; 
+    
+    /**
+      * local vector of xi_mob
+      */ 
+    MathLib::LocalVector _vec_xi_mob; 
+
+    /**
+      * local vector of xi_immob
+      */ 
 	MathLib::LocalVector _vec_xi_immob;
+
+    /**
+      * local vector of dxi_immob_dt
+      */ 
 	MathLib::LocalVector _vec_dxi_immob_dt; 
  
 }; 

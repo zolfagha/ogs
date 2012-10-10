@@ -5,7 +5,7 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file Concentration.h
+ * \file Concentration.hpp
  *
  * Created on 2012-09-06 by Haibing Shao
  */
@@ -292,13 +292,11 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	// set up solution
     _solution = new MyKinReductionSolution(dis, _problem, this, _linear_problems, _linear_solutions, _non_linear_problem, _non_linear_solution);
 	
-    // set initial output
-    // OutputVariableInfo var(this->getOutputParameterName(Concentrations), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
-    // femData->outController.setOutput(var.name, var); 
-
-    // initial output parameter
-	// TODO
-    // this->setOutput(Concentrations, Concentrations->getIC());
+    // set initial output parameter
+	for (i=0; i<_concentrations.size(); i++) {
+		OutputVariableInfo var1(this->getOutputParameterName(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
+        femData->outController.setOutput(var1.name, var1);
+    }
 
     return true;
 }
@@ -319,29 +317,27 @@ void FunctionConcentrations<T1, T2>::initializeTimeStep(const NumLib::TimeStep &
 	_non_linear_problem->getEquation()->getLinearAssembler()->setVelocity(vel); 
     _non_linear_problem->getEquation()->getResidualAssembler()->setVelocity(vel); 
 	_non_linear_problem->getEquation()->getJacobianAssembler()->setVelocity(vel); 
-
-	_non_linear_problem->getEquation()->getLinearAssembler()->set_xi_mob_rates( &_xi_mob_rates ); 
+    // set xi_mob_rates for non-linear problem
+	_non_linear_problem->getEquation()->getLinearAssembler()  ->set_xi_mob_rates( &_xi_mob_rates ); 
 	_non_linear_problem->getEquation()->getResidualAssembler()->set_xi_mob_rates( &_xi_mob_rates ); 
 	_non_linear_problem->getEquation()->getJacobianAssembler()->set_xi_mob_rates( &_xi_mob_rates ); 
-
-	_non_linear_problem->getEquation()->getLinearAssembler()->set_xi_immob_rates( &_xi_mob_rates ); 
-	_non_linear_problem->getEquation()->getResidualAssembler()->set_xi_immob_rates( &_xi_mob_rates ); 
-	_non_linear_problem->getEquation()->getJacobianAssembler()->set_xi_immob_rates( &_xi_mob_rates ); 
+    // set xi_immob_rates for non-linear problem
+	_non_linear_problem->getEquation()->getLinearAssembler()  ->set_xi_immob_rates( &_xi_immob_rates ); 
+	_non_linear_problem->getEquation()->getResidualAssembler()->set_xi_immob_rates( &_xi_immob_rates ); 
+	_non_linear_problem->getEquation()->getJacobianAssembler()->set_xi_immob_rates( &_xi_immob_rates ); 
 }
 
 template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::updateOutputParameter(const NumLib::TimeStep &/*time*/)
 { 
-	// first use the eta and xi values to calculate comp concentrations
-	// TODO
-	// then update the output
-	// TODO
-    // setOutput(Concentrations, _solution->getCurrentSolution(0));
+    // nothing to do in this case
 }
 
 template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 {
+    size_t i;
+
     // update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
 
@@ -349,7 +345,7 @@ void FunctionConcentrations<T1, T2>::output(const NumLib::TimeStep &/*time*/)
     convert_eta_xi_to_conc(); 
 
 	// set the new output
-	for (size_t i=0; i<_concentrations.size(); i++) {
+	for (i=0; i<_concentrations.size(); i++) {
 		OutputVariableInfo var1(this->getOutputParameterName(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
         femData->outController.setOutput(var1.name, var1);
     }
@@ -363,9 +359,10 @@ void FunctionConcentrations<T1, T2>::convert_conc_to_eta_xi(void)
 
 	n_comp      = this->_ReductionKin->get_n_Comp();
 	n_eta_mob   = this->_ReductionKin->get_n_eta_mob(); 
-	n_eta_immob = this->_ReductionKin->get_n_eta() - this->_ReductionKin->get_n_eta_mob() ;
+    n_eta_immob = this->_ReductionKin->get_n_eta_immob();
 	n_xi_mob    = this->_ReductionKin->get_n_xi_mob(); 
 	n_xi_immob  = this->_ReductionKin->get_n_xi_immob(); 
+
 	// only when the reduction scheme is fully initialized
 	if ( this->_ReductionKin->IsInitialized() )
 	{
@@ -423,7 +420,7 @@ void FunctionConcentrations<T1, T2>::convert_eta_xi_to_conc(void)
 
 	n_comp      = this->_ReductionKin->get_n_Comp();
 	n_eta_mob   = this->_ReductionKin->get_n_eta_mob(); 
-	n_eta_immob = this->_ReductionKin->get_n_eta() - this->_ReductionKin->get_n_eta_mob() ;
+    n_eta_immob = this->_ReductionKin->get_n_eta_immob();
 	n_xi_mob    = this->_ReductionKin->get_n_xi_mob(); 
 	n_xi_immob    = this->_ReductionKin->get_n_xi_immob(); 
 	// only when the reduction scheme is fully initialized
