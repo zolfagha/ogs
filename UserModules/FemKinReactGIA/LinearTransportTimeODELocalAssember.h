@@ -49,7 +49,6 @@ public:
       */ 
     virtual ~LinearTransportTimeODELocalAssembler() 
     {
-        BaseLib::releaseObject(_vel);
     };
 
     /**
@@ -82,6 +81,7 @@ protected:
         MathLib::LocalMatrix poro(1,1);
         MathLib::LocalMatrix d_poro(1,1);
         NumLib::ITXFunction::DataType v;
+
         for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
             q->getSamplingPoint(j, gp_x);
             fe->computeBasisFunctions(gp_x);

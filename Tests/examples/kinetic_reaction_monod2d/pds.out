@@ -7,6 +7,10 @@ GeoSys-OUT: Output ------------------------------------------------
   Comp_B
   Comp_C
   Biomass
+  eta_mob_0
+  eta_mob_1
+  xi_mob_0
+  xi_immob_0
  $ELE_VALUES
   VELOCITY
  $GEO_TYPE
@@ -14,7 +18,7 @@ GeoSys-OUT: Output ------------------------------------------------
  $DAT_TYPE
   PVD
  $TIM_TYPE
-  STEPS 1   
+  STEPS 1  
 
 #OUTPUT // profile
  $NOD_VALUES
@@ -24,6 +28,12 @@ GeoSys-OUT: Output ------------------------------------------------
   Comp_B
   Comp_C
   Biomass
+  eta_mob_0
+  eta_mob_1
+  xi_mob_0
+  xi_immob_0
+ $ELE_VALUES
+  VELOCITY
  $GEO_TYPE
   POLYLINE PLY_4
  $DAT_TYPE

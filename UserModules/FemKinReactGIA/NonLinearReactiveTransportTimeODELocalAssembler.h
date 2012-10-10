@@ -113,7 +113,7 @@ protected:
 			_vel->eval(gp_pos, v);
 			NumLib::ITXFunction::DataType v2 = v.topRows(n_dim).transpose();
 
-			// mass matrix
+    		// mass matrix
 			fe->integrateWxN(j, poro, localM_tmp);
 			// dispersion
 			fe->integrateDWxDN(j, d_poro, localDispersion_tmp);
@@ -136,9 +136,6 @@ protected:
 		    localF.segment(n_nodes*k,n_nodes).noalias() += Np.transpose() * rate_xi_mob_gp * fe->getDetJ() * q->getWeight(j);
         }  // end of for k
 
-        //std::cout << "M="; localM.write(std::cout); std::cout << std::endl;
-        //std::cout << "L="; matDiff.write(std::cout); std::cout << std::endl;
-        //std::cout << "A="; matAdv.write(std::cout); std::cout << std::endl;
     }
 
 private:

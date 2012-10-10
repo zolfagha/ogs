@@ -40,7 +40,7 @@ public:
 
     virtual ~LinearTransportJacobianLocalAssembler() 
     {
-        BaseLib::releaseObject(_vel);
+        
     };
 
     /**

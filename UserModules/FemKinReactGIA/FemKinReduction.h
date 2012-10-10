@@ -42,13 +42,17 @@ public:
     typedef T_DIS_SYS MyDiscreteSystem;
     typedef FemVariable MyVariable;
 
-    ///
+    /**
+      * constructor
+      */
     explicit FemKinReduction(MyDiscreteSystem* dis, ogsChem::chemReductionKin* myReductionKin )
      : _discrete_system(dis), _ReductionKin(myReductionKin)
     {
     }
 
-    ///
+    /**
+      * destructor
+      */
     virtual ~FemKinReduction()
     {
         BaseLib::releaseObjectsInStdVector(_variables);
@@ -56,23 +60,33 @@ public:
         _discrete_system = NULL;
     }
 
-    /// get this discrete system
+    /**
+      * get this discrete system
+      */
     MyDiscreteSystem* getDiscreteSystem() {return _discrete_system;};
 
-    /// create FE approximation field
+    /**
+      * create FE approximation field
+      */
     MyVariable* addVariable(const std::string &name)
     {
         _variables.push_back(new MyVariable(_variables.size(), name));
         return _variables.back();
     }
 
-    /// get a variable
+    /**
+      * get a variable
+      */
     MyVariable* getVariable(size_t i) const { return _variables[i]; }
 
-    /// get the number of variables
+    /**
+      * get the number of variables
+      */
     size_t getNumberOfVariables() const { return _variables.size(); }
 
-	// get the pointer to reduction scheme
+	/**
+      * get the pointer to reduction scheme
+      */
 	ogsChem::chemReductionKin* getReductionScheme() const { return _ReductionKin; }
 
 private:

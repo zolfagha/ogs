@@ -69,6 +69,11 @@ double chemReactionKin::calcReactionRateMonod(ogsChem::LocalVector & vec_Comp_Co
 	// times c_bio
 	rate *= c_bio;
 	// retrun rate
+
+    // ----debugging, set rate to zero-----------------
+    rate = 0.0; 
+    // ----end of debugging----------------------------
+
 	return rate; 
 }
 
@@ -96,6 +101,10 @@ double chemReactionKin::calcReactionRateDoubleMonodDecay(ogsChem::LocalVector & 
 	// TODO
 	// times c_bio
 	rate *= c_bio;
+
+    // ----debugging, set rate to zero-----------------
+    rate = 0.0; 
+    // ----end of debugging----------------------------
 
 	// retrun rate
 	return rate; 

@@ -110,9 +110,9 @@ int FunctionHeadToElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &/*ti
             MathLib::LocalMatrix k;
             pm->hydraulic_conductivity->eval(pos, k);
             if (k.rows()==1) {
-                static_cast<MathLib::LocalVector>(q.head(msh->getDimension())) = (*dN) * local_h * (-1.0 * k(0,0));
+                q.head(msh->getDimension()) = (*dN) * local_h * (-1.0 * k(0,0));
             } else {
-                static_cast<MathLib::LocalVector>(q.head(msh->getDimension())) = (*dN) * k * local_h * (-1.0);
+                q.head(msh->getDimension()) = (*dN) * k * local_h * (-1.0);
             }
             vel->setIntegrationPointValue(i_e, ip, q);
         }

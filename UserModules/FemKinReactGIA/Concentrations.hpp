@@ -298,6 +298,28 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
         femData->outController.setOutput(var1.name, var1);
     }
 
+    // -----------debugging, output eta and xi----------------------
+    for (i=0; i<_eta_mob.size(); i++) {
+        std::stringstream str_tmp;
+		str_tmp << "eta_mob_" << i ;
+        OutputVariableInfo var1(str_tmp.str(), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_mob[i]);
+        femData->outController.setOutput(var1.name, var1);
+    }
+    for (i=0; i<_xi_mob.size(); i++) {
+        std::stringstream str_tmp;
+		str_tmp << "xi_mob_" << i ;
+        OutputVariableInfo var1(str_tmp.str(), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob[i]);
+        femData->outController.setOutput(var1.name, var1);
+    }
+    for (i=0; i<_xi_immob.size(); i++) {
+        std::stringstream str_tmp;
+		str_tmp << "xi_immob_" << i ;
+        OutputVariableInfo var1(str_tmp.str(), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob[i]);
+        femData->outController.setOutput(var1.name, var1);
+    }
+    // -----------------end of debugging-----------------------------
+
+
     return true;
 }
 
@@ -349,6 +371,27 @@ void FunctionConcentrations<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 		OutputVariableInfo var1(this->getOutputParameterName(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
         femData->outController.setOutput(var1.name, var1);
     }
+
+    // -----------debugging, output eta and xi----------------------
+    for (i=0; i<_eta_mob.size(); i++) {
+        std::stringstream str_tmp;
+		str_tmp << "eta_mob_" << i ;
+        OutputVariableInfo var1(str_tmp.str(), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_mob[i]);
+        femData->outController.setOutput(var1.name, var1);
+    }
+    for (i=0; i<_xi_mob.size(); i++) {
+        std::stringstream str_tmp;
+		str_tmp << "xi_mob_" << i ;
+        OutputVariableInfo var1(str_tmp.str(), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob[i]);
+        femData->outController.setOutput(var1.name, var1);
+    }
+    for (i=0; i<_xi_immob.size(); i++) {
+        std::stringstream str_tmp;
+		str_tmp << "xi_immob_" << i ;
+        OutputVariableInfo var1(str_tmp.str(), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob[i]);
+        femData->outController.setOutput(var1.name, var1);
+    }
+    // -----------end of debugging----------------------------------
 }
 
 template <class T1, class T2>
