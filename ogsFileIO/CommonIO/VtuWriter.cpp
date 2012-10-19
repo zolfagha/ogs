@@ -246,13 +246,11 @@ bool VtuWriter::writeCellData(std::fstream &fin,
                 MathLib::LocalMatrix v;
                 for (size_t j=0; j<msh.getNumberOfElements(); j++) {
                     pt_data.f->eval(NumLib::TXPosition(NumLib::TXPosition::Element, j), v);
-                    if (v.array().size()>=(int)pt_data.nr_of_components) {
-                        for (size_t k=0; k<pt_data.nr_of_components; k++)
-                            fin << v.array()(k) << " ";
-                    } else {
-                        for (size_t k=0; k<pt_data.nr_of_components; k++)
-                            fin << 0 << " ";
-                    }
+                    const size_t n_dummy = pt_data.nr_of_components - static_cast<size_t>(v.array().size());
+                    for (int k=0; k<v.array().size(); k++)
+                        fin << v.array()(k) << " ";
+                    for (size_t k=0; k<n_dummy; k++)
+                        fin << 0 << " ";
                 }
                 fin << std::endl;
             }
@@ -262,14 +260,11 @@ bool VtuWriter::writeCellData(std::fstream &fin,
                 MathLib::LocalMatrix v;
                 for (long j = 0; j < (long) msh.getNumberOfElements(); j++) {
                     pt_data.f->eval(NumLib::TXPosition(NumLib::TXPosition::Element, j), v);
-                    if (v.array().size()>=(int)pt_data.nr_of_components) {
-                        for (size_t k=0; k<pt_data.nr_of_components; k++)
-                            BaseLib::write_value_binary(fin, v.array()(k));
-                    } else {
-                        for (size_t k=0; k<pt_data.nr_of_components; k++)
-                            BaseLib::write_value_binary<double>(fin, 0);
-                    }
-                   
+                    const size_t n_dummy = pt_data.nr_of_components - static_cast<size_t>(v.array().size());
+                    for (int k=0; k<v.array().size(); k++)
+                        BaseLib::write_value_binary(fin, v.array()(k));
+                    for (size_t k=0; k<n_dummy; k++)
+                        BaseLib::write_value_binary<double>(fin, 0);
                 }
             }
         } else {
