@@ -60,6 +60,9 @@ LIST(APPEND THMC_Files ${TempProcessLib_Files})
 # ./MaterialLib
 INCLUDE( MaterialLib/CMakeLists.txt )
 
+# ./PhysicsLib
+INCLUDE( PhysicsLib/CMakeLists.txt )
+
 # ./ChemLib
 INCLUDE( ChemLib/CMakeLists.txt )
 
@@ -71,6 +74,7 @@ ADD_LIBRARY( ogs6THMC STATIC
     ${MaterialLib_Files}
     ${ProcessLib_Files}
     ${ChemLib_Files}
+    ${PhysicsLib_Files}
     ${THMC_Files}
 )
 
