@@ -15,7 +15,7 @@
 #include "FemLib/Core/Element/IFemElement.h"
 #include "MaterialLib/PorousMedia.h"
 #include "MaterialLib/Solid.h"
-#include "../FemDeformationTotalForm/FemLinearElasticTools.h"
+#include "PhysicsLib/FemLinearElasticTools.h"
 #include "Ogs6FemData.h"
 
 void FemPoroelasticJacobianLocalAssembler::assembleComponents

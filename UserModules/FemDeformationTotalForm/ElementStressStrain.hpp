@@ -16,7 +16,7 @@
 
 #include "DiscreteLib/Utils/DiscreteSystemContainerPerMesh.h"
 #include "Ogs6FemData.h"
-#include "FemLinearElasticTools.h"
+#include "PhysicsLib/FemLinearElasticTools.h"
 
 template <class T>
 size_t FunctionElementStressStrain<T>::getNumberOfStrainComponents() const

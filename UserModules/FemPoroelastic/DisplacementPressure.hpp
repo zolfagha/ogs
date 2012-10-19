@@ -2,7 +2,7 @@
 
 #include "logog.hpp"
 
-#include "MeshLib/Tools/Tools.h"
+#include "MeshLib/Tools/MeshGenerator.h"
 #include "FemLib/Function/FemNodalFunction.h"
 #include "NumLib/Function/TXFunctionBuilder.h"
 #include "OutputIO/OutputBuilder.h"
@@ -11,9 +11,9 @@
 #include "SolutionLib/Fem/FemVariable.h"
 #include "MaterialLib/PorousMedia.h"
 #include "MaterialLib/Solid.h"
+#include "PhysicsLib/FemLinearElasticTools.h"
 #include "Ogs6FemData.h"
-
-#include "../FemDeformationTotalForm/FemLinearElasticTools.h"
+#include "FemVariableBuilder.h"
 
 template <class T1, class T2>
 typename FunctionDisplacementPressure<T1,T2>::MyVariable* FunctionDisplacementPressure<T1,T2>::getDisplacementComponent(MyVariable *u_x, MyVariable* u_y, MyVariable* u_z, const std::string &var_name)
@@ -51,7 +51,7 @@ bool FunctionDisplacementPressure<T1,T2>::initialize(const BaseLib::Options &opt
     //--------------------------------------------------------------------------
     MeshLib::IMesh* msh = femData->list_mesh[msh_id];
     INFO("->generating higher order mesh...");
-    MeshLib::generateHigherOrderUnstrucuredMesh(*(MeshLib::UnstructuredMesh*)msh, 2);
+    MeshLib::MeshGenerator::generateHigherOrderUnstrucuredMesh(*(MeshLib::UnstructuredMesh*)msh, 2);
     INFO("* mesh id %d: order=%d, nodes=%d, elements=%d", msh_id, msh->getMaxiumOrder(), msh->getNumberOfNodes(msh->getMaxiumOrder()), msh->getNumberOfElements());
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
@@ -72,6 +72,11 @@ bool FunctionDisplacementPressure<T1,T2>::initialize(const BaseLib::Options &opt
     MyVariable* u_y = _problem->addVariable("u_y", FemLib::PolynomialOrder::Quadratic);
     MyVariable* p = _problem->addVariable("p", FemLib::PolynomialOrder::Linear);
     _var_p_id = p->getID();
+    FemVariableBuilder var_builder;
+    var_builder.doit(this->getOutputParameterName(Displacement)+"_X1", option, msh, femData->geo, femData->geo_unique_name, _feObjects, u_x);
+    var_builder.doit(this->getOutputParameterName(Displacement)+"_Y1", option, msh, femData->geo, femData->geo_unique_name, _feObjects, u_y);
+    var_builder.doit(this->getOutputParameterName(Pressure), option, msh, femData->geo, femData->geo_unique_name, _feObjects, p);
+#if 0
     // IC
     NumLib::TXFunctionBuilder f_builder;
 //    MyNodalFunctionScalar* u0 = new MyNodalFunctionScalar();
@@ -153,6 +158,7 @@ bool FunctionDisplacementPressure<T1,T2>::initialize(const BaseLib::Options &opt
             WARN("Distribution type %s is specified but not found. Ignore this ST.", dis_name.c_str());
         }
     }
+#endif
 
     //--------------------------------------------------------------------------
     // set up equations

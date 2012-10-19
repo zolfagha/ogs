@@ -16,8 +16,7 @@
 #include "FemLib/Tools/LagrangeFeObjectContainer.h"
 #include "NumLib/TransientAssembler/IElementWiseTransientLinearEQSLocalAssembler.h"
 #include "MaterialLib/Solid.h"
-
-#include "FemLinearElasticTools.h"
+#include "PhysicsLib/FemLinearElasticTools.h"
 #include "Ogs6FemData.h"
 
 void FemLinearElasticLinearLocalAssembler::assembly(

@@ -10,9 +10,9 @@
 #include "SolutionLib/Fem/FemSourceTerm.h"
 #include "MaterialLib/PorousMedia.h"
 #include "MaterialLib/Solid.h"
+#include "PhysicsLib/FemLinearElasticTools.h"
 #include "Ogs6FemData.h"
-
-#include "FemLinearElasticTools.h"
+#include "FemVariableBuilder.h"
 
 template <class T1, class T2>
 typename FunctionDisplacement<T1,T2>::MyVariable* FunctionDisplacement<T1,T2>::getDisplacementComponent(MyVariable *u_x, MyVariable* u_y, MyVariable* u_z, const std::string &var_name)
@@ -53,6 +53,10 @@ bool FunctionDisplacement<T1,T2>::initialize(const BaseLib::Options &option)
     // set up variable
     MyVariable* u_x = _problem->addVariable("u_x");
     MyVariable* u_y = _problem->addVariable("u_y");
+    FemVariableBuilder var_builder;
+    var_builder.doit(this->getOutputParameterName(Displacement)+"_X", option, msh, femData->geo, femData->geo_unique_name, _feObjects, u_x);
+    var_builder.doit(this->getOutputParameterName(Displacement)+"_Y", option, msh, femData->geo, femData->geo_unique_name, _feObjects, u_y);
+#if 0
     // IC
     NumLib::TXFunctionBuilder f_builder;
     SolutionLib::FemIC* u_ic = new SolutionLib::FemIC(msh);
@@ -110,6 +114,7 @@ bool FunctionDisplacement<T1,T2>::initialize(const BaseLib::Options &option)
             WARN("Distribution type %s is specified but not found. Ignore this ST.", dis_name.c_str());
         }
     }
+#endif
 
     // set up solution
     _solution = new MySolutionType(dis, _problem);

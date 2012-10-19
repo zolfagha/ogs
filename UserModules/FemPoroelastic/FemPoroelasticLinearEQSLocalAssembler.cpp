@@ -19,7 +19,7 @@
 #include "MaterialLib/Solid.h"
 #include "MaterialLib/Fluid.h"
 
-#include "../FemDeformationTotalForm/FemLinearElasticTools.h"
+#include "PhysicsLib/FemLinearElasticTools.h"
 #include "Ogs6FemData.h"
 
 void FemPoroelasticLinearEQSLocalAssembler::assembleComponents(
