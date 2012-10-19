@@ -15,6 +15,7 @@
 #include <string>
 #include <map>
 #include <ostream>
+#include <vector>
 
 #include "StringTools.h"
 #include "OptionNode.h"
@@ -127,52 +128,32 @@ public:
      */
     const_iterator end() const { return _dictionary.end(); };
 
-    //TODO we need iterator classes for sub group and options
+    /// get a list of sub-group having the given key
+    std::vector<const OptionGroup*> getSubGroupList(const std::string &key) const;
 
-    /// get option with the given key if it exists.
-    const OptionGroup* getFirstSubGroup(const std::string &key) const;
-
-    /// get option with the given key if it exists.
-    const OptionGroup* getNextSubGroup() const;
-
-    /// return the first option
+    /// get a list of values related to the given key
     template<typename T>
-    inline const T getFirstOption(const std::string &key) const
+    std::vector<T> getOptionList(const std::string &key) const
     {
-        _leaf_range = _dictionary.equal_range(key);
-        _leaf_itr = _leaf_range.first;
-        if (_leaf_itr == _leaf_range.second || !_leaf_itr->second->isValue())
-            return getDummy<T>();
-        else
-            return static_cast<OptionLeaf<T>*>(_leaf_itr->second)->getValue();
+        // iterator for leaf
+        const_pair_of_iterator _leaf_range = _dictionary.equal_range(key);
+        DictionaryType::const_iterator itr;
+
+        std::vector<T> list_op;
+
+        for (itr = _leaf_range.first; itr!=_leaf_range.second; ++itr) {
+            if (itr->second->isValue())
+                list_op.push_back(static_cast<OptionLeaf<T>*>(itr->second)->getValue());
+        }
+
+        return list_op;
     }
-
-    /// return the next option
-    template<typename T>
-    inline const T getNextOption() const
-    {
-        if (_leaf_itr == _leaf_range.second)
-            return getDummy<T>();
-        ++_leaf_itr;
-
-        if (_leaf_itr == _leaf_range.second || !_leaf_itr->second->isValue())
-            return getDummy<T>();
-        else
-            return static_cast<OptionLeaf<T>*>(_leaf_itr->second)->getValue();
-    }
-
 
 private:
     // a dictionary storing pairs of key and OptionNodes
     DictionaryType _dictionary;
     // parent node
     OptionGroup* _parent;
-    // iterator for subgroup
-    mutable const_pair_of_iterator _subgroup_range;
-    mutable DictionaryType::const_iterator _subgroup_itr;
-    // iterator for leaf
-    mutable const_pair_of_iterator _leaf_range;
-    mutable DictionaryType::const_iterator _leaf_itr;
 };
 
 }
