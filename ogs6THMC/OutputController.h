@@ -46,8 +46,10 @@ public:
         OutputTimingBuilder outTimBuilder;
 
         const BaseLib::Options* opOutList = option.getSubGroup("outputList");
-        for (const BaseLib::Options* op = opOutList->getFirstSubGroup("output"); op!=0; op = opOutList->getNextSubGroup())
+        std::vector<const BaseLib::Options*> vec_opOutput = opOutList->getSubGroupList("output");
+        for (size_t i=0; i<vec_opOutput.size(); ++i)
         {
+            const BaseLib::Options* op = vec_opOutput[i];
             std::string data_type = op->getOption("dataType");
             IOutput* out = outBuilder.create(data_type);
             out->setOutputPath(output_dir, project_name);
@@ -60,12 +62,20 @@ public:
             out->setOutputTiming(outTimBuilder.create(time_type, out_steps));
 
             std::vector<std::string> nod_var_name;
-            for (const BaseLib::Options* opVal = op->getFirstSubGroup("nodeValue"); opVal!=NULL; opVal = op->getNextSubGroup())
+            std::vector<const BaseLib::Options*> vec_opNodeValue = op->getSubGroupList("nodeValue");
+            for (size_t j=0; j<vec_opNodeValue.size(); ++j)
+            {
+                const BaseLib::Options* opVal = vec_opNodeValue[j];
                 nod_var_name.push_back(opVal->getOption("name"));
+            }
             out->addNodalVariable(nod_var_name);
             std::vector<std::string> ele_var_name;
-            for (const BaseLib::Options* opVal = op->getFirstSubGroup("elementValue"); opVal!=NULL; opVal = op->getNextSubGroup())
+            std::vector<const BaseLib::Options*> vec_opEleValue = op->getSubGroupList("elementValue");
+            for (size_t j=0; j<vec_opEleValue.size(); ++j)
+            {
+                const BaseLib::Options* opVal = vec_opEleValue[j];
                 ele_var_name.push_back(opVal->getOption("name"));
+            }
             out->addElementalVariable(ele_var_name);
 
             std::string geo_type = op->getOption("geoType");
