@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include "logog.hpp"
+
 #include "MathLib/Integration/GaussLegendre.h"
 #include "MeshLib/Core/IElement.h"
 
@@ -39,14 +41,17 @@ class FemIntegrationGaussTriangle : public AbstractFemIntegrationGaussBase
 public:
     void getSamplingPoint(size_t igp, double* x) const
     {
-        switch (getNumberOfSamplingPoints())
+        const size_t n = getNumberOfSamplingPoints();
+        switch (n)
         {
         case 1:
-            break;
+            getSamplePointTri1(igp, x);
+             break;
         case 3:
             getSamplePointTri3(igp, x);
             break;
-        case 6:
+        default:
+            ERR("***Error in FemIntegrationGaussTriangle::getSamplingPoint() - Given sampling points %d are not supported not supported.", n);
             break;
         }
     }
