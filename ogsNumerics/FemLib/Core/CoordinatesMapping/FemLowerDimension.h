@@ -103,7 +103,7 @@ public:
         for (size_t i=0; i<_msh_dim; i++)
             x_global[i] = physical_pt[i];
         const MathLib::LocalMatrix &matR = getRotationMatrix();
-        assert(matR.rows() == _msh_dim);
+        assert(static_cast<size_t>(matR.rows()) == _msh_dim);
         MathLib::LocalVector x_local(_msh_dim);
         x_local = matR.transpose() * x_global;
 
