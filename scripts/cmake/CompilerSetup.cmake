@@ -42,6 +42,15 @@ IF (COMPILER_IS_INTEL)
         SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wall")
 ENDIF() # COMPILER_IS_INTEL
 
+### Clang compiler
+IF (COMPILER_IS_CLANG)
+        IF( NOT CMAKE_BUILD_TYPE STREQUAL "Debug" )
+                MESSAGE(STATUS "Set CLAG release flags")
+                SET(CMAKE_CXX_FLAGS "-O3 -DNDEBUG")
+        ENDIF()
+        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu89")
+ENDIF() # COMPILER_IS_CLANG
+
 # Profiling
 IF (OGS_PROFILE)
 	IF( NOT CMAKE_BUILD_TYPE STREQUAL "Release" )
