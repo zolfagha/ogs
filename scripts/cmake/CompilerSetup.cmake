@@ -45,7 +45,7 @@ ENDIF() # COMPILER_IS_INTEL
 ### Clang compiler
 IF (COMPILER_IS_CLANG)
         IF( NOT CMAKE_BUILD_TYPE STREQUAL "Debug" )
-                MESSAGE(STATUS "Set CLAG release flags")
+                MESSAGE(STATUS "Set Clang release flags")
                 SET(CMAKE_CXX_FLAGS "-O3 -DNDEBUG")
         ENDIF()
         SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu89")
