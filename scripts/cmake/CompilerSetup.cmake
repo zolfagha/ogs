@@ -48,6 +48,7 @@ IF (COMPILER_IS_CLANG)
                 MESSAGE(STATUS "Set Clang release flags")
                 SET(CMAKE_CXX_FLAGS "-O3 -DNDEBUG")
         ENDIF()
+         # need -std=gnu89 to avoid linking errors of multiple definitions
         SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu89")
 ENDIF() # COMPILER_IS_CLANG
 
