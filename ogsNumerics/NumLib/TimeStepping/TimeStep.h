@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include "BaseLib/CodingTools.h"
 
 namespace NumLib
@@ -32,6 +33,19 @@ public:
         _dt = t - prev._time_current;
         _time_stepping_count = prev._time_stepping_count+1;
     };
+
+    TimeStep(const TimeStep &src)
+    : _time_current(src._time_current), _dt(src._dt), _time_stepping_count(src._time_stepping_count)
+    {
+    };
+
+    TimeStep &operator=(const TimeStep &src)
+    {
+        _time_current = src._time_current;
+        _dt = src._dt;
+        _time_stepping_count = src._time_stepping_count;
+        return *this;
+    }
 
     bool operator<(const TimeStep &t) const
     {
@@ -63,13 +77,7 @@ private:
     double _dt;
     size_t _time_stepping_count;
 
-    DISALLOW_COPY_AND_ASSIGN(TimeStep);
-    //TimeStep(const TimeStep &prev) 
-    //{
-    //    _time_current = prev._time_current;
-    //    _dt = prev._dt;
-    //    _time_stepping_count = prev._time_stepping_count;
-    //};
+    //DISALLOW_COPY_AND_ASSIGN(TimeStep);
 };
 
 }
