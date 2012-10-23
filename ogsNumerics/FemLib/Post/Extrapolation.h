@@ -86,8 +86,10 @@ public:
         switch (tp) {
             case FEMExtrapolationMethod::Average:
                 return new FemExtrapolationAverage<T_DIS_SYS,Tvalue>();
+            default:
+                return NULL;
         }
-        return 0;
+        return NULL;
     };
 };
 

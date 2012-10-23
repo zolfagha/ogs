@@ -97,7 +97,7 @@ private:
     typedef MathLib::LocalVector LocalVectorType;
 public:
     GWJacobianAssembler(FemLib::LagrangianFeObjectContainer &feObjects, NumLib::ITXFunction &mat)
-    : _matK(&mat), _feObjects(&feObjects)
+    : _matK(&mat), _feObjects(&feObjects), test(.0)
     {
     };
 
@@ -211,7 +211,7 @@ class GWFemTestSystem : public NumLib::ITransientSystem
 public:
     GWFemTestSystem()
     {
-        BaseLib::zeroObject(_rec, _head, _problem);
+        BaseLib::zeroObject(_rec, _head, _problem, _solHead, _feObjects);
     }
 
     virtual ~GWFemTestSystem()
