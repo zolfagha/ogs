@@ -35,7 +35,7 @@ public:
 
     virtual ~ElementWiseDimDependentTransientLinearEQSLocalAssembler()
     {
-        BaseLib::releaseObjectsInStdVector(_vec_dim_assembler);
+//        BaseLib::releaseObjectsInStdVector(_vec_dim_assembler);
     };
 
     /**
