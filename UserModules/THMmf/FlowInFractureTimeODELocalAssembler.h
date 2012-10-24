@@ -90,7 +90,7 @@ void FlowInFractureTimeODELocalAssembler<T>::assembleODE(const NumLib::TimeStep 
         MathLib::LocalMatrix &Np = *fe->getBasisFunction();
         MathLib::LocalMatrix &dNp = *fe->getGradBasisFunction();
         fe->getRealCoordinates(real_x);
-        const double fac_q = fe->getDetJ() * q->getWeight(j);
+        const double fac = fe->getDetJ() * q->getWeight(j);
 
         // evaluate material properties
         fe->getRealCoordinates(real_x);
@@ -113,17 +113,16 @@ void FlowInFractureTimeODELocalAssembler<T>::assembleODE(const NumLib::TimeStep 
         local2.block(0, 0, local_k_mu.rows(), local_k_mu.cols()) = local_k_mu.block(0, 0, local_k_mu.rows(), local_k_mu.cols());
         //local2.topLeftCorner(local_k_mu.rows(), local_k_mu.cols()) = local_k_mu;
         MathLib::LocalMatrix global_k_mu = (*matR) * local2 * matR->transpose();
-        const double fac = fac_q * b;
 
-        // M_pp += Np^T * S * Np
-        localM.noalias() += fac * Np.transpose() * s * Np;
+        // M_pp += Np^T * b * S * Np
+        localM.noalias() += fac * Np.transpose() * b * s * Np;
 
-        // K_pp += dNp^T * K * dNp
-        localK.noalias() += fac * dNp.transpose() * global_k_mu * dNp;
+        // K_pp += dNp^T * b * K * dNp
+        localK.noalias() += fac * dNp.transpose() * b * global_k_mu * dNp;
 
         if (hasGravityEffect) {
-            // F += dNp^T * K * rho * gz
-            localF.noalias() += fac * dNp.transpose() * global_k_mu * rho_f * vec_g;
+            // F += dNp^T * b * K * rho * gz
+            localF.noalias() += fac * dNp.transpose() * b * global_k_mu * rho_f * vec_g;
         }
     }
 }
