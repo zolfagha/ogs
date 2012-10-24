@@ -19,6 +19,8 @@
 
 #include "MeshLib/Core/ElementFactory.h"
 #include "MeshLib/Tools/MeshNodesAlongPolyline.h"
+#include "MeshLib/Core/ElementCoordinatesInvariant.h"
+#include "MeshLib/Core/ElementCoordinatesMappingLocal.h"
 //#include "MeshLib/Topology/Topology.h"
 
 namespace MeshLib
@@ -242,5 +244,25 @@ void calculateMeshGeometricProperties(UnstructuredMesh &msh)
     max_len = std::max(max_len, pt_diff[2]);
     geo_prop->setMinEdgeLength(max_len * 1e-5);
 }
+
+void setMeshElementCoordinatesMapping(IMesh &msh)
+{
+    const size_t msh_dim = msh.getDimension();
+    for (size_t i=0; i<msh.getNumberOfElements(); i++) {
+        IElement* e = msh.getElement(i);
+        if (e->getMappedCoordinates()==NULL) {
+            MeshLib::IElementCoordinatesMapping* ele_map;
+            size_t ele_dim = e->getDimension();
+            assert(msh_dim >= ele_dim);
+            if (msh_dim == ele_dim) {
+                ele_map = new ElementCoordinatesInvariant(&msh, e);
+            } else {
+                ele_map = new ElementCoordinatesMappingLocal(&msh, *e, msh.getGeometricProperty()->getCoordinateSystem());
+            }
+            e->setMappedCoordinates(ele_map);
+        }
+
+    }
+};
 
 } // end namespace

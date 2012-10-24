@@ -58,4 +58,7 @@ void createEdgeElements(IMesh * msh);
 /// calculate geometric properties of an unstructured mesh
 void calculateMeshGeometricProperties(UnstructuredMesh &msh);
 
+/// set element coordinates mapping
+void setMeshElementCoordinatesMapping(IMesh &msh);
+
 }// end namespace
