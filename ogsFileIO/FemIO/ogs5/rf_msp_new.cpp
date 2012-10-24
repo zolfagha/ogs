@@ -31,6 +31,7 @@
 // FEM-Makros
 #include "makros.h"
 #include "readNonBlankLineFromInputStream.h"
+#include "StringTools.h"
 
 using namespace std;
 
@@ -121,6 +122,7 @@ std::ios::pos_type CSolidProperties::Read(std::ifstream* msp_file)
 
         position = msp_file->tellg();
         line_string = readNonBlankLineFromInputStream(*msp_file);
+        trim(line_string, ':'); //NW
         if(line_string.find(hash) != string::npos)
         {
             new_keyword = true;
