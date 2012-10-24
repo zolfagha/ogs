@@ -13,6 +13,8 @@
 #pragma once
 
 #include "BaseLib/CodingTools.h"
+#include "NumLib/TransientAssembler/DummyElementWiseTransientJacobianLocalAssembler.h"
+#include "NumLib/TransientAssembler/DummyElementWiseTransientResidualLocalAssembler.h"
 #include "FemLinearEQS.h"
 #include "FemResidualEQS.h"
 #include "FemDxEQS.h"
@@ -36,8 +38,8 @@ template
     class T_DIS_SYS,
     class T_LINEAR_SOLVER,
     class T_LOCAL_ASSEMBLER_LINEAR,
-    class T_LOCAL_ASSEMBLER_RESIDUAL,
-    class T_LOCAL_ASSEMBLER_JACOBIAN
+    class T_LOCAL_ASSEMBLER_RESIDUAL = NumLib::DummyElementWiseTransientResidualLocalAssembler,
+    class T_LOCAL_ASSEMBLER_JACOBIAN = NumLib::DummyElementWiseTransientJacobianLocalAssembler
     >
 class TemplateFemEquation
 {
@@ -53,9 +55,9 @@ public:
 
     ///
     TemplateFemEquation() :
-    _linear_assembler(0),
-    _residual_assembler(0),
-    _jacobian_assembler(0)
+    _linear_assembler(NULL),
+    _residual_assembler(NULL),
+    _jacobian_assembler(NULL)
     {};
 
     ///
@@ -74,6 +76,14 @@ public:
         _residual_assembler = residual_assembly;
         _jacobian_assembler = jacobian_assembly;
     }
+
+    void initialize(
+            LinearAssemblerType *linear_assembly
+            )
+    {
+        _linear_assembler = linear_assembly;
+    }
+
 
     ///
     LinearAssemblerType* getLinearAssembler() const { return _linear_assembler; }
