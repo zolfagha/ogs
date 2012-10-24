@@ -20,7 +20,7 @@
 //#include "FemGroundwaterFlow/HeadToElementVelocity.h"
 //#include "FemGroundwaterFlow/PressureToHead.h"
 #include "FemGroundwaterFlow/PressureToElementVelocity.h"
-#include "FemGroundwaterFlow/LiquidPressure.h"
+//#include "FemGroundwaterFlow/LiquidPressure.h"
 #include "FemMassTransport/Concentration.h"
 #include "FemHeatTransport/Temperature.h"
 //#include "FemKinReactGIA/Concentrations.h"
@@ -29,7 +29,8 @@
 #include "FemDeformationTotalForm/NodalStressStrain.h"
 #include "FemPoroelastic/DisplacementPressure.h"
 #include "Xfem/XFEM_EXAMPLE_CRACK1.h"
-
+#include "THMmf/Pmf.h"
+#include "THMmf/Tmf.h"
 //#include "ProcessBuilder.h"
 
 //OGS_LINK_PROCESS(GROUNDWATER_FLOW, FunctionHead);
