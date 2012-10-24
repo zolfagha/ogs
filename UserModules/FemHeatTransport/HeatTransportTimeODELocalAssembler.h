@@ -85,7 +85,7 @@ protected:
         NumLib::ITXFunction::DataType v;
         _vel->eval(e_pos, v);
         NumLib::ITXFunction::DataType v2 = v.topRows(n_dim).transpose();
-        v2 *= rho_cp_eff;
+        v2 *= rho_f * cp_f;
 
 
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
