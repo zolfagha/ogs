@@ -57,6 +57,13 @@ void convertFluidProperty(const CFluidProperties &mfp, MaterialLib::Fluid &fluid
         fluid.dynamic_viscosity = new NumLib::TXFunctionConstant(mfp.my_0);
     }
 
+    if (mfp.heat_capacity_model==1) {
+        fluid.specific_heat = new NumLib::TXFunctionConstant(mfp.specific_heat_capacity);
+    }
+
+    if (mfp.heat_conductivity_model==1) {
+        fluid.thermal_conductivity = new NumLib::TXFunctionConstant(mfp.heat_conductivity);
+    }
 }
 
 void convertSolidProperty(const CSolidProperties &msp, MaterialLib::Solid &solid)
@@ -71,6 +78,13 @@ void convertSolidProperty(const CSolidProperties &msp, MaterialLib::Solid &solid
         solid.Youngs_modulus = new NumLib::TXFunctionConstant((*msp.data_Youngs)(0));
     }
 
+    if (msp.Capacity_mode==1) {
+        solid.specific_heat = new NumLib::TXFunctionConstant((*msp.data_Capacity)(0));
+    }
+
+    if (msp.Conductivity_mode==1) {
+        solid.thermal_conductivity = new NumLib::TXFunctionConstant((*msp.data_Conductivity)(0));
+    }
 }
 
 void convertPorousMediumProperty(const CMediumProperties &mmp, MaterialLib::PorousMedia &pm)
