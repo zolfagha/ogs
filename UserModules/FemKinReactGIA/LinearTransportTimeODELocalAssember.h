@@ -79,7 +79,8 @@ protected:
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
         MathLib::LocalMatrix poro(1,1);
-        MathLib::LocalMatrix d_poro(1,1);
+        MathLib::LocalMatrix d_poro(1,3);   // HS, change size to 1 by 3
+        MathLib::LocalMatrix loc_disp(3,3); // HS, local dispersion matrix
         NumLib::ITXFunction::DataType v;
 
         for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
@@ -89,12 +90,16 @@ protected:
             NumLib::TXPosition gp_pos(NumLib::TXPosition::IntegrationPoint, e.getID(), j, real_x);
 
             pm->porosity->eval(gp_pos, poro);
+            pm->dispersivity->eval(gp_pos, loc_disp); 
             d_poro(0,0) = cmp_mol_diffusion * poro(0,0);
+            d_poro(0,1) = cmp_mol_diffusion * poro(0,0);
+            d_poro(0,2) = cmp_mol_diffusion * poro(0,0);
             _vel->eval(gp_pos, v);
             NumLib::ITXFunction::DataType v2 = v.topRows(n_dim).transpose();
+            NumLib::ITXFunction::DataType dispersion_diffusion = (loc_disp * v).transpose() + d_poro ; 
 
             fe->integrateWxN(j, poro, localM);
-            fe->integrateDWxDN(j, d_poro, localDispersion);
+            fe->integrateDWxDN(j, dispersion_diffusion, localDispersion); 
             fe->integrateWxDN(j, v2, localAdvection);
         }
 

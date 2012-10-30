@@ -105,7 +105,8 @@ public:
 		size_t n_sp    = q->getNumberOfSamplingPoints();  // number of sampling points
 		double gp_x[3], real_x[3];
         MathLib::LocalMatrix poro(1,1);
-        MathLib::LocalMatrix d_poro(1,1);
+        MathLib::LocalMatrix d_poro(1,3);   // HS, change size to 1 by 3
+        MathLib::LocalMatrix loc_disp(3,3); // HS, local dispersion matrix
         MathLib::LocalMatrix d_rate(1,1); 
         MathLib::LocalMatrix localJ_tmp = MathLib::LocalMatrix::Zero(n_nodes, n_nodes);
         NumLib::ITXFunction::DataType v;
@@ -121,14 +122,21 @@ public:
 				q->getSamplingPoint(j, gp_x);
 				fe->computeBasisFunctions(gp_x);
 				fe->getRealCoordinates(real_x);
+                NumLib::TXPosition gp_pos(NumLib::TXPosition::IntegrationPoint, e.getID(), j, real_x);
 
 				pm->porosity->eval(real_x, poro);
-				d_poro(0,0) = cmp_mol_diffusion * poro(0,0);
+                pm->dispersivity->eval(gp_pos, loc_disp);
+
+                d_poro(0,0) = cmp_mol_diffusion * poro(0,0);
+                d_poro(0,1) = cmp_mol_diffusion * poro(0,0);
+                d_poro(0,2) = cmp_mol_diffusion * poro(0,0);
+
 				_vel->eval(real_x, v);
 				v2 = v.topRows(n_dim).transpose();
-
-				fe->integrateWxN(j, poro, matM);
-				fe->integrateDWxDN(j, d_poro, matDiff);
+                NumLib::ITXFunction::DataType dispersion_diffusion = (loc_disp * v).transpose() + d_poro ; 
+				
+                fe->integrateWxN(j, poro, matM);
+				fe->integrateDWxDN(j, dispersion_diffusion, matDiff);
 				fe->integrateWxDN(j, v2, matAdv); 
             
 				// now dealing with the rate change terms

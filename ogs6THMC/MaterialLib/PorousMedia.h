@@ -30,6 +30,7 @@ struct PorousMedia
     NumLib::ITXFunction* porosity;
     NumLib::ITXFunction* storage;
     NumLib::ITXFunction* geo_area;
+    NumLib::ITXFunction* dispersivity;
 
     PorousMedia()
     {

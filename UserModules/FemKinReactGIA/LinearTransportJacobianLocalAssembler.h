@@ -56,6 +56,7 @@ public:
       */ 
     void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &, const MathLib::LocalVector &/*u1*/, const MathLib::LocalVector &/*u0*/, MathLib::LocalMatrix &localJ)
     {
+        const size_t n_dim = e.getDimension();
         FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
         size_t mat_id = e.getGroupID();
         MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];
@@ -69,21 +70,27 @@ public:
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
         MathLib::LocalMatrix poro(1,1);
-        MathLib::LocalMatrix d_poro(1,1);
+        MathLib::LocalMatrix d_poro(1,3);   // HS, change size to 1 by 3
+        MathLib::LocalMatrix loc_disp(3,3); // HS, local dispersion matrix
         NumLib::ITXFunction::DataType v;
 
         for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
             q->getSamplingPoint(j, gp_x);
             fe->computeBasisFunctions(gp_x);
             fe->getRealCoordinates(real_x);
+            NumLib::TXPosition gp_pos(NumLib::TXPosition::IntegrationPoint, e.getID(), j, real_x);
 
             pm->porosity->eval(real_x, poro);
+            pm->dispersivity->eval(gp_pos, loc_disp); 
             d_poro(0,0) = cmp_mol_diffusion * poro(0,0);
-            _vel->eval(real_x, v);
+            d_poro(0,1) = cmp_mol_diffusion * poro(0,0);
+            d_poro(0,2) = cmp_mol_diffusion * poro(0,0);
+            NumLib::ITXFunction::DataType v2 = v.topRows(n_dim).transpose();
+            NumLib::ITXFunction::DataType dispersion_diffusion = (loc_disp * v).transpose() + d_poro ; 
 
             fe->integrateWxN(j, poro, matM);
-            fe->integrateDWxDN(j, d_poro, matDiff);
-            fe->integrateWxDN(j, v, matAdv);
+            fe->integrateDWxDN(j, dispersion_diffusion, matDiff);
+            fe->integrateWxDN(j, v2, matAdv);
         }
 
         double dt = time.getTimeStepSize();
