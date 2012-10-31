@@ -100,6 +100,10 @@ void chemReductionKin::update_reductionScheme(void)
 	_mat_s_2 = lu_decomp_S2.image(_matS_2); 
 
 #ifdef _DEBUG
+    std::cout << "_mat_S_1: "    << std::endl; 
+	std::cout << _matS_1 << std::endl;
+	std::cout << "_mat_S_2: "    << std::endl; 
+	std::cout << _matS_2 << std::endl;
 	std::cout << "_mat_s_1: "    << std::endl; 
 	std::cout << _mat_s_1 << std::endl;
 	std::cout << "_mat_s_2: "    << std::endl; 

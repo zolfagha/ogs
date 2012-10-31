@@ -11,18 +11,18 @@
  */
  
 #include "chemReactionKin.h"
- 
+#include "logog.hpp"
+
 namespace ogsChem
 {
 
-chemReactionKin::chemReactionKin(void)
+chemReactionKin::chemReactionKin()
 {
 	// set initial values
 	_rate = 0.0;
-	
 	_rate_constant = 0.0; 
-    
 	_rate_constant_order = 1.0; 
+    _decay_rate = 0.0; 
 }
 
 chemReactionKin::~chemReactionKin(void)
@@ -39,9 +39,8 @@ void chemReactionKin::calcReactionRate(ogsChem::LocalVector & vec_Comp_Conc)
 {
 	if ( this->_kinReactType == ogsChem::Monod )
 		this->_rate = calcReactionRateMonod(vec_Comp_Conc); 
-	else if ( this->_kinReactType == ogsChem::DoubleMonodDecay )
-		this->_rate = calcReactionRateDoubleMonodDecay(vec_Comp_Conc);
-	
+    else
+        this->_rate = 0.0; 	
 }
 
 double chemReactionKin::calcReactionRateMonod(ogsChem::LocalVector & vec_Comp_Conc)
@@ -63,54 +62,20 @@ double chemReactionKin::calcReactionRateMonod(ogsChem::LocalVector & vec_Comp_Co
 	}  // end of for i
 	
 	// rate constant
-	rate *= _rate_constant; 
+	rate *= _rate_constant; // mu_max
 	// rate order
 	// TODO
 	// times c_bio
 	rate *= c_bio;
-	// retrun rate
-
-    // ----debugging, set rate to zero-----------------
-    rate = 0.0; 
-    // ----end of debugging----------------------------
-
-	return rate; 
-}
-
-double chemReactionKin::calcReactionRateDoubleMonodDecay(ogsChem::LocalVector & vec_Comp_Conc)
-{
-	size_t i, comp_idx; 
-	double rate = 1.0; 
-	double conc, c_bio;
-
-	// potential bug
-	c_bio = vec_Comp_Conc(3); 
-
-	// loop over all the monod term
-	for (i=0; i<this->_vec_Monod_Comps_Idx.size(); i++ )
-	{
-		comp_idx = _vec_Monod_Comps_Idx[i]; 
-		conc = vec_Comp_Conc( comp_idx ); 
-		// rate *= [ c / ( c + k_c) ]^order
-		rate *= pow( conc / (conc + this->_vec_Monod_Comps_Conc[i]), this->_vec_Monod_Comps_order[i] ); 
-	}  // end of for i
-	
-	// rate constant
-	rate *= _rate_constant; 
-	// rate order
-	// TODO
-	// times c_bio
-	rate *= c_bio;
-
-    // ----debugging, set rate to zero-----------------
-    rate = 0.0; 
-    // ----end of debugging----------------------------
-
+    // decay term
+    rate -= _decay_rate * c_bio; 
 	// retrun rate
 	return rate; 
 }
 
-void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & list_chemComp, ogs5::CKinReact* KRC_reaction)
+
+void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & list_chemComp, 
+                                      ogs5::CKinReact* KRC_reaction)
 {
 	// get the list of components 
 	_vecCompNames = KRC_reaction->reactionpartner; 
@@ -142,60 +107,30 @@ void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::
 		// loop over the monod term, 
 		for (size_t i=0; i < KRC_reaction->monod.size(); i++ )
 		{
-			size_t monodComp_idx; 
+			size_t monod_comp_idx; 
 			double monod_comp_conc(0.0), monod_term_order(1.0); 
 			// read the corresponding components
 			std::string comp_str = KRC_reaction->monod[i]->species; 
 			// find this component
-			for (size_t j=0; j < this->_vecComponents.size(); j++ )
-			{
-				if ( this->_vecComponents[j]->get_name() == comp_str )
-				{
-					monodComp_idx = this->_vecComponents[j]->getIndex(); 
-				    break; 
-				}
-			}  // end of for j
+            // get its index value in all component list
+            monod_comp_idx = list_chemComp.find( comp_str )->second->getIndex();
+			
+            if ( monod_comp_idx >= list_chemComp.size() )
+            {
+                ERR("When reading Monod terms, component name not found! ");
+                exit(1);
+            }
 
 			// read the monod component concentration
 			monod_comp_conc = KRC_reaction->monod[i]->concentration; 
 			// read the monod term order
 			monod_term_order = KRC_reaction->monod[i]->order; 
 
-			this->_vec_Monod_Comps_Idx.push_back(monodComp_idx);
-			this->_vec_Monod_Comps_Conc.push_back( monod_comp_conc ); 
+			this->_vec_Monod_Comps_Idx.push_back(   monod_comp_idx   );
+			this->_vec_Monod_Comps_Conc.push_back(  monod_comp_conc  ); 
 			this->_vec_Monod_Comps_order.push_back( monod_term_order ); 
 		}  // end of for i
 	}  // end of if KRC_reaction
-	else if ( KRC_reaction->getType() == "DoubleMonodDecay" )
-	{
-		this->_kinReactType = ogsChem::DoubleMonodDecay; 
-		// loop over the monod term, 
-		for (size_t i=0; i < KRC_reaction->monod.size(); i++ )
-		{
-			size_t monodComp_idx; 
-			double monod_comp_conc(0.0), monod_term_order(1.0); 
-			// read the corresponding components
-			std::string comp_str = KRC_reaction->monod[i]->species; 
-			// find this component
-			for (size_t j=0; j < this->_vecComponents.size(); j++ )
-			{
-				if ( this->_vecComponents[j]->get_name() == comp_str )
-				{
-					monodComp_idx = this->_vecComponents[j]->getIndex(); 
-				    break; 
-				}
-			}  // end of for j
-
-			// read the monod component concentration
-			monod_comp_conc = KRC_reaction->monod[i]->concentration; 
-			// read the monod term order
-			monod_term_order = KRC_reaction->monod[i]->order; 
-
-			this->_vec_Monod_Comps_Idx.push_back(monodComp_idx);
-			this->_vec_Monod_Comps_Conc.push_back( monod_comp_conc ); 
-			this->_vec_Monod_Comps_order.push_back( monod_term_order ); 
-		}  // end of for i
-	}
 	else
 	{
 		this->_kinReactType = ogsChem::NoType; 
@@ -205,11 +140,9 @@ void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::
 	this->_rate_constant = KRC_reaction->rateconstant; 
 	// read the rate order
 	this->_rate_constant_order = KRC_reaction->rateorder;
-
-
+    // read the decay rate
+    this->_decay_rate = KRC_reaction->decay_rate; 
 }
-
-
 
 
 }  // end of namespace

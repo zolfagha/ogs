@@ -9,13 +9,12 @@
  *
  * Created on 2012-09-05 by Haibing Shao
  */
- 
-#ifndef CHEM_REACTION_KIN_H
-#define CHEM_REACTION_KIN_H
-
 #include "chemReaction.h"
 #include "ogsFileIO/FemIO/ogs5/rf_kinreact.h"
-#include "BaseLib/OrderedMap.h"
+#include "BaseLib/OrderedMap.h" 
+
+#ifndef CHEM_REACTION_KIN_H
+#define CHEM_REACTION_KIN_H
 
 namespace ogsChem
 {
@@ -26,7 +25,7 @@ public:
 	/**
       * constructor and destructor
       */
-	chemReactionKin(void);
+	chemReactionKin();
 	~chemReactionKin(void);
 
 	/**
@@ -38,11 +37,6 @@ public:
       * calculate the reaction rate with monod kinetics
       */
 	double calcReactionRateMonod(ogsChem::LocalVector & vec_Comp_Conc); 
-
-	/**
-      * calculate the reaction rate with monod kinetics
-      */
-	double calcReactionRateDoubleMonodDecay(ogsChem::LocalVector & vec_Comp_Conc); 
 
 	/**
       * return the rate of current reaction. 
@@ -57,7 +51,8 @@ public:
 	/**
       * reading one reaction from KRC data structure
       */
-	void readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & list_chemComp, ogs5::CKinReact* KRC_reaction); 
+	void readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & list_chemComp, 
+                         ogs5::CKinReact* KRC_reaction); 
 
 private:
 	/**
@@ -79,6 +74,11 @@ private:
       * the rate constant order
       */
 	double _rate_constant_order; 
+
+    /**
+      * the decay rate
+      */
+    double _decay_rate; 
 
 	/**
       * a vector of monod rate components
