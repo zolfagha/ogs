@@ -76,6 +76,11 @@ private:
 	double _rate_constant_order; 
 
     /**
+      * index of the bacteria
+      */
+	size_t _idx_bacteria; 
+
+    /**
       * the decay rate
       */
     double _decay_rate; 

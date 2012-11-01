@@ -49,8 +49,8 @@ double chemReactionKin::calcReactionRateMonod(ogsChem::LocalVector & vec_Comp_Co
 	double rate = 1.0; 
 	double conc, c_bio;
 
-	// potential bug
-	c_bio = vec_Comp_Conc(3); 
+    // get the concentration of biomass
+    c_bio = vec_Comp_Conc(this->_idx_bacteria); 
 
 	// loop over all the monod term
 	for (i=0; i<this->_vec_Monod_Comps_Idx.size(); i++ )
@@ -103,6 +103,16 @@ void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::
 	if ( KRC_reaction->getType() == "monod" )
 	{
 		this->_kinReactType = ogsChem::Monod; 
+
+        // find the bacteria component
+        std::string str_bacteria = KRC_reaction->bacteria_name; 
+        this->_idx_bacteria = list_chemComp.find( str_bacteria )->second->getIndex(); 
+
+        if ( this->_idx_bacteria >= list_chemComp.size() )
+        {
+            ERR("When reading Monod reaction, bacteria name not found! ");
+            exit(1);
+        }
 
 		// loop over the monod term, 
 		for (size_t i=0; i < KRC_reaction->monod.size(); i++ )
