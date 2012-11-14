@@ -23,7 +23,7 @@ namespace BaseLib {
 /**
  * Returns true if given file exists. From http://www.techbytes.ca/techbyte103.html
  */
-static bool IsFileExisting(const std::string &strFilename)
+inline bool IsFileExisting(const std::string &strFilename)
 {
 	struct stat stFileInfo;
 	bool blnReturn;
@@ -55,7 +55,7 @@ static bool IsFileExisting(const std::string &strFilename)
 /**
  * \brief return a directory path
  */
-static std::string getFileDirecotryPath(const std::string &file_path)
+inline std::string getFileDirecotryPath(const std::string &file_path)
 {
     std::size_t indexChWin, indexChLinux;
     indexChWin = indexChLinux = 0;
@@ -74,7 +74,7 @@ static std::string getFileDirecotryPath(const std::string &file_path)
 /**
  * \brief return a file base name
  */
-static std::string getFileBaseName(const std::string &file_path)
+inline std::string getFileBaseName(const std::string &file_path)
 {
     std::size_t indexChWin, indexChLinux;
     indexChWin = indexChLinux = 0;
@@ -95,7 +95,7 @@ static std::string getFileBaseName(const std::string &file_path)
 /**
  * \brief return a file name with or without file extensions
  */ 
-static std::string getFileNameFromPath(const std::string &str, bool with_extension)
+inline std::string getFileNameFromPath(const std::string &str, bool with_extension)
 {
     std::string::size_type beg1 = str.find_last_of('/');
     std::string::size_type beg2 = str.find_last_of('\\');
@@ -122,7 +122,7 @@ template <typename T> void write_value_binary(std::fstream &fin, T val)
 /**
  * \brief truncate a file
  */
-static void truncateFile(const std::string &filename)
+inline void truncateFile(const std::string &filename)
 {
     std::ofstream ofs;
     ofs.open(filename.c_str(), std::ios_base::trunc);
