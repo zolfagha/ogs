@@ -19,6 +19,7 @@
 
 #include "MeshLib/Core/ElementFactory.h"
 #include "MeshLib/Tools/MeshNodesAlongPolyline.h"
+#include "MeshLib/Tools/MeshNodesAlongSurface.h"
 #include "MeshLib/Core/ElementCoordinatesInvariant.h"
 #include "MeshLib/Core/ElementCoordinatesMappingLocal.h"
 //#include "MeshLib/Topology/Topology.h"
@@ -44,6 +45,13 @@ void findNodesOnPoint(IMesh const* msh, GeoLib::Point const* point, std::vector<
     }
 };
 
+void findNodesOnSurface(IMesh const* msh, GeoLib::Surface const* sfc, std::vector<size_t> *vec_nodes)
+{
+    MeshNodesAlongSurface obj(sfc, msh);
+    std::vector<size_t> vec_node_id = obj.getNodeIDs();
+    vec_nodes->assign(vec_node_id.begin(), vec_node_id.end());
+}
+
 ///
 void findNodesOnGeometry(IMesh const* msh, GeoLib::GeoObject const* obj, std::vector<size_t> *vec_nodes)
 {
@@ -53,6 +61,9 @@ void findNodesOnGeometry(IMesh const* msh, GeoLib::GeoObject const* obj, std::ve
             break;
         case GeoLib::POLYLINE:
             findNodesOnPolyline(msh, static_cast<GeoLib::Polyline const*>(obj), vec_nodes);
+            break;
+        case GeoLib::SURFACE:
+            findNodesOnSurface(msh, static_cast<GeoLib::Surface const*>(obj), vec_nodes);
             break;
         case GeoLib::GEODOMAIN:
             vec_nodes->resize(msh->getNumberOfNodes());
