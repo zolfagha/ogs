@@ -64,7 +64,7 @@ public:
 
 public:
     std::vector<std::string> _PointsFCTNames;
-    std::vector<int> _PointsHaveDistribedBC;
+    std::vector<size_t> _PointsHaveDistribedBC;
     std::vector<double> _DistribedBC;
 
     // GEO
