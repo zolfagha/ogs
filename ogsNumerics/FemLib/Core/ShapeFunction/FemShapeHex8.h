@@ -5,23 +5,22 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file IFemShapeFunction.h
+ * \file FemShapeHex8.h
  *
  * Created on 2012-08-03 by Norihiro Watanabe
  */
 
 #pragma once
 
+#include "TemplateShapeFunction.h"
 
 namespace FemLib
 {
 
-class IFemShapeFunction
+class FemShapeHex8 : public TemplateShapeFunction<3, 8> 
 {
-public:
     virtual void computeShapeFunction(const double* pt, double* N) = 0;
     virtual void computeGradShapeFunction(const double* pt, double* dN) = 0;
-    virtual ~IFemShapeFunction() {};
 };
 
 }
