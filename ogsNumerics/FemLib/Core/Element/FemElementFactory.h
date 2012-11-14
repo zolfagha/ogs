@@ -13,6 +13,7 @@
 #pragma once
 
 #include <map>
+#include <cassert>
 
 #include "FemLib/Core/Element/FiniteElementType.h"
 #include "FemLib/Core/Element/C0IsoparametricElements.h"
@@ -44,6 +45,10 @@ public:
                 return new TRI3(msh);
             case FiniteElementType::TRI6:
                 return new TRI6(msh);
+            case FiniteElementType::TET4:
+                return new TET4(msh);
+            case FiniteElementType::TET10:
+                return new TET10(msh);
             default:
                 return 0;
         }

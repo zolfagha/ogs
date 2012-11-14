@@ -26,6 +26,8 @@ struct FiniteElementType
         QUAD4,
         QUAD8,
         QUAD9,
+        TET4,
+        TET10,
         INVALID
     };
 };
