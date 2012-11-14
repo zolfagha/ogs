@@ -51,7 +51,7 @@ TARGET_LINK_LIBRARIES ( tests
 
 
 # Link external libraries
-TARGET_LINK_LIBRARIES( tests ${GTEST_BOTH_LIBRARIES} )
+TARGET_LINK_LIBRARIES( tests GTest )
 
 IF (WIN32)
         TARGET_LINK_LIBRARIES( tests Winmm.lib )
