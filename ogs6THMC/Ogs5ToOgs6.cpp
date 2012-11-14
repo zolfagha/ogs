@@ -297,7 +297,23 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 						optBc->addOption("GeometryType", rfbc->geo_type_name);
 						optBc->addOption("GeometryName", rfbc->geo_name);
 						optBc->addOption("DistributionType", FiniteElement::convertDisTypeToString(rfbc->getProcessDistributionType()));
-						optBc->addOptionAsNum("DistributionValue", rfbc->geo_node_value);
+						switch (rfbc->getProcessDistributionType())
+						{
+                            case FiniteElement::CONSTANT:
+                                optBc->addOptionAsNum("DistributionValue", rfbc->geo_node_value);
+                                break;
+                            case FiniteElement::LINEAR:
+                                {
+                                    const size_t n_pt = rfbc->_PointsHaveDistribedBC.size();
+                                    optBc->addOptionAsNum("PointSize", n_pt);
+                                    for (size_t k=0; k<n_pt; k++) {
+                                        BaseLib::Options* optPtList = optBc->addSubGroup("PointValueList");
+                                        optPtList->addOptionAsNum("PointID", rfbc->_PointsHaveDistribedBC[k]);
+                                        optPtList->addOptionAsNum("Value", rfbc->_DistribedBC[k]);
+                                    }
+                                }
+                                break;
+						}
 					}  // end of if rfbc
         }  // end of for i
 
