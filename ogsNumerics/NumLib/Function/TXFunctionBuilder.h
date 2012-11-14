@@ -18,15 +18,28 @@
 namespace NumLib
 {
 
+/**
+ * \brief Builder of TX functions
+ */
 class TXFunctionBuilder
 {
 public:
+    ITXFunction* create(const TXFunctionType::type f_type, double v)
+    {
+        switch (f_type) {
+        case TXFunctionType::CONSTANT:
+            return new TXFunctionConstant(v);
+        case TXFunctionType::LINEAR:
+        default:
+            break;
+        }
+
+        return NULL;
+    }
+
     ITXFunction* create(const std::string &name, double v)
     {
-        if (name.compare("CONSTANT")==0) {
-            return new TXFunctionConstant(v);
-        }
-        return NULL;
+        return create(convertStringToTXFunctionType(name), v);
     }
 };
 

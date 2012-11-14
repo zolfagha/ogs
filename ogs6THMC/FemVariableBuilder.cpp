@@ -50,9 +50,22 @@ void FemVariableBuilder::doit(const std::string &given_var_name, const BaseLib::
         std::string geo_type = opBC->getOption("GeometryType");
         std::string geo_name = opBC->getOption("GeometryName");
         const GeoLib::GeoObject* geo_obj = geo->searchGeoByName(geo_unique_name, geo_type, geo_name);
-        std::string dis_name = opBC->getOption("DistributionType");
-        double dis_v = opBC->getOptionAsNum<double>("DistributionValue");
-        NumLib::ITXFunction* f_bc =  f_builder.create(dis_name, dis_v);
+        const std::string dis_name = opBC->getOption("DistributionType");
+        NumLib::ITXFunction* f_bc = NULL;
+        if (dis_name.compare("CONSTANT")==0) {
+            double dis_v = opBC->getOptionAsNum<double>("DistributionValue");
+            f_bc =  f_builder.create(dis_name, dis_v);
+        } else if (dis_name.compare("LINEAR")==0) {
+            size_t n_pt = opBC->getOptionAsNum<size_t>("PointSize");
+            std::vector<const BaseLib::OptionGroup*> list_opDistLinear = opBC->getSubGroupList("PointValue");
+            assert (n_pt == list_opDistLinear.size());
+            for (size_t j=0; j<n_pt; j++) {
+                size_t pt_id = list_opDistLinear[j]->getOptionAsNum<size_t>("PointID");
+                double pt_val = list_opDistLinear[j]->getOptionAsNum<double>("Value");
+            }
+        } else {
+            //error
+        }
         var->addDirichletBC(new SolutionLib::FemDirichletBC(msh, geo_obj, f_bc));
     }
     // ST

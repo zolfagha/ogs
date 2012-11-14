@@ -14,5 +14,9 @@
 
 #include "ITXFunction.h"
 #include "TXFunctionConstant.h"
+#include "TXFunctionGeoSpace.h"
+#include "TXFunctionAnalytical.h"
 #include "TXCompositFunction.h"
 #include "TXVectorFunctionAsColumnData.h"
+#include "TXFunctionType.h"
+
