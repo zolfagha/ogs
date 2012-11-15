@@ -31,6 +31,7 @@
 #include "Xfem/XFEM_EXAMPLE_CRACK1.h"
 #include "THMmf/Pmf.h"
 #include "THMmf/Tmf.h"
+#include "THMmf/Umf.h"
 //#include "ProcessBuilder.h"
 
 //OGS_LINK_PROCESS(GROUNDWATER_FLOW, FunctionHead);
