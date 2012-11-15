@@ -214,8 +214,11 @@ int THMCSimulator::execute()
             ERR("***Error: Failure during conversion of ogs5 to ogs6.");
             return 0;
         }
+        // output converted setting
+        std::ofstream of(ogs6fem->output_dir + "/converted_setting.log");
+        opOgs6->printout(of);
+        of.close();
     }
-    opOgs6->printout(std::cout);
 
 
     // ddc
