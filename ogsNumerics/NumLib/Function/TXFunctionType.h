@@ -40,4 +40,18 @@ inline TXFunctionType::type convertStringToTXFunctionType(const std::string &str
     }
 }
 
+inline std::string convertTXFunctionTypeToString(const TXFunctionType::type type)
+{
+    switch (type) {
+    case TXFunctionType::CONSTANT:
+        return "CONSTANT";
+    case TXFunctionType::GEOSPACE:
+        return "GEOSPACE";
+    case TXFunctionType::ANALYTICAL:
+        return "ANALYTICAL";
+    default:
+        return "";
+    }
 }
+
+} //end NumLib
