@@ -160,6 +160,20 @@ std::string convertLinearSolverPreconType(int ls_precon)
     return str;
 }
 
+NumLib::TXFunctionType::type convertDistributionType(FiniteElement::DistributionType ogs5_type)
+{
+    switch (ogs5_type) {
+        case FiniteElement::CONSTANT:
+            return NumLib::TXFunctionType::CONSTANT;
+        case FiniteElement::LINEAR:
+            return NumLib::TXFunctionType::GEOSPACE;
+        case FiniteElement::FUNCTION:
+            return NumLib::TXFunctionType::ANALYTICAL;
+        default:
+            return NumLib::TXFunctionType::INVALID;
+    }
+
+}
 
 bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options &option)
 {
@@ -296,7 +310,8 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 						optBc->addOption("Variable", rfbc->primaryvariable_name);
 						optBc->addOption("GeometryType", rfbc->geo_type_name);
 						optBc->addOption("GeometryName", rfbc->geo_name);
-						optBc->addOption("DistributionType", FiniteElement::convertDisTypeToString(rfbc->getProcessDistributionType()));
+						NumLib::TXFunctionType::type ogs6dis_type = convertDistributionType(rfbc->getProcessDistributionType());
+                        optBc->addOption("DistributionType", NumLib::convertTXFunctionTypeToString(ogs6dis_type));
 						switch (rfbc->getProcessDistributionType())
 						{
                             case FiniteElement::CONSTANT:
@@ -312,6 +327,14 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
                                         optPtList->addOptionAsNum("Value", rfbc->_DistribedBC[k]);
                                     }
                                 }
+                                break;
+                            case FiniteElement::FUNCTION:
+                                {
+                                    optBc->addOption("DistributionFunction", rfbc->function_exp);
+                                }
+                                break;
+                            default:
+                                //error
                                 break;
 						}
 					}  // end of if rfbc
