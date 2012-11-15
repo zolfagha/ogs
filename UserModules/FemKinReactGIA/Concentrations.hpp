@@ -672,7 +672,8 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
 			loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
 	    for (i=0; i < n_xi_immob; i++)
 			loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
-        
+            // loc_xi_immob[i] = this->_xi_immob_new[i]->getValue(node_idx);  // HS, use the new immob values after ODE calculation
+
         // calculate rates; 
         this->_ReductionKin->Calc_Xi_Rate( loc_eta_mob, 
                                            loc_eta_immob, 
@@ -680,7 +681,7 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
                                            loc_xi_immob, 
                                            loc_xi_mob_rates_base,
                                            loc_xi_immob_rates );
-		// loop over all xi
+		// loop over all xi_mob
 		for (i=0; i < n_xi_mob; i++)
 		{
             // loop over each xi_mob, 

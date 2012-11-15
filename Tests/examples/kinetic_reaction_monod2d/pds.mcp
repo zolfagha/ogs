@@ -30,9 +30,6 @@
  $DIFFUSION
   0             	; diffusion model type, diffusion constant
  
-#STOP
-
-; temperary disable the tracer for now
 #COMPONENT_PROPERTIES  ; comp0
  $NAME  ; 
   ConsTracer ; 
@@ -40,3 +37,6 @@
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
   1  0.0            	; diffusion model type, diffusion constant
+#STOP
+
+; temperary disable the tracer for now
