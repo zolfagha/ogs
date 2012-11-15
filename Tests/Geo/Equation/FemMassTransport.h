@@ -51,7 +51,7 @@ protected:
 
         LocalMatrixType matDiff = LocalMatrixType::Zero(localK.rows(), localK.cols());
         LocalMatrixType matAdv = LocalMatrixType::Zero(localK.rows(), localK.cols());
-        NumLib::TXCompositFunction<NumLib::ITXFunction, NumLib::ITXFunction, NumLib::Multiplication> f_diff_poro(*_cmp->molecular_diffusion, *_pm->porosity);
+        NumLib::TXCompositFunction<NumLib::ITXFunction, NumLib::ITXFunction, NumLib::Multiplication> f_diff_poro(_cmp->molecular_diffusion, _pm->porosity);
 
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
@@ -115,7 +115,7 @@ public:
         MathLib::LocalMatrix matM = MathLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
         MathLib::LocalMatrix matDiff = MathLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
         MathLib::LocalMatrix matAdv = MathLib::LocalMatrix::Zero(localJ.rows(), localJ.cols());
-        NumLib::TXCompositFunction<NumLib::ITXFunction, NumLib::ITXFunction, NumLib::Multiplication> f_diff_poro(*_cmp->molecular_diffusion, *_pm->porosity);
+        NumLib::TXCompositFunction<NumLib::ITXFunction, NumLib::ITXFunction, NumLib::Multiplication> f_diff_poro(_cmp->molecular_diffusion, _pm->porosity);
 
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
