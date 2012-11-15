@@ -46,7 +46,7 @@ public:
     void addLocalAssembler(size_t i_dim, IElementWiseTransientLinearEQSLocalAssembler* assembler)
     {
         assert(0 < i_dim && i_dim < 4);
-        _vec_dim_assembler[i_dim] = assembler;
+        _vec_dim_assembler[i_dim-1] = assembler;
     }
 
     /**
@@ -57,7 +57,7 @@ public:
     IElementWiseTransientLinearEQSLocalAssembler* getLocalAssembler(size_t i_dim)
     {
         assert(0 < i_dim && i_dim < 4);
-        return _vec_dim_assembler[i_dim];
+        return _vec_dim_assembler[i_dim-1];
     }
 
     /// assemble a local linear equation for the given element
