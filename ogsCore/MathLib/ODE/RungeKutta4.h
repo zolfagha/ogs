@@ -39,7 +39,6 @@ public:
     /**
      * solve dX/dt = F(t,X)
      */
-    template <class T_VALUE>
     void solve(F_DXDT &f, double t0, double dt, T_VALUE &y0, T_VALUE &y) const
     {
         T_VALUE k1 = dt*f(t0,y0);

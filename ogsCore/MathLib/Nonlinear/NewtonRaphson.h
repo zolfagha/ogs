@@ -19,6 +19,7 @@
 #include "NRErrorAbsResMNormOrRelDxMNorm.h"
 #include "NewtonFunctionDXVector.h"
 #include "NewtonFunctionDXScalar.h"
+#include "NRIterationStepInitializerDummy.h"
 
 namespace MathLib
 {
