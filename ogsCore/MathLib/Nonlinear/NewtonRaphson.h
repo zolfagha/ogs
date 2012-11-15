@@ -47,7 +47,9 @@ public:
         size_t itr_cnt=0;
         f_residuals.eval(x_new, r);
         //printout(0, x_new, r, dx);
-        if (!convergence->check(&r, &dx, &x_new)) {
+        converged = convergence->check(&r, &dx, &x_new);
+        
+        if (!converged) {
             for (itr_cnt=0; itr_cnt<max_itr_count; itr_cnt++) {
 				// preprocessing
 				if (pre_post) 
