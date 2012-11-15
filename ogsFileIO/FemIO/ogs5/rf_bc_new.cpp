@@ -129,6 +129,9 @@ std::ios::pos_type CBoundaryCondition::Read(std::ifstream* bc_file,
             {
                 setProcessDistributionType(FiniteElement::FUNCTION);
                 in.clear();
+                in.str(readNonBlankLineFromInputStream(*bc_file));
+                in >> function_exp; //sub_line
+                in.clear();
             }
             if (line_string.find("LINEAR") != std::string::npos)
             {

@@ -106,6 +106,8 @@ public:
     int MatGr;
     // aktive state is controlled by time curve WX:01.2011
     int time_contr_curve;
+
+    std::string function_exp;
 };
 
 
