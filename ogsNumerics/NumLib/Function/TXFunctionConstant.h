@@ -38,6 +38,10 @@ public:
     virtual void eval(const TXPosition /*x*/, DataType &v) const { v = _vec;}
     void eval(double &v) const { v = _vec(0,0); };
     void eval(DataType &v) const { v = _vec; };
+    virtual void eval(const double* /*x*/, double &val) const
+    {
+        val = _vec(0,0);
+    }
 
     virtual TXFunctionConstant* clone() const { return new TXFunctionConstant(_vec); }
 
