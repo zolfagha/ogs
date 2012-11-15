@@ -153,7 +153,7 @@ void ElementCoordinatesMappingLocal::getRotationMatrixToOriginal(const IElement 
         _matR2original(0,0) = _matR2original(1,1) = cos_theta;
         _matR2original(0,1) = - sin_theta;
         _matR2original(1,0) = sin_theta;
-    } else if (coordinate_system.getType() == CoordinateSystemType::XYZ && e->getDimension() == 3) {
+    } else if (coordinate_system.getType() == CoordinateSystemType::XYZ && e->getDimension() == 2) {
         // x"_vec
         //            xx[0] = nodes[1]->X() - nodes[0]->X();
         //            xx[1] = nodes[1]->Y() - nodes[0]->Y();
