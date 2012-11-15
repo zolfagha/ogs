@@ -118,13 +118,13 @@ bool FunctionDisplacementPressure<T1,T2>::initialize(const BaseLib::Options &opt
     }
 
     // set initial output
-    OutputVariableInfo var(this->getOutputParameterName(Displacement), OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
+    OutputVariableInfo var(this->getOutputParameterName(Displacement), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
     femData->outController.setOutput(var.name, var);
     for (size_t i=0; i<_vec_u_components.size(); i++) {
-        OutputVariableInfo var1(this->getOutputParameterName(Displacement) + getDisplacementComponentPostfix(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_u_components[i]);
+        OutputVariableInfo var1(this->getOutputParameterName(Displacement) + getDisplacementComponentPostfix(i), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_u_components[i]);
         femData->outController.setOutput(var1.name, var1);
     }
-    OutputVariableInfo outP(this->getOutputParameterName(Pressure), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(_var_p_id));
+    OutputVariableInfo outP(this->getOutputParameterName(Pressure), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(_var_p_id));
     femData->outController.setOutput(outP.name, outP);
 
     //--------------------------------------------------------------------------
@@ -155,14 +155,15 @@ template <class T1, class T2>
 void FunctionDisplacementPressure<T1,T2>::output(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
+    const size_t msh_id = _problem->getDiscreteSystem()->getMesh()->getID();
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    OutputVariableInfo var(this->getOutputParameterName(Displacement), OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
+    OutputVariableInfo var(this->getOutputParameterName(Displacement), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
     femData->outController.setOutput(var.name, var);
     for (size_t i=0; i<_vec_u_components.size(); i++) {
-        OutputVariableInfo var1(this->getOutputParameterName(Displacement) + getDisplacementComponentPostfix(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_u_components[i]);
+        OutputVariableInfo var1(this->getOutputParameterName(Displacement) + getDisplacementComponentPostfix(i), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_u_components[i]);
         femData->outController.setOutput(var1.name, var1);
     }
-    OutputVariableInfo outP(this->getOutputParameterName(Pressure), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(_var_p_id));
+    OutputVariableInfo outP(this->getOutputParameterName(Pressure), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(_var_p_id));
     femData->outController.setOutput(outP.name, outP);
 };
 

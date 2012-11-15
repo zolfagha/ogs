@@ -35,7 +35,7 @@ bool FunctionPressureToElementVelocity<T>::initialize(const BaseLib::Options &op
     _vel->initialize(dis);
 
     // set initial output
-    OutputVariableInfo var(this->getOutputParameterName(Velocity), OutputVariableInfo::Element, OutputVariableInfo::Real, 3, _vel);
+    OutputVariableInfo var(this->getOutputParameterName(Velocity), msh_id, OutputVariableInfo::Element, OutputVariableInfo::Real, 3, _vel);
     femData->outController.setOutput(var.name, var);
 
     // initial output parameter
@@ -52,7 +52,7 @@ void FunctionPressureToElementVelocity<T>::accept(const NumLib::TimeStep &/*time
     //_vel->printout();
     //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    OutputVariableInfo var(this->getOutputParameterName(Velocity), OutputVariableInfo::Element, OutputVariableInfo::Real, 3, _vel_3d);
+    OutputVariableInfo var(this->getOutputParameterName(Velocity), _dis->getMesh()->getID(), OutputVariableInfo::Element, OutputVariableInfo::Real, 3, _vel_3d);
     femData->outController.setOutput(var.name, var);
 };
 

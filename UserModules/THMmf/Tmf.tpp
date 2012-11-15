@@ -52,7 +52,7 @@ bool Tmf<T1,T2>::initialize(const BaseLib::Options &option)
     eqs->initialize(linear_assembler);
     _problem->setTimeSteppingFunction(*tim);
     // set up variable
-    typename MyProblemType::MyVariable* concentration = _problem->addVariable("concentration");
+    typename MyProblemType::MyVariable* concentration = _problem->addVariable("T");
     FemVariableBuilder varBuilder;
     varBuilder.doit(this->getOutputParameterName(Temperature), option, msh, femData->geo, femData->geo_unique_name, _feObjects, concentration);
 
@@ -64,7 +64,7 @@ bool Tmf<T1,T2>::initialize(const BaseLib::Options &option)
     _solution->getNonlinearSolver()->setOption(*optNum);
 
     // set initial output
-    OutputVariableInfo var(this->getOutputParameterName(Temperature), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
+    OutputVariableInfo var(this->getOutputParameterName(Temperature), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput(var.name, var); 
 
     // initial output parameter
@@ -95,7 +95,8 @@ template <class T1, class T2>
 void Tmf<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
+    const size_t msh_id = _problem->getDiscreteSystem()->getMesh()->getID();
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    OutputVariableInfo var(this->getOutputParameterName(Temperature), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
+    OutputVariableInfo var(this->getOutputParameterName(Temperature), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput(var.name, var); 
 };

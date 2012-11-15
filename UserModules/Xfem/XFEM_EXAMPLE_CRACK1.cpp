@@ -47,9 +47,9 @@ bool FunctionXFEM_EXAMPLE_CRACK1::initialize(const BaseLib::Options &option)
     _exact_displacement->initialize(*_dis, FemLib::PolynomialOrder::Linear, tmp_u0);
 
     // set initial output
-    OutputVariableInfo var("DISPLACEMENT", OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
+    OutputVariableInfo var("DISPLACEMENT", msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
     femData->outController.setOutput(var.name, var);
-    OutputVariableInfo var_eu("EXACT_U", OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _exact_displacement);
+    OutputVariableInfo var_eu("EXACT_U", msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _exact_displacement);
     femData->outController.setOutput(var_eu.name, var_eu);
 
     return true;
@@ -197,9 +197,9 @@ void FunctionXFEM_EXAMPLE_CRACK1::accept(const NumLib::TimeStep &/*time*/)
 {
 //    //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    OutputVariableInfo var("DISPLACEMENT", OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
+    OutputVariableInfo var("DISPLACEMENT", _msh->getID(), OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _displacement);
     femData->outController.setOutput(var.name, var);
-    OutputVariableInfo var_eu("EXACT_U", OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _exact_displacement);
+    OutputVariableInfo var_eu("EXACT_U", _msh->getID(), OutputVariableInfo::Node, OutputVariableInfo::Real, 2, _exact_displacement);
     femData->outController.setOutput(var_eu.name, var_eu);
 }
 

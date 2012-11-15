@@ -62,7 +62,7 @@ bool Pmf<T1,T2>::initialize(const BaseLib::Options &option)
     _solution->getNonlinearSolver()->setOption(*optNum);
 
     // set initial output
-    OutputVariableInfo var(this->getOutputParameterName(Pressure), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
+    OutputVariableInfo var(this->getOutputParameterName(Pressure), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput(var.name, var);
 
     // initial output parameter
@@ -81,7 +81,8 @@ template <class T1, class T2>
 void Pmf<T1,T2>::output(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
+    const size_t msh_id = _problem->getDiscreteSystem()->getMesh()->getID();
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    OutputVariableInfo var(this->getOutputParameterName(Pressure), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
+    OutputVariableInfo var(this->getOutputParameterName(Pressure), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput(var.name, var);
 };
