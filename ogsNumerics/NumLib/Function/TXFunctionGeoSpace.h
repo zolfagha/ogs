@@ -13,6 +13,7 @@
 #pragma once
 
 #include <vector>
+#include "GeoLib/Surface.h"
 #include "TXPosition.h"
 #include "ITXFunction.h"
 
@@ -57,14 +58,14 @@ public:
 #endif
     }
 
-    bool findTriangle(const double* pn, std::vector<size_t> &list_tri_vertex)
+    bool findTriangle(const double* pn, std::vector<size_t> &list_tri_vertex) const
     {
         double Area1, Area2;
         double Tol = 0.1;
         double gC[3], p1[3], p2[3], vn[3], unit[3], NTri[3];
         //
         GeoLib::Polyline* m_polyline = NULL;
-        GeoLib::Surface* m_surface = _sfc;
+        const GeoLib::Surface* m_surface = _sfc;
 
 #if 0
         std::vector<GeoLib::Polyline*>::iterator p =
