@@ -32,6 +32,8 @@ namespace MeshLib
 MeshNodesAlongSurface::MeshNodesAlongSurface(GeoLib::Surface const* const sfc, IMesh const* mesh) :
     _sfc(sfc), _mesh(mesh), _linear_nodes (0)
 {
+    std::cout << "In MeshNodesAlongSurface: x_max = " << sfc->getAABB().getMaxPoint()[0] << std::endl;
+    throw "stop";
     //std::vector<Node*> const& mesh_nodes (mesh->getNodeVector());
     double min_edge_length (mesh->getGeometricProperty()->getMinEdgeLength() * 0.1);
 

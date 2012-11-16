@@ -1,3 +1,14 @@
+/**
+ * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.com)
+ *            Distributed under a Modified BSD License.
+ *              See accompanying file LICENSE.txt or
+ *              http://www.opengeosys.com/LICENSE.txt
+ *
+ *
+ * \file Umf.tpp
+ *
+ * Created on 2012-11-15 by Norihiro Watanabe
+ */
 
 
 #include "logog.hpp"
@@ -16,7 +27,7 @@
 #include "FemVariableBuilder.h"
 
 template <class T1, class T2>
-typename FunctionUmf<T1,T2>::MyVariable* FunctionUmf<T1,T2>::getDisplacementComponent(MyVariable *u_x, MyVariable* u_y, MyVariable* u_z, const std::string &var_name)
+typename Umf<T1,T2>::MyVariable* Umf<T1,T2>::getDisplacementComponent(MyVariable *u_x, MyVariable* u_y, MyVariable* u_z, const std::string &var_name)
 {
     if (var_name.find("_X")!=std::string::npos) {
         return u_x;
@@ -28,7 +39,7 @@ typename FunctionUmf<T1,T2>::MyVariable* FunctionUmf<T1,T2>::getDisplacementComp
 }
 
 template <class T1, class T2>
-size_t FunctionUmf<T1,T2>::getDisplacementComponentIndex(const std::string &var_name) const
+size_t Umf<T1,T2>::getDisplacementComponentIndex(const std::string &var_name) const
 {
     if (var_name.find("_X")!=std::string::npos) {
         return 0;
@@ -40,7 +51,7 @@ size_t FunctionUmf<T1,T2>::getDisplacementComponentIndex(const std::string &var_
 }
 
 template <class T1, class T2>
-bool FunctionUmf<T1,T2>::initialize(const BaseLib::Options &option)
+bool Umf<T1,T2>::initialize(const BaseLib::Options &option)
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
     size_t msh_id = option.getOptionAsNum<size_t>("MeshID");
@@ -50,12 +61,16 @@ bool FunctionUmf<T1,T2>::initialize(const BaseLib::Options &option)
     // set up mesh and FE objects
     //--------------------------------------------------------------------------
     MeshLib::IMesh* msh = femData->list_mesh[msh_id];
-    INFO("->generating higher order mesh...");
-    MeshLib::MeshGenerator::generateHigherOrderUnstrucuredMesh(*(MeshLib::UnstructuredMesh*)msh, 2);
-    INFO("* mesh id %d: order=%d, nodes=%d, elements=%d", msh_id, msh->getMaxiumOrder(), msh->getNumberOfNodes(msh->getMaxiumOrder()), msh->getNumberOfElements());
+    const FemLib::PolynomialOrder::type msh_order = FemLib::PolynomialOrder::Linear;
+    if (msh_order != FemLib::PolynomialOrder::Linear) {
+        INFO("->generating higher order mesh...");
+        MeshLib::MeshGenerator::generateHigherOrderUnstrucuredMesh(*(MeshLib::UnstructuredMesh*)msh, 2);
+        INFO("* mesh id %d: order=%d, nodes=%d, elements=%d", msh_id, msh->getMaxiumOrder(), msh->getNumberOfNodes(msh->getMaxiumOrder()), msh->getNumberOfElements());
+    }
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
     _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
+    const size_t dim = msh->getDimension();
 
     //--------------------------------------------------------------------------
     // set up problem
@@ -68,14 +83,18 @@ bool FunctionUmf<T1,T2>::initialize(const BaseLib::Options &option)
     // set up variables
     //--------------------------------------------------------------------------
     // definitions
-    MyVariable* u_x = _problem->addVariable("u_x", FemLib::PolynomialOrder::Quadratic);
-    MyVariable* u_y = _problem->addVariable("u_y", FemLib::PolynomialOrder::Quadratic);
-    MyVariable* p = _problem->addVariable("p", FemLib::PolynomialOrder::Linear);
-    _var_p_id = p->getID();
+    MyVariable* u_x = _problem->addVariable("u_x", msh_order);
+    MyVariable* u_y = _problem->addVariable("u_y", msh_order);
+    MyVariable* u_z = NULL;
+    if (dim==3) {
+        u_z = _problem->addVariable("u_z", msh_order);
+    }
     FemVariableBuilder var_builder;
     var_builder.doit(this->getOutputParameterName(Displacement)+"_X1", option, msh, femData->geo, femData->geo_unique_name, _feObjects, u_x);
     var_builder.doit(this->getOutputParameterName(Displacement)+"_Y1", option, msh, femData->geo, femData->geo_unique_name, _feObjects, u_y);
-    var_builder.doit(this->getOutputParameterName(Pressure), option, msh, femData->geo, femData->geo_unique_name, _feObjects, p);
+    if (dim==3) {
+        var_builder.doit(this->getOutputParameterName(Displacement)+"_Z1", option, msh, femData->geo, femData->geo_unique_name, _feObjects, u_z);
+    }
 
     //--------------------------------------------------------------------------
     // set up equations
@@ -85,10 +104,13 @@ bool FunctionUmf<T1,T2>::initialize(const BaseLib::Options &option)
     for (size_t i=0; i<_problem->getNumberOfVariables(); i++)
         vec_orders.push_back(_problem->getVariable(i)->getCurrentOrder());
 
-    MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_feObjects, _problem->getNumberOfVariables(), vec_orders);
-    MyResidualAssemblerType* r_assembler = new MyResidualAssemblerType(_feObjects, _problem->getNumberOfVariables(), vec_orders);
-    MyJacobianAssemblerType* j_eqs = new MyJacobianAssemblerType(_feObjects, _problem->getNumberOfVariables(), vec_orders);
-    eqs->initialize(linear_assembler, r_assembler, j_eqs);
+    MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType();
+    MyLinearAssemblerTypeForPorousMedia* linear_assembler_pm = new MyLinearAssemblerTypeForPorousMedia(_feObjects, _problem->getNumberOfVariables(), vec_orders, msh->getGeometricProperty()->getCoordinateSystem());
+    //MyLinearAssemblerTypeForFracture* linear_assembler_frac = new MyLinearAssemblerTypeForFracture(*_feObjects, msh->getGeometricProperty()->getCoordinateSystem());
+    const MeshLib::CoordinateSystem coord = msh->getGeometricProperty()->getCoordinateSystem();
+    linear_assembler->addLocalAssembler(coord.getDimension(), linear_assembler_pm);
+    //linear_assembler->addLocalAssembler(coord.getDimension()-1, linear_assembler_frac);
+    eqs->initialize(linear_assembler);
 
 
     //--------------------------------------------------------------------------
@@ -110,10 +132,11 @@ bool FunctionUmf<T1,T2>::initialize(const BaseLib::Options &option)
     _displacement = new MyNodalFunctionVector();
     _displacement->initialize(*dis, u_x->getCurrentOrder(), tmp_u0);
     for (size_t i=0; i<_displacement->getNumberOfNodes(); i++) {
-        _displacement->getValue(i)(0) = _solution->getCurrentSolution(0)->getValue(i);
-        _displacement->getValue(i)(1) = _solution->getCurrentSolution(1)->getValue(i);
+        for (size_t j=0; j<dim; j++) {
+            _displacement->getValue(i)(j) = _solution->getCurrentSolution(j)->getValue(i);
+        }
     }
-    for (size_t i=0; i<2; i++) {
+    for (size_t i=0; i<dim; i++) {
         _vec_u_components.push_back(new NodalPointScalarWrapper(_displacement, i));
     }
 
@@ -124,35 +147,32 @@ bool FunctionUmf<T1,T2>::initialize(const BaseLib::Options &option)
         OutputVariableInfo var1(this->getOutputParameterName(Displacement) + getDisplacementComponentPostfix(i), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_u_components[i]);
         femData->outController.setOutput(var1.name, var1);
     }
-    OutputVariableInfo outP(this->getOutputParameterName(Pressure), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(_var_p_id));
-    femData->outController.setOutput(outP.name, outP);
 
     //--------------------------------------------------------------------------
     // set initial output
     //--------------------------------------------------------------------------
     // initial output parameter
     this->setOutput(Displacement, _displacement);
-    this->setOutput(Pressure, _solution->getCurrentSolution(_var_p_id));
 
+    std::cout << "At the end of Umf::init(): x_max = " << femData->geo->getSurfaceVec(femData->geo_unique_name)->at(2)->getAABB().getMaxPoint()[0] << std::endl;
 
     return true;
 }
 
 template <class T1, class T2>
-void FunctionUmf<T1,T2>::updateOutputParameter(const NumLib::TimeStep &/*time*/)
+void Umf<T1,T2>::updateOutputParameter(const NumLib::TimeStep &/*time*/)
 {
+    const size_t dim = _problem->getDiscreteSystem()->getMesh()->getDimension();
     for (size_t i=0; i<_displacement->getNumberOfNodes(); i++) {
-        _displacement->getValue(i)(0) = _solution->getCurrentSolution(0)->getValue(i);
-        _displacement->getValue(i)(1) = _solution->getCurrentSolution(1)->getValue(i);
+        for (size_t j=0; j<dim; j++) {
+            _displacement->getValue(i)(j) = _solution->getCurrentSolution(j)->getValue(i);
+        }
     }
     setOutput(Displacement, _displacement);
-    this->setOutput(Pressure, _solution->getCurrentSolution(_var_p_id));
-
-    //calculateStressStrain();
 }
 
 template <class T1, class T2>
-void FunctionUmf<T1,T2>::output(const NumLib::TimeStep &/*time*/)
+void Umf<T1,T2>::output(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
     const size_t msh_id = _problem->getDiscreteSystem()->getMesh()->getID();
@@ -163,7 +183,5 @@ void FunctionUmf<T1,T2>::output(const NumLib::TimeStep &/*time*/)
         OutputVariableInfo var1(this->getOutputParameterName(Displacement) + getDisplacementComponentPostfix(i), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_u_components[i]);
         femData->outController.setOutput(var1.name, var1);
     }
-    OutputVariableInfo outP(this->getOutputParameterName(Pressure), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(_var_p_id));
-    femData->outController.setOutput(outP.name, outP);
 };
 

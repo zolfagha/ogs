@@ -31,11 +31,14 @@ namespace THMmf
  * \brief Monolithic poro-elasticity calculator using FEM
  */
 template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER>
-class FunctionUmf
+class Umf
 : public ProcessLib::AbstractTransientProcess
 {
 public:
-    enum Out { Displacement=0, Pressure=1 };
+    enum Out
+    {
+        Displacement=0
+    };
 
     typedef T_DISCRETE_SYSTEM MyDiscreteSystem;
     typedef T_LINEAR_SOLVER MyLinearSolver;
@@ -67,7 +70,7 @@ public:
     typedef typename MyProblemType::MyVariable MyVariable;
 
     ///
-    FunctionUmf()
+    Umf()
     : ProcessLib::AbstractTransientProcess("DEFORMATION", 0, 1),
       _problem(0), _solution(0), _feObjects(0), _displacement(0)
     {
@@ -76,7 +79,7 @@ public:
     };
 
     ///
-    virtual ~FunctionUmf()
+    virtual ~Umf()
     {
         BaseLib::releaseObject(_problem, _solution, _feObjects, _displacement /*, _strain, _stress*/);
     }
@@ -105,7 +108,7 @@ private:
     size_t getDisplacementComponentIndex(const std::string &var_name) const;
     //void calculateStressStrain();
 
-    DISALLOW_COPY_AND_ASSIGN(FunctionUmf);
+    DISALLOW_COPY_AND_ASSIGN(Umf);
 
 private:
     MyProblemType* _problem;

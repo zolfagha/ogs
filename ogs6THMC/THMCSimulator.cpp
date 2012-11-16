@@ -209,7 +209,9 @@ int THMCSimulator::execute()
     if (BaseLib::IsFileExisting(proj_path+".pcs")) {
         INFO("->Reading OGS5 input files...");
         ogs5::Ogs5FemData ogs5femdata;
+        INFO("-------------------------------------------------");
         ogs5::Ogs5FemIO::read(proj_path, ogs5femdata);
+        INFO("-------------------------------------------------");
         if (!Ogs5ToOgs6::convert(ogs5femdata, *ogs6fem, *opOgs6)) {
             ERR("***Error: Failure during conversion of ogs5 to ogs6.");
             return 0;
