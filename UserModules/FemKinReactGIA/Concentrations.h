@@ -132,6 +132,7 @@ public:
 		                                        MyLinearSolutionType, 
 												MyNonLinearReactiveTransportProblemType, 
 	                                            MyNonLinearSolutionType> MyKinReductionSolution; 
+    typedef typename MyKinReductionProblemType::MyVariable MyVariableConc;
 
     FunctionConcentrations() 
         : Process("KIN_REACT_GIA", 1, 0),

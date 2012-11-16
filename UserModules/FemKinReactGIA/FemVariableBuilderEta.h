@@ -19,6 +19,7 @@
 #include "MeshLib/Core/IMesh.h"
 #include "FemLib/Tools/LagrangeFeObjectContainer.h"
 #include "SolutionLib/Fem/FemVariable.h"
+#include "FemVariableBuilder.h"
 
 /**
  * \brief FemVariable builder for eta based on BaseLib::Options

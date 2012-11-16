@@ -33,7 +33,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
     size_t time_id = option.getOptionAsNum<size_t>("TimeGroupID");
     NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
 
-    //mesh and FE objects
+    // mesh and FE objects
     MeshLib::IMesh* msh = femData->list_mesh[msh_id];
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
@@ -162,26 +162,9 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	// add all concentrations to discretized memory space
 	for ( i=0; i<n_Comp; i++ )
 	{
-		_problem->addVariable( femData->map_ChemComp[i]->second->get_name() );
-	}
-
-	// set IC for concentrations
-	NumLib::TXFunctionBuilder f_builder;
-	const BaseLib::Options* opICList = option.getSubGroup("ICList");
-    for (const BaseLib::Options* opIC = opICList->getFirstSubGroup("IC"); opIC!=0; opIC = opICList->getNextSubGroup())
-    {		
-		SolutionLib::FemIC* conc_ic = new SolutionLib::FemIC(msh);
-        std::string var_name = opIC->getOption("Variable");
-        std::string geo_type = opIC->getOption("GeometryType");
-        std::string geo_name = opIC->getOption("GeometryName");
-        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
-        std::string dis_name = opIC->getOption("DistributionType");
-        double dis_v = opIC->getOptionAsNum<double>("DistributionValue");
-        NumLib::ITXFunction* f_ic =  f_builder.create(dis_name, dis_v);
-        // set IC
-		conc_ic->addDistribution( geo_obj, f_ic ); 
-		size_t comp_idx = femData->map_ChemComp.find( var_name )->second->getIndex();  
-		_problem->getVariable(comp_idx)->setIC( conc_ic ); 
+		MyVariableConc* comp_conc = _problem->addVariable( femData->map_ChemComp[i]->second->get_name() );
+        FemVariableBuilder var_builder;
+        var_builder.doit(femData->map_ChemComp[i]->second->get_name(), option, msh, femData->geo, femData->geo_unique_name, _feObjects, comp_conc);
 	}
 
 	// backward flushing global vector of concentrations
@@ -213,7 +196,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	{
 		SolutionLib::FemIC* eta_ic = new SolutionLib::FemIC(msh);
 		eta_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _eta_mob[i]->getDiscreteData() ) ); 
-		_linear_problems[i]->getVariable(0)->setIC( eta_ic ); 
+		_linear_problems[i]->getVariable(i)->setIC( eta_ic ); 
 	}
 	// set IC for xi_mob
 	for ( i=0; i < n_xi_mob; i++ )
@@ -222,50 +205,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 		xi_mob_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _xi_mob[i]->getDiscreteData() ) ); 
 		_non_linear_problem->getVariable(i)->setIC( xi_mob_ic ); 
 	}
-	// set BC for concentrations
-	const BaseLib::Options* opBCList = option.getSubGroup("BCList");
-    for (const BaseLib::Options* opBC = opBCList->getFirstSubGroup("BC"); opBC!=0; opBC = opBCList->getNextSubGroup())
-    {
-		std::string var_name = opBC->getOption("Variable");
-        std::string geo_type = opBC->getOption("GeometryType");
-        std::string geo_name = opBC->getOption("GeometryName");
-        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
-        std::string dis_name = opBC->getOption("DistributionType");
-        double dis_v = opBC->getOptionAsNum<double>("DistributionValue");
-        NumLib::ITXFunction* f_bc =  f_builder.create(dis_name, dis_v);
-		size_t comp_idx = femData->map_ChemComp.find( var_name )->second->getIndex();
-		_problem->getVariable(comp_idx)->addDirichletBC(new SolutionLib::FemDirichletBC(msh, geo_obj, f_bc));
-    }
-
-	// set ST for concentrations
-	const BaseLib::Options* opSTList = option.getSubGroup("STList");
-    for (const BaseLib::Options* opST = opSTList->getFirstSubGroup("ST"); opST!=0; opST = opSTList->getNextSubGroup())
-    {
-		std::string var_name = opST->getOption("Variable");
-        std::string geo_type = opST->getOption("GeometryType");
-        std::string geo_name = opST->getOption("GeometryName");
-        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
-        std::string st_type = opST->getOption("STType");
-        std::string dis_name = opST->getOption("DistributionType");
-        double dis_v = opST->getOptionAsNum<double>("DistributionValue");
-        if (st_type.compare("NEUMANN")==0) {
-            dis_v *= -1; // user set inflow as positive sign but internally negative
-        }
-        NumLib::ITXFunction* f_st =  f_builder.create(dis_name, dis_v);
-        if (f_st!=NULL) {
-            SolutionLib::IFemNeumannBC *femSt = 0;
-            if (st_type.compare("NEUMANN")==0) {
-                femSt = new SolutionLib::FemNeumannBC(msh, _feObjects, geo_obj, f_st);
-            } else if (st_type.compare("SOURCESINK")==0) {
-                femSt = new SolutionLib::FemSourceTerm(msh, geo_obj, f_st);
-            }
-            size_t comp_idx = femData->map_ChemComp.find( var_name )->second->getIndex();
-			_problem->getVariable(comp_idx)->addNeumannBC(femSt);
-        } else {
-            WARN("Distribution type %s is specified but not found. Ignore this ST.", dis_name.c_str());
-        }
-    }
-
+	
     // set up linear solution
 	for ( i=0; i < n_eta_mob; i++ )
 	{
