@@ -33,8 +33,8 @@ public:
         IntegrationPoint
     };
 
-    explicit TXPosition(const double* x_) : _t(.0), _x(x_) {};
-    TXPosition(double t_, const double* x_) : _t(t_), _x(x_) {};
+    explicit TXPosition(const double* x_) : _t(.0), _x(x_), _obj_type(INVALID) {};
+    TXPosition(double t_, const double* x_) : _t(t_), _x(x_), _obj_type(INVALID) {};
     TXPosition(IdObjectType objType, size_t n) : _t(.0), _x(0), _array_id(1, n), _obj_type(objType) {};
     TXPosition(IdObjectType objType, size_t n, const double* p) : _t(.0), _x(p), _array_id(1, n), _obj_type(objType) {};
     TXPosition(IdObjectType objType, size_t id1, size_t id2, const double* p) : _t(.0), _x(p), _obj_type(objType) 

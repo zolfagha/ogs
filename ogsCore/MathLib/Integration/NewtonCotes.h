@@ -15,6 +15,8 @@
 
 #include <cstddef>
 
+#include <cstddef>
+
 namespace MathLib
 {
 
@@ -25,13 +27,13 @@ namespace MathLib
 class NewtonCotes
 {
     /// midpoint integration
-    double middpoint(double (*fun)(double), double a, double b, size_t n);
+    double middpoint(double (*fun)(double), double a, double b, std::size_t n);
 
     /// trapezoid integration
-    double trapezoid(double (*fun)(double), double a, double b, size_t n);
+    double trapezoid(double (*fun)(double), double a, double b, std::size_t n);
 
     /// simpson integration
-    double simpson(double (*fun)(double), double a, double b, size_t n);
+    double simpson(double (*fun)(double), double a, double b, std::size_t n);
 };
 
 }

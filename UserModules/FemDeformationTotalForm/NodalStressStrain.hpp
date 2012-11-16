@@ -18,7 +18,7 @@
 #include "FemLib/Post/Extrapolation.h"
 
 #include "Ogs6FemData.h"
-#include "FemLinearElasticTools.h"
+#include "PhysicsLib/FemLinearElasticTools.h"
 
 template <class T>
 size_t FunctionNodalStressStrain<T>::getNumberOfStrainComponents() const

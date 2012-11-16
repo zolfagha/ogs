@@ -132,6 +132,12 @@ public:
         return (*_nodal_values)[node_id];
     }
 
+    /// get nodal value
+    const Tvalue& getValue(size_t node_id) const
+    {
+        return (*_nodal_values)[node_id];
+    }
+
     ///
     void setValue(size_t node_id, Tvalue &v)
     {
@@ -283,7 +289,7 @@ public:
 
 
     /// get nodal value
-    double getValue(size_t node_id)
+    double getValue(size_t node_id) const
     {
         return (*_nodal_values)[node_id];
     }

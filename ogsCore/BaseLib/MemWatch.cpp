@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.com)
+ * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.org)
  *            Distributed under a Modified BSD License.
  *              See accompanying file LICENSE.txt or
- *              http://www.opengeosys.com/LICENSE.txt
+ *              http://www.opengeosys.org/project/license
  *
  *
  * \file MemWatch.cpp
@@ -12,7 +12,7 @@
 
 #include "MemWatch.h"
 
-#if !defined(_WIN32) && !defined (__CYGWIN__)
+#ifndef _MSC_VER
 
 namespace BaseLib {
 
@@ -71,4 +71,4 @@ unsigned long MemWatch::getCodeMemUsage () {
 
 } // end namespace BaseLib
 
-#endif // WIN
+#endif // _MSC_VER

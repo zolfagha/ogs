@@ -33,7 +33,7 @@ public:
      * \param point_id          point index
      * \return x
      */
-    static double getPoint(size_t n_sample_points, size_t point_id);
+    static double getPoint(std::size_t n_sample_points, std::size_t point_id);
     
 
     /**
@@ -43,7 +43,7 @@ public:
      * \param point_id          point index
      * \return weight
      */
-    static double getWeight(size_t n_sample_points, size_t point_id);
+    static double getWeight(std::size_t n_sample_points, std::size_t point_id);
 
 
     /**

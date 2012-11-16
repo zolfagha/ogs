@@ -39,7 +39,8 @@ bool FunctionHeadToElementVelocity<T>::initialize(const BaseLib::Options &option
     femData->outController.setOutput(var.name, var);
 
     // initial output parameter
-    this->setOutput(Velocity, _vel);
+    _vel_3d = new My3DIntegrationPointFunctionVector(_vel, msh->getGeometricProperty()->getCoordinateSystem());
+    this->setOutput(Velocity, _vel_3d);
 
     return true;
 }
@@ -61,63 +62,71 @@ int FunctionHeadToElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &/*ti
     INFO("Calculating Darcy velocity within elements from hydraulic head...");
 
     const MeshLib::IMesh *msh = _dis->getMesh();
-    MyNodalFunctionScalar *head = (MyNodalFunctionScalar*)getInput(Head);
+    const MeshLib::CoordinateSystem coord = msh->getGeometricProperty()->getCoordinateSystem();
+    FemLib::LagrangianFeObjectContainer* feObjects = _feObjects;
+    const MyNodalFunctionScalar* head = (MyNodalFunctionScalar*)getInput(Head);
     MyIntegrationPointFunctionVector *vel = _vel;;
 
-
-    FemLib::LagrangianFeObjectContainer* feObjects = _feObjects;
     //calculate vel (vel=f(h))
     for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
-        MeshLib::IElement* e = msh->getElement(i_e);
-        size_t mat_id = e->getGroupID();
+        //____________________________________________
+        // collect element information
+        const MeshLib::IElement* e = msh->getElement(i_e);
+        const MeshLib::ElementCoordinatesMappingLocal* ele_local_coord
+            = (MeshLib::ElementCoordinatesMappingLocal*)e->getMappedCoordinates();
+        const MathLib::LocalMatrix &matR = ele_local_coord->getRotationMatrixToOriginal();
+        const size_t mat_id = e->getGroupID();
         MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];
-
-        FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
         MathLib::LocalVector local_h(e->getNumberOfNodes());
         for (size_t j=0; j<e->getNumberOfNodes(); j++)
             local_h[j] = head->getValue(e->getNodeID(j));
-        // for each integration points
+
+        //____________________________________________
+        // define FE object
+        FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
         FemLib::IFemNumericalIntegration *integral = fe->getIntegrationMethod();
+
+        //____________________________________________
+        // for each integration points
         double r[3] = {};
         const size_t n_gp = integral->getNumberOfSamplingPoints();
         vel->setNumberOfIntegationPoints(i_e, n_gp);
-        MathLib::LocalVector xi(e->getNumberOfNodes());
-        MathLib::LocalVector yi(e->getNumberOfNodes());
-        MathLib::LocalVector zi(e->getNumberOfNodes());
-        for (size_t i=0; i<e->getNumberOfNodes(); i++) {
-            const GeoLib::Point* pt = msh->getNodeCoordinatesRef(e->getNodeID(i));
-            xi[i] = (*pt)[0];
-            yi[i] = (*pt)[1];
-            zi[i] = (*pt)[2];
-        }
-        MathLib::LocalVector q(3);
+        MathLib::LocalVector q = MathLib::LocalVector::Zero(3);
+        double xx[3] = {.0};
         for (size_t ip=0; ip<n_gp; ip++) {
-            q *= .0;
+            // calculate shape functions etc at this integration point
             integral->getSamplingPoint(ip, r);
             fe->computeBasisFunctions(r);
             const MathLib::LocalMatrix* dN = fe->getGradBasisFunction();
             MathLib::LocalMatrix* N = fe->getBasisFunction();
-            std::vector<double> xx(3, .0);
-            MathLib::LocalVector tmp_v;
-            tmp_v = (*N) * xi;
-            xx[0] = tmp_v[0];
-            tmp_v = (*N) * yi;
-            xx[1] = tmp_v[0];
-            tmp_v = (*N) * zi;
-            xx[2] = tmp_v[0];
-            NumLib::TXPosition pos(&xx[0]);
+            fe->getRealCoordinates(xx);
 
-            MathLib::LocalMatrix k;
+            // calculate material parameter at this integration point
+            NumLib::TXPosition pos(NumLib::TXPosition::Element, e->getID(), &xx[0]);
+            double k;
             pm->hydraulic_conductivity->eval(pos, k);
-            if (k.rows()==1) {
-                q.head(msh->getDimension()) = (*dN) * local_h * (-1.0 * k(0,0));
+            MathLib::LocalMatrix local_k = MathLib::LocalMatrix::Identity(e->getDimension(), e->getDimension());
+            local_k *= k;
+            MathLib::LocalMatrix global_k;
+            if (e->getDimension() < coord.getDimension()) {
+                MathLib::LocalMatrix local2 = MathLib::LocalMatrix::Zero(coord.getDimension(), coord.getDimension());
+    //            local2.topLeftCorner(local_k_mu.rows(), local_k_mu.cols()) = local_k_mu;
+                local2.block(0, 0, local_k.rows(), local_k.cols()) = local_k.block(0, 0, local_k.rows(), local_k.cols());
+                global_k = matR * local2 * matR.transpose();
             } else {
-                q.head(msh->getDimension()) = (*dN) * k * local_h * (-1.0);
+                global_k = local_k;
             }
+
+            // calculate Darcy velocity
+            q = - global_k * (*dN) * local_h;
+
+            // update array
             vel->setIntegrationPointValue(i_e, ip, q);
         }
     }
+
     setOutput(Velocity, vel);
+
     return 0;
 }
 

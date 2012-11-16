@@ -98,7 +98,7 @@ public:
         }
         // reset internal state
         _mapping->initialize(e);
-        _integration->initialize(e, 3); //TODO gp points
+        _integration->initialize(e, 2); //TODO gp points
         _is_basis_computed = false;
     }
 

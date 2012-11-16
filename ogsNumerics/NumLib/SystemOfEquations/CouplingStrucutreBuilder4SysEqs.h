@@ -64,10 +64,7 @@ private:
     template <class T_EQS_FACTORY>
     T_M* buildMonolithicSystem(const BaseLib::Options *option, T_EQS_FACTORY &eqs_fac)
     {
-        std::vector<std::string> list_var_name; // = option->getOptionAsArray<std::string>("variable");
-        for (std::string in_name = option->getFirstOption<std::string>("variable"); in_name != ""; in_name = option->getNextOption<std::string>()) {
-            list_var_name.push_back(in_name);
-        }
+        std::vector<std::string> list_var_name = option->getOptionList<std::string>("variable");
         T_M* eqs = eqs_fac.create(list_var_name);
         return eqs;
     }

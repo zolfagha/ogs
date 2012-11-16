@@ -18,7 +18,7 @@
 //------------------------------------------------------------------------------
 #include "FemGroundwaterFlow/Head.h"
 #include "FemGroundwaterFlow/HeadToElementVelocity.h"
-//#include "FemGroundwaterFlow/PressureToHead.h"
+#include "FemGroundwaterFlow/PressureToHead.h"
 #include "FemGroundwaterFlow/PressureToElementVelocity.h"
 #include "FemGroundwaterFlow/LiquidPressure.h"
 #include "FemMassTransport/Concentration.h"

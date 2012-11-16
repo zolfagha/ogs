@@ -271,7 +271,9 @@ int THMCSimulator::execute()
         const BaseLib::Options* opPCSList = opOgs6->getSubGroup("processList");
         const BaseLib::Options* opPCS = NULL;
         if (opPCSList!=NULL) {
-            for (const BaseLib::Options* opVal = opPCSList->getFirstSubGroup("process"); opVal!=NULL; opVal = opPCSList->getNextSubGroup()) {
+            std::vector<const BaseLib::Options*> vec_opPCS = opPCSList->getSubGroupList("process");
+            for (size_t i=0; i<vec_opPCS.size(); i++) {
+                const BaseLib::Options* opVal = vec_opPCS[i];
                 if (opVal->getOption("name").compare(pcs_name)==0)
                     opPCS = opVal;
             }

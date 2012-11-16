@@ -10,9 +10,9 @@
 #include "SolutionLib/Fem/FemSourceTerm.h"
 #include "MaterialLib/PorousMedia.h"
 #include "MaterialLib/Solid.h"
+#include "PhysicsLib/FemLinearElasticTools.h"
 #include "Ogs6FemData.h"
-
-#include "FemLinearElasticTools.h"
+#include "FemVariableBuilder.h"
 
 template <class T1, class T2>
 typename FunctionDisplacement<T1,T2>::MyVariable* FunctionDisplacement<T1,T2>::getDisplacementComponent(MyVariable *u_x, MyVariable* u_y, MyVariable* u_z, const std::string &var_name)
@@ -53,63 +53,9 @@ bool FunctionDisplacement<T1,T2>::initialize(const BaseLib::Options &option)
     // set up variable
     MyVariable* u_x = _problem->addVariable("u_x");
     MyVariable* u_y = _problem->addVariable("u_y");
-    // IC
-    NumLib::TXFunctionBuilder f_builder;
-    SolutionLib::FemIC* u_ic = new SolutionLib::FemIC(msh);
-    const BaseLib::Options* opICList = option.getSubGroup("ICList");
-    for (const BaseLib::Options* opIC = opICList->getFirstSubGroup("IC"); opIC!=0; opIC = opICList->getNextSubGroup())
-    {
-        std::string geo_type = opIC->getOption("GeometryType");
-        std::string geo_name = opIC->getOption("GeometryName");
-        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
-        std::string dis_name = opIC->getOption("DistributionType");
-        double dis_v = opIC->getOptionAsNum<double>("DistributionValue");
-        NumLib::ITXFunction* f_ic =  f_builder.create(dis_name, dis_v);
-        u_ic->addDistribution(geo_obj, f_ic);
-    }
-    u_x->setIC(u_ic);
-    u_y->setIC(u_ic);
-    // BC
-    const BaseLib::Options* opBCList = option.getSubGroup("BCList");
-    for (const BaseLib::Options* opBC = opBCList->getFirstSubGroup("BC"); opBC!=0; opBC = opBCList->getNextSubGroup())
-    {
-        std::string var_name = opBC->getOption("Variable");
-        std::string geo_type = opBC->getOption("GeometryType");
-        std::string geo_name = opBC->getOption("GeometryName");
-        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
-        std::string dis_name = opBC->getOption("DistributionType");
-        double dis_v = opBC->getOptionAsNum<double>("DistributionValue");
-        NumLib::ITXFunction* f_bc =  f_builder.create(dis_name, dis_v);
-        getDisplacementComponent(u_x, u_y, 0, var_name)->addDirichletBC(new SolutionLib::FemDirichletBC(msh, geo_obj, f_bc));
-    }
-
-    // ST
-    const BaseLib::Options* opSTList = option.getSubGroup("STList");
-    for (const BaseLib::Options* opST = opSTList->getFirstSubGroup("ST"); opST!=0; opST = opSTList->getNextSubGroup())
-    {
-        std::string var_name = opST->getOption("Variable");
-        std::string geo_type = opST->getOption("GeometryType");
-        std::string geo_name = opST->getOption("GeometryName");
-        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
-        std::string st_type = opST->getOption("STType");
-        std::string dis_name = opST->getOption("DistributionType");
-        double dis_v = opST->getOptionAsNum<double>("DistributionValue");
-        if (st_type.compare("NEUMANN")==0) {
-            dis_v *= -1; //TODO
-        }
-        NumLib::ITXFunction* f_st =  f_builder.create(dis_name, dis_v);
-        if (f_st!=NULL) {
-            SolutionLib::IFemNeumannBC *femSt = 0;
-            if (st_type.compare("NEUMANN")==0) {
-                femSt = new SolutionLib::FemNeumannBC(msh, _feObjects, geo_obj, f_st);
-            } else if (st_type.compare("SOURCESINK")==0) {
-                femSt = new SolutionLib::FemSourceTerm(msh, geo_obj, f_st);
-            }
-            getDisplacementComponent(u_x, u_y, 0, var_name)->addNeumannBC(femSt);
-        } else {
-            WARN("Distribution type %s is specified but not found. Ignore this ST.", dis_name.c_str());
-        }
-    }
+    FemVariableBuilder var_builder;
+    var_builder.doit(this->getOutputParameterName(Displacement)+"_X", option, msh, femData->geo, femData->geo_unique_name, _feObjects, u_x);
+    var_builder.doit(this->getOutputParameterName(Displacement)+"_Y", option, msh, femData->geo, femData->geo_unique_name, _feObjects, u_y);
 
     // set up solution
     _solution = new MySolutionType(dis, _problem);

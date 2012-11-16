@@ -19,7 +19,7 @@ namespace BaseLib
 OptionGroup::~OptionGroup()
 {
     for (DictionaryType::iterator itr=_dictionary.begin(); itr!=_dictionary.end(); itr++)
-        delete itr->second;
+        if (itr->second!=NULL) delete itr->second;
 }
 
 
@@ -58,28 +58,18 @@ const OptionGroup* OptionGroup::getSubGroup(const std::string &key) const
        return static_cast<OptionGroup*>(itr->second);
 }
 
-/// get option with the given key if it exists.
-const OptionGroup* OptionGroup::getFirstSubGroup(const std::string &key) const
+std::vector<const OptionGroup*> OptionGroup::getSubGroupList(const std::string &key) const
 {
-    _subgroup_range = _dictionary.equal_range(key);
-    _subgroup_itr = _subgroup_range.first;
-    if (_subgroup_itr == _subgroup_range.second || _subgroup_itr->second->isValue())
-       return 0;
-    else
-       return static_cast<OptionGroup*>(_subgroup_itr->second);
-}
+    const_pair_of_iterator subgroup_range = _dictionary.equal_range(key);
+    DictionaryType::const_iterator itr;
+    std::vector<const OptionGroup*> list_group;
 
-/// get option with the given key if it exists.
-const OptionGroup* OptionGroup::getNextSubGroup() const
-{
-    if (_subgroup_itr == _subgroup_range.second)
-        return 0;
-    ++_subgroup_itr;
+    for (itr = subgroup_range.first; itr!=subgroup_range.second; ++itr) {
+        if (!itr->second->isValue())
+            list_group.push_back(static_cast<OptionGroup*>(itr->second));
+    }
 
-    if (_subgroup_itr == _subgroup_range.second || _subgroup_itr->second->isValue())
-       return 0;
-    else
-       return static_cast<OptionGroup*>(_subgroup_itr->second);
+    return list_group;
 }
 
 /// check if there is a value with the given key

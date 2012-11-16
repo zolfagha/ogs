@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.com)
+ * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.org)
  *            Distributed under a Modified BSD License.
  *              See accompanying file LICENSE.txt or
- *              http://www.opengeosys.com/LICENSE.txt
+ *              http://www.opengeosys.org/project/license
  *
  *
  * \file FileTools.h
@@ -17,41 +17,39 @@
 
 #include <string>
 #include <fstream>
-
 #include <sys/stat.h>
 
-namespace BaseLib
-{
+namespace BaseLib {
 /**
  * Returns true if given file exists. From http://www.techbytes.ca/techbyte103.html
  */
 static bool IsFileExisting(const std::string &strFilename)
 {
-    struct stat stFileInfo;
-    bool blnReturn;
-    int intStat;
+	struct stat stFileInfo;
+	bool blnReturn;
+	int intStat;
 
-    // Attempt to get the file attributes
-    intStat = stat(strFilename.c_str(),&stFileInfo);
+	// Attempt to get the file attributes
+	intStat = stat(strFilename.c_str(),&stFileInfo);
 
-    if(intStat == 0)
-    {
-        // We were able to get the file attributes
-        // so the file obviously exists.
-        blnReturn = true;
-    }
-    else
-    {
-        // We were not able to get the file attributes.
-        // This may mean that we don't have permission to
-        // access the folder which contains this file. If you
-        // need to do that level of checking, lookup the
-        // return values of stat which will give you
-        // more details on why stat failed.
-        blnReturn = false;
-    }
+	if(intStat == 0)
+	{
+		// We were able to get the file attributes
+		// so the file obviously exists.
+		blnReturn = true;
+	}
+	else
+	{
+		// We were not able to get the file attributes.
+		// This may mean that we don't have permission to
+		// access the folder which contains this file. If you
+		// need to do that level of checking, lookup the
+		// return values of stat which will give you
+		// more details on why stat failed.
+		blnReturn = false;
+	}
 
-    return(blnReturn);
+	return(blnReturn);
 }
 
 /**
@@ -59,7 +57,7 @@ static bool IsFileExisting(const std::string &strFilename)
  */
 static std::string getFileDirecotryPath(const std::string &file_path)
 {
-    size_t indexChWin, indexChLinux;
+    std::size_t indexChWin, indexChLinux;
     indexChWin = indexChLinux = 0;
     indexChWin = file_path.find_last_of('\\');
     indexChLinux = file_path.find_last_of('/');
@@ -78,7 +76,7 @@ static std::string getFileDirecotryPath(const std::string &file_path)
  */
 static std::string getFileBaseName(const std::string &file_path)
 {
-    size_t indexChWin, indexChLinux;
+    std::size_t indexChWin, indexChLinux;
     indexChWin = indexChLinux = 0;
     indexChWin = file_path.find_last_of('\\');
     indexChLinux = file_path.find_last_of('/');
@@ -94,6 +92,9 @@ static std::string getFileBaseName(const std::string &file_path)
     return dir_path;
 }
 
+/**
+ * \brief return a file name with or without file extensions
+ */ 
 static std::string getFileNameFromPath(const std::string &str, bool with_extension)
 {
     std::string::size_type beg1 = str.find_last_of('/');
@@ -110,11 +111,17 @@ static std::string getFileNameFromPath(const std::string &str, bool with_extensi
     return file.substr(0,end);
 }
 
+/**
+ * \brief write value in binary
+ */
 template <typename T> void write_value_binary(std::fstream &fin, T val)
 {
     fin.write((const char*)&val, sizeof(T));
 }
 
+/**
+ * \brief truncate a file
+ */
 static void truncateFile(const std::string &filename)
 {
     std::ofstream ofs;
@@ -123,6 +130,5 @@ static void truncateFile(const std::string &filename)
 }
 
 } // end namespace BaseLib
-
 
 #endif // FILETOOLS_H

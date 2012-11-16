@@ -75,19 +75,13 @@ private:
             return NULL;
         }
         if (option->hasOption("in")) {
-            std::vector<std::string> in_names;
-            for (std::string in_name = option->getFirstOption<std::string>("in"); in_name != ""; in_name = option->getNextOption<std::string>()) {
-                in_names.push_back(in_name);
-            }
+            std::vector<std::string> in_names = option->getOptionList<std::string>("in");
             for (size_t i=0; i<in_names.size(); i++) {
                 eqs->setInputParameterName(i, in_names[i]);
             }
         }
         if (option->hasOption("out")) {
-            std::vector<std::string> out_names;
-            for (std::string out_name = option->getFirstOption<std::string>("out"); out_name != ""; out_name = option->getNextOption<std::string>()) {
-                out_names.push_back(out_name);
-            }
+            std::vector<std::string> out_names = option->getOptionList<std::string>("out");
             for (size_t i=0; i<out_names.size(); i++) {
                 eqs->setOutputParameterName(i, out_names[i]);
             }
@@ -103,20 +97,14 @@ private:
         T_P* part = new T_P();
         //para
         if (option->hasOption("in")) {
-            std::vector<std::string> in_names;
-            for (std::string in_name = option->getFirstOption<std::string>("in"); in_name != ""; in_name = option->getNextOption<std::string>()) {
-                in_names.push_back(in_name);
-            }
+            std::vector<std::string> in_names = option->getOptionList<std::string>("in");
             part->resizeInputParameter(in_names.size());
             for (size_t i=0; i<in_names.size(); i++) {
                 part->setInputParameterName(i, in_names[i]);
             }
         }
         if (option->hasOption("out")) {
-            std::vector<std::string> out_names;
-            for (std::string out_name = option->getFirstOption<std::string>("out"); out_name != ""; out_name = option->getNextOption<std::string>()) {
-                out_names.push_back(out_name);
-            }
+            std::vector<std::string> out_names = option->getOptionList<std::string>("out");
             part->resizeOutputParameter(out_names.size());
             for (size_t i=0; i<out_names.size(); i++) {
                 part->setOutputParameterName(i, out_names[i]);

@@ -2,7 +2,7 @@
 
 #include "logog.hpp"
 
-#include "MeshLib/Tools/Tools.h"
+#include "MeshLib/Tools/MeshGenerator.h"
 #include "FemLib/Function/FemNodalFunction.h"
 #include "NumLib/Function/TXFunctionBuilder.h"
 #include "OutputIO/OutputBuilder.h"
@@ -11,9 +11,9 @@
 #include "SolutionLib/Fem/FemVariable.h"
 #include "MaterialLib/PorousMedia.h"
 #include "MaterialLib/Solid.h"
+#include "PhysicsLib/FemLinearElasticTools.h"
 #include "Ogs6FemData.h"
-
-#include "../FemDeformationTotalForm/FemLinearElasticTools.h"
+#include "FemVariableBuilder.h"
 
 template <class T1, class T2>
 typename FunctionDisplacementPressure<T1,T2>::MyVariable* FunctionDisplacementPressure<T1,T2>::getDisplacementComponent(MyVariable *u_x, MyVariable* u_y, MyVariable* u_z, const std::string &var_name)
@@ -51,7 +51,7 @@ bool FunctionDisplacementPressure<T1,T2>::initialize(const BaseLib::Options &opt
     //--------------------------------------------------------------------------
     MeshLib::IMesh* msh = femData->list_mesh[msh_id];
     INFO("->generating higher order mesh...");
-    MeshLib::generateHigherOrderUnstrucuredMesh(*(MeshLib::UnstructuredMesh*)msh, 2);
+    MeshLib::MeshGenerator::generateHigherOrderUnstrucuredMesh(*(MeshLib::UnstructuredMesh*)msh, 2);
     INFO("* mesh id %d: order=%d, nodes=%d, elements=%d", msh_id, msh->getMaxiumOrder(), msh->getNumberOfNodes(msh->getMaxiumOrder()), msh->getNumberOfElements());
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
@@ -72,87 +72,10 @@ bool FunctionDisplacementPressure<T1,T2>::initialize(const BaseLib::Options &opt
     MyVariable* u_y = _problem->addVariable("u_y", FemLib::PolynomialOrder::Quadratic);
     MyVariable* p = _problem->addVariable("p", FemLib::PolynomialOrder::Linear);
     _var_p_id = p->getID();
-    // IC
-    NumLib::TXFunctionBuilder f_builder;
-//    MyNodalFunctionScalar* u0 = new MyNodalFunctionScalar();
-//    u0->initialize(*dis, u_x->getCurrentOrder(), 0);
-//    u_x->setIC(u0);
-//    u_y->setIC(u0);
-//    MyNodalFunctionScalar* p0 = new MyNodalFunctionScalar();
-//    p0->initialize(*dis, p->getCurrentOrder(), 0);
-//    p->setIC(p0);
-    std::vector<SolutionLib::FemIC*> vec_u_ic(msh->getDimension());
-    for (size_t i=0; i<msh->getDimension(); i++)
-        vec_u_ic[i] = new SolutionLib::FemIC(msh);
-    SolutionLib::FemIC* p_ic = new SolutionLib::FemIC(msh);
-    const BaseLib::Options* opICList = option.getSubGroup("ICList");
-    for (const BaseLib::Options* opIC = opICList->getFirstSubGroup("IC"); opIC!=0; opIC = opICList->getNextSubGroup())
-    {
-        std::string var_name = opIC->getOption("Variable");
-        std::string geo_type = opIC->getOption("GeometryType");
-        std::string geo_name = opIC->getOption("GeometryName");
-        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
-        std::string dis_name = opIC->getOption("DistributionType");
-        double dis_v = opIC->getOptionAsNum<double>("DistributionValue");
-        NumLib::ITXFunction* f_ic =  f_builder.create(dis_name, dis_v);
-        if (var_name.find(this->getOutputParameterName(Displacement))!=std::string::npos) {
-            size_t u_i = getDisplacementComponentIndex(var_name);
-            vec_u_ic[u_i]->addDistribution(geo_obj, f_ic);
-        } else if (var_name.find(this->getOutputParameterName(Pressure))!=std::string::npos) {
-            p_ic->addDistribution(geo_obj, f_ic);
-        }
-    }
-    u_x->setIC(vec_u_ic[0]);
-    u_y->setIC(vec_u_ic[1]);
-    p->setIC(p_ic);
-    // BC
-    const BaseLib::Options* opBCList = option.getSubGroup("BCList");
-    for (const BaseLib::Options* opBC = opBCList->getFirstSubGroup("BC"); opBC!=0; opBC = opBCList->getNextSubGroup())
-    {
-        std::string var_name = opBC->getOption("Variable");
-        std::string geo_type = opBC->getOption("GeometryType");
-        std::string geo_name = opBC->getOption("GeometryName");
-        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
-        std::string dis_name = opBC->getOption("DistributionType");
-        double dis_v = opBC->getOptionAsNum<double>("DistributionValue");
-        NumLib::ITXFunction* f_bc =  f_builder.create(dis_name, dis_v);
-        if (var_name.find(this->getOutputParameterName(Displacement))!=std::string::npos) {
-            getDisplacementComponent(u_x, u_y, 0, var_name)->addDirichletBC(new SolutionLib::FemDirichletBC(msh, geo_obj, f_bc));
-        } else if (var_name.find(this->getOutputParameterName(Pressure))!=std::string::npos) {
-            p->addDirichletBC(new SolutionLib::FemDirichletBC(msh, geo_obj, f_bc));
-        }
-    }
-    // ST
-    const BaseLib::Options* opSTList = option.getSubGroup("STList");
-    for (const BaseLib::Options* opST = opSTList->getFirstSubGroup("ST"); opST!=0; opST = opSTList->getNextSubGroup())
-    {
-        std::string var_name = opST->getOption("Variable");
-        std::string geo_type = opST->getOption("GeometryType");
-        std::string geo_name = opST->getOption("GeometryName");
-        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
-        std::string st_type = opST->getOption("STType");
-        std::string dis_name = opST->getOption("DistributionType");
-        double dis_v = opST->getOptionAsNum<double>("DistributionValue");
-        if (st_type.compare("NEUMANN")==0) {
-            dis_v *= -1; //TODO
-        }
-        NumLib::ITXFunction* f_st =  f_builder.create(dis_name, dis_v);
-        if (f_st!=NULL) {
-            SolutionLib::IFemNeumannBC *femSt = 0;
-            if (st_type.compare("NEUMANN")==0) {
-                femSt = new SolutionLib::FemNeumannBC(msh, _feObjects, geo_obj, f_st);
-            } else if (st_type.compare("SOURCESINK")==0) {
-                femSt = new SolutionLib::FemSourceTerm(msh, geo_obj, f_st);
-            }
-            if (var_name.find(this->getOutputParameterName(Displacement))!=std::string::npos) {
-                getDisplacementComponent(u_x, u_y, 0, var_name)->addNeumannBC(femSt);
-            } else if (var_name.find(this->getOutputParameterName(Pressure))!=std::string::npos) {
-                p->addNeumannBC(femSt);
-            }
-        } else {
-            WARN("Distribution type %s is specified but not found. Ignore this ST.", dis_name.c_str());
-        }
-    }
+    FemVariableBuilder var_builder;
+    var_builder.doit(this->getOutputParameterName(Displacement)+"_X1", option, msh, femData->geo, femData->geo_unique_name, _feObjects, u_x);
+    var_builder.doit(this->getOutputParameterName(Displacement)+"_Y1", option, msh, femData->geo, femData->geo_unique_name, _feObjects, u_y);
+    var_builder.doit(this->getOutputParameterName(Pressure), option, msh, femData->geo, femData->geo_unique_name, _feObjects, p);
 
     //--------------------------------------------------------------------------
     // set up equations
