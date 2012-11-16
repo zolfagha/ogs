@@ -167,8 +167,11 @@ bool NUMRead(const std::string &file_base_name, std::vector<CNumerics*> &num_vec
     {
         num_file.getline(line,MAX_ZEILE);
         line_string = line;
-        if(line_string.find("#STOP") != string::npos)
-            return true;
+        if(line_string.find("#STOP") != std::string::npos) {
+            std::cout << "done, read " << num_vector.size() << " numeric properties" <<
+            std::endl;
+           return true;
+        }
         //
         if(line_string.find("$OVERALL_COUPLING") != string::npos){
             overall_coupling_exists = true; // JT: for error checking

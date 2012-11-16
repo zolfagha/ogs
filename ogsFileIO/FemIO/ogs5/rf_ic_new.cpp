@@ -105,8 +105,11 @@ bool ICRead(const std::string& file_base_name,
     {
         ic_file.getline(line, MAX_ZEILE);
         line_string = line;
-        if (line_string.find("#STOP") != string::npos)
-            return true;
+        if(line_string.find("#STOP") != std::string::npos) {
+            std::cout << "done, read " << ic_vector.size() << " initial conditions" <<
+            std::endl;
+           return true;
+        }
 
         // keyword found
         if (line_string.find("#INITIAL_CONDITION") != std::string::npos)

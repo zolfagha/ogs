@@ -68,8 +68,11 @@ bool OUTRead(const std::string& file_base_name,
     {
         out_file.getline(line, MAX_ZEILE);
         line_string = line;
-        if (line_string.find("#STOP") != string::npos)
-            return true;
+        if(line_string.find("#STOP") != std::string::npos) {
+            std::cout << "done, read " << out_vector.size() << " output settings" <<
+            std::endl;
+           return true;
+        }
 
         COutput* out(new COutput(out_vector.size()));
         //15.01.2008. WW

@@ -72,8 +72,11 @@ bool MSPRead(const std::string &file_base_name, std::vector<CSolidProperties*> &
     {
         msp_file.getline(line,MAX_ZEILE);
         line_string = line;
-        if(line_string.find("#STOP") != string::npos)
-            return true;
+        if(line_string.find("#STOP") != std::string::npos) {
+            std::cout << "done, read " << msp_vector.size() << " solid properties" <<
+            std::endl;
+           return true;
+        }
         //----------------------------------------------------------------------
         // keyword found
         if(line_string.find("#SOLID_PROPERTIES") != std::string::npos)
