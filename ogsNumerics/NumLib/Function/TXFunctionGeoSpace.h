@@ -36,6 +36,7 @@ public:
 
     virtual ~TXFunctionLinear() {};
 
+#if 0
     virtual void eval(const TXPosition x, double &val) const
     {
         //----------------------------------------------------------------------
@@ -47,7 +48,6 @@ public:
         // get values at the vertex
         std::vector<double> list_tri_vertex_value;
         // interpolate within the triangle
-#if 0
         double unit[3];
         for (size_t l = 0; l < 2; l++)
             unit[l] /= Area1;
@@ -55,9 +55,10 @@ public:
         ShapeFunctionTri(NTri, unit);
         for (size_t l = 0; l < 3; l++)
             val += list_tri_vertex_value[l] * NTri[l];
-#endif
     }
+#endif
 
+#if 0
     bool findTriangle(const double* pn, std::vector<size_t> &list_tri_vertex) const
     {
         double Area1, Area2;
@@ -67,7 +68,6 @@ public:
         GeoLib::Polyline* m_polyline = NULL;
         const GeoLib::Surface* m_surface = _sfc;
 
-#if 0
         std::vector<GeoLib::Polyline*>::iterator p =
                 m_surface->polyline_of_surface_vector.begin();
 
@@ -123,10 +123,10 @@ public:
             //
             p++;
         } // while
-#endif
         return false;
 
     }
+#endif
 
     virtual TXFunctionLinear* clone() const
     {
