@@ -28,28 +28,34 @@ class DeformationInPorousMediaLinearEQSLocalAssembler
 : public NumLib::ElementWiseTransientCoupledLinearEQSLocalAssembler
 {
 public:
-    typedef MathLib::LocalVector LocalVectorType;
-    typedef MathLib::LocalMatrix LocalMatrixType;
 
-    explicit DeformationInPorousMediaLinearEQSLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects, size_t n_var, const std::vector<size_t> &vec_order)
-    : NumLib::ElementWiseTransientCoupledLinearEQSLocalAssembler(n_var, vec_order), _feObjects(*feObjects)
+    DeformationInPorousMediaLinearEQSLocalAssembler(
+                const FemLib::LagrangianFeObjectContainer* feObjects,
+                const size_t n_var,
+                const std::vector<size_t> &vec_order,
+                const MeshLib::CoordinateSystem &problem_coordinates
+                )
+    : NumLib::ElementWiseTransientCoupledLinearEQSLocalAssembler(n_var, vec_order),
+      _feObjects(*feObjects), _problem_coordinates(problem_coordinates)
     {
     };
 
     virtual ~DeformationInPorousMediaLinearEQSLocalAssembler() {};
 
 protected:
-    virtual void assembleComponents(  const NumLib::TimeStep &/*time*/,  
-                            const MeshLib::IElement &e, 
-                            const std::vector<size_t> &vec_order, 
-                            const std::vector<LocalVectorType> &vec_u0, 
-                            const std::vector<LocalVectorType> &vec_u1, 
-                            std::vector<std::vector<LocalMatrixType> > &vec_K,
-                            std::vector<LocalVectorType> &vec_F
-                            );
+    virtual void assembleComponents(
+                const NumLib::TimeStep &/*time*/,
+                const MeshLib::IElement &e,
+                const std::vector<size_t> &vec_order,
+                const std::vector<MathLib::LocalVector> &vec_u0,
+                const std::vector<MathLib::LocalVector> &vec_u1,
+                std::vector<std::vector<MathLib::LocalMatrix> > &vec_K,
+                std::vector<MathLib::LocalVector> &vec_F
+                );
 
 private:
     FemLib::LagrangianFeObjectContainer _feObjects;
+    const MeshLib::CoordinateSystem _problem_coordinates;
 };
 
 }
