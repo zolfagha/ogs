@@ -105,8 +105,9 @@ public:
 		size_t n_sp    = q->getNumberOfSamplingPoints();  // number of sampling points
 		double gp_x[3], real_x[3];
         MathLib::LocalMatrix poro(1,1);
-        MathLib::LocalMatrix d_poro(1,3);   // HS, change size to 1 by 3
-        MathLib::LocalMatrix loc_disp(3,3); // HS, local dispersion matrix
+        MathLib::LocalMatrix d_poro = MathLib::LocalMatrix::Zero(3,3);   // HS, change size to 1 by 3
+        double disp_l = 0.0; 
+        double disp_t = 0.0; 
         MathLib::LocalMatrix d_rate(1,1); 
         MathLib::LocalMatrix localJ_tmp = MathLib::LocalMatrix::Zero(n_nodes, n_nodes);
         NumLib::ITXFunction::DataType v;
@@ -125,15 +126,20 @@ public:
                 NumLib::TXPosition gp_pos(NumLib::TXPosition::IntegrationPoint, e.getID(), j, real_x);
 
 				pm->porosity->eval(real_x, poro);
-                pm->dispersivity->eval(gp_pos, loc_disp);
+                pm->dispersivity_long->eval(gp_pos, disp_l);
+                pm->dispersivity_trans->eval(gp_pos, disp_t);
 
                 d_poro(0,0) = cmp_mol_diffusion * poro(0,0);
-                d_poro(0,1) = cmp_mol_diffusion * poro(0,0);
-                d_poro(0,2) = cmp_mol_diffusion * poro(0,0);
+                d_poro(1,1) = cmp_mol_diffusion * poro(0,0);
+                d_poro(2,2) = cmp_mol_diffusion * poro(0,0);
 
 				_vel->eval(real_x, v);
 				v2 = v.topRows(n_dim).transpose();
-                NumLib::ITXFunction::DataType dispersion_diffusion = (loc_disp.topLeftCorner(n_dim,n_dim) * v).transpose() + d_poro.leftCols(n_dim) ; 
+                
+                NumLib::ITXFunction::DataType dispersion_diffusion = NumLib::ITXFunction::DataType::Identity(n_dim, n_dim); 
+                dispersion_diffusion *= disp_l * v.norm(); 
+                dispersion_diffusion += (disp_l - disp_t) * ( v2.transpose() * v2 ) / v.norm(); 
+                dispersion_diffusion += d_poro.topLeftCorner(n_dim, n_dim);
 				
                 fe->integrateWxN(j, poro, matM);
 				fe->integrateDWxDN(j, dispersion_diffusion, matDiff);

@@ -89,11 +89,8 @@ void convertPorousMediumProperty(const CMediumProperties &mmp, MaterialLib::Poro
     }
 
     if (mmp.mass_dispersion_model==1) {
-        NumLib::ITXFunction::DataType mass_disp = NumLib::ITXFunction::DataType::Zero(3,3); 
-        mass_disp(0,0) = mmp.mass_dispersion_longitudinal; 
-        mass_disp(1,1) = mmp.mass_dispersion_transverse;
-        mass_disp(2,2) = mmp.mass_dispersion_transverse; 
-        pm.dispersivity = new NumLib::TXFunctionConstant(mass_disp); 
+        pm.dispersivity_long  = new NumLib::TXFunctionConstant(mmp.mass_dispersion_longitudinal); 
+        pm.dispersivity_trans = new NumLib::TXFunctionConstant(mmp.mass_dispersion_transverse);
     }
 
     pm.geo_area = new NumLib::TXFunctionConstant(mmp.geo_area);
