@@ -16,8 +16,8 @@
 // List of active modules
 // * This file should be called in body files (e.g. cpp)
 //------------------------------------------------------------------------------
-//#include "FemGroundwaterFlow/Head.h"
-//#include "FemGroundwaterFlow/HeadToElementVelocity.h"
+#include "FemGroundwaterFlow/Head.h"
+#include "FemGroundwaterFlow/HeadToElementVelocity.h"
 //#include "FemGroundwaterFlow/PressureToHead.h"
 #include "FemGroundwaterFlow/PressureToElementVelocity.h"
 //#include "FemGroundwaterFlow/LiquidPressure.h"
