@@ -86,7 +86,7 @@ public:
             d_poro(0,1) = cmp_mol_diffusion * poro(0,0);
             d_poro(0,2) = cmp_mol_diffusion * poro(0,0);
             NumLib::ITXFunction::DataType v2 = v.topRows(n_dim).transpose();
-            NumLib::ITXFunction::DataType dispersion_diffusion = (loc_disp * v).transpose() + d_poro ; 
+            NumLib::ITXFunction::DataType dispersion_diffusion = (loc_disp.topLeftCorner(n_dim,n_dim) * v).transpose() + d_poro.leftCols(n_dim) ; 
 
             fe->integrateWxN(j, poro, matM);
             fe->integrateDWxDN(j, dispersion_diffusion, matDiff);

@@ -196,7 +196,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	{
 		SolutionLib::FemIC* eta_ic = new SolutionLib::FemIC(msh);
 		eta_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _eta_mob[i]->getDiscreteData() ) ); 
-		_linear_problems[i]->getVariable(i)->setIC( eta_ic ); 
+		_linear_problems[i]->getVariable(0)->setIC( eta_ic );  // be careful, here each linear problem only has one variable "eta". 
 	}
 	// set IC for xi_mob
 	for ( i=0; i < n_xi_mob; i++ )
