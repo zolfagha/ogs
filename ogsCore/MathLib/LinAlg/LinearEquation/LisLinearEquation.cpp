@@ -106,7 +106,9 @@ void LisLinearEquation::solveEqs(CRSMatrix<double, signed> *A, double *b, double
     // Assemble the vector, b, x
     ierr = lis_vector_duplicate(AA, &bb);
     ierr = lis_vector_duplicate(AA, &xx);
+#ifdef _OPENMP
     #pragma omp parallel for
+#endif
     for (long i=0; i < dimension; ++i)
     {
         ierr = lis_vector_set_value(LIS_INS_VALUE, i, x[i], xx);
@@ -133,7 +135,9 @@ void LisLinearEquation::solveEqs(CRSMatrix<double, signed> *A, double *b, double
     //    lis_vector_print(bb);
 
     // Update the solution (answer) into the x vector
+#ifdef _OPENMP
     #pragma omp parallel for
+#endif
     for(long i=0; i<dimension; ++i)
     {
         lis_vector_get_value(xx,i,&(x[i]));
