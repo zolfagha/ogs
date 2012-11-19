@@ -149,6 +149,8 @@ public:
     {
 	    size_t i; 
 		
+        BaseLib::releaseObject(_solution); 
+        BaseLib::releaseObject(_problem); 
 		BaseLib::releaseObject(_feObjects);
         BaseLib::releaseObject(_ReductionKin);
 		BaseLib::releaseObject(_local_ode_xi_immob); 
@@ -164,11 +166,17 @@ public:
 	    for (i=0; i < _eta_immob.size(); i++)
 	        BaseLib::releaseObject(_eta_immob[i]);
 		for (i=0; i < _xi_mob.size(); i++)
+        {
 			BaseLib::releaseObject(_xi_mob[i]); 
+            BaseLib::releaseObject(_xi_mob_rates[i]);
+
+            BaseLib::releaseObject(_xi_mob_drates_dxi[i]); 
+        }
         for (i=0; i < _xi_immob.size(); i++)
 		{
 			BaseLib::releaseObject(_xi_immob[i]); 
 			BaseLib::releaseObject(_xi_immob_new[i]); 
+            BaseLib::releaseObject(_xi_immob_rates[i]); 
 		}
 
     };

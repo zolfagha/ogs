@@ -110,6 +110,8 @@ public:
             BaseLib::releaseObject( _linear_problem[i] );
         for ( i=0; i < _lin_solutions.size(); i++ )
             BaseLib::releaseObject( _lin_solutions[i] );
+        for ( i=0; i < _vec_u_n1.size(); i++ )
+            BaseLib::releaseObject( _vec_u_n1[i] ); 
 
     }
 

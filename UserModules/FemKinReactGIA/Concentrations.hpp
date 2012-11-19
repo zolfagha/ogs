@@ -673,11 +673,11 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 	size_t n_xi_immob  = this->_ReductionKin->get_n_xi_immob(); 
 
 	// initialize the local vector
-	loc_eta_mob           = LocalVector::Zero( n_eta_mob ); 
-	loc_eta_immob         = LocalVector::Zero( n_eta_immob ); 
-	loc_xi_mob            = LocalVector::Zero( n_xi_mob ); 
-	loc_xi_immob          = LocalVector::Zero( n_xi_immob );
-	loc_xi_immob_new      = LocalVector::Zero( n_xi_immob );
+	loc_eta_mob        = LocalVector::Zero( n_eta_mob ); 
+	loc_eta_immob      = LocalVector::Zero( n_eta_immob ); 
+	loc_xi_mob         = LocalVector::Zero( n_xi_mob ); 
+	loc_xi_immob       = LocalVector::Zero( n_xi_immob );
+	loc_xi_immob_new   = LocalVector::Zero( n_xi_immob );
 
 	// signal, solving local ODEs of xi_immob
 	INFO("--Solving local ODE problem of xi_immob...");
