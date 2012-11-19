@@ -85,7 +85,7 @@ void HeatTransportInFractureTimeODELocalAssembler<T>::assembleODE(const NumLib::
     MeshLib::ElementCoordinatesMappingLocal* ele_local_coord;
     ele_local_coord = (MeshLib::ElementCoordinatesMappingLocal*)e.getMappedCoordinates();
     assert(ele_local_coord!=NULL);
-    const MathLib::LocalMatrix* matR = &ele_local_coord->getRotationMatrixToOriginal();
+    //const MathLib::LocalMatrix* matR = &ele_local_coord->getRotationMatrixToOriginal();
 
     // material data
     MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];

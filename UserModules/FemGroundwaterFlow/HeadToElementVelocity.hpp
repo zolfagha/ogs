@@ -98,7 +98,7 @@ int FunctionHeadToElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &/*ti
             integral->getSamplingPoint(ip, r);
             fe->computeBasisFunctions(r);
             const MathLib::LocalMatrix* dN = fe->getGradBasisFunction();
-            MathLib::LocalMatrix* N = fe->getBasisFunction();
+            //MathLib::LocalMatrix* N = fe->getBasisFunction();
             fe->getRealCoordinates(xx);
 
             // calculate material parameter at this integration point

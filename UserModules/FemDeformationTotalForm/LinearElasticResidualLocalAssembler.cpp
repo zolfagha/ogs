@@ -23,7 +23,7 @@
 void FemLinearElasticResidualLocalAssembler::assembly
     (   const NumLib::TimeStep &/*time*/,
         const MeshLib::IElement &e,
-        const DiscreteLib::DofEquationIdTable &localDofManager, 
+        const DiscreteLib::DofEquationIdTable &/*localDofManager*/,
         const MathLib::LocalVector &local_u_n1,
         const MathLib::LocalVector &/*local_u_n*/,
         MathLib::LocalVector &local_r    )

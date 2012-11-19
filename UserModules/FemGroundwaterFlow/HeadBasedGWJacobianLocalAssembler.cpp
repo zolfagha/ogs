@@ -15,7 +15,7 @@
 #include "NumLib/Function/TXFunction.h"
 #include "Ogs6FemData.h"
 
-void HeadBasedGWJacobianLocalAssembler::assembly(const NumLib::TimeStep &ts, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const MathLib::LocalVector &/*u1*/, const MathLib::LocalVector &/*u0*/,  MathLib::LocalMatrix &localJ)
+void HeadBasedGWJacobianLocalAssembler::assembly(const NumLib::TimeStep &ts, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &/*localDofManager*/, const MathLib::LocalVector &/*u1*/, const MathLib::LocalVector &/*u0*/,  MathLib::LocalMatrix &localJ)
 {
     FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
     size_t mat_id = e.getGroupID();
