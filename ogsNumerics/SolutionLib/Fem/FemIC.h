@@ -45,9 +45,7 @@ public:
     ///
     virtual ~FemIC()
     {
-        size_t i; 
-        for (i=0; i<_vec_func.size(); i++)
-            BaseLib::releaseObject( _vec_func[i] ); 
+        BaseLib::releaseObjectsInStdVector( _vec_func ); 
     }
 
     /// add a distribution
