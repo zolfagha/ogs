@@ -147,7 +147,6 @@ public:
 	  */
     virtual ~FunctionConcentrations()
     {
-	    size_t i; 
 		BaseLib::releaseObject(myNRIterator);
         BaseLib::releaseObject(myNSolverFactory);
         
@@ -159,30 +158,19 @@ public:
         BaseLib::releaseObject(_ReductionKin);
 		BaseLib::releaseObject(_local_ode_xi_immob); 
 		
-		for (i=0; i < _concentrations.size(); i++)
-			BaseLib::releaseObject(_concentrations[i]);
-		for (i=0; i < _eta_mob.size(); i++)
-		{
-			BaseLib::releaseObject(_linear_problems[i]); 
-			BaseLib::releaseObject(_linear_solutions[i]); 
-	        BaseLib::releaseObject(_eta_mob[i]); 
-		}
-	    for (i=0; i < _eta_immob.size(); i++)
-	        BaseLib::releaseObject(_eta_immob[i]);
-		for (i=0; i < _xi_mob.size(); i++)
-        {
-			BaseLib::releaseObject(_xi_mob[i]); 
-            BaseLib::releaseObject(_xi_mob_rates[i]);
+        BaseLib::releaseObjectsInStdVector(_concentrations);
+        BaseLib::releaseObjectsInStdVector(_linear_problems); 
+        BaseLib::releaseObjectsInStdVector(_linear_solutions); 
+        BaseLib::releaseObjectsInStdVector(_eta_mob); 
+        BaseLib::releaseObjectsInStdVector(_eta_immob);
 
-            BaseLib::releaseObject(_xi_mob_drates_dxi[i]); 
-        }
-        for (i=0; i < _xi_immob.size(); i++)
-		{
-			BaseLib::releaseObject(_xi_immob[i]); 
-			BaseLib::releaseObject(_xi_immob_new[i]); 
-            BaseLib::releaseObject(_xi_immob_rates[i]); 
-		}
-
+		BaseLib::releaseObjectsInStdVector(_xi_mob); 
+        BaseLib::releaseObjectsInStdVector(_xi_mob_rates);
+        BaseLib::releaseObjectsInStdVector(_xi_mob_drates_dxi); 
+		BaseLib::releaseObjectsInStdVector(_xi_immob); 
+		BaseLib::releaseObjectsInStdVector(_xi_immob_new); 
+        BaseLib::releaseObjectsInStdVector(_xi_immob_rates); 
+		
     };
 
     /**

@@ -259,6 +259,8 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
     }
     // -----------------end of debugging-----------------------------
 
+    linear_solver = NULL;
+    optNum = NULL;
 
     return true;
 }
