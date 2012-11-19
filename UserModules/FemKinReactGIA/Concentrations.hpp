@@ -218,8 +218,8 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	
 	// set up non-linear solution
 	// NRIterationStepInitializer
-	MyNRIterationStepInitializer* myNRIterator = new MyNRIterationStepInitializer(non_linear_r_assembler, non_linear_j_assembler); 
-	MyDiscreteNonlinearSolverFactory* myNSolverFactory = new MyDiscreteNonlinearSolverFactory( myNRIterator ); 
+	myNRIterator = new MyNRIterationStepInitializer(non_linear_r_assembler, non_linear_j_assembler); 
+	myNSolverFactory = new MyDiscreteNonlinearSolverFactory( myNRIterator ); 
 	this->_non_linear_solution = new MyNonLinearSolutionType( dis, this->_non_linear_problem, myNSolverFactory ); 
     this->_non_linear_solution->getDofEquationIdTable()->setNumberingType(DiscreteLib::DofNumberingType::BY_POINT);  // global order
     this->_non_linear_solution->getDofEquationIdTable()->setLocalNumberingType(DiscreteLib::DofNumberingType::BY_VARIABLE);  // local order

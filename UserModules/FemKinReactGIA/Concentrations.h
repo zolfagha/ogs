@@ -148,7 +148,11 @@ public:
     virtual ~FunctionConcentrations()
     {
 	    size_t i; 
-		
+		BaseLib::releaseObject(myNRIterator);
+        BaseLib::releaseObject(myNSolverFactory);
+        
+        BaseLib::releaseObject(_non_linear_solution);
+
         BaseLib::releaseObject(_solution); 
         BaseLib::releaseObject(_problem); 
 		BaseLib::releaseObject(_feObjects);
@@ -301,7 +305,17 @@ private:
       */
     std::vector<MyLinearSolutionType*>         _linear_solutions;
 
-	/**
+    /**
+      * Nonlinear iterator
+      */
+	MyNRIterationStepInitializer*              myNRIterator; 
+	
+    /**
+      * Nonlinear solver factory
+      */
+    MyDiscreteNonlinearSolverFactory*          myNSolverFactory;
+    
+    /**
       * nonlinear equation
       */ 
 	MyNonLinearEquationType*                  _non_linear_eqs; 
