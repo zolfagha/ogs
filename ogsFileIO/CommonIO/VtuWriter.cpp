@@ -24,7 +24,10 @@
 using namespace MeshLib;
 
 VtuWriter::VtuWriter(bool binary_mode)
-: _useBinary(binary_mode), _isInitialized(false), _isLittleEndian(true), SIZE_OF_BLOCK_LENGTH_TAG(0)
+: _useBinary(binary_mode), _isInitialized(false), _isLittleEndian(true),
+  type_UChar(VTK_XML_DATA_TYPE::Int8), type_Int(VTK_XML_DATA_TYPE::Int32),
+  type_UInt(VTK_XML_DATA_TYPE::Int8), type_Long(VTK_XML_DATA_TYPE::Int8),
+  type_Double(VTK_XML_DATA_TYPE::Int8),  SIZE_OF_BLOCK_LENGTH_TAG(0)
 {
     this->initialize();
 }
@@ -200,7 +203,7 @@ bool VtuWriter::writePointData(std::fstream &fin,
                         for (size_t k=0; k<pt_data.nr_of_components; k++)
                             fin << v.array()(k) << " ";
                     } else {
-                        for (size_t k=0; k<(int)pt_data.nr_of_components; k++)
+                        for (size_t k=0; k<pt_data.nr_of_components; k++)
                             fin << 0 << " ";
                     }
                 } else {
