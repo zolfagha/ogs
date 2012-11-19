@@ -21,7 +21,6 @@
 
 void FemVariableBuilder::doit(const std::string &given_var_name, const BaseLib::Options &option, const MeshLib::IMesh* msh, const GeoLib::GEOObjects *geo, const std::string &geo_unique_name, FemLib::LagrangianFeObjectContainer* _feObjects, SolutionLib::FemVariable* var) const
 {
-    NumLib::TXFunctionBuilder f_builder;
     // IC
     SolutionLib::FemIC* var_ic = new SolutionLib::FemIC(msh);
     const BaseLib::Options* opICList = option.getSubGroup("ICList");
