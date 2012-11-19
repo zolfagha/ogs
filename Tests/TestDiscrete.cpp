@@ -171,7 +171,7 @@ TEST(Discrete, NDDCSSVec1)
     IDiscreteVector<double>* v = dis.createVector<double>(ddc->getTotalNumberOfDecomposedObjects());
     for (size_t i=0; i<v->size(); ++i)
         (*v)[i] = i;
-    ASSERT_EQ(9, v->size());
+    ASSERT_EQ(9u, v->size());
     double expected[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
     ASSERT_DOUBLE_ARRAY_EQ(expected, *v, 9);
 }
@@ -188,7 +188,7 @@ TEST(Discrete, NDDCSSVec2)
     IDiscreteVector<double>* v = dis.createVector<double>(ddc->getTotalNumberOfDecomposedObjects());
     for (size_t i=0; i<v->size(); ++i)
         (*v)[i] = i;
-    ASSERT_EQ(9, v->size());
+    ASSERT_EQ(9u, v->size());
     double expected[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
     ASSERT_DOUBLE_ARRAY_EQ(expected, *v, 9);
 }
@@ -274,7 +274,7 @@ TEST(Discrete, VecSingle1)
     double expected[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
     std::copy(expected, expected+9, v->begin());
     
-    ASSERT_EQ(9, v->size());
+    ASSERT_EQ(9u, v->size());
     ASSERT_DOUBLE_ARRAY_EQ(expected, *v, 9);
 }
 

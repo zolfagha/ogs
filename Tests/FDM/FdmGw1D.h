@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "BaseLib/CodingTools.h"
 #include "NumLib/Function/DiscreteDataConvergenceCheck.h"
 #include "Tests/Geo/Material/PorousMedia.h"
 #include "IStencilWiseTransientLinearEQSLocalAssembler.h"
@@ -31,9 +32,9 @@ public:
     {
     };
 
-    virtual void assembly(const NumLib::TimeStep &time,  FdmLib::IStencil &s, const LocalVectorType &local_u_n1, const LocalVectorType &local_u_n, LocalEquationType &eqs)
+    virtual void assembly(const NumLib::TimeStep &/*time*/,  FdmLib::IStencil &s, const LocalVectorType &/*local_u_n1*/, const LocalVectorType &/*local_u_n*/, LocalEquationType &eqs)
     {
-        const double dt = time.getTimeStepSize();
+        //const double dt = time.getTimeStepSize();
         const size_t center_point_id = s.getCentralNodeID();
         //double storage = .0;
         //_pm->storage->eval(0, storage);
@@ -86,6 +87,7 @@ public:
             > SolutionForHead;
 
     FunctionHead()
+    : _problem(NULL), _solHead(NULL), _rec(NULL)
     {
         AbstractTransientMonolithicSystem::resizeOutputParameter(1);
     };
@@ -141,6 +143,7 @@ class FunctionFdmVelocity
 public:
 
     FunctionFdmVelocity()
+    : _dis(NULL), _vel(NULL), _K(NULL)
     {
         AbstractTransientMonolithicSystem::resizeInputParameter(1);
         AbstractTransientMonolithicSystem::resizeOutputParameter(1);

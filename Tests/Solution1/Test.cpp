@@ -148,7 +148,7 @@ Geo::GWFemProblem* defineGWProblem1D(DiscreteSystem &dis, GeoLib::Line &line, Ge
     return _problem;
 }
 
-Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec, Geo::PorousMedia &pm, Geo::Compound &comp, FemLib::LagrangianFeObjectContainer* feObjects)
+Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec, Geo::PorousMedia &pm, Geo::Compound &comp, FemLib::LagrangianFeObjectContainer* /*feObjects*/)
 {
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
@@ -176,7 +176,7 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Rec
     return _problem;
 }
 
-Geo::FemLinearElasticProblem* defineLinearElasticProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec, Geo::PorousMedia &pm, FemLib::LagrangianFeObjectContainer* feObjects)
+Geo::FemLinearElasticProblem* defineLinearElasticProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec, Geo::PorousMedia &pm, FemLib::LagrangianFeObjectContainer* /*feObjects*/)
 {
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
@@ -448,7 +448,7 @@ TEST(Solution, CouplingFem2)
         timestepping.solve(tim.getEnd());
 
         const MyNodalFunctionScalar* r_f_head = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("h"));
-        const MyIntegrationPointFunctionVector* r_f_v = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
+        //const MyIntegrationPointFunctionVector* r_f_v = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
         const MyNodalFunctionScalar* r_f_c = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("c"));
         const IDiscreteVector<double>* vec_h = r_f_head->getDiscreteData();
         //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
@@ -560,12 +560,12 @@ TEST(Solution, LinearElastic2D)
         timestepping.setBeginning(.0);
         timestepping.solve(tim.getEnd());
 
-        const MyNodalFunctionScalar* r_f_ux = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("u_x"));
-        const MyNodalFunctionScalar* r_f_uy = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("u_y"));
+//        const MyNodalFunctionScalar* r_f_ux = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("u_x"));
+//        const MyNodalFunctionScalar* r_f_uy = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("u_y"));
         const MyIntegrationPointFunctionVector* r_f_strain = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("Strain"));
         const MyIntegrationPointFunctionVector* r_f_stress = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("Stress"));
-        const IDiscreteVector<double>* vec_r_f_ux = r_f_ux->getDiscreteData();
-        const IDiscreteVector<double>* vec_r_f_uy = r_f_uy->getDiscreteData();
+//        const IDiscreteVector<double>* vec_r_f_ux = r_f_ux->getDiscreteData();
+//        const IDiscreteVector<double>* vec_r_f_uy = r_f_uy->getDiscreteData();
         const MyIntegrationPointFunctionVector::MyDiscreteVector* vec_strain = r_f_strain->getDiscreteData();
         const MyIntegrationPointFunctionVector::MyDiscreteVector* vec_stress = r_f_stress->getDiscreteData();
 

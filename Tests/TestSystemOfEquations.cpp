@@ -86,8 +86,8 @@ void defineProblem1(SystemOfEquations &sysEqs)
     sysEqs.addEquation(*odeTransport);
     sysEqs.addEquation(*odeTransport2);
 
-    ASSERT_EQ(3, sysEqs.getNumberOfVariables());
-    ASSERT_EQ(3, sysEqs.getNumberOfEquations());
+    ASSERT_EQ(3u, sysEqs.getNumberOfVariables());
+    ASSERT_EQ(3u, sysEqs.getNumberOfEquations());
 
 }
 
@@ -354,7 +354,7 @@ TEST(Math, SystemOfEqs_AutoM3)
     BaseLib::Options* option = defineCouplingM3();
     std::vector<MyMyCouplingEQS*> list_sub_problem;
     CoupledProblemFactory<MyConvergenceCheck4Array> eqs_fac(sysEqs, ini_para, list_sub_problem);
-    MyConvergenceChecker4ArrayFactory checker;
+    //MyConvergenceChecker4ArrayFactory checker;
     CouplingStrucutreBuilder4SysEqs<MyConvergenceCheck4Array>::type cpl_builder;
     ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac);
 
@@ -390,7 +390,7 @@ TEST(Math, SystemOfEqs_AutoP1_M2M1)
     BaseLib::Options* option = defineCouplingP1_M2M1();
     std::vector<MyMyCouplingEQS*> list_sub_problem;
     CoupledProblemFactory<MyConvergenceCheck4Array> eqs_fac(sysEqs, ini_para, list_sub_problem);
-    MyConvergenceChecker4ArrayFactory checker;
+    //MyConvergenceChecker4ArrayFactory checker;
     CouplingStrucutreBuilder4SysEqs<MyConvergenceCheck4Array>::type cpl_builder;
     ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac);
 
@@ -426,7 +426,7 @@ TEST(Math, SystemOfEqs_AutoP1_3M1)
     BaseLib::Options* option = defineCouplingP1_3M1();
     std::vector<MyMyCouplingEQS*> list_sub_problem;
     CoupledProblemFactory<MyConvergenceCheck4Array> eqs_fac(sysEqs, ini_para, list_sub_problem);
-    MyConvergenceChecker4ArrayFactory checker;
+    //MyConvergenceChecker4ArrayFactory checker;
     CouplingStrucutreBuilder4SysEqs<MyConvergenceCheck4Array>::type cpl_builder;
     ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac);
 
@@ -462,7 +462,7 @@ TEST(Math, SystemOfEqs_AutoP1_P2M1)
     BaseLib::Options* option = defineCouplingP1_P2M1();
     std::vector<MyMyCouplingEQS*> list_sub_problem;
     CoupledProblemFactory<MyConvergenceCheck4Array> eqs_fac(sysEqs, ini_para, list_sub_problem);
-    MyConvergenceChecker4ArrayFactory checker;
+    //MyConvergenceChecker4ArrayFactory checker;
     CouplingStrucutreBuilder4SysEqs<MyConvergenceCheck4Array>::type cpl_builder;
     ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac);
 

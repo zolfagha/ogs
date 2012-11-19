@@ -107,7 +107,7 @@ public:
     /// @param local_u_n1    guess of current time step value
     /// @param local_u_n    previous time step value
     /// @param local_J        local Jacobian
-    virtual void assembly(const TimeStep &/*time*/,  const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const LocalVectorType &local_u_n1, const LocalVectorType &/*local_u_n*/, LocalMatrixType &local_J)
+    virtual void assembly(const TimeStep &/*time*/,  const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &/*localDofManager*/, const LocalVectorType &local_u_n1, const LocalVectorType &/*local_u_n*/, LocalMatrixType &local_J)
     {
         IFiniteElement* fe = _feObjects->getFeObject(e);
         const size_t n = local_u_n1.size();
