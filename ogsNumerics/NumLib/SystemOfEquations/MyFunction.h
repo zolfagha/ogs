@@ -40,7 +40,7 @@ public:
 
 //        Matrix<double> A(n_dof, n_dof);
 //        std::valarray<double> b(n_dof);
-        MathLib::LocalMatrix* A = eqs.getA();
+        //MathLib::LocalMatrix* A = eqs.getA();
         double* b = eqs.getRHS();
 
         size_t row_offset = 0;

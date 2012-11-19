@@ -33,13 +33,13 @@ ITXFunction* TXFunctionBuilder::create(const BaseLib::Options &opDistribution)
             break;
         case NumLib::TXFunctionType::GEOSPACE:
             {
-                size_t n_pt = opDistribution.getOptionAsNum<size_t>("PointSize");
-                std::vector<const BaseLib::OptionGroup*> list_opDistLinear = opDistribution.getSubGroupList("PointValue");
-                assert (n_pt == list_opDistLinear.size());
-                for (size_t j=0; j<n_pt; j++) {
-                    size_t pt_id = list_opDistLinear[j]->getOptionAsNum<size_t>("PointID");
-                    double pt_val = list_opDistLinear[j]->getOptionAsNum<double>("Value");
-                }
+//                size_t n_pt = opDistribution.getOptionAsNum<size_t>("PointSize");
+//                std::vector<const BaseLib::OptionGroup*> list_opDistLinear = opDistribution.getSubGroupList("PointValue");
+//                assert (n_pt == list_opDistLinear.size());
+//                for (size_t j=0; j<n_pt; j++) {
+//                    size_t pt_id = list_opDistLinear[j]->getOptionAsNum<size_t>("PointID");
+//                    double pt_val = list_opDistLinear[j]->getOptionAsNum<double>("Value");
+//                }
             }
             break;
         case NumLib::TXFunctionType::ANALYTICAL:
