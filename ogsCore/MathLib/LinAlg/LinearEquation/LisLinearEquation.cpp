@@ -72,7 +72,7 @@ void LisLinearEquation::solveEqs(CRSMatrix<double, signed> *A, double *b, double
 //    std::cout << std::endl;
 
 
-    int ierr;
+    int ierr = 0;
     // Creating a matrix.
     LIS_SOLVER solver;
     LIS_MATRIX AA;
@@ -85,6 +85,9 @@ void LisLinearEquation::solveEqs(CRSMatrix<double, signed> *A, double *b, double
     lis_matrix_set_size(AA,dimension,0);
 //    lis_matrix_get_size(AA, &_local_dim, &_global_dim);
 #endif
+    if (ierr != LIS_SUCCESS) {
+        std::cout << "***ERROR: lis error code = " << ierr << std::endl;
+    }
 
     // Matrix solver and Precondition can be handled better way.
     const size_t MAX_ZEILE = 512;
@@ -120,7 +123,7 @@ void LisLinearEquation::solveEqs(CRSMatrix<double, signed> *A, double *b, double
 
     ierr = lis_solver_set_option(solver_options, solver);
     ierr = lis_solver_set_option(tol_option, solver);
-    ierr = lis_solver_set_option("-print mem", solver);
+    ierr = lis_solver_set_option((char*)"-print mem", solver);
     
     ierr = lis_solve(AA, bb, xx, solver);
     //lis_output(AA, bb, xx, LIS_FMT_MM, "/home/norihiro/work/task/20120814_ogs6test/deformation/matrix1.txt");
