@@ -244,7 +244,7 @@ MeshLib::CoordinateSystemType::type getCoordinateSystemFromBoundingBox(const Geo
 void calculateMeshGeometricProperties(UnstructuredMesh &msh)
 {
     MeshGeometricProperty* geo_prop = msh.getGeometricProperty();
-    double tol = std::numeric_limits<double>::epsilon();
+    //double tol = std::numeric_limits<double>::epsilon();
 
     // coordinate systems
     geo_prop->setCoordinateSystem(getCoordinateSystemFromBoundingBox(geo_prop->getBoundingBox()));
