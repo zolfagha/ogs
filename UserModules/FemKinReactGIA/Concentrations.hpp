@@ -718,4 +718,5 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 
 	}  // end of for node_idx
 
+    delete rk4; 
 }
