@@ -25,10 +25,10 @@ chemReactionKin::~chemReactionKin(void)
 {
 }
 
-void chemReactionKin::readReactionStr(std::string & reaction_str)
+void chemReactionKin::readReactionStr(std::string & /*reaction_str*/)
 {
 	// TODO
-	std::string tmp_str;
+//	std::string tmp_str;
 }
 
 void chemReactionKin::calcReactionRate(void)
