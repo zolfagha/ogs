@@ -15,6 +15,8 @@
 #include <algorithm>
 #include <exception>
 
+#include "logog.hpp"
+
 #include "GeoLib/GeoType.h"
 
 #include "MeshLib/Core/ElementFactory.h"
@@ -241,6 +243,25 @@ MeshLib::CoordinateSystemType::type getCoordinateSystemFromBoundingBox(const Geo
     return coords;
 }
 
+double calculateMeshMinimumEdgeLength(UnstructuredMesh &msh)
+{
+    std::vector<size_t> vec_edge_nodes;
+    double min_edge_len = std::numeric_limits<double>::max();
+    const size_t n_ele = msh.getNumberOfElements();
+    for (size_t i=0; i<n_ele; i++) {
+        MeshLib::IElement* e = msh.getElement(i);
+        for (size_t j=0; j<e->getNumberOfEdges(); j++) {
+            e->getNodeIDsOfEdges(j, vec_edge_nodes);
+            assert (vec_edge_nodes.size() == 2);
+
+            double edge_len = std::sqrt(GeoLib::sqrDist(msh.getNodeCoordinatesRef(vec_edge_nodes[0]), msh.getNodeCoordinatesRef(vec_edge_nodes[1])));
+            min_edge_len = std::min(min_edge_len, edge_len);
+        }
+    }
+
+    return min_edge_len;
+}
+
 void calculateMeshGeometricProperties(UnstructuredMesh &msh)
 {
     MeshGeometricProperty* geo_prop = msh.getGeometricProperty();
@@ -249,11 +270,17 @@ void calculateMeshGeometricProperties(UnstructuredMesh &msh)
     // coordinate systems
     geo_prop->setCoordinateSystem(getCoordinateSystemFromBoundingBox(geo_prop->getBoundingBox()));
 
-    // 
-    GeoLib::Point pt_diff = geo_prop->getBoundingBox().getMaxPoint() - geo_prop->getBoundingBox().getMinPoint(); 
-    double max_len = std::max(pt_diff[0], pt_diff[1]);
-    max_len = std::max(max_len, pt_diff[2]);
-    geo_prop->setMinEdgeLength(max_len * 1e-5);
+    //
+//    GeoLib::Point pt_diff = geo_prop->getBoundingBox().getMaxPoint() - geo_prop->getBoundingBox().getMinPoint();
+//    double max_len = std::max(pt_diff[0], pt_diff[1]);
+//    max_len = std::max(max_len, pt_diff[2]);
+//    double min_edge_len = max_len / msh.getNumberOfNodes();
+    double min_edge_len = calculateMeshMinimumEdgeLength(msh);
+    geo_prop->setMinEdgeLength(min_edge_len);
+
+    INFO("-> calculate mesh geometric properties");
+    INFO("* min. edge length = %f", min_edge_len);
+
 }
 
 void setMeshElementCoordinatesMapping(IMesh &msh)

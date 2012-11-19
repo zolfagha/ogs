@@ -66,4 +66,8 @@ void calculateMeshGeometricProperties(UnstructuredMesh &msh);
 /// set element coordinates mapping
 void setMeshElementCoordinatesMapping(IMesh &msh);
 
+/// calculate minimum edge length in a given mesh
+double calculateMeshMinimumEdgeLength(UnstructuredMesh &msh);
+
+
 }// end namespace
