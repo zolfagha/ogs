@@ -105,7 +105,7 @@ bool ICRead(const std::string& file_base_name,
     std::ios::pos_type position;
 
     // Keyword loop
-    std::cout << "ICRead" << std::endl;
+    std::cout << "ICRead ... " << std::flush;
     while (!ic_file.eof())
     {
         ic_file.getline(line, MAX_ZEILE);

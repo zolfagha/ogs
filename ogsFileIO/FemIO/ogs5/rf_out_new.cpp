@@ -62,7 +62,7 @@ bool OUTRead(const std::string& file_base_name,
     out_file.seekg(0L, ios::beg);
 
     // Keyword loop
-    cout << "OUTRead" << endl;
+    cout << "OUTRead ... " << std::flush;
     while (!out_file.eof())
     {
         out_file.getline(line, MAX_ZEILE);

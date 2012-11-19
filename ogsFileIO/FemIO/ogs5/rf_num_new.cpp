@@ -162,7 +162,7 @@ bool NUMRead(const std::string &file_base_name, std::vector<CNumerics*> &num_vec
     num_file.seekg(0L,ios::beg);
     //========================================================================
     // Keyword loop
-    cout << "NUMRead" << endl;
+    cout << "NUMRead ... " << std::flush;
     while (!num_file.eof())
     {
         num_file.getline(line,MAX_ZEILE);

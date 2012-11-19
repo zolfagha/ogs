@@ -67,7 +67,7 @@ bool MSPRead(const std::string &file_base_name, std::vector<CSolidProperties*> &
     msp_file.seekg(0L,std::ios::beg);
     //========================================================================
     // Keyword loop
-    std::cout << "MSPRead" << std::endl;
+    std::cout << "MSPRead ... " << std::flush;
     while (!msp_file.eof())
     {
         msp_file.getline(line,MAX_ZEILE);

@@ -539,7 +539,7 @@ bool TIMRead(const std::string& file_base_name, std::vector<CTimeDiscretization*
     tim_file.seekg(0L,std::ios::beg);
     //========================================================================
     // Keyword loop
-    std::cout << "TIMRead" << std::endl;
+    std::cout << "TIMRead ... " << std::flush;
     while (!tim_file.eof())
     {
         tim_file.getline(line,MAX_ZEILE);

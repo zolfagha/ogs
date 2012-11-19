@@ -500,7 +500,7 @@ bool MFPRead(const std::string &file_base_name, std::vector<CFluidProperties*> &
     mfp_file.seekg(0L,std::ios::beg);
     //========================================================================
     // Keyword loop
-    std::cout << "MFPRead" << std::endl;
+    std::cout << "MFPRead ... " << std::flush;
     while (!mfp_file.eof())
     {
         mfp_file.getline(line,MAX_ZEILE);
