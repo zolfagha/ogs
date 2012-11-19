@@ -17,7 +17,7 @@
 #include "makros.h"
 #include "readNonBlankLineFromInputStream.h"
 
-static std::string GetUncommentedLine(std::string& line)
+inline std::string GetUncommentedLine(std::string& line)
 {
     std::string zeile = "";
     int i = 0, j = 0;
@@ -36,7 +36,7 @@ static std::string GetUncommentedLine(std::string& line)
     return zeile;
 }
 
-static std::ios::pos_type GetNextSubKeyword(std::ifstream* file,std::string* line, bool* keyword)
+inline std::ios::pos_type GetNextSubKeyword(std::ifstream* file,std::string* line, bool* keyword)
 {
     char buffer[MAX_ZEILE];
     std::ios::pos_type position;

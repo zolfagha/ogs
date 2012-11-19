@@ -101,7 +101,7 @@ bool MSPRead(const std::string &file_base_name, std::vector<CSolidProperties*> &
 **************************************************************************/
 std::ios::pos_type CSolidProperties::Read(std::ifstream* msp_file)
 {
-    char buffer[MAX_ZEILE];
+    //char buffer[MAX_ZEILE];
     std::string sub_line;
     std::string line_string;
     std::string delimiter(" ");

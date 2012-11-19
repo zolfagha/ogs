@@ -52,6 +52,11 @@ CInitialCondition::CInitialCondition()
     SubNumber = 0;
     this->setProcess(NULL);               //OK
 
+    geo_node_value = .0;
+    gradient_ref_depth = .0;
+    gradient_ref_depth_gradient = .0;
+    gradient_ref_depth_value = .0;
+
 }
 
 

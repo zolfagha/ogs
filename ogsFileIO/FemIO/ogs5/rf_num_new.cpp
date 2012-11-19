@@ -149,7 +149,7 @@ bool NUMRead(const std::string &file_base_name, std::vector<CNumerics*> &num_vec
     //----------------------------------------------------------------------
     CNumerics* m_num = NULL;
     char line[MAX_ZEILE];
-    bool overall_coupling_exists=false; //JT
+//    bool overall_coupling_exists=false; //JT
     string sub_line;
     string line_string;
     ios::pos_type position;
@@ -172,10 +172,10 @@ bool NUMRead(const std::string &file_base_name, std::vector<CNumerics*> &num_vec
             std::endl;
            return true;
         }
-        //
-        if(line_string.find("$OVERALL_COUPLING") != string::npos){
-            overall_coupling_exists = true; // JT: for error checking
-        }
+//        //
+//        if(line_string.find("$OVERALL_COUPLING") != string::npos){
+//            overall_coupling_exists = true; // JT: for error checking
+//        }
         //----------------------------------------------------------------------
         // keyword found
         if(line_string.find("#NUMERICS") != string::npos)

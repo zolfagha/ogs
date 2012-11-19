@@ -53,7 +53,6 @@ bool OUTRead(const std::string& file_base_name,
     char line[MAX_ZEILE];
     std::string line_string;
     ios::pos_type position;
-    bool output_version = false; // 02.2011. WW
 
     // File handling
     std::string out_file_name = file_base_name + OUT_FILE_EXTENSION;
@@ -75,9 +74,9 @@ bool OUTRead(const std::string& file_base_name,
         }
 
         COutput* out(new COutput(out_vector.size()));
-        //15.01.2008. WW
-        if (line_string.find("#VERSION") != string::npos)
-            output_version = true;  // 02.2011. WW
+//        //15.01.2008. WW
+//        if (line_string.find("#VERSION") != string::npos)
+//            output_version = true;  // 02.2011. WW
         //----------------------------------------------------------------------
         // keyword found
         if (line_string.find("#OUTPUT") != string::npos)

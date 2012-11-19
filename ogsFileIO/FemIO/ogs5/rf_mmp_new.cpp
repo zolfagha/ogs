@@ -43,7 +43,7 @@ void ScreenMessage(const char* message)
     if(myrank > 0)
         return;
 #endif
-    printf(message);
+    printf("%s", message);
 }
 
 /**************************************************************************
@@ -256,7 +256,7 @@ std::ios::pos_type CMediumProperties::Read(std::ifstream* mmp_file)
     char seps[] = "+\n";
     char seps1[] = "*";
     double f_buff;
-    size_t indexChWin, indexChLinux;      //JT, DEC 2009
+//    size_t indexChWin, indexChLinux;      //JT, DEC 2009
     std::string funfname;                 //JT, DEC 2009
 
     while (!new_keyword)
@@ -323,7 +323,7 @@ std::ios::pos_type CMediumProperties::Read(std::ifstream* mmp_file)
         // ToDo to GeoLib
         //2ii..GEOMETRY_AREA
         //------------------------------------------------------------------------
-        indexChWin = indexChLinux = 0; //JT, DEC 2009
+//        indexChWin = indexChLinux = 0; //JT, DEC 2009
                                        //subkeyword found
         if(line_string.find("$GEOMETRY_AREA") != std::string::npos)
         {
@@ -1570,8 +1570,8 @@ std::ios::pos_type CMediumProperties::Read(std::ifstream* mmp_file)
         //------------------------------------------------------------------------
         //11..PERMEABILITY_DISTRIBUTION
         //------------------------------------------------------------------------
-        size_t indexChWin, indexChLinux; //WW
-        indexChWin = indexChLinux = 0;
+//        size_t indexChWin, indexChLinux; //WW
+//        indexChWin = indexChLinux = 0;
         std::string funfname;
         //subkeyword found
         if(line_string.find("$PERMEABILITY_DISTRIBUTION") != std::string::npos)
