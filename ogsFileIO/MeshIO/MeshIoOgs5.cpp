@@ -127,7 +127,7 @@ void readMesh(std::string const& fileName, std::vector<MeshLib::IMesh*> &vec_mes
     if_file.close();
 };
 
-void write(MeshLib::IMesh const * mesh, std::string const& fileName) 
+void write(MeshLib::IMesh const * /*mesh*/, std::string const& /*fileName*/)
 {
     std::cout << "Not implemented yet." << std::endl;
 };
