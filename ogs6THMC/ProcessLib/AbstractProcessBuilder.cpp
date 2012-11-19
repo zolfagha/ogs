@@ -22,9 +22,9 @@ namespace ProcessLib
 ProcessInfo* AbstractProcessBuilder::registerProcess(const std::string &pcs_name, ProcessFactoryBase* pcs_buid)
 {
     this->_map_pcs_name2new[pcs_name] = pcs_buid;
-    ProcessInfo* pcs_info = new ProcessInfo();
+    // ProcessInfo* pcs_info = new ProcessInfo();
 
-    return pcs_info;
+    return NULL;
 }
 
 bool AbstractProcessBuilder::hasRegisterd(const std::string &pcs_name) const
