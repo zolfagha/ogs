@@ -41,7 +41,10 @@ public:
     }
 
     ///
-    virtual ~PartitionedProblem() {};
+    virtual ~PartitionedProblem()
+    {
+        BaseLib::releaseObject(_algorithm);
+    };
 
     ///
     virtual void setAlgorithm(IPartitionedAlgorithm &algo)
