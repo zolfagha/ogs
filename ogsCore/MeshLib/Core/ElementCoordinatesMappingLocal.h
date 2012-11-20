@@ -46,13 +46,12 @@ public:
     ///
     virtual ~ElementCoordinatesMappingLocal()
     {
-        BaseLib::releaseObjectsInStdVector(_point_vec);
     }
 
     /// return mapped coordinates of the node
     virtual GeoLib::Point* getNodePoint(size_t node_id) 
     {
-        return _point_vec[node_id];
+        return &_point_vec[node_id];
     }
 
     /// return a rotation matrix converting to orinal coordinates
@@ -66,17 +65,17 @@ public:
 
 private:
     ///
-    void translate(std::vector<GeoLib::Point*> &point_vec);
+    void translate(std::vector<GeoLib::Point> &point_vec);
     ///
-    void flip(IElement &e, const CoordinateSystem &coordinate_system, const std::vector<GeoLib::Point*> &vec_pt);
+    void flip(IElement &e, const CoordinateSystem &coordinate_system, std::vector<GeoLib::Point> &vec_pt);
     ///
-    void rotate(IElement &e, const CoordinateSystem &coordinate_system, std::vector<GeoLib::Point*> &vec_pt);
+    void rotate(IElement &e, const CoordinateSystem &coordinate_system, std::vector<GeoLib::Point> &vec_pt);
     // x=Rx' where x is original coordinates and x' is local coordinates
-    void getRotationMatrixToOriginal(const IElement &e, const CoordinateSystem &coordinate_system, const std::vector<GeoLib::Point*> &vec_pt);
+    void getRotationMatrixToOriginal(const IElement &e, const CoordinateSystem &coordinate_system, const std::vector<GeoLib::Point> &vec_pt);
 
 private:
     const IMesh* _msh;
-    std::vector<GeoLib::Point*> _point_vec;
+    std::vector<GeoLib::Point> _point_vec;
     GeoLib::Point _pt_translate;
     MathLib::LocalMatrix _matR2original;
     MathLib::LocalMatrix _matR2local;
