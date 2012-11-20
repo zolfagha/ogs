@@ -89,6 +89,36 @@ CFluidProperties::CFluidProperties()
 //    Fem_Ele_Std = NULL;
 //    // WW
 //    molar_mass = COMP_MOL_MASS_AIR;
+
+    cal_gravity = true;
+    molar_mass = .0;
+    rho_0 = .0;
+    drho_dp = .0;
+    drho_dT = .0;
+    drho_dC = .0;
+    diffusion = .0;
+    my_0 = .0;
+    dmy_dp = .0;
+    specific_heat_capacity = .0;
+    heat_conductivity = .0;
+    p_0 = .0;
+    T_0 = .0;
+    C_0 = .0;
+    T_Latent1 = .0;
+    T_Latent2 = .0;
+    latent_heat = .0;
+    compressibility_model_pressure = 0;
+    compressibility_model_temperature = 0;
+    compressibility_pressure = .0;
+    compressibility_temperature = .0;
+    JTC = 0;
+    density_model = 0;
+    viscosity_model = 0;
+    heat_conductivity_model = 0;
+    heat_capacity_model = 0;
+    diffusion_model = 0;
+    heat_phase_change_curve = 0;
+    phase = 0;
 }
 
 /**************************************************************************

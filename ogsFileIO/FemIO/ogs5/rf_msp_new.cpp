@@ -761,6 +761,25 @@ CSolidProperties::CSolidProperties()
     thermal_conductivity_tensor[0] = 1.0;
 
     bishop_model = -1; //15.08.2011. WW
+
+    Al = .0;
+    BetaN = .0;
+    bishop_model_value = .0;
+    csn = .0;
+    Hard_Loc = .0;
+    Hard = .0;
+    HoekB_a = .0;
+    HoekB_cohe = .0;
+    HoekB_mb = .0;
+    HoekB_s = .0;
+    HoekB_sigci = .0;
+    HoekB_tens = .0;
+    Nphi = .0;
+    Ntheta = .0;
+    tension = .0;
+    Xi = .0;
+    Y0 = .0;
+
 }
 CSolidProperties::~CSolidProperties()
 {

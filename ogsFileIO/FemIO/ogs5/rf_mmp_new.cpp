@@ -107,6 +107,33 @@ CMediumProperties::CMediumProperties() :
 
     permeability_pressure_model = -1; //01.09.2011. WW
     permeability_strain_model = -1; //01.09.2011. WW
+
+    argument = .0;
+    this->channel = false;
+    this->conductivity = .0;
+    this->density = .0;
+    this->evaporation = 0;
+    fct_number = 0;
+    friction_exp_depth = .0;
+    friction_exp_slope = .0;
+    heat_capacity = .0;
+    heatflux = .0;
+    KC_permeability_initial = .0;
+    KC_porosity_initial = .0;
+    mass_dispersion_model = 0;
+    number = 0;
+    overland_width = .0;
+    permeability_porosity_model = 0;
+    permeability_pressure_rel = .0;
+    permeability = .0;
+    porosity_curve = 0;
+    specific_storage = .0;
+    storativity = .0;
+    tortuosity = .0;
+    vaporfraction = .0;
+    transfer_coefficient = .0;
+    rill_epsilon = .0;
+    rill_height = .0;
 }
 
 /**************************************************************************

@@ -121,6 +121,15 @@ CNumerics::CNumerics(string name)
         nls_max_iterations = 25;
     }
     //
+    lag_local_eps = .0;
+    lag_max_steps = 0;
+    lag_min_weight = .0;
+    lag_quality = .0;
+    lag_time_weighting = .0;
+    lag_use_matrix = 0;
+    lag_vel_method = 0;
+    nls_plasticity_local_tolerance = .0;
+    renumber_parameter = 0;
 }
 
 /**************************************************************************
