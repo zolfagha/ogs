@@ -39,7 +39,10 @@ public:
     AbstractPartitionedProblem() : _check(&_list_subproblems, &_map) {};
 
     ///
-    virtual ~AbstractPartitionedProblem() {};
+    virtual ~AbstractPartitionedProblem()
+    {
+        BaseLib::releaseObjectsInStdVector(_list_subproblems);
+    };
 
     /// check consistency
     virtual bool check() const
