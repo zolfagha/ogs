@@ -103,10 +103,25 @@ void LisLinearEquation::solveEqs(CRSMatrix<double, signed> *A, double *b, double
     sprintf(solver_options, "-i %d -p %d %s", _option.ls_method, _option.ls_precond, _option.ls_extra_arg.c_str()); 
     sprintf(tol_option, "-tol %e -maxiter %ld -omp_num_threads %d -initx_zeros 0", _option.ls_error_tolerance, _option.ls_max_iterations, nthreads);
 
-    ierr = lis_matrix_set_crs(A->getNNZ(), (int*)A->getRowPtrArray(), (int*)A->getColIdxArray(), (double*)A->getEntryArray(), AA);
+    LIS_INT nnz = A->getNNZ();
+    LIS_INT *ptr, *index;
+    LIS_SCALAR *value;
+    lis_matrix_malloc_crs(dimension, nnz,&ptr,&index,&value);
+    for (int i=0; i<dimension+1; i++)
+        ptr[i] = A->getRowPtrArray()[i];
+    for (int i=0; i<nnz; i++)
+        index[i] = A->getColIdxArray()[i];
+    for (int i=0; i<nnz; i++)
+        value[i] = A->getEntryArray()[i];
+
+    ierr = lis_matrix_set_crs(A->getNNZ(), ptr, index, value, AA);
     ierr = lis_matrix_assemble(AA);
 
     // Assemble the vector, b, x
+    if (bb!=NULL) {
+        lis_vector_destroy(bb);
+        lis_vector_destroy(xx);
+    }
     ierr = lis_vector_duplicate(AA, &bb);
     ierr = lis_vector_duplicate(AA, &xx);
 #ifdef _OPENMP
@@ -147,7 +162,7 @@ void LisLinearEquation::solveEqs(CRSMatrix<double, signed> *A, double *b, double
     }
 
     // Clear memory
-    //lis_matrix_destroy(AA); // CRSMatrix will free this memory
+    lis_matrix_destroy(AA); // CRSMatrix will free this memory
     lis_solver_destroy(solver);
     std::cout << "------------------------------------------------------------------" << std::endl;
 }
