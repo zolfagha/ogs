@@ -55,6 +55,11 @@ struct LinearComponent
     MathLib::LocalVector* source;
 
     LinearComponent(MathLib::LocalMatrix* m, MathLib::LocalVector* v = 0) : stiffness(m), source(v) {};
+
+    ~LinearComponent()
+    {
+        BaseLib::releaseObject(stiffness, source);
+    }
 };
 
 struct LinearEquation

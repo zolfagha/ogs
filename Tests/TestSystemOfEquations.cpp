@@ -240,6 +240,9 @@ TEST(Math, SystemOfEqs_M1)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete part1;
 }
 
 TEST(Math, SystemOfEqs_P2)
@@ -285,6 +288,9 @@ TEST(Math, SystemOfEqs_P2)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete part1;
 }
 
 TEST(Math, SystemOfEqs_P3)
@@ -330,6 +336,9 @@ TEST(Math, SystemOfEqs_P3)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete part1;
 }
 
 class MyConvergenceChecker4ArrayFactory
@@ -376,6 +385,10 @@ TEST(Math, SystemOfEqs_AutoM3)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete cpl_sys;
+    delete option;
 }
 
 TEST(Math, SystemOfEqs_AutoP1_M2M1)
@@ -412,6 +425,10 @@ TEST(Math, SystemOfEqs_AutoP1_M2M1)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete cpl_sys;
+    delete option;
 }
 
 TEST(Math, SystemOfEqs_AutoP1_3M1)
@@ -448,6 +465,10 @@ TEST(Math, SystemOfEqs_AutoP1_3M1)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete cpl_sys;
+    delete option;
 }
 
 TEST(Math, SystemOfEqs_AutoP1_P2M1)
@@ -484,4 +505,8 @@ TEST(Math, SystemOfEqs_AutoP1_P2M1)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete cpl_sys;
+    delete option;
 }
