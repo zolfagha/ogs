@@ -43,6 +43,7 @@ public:
     ///
     virtual ~FemNaturalCoordinates()
     {
+        delete _shape;
         delete _prop;
     }
 
