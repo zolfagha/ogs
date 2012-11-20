@@ -38,7 +38,7 @@ class Ogs5FemData
 {
 
 public:
-    Ogs5FemData() {};
+    Ogs5FemData() : geo_obj(NULL) {};
     ~Ogs5FemData();
 
 public:
