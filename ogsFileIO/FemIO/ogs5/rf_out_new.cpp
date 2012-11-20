@@ -73,7 +73,6 @@ bool OUTRead(const std::string& file_base_name,
            return true;
         }
 
-        COutput* out(new COutput(out_vector.size()));
 //        //15.01.2008. WW
 //        if (line_string.find("#VERSION") != string::npos)
 //            output_version = true;  // 02.2011. WW
@@ -81,6 +80,7 @@ bool OUTRead(const std::string& file_base_name,
         // keyword found
         if (line_string.find("#OUTPUT") != string::npos)
         {
+            COutput* out(new COutput(out_vector.size()));
             position = out->Read(out_file);
             out_vector.push_back(out);
             out_file.seekg(position, ios::beg);
