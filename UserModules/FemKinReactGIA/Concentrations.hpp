@@ -561,7 +561,7 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_rates(void)
                 this->_xi_mob_rates[i]->setValue( node_idx, loc_xi_mob_rates[i] ); 
 
             for (i=0; i < n_xi_immob; i++)
-                this->_xi_mob_rates[i]->setValue( node_idx, loc_xi_immob_rates[i] );
+                this->_xi_immob_rates[i]->setValue( node_idx, loc_xi_immob_rates[i] );
 
 		}  // end of for node_idx
 	}  // end of if _ReductionKin
@@ -717,6 +717,12 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 			for (i=0; i < n_xi_immob; i++)
 				_xi_immob_new[i]->setValue(node_idx, loc_xi_immob_new[i]); 
 		} // end of if
+        else 
+        {
+            // if it is boundary nodes, then xi_immob_new is equal to xi_immob. 
+            for (i=0; i < n_xi_immob; i++)
+				_xi_immob_new[i] = _xi_immob[i]; 
+        }
 
 	}  // end of for node_idx
 
