@@ -35,7 +35,6 @@ class TRI3CONST : public TemplateFeBase<FiniteElementType::TRI3CONST, 3>
 {
 private:
     MeshLib::Triangle *_ele;
-    MeshLib::IMesh *_msh;
     double a[3], b[3], c[3];
     double A;
     FemIntegrationAnalytical _integration;
