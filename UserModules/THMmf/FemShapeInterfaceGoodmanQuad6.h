@@ -12,16 +12,16 @@
 
 #pragma once
 
-#include "TemplateShapeFunction.h"
-#include "FemShapeLine3.h"
+#include "FemLib/Core/ShapeFunction/TemplateShapeFunction.h"
+#include "FemLib/Core/ShapeFunction/FemShapeLine3.h"
 
-namespace FemLib
+namespace THMmf
 {
 
 /**
  *
  */
-class FemShapeInterfaceGoodmanQuad6 : public TemplateShapeFunction<2, 6>
+class FemShapeInterfaceGoodmanQuad6 : public FemLib::TemplateShapeFunction<2, 6>
 {
 public:
     void computeShapeFunction(const double* pt, double *N6)
@@ -43,15 +43,13 @@ public:
         N6[5] = N3[2];
     };
 
-    void computeGradShapeFunction(const double*, double *dN)
+    void computeGradShapeFunction(const double*, double *)
     {
         //TODO
-        dN[0] = -0.5;
-        dN[1] = 0.5;
     };
 
 private:
-    FemShapeLine3 _fe_line3;
+    FemLib::FemShapeLine3 _fe_line3;
 };
 
 }

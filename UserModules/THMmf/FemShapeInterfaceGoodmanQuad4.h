@@ -12,14 +12,16 @@
 
 #pragma once
 
-#include "TemplateShapeFunction.h"
-#include "FemShapeLine2.h"
+#include "FemLib/Core/ShapeFunction/TemplateShapeFunction.h"
+#include "FemLib/Core/ShapeFunction/FemShapeLine2.h"
 
-namespace FemLib
+namespace THMmf
 {
 
 /**
- * Goodman joint elements: [[u]] = u_top - u_bottom
+ * \brief Shape function for Goodman joint elements
+ *
+ * [[u]] = u_top - u_bottom
  *
  *  3                2
  *  *----------------*
@@ -27,10 +29,10 @@ namespace FemLib
  *  *----------------*
  *  0                1
  */
-class FemShapeInterfaceGoodmanQuad4 : public TemplateShapeFunction<2, 4>
+class FemShapeInterfaceGoodmanQuad4 : public FemLib::TemplateShapeFunction<2, 4>
 {
 public:
-    void computeShapeFunction(const double* pt, double *N4)
+    virtual void computeShapeFunction(const double* pt, double *N4)
     {
         double N2[2] = {};
         _fe_line2.computeShapeFunction(pt, N2);
@@ -47,15 +49,13 @@ public:
         N4[2] = N2[1];
     };
 
-    void computeGradShapeFunction(const double*, double *dN)
+    virtual void computeGradShapeFunction(const double*, double *)
     {
         //TODO
-        dN[0] = -0.5;
-        dN[1] = 0.5;
     };
 
 private:
-    FemShapeLine2 _fe_line2;
+    FemLib::FemShapeLine2 _fe_line2;
 };
 
 }
