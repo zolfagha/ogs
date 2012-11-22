@@ -368,7 +368,7 @@ TEST(Solution, line)
 TEST(Solution, CouplingFem2)
 {
     // problem definition
-    const size_t div = 40;
+    const size_t div = 20;
     const double poro = 1.0;
     const double mol_diff = 1e-6;
     const double darcy_vel = 1e-5;
@@ -379,7 +379,7 @@ TEST(Solution, CouplingFem2)
         GeoLib::Rectangle* _rec = new GeoLib::Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
         //time
         //TimeStepFunctionConstant tim(.0, 1e+3, 1e+3);
-        TimeStepFunctionConstant tim(.0, 1e+4, 0.5e+3);
+        TimeStepFunctionConstant tim(.0, 1e+4, 1e+3);
         //material
         Geo::PorousMedia pm;
         pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
