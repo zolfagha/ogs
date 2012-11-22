@@ -25,9 +25,9 @@ using namespace MeshLib;
 
 VtuWriter::VtuWriter(bool binary_mode)
 : _useBinary(binary_mode), _isInitialized(false), _isLittleEndian(true),
-  type_UChar(VTK_XML_DATA_TYPE::Int8), type_Int(VTK_XML_DATA_TYPE::Int32),
-  type_UInt(VTK_XML_DATA_TYPE::Int8), type_Long(VTK_XML_DATA_TYPE::Int8),
-  type_Double(VTK_XML_DATA_TYPE::Int8),  SIZE_OF_BLOCK_LENGTH_TAG(0)
+  type_UChar(Int8), type_Int(Int32),
+  type_UInt(Int8), type_Long(Int8),
+  type_Double(Int8),  SIZE_OF_BLOCK_LENGTH_TAG(0)
 {
     this->initialize();
 }
