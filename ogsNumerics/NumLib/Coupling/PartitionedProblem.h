@@ -36,14 +36,13 @@ public:
     typedef size_t ExternalKey;
 
     /// 
-    PartitionedProblem() : _algorithm(0)
+    PartitionedProblem() : _algorithm(NULL)
     {
     }
 
     ///
     virtual ~PartitionedProblem()
     {
-        BaseLib::releaseObject(_algorithm);
     };
 
     ///

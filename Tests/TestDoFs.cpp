@@ -101,7 +101,7 @@ TEST(Discrete, DoF_inactive)
     ASSERT_EQ(8u, dofManager->getTotalNumberOfActiveDoFs());
     ASSERT_EQ(8u, dofManager->getTotalNumberOfActiveDoFsWithoutGhost());
     ASSERT_EQ(0u, dofManager->mapEqsID(varId, 0, 0));
-    ASSERT_EQ(-1u, dofManager->mapEqsID(varId, 0, 8));
+    ASSERT_EQ((size_t)-1, dofManager->mapEqsID(varId, 0, 8));
 
     delete dofManager;
 }
