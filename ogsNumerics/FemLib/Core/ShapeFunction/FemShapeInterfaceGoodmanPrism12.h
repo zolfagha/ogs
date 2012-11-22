@@ -5,7 +5,7 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file FemShapeInterfacePrism12.h
+ * \file FemShapeInterfaceGoodmanPrism12.h
  *
  * Created on 2012-11-20 by Norihiro Watanabe
  */

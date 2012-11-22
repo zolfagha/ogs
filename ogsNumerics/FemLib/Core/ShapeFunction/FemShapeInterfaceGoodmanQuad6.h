@@ -5,7 +5,7 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file FemShapeInterfaceQuad6.h
+ * \file FemShapeInterfaceGoodmanQuad6.h
  *
  * Created on 2012-11-20 by Norihiro Watanabe
  */
@@ -21,7 +21,7 @@ namespace FemLib
 /**
  *
  */
-class FemShapeInterfaceQuad6 : public TemplateShapeFunction<2, 6>
+class FemShapeInterfaceGoodmanQuad6 : public TemplateShapeFunction<2, 6>
 {
 public:
     void computeShapeFunction(const double* pt, double *N6)

@@ -5,7 +5,7 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file FemShapeInterfaceHex16.h
+ * \file FemShapeInterfaceGoodmanHex16.h
  *
  * Created on 2012-11-20 by Norihiro Watanabe
  */
