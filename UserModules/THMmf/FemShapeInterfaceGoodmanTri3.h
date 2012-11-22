@@ -49,10 +49,10 @@ public:
         N3[2] = N2[1];
     };
 
-    void ShapeFunctionGoodmanTriEnd(double* N3, const double* u)
+    void ShapeFunctionGoodmanTriEnd(double* N3, const double* pt)
     {
         double N2[2] = {};
-        ShapeFunctionLine(N2, u);
+        _fe_line2.computeShapeFunction(pt, N2);
 
         //*Notice: node order of an element
         //  2
