@@ -41,7 +41,7 @@ public:
     ///
     virtual ~AbstractPartitionedProblem()
     {
-        BaseLib::releaseObjectsInStdVector(_list_subproblems);
+        BaseLib::releaseObjectsInStdVector(_list_part_problems);
     };
 
     /// check consistency
@@ -133,9 +133,11 @@ public:
     }
 #endif
 
-    void addProblem(T_PROBLEM &subproblem)
+    void addProblem(T_PROBLEM &subproblem, bool is_partitioned=false)
     {
         _list_subproblems.push_back(&subproblem);
+        if (is_partitioned)
+            _list_part_problems.push_back(&subproblem);
         _map._list_subproblem_input_source.resize(_list_subproblems.size());
 
         //return _list_subproblems.size();
@@ -231,6 +233,7 @@ public:
 
 protected:
     std::vector<T_PROBLEM*> _list_subproblems;
+    std::vector<T_PROBLEM*> _list_part_problems;
     ParameterProblemMappingTable _map;
     PartitionedConvergenceCheck<T_PROBLEM> _check;
 };
