@@ -125,10 +125,11 @@ private:
             T_I* sys = 0;
             if (str.compare("M")==0) {
                 sys = buildMonolithicSystem(op_sub, eqs_fac);
+                if (sys!=0) part->addProblem(*sys);
             } else if (str.compare("P")==0) {
                 sys = buildPartitionedSystem(op_sub, eqs_fac);
+                if (sys!=0) part->addProblem(*sys, true);
             }
-            if (sys!=0) part->addProblem(*sys);
         }
         part->connectParameters();
         return part;
