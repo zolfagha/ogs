@@ -107,6 +107,7 @@ private:
     NumLib::DiscreteDataConvergenceCheck _checker;
 };
 
+} //THMmf
+
 #include "Tmf.tpp"
 
-} //THMmf

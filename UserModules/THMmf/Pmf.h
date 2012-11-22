@@ -115,8 +115,9 @@ private:
     NumLib::DiscreteDataConvergenceCheck _checker;
 };
 
+}
+
 #include "Pmf.tpp"
 
-}
 
 

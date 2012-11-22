@@ -21,6 +21,9 @@
 #include "Ogs6FemData.h"
 #include "FemVariableBuilder.h"
 
+namespace THMmf
+{
+
 template <class T1, class T2>
 bool Pmf<T1,T2>::initialize(const BaseLib::Options &option)
 {
@@ -86,3 +89,5 @@ void Pmf<T1,T2>::output(const NumLib::TimeStep &/*time*/)
     OutputVariableInfo var(this->getOutputParameterName(Pressure), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput(var.name, var);
 };
+
+}

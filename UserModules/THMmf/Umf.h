@@ -120,6 +120,7 @@ private:
 
 };
 
+}
+
 #include "Umf.tpp"
 
-}

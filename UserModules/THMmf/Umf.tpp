@@ -26,6 +26,9 @@
 #include "Ogs6FemData.h"
 #include "FemVariableBuilder.h"
 
+namespace THMmf
+{
+
 template <class T1, class T2>
 typename Umf<T1,T2>::MyVariable* Umf<T1,T2>::getDisplacementComponent(MyVariable *u_x, MyVariable* u_y, MyVariable* u_z, const std::string &var_name)
 {
@@ -185,3 +188,4 @@ void Umf<T1,T2>::output(const NumLib::TimeStep &/*time*/)
     }
 };
 
+}
