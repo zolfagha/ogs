@@ -217,7 +217,8 @@ int THMCSimulator::execute()
             return 0;
         }
         // output converted setting
-        std::ofstream of(ogs6fem->output_dir + "/converted_setting.log");
+        std::string str_conversion_logfile = ogs6fem->output_dir + "/converted_setting.log";
+        std::ofstream of(str_conversion_logfile.c_str());
         opOgs6->printout(of);
         of.close();
     }
