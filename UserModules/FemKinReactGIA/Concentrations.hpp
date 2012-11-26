@@ -294,7 +294,8 @@ void FunctionConcentrations<T1, T2>::initializeTimeStep(const NumLib::TimeStep &
 template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::updateOutputParameter(const NumLib::TimeStep &/*time*/)
 { 
-    // nothing to do in this case
+    // convert eta and xi back to concentrations
+    convert_eta_xi_to_conc(); 
 }
 
 template <class T1, class T2>
@@ -304,9 +305,6 @@ void FunctionConcentrations<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 
     // update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-
-	// convert eta and xi back to concentrations
-    convert_eta_xi_to_conc(); 
 
 	// set the new output
 	for (i=0; i<_concentrations.size(); i++) {
@@ -390,7 +388,11 @@ void FunctionConcentrations<T1, T2>::convert_conc_to_eta_xi(void)
 			for (i=0; i < n_xi_mob; i++)
 				this->_xi_mob[i]->setValue(node_idx, loc_xi_mob[i]); 
 			for (i=0; i < n_xi_immob; i++)
+            {
 				this->_xi_immob[i]->setValue(node_idx, loc_xi_immob[i]); 
+                // also over-write xi_immob_new
+                this->_xi_immob_new[i]->setValue(node_idx, loc_xi_immob[i]); 
+            }
 		}  // end of for node_idx
 	
 	}  // end of if _ReductionKin
@@ -441,7 +443,9 @@ void FunctionConcentrations<T1, T2>::convert_eta_xi_to_conc(void)
 			for (i=0; i < n_xi_mob; i++)
 				loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
 		    for (i=0; i < n_xi_immob; i++)
-				loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
+				// loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
+                // using the xi_immob_new values
+                loc_xi_immob[i] = this->_xi_immob_new[i]->getValue(node_idx); 
 
 			// pass them to the transform function in the reductionKin class
 			// and thet the loc_eta_mob, local_eta_immob and local_xi
@@ -546,7 +550,8 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_rates(void)
 			for (i=0; i < n_xi_mob; i++)
 				loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
 		    for (i=0; i < n_xi_immob; i++)
-				loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
+				// loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
+                loc_xi_immob[i] = this->_xi_immob_new[i]->getValue(node_idx); // using new rates instead! // HS 26.11.2012
 
             // calculate rates; 
             this->_ReductionKin->Calc_Xi_Rate( loc_eta_mob, 
@@ -613,8 +618,8 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
 		for (i=0; i < n_xi_mob; i++)
 			loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
 	    for (i=0; i < n_xi_immob; i++)
-			loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
-            // loc_xi_immob[i] = this->_xi_immob_new[i]->getValue(node_idx);  // HS, use the new immob values after ODE calculation
+			// loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
+            loc_xi_immob[i] = this->_xi_immob_new[i]->getValue(node_idx);  // HS, use the new immob values after ODE calculation
 
         // calculate rates; 
         this->_ReductionKin->Calc_Xi_Rate( loc_eta_mob, 
@@ -713,7 +718,7 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 			// solve the local ODE problem using RK
 			rk4->solve( *_local_ode_xi_immob, 0.0, dt, loc_xi_immob, loc_xi_immob_new); 
 		
-			// collect the new xi_immob_new
+			// collect the xi_immob_new
 			for (i=0; i < n_xi_immob; i++)
 				_xi_immob_new[i]->setValue(node_idx, loc_xi_immob_new[i]); 
 		} // end of if
