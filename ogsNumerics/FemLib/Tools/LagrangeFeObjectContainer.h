@@ -27,10 +27,10 @@ namespace FemLib
 class LagrangianFeObjectContainer : public FeObjectCachePerFeType, public IFeObjectContainer
 {
 public:
-    explicit LagrangianFeObjectContainer(MeshLib::IMesh &msh) :  FeObjectCachePerFeType(msh), _order(1) {};
+    explicit LagrangianFeObjectContainer(MeshLib::IMesh* msh) :  FeObjectCachePerFeType(msh), _order(1) {};
 
     LagrangianFeObjectContainer(const LagrangianFeObjectContainer &src)
-    : FeObjectCachePerFeType(*src.getMesh())
+    : FeObjectCachePerFeType(src.getMesh())
     {
         _order = src._order;
     }

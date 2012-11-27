@@ -29,7 +29,7 @@ namespace FemLib
 class FeObjectCachePerFeType
 {
 public:
-    explicit FeObjectCachePerFeType(MeshLib::IMesh &msh) : _msh(&msh) {};
+    explicit FeObjectCachePerFeType(MeshLib::IMesh* msh) : _msh(msh) {};
 
     virtual ~FeObjectCachePerFeType()
     {
@@ -42,7 +42,7 @@ public:
 
 private:
     std::map<FiniteElementType::type, IFiniteElement*> _mapFeObj;
-    MeshLib::IMesh *_msh;
+    MeshLib::IMesh* _msh;
 
     DISALLOW_COPY_AND_ASSIGN(FeObjectCachePerFeType);
 };
