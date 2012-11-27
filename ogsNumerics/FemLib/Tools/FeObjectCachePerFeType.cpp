@@ -15,11 +15,20 @@
 namespace FemLib
 {
 
-IFiniteElement* FeObjectCachePerFeType::getFeObject(FiniteElementType::type fe_type)
+FeObjectCachePerFeType::FeObjectCachePerFeType(const FeObjectCachePerFeType& src)
+: _fe_catalog(src._fe_catalog), _msh(src._msh)
+{
+    std::map<int, IFiniteElement*>::const_iterator itr = src._mapFeObj.begin();
+    for (; itr!=src._mapFeObj.end(); ++itr) {
+        _mapFeObj.insert(*itr);
+    }
+}
+
+IFiniteElement* FeObjectCachePerFeType::getFeObject(const int fe_type)
 {
     IFiniteElement *fe = 0;
     if (_mapFeObj.count(fe_type)==0) {
-        fe = FemElementFactory::create(fe_type, _msh);
+        fe = _fe_catalog->createFeObject(fe_type, _msh);
         _mapFeObj[fe_type] = fe;
     } else {
         fe = _mapFeObj[fe_type];
