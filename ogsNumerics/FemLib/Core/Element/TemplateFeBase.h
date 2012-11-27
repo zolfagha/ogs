@@ -30,7 +30,7 @@ namespace FemLib
  * \tparam T_FETYPE         Finite element type
  * \tparam N_VARIABLES      The number of variables
  */
-template <FiniteElementType::type T_FETYPE, size_t N_VARIABLES>
+template < size_t N_VARIABLES >
 class TemplateFeBase : public IFiniteElement
 {
 public:
@@ -38,7 +38,7 @@ public:
      *
      * @param msh
      */
-    explicit TemplateFeBase(MeshLib::IMesh* msh) : _msh(msh), _ele(NULL) {};
+    explicit TemplateFeBase(MeshLib::IMesh* msh) : _fe_type(-1), _msh(msh), _ele(NULL) {};
 
     ///
     virtual ~TemplateFeBase() {};
@@ -56,17 +56,20 @@ public:
     virtual size_t getNumberOfVariables() const { return N_VARIABLES; };
 
     /// return finite element type
-    virtual FiniteElementType::type getFeType() const { return T_FETYPE; };
+    virtual int getFeType() const { return TemplateFeBase<N_VARIABLES>::_fe_type; };
+
+    /// set finite element type ID
+    void setFeType(int n) {_fe_type = n;};
 
 protected:
     ///
     void setElement(MeshLib::IElement* e) {_ele = e;};
 
 private:
+    int _fe_type;
     MeshLib::IMesh* _msh;
     MeshLib::IElement* _ele;
 };
-
 
 }
 

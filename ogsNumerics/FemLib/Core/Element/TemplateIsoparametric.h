@@ -30,7 +30,6 @@ namespace FemLib
 /**
  * \brief Template class for any isoparametric FE classes
  *
- * \tparam T_FETYPE
  * \tparam N_DIM
  * \tparam N_VARIABLES
  * \tparam N_ORDER
@@ -39,7 +38,6 @@ namespace FemLib
  * \tparam T_EXTRAPOLATE
  */
 template <
-    FiniteElementType::type T_FETYPE,
     size_t N_ELE_DIM,
     size_t N_VARIABLES,
     size_t N_ORDER,
@@ -47,12 +45,12 @@ template <
     class T_INTEGRAL,
     class T_EXTRAPOLATE
     >
-class TemplateIsoparametric : public TemplateFeBase<T_FETYPE, N_VARIABLES>
+class TemplateIsoparametric : public TemplateFeBase<N_VARIABLES>
 {
 public:
     ///
     explicit TemplateIsoparametric(MeshLib::IMesh* msh)
-    : TemplateFeBase<T_FETYPE, N_VARIABLES>(msh)
+    : TemplateFeBase<N_VARIABLES>(msh)
     {
         const size_t mesh_dim = msh->getDimension();
         if (mesh_dim == N_ELE_DIM)
@@ -81,8 +79,8 @@ public:
     virtual void configure( MeshLib::IElement &e )
     {
         e.setCurrentOrder(getOrder());
-        TemplateFeBase<T_FETYPE, N_VARIABLES>::setElement(&e);
-        const MeshLib::IMesh* msh = TemplateFeBase<T_FETYPE, N_VARIABLES>::getMesh();
+        TemplateFeBase<N_VARIABLES>::setElement(&e);
+        const MeshLib::IMesh* msh = TemplateFeBase<N_VARIABLES>::getMesh();
         msh->setCurrentOrder(getOrder());
         if (e.getMappedCoordinates()==NULL) {
             MeshLib::IElementCoordinatesMapping* ele_map;
@@ -146,7 +144,7 @@ public:
         const CoordinateMappingProperty *prop = _mapping->compute(natural_pt);
         double *N = &(*prop->shape_r)(0,0);
         double v = .0;
-        for (size_t i=0; i<TemplateFeBase<T_FETYPE, N_VARIABLES>::getNumberOfVariables(); i++)
+        for (size_t i=0; i<TemplateFeBase<N_VARIABLES>::getNumberOfVariables(); i++)
             v+=N[i]*nodal_values[i];
         return v;
     }

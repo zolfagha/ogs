@@ -42,7 +42,7 @@ public:
     virtual void configure(MeshLib::IElement &e ) = 0;
 
     /// return finite element type
-    virtual FiniteElementType::type getFeType() const = 0;
+    virtual int getFeType() const = 0;
 
     /// return this mesh element
     virtual MeshLib::IElement* getElement() const = 0;
