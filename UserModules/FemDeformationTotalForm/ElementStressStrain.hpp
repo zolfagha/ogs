@@ -43,7 +43,7 @@ bool FunctionElementStressStrain<T>::initialize(const BaseLib::Options &option)
     _strain->initialize(_dis, v0);
     _stress = new MyIntegrationPointFunctionVector();
     _stress->initialize(_dis, v0);
-    _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
+    _feObjects = new FemLib::LagrangianFeObjectContainer(msh);
 
     // set initial output
     for (size_t i=0; i<n_strain_components; i++) {

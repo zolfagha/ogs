@@ -71,7 +71,7 @@ public:
         //mesh
         this->msh = msh;
         dis = new DiscreteLib::DiscreteSystem(msh);
-        _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
+        _feObjects = new FemLib::LagrangianFeObjectContainer(msh);
         //discretization
         head = new MyNodalFunctionScalar();
         head->initialize(*dis, FemLib::PolynomialOrder::Linear);

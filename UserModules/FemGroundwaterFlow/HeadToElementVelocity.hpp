@@ -29,7 +29,7 @@ bool FunctionHeadToElementVelocity<T>::initialize(const BaseLib::Options &option
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
 
-    _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
+    _feObjects = new FemLib::LagrangianFeObjectContainer(msh);
     _dis = dis;
     _vel = new MyIntegrationPointFunctionVector();
     _vel->initialize(dis);

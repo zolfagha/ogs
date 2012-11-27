@@ -55,7 +55,7 @@ public:
         _K = pm.hydraulic_conductivity;
         _vel = new MyIntegrationPointFunctionVector();
         _vel->initialize(&dis);
-        _feObjects = new FemLib::LagrangianFeObjectContainer(*dis.getMesh());
+        _feObjects = new FemLib::LagrangianFeObjectContainer(dis.getMesh());
         //this->setOutput(Velocity, _vel);
     }
     NumLib::DiscreteDataConvergenceCheck _checker;

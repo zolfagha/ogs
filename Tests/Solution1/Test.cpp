@@ -94,7 +94,7 @@ typedef MyFunctionDisplacement::FemLinearElasticEquation FemLinearElasticEquatio
 
 Geo::GWFemProblem* createGWProblem(DiscreteSystem &dis, Geo::PorousMedia &pm)
 {
-    LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
+    LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(dis.getMesh());
     //equations
     Geo::GWFemEquation::LinearAssemblerType* linear_assembler = new Geo::GWFemEquation::LinearAssemblerType(*_feObjects, pm);
     Geo::GWFemEquation::ResidualAssemblerType* r_assembler = new Geo::GWFemEquation::ResidualAssemblerType(*_feObjects, pm);
@@ -150,7 +150,7 @@ Geo::GWFemProblem* defineGWProblem1D(DiscreteSystem &dis, GeoLib::Line &line, Ge
 
 Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec, Geo::PorousMedia &pm, Geo::Compound &comp, FemLib::LagrangianFeObjectContainer* /*feObjects*/)
 {
-    LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
+    LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(dis.getMesh());
     //equations
     Geo::MassFemEquation::LinearAssemblerType* linear_assembler = new Geo::MassFemEquation::LinearAssemblerType(*_feObjects, pm, comp);
     Geo::MassFemEquation::ResidualAssemblerType* r_assembler = new Geo::MassFemEquation::ResidualAssemblerType(*_feObjects, pm, comp);
@@ -178,7 +178,7 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Rec
 
 Geo::FemLinearElasticProblem* defineLinearElasticProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec, Geo::PorousMedia &pm, FemLib::LagrangianFeObjectContainer* /*feObjects*/)
 {
-    LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
+    LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(dis.getMesh());
     //equations
     Geo::FemLinearElasticEquation::LinearAssemblerType* linear_assembler = new Geo::FemLinearElasticEquation::LinearAssemblerType(*_feObjects, pm);
     Geo::FemLinearElasticEquation::ResidualAssemblerType* r_assembler = new Geo::FemLinearElasticEquation::ResidualAssemblerType(*_feObjects, pm);
@@ -230,7 +230,7 @@ TEST(Solution, CouplingFem2D)
         pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
         pm.porosity = new NumLib::TXFunctionConstant(0.2);
         DiscreteSystem dis(msh);
-        FemLib::LagrangianFeObjectContainer feObjects(*msh);
+        FemLib::LagrangianFeObjectContainer feObjects(msh);
         Geo::GWFemProblem* pGW = defineGWProblem(dis, *_rec, pm, &feObjects);
         TimeStepFunctionConstant tim(.0, 100.0, 10.0);
         pGW->setTimeSteppingFunction(tim);
@@ -302,7 +302,7 @@ TEST(Solution, line)
         pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
         pm.porosity = new NumLib::TXFunctionConstant(0.2);
         DiscreteSystem dis(msh);
-        FemLib::LagrangianFeObjectContainer feObjects(*msh);
+        FemLib::LagrangianFeObjectContainer feObjects(msh);
         Geo::GWFemProblem* pGW = defineGWProblem1D(dis, *line, pm, &feObjects);
         TimeStepFunctionConstant tim(.0, 10.0, 10.0);
         pGW->setTimeSteppingFunction(tim);
@@ -388,7 +388,7 @@ TEST(Solution, CouplingFem2)
         tracer.molecular_diffusion = new NumLib::TXFunctionConstant(mol_diff);
         //problems
         DiscreteSystem dis(msh);
-        FemLib::LagrangianFeObjectContainer feObjects(*msh);
+        FemLib::LagrangianFeObjectContainer feObjects(msh);
         Geo::GWFemProblem* pGW = defineGWProblem(dis, *_rec, pm, &feObjects);
         Geo::MassFemProblem* pMass = defineMassTransportProblem(dis, *_rec, pm, tracer, &feObjects);
         pGW->setTimeSteppingFunction(tim);
@@ -517,7 +517,7 @@ TEST(Solution, LinearElastic2D)
         solid.Youngs_modulus = 10e+9;
         pm.solidphase = &solid;
         DiscreteSystem dis(msh);
-        FemLib::LagrangianFeObjectContainer feObjects(*msh);
+        FemLib::LagrangianFeObjectContainer feObjects(msh);
         Geo::FemLinearElasticProblem* pDe = defineLinearElasticProblem(dis, *_rec, pm, &feObjects);
         TimeStepFunctionConstant tim(.0, 10.0, 10.0);
         pDe->setTimeSteppingFunction(tim);

@@ -164,7 +164,7 @@ SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY>::SingleSte
     const size_t n_total_dofs = _dofManager.getTotalNumberOfActiveDoFs();
     INFO("* Total number of DoFs = %d", n_total_dofs);
 
-    _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
+    _feObjects = new FemLib::LagrangianFeObjectContainer(msh);
 
     // setup IC
     _vec_u_n1.resize(n_var, 0);

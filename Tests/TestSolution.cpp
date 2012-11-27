@@ -245,7 +245,7 @@ public:
     {
         MeshLib::IMesh *msh = dis.getMesh();
         //size_t nnodes = msh->getNumberOfNodes();
-        _feObjects = new LagrangianFeObjectContainer(*msh);
+        _feObjects = new LagrangianFeObjectContainer(msh);
         //equations
         typename GWFemEquation::LinearAssemblerType* local_linear = new typename GWFemEquation::LinearAssemblerType(*_feObjects, K);
         typename GWFemEquation::ResidualAssemblerType* local_r = new typename GWFemEquation::ResidualAssemblerType(*_feObjects, K);

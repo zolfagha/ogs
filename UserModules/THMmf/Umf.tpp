@@ -69,7 +69,7 @@ bool Umf<T1,T2>::initialize(const BaseLib::Options &option)
     }
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
-    _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
+    _feObjects = new FemLib::LagrangianFeObjectContainer(msh);
     const size_t dim = msh->getDimension();
 
     //--------------------------------------------------------------------------
