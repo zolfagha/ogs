@@ -12,7 +12,7 @@
 
 #include "LagrangeFeObjectContainer.h"
 
-#include "FemLib/Core/Element/FemElementFactory.h"
+#include "FemLib/Tools/FemElementFactory.h"
 
 namespace FemLib
 {

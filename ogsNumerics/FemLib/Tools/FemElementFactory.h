@@ -27,7 +27,7 @@ class FemElementFactory
 public:
     static IFiniteElement* create(FiniteElementType::type fe_type, MeshLib::IMesh* msh)
     {
-        switch (fe_type)
+       switch (fe_type)
         {
             case FiniteElementType::LINE2:
                 return new LINE2(msh);
