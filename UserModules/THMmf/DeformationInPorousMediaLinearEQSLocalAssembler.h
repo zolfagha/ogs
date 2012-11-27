@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include "MeshLib/Core/CoordinateSystem.h"
 #include "MeshLib/Core/IElement.h"
 #include "DiscreteLib/Utils/DofEquationIdTable.h"
 #include "DiscreteLib/Utils/Tools.h"
