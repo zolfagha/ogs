@@ -13,11 +13,8 @@
 #pragma once
 
 #include <map>
-#include <cassert>
 
-#include "FemLib/Core/Element/FiniteElementType.h"
-#include "FemLib/Core/Element/C0IsoparametricElements.h"
-#include "FemLib/Core/Element/TRI3CONST.h"
+#include "FemLib/Core/Element/IFemElement.h"
 
 #include "FemElementFactoryBase.h"
 #include "FemElementFactoryImpl.h"
@@ -53,32 +50,14 @@ public:
      * @return the given ID if succeed, otherwise -1
      */
     template<class T_FE>
-    int registerFeType(const int fe_id)
-    {
-        if (exist(fe_id))
-            return -1;
-
-        _map_fe_factories[fe_id] = new FemElementFactoryImpl<T_FE>;
-        _max_id = std::max(_max_id, fe_id);
-
-        return fe_id;
-    }
+    int registerFeType(const int fe_id);
 
     /**
      * register new finite element type and automatically assign id
      * @return the automatically assigned ID if succeed, otherwise -1
      */
     template<class T_FE>
-    int registerFeType()
-    {
-        const int fe_id = _max_id + 1;
-        assert(_map_fe_factories.count(fe_id)==0);
-        _map_fe_factories[fe_id] = new FemElementFactoryImpl<T_FE>;
-        _max_id = fe_id;
-
-        return fe_id;
-    }
-
+    int registerFeType();
 
     /**
      * create an object of the given finite element type
@@ -86,18 +65,44 @@ public:
      * @param msh
      * @return a pointer to IFiniteElement
      */
-    IFiniteElement* createFeObject(const int fe_id, MeshLib::IMesh* msh) const
-    {
-        if (!exist(fe_id))
-            return NULL;
-
-        std::map<int, FemElementFactoryBase*>::const_iterator itr = _map_fe_factories.find(fe_id);
-        return itr->second->create(msh);
-    }
+    IFiniteElement* createFeObject(const int fe_id, MeshLib::IMesh* msh) const;
 
 private:
     std::map<int, FemElementFactoryBase*> _map_fe_factories;
     int _max_id;
 };
+
+
+/**
+ * register new finite element type with the given id
+ * @param fe_id     Unique ID for this finite element type
+ * @return the given ID if succeed, otherwise -1
+ */
+template<class T_FE>
+int FemElementCatalog::registerFeType(const int fe_id)
+{
+    if (exist(fe_id))
+        return -1;
+
+    _map_fe_factories[fe_id] = new FemElementFactoryImpl<T_FE>;
+    _max_id = std::max(_max_id, fe_id);
+
+    return fe_id;
+}
+
+/**
+ * register new finite element type and automatically assign id
+ * @return the automatically assigned ID if succeed, otherwise -1
+ */
+template<class T_FE>
+int FemElementCatalog::registerFeType()
+{
+    const int fe_id = _max_id + 1;
+    assert(_map_fe_factories.count(fe_id)==0);
+    _map_fe_factories[fe_id] = new FemElementFactoryImpl<T_FE>;
+    _max_id = fe_id;
+
+    return fe_id;
+}
 
 }
