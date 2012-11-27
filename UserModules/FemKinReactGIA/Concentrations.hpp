@@ -5,7 +5,7 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file Concentration.hpp
+ * \file Concentration.h
  *
  * Created on 2012-09-06 by Haibing Shao
  */
@@ -32,8 +32,8 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
     size_t msh_id = option.getOptionAsNum<size_t>("MeshID");
     size_t time_id = option.getOptionAsNum<size_t>("TimeGroupID");
     NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
-
-    // mesh and FE objects
+        
+    //mesh and FE objects
     MeshLib::IMesh* msh = femData->list_mesh[msh_id];
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
@@ -68,14 +68,14 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 
 	// creating local memory space to store IC and BC
 	// initialize eta_mob, 
-	for ( i=0; i < n_eta_mob ; i++ )
+	for (i=0; i<n_eta_mob ; i++)
 	{
 		MyNodalFunctionScalar* eta_i = new MyNodalFunctionScalar(); 
 		eta_i->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0 );
 	    _eta_mob.push_back(eta_i); 
 	}
 	// initialize eta_immob, 
-	for ( i=0; i < n_eta_immob; i++ )
+	for (i=0; i<n_eta_immob; i++)
 	{
 		MyNodalFunctionScalar* eta_i = new MyNodalFunctionScalar(); 
 	    eta_i->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0 );
@@ -166,7 +166,24 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
         FemVariableBuilder var_builder;
         var_builder.doit(femData->map_ChemComp[i]->second->get_name(), option, msh, femData->geo, femData->geo_unique_name, _feObjects, comp_conc);
 	}
-
+	// set IC for concentrations
+	const BaseLib::Options* opICList = option.getSubGroup("ICList");
+    std::vector<const BaseLib::Options*> vec_opIC = opICList->getSubGroupList("IC"); 
+    SolutionLib::FemIC* var_ic = new SolutionLib::FemIC(msh);
+    for (size_t i=0; i<vec_opIC.size(); i++)
+    {
+        const BaseLib::Options* opIC = vec_opIC[i];
+        std::string var_name = opIC->getOption("Variable");
+        std::string geo_type = opIC->getOption("GeometryType");
+        std::string geo_name = opIC->getOption("GeometryName");
+        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
+        assert(opIC->hasOption("DistributionType"));
+        NumLib::ITXFunction* f_ic = NumLib::TXFunctionBuilder::create(*opIC);
+        var_ic->addDistribution(geo_obj, f_ic);
+        size_t comp_idx = femData->map_ChemComp.find( var_name )->second->getIndex(); 
+        _problem->getVariable(comp_idx)->setIC(var_ic);
+    }
+    
 	// backward flushing global vector of concentrations
 	MyNodalFunctionScalar* tmp_conc; 
 	for (i=0; i < n_Comp; i++)
@@ -205,7 +222,55 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 		xi_mob_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _xi_mob[i]->getDiscreteData() ) ); 
 		_non_linear_problem->getVariable(i)->setIC( xi_mob_ic ); 
 	}
-	
+
+    // set BC for concentrations
+    const BaseLib::Options* opBCList = option.getSubGroup("BCList");
+    std::vector<const BaseLib::Options*> vec_opBC = opICList->getSubGroupList("BC"); 
+    for (size_t i=0; i<vec_opBC.size(); i++)
+    {
+        const BaseLib::Options* opBC = vec_opBC[i];
+        std::string var_name = opBC->getOption("Variable");
+        std::string geo_type = opBC->getOption("GeometryType");
+        std::string geo_name = opBC->getOption("GeometryName");
+        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
+        assert(opBC->hasOption("DistributionType"));
+        NumLib::ITXFunction* f_bc = NumLib::TXFunctionBuilder::create(*opBC);
+        size_t comp_idx = femData->map_ChemComp.find( var_name )->second->getIndex(); 
+        _problem->getVariable(comp_idx)->addDirichletBC(new SolutionLib::FemDirichletBC(msh, geo_obj, f_bc));
+    }
+    
+    // set ST for concentrations
+	const BaseLib::Options* opSTList = option.getSubGroup("STList");
+    std::vector<const BaseLib::Options*> vec_opST = opSTList->getSubGroupList("ST");
+    for (size_t i=0; i<vec_opST.size(); i++)
+    {
+        const BaseLib::Options* opST = vec_opST[i];
+		std::string var_name = opST->getOption("Variable");
+        std::string geo_type = opST->getOption("GeometryType");
+        std::string geo_name = opST->getOption("GeometryName");
+        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
+        std::string st_type = opST->getOption("STType");
+        assert(opST->hasOption("DistributionType"));
+        NumLib::ITXFunction* f_st = NumLib::TXFunctionBuilder::create(*opST);
+        double dis_v = opST->getOptionAsNum<double>("DistributionValue");
+        if (st_type.compare("NEUMANN")==0) {
+            // user set inflow as positive sign but internally negative
+            f_st = new NumLib::TXCompositFunction
+            <
+                NumLib::ITXFunction, NumLib::TXFunctionConstant,
+                NumLib::Multiplication
+            >(f_st, new NumLib::TXFunctionConstant(-1.));
+        }
+        SolutionLib::IFemNeumannBC *femSt = 0;
+        if (st_type.compare("NEUMANN")==0) {
+            femSt = new SolutionLib::FemNeumannBC(msh, _feObjects, geo_obj, f_st);
+        } else if (st_type.compare("SOURCESINK")==0) {
+            femSt = new SolutionLib::FemSourceTerm(msh, geo_obj, f_st);
+        }
+        size_t comp_idx = femData->map_ChemComp.find( var_name )->second->getIndex(); 
+        _problem->getVariable(comp_idx)->addNeumannBC(femSt); 
+    }
+
     // set up linear solution
 	for ( i=0; i < n_eta_mob; i++ )
 	{
@@ -232,9 +297,11 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	// set up solution
     _solution = new MyKinReductionSolution(dis, _problem, this, _linear_problems, _linear_solutions, _non_linear_problem, _non_linear_solution);
 	
+    this->setOutput(Concentrations, _solution->getCurrentSolution(0));
+
     // set initial output parameter
 	for (i=0; i<_concentrations.size(); i++) {
-		OutputVariableInfo var1(this->getOutputParameterName(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
+		OutputVariableInfo var1(this->getOutputParameterName(i), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
         femData->outController.setOutput(var1.name, var1);
     }
 
@@ -242,19 +309,19 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
     for (i=0; i<_eta_mob.size(); i++) {
         std::stringstream str_tmp;
 		str_tmp << "eta_mob_" << i ;
-        OutputVariableInfo var1(str_tmp.str(), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_mob[i]);
+        OutputVariableInfo var1(str_tmp.str(), msh_id,  OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_mob[i]);
         femData->outController.setOutput(var1.name, var1);
     }
     for (i=0; i<_xi_mob.size(); i++) {
         std::stringstream str_tmp;
 		str_tmp << "xi_mob_" << i ;
-        OutputVariableInfo var1(str_tmp.str(), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob[i]);
+        OutputVariableInfo var1(str_tmp.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob[i]);
         femData->outController.setOutput(var1.name, var1);
     }
     for (i=0; i<_xi_immob.size(); i++) {
         std::stringstream str_tmp;
 		str_tmp << "xi_immob_" << i ;
-        OutputVariableInfo var1(str_tmp.str(), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob[i]);
+        OutputVariableInfo var1(str_tmp.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob[i]);
         femData->outController.setOutput(var1.name, var1);
     }
     // -----------------end of debugging-----------------------------
@@ -305,10 +372,10 @@ void FunctionConcentrations<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 
     // update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-
+    size_t msh_id = this->_problem->getDiscreteSystem()->getMesh()->getID(); 
 	// set the new output
 	for (i=0; i<_concentrations.size(); i++) {
-		OutputVariableInfo var1(this->getOutputParameterName(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
+		OutputVariableInfo var1(this->getOutputParameterName(i), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
         femData->outController.setOutput(var1.name, var1);
     }
 
@@ -316,19 +383,19 @@ void FunctionConcentrations<T1, T2>::output(const NumLib::TimeStep &/*time*/)
     for (i=0; i<_eta_mob.size(); i++) {
         std::stringstream str_tmp;
 		str_tmp << "eta_mob_" << i ;
-        OutputVariableInfo var1(str_tmp.str(), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_mob[i]);
+        OutputVariableInfo var1(str_tmp.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_mob[i]);
         femData->outController.setOutput(var1.name, var1);
     }
     for (i=0; i<_xi_mob.size(); i++) {
         std::stringstream str_tmp;
 		str_tmp << "xi_mob_" << i ;
-        OutputVariableInfo var1(str_tmp.str(), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob[i]);
+        OutputVariableInfo var1(str_tmp.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob[i]);
         femData->outController.setOutput(var1.name, var1);
     }
     for (i=0; i<_xi_immob.size(); i++) {
         std::stringstream str_tmp;
 		str_tmp << "xi_immob_" << i ;
-        OutputVariableInfo var1(str_tmp.str(), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob[i]);
+        OutputVariableInfo var1(str_tmp.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob[i]);
         femData->outController.setOutput(var1.name, var1);
     }
     // -----------end of debugging----------------------------------

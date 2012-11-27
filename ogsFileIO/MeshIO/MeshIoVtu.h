@@ -26,11 +26,4 @@ public:
 public:
     bool WriteXMLUnstructuredGrid(const std::string &vtkfile,
                                   MeshLib::IMesh &msh);
-
-protected:
-    bool WriteElementGroupID(std::fstream &fin,
-                                  bool output_data,
-                                  MeshLib::IMesh& m_msh,
-                                  long &offset);
-
 };

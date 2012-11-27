@@ -41,7 +41,7 @@ public:
 	// input variable is velocity
     enum In { Velocity=0 };
 	// no output variable
-    enum Out { };
+    enum Out { Concentrations=0 };
 
 	// local matrix and vector
 	typedef MathLib::LocalMatrix LocalMatrix;

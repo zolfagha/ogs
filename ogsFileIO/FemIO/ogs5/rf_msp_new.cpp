@@ -31,6 +31,7 @@
 // FEM-Makros
 #include "makros.h"
 #include "readNonBlankLineFromInputStream.h"
+#include "StringTools.h"
 
 using namespace std;
 
@@ -66,13 +67,16 @@ bool MSPRead(const std::string &file_base_name, std::vector<CSolidProperties*> &
     msp_file.seekg(0L,std::ios::beg);
     //========================================================================
     // Keyword loop
-    std::cout << "MSPRead" << std::endl;
+    std::cout << "MSPRead ... " << std::flush;
     while (!msp_file.eof())
     {
         msp_file.getline(line,MAX_ZEILE);
         line_string = line;
-        if(line_string.find("#STOP") != string::npos)
-            return true;
+        if(line_string.find("#STOP") != std::string::npos) {
+            std::cout << "done, read " << msp_vector.size() << " solid properties" <<
+            std::endl;
+           return true;
+        }
         //----------------------------------------------------------------------
         // keyword found
         if(line_string.find("#SOLID_PROPERTIES") != std::string::npos)
@@ -97,7 +101,7 @@ bool MSPRead(const std::string &file_base_name, std::vector<CSolidProperties*> &
 **************************************************************************/
 std::ios::pos_type CSolidProperties::Read(std::ifstream* msp_file)
 {
-    char buffer[MAX_ZEILE];
+    //char buffer[MAX_ZEILE];
     std::string sub_line;
     std::string line_string;
     std::string delimiter(" ");
@@ -121,6 +125,7 @@ std::ios::pos_type CSolidProperties::Read(std::ifstream* msp_file)
 
         position = msp_file->tellg();
         line_string = readNonBlankLineFromInputStream(*msp_file);
+        trim(line_string, ':'); //NW
         if(line_string.find(hash) != string::npos)
         {
             new_keyword = true;
@@ -756,6 +761,25 @@ CSolidProperties::CSolidProperties()
     thermal_conductivity_tensor[0] = 1.0;
 
     bishop_model = -1; //15.08.2011. WW
+
+    Al = .0;
+    BetaN = .0;
+    bishop_model_value = .0;
+    csn = .0;
+    Hard_Loc = .0;
+    Hard = .0;
+    HoekB_a = .0;
+    HoekB_cohe = .0;
+    HoekB_mb = .0;
+    HoekB_s = .0;
+    HoekB_sigci = .0;
+    HoekB_tens = .0;
+    Nphi = .0;
+    Ntheta = .0;
+    tension = .0;
+    Xi = .0;
+    Y0 = .0;
+
 }
 CSolidProperties::~CSolidProperties()
 {

@@ -43,7 +43,7 @@ void ScreenMessage(const char* message)
     if(myrank > 0)
         return;
 #endif
-    printf(message);
+    printf("%s", message);
 }
 
 /**************************************************************************
@@ -107,6 +107,33 @@ CMediumProperties::CMediumProperties() :
 
     permeability_pressure_model = -1; //01.09.2011. WW
     permeability_strain_model = -1; //01.09.2011. WW
+
+    argument = .0;
+    this->channel = false;
+    this->conductivity = .0;
+    this->density = .0;
+    this->evaporation = 0;
+    fct_number = 0;
+    friction_exp_depth = .0;
+    friction_exp_slope = .0;
+    heat_capacity = .0;
+    heatflux = .0;
+    KC_permeability_initial = .0;
+    KC_porosity_initial = .0;
+    mass_dispersion_model = 0;
+    number = 0;
+    overland_width = .0;
+    permeability_porosity_model = 0;
+    permeability_pressure_rel = .0;
+    permeability = .0;
+    porosity_curve = 0;
+    specific_storage = .0;
+    storativity = .0;
+    tortuosity = .0;
+    vaporfraction = .0;
+    transfer_coefficient = .0;
+    rill_epsilon = .0;
+    rill_height = .0;
 }
 
 /**************************************************************************
@@ -256,7 +283,7 @@ std::ios::pos_type CMediumProperties::Read(std::ifstream* mmp_file)
     char seps[] = "+\n";
     char seps1[] = "*";
     double f_buff;
-    size_t indexChWin, indexChLinux;      //JT, DEC 2009
+//    size_t indexChWin, indexChLinux;      //JT, DEC 2009
     std::string funfname;                 //JT, DEC 2009
 
     while (!new_keyword)
@@ -323,7 +350,7 @@ std::ios::pos_type CMediumProperties::Read(std::ifstream* mmp_file)
         // ToDo to GeoLib
         //2ii..GEOMETRY_AREA
         //------------------------------------------------------------------------
-        indexChWin = indexChLinux = 0; //JT, DEC 2009
+//        indexChWin = indexChLinux = 0; //JT, DEC 2009
                                        //subkeyword found
         if(line_string.find("$GEOMETRY_AREA") != std::string::npos)
         {
@@ -1570,8 +1597,8 @@ std::ios::pos_type CMediumProperties::Read(std::ifstream* mmp_file)
         //------------------------------------------------------------------------
         //11..PERMEABILITY_DISTRIBUTION
         //------------------------------------------------------------------------
-        size_t indexChWin, indexChLinux; //WW
-        indexChWin = indexChLinux = 0;
+//        size_t indexChWin, indexChLinux; //WW
+//        indexChWin = indexChLinux = 0;
         std::string funfname;
         //subkeyword found
         if(line_string.find("$PERMEABILITY_DISTRIBUTION") != std::string::npos)

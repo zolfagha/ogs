@@ -121,6 +121,15 @@ CNumerics::CNumerics(string name)
         nls_max_iterations = 25;
     }
     //
+    lag_local_eps = .0;
+    lag_max_steps = 0;
+    lag_min_weight = .0;
+    lag_quality = .0;
+    lag_time_weighting = .0;
+    lag_use_matrix = 0;
+    lag_vel_method = 0;
+    nls_plasticity_local_tolerance = .0;
+    renumber_parameter = 0;
 }
 
 /**************************************************************************
@@ -149,7 +158,7 @@ bool NUMRead(const std::string &file_base_name, std::vector<CNumerics*> &num_vec
     //----------------------------------------------------------------------
     CNumerics* m_num = NULL;
     char line[MAX_ZEILE];
-    bool overall_coupling_exists=false; //JT
+//    bool overall_coupling_exists=false; //JT
     string sub_line;
     string line_string;
     ios::pos_type position;
@@ -162,17 +171,20 @@ bool NUMRead(const std::string &file_base_name, std::vector<CNumerics*> &num_vec
     num_file.seekg(0L,ios::beg);
     //========================================================================
     // Keyword loop
-    cout << "NUMRead" << endl;
+    cout << "NUMRead ... " << std::flush;
     while (!num_file.eof())
     {
         num_file.getline(line,MAX_ZEILE);
         line_string = line;
-        if(line_string.find("#STOP") != string::npos)
-            return true;
-        //
-        if(line_string.find("$OVERALL_COUPLING") != string::npos){
-            overall_coupling_exists = true; // JT: for error checking
+        if(line_string.find("#STOP") != std::string::npos) {
+            std::cout << "done, read " << num_vector.size() << " numeric properties" <<
+            std::endl;
+           return true;
         }
+//        //
+//        if(line_string.find("$OVERALL_COUPLING") != string::npos){
+//            overall_coupling_exists = true; // JT: for error checking
+//        }
         //----------------------------------------------------------------------
         // keyword found
         if(line_string.find("#NUMERICS") != string::npos)

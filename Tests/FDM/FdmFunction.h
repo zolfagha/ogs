@@ -187,7 +187,7 @@ public:
         return obj;
     };
 
-    virtual void eval(const NumLib::TXPosition x, NumLib::ITXFunction::DataType &val) const
+    virtual void eval(const NumLib::TXPosition /*x*/, NumLib::ITXFunction::DataType &val) const
     {
         val = _vec[0];
     }

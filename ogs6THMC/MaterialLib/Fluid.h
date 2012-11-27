@@ -22,19 +22,25 @@ struct Fluid
 {
     NumLib::ITXFunction* density;
     NumLib::ITXFunction* dynamic_viscosity;
+    NumLib::ITXFunction* specific_heat;
+    NumLib::ITXFunction* thermal_conductivity;
 
     Fluid()
     {
         BaseLib::zeroObject(
                 density,
-                dynamic_viscosity
+                dynamic_viscosity,
+                specific_heat,
+                thermal_conductivity
                 );
     }
     ~Fluid()
     {
         BaseLib::releaseObject(
                 density,
-                dynamic_viscosity
+                dynamic_viscosity,
+                specific_heat,
+                thermal_conductivity
                 );
     }
 };

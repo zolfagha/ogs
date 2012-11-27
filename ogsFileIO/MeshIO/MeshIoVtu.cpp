@@ -102,7 +102,7 @@ bool MeshIoVtu::WriteXMLUnstructuredGrid(const std::string &vtkfile,
     //....................................................................
     // Element values
     fin << "      <CellData>" << endl;
-    WriteElementGroupID(fin, data_out, msh, offset);
+    writeElementGroupID(fin, data_out, msh, offset);
     fin << "      </CellData>" << endl;
     fin << "    </Piece>" << endl;
     fin << "  </UnstructuredGrid>" << endl;
@@ -126,7 +126,7 @@ bool MeshIoVtu::WriteXMLUnstructuredGrid(const std::string &vtkfile,
         // Nodal values
         //this->WriteNodalValue(fin, true, out, msh, offset);
         // Elemental values
-        this->WriteElementGroupID(fin, true,  msh, offset);
+        this->writeElementGroupID(fin, true,  msh, offset);
 
         fin << endl;
         fin << "  </AppendedData>" << endl;
@@ -139,53 +139,3 @@ bool MeshIoVtu::WriteXMLUnstructuredGrid(const std::string &vtkfile,
 }
 
 
-
-bool MeshIoVtu::WriteElementGroupID(std::fstream &fin,
-                             bool output_data,
-                             IMesh& msh,
-                             long &offset)
-{
-    string str_format;
-    if (!_useBinary)
-        str_format = "ascii";
-    else
-        str_format = "appended";
-
-
-    if (!_useBinary || !output_data)
-        writeDataArrayHeader(fin, this->type_Int, "MatGroup", 0, str_format, offset);
-    if (output_data)
-    {
-        MeshLib::IElement* ele = NULL;
-        if (!_useBinary)
-        {
-            fin << "          ";
-            for(long i = 0; i < (long)msh.getNumberOfElements(); i++)
-            {
-                ele = msh.getElement(i);
-                fin << ele->getGroupID() << " ";
-            }
-            fin << endl;
-        }
-        else
-        {
-            BaseLib::write_value_binary<unsigned int>(
-                    fin,
-                    sizeof(int) *
-                    (long)msh.getNumberOfElements());
-            for (long i = 0; i < (long)msh.getNumberOfElements(); i++)
-                BaseLib::write_value_binary(fin, msh.getElement(i)->getGroupID());
-        }
-    }
-    else
-    {
-        offset += (long)msh.getNumberOfElements() * sizeof(int) +
-                  SIZE_OF_BLOCK_LENGTH_TAG;
-    }
-
-    if (!_useBinary || !output_data)
-        writeDataArrayFooter(fin);
-
-
-    return true;
-}

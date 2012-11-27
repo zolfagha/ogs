@@ -22,7 +22,7 @@
 void FemLinearElasticJacobianLocalAssembler::assembly
     (   const NumLib::TimeStep &/*time*/,
         const MeshLib::IElement &e,
-        const DiscreteLib::DofEquationIdTable &localDofManager, 
+        const DiscreteLib::DofEquationIdTable &/*localDofManager*/,
         const MathLib::LocalVector &/*u1*/,
         const MathLib::LocalVector &/*u0*/,
         MathLib::LocalMatrix &localJ )

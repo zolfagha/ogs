@@ -43,6 +43,8 @@ FiniteElementType::type LagrangianFeObjectContainer::getFeType(MeshLib::ElementS
             return (order==1) ? FiniteElementType::QUAD4 : FiniteElementType::QUAD9;
         case MeshLib::ElementShape::TRIANGLE:
             return (order==1) ? FiniteElementType::TRI3 : FiniteElementType::TRI6;
+        case MeshLib::ElementShape::TETRAHEDRON:
+            return (order==1) ? FiniteElementType::TET4 : FiniteElementType::TET10;
         default:
             return FiniteElementType::INVALID;
     }

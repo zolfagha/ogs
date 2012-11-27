@@ -38,7 +38,7 @@ inline void setNu_Matrix_byPoint(const size_t dim, const size_t nnodes, const T_
 }
 
 template <class T_MATRIX>
-inline void setNu_Matrix_byComponent(const size_t dim, const size_t nnodes, const T_MATRIX &N, T_MATRIX &matN, bool sort_by_point = true)
+inline void setNu_Matrix_byComponent(const size_t dim, const size_t nnodes, const T_MATRIX &N, T_MATRIX &matN)
 {
     matN *= .0;
     for (size_t i_dim = 0; i_dim<dim; i_dim++) {

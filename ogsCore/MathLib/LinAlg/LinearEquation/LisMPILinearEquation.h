@@ -16,6 +16,11 @@ public:
         _local_dim = 0;
         _dynamic = false;
         _created = false;
+        _A = 0;
+        _b = 0;
+        _x = 0;
+        _is = 0;
+        _ie = 0;
     }
     virtual ~LisMPILinearEquation();
 

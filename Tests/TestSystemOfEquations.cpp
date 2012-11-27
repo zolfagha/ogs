@@ -86,8 +86,8 @@ void defineProblem1(SystemOfEquations &sysEqs)
     sysEqs.addEquation(*odeTransport);
     sysEqs.addEquation(*odeTransport2);
 
-    ASSERT_EQ(3, sysEqs.getNumberOfVariables());
-    ASSERT_EQ(3, sysEqs.getNumberOfEquations());
+    ASSERT_EQ(3u, sysEqs.getNumberOfVariables());
+    ASSERT_EQ(3u, sysEqs.getNumberOfEquations());
 
 }
 
@@ -240,6 +240,9 @@ TEST(Math, SystemOfEqs_M1)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete part1;
 }
 
 TEST(Math, SystemOfEqs_P2)
@@ -285,6 +288,9 @@ TEST(Math, SystemOfEqs_P2)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete part1;
 }
 
 TEST(Math, SystemOfEqs_P3)
@@ -330,6 +336,9 @@ TEST(Math, SystemOfEqs_P3)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete part1;
 }
 
 class MyConvergenceChecker4ArrayFactory
@@ -354,7 +363,7 @@ TEST(Math, SystemOfEqs_AutoM3)
     BaseLib::Options* option = defineCouplingM3();
     std::vector<MyMyCouplingEQS*> list_sub_problem;
     CoupledProblemFactory<MyConvergenceCheck4Array> eqs_fac(sysEqs, ini_para, list_sub_problem);
-    MyConvergenceChecker4ArrayFactory checker;
+    //MyConvergenceChecker4ArrayFactory checker;
     CouplingStrucutreBuilder4SysEqs<MyConvergenceCheck4Array>::type cpl_builder;
     ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac);
 
@@ -376,6 +385,10 @@ TEST(Math, SystemOfEqs_AutoM3)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete cpl_sys;
+    delete option;
 }
 
 TEST(Math, SystemOfEqs_AutoP1_M2M1)
@@ -390,7 +403,7 @@ TEST(Math, SystemOfEqs_AutoP1_M2M1)
     BaseLib::Options* option = defineCouplingP1_M2M1();
     std::vector<MyMyCouplingEQS*> list_sub_problem;
     CoupledProblemFactory<MyConvergenceCheck4Array> eqs_fac(sysEqs, ini_para, list_sub_problem);
-    MyConvergenceChecker4ArrayFactory checker;
+    //MyConvergenceChecker4ArrayFactory checker;
     CouplingStrucutreBuilder4SysEqs<MyConvergenceCheck4Array>::type cpl_builder;
     ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac);
 
@@ -412,6 +425,10 @@ TEST(Math, SystemOfEqs_AutoP1_M2M1)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete cpl_sys;
+    delete option;
 }
 
 TEST(Math, SystemOfEqs_AutoP1_3M1)
@@ -426,7 +443,7 @@ TEST(Math, SystemOfEqs_AutoP1_3M1)
     BaseLib::Options* option = defineCouplingP1_3M1();
     std::vector<MyMyCouplingEQS*> list_sub_problem;
     CoupledProblemFactory<MyConvergenceCheck4Array> eqs_fac(sysEqs, ini_para, list_sub_problem);
-    MyConvergenceChecker4ArrayFactory checker;
+    //MyConvergenceChecker4ArrayFactory checker;
     CouplingStrucutreBuilder4SysEqs<MyConvergenceCheck4Array>::type cpl_builder;
     ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac);
 
@@ -448,6 +465,10 @@ TEST(Math, SystemOfEqs_AutoP1_3M1)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete cpl_sys;
+    delete option;
 }
 
 TEST(Math, SystemOfEqs_AutoP1_P2M1)
@@ -462,7 +483,7 @@ TEST(Math, SystemOfEqs_AutoP1_P2M1)
     BaseLib::Options* option = defineCouplingP1_P2M1();
     std::vector<MyMyCouplingEQS*> list_sub_problem;
     CoupledProblemFactory<MyConvergenceCheck4Array> eqs_fac(sysEqs, ini_para, list_sub_problem);
-    MyConvergenceChecker4ArrayFactory checker;
+    //MyConvergenceChecker4ArrayFactory checker;
     CouplingStrucutreBuilder4SysEqs<MyConvergenceCheck4Array>::type cpl_builder;
     ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac);
 
@@ -484,4 +505,8 @@ TEST(Math, SystemOfEqs_AutoP1_P2M1)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete cpl_sys;
+    delete option;
 }

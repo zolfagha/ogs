@@ -96,7 +96,7 @@ public:
       */ 
     virtual ~SingleStepKinReduction()
     {
-        size_t i; 
+        // size_t i; 
         _discrete_system->deleteVector(_x_n0);
         _discrete_system->deleteVector(_x_n1);
         _discrete_system->deleteVector(_x_n1_0);

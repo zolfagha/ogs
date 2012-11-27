@@ -28,6 +28,8 @@ void PVDOutput::write(  const NumLib::TimeStep &current_time,
     std::vector<VtuWriter::CellData> ele_values;
     
     for (BaseLib::OrderedMap<std::string, OutputVariableInfo>::iterator itr = data.begin(); itr!=data.end(); ++itr) {
+        // pick up variables for this mesh and specified by users
+        if (itr->second.mesh_id != getMesh()->getID()) continue;
         if ((itr->second.object_type == OutputVariableInfo::Node && hasNodalVariable(itr->first))
             || (itr->second.object_type == OutputVariableInfo::Element && hasElementalVariable(itr->first))) {
             OutputVariableInfo &var = itr->second;
@@ -60,7 +62,7 @@ void PVDOutput::write(  const NumLib::TimeStep &current_time,
     INFO("Writing results...: %s", vtk_file_name_absolute.c_str());
 
     VtuWriter vtuWriter(false);
-    vtuWriter.write(vtk_file_name_absolute, *getMesh(), node_values, ele_values);
+    vtuWriter.write(vtk_file_name_absolute, *getMesh(), node_values, ele_values, true);
     
     // update PVD file
     if (_pvd==NULL) {

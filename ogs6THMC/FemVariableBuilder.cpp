@@ -13,6 +13,7 @@
 #include "FemVariableBuilder.h"
 
 #include <vector>
+#include <cassert>
 #include "logog.hpp"
 #include "NumLib/Function/TXFunctionBuilder.h"
 #include "SolutionLib/Fem/IFemNeumannBC.h"
@@ -20,7 +21,6 @@
 
 void FemVariableBuilder::doit(const std::string &given_var_name, const BaseLib::Options &option, const MeshLib::IMesh* msh, const GeoLib::GEOObjects *geo, const std::string &geo_unique_name, FemLib::LagrangianFeObjectContainer* _feObjects, SolutionLib::FemVariable* var) const
 {
-    NumLib::TXFunctionBuilder f_builder;
     // IC
     SolutionLib::FemIC* var_ic = new SolutionLib::FemIC(msh);
     const BaseLib::Options* opICList = option.getSubGroup("ICList");
@@ -33,9 +33,8 @@ void FemVariableBuilder::doit(const std::string &given_var_name, const BaseLib::
         std::string geo_type = opIC->getOption("GeometryType");
         std::string geo_name = opIC->getOption("GeometryName");
         const GeoLib::GeoObject* geo_obj = geo->searchGeoByName(geo_unique_name, geo_type, geo_name);
-        std::string dis_name = opIC->getOption("DistributionType");
-        double dis_v = opIC->getOptionAsNum<double>("DistributionValue");
-        NumLib::ITXFunction* f_ic =  f_builder.create(dis_name, dis_v);
+        assert(opIC->hasOption("DistributionType"));
+        NumLib::ITXFunction* f_ic = NumLib::TXFunctionBuilder::create(*opIC);
         var_ic->addDistribution(geo_obj, f_ic);
     }
     var->setIC(var_ic);
@@ -50,9 +49,8 @@ void FemVariableBuilder::doit(const std::string &given_var_name, const BaseLib::
         std::string geo_type = opBC->getOption("GeometryType");
         std::string geo_name = opBC->getOption("GeometryName");
         const GeoLib::GeoObject* geo_obj = geo->searchGeoByName(geo_unique_name, geo_type, geo_name);
-        std::string dis_name = opBC->getOption("DistributionType");
-        double dis_v = opBC->getOptionAsNum<double>("DistributionValue");
-        NumLib::ITXFunction* f_bc =  f_builder.create(dis_name, dis_v);
+        assert(opBC->hasOption("DistributionType"));
+        NumLib::ITXFunction* f_bc = NumLib::TXFunctionBuilder::create(*opBC);
         var->addDirichletBC(new SolutionLib::FemDirichletBC(msh, geo_obj, f_bc));
     }
     // ST
@@ -67,22 +65,22 @@ void FemVariableBuilder::doit(const std::string &given_var_name, const BaseLib::
         std::string geo_name = opST->getOption("GeometryName");
         const GeoLib::GeoObject* geo_obj = geo->searchGeoByName(geo_unique_name, geo_type, geo_name);
         std::string st_type = opST->getOption("STType");
-        std::string dis_name = opST->getOption("DistributionType");
-        double dis_v = opST->getOptionAsNum<double>("DistributionValue");
+        assert(opST->hasOption("DistributionType"));
+        NumLib::ITXFunction* f_st = NumLib::TXFunctionBuilder::create(*opST);
         if (st_type.compare("NEUMANN")==0) {
-            dis_v *= -1; // user set inflow as positive sign but internally negative
+            // user set inflow as positive sign but internally negative
+            f_st = new NumLib::TXCompositFunction
+            <
+                NumLib::ITXFunction, NumLib::TXFunctionConstant,
+                NumLib::Multiplication
+            >(f_st, new NumLib::TXFunctionConstant(-1.));
         }
-        NumLib::ITXFunction* f_st =  f_builder.create(dis_name, dis_v);
-        if (f_st!=NULL) {
-            SolutionLib::IFemNeumannBC *femSt = 0;
-            if (st_type.compare("NEUMANN")==0) {
-                femSt = new SolutionLib::FemNeumannBC(msh, _feObjects, geo_obj, f_st);
-            } else if (st_type.compare("SOURCESINK")==0) {
-                femSt = new SolutionLib::FemSourceTerm(msh, geo_obj, f_st);
-            }
-            var->addNeumannBC(femSt);
-        } else {
-            WARN("Distribution type %s is specified but not found. Ignore this ST.", dis_name.c_str());
+        SolutionLib::IFemNeumannBC *femSt = 0;
+        if (st_type.compare("NEUMANN")==0) {
+            femSt = new SolutionLib::FemNeumannBC(msh, _feObjects, geo_obj, f_st);
+        } else if (st_type.compare("SOURCESINK")==0) {
+            femSt = new SolutionLib::FemSourceTerm(msh, geo_obj, f_st);
         }
+        var->addNeumannBC(femSt);
     }
 }

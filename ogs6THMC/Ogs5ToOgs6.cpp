@@ -57,6 +57,13 @@ void convertFluidProperty(const CFluidProperties &mfp, MaterialLib::Fluid &fluid
         fluid.dynamic_viscosity = new NumLib::TXFunctionConstant(mfp.my_0);
     }
 
+    if (mfp.heat_capacity_model==1) {
+        fluid.specific_heat = new NumLib::TXFunctionConstant(mfp.specific_heat_capacity);
+    }
+
+    if (mfp.heat_conductivity_model==1) {
+        fluid.thermal_conductivity = new NumLib::TXFunctionConstant(mfp.heat_conductivity);
+    }
 }
 
 void convertSolidProperty(const CSolidProperties &msp, MaterialLib::Solid &solid)
@@ -71,6 +78,13 @@ void convertSolidProperty(const CSolidProperties &msp, MaterialLib::Solid &solid
         solid.Youngs_modulus = new NumLib::TXFunctionConstant((*msp.data_Youngs)(0));
     }
 
+    if (msp.Capacity_mode==1) {
+        solid.specific_heat = new NumLib::TXFunctionConstant((*msp.data_Capacity)(0));
+    }
+
+    if (msp.Conductivity_mode==1) {
+        solid.thermal_conductivity = new NumLib::TXFunctionConstant((*msp.data_Conductivity)(0));
+    }
 }
 
 void convertPorousMediumProperty(const CMediumProperties &mmp, MaterialLib::PorousMedia &pm)
@@ -151,6 +165,20 @@ std::string convertLinearSolverPreconType(int ls_precon)
     return str;
 }
 
+NumLib::TXFunctionType::type convertDistributionType(FiniteElement::DistributionType ogs5_type)
+{
+    switch (ogs5_type) {
+        case FiniteElement::CONSTANT:
+            return NumLib::TXFunctionType::CONSTANT;
+        case FiniteElement::LINEAR:
+            return NumLib::TXFunctionType::GEOSPACE;
+        case FiniteElement::FUNCTION:
+            return NumLib::TXFunctionType::ANALYTICAL;
+        default:
+            return NumLib::TXFunctionType::INVALID;
+    }
+
+}
 
 bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options &option)
 {
@@ -287,8 +315,33 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 						optBc->addOption("Variable", rfbc->primaryvariable_name);
 						optBc->addOption("GeometryType", rfbc->geo_type_name);
 						optBc->addOption("GeometryName", rfbc->geo_name);
-						optBc->addOption("DistributionType", FiniteElement::convertDisTypeToString(rfbc->getProcessDistributionType()));
-						optBc->addOptionAsNum("DistributionValue", rfbc->geo_node_value);
+						NumLib::TXFunctionType::type ogs6dis_type = convertDistributionType(rfbc->getProcessDistributionType());
+                        optBc->addOption("DistributionType", NumLib::convertTXFunctionTypeToString(ogs6dis_type));
+						switch (rfbc->getProcessDistributionType())
+						{
+                            case FiniteElement::CONSTANT:
+                                optBc->addOptionAsNum("DistributionValue", rfbc->geo_node_value);
+                                break;
+                            case FiniteElement::LINEAR:
+                                {
+                                    const size_t n_pt = rfbc->_PointsHaveDistribedBC.size();
+                                    optBc->addOptionAsNum("PointSize", n_pt);
+                                    for (size_t k=0; k<n_pt; k++) {
+                                        BaseLib::Options* optPtList = optBc->addSubGroup("PointValueList");
+                                        optPtList->addOptionAsNum("PointID", rfbc->_PointsHaveDistribedBC[k]);
+                                        optPtList->addOptionAsNum("Value", rfbc->_DistribedBC[k]);
+                                    }
+                                }
+                                break;
+                            case FiniteElement::FUNCTION:
+                                {
+                                    optBc->addOption("DistributionFunction", rfbc->function_exp);
+                                }
+                                break;
+                            default:
+                                //error
+                                break;
+						}
 					}  // end of if rfbc
         }  // end of for i
 

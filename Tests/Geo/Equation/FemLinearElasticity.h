@@ -156,7 +156,7 @@ public:
 
     virtual ~FemLinearElasticLinearLocalAssembler() {};
 
-    virtual void assembly(const NumLib::TimeStep &/*time*/,  const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const LocalVectorType &/*local_u_n1*/, const LocalVectorType &/*local_u_n*/, MathLib::LocalEquation &eqs)
+    virtual void assembly(const NumLib::TimeStep &/*time*/,  const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &/*localDofManager*/, const LocalVectorType &/*local_u_n1*/, const LocalVectorType &/*local_u_n*/, MathLib::LocalEquation &eqs)
     {
         FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
 
@@ -228,7 +228,7 @@ public:
     /// @param local_u_n1    guess of current time step value
     /// @param local_u_n    previous time step value
     /// @param local_r        local residual
-    virtual void assembly(const NumLib::TimeStep &time,  const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const MathLib::LocalVector &local_u_n1, const MathLib::LocalVector &local_u_n, MathLib::LocalVector &local_r)
+    virtual void assembly(const NumLib::TimeStep &/*time*/,  const MeshLib::IElement &/*e*/, const DiscreteLib::DofEquationIdTable &/*localDofManager*/, const MathLib::LocalVector &/*local_u_n1*/, const MathLib::LocalVector &/*local_u_n*/, MathLib::LocalVector &/*local_r*/)
     {
 
     }
@@ -245,7 +245,7 @@ public:
     {
     };
 
-    void assembly(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const MathLib::LocalVector &/*u1*/, const MathLib::LocalVector &/*u0*/,  MathLib::LocalMatrix &localJ)
+    void assembly(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &/*localDofManager*/, const MathLib::LocalVector &/*u1*/, const MathLib::LocalVector &/*u0*/,  MathLib::LocalMatrix &/*localJ*/)
     {
         FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
 

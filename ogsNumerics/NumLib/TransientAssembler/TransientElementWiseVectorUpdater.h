@@ -28,7 +28,7 @@ public:
     typedef T_LOCAL LocalAssemblerType;
     typedef DiscreteLib::IDiscreteVector<double> GlobalVector;
 
-    TransientElementWiseVectorUpdater(const TimeStep* time, MeshLib::IMesh* msh, DiscreteLib::DofEquationIdTable* dofManager, const GlobalVector* u0, const GlobalVector* u1, LocalAssemblerType* a)
+    TransientElementWiseVectorUpdater(const TimeStep* time, MeshLib::IMesh* msh, DiscreteLib::DofEquationIdTable* /*dofManager*/, const GlobalVector* u0, const GlobalVector* u1, LocalAssemblerType* a)
     : _msh(msh), _transient_e_assembler(a), _timestep(time), _vec_u0(u0), _vec_u1(u1)
     {
 

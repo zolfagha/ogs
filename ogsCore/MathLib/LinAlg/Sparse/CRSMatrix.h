@@ -39,12 +39,13 @@ template<typename FP_TYPE, typename IDX_TYPE>
 class CRSMatrix: public SparseMatrixBase<FP_TYPE, IDX_TYPE>
 {
 public:
-    CRSMatrix()
+    CRSMatrix() :
+        _row_ptr(NULL), _col_idx(NULL), _data(NULL)
     {
 
     }
 
-    CRSMatrix(std::string const &fname) :
+    explicit CRSMatrix(std::string const &fname) :
         SparseMatrixBase<FP_TYPE, IDX_TYPE>(),
         _row_ptr(NULL), _col_idx(NULL), _data(NULL)
     {
@@ -153,7 +154,7 @@ public:
      */
     int setValue(IDX_TYPE row, IDX_TYPE col, FP_TYPE val)
     {
-        assert(0 <= row && row < MatrixBase<IDX_TYPE>::_n_rows);
+        assert(0 <= (signed)row && row < MatrixBase<IDX_TYPE>::_n_rows);
 
         // linear search - for matrices with many entries per row binary search is much faster
         const IDX_TYPE idx_end (_row_ptr[row+1]);
@@ -179,7 +180,7 @@ public:
      */
     int addValue(IDX_TYPE row, IDX_TYPE col, FP_TYPE val)
     {
-        assert(0 <= row && row < MatrixBase<IDX_TYPE>::_n_rows);
+        assert(0 <= (signed)row && row < MatrixBase<IDX_TYPE>::_n_rows);
 
         // linear search - for matrices with many entries per row binary search is much faster
         const IDX_TYPE idx_end (_row_ptr[row+1]);
@@ -187,7 +188,9 @@ public:
 
         while (j<idx_end && (k=_col_idx[j]) <= col) {
             if (k == col) {
+#ifdef _OPENMP
                 #pragma omp atomic
+#endif
                 _data[j] += val;
                 return 0;
             }
@@ -205,7 +208,7 @@ public:
      */
     double getValue(IDX_TYPE row, IDX_TYPE col)
     {
-        assert(0 <= row && row < MatrixBase<IDX_TYPE>::_n_rows);
+        assert(0 <= (signed)row && row < MatrixBase<IDX_TYPE>::_n_rows);
 
         // linear search - for matrices with many entries per row binary search is much faster
         const IDX_TYPE idx_end (_row_ptr[row+1]);
@@ -229,7 +232,7 @@ public:
      */
     FP_TYPE operator() (IDX_TYPE row, IDX_TYPE col) const
     {
-        assert(0 <= row && row < MatrixBase<IDX_TYPE>::_n_rows);
+        assert(0 <= (signed)row && row < MatrixBase<IDX_TYPE>::_n_rows);
 
         // linear search - for matrices with many entries per row binary search is much faster
         const IDX_TYPE idx_end (_row_ptr[row+1]);

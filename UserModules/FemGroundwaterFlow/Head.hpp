@@ -74,7 +74,7 @@ bool FunctionHead<T1,T2>::initialize(const BaseLib::Options &option)
     //--------------------------------------------------------------------------
     // set up data for output
     //--------------------------------------------------------------------------
-    OutputVariableInfo var(this->getOutputParameterName(Head), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
+    OutputVariableInfo var(this->getOutputParameterName(Head), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput(var.name, var);
 
     //--------------------------------------------------------------------------
@@ -96,6 +96,6 @@ void FunctionHead<T1,T2>::output(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    OutputVariableInfo var(this->getOutputParameterName(Head), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
+    OutputVariableInfo var(this->getOutputParameterName(Head), _problem->getDiscreteSystem()->getMesh()->getID(), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput(var.name, var);
 };

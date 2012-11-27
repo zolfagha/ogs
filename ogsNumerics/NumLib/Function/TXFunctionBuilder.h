@@ -12,22 +12,24 @@
 
 #pragma once
 
-#include <string>
+#include "BaseLib/Options.h"
 #include "TXFunction.h"
 
 namespace NumLib
 {
 
+/**
+ * \brief Builder of TX functions
+ */
 class TXFunctionBuilder
 {
 public:
-    ITXFunction* create(const std::string &name, double v)
-    {
-        if (name.compare("CONSTANT")==0) {
-            return new TXFunctionConstant(v);
-        }
-        return NULL;
-    }
+    /**
+     *
+     * @param opDistribution    Option tree for distribution function
+     * @return
+     */
+    static ITXFunction* create(const BaseLib::Options &opDistribution);
 };
 
 

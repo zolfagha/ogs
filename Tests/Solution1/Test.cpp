@@ -148,7 +148,7 @@ Geo::GWFemProblem* defineGWProblem1D(DiscreteSystem &dis, GeoLib::Line &line, Ge
     return _problem;
 }
 
-Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec, Geo::PorousMedia &pm, Geo::Compound &comp, FemLib::LagrangianFeObjectContainer* feObjects)
+Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec, Geo::PorousMedia &pm, Geo::Compound &comp, FemLib::LagrangianFeObjectContainer* /*feObjects*/)
 {
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
@@ -176,7 +176,7 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Rec
     return _problem;
 }
 
-Geo::FemLinearElasticProblem* defineLinearElasticProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec, Geo::PorousMedia &pm, FemLib::LagrangianFeObjectContainer* feObjects)
+Geo::FemLinearElasticProblem* defineLinearElasticProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec, Geo::PorousMedia &pm, FemLib::LagrangianFeObjectContainer* /*feObjects*/)
 {
     LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
     //equations
@@ -367,9 +367,15 @@ TEST(Solution, line)
 
 TEST(Solution, CouplingFem2)
 {
+    // problem definition
+    const size_t div = 20;
+    const double poro = 1.0;
+    const double mol_diff = 1e-6;
+    const double darcy_vel = 1e-5;
+
     try {
         //space
-        MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 20, .0, .0, .0);
+        MeshLib::IMesh *msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, div, .0, .0, .0);
         GeoLib::Rectangle* _rec = new GeoLib::Rectangle(Point(0.0, 0.0, 0.0),  Point(2.0, 2.0, 0.0));
         //time
         //TimeStepFunctionConstant tim(.0, 1e+3, 1e+3);
@@ -377,9 +383,9 @@ TEST(Solution, CouplingFem2)
         //material
         Geo::PorousMedia pm;
         pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
-        pm.porosity = new NumLib::TXFunctionConstant(1.0);
+        pm.porosity = new NumLib::TXFunctionConstant(poro);
         Geo::Compound tracer;
-        tracer.molecular_diffusion = new NumLib::TXFunctionConstant(1.e-6);
+        tracer.molecular_diffusion = new NumLib::TXFunctionConstant(mol_diff);
         //problems
         DiscreteSystem dis(msh);
         FemLib::LagrangianFeObjectContainer feObjects(*msh);
@@ -442,7 +448,7 @@ TEST(Solution, CouplingFem2)
         timestepping.solve(tim.getEnd());
 
         const MyNodalFunctionScalar* r_f_head = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("h"));
-        const MyIntegrationPointFunctionVector* r_f_v = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
+        //const MyIntegrationPointFunctionVector* r_f_v = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("v"));
         const MyNodalFunctionScalar* r_f_c = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("c"));
         const IDiscreteVector<double>* vec_h = r_f_head->getDiscreteData();
         //const FEMIntegrationPointFunctionVector2d::DiscreteVectorType* vec_v = r_f_v->getNodalValues();
@@ -452,10 +458,7 @@ TEST(Solution, CouplingFem2)
         //r_f_v->printout();
 //#undef OUTPUT_C
 #define OUTPUT_C
-#ifdef OUTPUT_C
-        r_f_c->printout();
-#endif
-        std::vector<double> expectedHead(21);
+        std::vector<double> expectedHead(msh->getNumberOfNodes());
         const double p_left = 2.e+6;
         const double p_right = .0;
         const double x_len = 2.0;
@@ -463,7 +466,7 @@ TEST(Solution, CouplingFem2)
         std::cout << std::endl << "expected p=";
 #endif
         for (size_t i=0; i<expectedHead.size(); i++) {
-            double x = i*0.1;
+            double x = msh->getNodeCoordinatesRef(i)->getData()[0];
             expectedHead[i] = (p_right-p_left) / x_len * x + p_left;
 #ifdef OUTPUT_C
             std::cout << expectedHead[i] << " ";
@@ -473,14 +476,16 @@ TEST(Solution, CouplingFem2)
         ASSERT_DOUBLE_ARRAY_EQ(&expectedHead[0], &(*vec_h)[0], expectedHead.size(), 1e-5);
 
 
-        std::vector<double> expectedC;
-        expectedC.resize(21);
+        std::vector<double> expectedC(msh->getNumberOfNodes());
 
 #ifdef OUTPUT_C
-        std::cout << std::endl << "expected C=";
+        std::cout << std::endl << "simulated C:"<< std::endl;
+        r_f_c->printout();
+        std::cout << "expected C=";
 #endif
-        for (size_t i=0; i<expectedC.size(); i++) {
-            expectedC[i] = analyticalOgataBank(i*0.1, tim.getEnd(), 1e-5/1.0, 1e-6);
+        for (size_t i=0; i<msh->getNumberOfNodes(); i++) {
+            double x = msh->getNodeCoordinatesRef(i)->getData()[0];
+            expectedC[i] = analyticalOgataBank(x, tim.getEnd(), darcy_vel/poro, mol_diff);
 #ifdef OUTPUT_C
             std::cout << expectedC[i] << " ";
 #endif
@@ -555,12 +560,12 @@ TEST(Solution, LinearElastic2D)
         timestepping.setBeginning(.0);
         timestepping.solve(tim.getEnd());
 
-        const MyNodalFunctionScalar* r_f_ux = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("u_x"));
-        const MyNodalFunctionScalar* r_f_uy = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("u_y"));
+//        const MyNodalFunctionScalar* r_f_ux = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("u_x"));
+//        const MyNodalFunctionScalar* r_f_uy = apart1.getOutput<MyNodalFunctionScalar>(apart1.getOutputParameterID("u_y"));
         const MyIntegrationPointFunctionVector* r_f_strain = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("Strain"));
         const MyIntegrationPointFunctionVector* r_f_stress = apart1.getOutput<MyIntegrationPointFunctionVector>(apart1.getOutputParameterID("Stress"));
-        const IDiscreteVector<double>* vec_r_f_ux = r_f_ux->getDiscreteData();
-        const IDiscreteVector<double>* vec_r_f_uy = r_f_uy->getDiscreteData();
+//        const IDiscreteVector<double>* vec_r_f_ux = r_f_ux->getDiscreteData();
+//        const IDiscreteVector<double>* vec_r_f_uy = r_f_uy->getDiscreteData();
         const MyIntegrationPointFunctionVector::MyDiscreteVector* vec_strain = r_f_strain->getDiscreteData();
         const MyIntegrationPointFunctionVector::MyDiscreteVector* vec_stress = r_f_stress->getDiscreteData();
 

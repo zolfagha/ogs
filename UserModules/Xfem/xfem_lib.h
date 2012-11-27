@@ -12,21 +12,21 @@
 
 void exactSol_Mode1(
         const double xx, const double yy,
-        const double k1, const double kappa, const double mu, const double lambda,
+        const double k1, const double kappa, const double mu, const double /*lambda*/,
         double &uu, double &vv)
 {
     const static double pi = 4*atan(1.0);
 
     double rr = sqrt(xx*xx+yy*yy); // Crack tip is at (0, 0).
-    double drrdx = xx/rr;
-    double drrdy = yy/rr;
-
-    double dthdx = -yy/(xx*xx+yy*yy);
-    double dthdy = 0;
-    if (xx == 0.)
-        dthdy = 0;
-    else
-        dthdy = 1/(xx+yy*yy/xx);
+//    double drrdx = xx/rr;
+//    double drrdy = yy/rr;
+//
+//    double dthdx = -yy/(xx*xx+yy*yy);
+//    double dthdy = 0;
+//    if (xx == 0.)
+//        dthdy = 0;
+//    else
+//        dthdy = 1/(xx+yy*yy/xx);
 
     double th = 0;
     if (xx == 0) {
@@ -486,7 +486,7 @@ void ShapeFctsXFEMSign(
 void BuildMatRhs_Hooke(
         const MathLib::LocalMatrix &NMat, const MathLib::LocalMatrix &dNdxMat, const MathLib::LocalMatrix &dNdyMat,
         const MathLib::LocalMatrix &MMat, const MathLib::LocalMatrix &dMdxMat, const MathLib::LocalMatrix &dMdyMat,
-        const MathLib::LocalVector &xxInt, const MathLib::LocalVector &yyInt, const MathLib::LocalVector &wwInt,
+        const MathLib::LocalVector &/*xxInt*/, const MathLib::LocalVector &/*yyInt*/, const MathLib::LocalVector &wwInt,
         const MathLib::LocalVector &ffInt, const Eigen::VectorXi &Nodes,
         double lambda1, double lambda2, double mu1, double mu2,
         double fx, double fy, size_t nQ, size_t NodeNum,

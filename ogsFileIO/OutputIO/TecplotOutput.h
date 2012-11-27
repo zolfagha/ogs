@@ -25,7 +25,7 @@
 class TecplotOutput : public IOutput
 {
 public:
-    virtual void write(const NumLib::TimeStep &current_time,BaseLib::OrderedMap<std::string, OutputVariableInfo> &data)
+    virtual void write(const NumLib::TimeStep &/*current_time*/, BaseLib::OrderedMap<std::string, OutputVariableInfo> &/*data*/)
     {
 
     }

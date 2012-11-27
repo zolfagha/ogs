@@ -51,9 +51,9 @@ bool FunctionElementStressStrain<T>::initialize(const BaseLib::Options &option)
         _vec_stress_components.push_back(new IntegrationPointScalarWrapper(_stress, i));
     }
     for (size_t i=0; i<n_strain_components; i++) {
-        OutputVariableInfo var1(this->getOutputParameterName(Strain) + getStressStrainComponentPostfix(i), OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_strain_components[i]);
+        OutputVariableInfo var1(this->getOutputParameterName(Strain) + getStressStrainComponentPostfix(i), msh_id, OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_strain_components[i]);
         femData->outController.setOutput(var1.name, var1);
-        OutputVariableInfo var2(this->getOutputParameterName(Stress) + getStressStrainComponentPostfix(i), OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_stress_components[i]);
+        OutputVariableInfo var2(this->getOutputParameterName(Stress) + getStressStrainComponentPostfix(i), msh_id, OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_stress_components[i]);
         femData->outController.setOutput(var2.name, var2);
     }
 
@@ -70,10 +70,11 @@ void FunctionElementStressStrain<T>::accept(const NumLib::TimeStep &/*time*/)
     //update data for output
     const size_t n_strain_components = getNumberOfStrainComponents();
     Ogs6FemData* femData = Ogs6FemData::getInstance();
+    const size_t msh_id = _dis->getMesh()->getID();
     for (size_t i=0; i<n_strain_components; i++) {
-        OutputVariableInfo var1(this->getOutputParameterName(Strain) + getStressStrainComponentPostfix(i), OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_strain_components[i]);
+        OutputVariableInfo var1(this->getOutputParameterName(Strain) + getStressStrainComponentPostfix(i), msh_id, OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_strain_components[i]);
         femData->outController.setOutput(var1.name, var1);
-        OutputVariableInfo var2(this->getOutputParameterName(Stress) + getStressStrainComponentPostfix(i), OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_stress_components[i]);
+        OutputVariableInfo var2(this->getOutputParameterName(Stress) + getStressStrainComponentPostfix(i), msh_id, OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_stress_components[i]);
         femData->outController.setOutput(var2.name, var2);
     }
 };

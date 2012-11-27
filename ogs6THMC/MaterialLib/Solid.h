@@ -24,6 +24,8 @@ struct Solid
     NumLib::ITXFunction* thermal_expansion;
     NumLib::ITXFunction* poisson_ratio;
     NumLib::ITXFunction* Youngs_modulus;
+    NumLib::ITXFunction* specific_heat;
+    NumLib::ITXFunction* thermal_conductivity;
 
 
     Solid()
@@ -32,7 +34,9 @@ struct Solid
                 density,
                 thermal_expansion,
                 poisson_ratio,
-                Youngs_modulus
+                Youngs_modulus,
+                specific_heat,
+                thermal_conductivity
                 );
     }
     ~Solid()
@@ -41,7 +45,9 @@ struct Solid
                 density,
                 thermal_expansion,
                 poisson_ratio,
-                Youngs_modulus
+                Youngs_modulus,
+                specific_heat,
+                thermal_conductivity
                 );
     }
 };

@@ -129,6 +129,9 @@ std::ios::pos_type CBoundaryCondition::Read(std::ifstream* bc_file,
             {
                 setProcessDistributionType(FiniteElement::FUNCTION);
                 in.clear();
+                in.str(readNonBlankLineFromInputStream(*bc_file));
+                in >> function_exp; //sub_line
+                in.clear();
             }
             if (line_string.find("LINEAR") != std::string::npos)
             {
@@ -263,6 +266,14 @@ CBoundaryCondition::CBoundaryCondition() :
     time_contr_curve = -1;                //WX
     bcExcav = -1;                         //WX
     MatGr = -1;                           //WX
+    _msh_node_number = 0;
+    _periode_phase_shift = .0;
+    _periode_time_length = .0;
+    _periodic = false;
+    condition = .0;
+    geo_node_number = 0;
+    geo_node_value = .0;
+    node_value_cond = .0;
 }
 
 

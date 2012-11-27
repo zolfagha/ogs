@@ -72,7 +72,7 @@ void LisLinearEquation::solveEqs(CRSMatrix<double, signed> *A, double *b, double
 //    std::cout << std::endl;
 
 
-    int ierr;
+    int ierr = 0;
     // Creating a matrix.
     LIS_SOLVER solver;
     LIS_MATRIX AA;
@@ -85,6 +85,9 @@ void LisLinearEquation::solveEqs(CRSMatrix<double, signed> *A, double *b, double
     lis_matrix_set_size(AA,dimension,0);
 //    lis_matrix_get_size(AA, &_local_dim, &_global_dim);
 #endif
+    if (ierr != LIS_SUCCESS) {
+        std::cout << "***ERROR: lis error code = " << ierr << std::endl;
+    }
 
     // Matrix solver and Precondition can be handled better way.
     const size_t MAX_ZEILE = 512;
@@ -100,13 +103,30 @@ void LisLinearEquation::solveEqs(CRSMatrix<double, signed> *A, double *b, double
     sprintf(solver_options, "-i %d -p %d %s", _option.ls_method, _option.ls_precond, _option.ls_extra_arg.c_str()); 
     sprintf(tol_option, "-tol %e -maxiter %ld -omp_num_threads %d -initx_zeros 0", _option.ls_error_tolerance, _option.ls_max_iterations, nthreads);
 
-    ierr = lis_matrix_set_crs(A->getNNZ(), (int*)A->getRowPtrArray(), (int*)A->getColIdxArray(), (double*)A->getEntryArray(), AA);
+    LIS_INT nnz = A->getNNZ();
+    LIS_INT *ptr, *index;
+    LIS_SCALAR *value;
+    lis_matrix_malloc_crs(dimension, nnz,&ptr,&index,&value);
+    for (int i=0; i<dimension+1; i++)
+        ptr[i] = A->getRowPtrArray()[i];
+    for (int i=0; i<nnz; i++)
+        index[i] = A->getColIdxArray()[i];
+    for (int i=0; i<nnz; i++)
+        value[i] = A->getEntryArray()[i];
+
+    ierr = lis_matrix_set_crs(A->getNNZ(), ptr, index, value, AA);
     ierr = lis_matrix_assemble(AA);
 
     // Assemble the vector, b, x
+    if (bb!=NULL) {
+        lis_vector_destroy(bb);
+        lis_vector_destroy(xx);
+    }
     ierr = lis_vector_duplicate(AA, &bb);
     ierr = lis_vector_duplicate(AA, &xx);
+#ifdef _OPENMP
     #pragma omp parallel for
+#endif
     for (long i=0; i < dimension; ++i)
     {
         ierr = lis_vector_set_value(LIS_INS_VALUE, i, x[i], xx);
@@ -118,7 +138,7 @@ void LisLinearEquation::solveEqs(CRSMatrix<double, signed> *A, double *b, double
 
     ierr = lis_solver_set_option(solver_options, solver);
     ierr = lis_solver_set_option(tol_option, solver);
-    ierr = lis_solver_set_option("-print mem", solver);
+    ierr = lis_solver_set_option((char*)"-print mem", solver);
     
     ierr = lis_solve(AA, bb, xx, solver);
     //lis_output(AA, bb, xx, LIS_FMT_MM, "/home/norihiro/work/task/20120814_ogs6test/deformation/matrix1.txt");
@@ -133,14 +153,16 @@ void LisLinearEquation::solveEqs(CRSMatrix<double, signed> *A, double *b, double
     //    lis_vector_print(bb);
 
     // Update the solution (answer) into the x vector
+#ifdef _OPENMP
     #pragma omp parallel for
+#endif
     for(long i=0; i<dimension; ++i)
     {
         lis_vector_get_value(xx,i,&(x[i]));
     }
 
     // Clear memory
-    //lis_matrix_destroy(AA); // CRSMatrix will free this memory
+    lis_matrix_destroy(AA); // CRSMatrix will free this memory
     lis_solver_destroy(solver);
     std::cout << "------------------------------------------------------------------" << std::endl;
 }

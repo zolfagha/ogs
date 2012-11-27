@@ -35,7 +35,7 @@ bool FunctionHeadToElementVelocity<T>::initialize(const BaseLib::Options &option
     _vel->initialize(dis);
 
     // set initial output
-    OutputVariableInfo var(this->getOutputParameterName(Velocity), OutputVariableInfo::Element, OutputVariableInfo::Real, 3, _vel);
+    OutputVariableInfo var(this->getOutputParameterName(Velocity), msh_id, OutputVariableInfo::Element, OutputVariableInfo::Real, 3, _vel);
     femData->outController.setOutput(var.name, var);
 
     // initial output parameter
@@ -52,7 +52,7 @@ void FunctionHeadToElementVelocity<T>::accept(const NumLib::TimeStep &/*time*/)
     //_vel->printout();
     //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    OutputVariableInfo var(this->getOutputParameterName(Velocity), OutputVariableInfo::Element, OutputVariableInfo::Real, 3, _vel);
+    OutputVariableInfo var(this->getOutputParameterName(Velocity), _dis->getMesh()->getID(), OutputVariableInfo::Element, OutputVariableInfo::Real, 3, _vel);
     femData->outController.setOutput(var.name, var);
 };
 
@@ -98,7 +98,7 @@ int FunctionHeadToElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &/*ti
             integral->getSamplingPoint(ip, r);
             fe->computeBasisFunctions(r);
             const MathLib::LocalMatrix* dN = fe->getGradBasisFunction();
-            MathLib::LocalMatrix* N = fe->getBasisFunction();
+            //MathLib::LocalMatrix* N = fe->getBasisFunction();
             fe->getRealCoordinates(xx);
 
             // calculate material parameter at this integration point

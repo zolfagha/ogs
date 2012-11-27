@@ -16,6 +16,7 @@
 
 #include "GeoLib/GeoObject.h"
 #include "GeoLib/Polyline.h"
+#include "GeoLib/Surface.h"
 
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Core/UnstructuredMesh.h"
@@ -27,10 +28,14 @@ namespace MeshLib
 /// seeks all nodes located on a given object and returns a list of the found node pointers.
 void findNodesOnGeometry(IMesh const* msh, GeoLib::GeoObject const* obj, std::vector<size_t> *vec_nodes);
 
+/// find nodes on a given point
 void findNodesOnPoint(IMesh const* msh, GeoLib::Point const* point, std::vector<size_t> *vec_nodes);
 
 /// seeks all nodes located on a given polyline and returns a list of the found node pointers.
 void findNodesOnPolyline(IMesh const* msh, GeoLib::Polyline const* poly, std::vector<size_t> *vec_nodes);
+
+/// seeks all nodes located on a given surface and returns a list of the found node pointers.
+void findNodesOnSurface(IMesh const* msh, GeoLib::Surface const* surf, std::vector<size_t> *vec_nodes);
 
 /// find boundary elements located on given geometries
 void findBoundaryElementsOnGeometry(IMesh * msh, GeoLib::GeoObject const* obj, std::vector<IElement*> *vec_eles);
@@ -57,5 +62,12 @@ void createEdgeElements(IMesh * msh);
 
 /// calculate geometric properties of an unstructured mesh
 void calculateMeshGeometricProperties(UnstructuredMesh &msh);
+
+/// set element coordinates mapping
+void setMeshElementCoordinatesMapping(IMesh &msh);
+
+/// calculate minimum edge length in a given mesh
+double calculateMeshMinimumEdgeLength(UnstructuredMesh &msh);
+
 
 }// end namespace
