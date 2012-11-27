@@ -23,6 +23,7 @@
 #include "MathLib/Nonlinear/NewtonRaphson.h"
 #include "MathLib/Nonlinear/Picard.h"
 #include "MathLib/Nonlinear/BisectionMethod.h"
+#include "MathLib/Nonlinear/NRIterationStepInitializerDummy.h"
 #include "NumLib/Function/IFunction.h"
 #include "TestUtil.h"
 
@@ -371,7 +372,7 @@ TEST(Math, NonlinearNR_sparse)
     MyDxFunction f_dx(df, *f.getLinearSolver());
 
     NewtonRaphsonMethod nr;
-    nr.solve<NL3_NR,MyDxFunction,MyVector,MyConverge>(f, f_dx, x0, x, r, dx);
+    nr.solve<NL3_NR,MyDxFunction,MyVector,MyConverge, NRIterationStepInitializerDummy>(f, f_dx, x0, x, r, dx);
 
     double my_expect[] = {2., 8.};
     ASSERT_DOUBLE_ARRAY_EQ(my_expect, x, 2, 1e-5);

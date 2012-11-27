@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "NumLib/DataType.h"
+#include "MathLib/DataType.h"
 
 
 namespace MeshLib
@@ -46,8 +46,8 @@ public:
     /// @param eqs            local algebraic equation
     virtual void assembly(  const TimeStep &time,  const MeshLib::IElement &e, 
                             const DiscreteLib::DofEquationIdTable &localDofManager, 
-                            const LocalVector &local_u_n1, const LocalVector &local_u_n, 
-                            LocalEquation &eqs) = 0;
+                            const MathLib::LocalVector &local_u_n1, const MathLib::LocalVector &local_u_n, 
+                            MathLib::LocalEquation &eqs) = 0;
 
 };
 

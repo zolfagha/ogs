@@ -28,7 +28,7 @@ public:
     typedef T_LOCAL LocalAssemblerType;
     typedef DiscreteLib::IDiscreteVector<double> GlobalVector;
 
-    TransientElementWiseVectorUpdater(const TimeStep* time, MeshLib::IMesh* msh, DiscreteLib::DofEquationIdTable* dofManager, const GlobalVector* u0, const GlobalVector* u1, LocalAssemblerType* a)
+    TransientElementWiseVectorUpdater(const TimeStep* time, MeshLib::IMesh* msh, DiscreteLib::DofEquationIdTable* /*dofManager*/, const GlobalVector* u0, const GlobalVector* u1, LocalAssemblerType* a)
     : _msh(msh), _transient_e_assembler(a), _timestep(time), _vec_u0(u0), _vec_u1(u1)
     {
 
@@ -52,9 +52,9 @@ public:
     {
         std::vector<size_t> ele_node_ids, ele_node_size_order;
         std::vector<size_t> local_dofmap_row, local_dofmap_column;
-        LocalVector localVec;
-        LocalVector local_u_n1;
-        LocalVector local_u_n;
+        MathLib::LocalVector localVec;
+        MathLib::LocalVector local_u_n1;
+        MathLib::LocalVector local_u_n;
 
         e.getNodeIDList(e.getMaximumOrder(), ele_node_ids);
         e.getListOfNumberOfNodesForAllOrders(ele_node_size_order);
@@ -68,7 +68,7 @@ public:
         dofManager.createLocalMappingTable(_msh->getID(), ele_node_ids, localDofMap);
         
         // local assembly
-        localVec = LocalVector::Zero(local_dofmap_row.size());
+        localVec = MathLib::LocalVector::Zero(local_dofmap_row.size());
         _transient_e_assembler->assembly(*_timestep, e, localDofMap, local_u_n1, local_u_n, localVec);
         // update global
         globalVec.addSubvector(local_dofmap_row, &localVec[0]);

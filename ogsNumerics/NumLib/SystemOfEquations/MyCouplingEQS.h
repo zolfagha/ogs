@@ -28,7 +28,7 @@ template <class T_CONVERGENCE>
 class MyCouplingEQS : public AbstractMonolithicSystem<ICoupledSystem>
 {
 public:
-    typedef NumLib::LocalVector ArrayType;
+    typedef MathLib::LocalVector ArrayType;
     typedef MyArrayFunction<ArrayType > ParameterType;
 
     MyCouplingEQS(const std::vector<Variable*> &variables, const std::vector<LinearEquation*> &equations)
@@ -44,11 +44,19 @@ public:
             AbstractMonolithicSystem<ICoupledSystem>::setOutputParameterName(i, _active_variables[i]->name);
     };
 
+    virtual ~MyCouplingEQS()
+    {
+        BaseLib::releaseObjectsInStdVector(_vec_arr);
+        delete _f;
+    }
+
     void setInitial(std::vector<ArrayType*> &vec_arrays)
     {
         for (size_t i=0; i<_active_variables.size(); i++) {
             ArrayType* arr = vec_arrays[_active_variables[i]->id];
-            setOutput(i, new ParameterType(*arr));
+            ParameterType* p = new ParameterType(*arr);
+            _vec_arr.push_back(p);
+            setOutput(i, p);
         }
     }
 
@@ -61,7 +69,7 @@ public:
             inactive_x[para_id] = *p->getArray();
         }
 
-        NumLib::LocalEquation eqs1;
+        MathLib::LocalEquation eqs1;
         _f->eval(inactive_x, eqs1);
         eqs1.solve();
         double *u1 = eqs1.getX();
@@ -74,7 +82,9 @@ public:
                 ret[j] = u1[offset + j];
             offset += var->n_dof;
 
-            setOutput(i, new ParameterType(ret));
+            ParameterType* p = new ParameterType(ret);
+            _vec_arr.push_back(p);
+            setOutput(i, p);
         }
 
         return 0;
@@ -121,6 +131,7 @@ private:
     std::vector<Variable*> _inactive_variables;
     const std::vector<LinearEquation*> _equations;
     T_CONVERGENCE _checker;
+    std::vector<ParameterType*> _vec_arr;
 };
 
 } //end

@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.com)
+ * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.org)
  *            Distributed under a Modified BSD License.
  *              See accompanying file LICENSE.txt or
- *              http://www.opengeosys.com/LICENSE.txt
+ *              http://www.opengeosys.org/project/license
  *
  *
  * \file CPUTime.h
@@ -17,8 +17,7 @@
 
 #include "TimeMeasurementBase.h"
 
-namespace BaseLib 
-{
+namespace BaseLib {
 
 class CPUTime
 {
@@ -26,7 +25,7 @@ public:
 	virtual void start();
     virtual void stop();
     virtual double elapsed();
-	virtual ~CPUTime() {};
+	~CPUTime() {};
 private:
 	clock_t _start;
 	clock_t _stop;

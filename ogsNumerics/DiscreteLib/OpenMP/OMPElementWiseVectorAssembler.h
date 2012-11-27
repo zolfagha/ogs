@@ -18,7 +18,7 @@
 #endif
 
 #include "MeshLib/Core/IMesh.h"
-#include "DiscreteLib/Core/LocalDataType.h"
+#include "MathLib/DataType.h"
 #include "DiscreteLib/Core/IDiscreteVectorAssembler.h"
 
 namespace MeshLib 
@@ -62,9 +62,11 @@ void OMPElementWiseVectorAssembler<T1,T2>::assembly(const MeshLib::IMesh &msh, G
     const size_t n_ele = msh.getNumberOfElements();
     UpdaterType assembler(*_e_assembler);
 
+#ifdef _OPENMP
     #pragma omp parallel for default(none), shared(msh, globalVec), firstprivate(assembler)
+#endif
     for (size_t i=0; i<n_ele; i++) {
-        MeshLib::IElement *e = msh.getElemenet(i);
+        MeshLib::IElement *e = msh.getElement(i);
         assembler.update(*e, globalVec);
     }
 };

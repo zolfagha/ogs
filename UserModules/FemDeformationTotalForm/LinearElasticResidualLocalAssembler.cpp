@@ -16,18 +16,17 @@
 #include "FemLib/Core/Element/IFemElement.h"
 #include "MaterialLib/PorousMedia.h"
 #include "MaterialLib/Solid.h"
-
-#include "FemLinearElasticTools.h"
+#include "PhysicsLib/FemLinearElasticTools.h"
 #include "Ogs6FemData.h"
 
 /// assemble a local residual for the given element
 void FemLinearElasticResidualLocalAssembler::assembly
     (   const NumLib::TimeStep &/*time*/,
         const MeshLib::IElement &e,
-        const DiscreteLib::DofEquationIdTable &localDofManager, 
-        const NumLib::LocalVector &local_u_n1,
-        const NumLib::LocalVector &/*local_u_n*/,
-        NumLib::LocalVector &local_r    )
+        const DiscreteLib::DofEquationIdTable &/*localDofManager*/,
+        const MathLib::LocalVector &local_u_n1,
+        const MathLib::LocalVector &/*local_u_n*/,
+        MathLib::LocalVector &local_r    )
 {
 
     FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
@@ -42,9 +41,9 @@ void FemLinearElasticResidualLocalAssembler::assembly
     const NumLib::TXPosition e_pos(NumLib::TXPosition::Element, e.getID());
 
     // set D
-    NumLib::LocalMatrix matD = NumLib::LocalMatrix::Zero(n_strain_components, n_strain_components);
-    NumLib::LocalMatrix nv(1,1);
-    NumLib::LocalMatrix E(1,1);
+    MathLib::LocalMatrix matD = MathLib::LocalMatrix::Zero(n_strain_components, n_strain_components);
+    MathLib::LocalMatrix nv(1,1);
+    MathLib::LocalMatrix E(1,1);
     solidphase->poisson_ratio->eval(e_pos, nv);
     solidphase->Youngs_modulus->eval(e_pos, E);
     double Lambda, G, K;
@@ -52,7 +51,7 @@ void FemLinearElasticResidualLocalAssembler::assembly
     MaterialLib::setElasticConsitutiveTensor(dim, Lambda, G, matD);
 
     // body force
-    NumLib::LocalVector body_force = NumLib::LocalVector::Zero(dim);
+    MathLib::LocalVector body_force = MathLib::LocalVector::Zero(dim);
     bool hasGravity = false;
     if (hasGravity) {
         double rho_s = .0;
@@ -61,10 +60,10 @@ void FemLinearElasticResidualLocalAssembler::assembly
     }
 
     //
-    NumLib::LocalMatrix localK = NumLib::LocalMatrix::Zero(local_r.rows(), local_r.rows());
-    NumLib::LocalVector localRHS = NumLib::LocalVector::Zero(local_r.rows());
-    NumLib::LocalMatrix matB = NumLib::LocalVector::Zero(n_strain_components, nnodes*dim);
-    NumLib::LocalMatrix matN = NumLib::LocalVector::Zero(dim, nnodes*dim);
+    MathLib::LocalMatrix localK = MathLib::LocalMatrix::Zero(local_r.rows(), local_r.rows());
+    MathLib::LocalVector localRHS = MathLib::LocalVector::Zero(local_r.rows());
+    MathLib::LocalMatrix matB = MathLib::LocalVector::Zero(n_strain_components, nnodes*dim);
+    MathLib::LocalMatrix matN = MathLib::LocalVector::Zero(dim, nnodes*dim);
     FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
     double gp_x[3], real_x[3];
     for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
@@ -74,8 +73,8 @@ void FemLinearElasticResidualLocalAssembler::assembly
         double fac = fe->getDetJ() * q->getWeight(j);
 
         // set N,B
-        NumLib::LocalMatrix &N = *fe->getBasisFunction();
-        NumLib::LocalMatrix &dN = *fe->getGradBasisFunction();
+        MathLib::LocalMatrix &N = *fe->getBasisFunction();
+        MathLib::LocalMatrix &dN = *fe->getGradBasisFunction();
         setNu_Matrix_byPoint(dim, nnodes, N, matN);
         setB_Matrix_byPoint(dim, nnodes, dN, matB);
 

@@ -41,7 +41,13 @@ public:
     {
         AbstractTransientMonolithicSystem::resizeInputParameter(1);
         AbstractTransientMonolithicSystem::resizeOutputParameter(1);
+        BaseLib::zeroObject(_feObjects);
     };
+
+    virtual ~FunctionVelocity()
+    {
+        BaseLib::releaseObject(_feObjects);
+    }
 
     void define(DiscreteLib::DiscreteSystem &dis, PorousMedia &pm)
     {
@@ -49,6 +55,7 @@ public:
         _K = pm.hydraulic_conductivity;
         _vel = new MyIntegrationPointFunctionVector();
         _vel->initialize(&dis);
+        _feObjects = new FemLib::LagrangianFeObjectContainer(*dis.getMesh());
         //this->setOutput(Velocity, _vel);
     }
     NumLib::DiscreteDataConvergenceCheck _checker;
@@ -63,12 +70,12 @@ public:
         MyNodalFunctionScalar *head = (MyNodalFunctionScalar*)getInput(Head);
         MyIntegrationPointFunctionVector *vel = _vel;;
 
-        FemLib::LagrangianFeObjectContainer* feObjects = head->getFeObjectContainer();
+        FemLib::LagrangianFeObjectContainer* feObjects = _feObjects;
         //calculate vel (vel=f(h))
         for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
-            MeshLib::IElement* e = msh->getElemenet(i_e);
+            MeshLib::IElement* e = msh->getElement(i_e);
             FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
-            NumLib::LocalVector local_h(e->getNumberOfNodes());
+            MathLib::LocalVector local_h(e->getNumberOfNodes());
             for (size_t j=0; j<e->getNumberOfNodes(); j++)
                 local_h[j] = head->getValue(e->getNodeID(j));
             // for each integration points
@@ -76,30 +83,30 @@ public:
             double r[2] = {};
             const size_t n_gp = integral->getNumberOfSamplingPoints();
             vel->setNumberOfIntegationPoints(i_e, n_gp);
-            NumLib::LocalVector xi(e->getNumberOfNodes());
-            NumLib::LocalVector yi(e->getNumberOfNodes());
+            MathLib::LocalVector xi(e->getNumberOfNodes());
+            MathLib::LocalVector yi(e->getNumberOfNodes());
             for (size_t i=0; i<e->getNumberOfNodes(); i++) {
                 const GeoLib::Point* pt = msh->getNodeCoordinatesRef(e->getNodeID(i));
                 xi[i] = (*pt)[0];
                 yi[i] = (*pt)[1];
             }
             for (size_t ip=0; ip<n_gp; ip++) {
-                NumLib::LocalVector q(2);
+                MathLib::LocalVector q(2);
                 q[0] = .0;
                 q[1] = .0;
                 integral->getSamplingPoint(ip, r);
                 fe->computeBasisFunctions(r);
-                const NumLib::LocalMatrix* dN = fe->getGradBasisFunction();
-                NumLib::LocalMatrix* N = fe->getBasisFunction();
+                const MathLib::LocalMatrix* dN = fe->getGradBasisFunction();
+                MathLib::LocalMatrix* N = fe->getBasisFunction();
                 std::vector<double> xx(3, .0);
-                NumLib::LocalVector tmp_v;
+                MathLib::LocalVector tmp_v;
                 tmp_v = (*N) * xi;
                 xx[0] = tmp_v[0];
                 tmp_v = (*N) * yi;
                 xx[1] = tmp_v[0];
                 NumLib::TXPosition pos(&xx[0]);
 
-                NumLib::LocalMatrix k;
+                MathLib::LocalMatrix k;
                 _K->eval(pos, k);
                 if (k.rows()==1) {
                     q.noalias() = (*dN) * local_h * (-1.0) * k(0,0);
@@ -133,6 +140,7 @@ private:
     DiscreteLib::DiscreteSystem* _dis;
     MyIntegrationPointFunctionVector* _vel;
     NumLib::ITXFunction* _K;
+    FemLib::LagrangianFeObjectContainer* _feObjects;
 
     DISALLOW_COPY_AND_ASSIGN(FunctionVelocity);
 };

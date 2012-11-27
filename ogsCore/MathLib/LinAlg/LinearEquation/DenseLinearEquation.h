@@ -22,7 +22,7 @@ namespace MathLib
 {
 
 /**
- * \brief 
+ * \brief Linear equation based on dense matrix
  */
 class DenseLinearEquation : public AbstractDenseLinearEquation
 {

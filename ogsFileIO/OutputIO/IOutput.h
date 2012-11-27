@@ -41,17 +41,18 @@ struct OutputVariableInfo
     };
 
     std::string name;
+    size_t mesh_id;
     ObjectType object_type;
     DataType data_type;
     size_t nr_of_components;
     NumLib::ITXFunction* value;
 
     OutputVariableInfo() 
-        : name(""), object_type(Node), data_type(Char), nr_of_components(1), value(NULL)
+        : name(""), mesh_id(0), object_type(Node), data_type(Char), nr_of_components(1), value(NULL)
     {};
 
-    OutputVariableInfo(const std::string &s, ObjectType o, DataType d, size_t n, NumLib::ITXFunction* v) 
-    : name(s), object_type(o), data_type(d), nr_of_components(n), value(v)
+    OutputVariableInfo(const std::string &s, size_t msh_id, ObjectType o, DataType d, size_t n, NumLib::ITXFunction* v)
+    : name(s), mesh_id(msh_id), object_type(o), data_type(d), nr_of_components(n), value(v)
     {
     };
 };

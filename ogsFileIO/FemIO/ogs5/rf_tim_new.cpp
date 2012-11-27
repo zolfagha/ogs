@@ -72,6 +72,20 @@ CTimeDiscretization::CTimeDiscretization(void)
     for(size_t ii=0; ii<DOF_NUMBER_MAX+1; ii++){
         dynamic_control_tolerance[ii] = -1.0;
     }
+    dynamic_failure_threshold = .0;
+    dynamic_minimum_suggestion = .0;
+    iter_times = 0;
+    last_dt_accepted = false;
+    multiply_coef = .0;
+    nonlinear_iteration_error = .0;
+    recommended_time_step = 0;
+    reject_factor = .0;
+    rwpt_numsplits = 0;
+    safty_coe = .0;
+    time_control_manipulate = .0;
+    time_current = .0;
+    time_step_length = .0;
+    time_step_length_neumann = .0;
 }
 
 /**************************************************************************
@@ -539,13 +553,16 @@ bool TIMRead(const std::string& file_base_name, std::vector<CTimeDiscretization*
     tim_file.seekg(0L,std::ios::beg);
     //========================================================================
     // Keyword loop
-    std::cout << "TIMRead" << std::endl;
+    std::cout << "TIMRead ... " << std::flush;
     while (!tim_file.eof())
     {
         tim_file.getline(line,MAX_ZEILE);
         line_string = line;
-        if(line_string.find("#STOP") != std::string::npos)
-            return true;
+        if(line_string.find("#STOP") != std::string::npos) {
+            std::cout << "done, read " << time_vector.size() << " time stepping properties" <<
+            std::endl;
+           return true;
+        }
         //----------------------------------------------------------------------
         // keyword found
         if(line_string.find("#TIME_STEPPING") != std::string::npos)

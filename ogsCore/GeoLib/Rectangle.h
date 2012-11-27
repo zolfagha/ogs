@@ -22,70 +22,37 @@
 namespace GeoLib
 {
 
+/**
+ * \brief Rectangle shape
+ *
+ */
 class Rectangle
 {
 public:
-    Rectangle(const Point &pt_lower_left, const Point &pt_upper_right) {
-        const double z = pt_lower_left[2];
-        _pnt_vec.push_back(new Point(pt_lower_left));
-        _pnt_vec.push_back(new Point(pt_upper_right[0], pt_lower_left[1], z));
-        _pnt_vec.push_back(new Point(pt_upper_right));
-        _pnt_vec.push_back(new Point(pt_lower_left[0], pt_upper_right[1], z));
-    };
-    virtual ~Rectangle() {
-        BaseLib::releaseObjectsInStdVector(_pnt_vec);
-        BaseLib::releaseObjectsInStdVector(_poly_vec);
-    }
+    /// Create this shape by specifying the lower left and lower right points
+    Rectangle(const Point &pt_lower_left, const Point &pt_upper_right);
 
-    Polyline* getDomainPolyline() 
-    {
-        Polyline *poly = new Polyline(_pnt_vec);
-        poly->addPoint(0);
-        poly->addPoint(1);
-        poly->addPoint(2);
-        poly->addPoint(3);
-        _poly_vec.push_back(poly);
-        return poly;
-    };
+    ///
+    virtual ~Rectangle();
 
-    Polyline* getLeft()
-    {
-        Polyline *poly = new Polyline(_pnt_vec);
-        poly->addPoint(0);
-        poly->addPoint(3);
-        _poly_vec.push_back(poly);
-        return poly;
-    };
+    ///
+    const Polyline& getDomainPolyline() const;
 
-    Polyline* getRight() 
-    {
-        Polyline *poly = new Polyline(_pnt_vec);
-        poly->addPoint(1);
-        poly->addPoint(2);
-        _poly_vec.push_back(poly);
-        return poly;
-    };
+    ///
+    const Polyline& getLeft() const;
 
-    Polyline* getTop() 
-    {
-        Polyline *poly = new Polyline(_pnt_vec);
-        poly->addPoint(2);
-        poly->addPoint(3);
-        _poly_vec.push_back(poly);
-        return poly;
-    };
+    ///
+    const Polyline& getRight() const;
 
-    Polyline* getBottom() 
-    {
-        Polyline *poly = new Polyline(_pnt_vec);
-        poly->addPoint(0);
-        poly->addPoint(1);
-        _poly_vec.push_back(poly);
-        return poly;
-    };
+    ///
+    const Polyline& getTop() const;
+
+    ///
+    const Polyline& getBottom() const;
 
 private:
     std::vector<Point*> _pnt_vec;
+    Polyline* _poly_domain;
     std::vector<Polyline*> _poly_vec;
 };
 

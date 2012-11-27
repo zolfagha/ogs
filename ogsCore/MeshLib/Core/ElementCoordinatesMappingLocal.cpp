@@ -28,7 +28,7 @@ ElementCoordinatesMappingLocal::ElementCoordinatesMappingLocal(const IMesh* msh,
     for(size_t i = 0; i < e.getNumberOfNodes(); i++)
     {
         const GeoLib::Point *p = _msh->getNodeCoordinatesRef(e.getNodeID(i));
-        _point_vec.push_back(new GeoLib::Point((*p)[0], (*p)[1], (*p)[2]));
+        _point_vec.push_back(GeoLib::Point((*p)[0], (*p)[1], (*p)[2]));
     }
 
     flip(e, coordinate_system, _point_vec);
@@ -38,16 +38,16 @@ ElementCoordinatesMappingLocal::ElementCoordinatesMappingLocal(const IMesh* msh,
     }
 };
 
-void ElementCoordinatesMappingLocal::translate(std::vector<GeoLib::Point*> &vec_pt)
+void ElementCoordinatesMappingLocal::translate(std::vector<GeoLib::Point> &vec_pt)
 {
-    _pt_translate =  *vec_pt[0];
+    _pt_translate =  vec_pt[0];
     for (size_t i=0; i<vec_pt.size(); ++i) {
-        *vec_pt[i] -= _pt_translate;
+        vec_pt[i] -= _pt_translate;
     }
 }
 
 ///
-void ElementCoordinatesMappingLocal::flip(IElement &ele, const CoordinateSystem &coordinate_system, const std::vector<GeoLib::Point*> &vec_pt)
+void ElementCoordinatesMappingLocal::flip(IElement &ele, const CoordinateSystem &coordinate_system, std::vector<GeoLib::Point> &vec_pt)
 {
     IElement* e = &ele;
     switch(coordinate_system.getType())
@@ -57,9 +57,9 @@ void ElementCoordinatesMappingLocal::flip(IElement &ele, const CoordinateSystem 
             assert(e->getDimension()==1);
             for(size_t i = 0; i < vec_pt.size(); i++)
             {
-                double tmp_x = (*vec_pt[i])[0];
-                (*vec_pt[i])[0] = (*vec_pt[i])[1];
-                (*vec_pt[i])[1] = tmp_x;
+                double tmp_x = vec_pt[i][0];
+                vec_pt[i][0] = vec_pt[i][1];
+                vec_pt[i][1] = tmp_x;
             }
         }
         break;
@@ -68,9 +68,9 @@ void ElementCoordinatesMappingLocal::flip(IElement &ele, const CoordinateSystem 
             assert(e->getDimension()==1);
             for(size_t i = 0; i < vec_pt.size(); i++)
             {
-                double tmp_x = (*vec_pt[i])[0];
-                (*vec_pt[i])[0] = (*vec_pt[i])[2];
-                (*vec_pt[i])[2] = tmp_x;
+                double tmp_x = vec_pt[i][0];
+                vec_pt[i][0] = vec_pt[i][2];
+                vec_pt[i][2] = tmp_x;
             }
         }
         break;
@@ -79,9 +79,9 @@ void ElementCoordinatesMappingLocal::flip(IElement &ele, const CoordinateSystem 
             assert(e->getDimension()<3);
             for(size_t i = 0; i < vec_pt.size(); i++)
             {
-                double tmp_y = (*vec_pt[i])[1];
-                (*vec_pt[i])[1] = (*vec_pt[i])[2];
-                (*vec_pt[i])[2] = tmp_y;
+                double tmp_y = vec_pt[i][1];
+                vec_pt[i][1] = vec_pt[i][2];
+                vec_pt[i][2] = tmp_y;
             }
         }
         break;
@@ -90,10 +90,10 @@ void ElementCoordinatesMappingLocal::flip(IElement &ele, const CoordinateSystem 
             assert(e->getDimension()<3);
             for(size_t i = 0; i < vec_pt.size(); i++)
             {
-                double tmp_x = (*vec_pt[i])[0];
-                (*vec_pt[i])[0] = (*vec_pt[i])[1];
-                (*vec_pt[i])[1] = (*vec_pt[i])[2];
-                (*vec_pt[i])[2] = tmp_x;
+                double tmp_x = vec_pt[i][0];
+                vec_pt[i][0] = vec_pt[i][1];
+                vec_pt[i][1] = vec_pt[i][2];
+                vec_pt[i][2] = tmp_x;
             }
         }
         break;
@@ -103,7 +103,7 @@ void ElementCoordinatesMappingLocal::flip(IElement &ele, const CoordinateSystem 
 }
 
 ///
-void ElementCoordinatesMappingLocal::rotate(IElement &ele, const CoordinateSystem &coordinate_system, std::vector<GeoLib::Point*> &vec_pt)
+void ElementCoordinatesMappingLocal::rotate(IElement &ele, const CoordinateSystem &coordinate_system, std::vector<GeoLib::Point> &vec_pt)
 {
     const size_t global_dim = coordinate_system.getDimension();
     IElement* e = &ele;
@@ -115,21 +115,22 @@ void ElementCoordinatesMappingLocal::rotate(IElement &ele, const CoordinateSyste
         _is_R2orig_set = true;
     }
 
-    double const* const coords_node_0 (vec_pt[0]->getData());
-    MathLib::LocalVector dx(global_dim), x_new(global_dim);
+    double const* const coords_node_0 (vec_pt[0].getData());
+    MathLib::LocalVector dx = MathLib::LocalVector::Zero(global_dim);
+    MathLib::LocalVector x_new = MathLib::LocalVector::Zero(3);
     for(size_t i = 0; i < e->getNumberOfNodes(); i++)
     {
-        double const* const coords_node_i (vec_pt[i]->getData());
+        double const* const coords_node_i (vec_pt[i].getData());
         for (size_t j=0; j<global_dim; j++)
             dx[j] = (coords_node_i[j] - coords_node_0[j]);
 
-        x_new = _matR2local * dx;
-        _point_vec[i] = new GeoLib::Point(x_new.data());
+        x_new.head(global_dim) = _matR2local * dx;
+        _point_vec[i] = GeoLib::Point(x_new.data());
     }
 };
 
 // x=Rx' where x is original coordinates and x' is local coordinates
-void ElementCoordinatesMappingLocal::getRotationMatrixToOriginal(const IElement &ele, const CoordinateSystem &coordinate_system, const std::vector<GeoLib::Point*> &vec_pt)
+void ElementCoordinatesMappingLocal::getRotationMatrixToOriginal(const IElement &ele, const CoordinateSystem &coordinate_system, const std::vector<GeoLib::Point> &vec_pt)
 {
     const size_t global_dim = coordinate_system.getDimension();
     double xx[3];
@@ -142,8 +143,8 @@ void ElementCoordinatesMappingLocal::getRotationMatrixToOriginal(const IElement 
             _matR2original(i,i) = 1.;
     } else if (coordinate_system.getDimension() == 2 && e->getDimension() == 1) {
 //    } else if (coordinate_system.getType() == CoordinateSystemType::XY && e->getDimension() == 1) {
-        double const* const pnt0(vec_pt[0]->getData());
-        double const* const pnt1(vec_pt[1]->getData());
+        double const* const pnt0(vec_pt[0].getData());
+        double const* const pnt1(vec_pt[1].getData());
         xx[0] = pnt1[0] - pnt0[0];
         xx[1] = pnt1[1] - pnt0[1];
         MathLib::normalizeVector(xx, 2);
@@ -152,13 +153,13 @@ void ElementCoordinatesMappingLocal::getRotationMatrixToOriginal(const IElement 
         _matR2original(0,0) = _matR2original(1,1) = cos_theta;
         _matR2original(0,1) = - sin_theta;
         _matR2original(1,0) = sin_theta;
-    } else if (coordinate_system.getType() == CoordinateSystemType::XYZ && e->getDimension() == 3) {
+    } else if (coordinate_system.getType() == CoordinateSystemType::XYZ && e->getDimension() == 2) {
         // x"_vec
         //            xx[0] = nodes[1]->X() - nodes[0]->X();
         //            xx[1] = nodes[1]->Y() - nodes[0]->Y();
         //            xx[2] = nodes[1]->Z() - nodes[0]->Z();
-        double const* const pnt0(vec_pt[0]->getData());
-        double const* const pnt1(vec_pt[1]->getData());
+        double const* const pnt0(vec_pt[0].getData());
+        double const* const pnt1(vec_pt[1].getData());
         xx[0] = pnt1[0] - pnt0[0];
         xx[1] = pnt1[1] - pnt0[1];
         xx[2] = pnt1[2] - pnt0[2];
@@ -167,7 +168,7 @@ void ElementCoordinatesMappingLocal::getRotationMatrixToOriginal(const IElement 
         //            yy[0] = nodes[2]->X() - nodes[1]->X();
         //            yy[1] = nodes[2]->Y() - nodes[1]->Y();
         //            yy[2] = nodes[2]->Z() - nodes[1]->Z();
-        double const* const pnt2(vec_pt[2]->getData());
+        double const* const pnt2(vec_pt[2].getData());
         yy[0] = pnt2[0] - pnt1[0];
         yy[1] = pnt2[1] - pnt1[1];
         yy[2] = pnt2[2] - pnt1[2];
@@ -185,8 +186,8 @@ void ElementCoordinatesMappingLocal::getRotationMatrixToOriginal(const IElement 
         }
     } else if (global_dim == 3 && e->getDimension() == 1) {
         // x"_vec
-        double const* const pnt0(vec_pt[0]->getData());
-        double const* const pnt1(vec_pt[1]->getData());
+        double const* const pnt0(vec_pt[0].getData());
+        double const* const pnt1(vec_pt[1].getData());
         xx[0] = pnt1[0] - pnt0[0];
         xx[1] = pnt1[1] - pnt0[1];
         xx[2] = pnt1[2] - pnt0[2];

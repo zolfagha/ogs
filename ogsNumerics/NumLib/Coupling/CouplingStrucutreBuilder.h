@@ -38,6 +38,10 @@ public:
     T_I* build(const BaseLib::Options *option, T_EQS_FACTORY &eqs_fac)
     {
         const BaseLib::Options* op_cpl = option->getSubGroup("coupling");
+        if (op_cpl==0) {
+            INFO("tag<coupling> not found.");
+            return NULL;
+        }
         if (op_cpl->hasSubGroup("M")) {
             const BaseLib::Options* op_sub = op_cpl->getSubGroup("M");
             T_M *sys = buildMonolithicSystem(op_sub, eqs_fac);
@@ -47,7 +51,7 @@ public:
             T_P *sys = buildPartitionedSystem(op_sub, eqs_fac);
             return sys;
         }
-        return 0;
+        return NULL;
     }
 
     std::vector<T_M*>& getListOfMonolithicSystem()
@@ -71,19 +75,13 @@ private:
             return NULL;
         }
         if (option->hasOption("in")) {
-            std::vector<std::string> in_names;
-            for (std::string in_name = option->getFirstOption<std::string>("in"); in_name != ""; in_name = option->getNextOption<std::string>()) {
-                in_names.push_back(in_name);
-            }
+            std::vector<std::string> in_names = option->getOptionList<std::string>("in");
             for (size_t i=0; i<in_names.size(); i++) {
                 eqs->setInputParameterName(i, in_names[i]);
             }
         }
         if (option->hasOption("out")) {
-            std::vector<std::string> out_names;
-            for (std::string out_name = option->getFirstOption<std::string>("out"); out_name != ""; out_name = option->getNextOption<std::string>()) {
-                out_names.push_back(out_name);
-            }
+            std::vector<std::string> out_names = option->getOptionList<std::string>("out");
             for (size_t i=0; i<out_names.size(); i++) {
                 eqs->setOutputParameterName(i, out_names[i]);
             }
@@ -99,20 +97,14 @@ private:
         T_P* part = new T_P();
         //para
         if (option->hasOption("in")) {
-            std::vector<std::string> in_names;
-            for (std::string in_name = option->getFirstOption<std::string>("in"); in_name != ""; in_name = option->getNextOption<std::string>()) {
-                in_names.push_back(in_name);
-            }
+            std::vector<std::string> in_names = option->getOptionList<std::string>("in");
             part->resizeInputParameter(in_names.size());
             for (size_t i=0; i<in_names.size(); i++) {
                 part->setInputParameterName(i, in_names[i]);
             }
         }
         if (option->hasOption("out")) {
-            std::vector<std::string> out_names;
-            for (std::string out_name = option->getFirstOption<std::string>("out"); out_name != ""; out_name = option->getNextOption<std::string>()) {
-                out_names.push_back(out_name);
-            }
+            std::vector<std::string> out_names = option->getOptionList<std::string>("out");
             part->resizeOutputParameter(out_names.size());
             for (size_t i=0; i<out_names.size(); i++) {
                 part->setOutputParameterName(i, out_names[i]);
@@ -133,10 +125,11 @@ private:
             T_I* sys = 0;
             if (str.compare("M")==0) {
                 sys = buildMonolithicSystem(op_sub, eqs_fac);
+                if (sys!=0) part->addProblem(*sys);
             } else if (str.compare("P")==0) {
                 sys = buildPartitionedSystem(op_sub, eqs_fac);
+                if (sys!=0) part->addProblem(*sys, true);
             }
-            if (sys!=0) part->addProblem(*sys);
         }
         part->connectParameters();
         return part;

@@ -29,8 +29,8 @@ template <class T>
 class MassTransportTimeODELocalAssembler: public T
 {
 public:
-    typedef NumLib::LocalVector LocalVectorType;
-    typedef NumLib::LocalMatrix LocalMatrixType;
+    typedef MathLib::LocalVector LocalVectorType;
+    typedef MathLib::LocalMatrix LocalMatrixType;
 
     MassTransportTimeODELocalAssembler(MaterialLib::Compound* cmp, FemLib::LagrangianFeObjectContainer* feObjects)
         : _cmp(cmp), _feObjects(*feObjects), _vel(NULL)
@@ -52,14 +52,14 @@ protected:
         size_t mat_id = e.getGroupID();
         MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];
 
-        LocalMatrixType localDispersion = NumLib::LocalMatrix::Zero(localK.rows(), localK.cols());
-        LocalMatrixType localAdvection = NumLib::LocalMatrix::Zero(localK.rows(), localK.cols());
+        LocalMatrixType localDispersion = MathLib::LocalMatrix::Zero(localK.rows(), localK.cols());
+        LocalMatrixType localAdvection = MathLib::LocalMatrix::Zero(localK.rows(), localK.cols());
 
         double cmp_mol_diffusion = .0;
         _cmp->molecular_diffusion->eval(0, cmp_mol_diffusion);
 
-        NumLib::LocalMatrix poro(1,1);
-        NumLib::LocalMatrix d_poro(1,1);
+        MathLib::LocalMatrix poro(1,1);
+        MathLib::LocalMatrix d_poro(1,1);
         NumLib::ITXFunction::DataType v;
 
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();

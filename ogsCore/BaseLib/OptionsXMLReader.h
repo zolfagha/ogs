@@ -13,15 +13,17 @@
 #pragma once
 
 #include <string>
-#include <map>
-#include <vector>
-
-#include "StringTools.h"
 #include "BaseLib/Options.h"
 
 namespace BaseLib
 {
 
+/**
+ * read a XML file and add contents to BaseLib::Options
+ *
+ * \param xml_file  a path to the XML file
+ * \param propertoes BaseLib::Options object
+ */
 bool addXMLtoOptions(const std::string &xml_file, BaseLib::Options &properties);
 
 }

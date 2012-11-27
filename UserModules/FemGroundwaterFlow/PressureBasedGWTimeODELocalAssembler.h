@@ -25,8 +25,8 @@ template <class T>
 class PressureBasedGWTimeODELocalAssembler: public T
 {
 public:
-    typedef NumLib::LocalVector LocalVector;
-    typedef NumLib::LocalMatrix LocalMatrix;
+    typedef MathLib::LocalVector LocalVector;
+    typedef MathLib::LocalMatrix LocalMatrix;
 
     explicit PressureBasedGWTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, const MeshLib::CoordinateSystem &problem_coordinates)
     : _feObjects(feObjects), _problem_coordinates(problem_coordinates)
@@ -40,7 +40,7 @@ protected:
     {
         FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
         const NumLib::TXPosition e_pos(NumLib::TXPosition::Element, e.getID());
-        const NumLib::LocalMatrix* matR = NULL;
+        const MathLib::LocalMatrix* matR = NULL;
         if (e.getDimension() < _problem_coordinates.getDimension()) {
             MeshLib::ElementCoordinatesMappingLocal* ele_local_coord;
             ele_local_coord = (MeshLib::ElementCoordinatesMappingLocal*)e.getMappedCoordinates();
@@ -79,11 +79,11 @@ protected:
             pm->storage->eval(real_x, s);
             double k_mu;
             k_mu = k / mu;
-            NumLib::LocalMatrix local_k_mu = NumLib::LocalMatrix::Identity(e.getDimension(), e.getDimension());
+            MathLib::LocalMatrix local_k_mu = MathLib::LocalMatrix::Identity(e.getDimension(), e.getDimension());
             local_k_mu *= k_mu;
-            NumLib::LocalMatrix global_k_mu;
+            MathLib::LocalMatrix global_k_mu;
             if (e.getDimension() < _problem_coordinates.getDimension()) {
-                NumLib::LocalMatrix local2 = NumLib::LocalMatrix::Zero(_problem_coordinates.getDimension(), _problem_coordinates.getDimension());
+                MathLib::LocalMatrix local2 = MathLib::LocalMatrix::Zero(_problem_coordinates.getDimension(), _problem_coordinates.getDimension());
                 local2.block(0, 0, local_k_mu.rows(), local_k_mu.cols()) = local_k_mu.block(0, 0, local_k_mu.rows(), local_k_mu.cols());
                 //local2.topLeftCorner(local_k_mu.rows(), local_k_mu.cols()) = local_k_mu;
                 global_k_mu = (*matR) * local2 * matR->transpose();

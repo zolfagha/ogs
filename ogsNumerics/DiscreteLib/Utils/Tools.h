@@ -14,7 +14,7 @@
 
 #include <vector>
 #include "DiscreteLib/Serial/DiscreteVector.h"
-#include "DiscreteLib/Core/LocalDataType.h"
+#include "MathLib/DataType.h"
 #include "DiscreteLib/Utils/DofEquationIdTable.h"
 
 namespace DiscreteLib
@@ -24,11 +24,11 @@ namespace DiscreteLib
 void getLocalVector2(const DofEquationIdTable &dofManager, const std::vector<size_t> &list_vec_entry_id, const std::vector<size_t> &list_vec_size_for_order, const std::vector<IDiscreteVector<double>*> &list_multiple_u, std::vector<double> &local_u);
 
 /// create a subset of vector u corresponding to the given vector index
-void getLocalVector(const DofEquationIdTable &dofManager, const std::vector<size_t> &list_vec_entry_id, const std::vector<size_t> &list_vec_size_for_order, const std::vector<IDiscreteVector<double>*> &list_multiple_u, LocalVector &local_u);
+void getLocalVector(const DofEquationIdTable &dofManager, const std::vector<size_t> &list_vec_entry_id, const std::vector<size_t> &list_vec_size_for_order, const std::vector<IDiscreteVector<double>*> &list_multiple_u, MathLib::LocalVector &local_u);
 
-void getLocalVector(const std::vector<size_t> &list_vec_entry_id, const IDiscreteVector<double> &global_u, LocalVector &local_u);
+void getLocalVector(const std::vector<size_t> &list_vec_entry_id, const IDiscreteVector<double> &global_u, MathLib::LocalVector &local_u);
 
-void getLocalVector(const std::vector<size_t> &list_vec_entry_id, const LocalVector &global_u, LocalVector &local_u);
+void getLocalVector(const std::vector<size_t> &list_vec_entry_id, const MathLib::LocalVector &global_u, MathLib::LocalVector &local_u);
 
 /// set
 void setGlobalVector(const DofEquationIdTable &dofManager, size_t var_id, size_t mesh_id, const IDiscreteVector<double> &u, IDiscreteVector<double> &global_vec);

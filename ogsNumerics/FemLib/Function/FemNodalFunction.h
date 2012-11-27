@@ -23,7 +23,7 @@
 
 //#include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "DiscreteLib/Core/IDiscreteVector.h"
-#include "DiscreteLib/Core/LocalDataType.h"
+#include "MathLib/DataType.h"
 
 #include "NumLib/Function/TXFunction.h"
 #include "NumLib/Function/ITXDiscreteFunction.h"
@@ -128,6 +128,12 @@ public:
 
     /// get nodal value
     Tvalue& getValue(size_t node_id)
+    {
+        return (*_nodal_values)[node_id];
+    }
+
+    /// get nodal value
+    const Tvalue& getValue(size_t node_id) const
     {
         return (*_nodal_values)[node_id];
     }
@@ -283,7 +289,7 @@ public:
 
 
     /// get nodal value
-    double getValue(size_t node_id)
+    double getValue(size_t node_id) const
     {
         return (*_nodal_values)[node_id];
     }
@@ -399,10 +405,10 @@ struct FemNodalFunctionScalar
 template <class T_DIS_SYS>
 struct FemNodalFunctionVector
 {
-    typedef TemplateFEMNodalFunction<T_DIS_SYS, NumLib::LocalVector> type;
+    typedef TemplateFEMNodalFunction<T_DIS_SYS, MathLib::LocalVector> type;
 };
 
 //typedef TemplateFEMNodalFunction<double> FemNodalFunctionScalar;
-//typedef TemplateFEMNodalFunction<NumLib::LocalVector> FemNodalFunctionVector;
+//typedef TemplateFEMNodalFunction<MathLib::LocalVector> FemNodalFunctionVector;
 
 } //end

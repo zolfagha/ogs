@@ -198,6 +198,7 @@ class WeakCouplingEQS3 : public TemplateSteadyMonolithicSystem
 public:
 
     WeakCouplingEQS3() 
+    : va(.0), vb(.0), vc(.0)
     {
         resizeInputParameter(2);
         resizeOutputParameter(1);
@@ -333,7 +334,7 @@ TEST(Coupling, SteadyCouplingOption)
     CouplingStrucutreBuilder cpl_builder;
     PartitionedProblem *coupled_sys = (PartitionedProblem*)cpl_builder.build(option, eqsFac);
     ASSERT_TRUE(coupled_sys->check());
-    ASSERT_EQ(2, coupled_sys->getNumberOfSubProblems());
+    ASSERT_EQ(2u, coupled_sys->getNumberOfSubProblems());
     coupled_sys->solve();
 
     const double epsilon = 1.e-3;

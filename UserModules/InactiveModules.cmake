@@ -2,8 +2,9 @@
 
 #-------------------------------------------------------------------------------
 LIST(APPEND INACTIVE_MODULES
-     #FemGroundwaterFlow
-     #FemMassTransport
-     FemDeformationTotalForm
+    #FemKinReactGIA
+    #FemGroundwaterFlow
+    #FemMassTransport
+    FemDeformationTotalForm
      FemPoroelastic
      ) 

@@ -15,11 +15,16 @@
 #include <algorithm>
 #include <exception>
 
+#include "logog.hpp"
+
 #include "GeoLib/GeoType.h"
 
 #include "MeshLib/Core/ElementFactory.h"
 #include "MeshLib/Tools/MeshNodesAlongPolyline.h"
-#include "MeshLib/Topology/Topology.h"
+#include "MeshLib/Tools/MeshNodesAlongSurface.h"
+#include "MeshLib/Core/ElementCoordinatesInvariant.h"
+#include "MeshLib/Core/ElementCoordinatesMappingLocal.h"
+//#include "MeshLib/Topology/Topology.h"
 
 namespace MeshLib
 {
@@ -42,6 +47,13 @@ void findNodesOnPoint(IMesh const* msh, GeoLib::Point const* point, std::vector<
     }
 };
 
+void findNodesOnSurface(IMesh const* msh, GeoLib::Surface const* sfc, std::vector<size_t> *vec_nodes)
+{
+    MeshNodesAlongSurface obj(sfc, msh);
+    std::vector<size_t> vec_node_id = obj.getNodeIDs();
+    vec_nodes->assign(vec_node_id.begin(), vec_node_id.end());
+}
+
 ///
 void findNodesOnGeometry(IMesh const* msh, GeoLib::GeoObject const* obj, std::vector<size_t> *vec_nodes)
 {
@@ -51,6 +63,9 @@ void findNodesOnGeometry(IMesh const* msh, GeoLib::GeoObject const* obj, std::ve
             break;
         case GeoLib::POLYLINE:
             findNodesOnPolyline(msh, static_cast<GeoLib::Polyline const*>(obj), vec_nodes);
+            break;
+        case GeoLib::SURFACE:
+            findNodesOnSurface(msh, static_cast<GeoLib::Surface const*>(obj), vec_nodes);
             break;
         case GeoLib::GEODOMAIN:
             vec_nodes->resize(msh->getNumberOfNodes());
@@ -67,7 +82,7 @@ void findNodesOnGeometry(IMesh const* msh, GeoLib::GeoObject const* obj, std::ve
 void findConnectedElements(IMesh const* msh, const std::vector<size_t> &nodes, std::vector<size_t> &connected_elements)
 {
     for (size_t i=0; i<msh->getNumberOfElements(); i++) {
-        IElement* e = msh->getElemenet(i);
+        IElement* e = msh->getElement(i);
         for (size_t j=0; j<e->getNumberOfNodes(); j++) {
             if (std::find(nodes.begin(), nodes.end(), e->getNodeID(j))!=nodes.end()) {
                 connected_elements.push_back(e->getID());
@@ -177,7 +192,7 @@ void findEdgeElements(IMesh& msh, IElement &e, std::vector<IElement*> &edges)
 void createEdgeElements(IMesh * msh, const std::vector<size_t> &selected_ele, std::vector<IElement*> &edges)
 {
     for (size_t i=0; i<selected_ele.size(); i++) {
-        IElement *e = msh->getElemenet(selected_ele[i]);
+        IElement *e = msh->getElement(selected_ele[i]);
         findEdgeElements(*msh, *e, edges);
     }
 };
@@ -186,89 +201,20 @@ void createEdgeElements(IMesh * msh)
 {
     std::vector<IElement*> edges;
     for (size_t i=0; i<msh->getNumberOfElements(); i++) {
-        IElement *e = msh->getElemenet(i);
+        IElement *e = msh->getElement(i);
         findEdgeElements(*msh, *e, edges);
     }
 };
 
 
-/**
- * generate higher order mesh
- */
-void generateHigherOrderUnstrucuredMesh(UnstructuredMesh &msh, size_t order)
-{
-    assert(order<3);
-
-    TopologySequentialNodes2Elements nod2ele(msh);
-
-    if (msh.getNumberOfEdges()==0) {
-        createEdgeElements(&msh);
-    }
-
-    // make all edges higher order
-    for (size_t i=0; i<msh.getNumberOfEdges(); i++) {
-        IElement* e = msh.getEdgeElement(i);
-        double const* const pnt0(msh.getNodeCoordinatesRef(e->getNodeID(0))->getData());
-        double const* const pnt1(msh.getNodeCoordinatesRef(e->getNodeID(1))->getData());
-        e->setMaximumOrder(order);
-        if (order==2) {
-            // add midpoint
-            GeoLib::Point p(.5 * (pnt0[0] + pnt1[0]), 0.5 * (pnt0[1] + pnt1[1]), 0.5 * (pnt0[2] + pnt1[2]));
-            size_t nod_id = msh.addNode(p, 2);
-            //size_t nod_id = msh.addNode(GeoLib::Point(.5 * (pnt0[0] + pnt1[0]), 0.5 * (pnt0[1] + pnt1[1]), 0.5 * (pnt0[2] + pnt1[2])), 2);
-            e->setNodeID(2, nod_id);
-        } else {
-            //
-            std::cout << "***Error: order (" << order << ") is not supported in generateHigherOrderUnstrucuredMesh()" << std::endl;
-        }
-    }
-
-    // set the new node ids to all elements
-    for (size_t i=0; i<msh.getNumberOfElements(); i++) {
-        IElement* e = msh.getElemenet(i);
-        size_t e_nnodes1 = e->getNumberOfNodes(1);
-        e->setMaximumOrder(order);
-        // for each edge
-        for (size_t j=0; j<e->getNumberOfEdges(); j++) {
-            IElement *edge = e->getEdge(j);
-            size_t new_nod = edge->getNodeID(2);
-            size_t local_id = e_nnodes1 + j;
-            e->setNodeID(local_id, new_nod);
-        }
-
-        // Quad 9
-        if (e->getShapeType() == ElementShape::QUAD || e->getNumberOfNodes(2)==9)
-        {
-            double x0, y0, z0;
-            x0 = y0 = z0 = 0.0;
-            std::vector<size_t> list_e_nodes;
-            e->getNodeIDList(1, list_e_nodes);
-            for (size_t i = 0; i < list_e_nodes.size(); i++) // Nodes
-            {
-                const GeoLib::Point* pt = msh.getNodeCoordinatesRef(list_e_nodes[i]);
-                double const* const pnt_i(pt->getData());
-                x0 += pnt_i[0];
-                y0 += pnt_i[1];
-                z0 += pnt_i[2];
-            }
-            x0 /= (double) e_nnodes1;
-            y0 /= (double) e_nnodes1;
-            z0 /= (double) e_nnodes1;
-            GeoLib::Point p(x0,y0,z0);
-            size_t nodid = msh.addNode(p,2);
-            //size_t nodid = msh.addNode(GeoLib::Point(x0,y0,z0),2);
-            e->setNodeID(8, nodid);
-        }
-    }
-}
 
 MeshLib::CoordinateSystemType::type getCoordinateSystemFromBoundingBox(const GeoLib::AxisAlignedBoundingBox &bbox)
 {
     GeoLib::Point pt_diff = bbox.getMaxPoint() - bbox.getMinPoint();
     MeshLib::CoordinateSystemType::type coords;
-    bool hasX = fabs(pt_diff[0]);
-    bool hasY = fabs(pt_diff[1]);
-    bool hasZ = fabs(pt_diff[2]);
+    bool hasX = fabs(pt_diff[0]) > .0;
+    bool hasY = fabs(pt_diff[1]) > .0;
+    bool hasZ = fabs(pt_diff[2]) > .0;
 
     if (hasX) {
         if (hasY) {
@@ -297,19 +243,64 @@ MeshLib::CoordinateSystemType::type getCoordinateSystemFromBoundingBox(const Geo
     return coords;
 }
 
+double calculateMeshMinimumEdgeLength(UnstructuredMesh &msh)
+{
+    std::vector<size_t> vec_edge_nodes;
+    double min_edge_len = std::numeric_limits<double>::max();
+    const size_t n_ele = msh.getNumberOfElements();
+    for (size_t i=0; i<n_ele; i++) {
+        MeshLib::IElement* e = msh.getElement(i);
+        for (size_t j=0; j<e->getNumberOfEdges(); j++) {
+            e->getNodeIDsOfEdges(j, vec_edge_nodes);
+            assert (vec_edge_nodes.size() == 2);
+
+            double edge_len = std::sqrt(GeoLib::sqrDist(msh.getNodeCoordinatesRef(vec_edge_nodes[0]), msh.getNodeCoordinatesRef(vec_edge_nodes[1])));
+            min_edge_len = std::min(min_edge_len, edge_len);
+        }
+    }
+
+    return min_edge_len;
+}
+
 void calculateMeshGeometricProperties(UnstructuredMesh &msh)
 {
     MeshGeometricProperty* geo_prop = msh.getGeometricProperty();
-    double tol = std::numeric_limits<double>::epsilon();
+    //double tol = std::numeric_limits<double>::epsilon();
 
     // coordinate systems
     geo_prop->setCoordinateSystem(getCoordinateSystemFromBoundingBox(geo_prop->getBoundingBox()));
 
-    // 
-    GeoLib::Point pt_diff = geo_prop->getBoundingBox().getMaxPoint() - geo_prop->getBoundingBox().getMinPoint(); 
-    double max_len = std::max(pt_diff[0], pt_diff[1]);
-    max_len = std::max(max_len, pt_diff[2]);
-    geo_prop->setMinEdgeLength(max_len * 1e-5);
+    //
+//    GeoLib::Point pt_diff = geo_prop->getBoundingBox().getMaxPoint() - geo_prop->getBoundingBox().getMinPoint();
+//    double max_len = std::max(pt_diff[0], pt_diff[1]);
+//    max_len = std::max(max_len, pt_diff[2]);
+//    double min_edge_len = max_len / msh.getNumberOfNodes();
+    double min_edge_len = calculateMeshMinimumEdgeLength(msh);
+    geo_prop->setMinEdgeLength(min_edge_len);
+
+    INFO("-> calculate mesh geometric properties");
+    INFO("* min. edge length = %f", min_edge_len);
+
 }
+
+void setMeshElementCoordinatesMapping(IMesh &msh)
+{
+    const size_t msh_dim = msh.getDimension();
+    for (size_t i=0; i<msh.getNumberOfElements(); i++) {
+        IElement* e = msh.getElement(i);
+        if (e->getMappedCoordinates()==NULL) {
+            MeshLib::IElementCoordinatesMapping* ele_map;
+            size_t ele_dim = e->getDimension();
+            assert(msh_dim >= ele_dim);
+            if (msh_dim == ele_dim) {
+                ele_map = new ElementCoordinatesInvariant(&msh, e);
+            } else {
+                ele_map = new ElementCoordinatesMappingLocal(&msh, *e, msh.getGeometricProperty()->getCoordinateSystem());
+            }
+            e->setMappedCoordinates(ele_map);
+        }
+
+    }
+};
 
 } // end namespace

@@ -20,6 +20,7 @@
 #include "Polyline.h"
 #include "Triangle.h"
 #include "AxisAlignedBoundingBox.h"
+#include "SurfaceGrid.h"
 
 namespace GeoLib {
 
@@ -65,7 +66,7 @@ public:
      * @param pnt the point
      * @return true if the point is contained in the surface
      */
-    bool isPntInSfc (const double *pnt) const;
+	bool isPntInSfc (const double* pnt, double eps = std::numeric_limits<double>::epsilon()) const;
 
     const std::vector<Point*> *getPointVec() const { return &_sfc_pnts; };
 
@@ -75,6 +76,8 @@ public:
      */
     AxisAlignedBoundingBox const & getAABB () const { return _bv; }
 
+	void initSurfaceGrid();
+
 protected:
     /** a vector of pointers to Points */
     const std::vector<Point*> &_sfc_pnts;
@@ -82,6 +85,8 @@ protected:
     std::vector<Triangle*> _sfc_triangles;
     /** bounding volume is an axis aligned bounding box */
     AxisAlignedBoundingBox _bv;
+	/** a helper structure to improve the search */
+	SurfaceGrid* _sfc_grid;
 };
 
 }

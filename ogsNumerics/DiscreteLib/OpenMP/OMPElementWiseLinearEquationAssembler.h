@@ -61,9 +61,11 @@ void OMPElementWiseLinearEquationAssembler<T1,T2>::assembly(const MeshLib::IMesh
     const size_t n_ele = msh.getNumberOfElements();
     UpdaterType assembler(*_e_assembler);
 
+#ifdef _OPENMP
     #pragma omp parallel for default(none), shared(std::cout, msh, eqs), firstprivate(assembler)
+#endif
     for (size_t i=0; i<n_ele; i++) {
-        MeshLib::IElement *e = msh.getElemenet(i);
+        MeshLib::IElement *e = msh.getElement(i);
         assembler.update(*e, eqs);
     }
 };

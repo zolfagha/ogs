@@ -187,12 +187,12 @@ public:
         return obj;
     };
 
-    virtual void eval(const NumLib::TXPosition x, NumLib::ITXFunction::DataType &val) const
+    virtual void eval(const NumLib::TXPosition /*x*/, NumLib::ITXFunction::DataType &val) const
     {
         val = _vec[0];
     }
 
-    void setValue(size_t i, NumLib::LocalVector &v)
+    void setValue(size_t i, MathLib::LocalVector &v)
     {
         _vec[i] = v;
     }
@@ -201,16 +201,16 @@ public:
     {
         std::cout << "cell_values = ";
         for (size_t i=0; i<_vec.size(); ++i) {
-            const NumLib::LocalVector &val1 = _vec[i];
+            const MathLib::LocalVector &val1 = _vec[i];
             std::cout << "(";
-            for (size_t j=0; j<val1.size(); ++j) std::cout << val1[j] << " ";
+            for (int j=0; j<val1.size(); ++j) std::cout << val1[j] << " ";
             std::cout << ") ";
         }
         std::cout << std::endl;
     }
 
 private:
-    std::vector<NumLib::LocalVector> _vec;
+    std::vector<MathLib::LocalVector> _vec;
 };
 
 } //end

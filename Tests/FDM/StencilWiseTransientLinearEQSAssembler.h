@@ -15,7 +15,7 @@
 #include <vector>
 
 #include "MathLib/LinAlg/LinearEquation/ILinearEquation.h"
-#include "MeshLib/Topology/Topology.h"
+#include "MeshLib/Topology/TopologyNode2NodesConnectedByEdges.h"
 
 #include "DiscreteLib/Utils/DofEquationIdTable.h"
 #include "DiscreteLib/Serial/DiscreteVector.h"
@@ -70,7 +70,7 @@ public:
         std::vector<size_t> ele_node_ids, ele_node_size_order;
         std::vector<size_t> local_dofmap;
         const size_t n_nod = msh.getNumberOfNodes();
-        MeshLib::TopologyNode2NodesConnectedByEdges topo((MeshLib::IMesh*)&msh);
+        MeshLib::TopologyNode2NodesConnectedByEdges topo(msh);
 
         LocalVectorType local_u_n1;
         LocalVectorType local_u_n;

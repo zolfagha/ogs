@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "NumLib/DataType.h"
+#include "MathLib/DataType.h"
 
 namespace MeshLib
 {
@@ -43,23 +43,7 @@ public:
     /// @param local_u_n1    guess of current time step value
     /// @param local_u_n    previous time step value
     /// @param local_J        local Jacobian
-    virtual void assembly(const TimeStep &time,  const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalMatrix &local_J) = 0;
+    virtual void assembly(const TimeStep &time,  const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const MathLib::LocalVector &local_u_n1, const MathLib::LocalVector &local_u_n, MathLib::LocalMatrix &local_J) = 0;
 };
-
-
-class DummyElementWiseTransientJacobianLocalAssembler : public IElementWiseTransientJacobianLocalAssembler
-{
-public:
-    virtual ~DummyElementWiseTransientJacobianLocalAssembler() {};
-
-    /// assemble a local Jacobian matrix for the given element
-    /// @param time            time step
-    /// @param e            element
-    /// @param local_u_n1    guess of current time step value
-    /// @param local_u_n    previous time step value
-    /// @param local_J        local Jacobian
-    virtual void assembly(const TimeStep &,  const MeshLib::IElement &, const DiscreteLib::DofEquationIdTable &, const LocalVector &, const LocalVector &, LocalMatrix &) {};
-};
-
 
 } //end

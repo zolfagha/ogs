@@ -45,7 +45,7 @@ private:
     static Ogs6FemData* _obj;
 
 private:
-    Ogs6FemData(): geo(NULL) {};
+    Ogs6FemData(): geo(NULL), m_KinReductScheme(NULL) {};
 
 public:
     //material data

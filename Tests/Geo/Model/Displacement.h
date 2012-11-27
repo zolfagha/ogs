@@ -109,7 +109,7 @@ public:
         Solid *solidphase = _pm->solidphase;
 
         // set D
-        NumLib::LocalMatrix matD = NumLib::LocalMatrix::Zero(n_strain_components, n_strain_components);
+        MathLib::LocalMatrix matD = MathLib::LocalMatrix::Zero(n_strain_components, n_strain_components);
         //matD *= .0;
         double nv = solidphase->poisson_ratio;
         double E = solidphase->Youngs_modulus;
@@ -121,7 +121,7 @@ public:
         for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++)
         {
             // element setup
-            MeshLib::IElement* e = msh->getElemenet(i_e);
+            MeshLib::IElement* e = msh->getElement(i_e);
             const size_t nnodes = e->getNumberOfNodes();
             FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
             FemLib::IFemNumericalIntegration *integral = fe->getIntegrationMethod();
@@ -130,7 +130,7 @@ public:
             stress->setNumberOfIntegationPoints(i_e, n_gp);
 
             // local u
-            NumLib::LocalVector local_u(dim*nnodes);
+            MathLib::LocalVector local_u(dim*nnodes);
             for (size_t j=0; j<nnodes; j++) {
                 const size_t node_id = e->getNodeID(j);
                 local_u[j*dim] = ux->getValue(node_id);
@@ -138,15 +138,15 @@ public:
             }
 
             // for each integration points
-            NumLib::LocalMatrix matB = NumLib::LocalMatrix::Zero(n_strain_components, nnodes*dim);
-            NumLib::LocalMatrix matN = NumLib::LocalMatrix::Zero(dim, nnodes*dim);
+            MathLib::LocalMatrix matB = MathLib::LocalMatrix::Zero(n_strain_components, nnodes*dim);
+            MathLib::LocalMatrix matN = MathLib::LocalMatrix::Zero(dim, nnodes*dim);
             double r[3] = {};
             double x[3] = {};
             for (size_t ip=0; ip<n_gp; ip++) {
                 integral->getSamplingPoint(ip, r);
                 fe->computeBasisFunctions(r);
-                NumLib::LocalMatrix &N = *fe->getBasisFunction();
-                const NumLib::LocalMatrix &dN = *fe->getGradBasisFunction();
+                MathLib::LocalMatrix &N = *fe->getBasisFunction();
+                const MathLib::LocalMatrix &dN = *fe->getGradBasisFunction();
                 fe->getRealCoordinates(x);
 
                 // set N,B
@@ -154,12 +154,12 @@ public:
                 setB_Matrix(dim, nnodes, dN, matB);
 
                 // strain
-                NumLib::LocalVector gp_strain(n_strain_components);
+                MathLib::LocalVector gp_strain(n_strain_components);
                 gp_strain.noalias() = matB * local_u;
                 strain->setIntegrationPointValue(i_e, ip, gp_strain);
 
                 // stress
-                NumLib::LocalVector gp_stress(n_strain_components);
+                MathLib::LocalVector gp_stress(n_strain_components);
                 gp_stress = matD * gp_strain;
                 stress->setIntegrationPointValue(i_e, ip, gp_stress);
 

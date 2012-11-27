@@ -57,6 +57,13 @@ void convertFluidProperty(const CFluidProperties &mfp, MaterialLib::Fluid &fluid
         fluid.dynamic_viscosity = new NumLib::TXFunctionConstant(mfp.my_0);
     }
 
+    if (mfp.heat_capacity_model==1) {
+        fluid.specific_heat = new NumLib::TXFunctionConstant(mfp.specific_heat_capacity);
+    }
+
+    if (mfp.heat_conductivity_model==1) {
+        fluid.thermal_conductivity = new NumLib::TXFunctionConstant(mfp.heat_conductivity);
+    }
 }
 
 void convertSolidProperty(const CSolidProperties &msp, MaterialLib::Solid &solid)
@@ -71,6 +78,13 @@ void convertSolidProperty(const CSolidProperties &msp, MaterialLib::Solid &solid
         solid.Youngs_modulus = new NumLib::TXFunctionConstant((*msp.data_Youngs)(0));
     }
 
+    if (msp.Capacity_mode==1) {
+        solid.specific_heat = new NumLib::TXFunctionConstant((*msp.data_Capacity)(0));
+    }
+
+    if (msp.Conductivity_mode==1) {
+        solid.thermal_conductivity = new NumLib::TXFunctionConstant((*msp.data_Conductivity)(0));
+    }
 }
 
 void convertPorousMediumProperty(const CMediumProperties &mmp, MaterialLib::PorousMedia &pm)
@@ -86,6 +100,11 @@ void convertPorousMediumProperty(const CMediumProperties &mmp, MaterialLib::Poro
 
     if (mmp.storage_model==1) {
         pm.storage = new NumLib::TXFunctionConstant(mmp.storage_model_values[0]);
+    }
+
+    if (mmp.mass_dispersion_model==1) {
+        pm.dispersivity_long  = new NumLib::TXFunctionConstant(mmp.mass_dispersion_longitudinal); 
+        pm.dispersivity_trans = new NumLib::TXFunctionConstant(mmp.mass_dispersion_transverse);
     }
 
     pm.geo_area = new NumLib::TXFunctionConstant(mmp.geo_area);
@@ -146,6 +165,20 @@ std::string convertLinearSolverPreconType(int ls_precon)
     return str;
 }
 
+NumLib::TXFunctionType::type convertDistributionType(FiniteElement::DistributionType ogs5_type)
+{
+    switch (ogs5_type) {
+        case FiniteElement::CONSTANT:
+            return NumLib::TXFunctionType::CONSTANT;
+        case FiniteElement::LINEAR:
+            return NumLib::TXFunctionType::GEOSPACE;
+        case FiniteElement::FUNCTION:
+            return NumLib::TXFunctionType::ANALYTICAL;
+        default:
+            return NumLib::TXFunctionType::INVALID;
+    }
+
+}
 
 bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options &option)
 {
@@ -225,7 +258,9 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
     // Individual process and IVBV
     // -------------------------------------------------------------------------
     // PCS
-    BaseLib::Options* optPcsData = option.addSubGroup("ProcessData");
+    BaseLib::Options* optPcsData = option.getSubGroup("processList");
+    if (optPcsData==NULL)
+        optPcsData = option.addSubGroup("processList");
     size_t masstransport_counter = 0;
     if (ogs5fem.pcs_vector.size()==0) {
         ERR("***Error: no PCS found in ogs5");
@@ -237,7 +272,9 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         std::string pcs_name = FiniteElement::convertProcessTypeToString(rfpcs->getProcessType());
         std::vector<std::string>& var_name = rfpcs->primary_variable_name;
 
-        BaseLib::Options* optPcs = optPcsData->addSubGroup(pcs_name);
+        BaseLib::Options* optPcs = optPcsData->addSubGroup("process");
+        optPcs->addOption("type", pcs_name);
+        optPcs->addOption("name", pcs_name);
 
         //Mesh
         optPcs->addOptionAsNum("MeshID", rfpcs->mesh_id);
@@ -278,8 +315,33 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 						optBc->addOption("Variable", rfbc->primaryvariable_name);
 						optBc->addOption("GeometryType", rfbc->geo_type_name);
 						optBc->addOption("GeometryName", rfbc->geo_name);
-						optBc->addOption("DistributionType", FiniteElement::convertDisTypeToString(rfbc->getProcessDistributionType()));
-						optBc->addOptionAsNum("DistributionValue", rfbc->geo_node_value);
+						NumLib::TXFunctionType::type ogs6dis_type = convertDistributionType(rfbc->getProcessDistributionType());
+                        optBc->addOption("DistributionType", NumLib::convertTXFunctionTypeToString(ogs6dis_type));
+						switch (rfbc->getProcessDistributionType())
+						{
+                            case FiniteElement::CONSTANT:
+                                optBc->addOptionAsNum("DistributionValue", rfbc->geo_node_value);
+                                break;
+                            case FiniteElement::LINEAR:
+                                {
+                                    const size_t n_pt = rfbc->_PointsHaveDistribedBC.size();
+                                    optBc->addOptionAsNum("PointSize", n_pt);
+                                    for (size_t k=0; k<n_pt; k++) {
+                                        BaseLib::Options* optPtList = optBc->addSubGroup("PointValueList");
+                                        optPtList->addOptionAsNum("PointID", rfbc->_PointsHaveDistribedBC[k]);
+                                        optPtList->addOptionAsNum("Value", rfbc->_DistribedBC[k]);
+                                    }
+                                }
+                                break;
+                            case FiniteElement::FUNCTION:
+                                {
+                                    optBc->addOption("DistributionFunction", rfbc->function_exp);
+                                }
+                                break;
+                            default:
+                                //error
+                                break;
+						}
 					}  // end of if rfbc
         }  // end of for i
 
@@ -362,9 +424,9 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 			mChemComp->set_name(ogs6fem.list_compound[i]->name); 
 			// set mobility
 			if ( ogs6fem.list_compound[i]->is_mobile )
-				mChemComp->set_mobility( ogsChem::Comp_Mobility::MOBILE  ); 
+				mChemComp->set_mobility( ogsChem::MOBILE  ); 
 			else 
-				mChemComp->set_mobility( ogsChem::Comp_Mobility::MINERAL );
+				mChemComp->set_mobility( ogsChem::MINERAL );
 
 			ogs6fem.map_ChemComp.insert(ogs6fem.list_compound[i]->name, mChemComp); 
 			mChemComp = NULL; 
@@ -379,7 +441,7 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 			ogsChem::chemReactionKin* mKinReaction; 
 			mKinReaction = new ogsChem::chemReactionKin(); 
 			// convert the ogs5 KRC data structure into ogs6 Kinetic reactions
-			mKinReaction->readReactionKRC( rfKinReact ); 
+			mKinReaction->readReactionKRC( ogs6fem.map_ChemComp, rfKinReact ); 
 			// adding the instance of one single kinetic reaction
 			ogs6fem.list_kin_reactions.push_back(mKinReaction); 
 		}  // end of for
@@ -400,7 +462,7 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
     // -------------------------------------------------------------------------
 
     // OUT
-    BaseLib::Options* optOut = option.addSubGroup("OutputList");
+    BaseLib::Options* optOut = option.addSubGroup("outputList");
     for (size_t i=0; i<ogs5fem.out_vector.size(); i++)
     {
         COutput* rfout = ogs5fem.out_vector[i];
@@ -420,16 +482,23 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             }
         }
 
-        BaseLib::Options* opt = optOut->addSubGroup("Output");
-        opt->addOption("DataType", rfout->dat_type_name);
-        opt->addOption("GeometryType", rfout->geo_type);
-        opt->addOption("GeometryName", rfout->geo_name);
-        opt->addOption("TimeType", rfout->tim_type_name);
-        opt->addOptionAsNum("TimeSteps", rfout->nSteps);
-        opt->addOptionAsArray("NodalVariables", rfout->_nod_value_vector);
-        opt->addOptionAsArray("ElementalVariables", rfout->_ele_value_vector);
-        opt->addOptionAsArray("MMPValues", rfout->mmp_value_vector);
-        opt->addOptionAsArray("MFPValues", rfout->mfp_value_vector);
+        BaseLib::Options* opt = optOut->addSubGroup("output");
+        opt->addOption("dataType", rfout->dat_type_name);
+        opt->addOption("meshID", "0"); //TODO
+        opt->addOption("geoType", rfout->geo_type);
+        opt->addOption("geoName", rfout->geo_name);
+        opt->addOption("timeType", rfout->tim_type_name);
+        opt->addOptionAsNum("timeSteps", rfout->nSteps);
+        for (size_t j=0; j<rfout->_nod_value_vector.size(); j++) {
+            BaseLib::Options* optVal = opt->addSubGroup("nodeValue");
+            optVal->addOption("name", rfout->_nod_value_vector[j]);
+        }
+        for (size_t j=0; j<rfout->_ele_value_vector.size(); j++) {
+            BaseLib::Options* optVal = opt->addSubGroup("elementValue");
+            optVal->addOption("name", rfout->_ele_value_vector[j]);
+        }
+//        opt->addOptionAsArray("MMPValues", rfout->mmp_value_vector);
+//        opt->addOptionAsArray("MFPValues", rfout->mfp_value_vector);
     }
 
     ogs6fem.outController.initialize(option, ogs6fem.output_dir, ogs6fem.project_name, ogs6fem.list_mesh, *ogs6fem.geo, ogs6fem.geo_unique_name);

@@ -50,7 +50,7 @@ public:
 
 public:
     bool write(const std::string &vtkfile,
-                                  MeshLib::IMesh &msh, std::vector<PointData> &nodal, std::vector<CellData> &elemental);
+                                  MeshLib::IMesh &msh, std::vector<PointData> &nodal, std::vector<CellData> &elemental, bool outGroupID);
 
 protected:
     void initialize();
@@ -105,6 +105,11 @@ protected:
                                   std::vector<CellData> &elemental,
                                     MeshLib::IMesh &m_msh,
                                   long &offset);
+
+    bool writeElementGroupID(std::fstream &fin,
+                                 bool output_data,
+                                 MeshLib::IMesh& msh,
+                                 long &offset);
 
 protected:
     //for binary output

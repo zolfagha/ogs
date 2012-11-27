@@ -16,8 +16,7 @@
 #include "FemLib/Tools/LagrangeFeObjectContainer.h"
 #include "NumLib/TransientAssembler/IElementWiseTransientLinearEQSLocalAssembler.h"
 #include "MaterialLib/Solid.h"
-
-#include "FemLinearElasticTools.h"
+#include "PhysicsLib/FemLinearElasticTools.h"
 #include "Ogs6FemData.h"
 
 void FemLinearElasticLinearLocalAssembler::assembly(
@@ -26,7 +25,7 @@ void FemLinearElasticLinearLocalAssembler::assembly(
             const DiscreteLib::DofEquationIdTable &/*localDofManager*/,
             const LocalVectorType &/*local_u_n1*/,
             const LocalVectorType &/*local_u_n*/,
-            NumLib::LocalEquation &eqs)
+            MathLib::LocalEquation &eqs)
 {
     FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
     size_t mat_id = e.getGroupID();
@@ -40,8 +39,8 @@ void FemLinearElasticLinearLocalAssembler::assembly(
 
     // set D
     LocalMatrixType matD = LocalMatrixType::Zero(n_strain_components, n_strain_components);
-    NumLib::LocalMatrix nv(1,1);
-    NumLib::LocalMatrix E(1,1);
+    MathLib::LocalMatrix nv(1,1);
+    MathLib::LocalMatrix E(1,1);
     solidphase->poisson_ratio->eval(e_pos, nv);
     solidphase->Youngs_modulus->eval(e_pos, E);
     double Lambda, G, K;

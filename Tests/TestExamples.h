@@ -66,8 +66,8 @@ public:
         //#Define a problem
         //geometry
         rec = new GeoLib::Rectangle(GeoLib::Point(0.0, 0.0, 0.0),  GeoLib::Point(2.0, 2.0, 0.0));
-        GeoLib::Polyline* poly_left = rec->getLeft();
-        GeoLib::Polyline* poly_right = rec->getRight();
+        const GeoLib::Polyline &poly_left = rec->getLeft();
+        const GeoLib::Polyline &poly_right = rec->getRight();
         //mesh
         this->msh = msh;
         dis = new DiscreteLib::DiscreteSystem(msh);
@@ -80,9 +80,9 @@ public:
         vel->initialize(dis);
         //bc
         NumLib::TXFunctionConstant f_bc1(.0);
-        FemLib::DirichletBC2FEM bc1(*msh, *poly_right, f_bc1, vec_bc1_nodes, vec_bc1_vals);
+        FemLib::DirichletBC2FEM bc1(*msh, poly_right, f_bc1, vec_bc1_nodes, vec_bc1_vals);
         NumLib::TXFunctionConstant f_bc2(-1e-5);
-        FemLib::NeumannBC2FEM bc2(*msh, *_feObjects, *poly_left, f_bc2, vec_bc2_nodes, vec_bc2_vals);
+        FemLib::NeumannBC2FEM bc2(*msh, *_feObjects, poly_left, f_bc2, vec_bc2_nodes, vec_bc2_vals);
         // mat
         _K = (K!=0) ? K : new NumLib::TXFunctionConstant(1.e-11);
     }
@@ -102,14 +102,14 @@ public:
 
         //assembly
         FemLib::LagrangianFeObjectContainer* feObjects = gw.head->getFeObjectContainer();
-        NumLib::LocalMatrix localK;
+        MathLib::LocalMatrix localK;
         std::vector<size_t> e_node_id_list;
         double gp_x[3], real_x[3];
         for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
-            MeshLib::IElement *e = msh->getElemenet(i_e);
+            MeshLib::IElement *e = msh->getElement(i_e);
             FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
             const size_t &n_dof = fe->getNumberOfVariables();
-            localK = NumLib::LocalMatrix::Zero(n_dof, n_dof);
+            localK = MathLib::LocalMatrix::Zero(n_dof, n_dof);
             FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
             for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
                 q->getSamplingPoint(j, gp_x);
@@ -117,7 +117,7 @@ public:
                 fe->getRealCoordinates(real_x);
                 double k = .0;
                 gw._K->eval(real_x, k);
-                NumLib::LocalMatrix mat_k(1,1);
+                MathLib::LocalMatrix mat_k(1,1);
                 mat_k(0,0) = k;
                 fe->integrateDWxDN(j, mat_k, localK);
             }
@@ -151,9 +151,9 @@ public:
         FemLib::LagrangianFeObjectContainer* feObjects = gw.head->getFeObjectContainer();
         //calculate vel (vel=f(h))
         for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
-            MeshLib::IElement* e = msh->getElemenet(i_e);
+            MeshLib::IElement* e = msh->getElement(i_e);
             FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
-            NumLib::LocalVector local_h(e->getNumberOfNodes());
+            MathLib::LocalVector local_h(e->getNumberOfNodes());
             for (size_t j=0; j<e->getNumberOfNodes(); j++)
                 local_h[j] = gw.head->getValue(e->getNodeID(j));
             // for each integration points
@@ -169,12 +169,12 @@ public:
                 yi[i] = (*pt)[1];
             }
             for (size_t ip=0; ip<n_gp; ip++) {
-                NumLib::LocalVector q(2);
+                MathLib::LocalVector q(2);
                 q[0] = .0;
                 q[1] = .0;
                 integral->getSamplingPoint(ip, r);
                 fe->computeBasisFunctions(r);
-                const NumLib::LocalMatrix *dN = fe->getGradBasisFunction();
+                const MathLib::LocalMatrix *dN = fe->getGradBasisFunction();
                 //MathLib::Matrix<double>*N = fe->getBasisFunction();
                 std::vector<double> xx(2);
                 fe->getRealCoordinates(&xx[0]);

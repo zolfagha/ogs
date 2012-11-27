@@ -18,7 +18,7 @@
 #include "FemLib/Post/Extrapolation.h"
 
 #include "Ogs6FemData.h"
-#include "FemLinearElasticTools.h"
+#include "PhysicsLib/FemLinearElasticTools.h"
 
 template <class T>
 size_t FunctionNodalStressStrain<T>::getNumberOfStrainComponents() const
@@ -33,14 +33,14 @@ bool FunctionNodalStressStrain<T>::initialize(const BaseLib::Options &option)
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
 
-    size_t msh_id = option.getOption<size_t>("MeshID");
+    size_t msh_id = option.getOptionAsNum<size_t>("MeshID");
     MeshLib::IMesh* msh = femData->list_mesh[msh_id];
     _dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
     const size_t n_strain_components = getNumberOfStrainComponents();
     _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
 
     // create strain, stress vectors
-    NumLib::LocalVector v0(n_strain_components);
+    MathLib::LocalVector v0(n_strain_components);
     v0 *= .0;
 
     // set initial output
@@ -53,9 +53,9 @@ bool FunctionNodalStressStrain<T>::initialize(const BaseLib::Options &option)
         _vec_nodal_stress_components.push_back(new NodalPointScalarWrapper(_nodal_stress, i));
     }
     for (size_t i=0; i<n_strain_components; i++) {
-        OutputVariableInfo var1(this->getOutputParameterName(NodStrain) + getStressStrainComponentPostfix(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_nodal_strain_components[i]);
+        OutputVariableInfo var1(this->getOutputParameterName(NodStrain) + getStressStrainComponentPostfix(i), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_nodal_strain_components[i]);
         femData->outController.setOutput(var1.name, var1);
-        OutputVariableInfo var2(this->getOutputParameterName(NodStress) + getStressStrainComponentPostfix(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_nodal_stress_components[i]);
+        OutputVariableInfo var2(this->getOutputParameterName(NodStress) + getStressStrainComponentPostfix(i), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_nodal_stress_components[i]);
         femData->outController.setOutput(var2.name, var2);
     }
 
@@ -71,11 +71,12 @@ void FunctionNodalStressStrain<T>::accept(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
     const size_t n_strain_components = getNumberOfStrainComponents();
+    const size_t msh_id = _dis->getMesh()->getID();
     Ogs6FemData* femData = Ogs6FemData::getInstance();
     for (size_t i=0; i<n_strain_components; i++) {
-        OutputVariableInfo var1(this->getOutputParameterName(NodStrain) + getStressStrainComponentPostfix(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_nodal_strain_components[i]);
+        OutputVariableInfo var1(this->getOutputParameterName(NodStrain) + getStressStrainComponentPostfix(i), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_nodal_strain_components[i]);
         femData->outController.setOutput(var1.name, var1);
-        OutputVariableInfo var2(this->getOutputParameterName(NodStress) + getStressStrainComponentPostfix(i), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_nodal_stress_components[i]);
+        OutputVariableInfo var2(this->getOutputParameterName(NodStress) + getStressStrainComponentPostfix(i), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _vec_nodal_stress_components[i]);
         femData->outController.setOutput(var2.name, var2);
     }
 };
@@ -88,7 +89,7 @@ int FunctionNodalStressStrain<T>::solveTimeStep(const NumLib::TimeStep &/*time*/
     MyIntegrationPointFunctionVector* strain = (MyIntegrationPointFunctionVector*)getInput(GpStrain);
     MyIntegrationPointFunctionVector* stress = (MyIntegrationPointFunctionVector*)getInput(GpStress);
 
-    FemLib::FemExtrapolationAverage<MyDiscreteSystem, NumLib::LocalVector> extrapo;
+    FemLib::FemExtrapolationAverage<MyDiscreteSystem, MathLib::LocalVector> extrapo;
     _nodal_strain->setFeObjectContainer(_feObjects);
     _nodal_stress->setFeObjectContainer(_feObjects);
     extrapo.extrapolate(*strain, *_nodal_strain);

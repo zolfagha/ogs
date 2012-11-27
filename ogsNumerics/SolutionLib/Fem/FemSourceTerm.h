@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <vector>
 
 #include "GeoLib/GeoObject.h"
@@ -32,47 +33,21 @@ class FemSourceTerm : public IFemNeumannBC
 {
 public:
     /// 
-    FemSourceTerm(const MeshLib::IMesh *msh, const GeoLib::GeoObject *geo, NumLib::ITXFunction *func)
-    {
-        _msh = msh;
-        _geo = geo;
-        _bc_func = func->clone();
-        _is_transient = false;
-        _do_setup = true;
-       // _order = 1;
-    }
+    FemSourceTerm(const MeshLib::IMesh *msh, const GeoLib::GeoObject *geo, NumLib::ITXFunction *func);
 
-//    virtual void setOrder(size_t order)
-//    {
-//        _order = order;
-//    }
+    ///
+    FemSourceTerm(const std::vector<size_t> &vec_node_id, const std::vector<double> &vec_node_values);
+
+    /// clone this object
+    FemSourceTerm* clone() const;
 
     /// setup  
-    void setup(size_t order);
+    virtual void setup(size_t order);
 
-    size_t getNumberOfConditions() const
-    {
-        return _vec_nodes.size();
-    }
-
-    size_t getConditionDoF( size_t i ) const
-    {
-        return _vec_nodes[i];
-    }
-
-    double getConditionValue( size_t i ) const
-    {
-        return _vec_values[i];
-    }
-
-
-    FemSourceTerm* clone() const
-    {
-        FemSourceTerm *f = new FemSourceTerm(_msh, _geo, _bc_func);
-        return f;
-    }
-
+    /// get a list of boundary condition nodes
     std::vector<size_t>& getListOfBCNodes() {return _vec_nodes;};
+
+    /// get a list of boundary condition values
     std::vector<double>& getListOfBCValues() {return _vec_values;};
 
 private:
@@ -84,8 +59,6 @@ private:
     std::vector<double> _vec_values;
     bool _is_transient;
     bool _do_setup;
-    //size_t _order;
-
 };
 
 }

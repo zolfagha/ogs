@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "NumLib/DataType.h"
+#include "MathLib/DataType.h"
 
 
 namespace MeshLib
@@ -45,7 +45,7 @@ public:
     /// @param local_u_n1    guess of current time step value
     /// @param local_u_n    previous time step value
     /// @param local_r        local residual
-    virtual void assembly(const TimeStep &time,  const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const LocalVector &local_u_n1, const LocalVector &local_u_n, LocalVector &local_r) = 0;
+    virtual void assembly(const TimeStep &time,  const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const MathLib::LocalVector  &local_u_n1, const MathLib::LocalVector  &local_u_n, MathLib::LocalVector  &local_r) = 0;
 };
 
 } //end

@@ -17,6 +17,7 @@
 #include "FemLib/Function/FemFunction.h"
 #include "NumLib/Function/Function.h"
 #include "NumLib/Function/DiscreteDataConvergenceCheck.h"
+#include "NumLib/Function/TXWrapped3DVectorFunction.h"
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "ProcessLib/AbstractTimeIndependentProcess.h"
 
@@ -31,9 +32,11 @@ public:
     typedef T_DISCRETE_SYSTEM MyDiscreteSystem;
     typedef typename FemLib::FemNodalFunctionScalar<MyDiscreteSystem>::type MyNodalFunctionScalar;
     typedef typename FemLib::FEMIntegrationPointFunctionVector<MyDiscreteSystem>::type MyIntegrationPointFunctionVector;
+    typedef typename NumLib::TXWrapped3DVectorFunction<MyIntegrationPointFunctionVector> My3DIntegrationPointFunctionVector;
 
     FunctionHeadToElementVelocity() 
-    : ProcessLib::AbstractTimeIndependentProcess("HEAD_TO_ELEMENT_VELOCITY", 1, 1), _dis(NULL), _vel(NULL), _feObjects(NULL)
+    : ProcessLib::AbstractTimeIndependentProcess("HEAD_TO_ELEMENT_VELOCITY", 1, 1),
+      _dis(NULL), _vel(NULL), _feObjects(NULL), _vel_3d(NULL)
     {
         // set default parameter name
         ProcessLib::AbstractTimeIndependentProcess::setInputParameterName(Head, "Head");
@@ -62,6 +65,7 @@ private:
     MyIntegrationPointFunctionVector* _vel;
     FemLib::LagrangianFeObjectContainer* _feObjects;
     NumLib::DiscreteDataConvergenceCheck _checker;
+    My3DIntegrationPointFunctionVector* _vel_3d;
 
     DISALLOW_COPY_AND_ASSIGN(FunctionHeadToElementVelocity);
 };

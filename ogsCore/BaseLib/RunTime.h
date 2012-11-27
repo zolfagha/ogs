@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.com)
+ * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.org)
  *            Distributed under a Modified BSD License.
  *              See accompanying file LICENSE.txt or
- *              http://www.opengeosys.com/LICENSE.txt
+ *              http://www.opengeosys.org/project/license
  *
  *
  * \file RunTime.h
@@ -15,7 +15,7 @@
 
 #include "TimeMeasurementBase.h"
 
-#ifndef  _MSC_VER
+#ifndef _MSC_VER
 #include <sys/time.h>
 #else
 #include <windows.h>
@@ -28,17 +28,17 @@ namespace BaseLib {
 class RunTime : public TimeMeasurementBase
 {
 public:
-    virtual void start();
-    virtual void stop();
-    virtual double elapsed();
-    ~RunTime() {};
+	virtual void start();
+	virtual void stop();
+	virtual double elapsed();
+	~RunTime() {};
 private:
 #ifndef _MSC_VER
-    timeval _start;
-    timeval _stop;
+	timeval _start;
+	timeval _stop;
 #else
-    unsigned long _start;
-    unsigned long _stop;
+	unsigned long _start;
+	unsigned long _stop;
 #endif
 };
 

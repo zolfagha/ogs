@@ -24,13 +24,16 @@
 using namespace MeshLib;
 
 VtuWriter::VtuWriter(bool binary_mode)
-: _useBinary(binary_mode), _isInitialized(false), _isLittleEndian(true), SIZE_OF_BLOCK_LENGTH_TAG(0)
+: _useBinary(binary_mode), _isInitialized(false), _isLittleEndian(true),
+  type_UChar(Int8), type_Int(Int32),
+  type_UInt(Int8), type_Long(Int8),
+  type_Double(Int8),  SIZE_OF_BLOCK_LENGTH_TAG(0)
 {
     this->initialize();
 }
 
 bool VtuWriter::write(const std::string &vtkfile,
-                                    MeshLib::IMesh &msh, std::vector<PointData> &nodal_values, std::vector<CellData> &elemental_values)
+                                    MeshLib::IMesh &msh, std::vector<PointData> &nodal_values, std::vector<CellData> &elemental_values, bool outGroupID)
 {
     //-------------------------------------------------------------------------
     //# Setup file stream
@@ -132,6 +135,8 @@ bool VtuWriter::write(const std::string &vtkfile,
     // Element values
     fin << "      <CellData>" << std::endl;
     writeCellData(fin, data_out, elemental_values, msh, offset);
+    if (outGroupID)
+        writeElementGroupID(fin, data_out, msh, offset);
     fin << "      </CellData>" << std::endl;
     fin << "    </Piece>" << std::endl;
     fin << "  </UnstructuredGrid>" << std::endl;
@@ -190,7 +195,7 @@ bool VtuWriter::writePointData(std::fstream &fin,
             } else {
                 BaseLib::write_value_binary<unsigned int> (fin, bin_data_length);
             }
-            NumLib::LocalMatrix v;
+            MathLib::LocalMatrix v;
             for (size_t j = 0; j < msh.getNumberOfNodes(); j++) {
                 pt_data.f->eval(NumLib::TXPosition(NumLib::TXPosition::Node, j, msh.getNodeCoordinatesRef(j)->getData()), v);
                 if (!_useBinary) {
@@ -198,7 +203,7 @@ bool VtuWriter::writePointData(std::fstream &fin,
                         for (size_t k=0; k<pt_data.nr_of_components; k++)
                             fin << v.array()(k) << " ";
                     } else {
-                        for (size_t k=0; k<(int)pt_data.nr_of_components; k++)
+                        for (size_t k=0; k<pt_data.nr_of_components; k++)
                             fin << 0 << " ";
                     }
                 } else {
@@ -243,33 +248,28 @@ bool VtuWriter::writeCellData(std::fstream &fin,
             if (!_useBinary)
             {
                 fin << "          ";
-                NumLib::LocalMatrix v;
+                MathLib::LocalMatrix v;
                 for (size_t j=0; j<msh.getNumberOfElements(); j++) {
                     pt_data.f->eval(NumLib::TXPosition(NumLib::TXPosition::Element, j), v);
-                    if (v.array().size()>=(int)pt_data.nr_of_components) {
-                        for (size_t k=0; k<pt_data.nr_of_components; k++)
-                            fin << v.array()(k) << " ";
-                    } else {
-                        for (size_t k=0; k<pt_data.nr_of_components; k++)
-                            fin << 0 << " ";
-                    }
+                    const size_t n_dummy = pt_data.nr_of_components - static_cast<size_t>(v.array().size());
+                    for (int k=0; k<v.array().size(); k++)
+                        fin << v.array()(k) << " ";
+                    for (size_t k=0; k<n_dummy; k++)
+                        fin << 0 << " ";
                 }
                 fin << std::endl;
             }
             else
             {
                 BaseLib::write_value_binary<unsigned int> (fin, bin_data_length);
-                NumLib::LocalMatrix v;
+                MathLib::LocalMatrix v;
                 for (long j = 0; j < (long) msh.getNumberOfElements(); j++) {
                     pt_data.f->eval(NumLib::TXPosition(NumLib::TXPosition::Element, j), v);
-                    if (v.array().size()>=(int)pt_data.nr_of_components) {
-                        for (size_t k=0; k<pt_data.nr_of_components; k++)
-                            BaseLib::write_value_binary(fin, v.array()(k));
-                    } else {
-                        for (size_t k=0; k<pt_data.nr_of_components; k++)
-                            BaseLib::write_value_binary<double>(fin, 0);
-                    }
-                   
+                    const size_t n_dummy = pt_data.nr_of_components - static_cast<size_t>(v.array().size());
+                    for (int k=0; k<v.array().size(); k++)
+                        BaseLib::write_value_binary(fin, v.array()(k));
+                    for (size_t k=0; k<n_dummy; k++)
+                        BaseLib::write_value_binary<double>(fin, 0);
                 }
             }
         } else {
@@ -279,6 +279,57 @@ bool VtuWriter::writeCellData(std::fstream &fin,
         if (!_useBinary || !output_data)
             writeDataArrayFooter(fin);
     }
+
+    return true;
+}
+
+
+bool VtuWriter::writeElementGroupID(std::fstream &fin,
+                             bool output_data,
+                             MeshLib::IMesh& msh,
+                             long &offset)
+{
+    std::string str_format;
+    if (!_useBinary)
+        str_format = "ascii";
+    else
+        str_format = "appended";
+
+
+    if (!_useBinary || !output_data)
+        writeDataArrayHeader(fin, this->type_Int, "MatGroup", 0, str_format, offset);
+    if (output_data)
+    {
+        MeshLib::IElement* ele = NULL;
+        if (!_useBinary)
+        {
+            fin << "          ";
+            for(long i = 0; i < (long)msh.getNumberOfElements(); i++)
+            {
+                ele = msh.getElement(i);
+                fin << ele->getGroupID() << " ";
+            }
+            fin << std::endl;
+        }
+        else
+        {
+            BaseLib::write_value_binary<unsigned int>(
+                    fin,
+                    sizeof(int) *
+                    (long)msh.getNumberOfElements());
+            for (long i = 0; i < (long)msh.getNumberOfElements(); i++)
+                BaseLib::write_value_binary(fin, msh.getElement(i)->getGroupID());
+        }
+    }
+    else
+    {
+        offset += (long)msh.getNumberOfElements() * sizeof(int) +
+                  SIZE_OF_BLOCK_LENGTH_TAG;
+    }
+
+    if (!_useBinary || !output_data)
+        writeDataArrayFooter(fin);
+
 
     return true;
 }
@@ -461,7 +512,7 @@ bool VtuWriter::writeCellConnectivity(std::fstream &fin,
         if (!_useBinary)
             for (long i = 0; i < (long)msh.getNumberOfElements(); i++)
             {
-                ele = msh.getElemenet(i);
+                ele = msh.getElement(i);
                 fin << "          ";
                 for (size_t j = 0; j < ele->getNumberOfNodes(); j++)
                     fin << ele->getNodeID(j) << " ";
@@ -472,7 +523,7 @@ bool VtuWriter::writeCellConnectivity(std::fstream &fin,
             BaseLib::write_value_binary<unsigned int>(fin, sizeof(long) * sum_ele_components);
             for (long i = 0; i < (long)msh.getNumberOfElements(); i++)
             {
-                ele = msh.getElemenet(i);
+                ele = msh.getElement(i);
                 for (size_t j = 0; j < ele->getNumberOfNodes(); j++)
                     BaseLib::write_value_binary<long>(fin, ele->getNodeID(j));
             }
@@ -483,7 +534,7 @@ bool VtuWriter::writeCellConnectivity(std::fstream &fin,
         sum_ele_components = 0;
         MeshLib::IElement* ele = NULL;
         for (size_t i = 0; i < msh.getNumberOfElements(); i++) {
-            ele = msh.getElemenet(i);
+            ele = msh.getElement(i);
             sum_ele_components += ele->getNumberOfNodes();
         }
         offset += sum_ele_components * sizeof(long) + SIZE_OF_BLOCK_LENGTH_TAG;
@@ -504,7 +555,7 @@ bool VtuWriter::writeCellOffset(std::fstream &fin, bool output_data, IMesh& msh,
             long ele_offset = 0;
             for (long i = 0; i < (long)msh.getNumberOfElements(); i++)
             {
-                ele = msh.getElemenet(i);
+                ele = msh.getElement(i);
                 ele_offset += ele->getNumberOfNodes();
                 fin << ele_offset << " ";
             }
@@ -518,7 +569,7 @@ bool VtuWriter::writeCellOffset(std::fstream &fin, bool output_data, IMesh& msh,
             long ele_offset = 0;
             for (long i = 0; i < (long)msh.getNumberOfElements(); i++)
             {
-                ele = msh.getElemenet(i);
+                ele = msh.getElement(i);
                 ele_offset += ele->getNumberOfNodes();
                 BaseLib::write_value_binary(fin, ele_offset);
             }
@@ -542,7 +593,7 @@ bool VtuWriter::writeCellType(std::fstream &fin, bool output_data, IMesh& msh, l
             fin << "          ";
             for(long i = 0; i < (long)msh.getNumberOfElements(); i++)
             {
-                ele = msh.getElemenet(i);
+                ele = msh.getElement(i);
                 fin << (int)this->getVTKCellType(ele->getShapeType()) << " ";
             }
             fin << std::endl;
@@ -555,7 +606,7 @@ bool VtuWriter::writeCellType(std::fstream &fin, bool output_data, IMesh& msh, l
                     (long)msh.getNumberOfElements());
             for(long i = 0; i < (long)msh.getNumberOfElements(); i++)
             {
-                ele = msh.getElemenet(i);
+                ele = msh.getElement(i);
                 BaseLib::write_value_binary(fin, this->getVTKCellType(ele->getShapeType()));
             }
         }

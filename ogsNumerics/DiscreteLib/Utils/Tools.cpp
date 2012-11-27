@@ -41,7 +41,7 @@ void getLocalVector2(const DofEquationIdTable &dofManager, const std::vector<siz
 }
 
 /// create a subset of vector u corresponding to the given vector index
-void getLocalVector(const DofEquationIdTable &dofManager, const std::vector<size_t> &list_vec_entry_id, const std::vector<size_t> &list_vec_size_for_order, const std::vector<IDiscreteVector<double>*> &list_multiple_u, LocalVector &local_u)
+void getLocalVector(const DofEquationIdTable &dofManager, const std::vector<size_t> &list_vec_entry_id, const std::vector<size_t> &list_vec_size_for_order, const std::vector<IDiscreteVector<double>*> &list_multiple_u, MathLib::LocalVector &local_u)
 {
     std::vector<double> temp_v;
     getLocalVector2(dofManager, list_vec_entry_id, list_vec_size_for_order, list_multiple_u, temp_v);
@@ -57,7 +57,7 @@ void getLocalVector(const DofEquationIdTable &dofManager, const std::vector<size
  * @param global_u              global vector
  * @param local_u               subset
  */
-void getLocalVector(const std::vector<size_t> &list_vec_entry_id, const IDiscreteVector<double> &global_u, LocalVector &local_u)
+void getLocalVector(const std::vector<size_t> &list_vec_entry_id, const IDiscreteVector<double> &global_u, MathLib::LocalVector &local_u)
 {
     size_t valid_entry_cnt = 0;
     for (size_t i=0; i<list_vec_entry_id.size(); i++) {
@@ -72,7 +72,7 @@ void getLocalVector(const std::vector<size_t> &list_vec_entry_id, const IDiscret
     }
 }
 
-void getLocalVector(const std::vector<size_t> &list_vec_entry_id, const LocalVector &global_u, LocalVector &local_u)
+void getLocalVector(const std::vector<size_t> &list_vec_entry_id, const MathLib::LocalVector &global_u, MathLib::LocalVector &local_u)
 {
     size_t valid_entry_cnt = 0;
     for (size_t i=0; i<list_vec_entry_id.size(); i++) {

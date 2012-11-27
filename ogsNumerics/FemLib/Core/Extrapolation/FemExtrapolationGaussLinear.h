@@ -16,7 +16,7 @@
 
 #include "MeshLib/Core/IElement.h"
 
-#include "FemLib/Core/DataType.h"
+#include "MathLib/DataType.h"
 #include "FemLib/Core/Integration/Integration.h"
 #include "IFeExtrapolationMethod.h"
 
@@ -29,7 +29,7 @@ namespace FemLib
 class FeExtrapolationGaussLinear : public IFeExtrapolationMethod
 {
 public:
-    void extrapolate(IFiniteElement &fe, const std::vector<LocalVector> &gp_values, std::vector<LocalVector> &nodal_values);
+    void extrapolate(IFiniteElement &fe, const std::vector<MathLib::LocalVector> &gp_values, std::vector<MathLib::LocalVector> &nodal_values);
 
     template<typename Tvalue>
     void extrapolate(IFiniteElement &fe, const std::vector<Tvalue> &gp_values, std::vector<Tvalue> &nodal_values);

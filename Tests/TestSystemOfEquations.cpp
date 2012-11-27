@@ -86,8 +86,8 @@ void defineProblem1(SystemOfEquations &sysEqs)
     sysEqs.addEquation(*odeTransport);
     sysEqs.addEquation(*odeTransport2);
 
-    ASSERT_EQ(3, sysEqs.getNumberOfVariables());
-    ASSERT_EQ(3, sysEqs.getNumberOfEquations());
+    ASSERT_EQ(3u, sysEqs.getNumberOfVariables());
+    ASSERT_EQ(3u, sysEqs.getNumberOfEquations());
 
 }
 
@@ -113,11 +113,9 @@ BaseLib::Options* defineCouplingM3()
     BaseLib::Options* options = new BaseLib::Options();
     BaseLib::Options* coupling = options->addSubGroup("coupling");
     BaseLib::Options* M1 = coupling->addSubGroup("M1");
-    std::vector<std::string> var;
-    var.push_back("p");
-    var.push_back("T");
-    var.push_back("c");
-    M1->addOptionAsArray("variable", var);
+    M1->addOption("variable", "p");
+    M1->addOption("variable", "T");
+    M1->addOption("variable", "c");
 
     return options;
 };
@@ -137,13 +135,9 @@ BaseLib::Options* defineCouplingP1_M2M1()
     BaseLib::Options* P1_sub = P1->addSubGroup("problems");
     BaseLib::Options* M1 = P1_sub->addSubGroup("M1");
     BaseLib::Options* M2 = P1_sub->addSubGroup("M2");
-    std::vector<std::string> var1;
-    var1.push_back("p");
-    var1.push_back("T");
-    M1->addOptionAsArray("variable", var1);
-    std::vector<std::string> var2;
-    var2.push_back("c");
-    M2->addOptionAsArray("variable", var2);
+    M1->addOption("variable", "p");
+    M1->addOption("variable", "T");
+    M2->addOption("variable", "c");
 
     return options;
 };
@@ -165,15 +159,9 @@ BaseLib::Options* defineCouplingP1_3M1()
     BaseLib::Options* M2 = P1_sub->addSubGroup("M2");
     BaseLib::Options* M3 = P1_sub->addSubGroup("M3");
 
-    std::vector<std::string> var1;
-    var1.push_back("p");
-    M1->addOptionAsArray("variable", var1);
-    std::vector<std::string> var2;
-    var2.push_back("T");
-    M2->addOptionAsArray("variable", var2);
-    std::vector<std::string> var3;
-    var3.push_back("c");
-    M3->addOptionAsArray("variable", var3);
+    M1->addOption("variable", "p");
+    M2->addOption("variable", "T");
+    M3->addOption("variable", "c");
 
     return options;
 };
@@ -204,15 +192,9 @@ BaseLib::Options* defineCouplingP1_P2M1()
     BaseLib::Options* M2 = P1_sub->addSubGroup("M2");
     BaseLib::Options* M3 = P2_sub->addSubGroup("M3");
 
-    std::vector<std::string> var1;
-    var1.push_back("p");
-    M1->addOptionAsArray("variable", var1);
-    std::vector<std::string> var2;
-    var2.push_back("T");
-    M2->addOptionAsArray("variable", var2);
-    std::vector<std::string> var3;
-    var3.push_back("c");
-    M3->addOptionAsArray("variable", var3);
+    M1->addOption("variable", "p");
+    M2->addOption("variable", "T");
+    M3->addOption("variable", "c");
 
     return options;
 };
@@ -258,6 +240,9 @@ TEST(Math, SystemOfEqs_M1)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete part1;
 }
 
 TEST(Math, SystemOfEqs_P2)
@@ -303,6 +288,9 @@ TEST(Math, SystemOfEqs_P2)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete part1;
 }
 
 TEST(Math, SystemOfEqs_P3)
@@ -348,6 +336,9 @@ TEST(Math, SystemOfEqs_P3)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete part1;
 }
 
 class MyConvergenceChecker4ArrayFactory
@@ -372,7 +363,7 @@ TEST(Math, SystemOfEqs_AutoM3)
     BaseLib::Options* option = defineCouplingM3();
     std::vector<MyMyCouplingEQS*> list_sub_problem;
     CoupledProblemFactory<MyConvergenceCheck4Array> eqs_fac(sysEqs, ini_para, list_sub_problem);
-    MyConvergenceChecker4ArrayFactory checker;
+    //MyConvergenceChecker4ArrayFactory checker;
     CouplingStrucutreBuilder4SysEqs<MyConvergenceCheck4Array>::type cpl_builder;
     ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac);
 
@@ -394,6 +385,10 @@ TEST(Math, SystemOfEqs_AutoM3)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete cpl_sys;
+    delete option;
 }
 
 TEST(Math, SystemOfEqs_AutoP1_M2M1)
@@ -408,7 +403,7 @@ TEST(Math, SystemOfEqs_AutoP1_M2M1)
     BaseLib::Options* option = defineCouplingP1_M2M1();
     std::vector<MyMyCouplingEQS*> list_sub_problem;
     CoupledProblemFactory<MyConvergenceCheck4Array> eqs_fac(sysEqs, ini_para, list_sub_problem);
-    MyConvergenceChecker4ArrayFactory checker;
+    //MyConvergenceChecker4ArrayFactory checker;
     CouplingStrucutreBuilder4SysEqs<MyConvergenceCheck4Array>::type cpl_builder;
     ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac);
 
@@ -430,6 +425,10 @@ TEST(Math, SystemOfEqs_AutoP1_M2M1)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete cpl_sys;
+    delete option;
 }
 
 TEST(Math, SystemOfEqs_AutoP1_3M1)
@@ -444,7 +443,7 @@ TEST(Math, SystemOfEqs_AutoP1_3M1)
     BaseLib::Options* option = defineCouplingP1_3M1();
     std::vector<MyMyCouplingEQS*> list_sub_problem;
     CoupledProblemFactory<MyConvergenceCheck4Array> eqs_fac(sysEqs, ini_para, list_sub_problem);
-    MyConvergenceChecker4ArrayFactory checker;
+    //MyConvergenceChecker4ArrayFactory checker;
     CouplingStrucutreBuilder4SysEqs<MyConvergenceCheck4Array>::type cpl_builder;
     ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac);
 
@@ -466,6 +465,10 @@ TEST(Math, SystemOfEqs_AutoP1_3M1)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete cpl_sys;
+    delete option;
 }
 
 TEST(Math, SystemOfEqs_AutoP1_P2M1)
@@ -480,7 +483,7 @@ TEST(Math, SystemOfEqs_AutoP1_P2M1)
     BaseLib::Options* option = defineCouplingP1_P2M1();
     std::vector<MyMyCouplingEQS*> list_sub_problem;
     CoupledProblemFactory<MyConvergenceCheck4Array> eqs_fac(sysEqs, ini_para, list_sub_problem);
-    MyConvergenceChecker4ArrayFactory checker;
+    //MyConvergenceChecker4ArrayFactory checker;
     CouplingStrucutreBuilder4SysEqs<MyConvergenceCheck4Array>::type cpl_builder;
     ICoupledSystem* cpl_sys = cpl_builder.build(option, eqs_fac);
 
@@ -502,4 +505,8 @@ TEST(Math, SystemOfEqs_AutoP1_P2M1)
     ASSERT_NEAR(1., (*v1)[0], epsilon);
     ASSERT_NEAR(2., (*v2)[0], epsilon);
     ASSERT_NEAR(3., (*v3)[0], epsilon);
+
+    //BaseLib::releaseObjectsInStdVector(list_sub_problem);
+    delete cpl_sys;
+    delete option;
 }

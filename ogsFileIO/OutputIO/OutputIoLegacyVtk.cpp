@@ -34,7 +34,7 @@ void OutputIOLegacyVtk::WriteAsciiFile(std::string str_file_name, const IMesh &m
     vtk_file.close();
 };
 
-void OutputIOLegacyVtk::WriteVTKHeader(std::fstream &vtk_file, int time_step_number, double simulation_time, std::vector<NodalScalarValue> &nodalScalarValues)
+void OutputIOLegacyVtk::WriteVTKHeader(std::fstream &vtk_file, int time_step_number, double simulation_time, std::vector<NodalScalarValue> &/*nodalScalarValues*/)
 {
     MeshIOLegacyVtk::WriteVTKHeader(vtk_file);
     // time information

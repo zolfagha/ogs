@@ -75,6 +75,7 @@ CKinReact::CKinReact(void)
 	stochmet.clear();
 	rateconstant = 0.0;
 	rateorder = 0.0;
+    decay_rate = 0.0; // HS
 	number_monod = 0;
 	number_inhibit = 0;
 	number_production = 0;
@@ -112,6 +113,9 @@ CKinReact::CKinReact(void)
 	typeflag_exchange_freundlich = 0;
 	typeflag_napldissolution = 0;
 	typeflag_iso_fract = 0;               // CB isotope fractionation
+
+	currentnode = 0;
+	number = 0;
 }
 
 /***************************************************************************
@@ -1862,7 +1866,7 @@ bool CKinBlob::Read(ifstream* rfd_file)
 	char line[MAX_ZEILE];
 	string line_string, line_str1, s_geo_type, s_geo_name;
 	string hash("#"), dollar("$");
-	bool new_keyword = false, OK = true;
+	bool new_keyword = false; //, OK = true;
 	size_t index;
 	// double d_inivalue;
 	std::stringstream in;
@@ -2228,6 +2232,8 @@ CKinReactData::CKinReactData(void)
 	ReactNeighborhood.clear();            // node indices of local neighborhood around individual nodes
 
 	debugoutflag = false;
+
+	concentrationmatrix = NULL;
 }
 
 /**************************************************************************

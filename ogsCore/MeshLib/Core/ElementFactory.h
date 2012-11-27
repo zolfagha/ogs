@@ -18,7 +18,7 @@ namespace MeshLib
 {
 
 /**
- * \brief Element factory
+ * \brief Mesh element factory
  */
 class ElemenetFactory
 {

@@ -89,6 +89,36 @@ CFluidProperties::CFluidProperties()
 //    Fem_Ele_Std = NULL;
 //    // WW
 //    molar_mass = COMP_MOL_MASS_AIR;
+
+    cal_gravity = true;
+    molar_mass = .0;
+    rho_0 = .0;
+    drho_dp = .0;
+    drho_dT = .0;
+    drho_dC = .0;
+    diffusion = .0;
+    my_0 = .0;
+    dmy_dp = .0;
+    specific_heat_capacity = .0;
+    heat_conductivity = .0;
+    p_0 = .0;
+    T_0 = .0;
+    C_0 = .0;
+    T_Latent1 = .0;
+    T_Latent2 = .0;
+    latent_heat = .0;
+    compressibility_model_pressure = 0;
+    compressibility_model_temperature = 0;
+    compressibility_pressure = .0;
+    compressibility_temperature = .0;
+    JTC = 0;
+    density_model = 0;
+    viscosity_model = 0;
+    heat_conductivity_model = 0;
+    heat_capacity_model = 0;
+    diffusion_model = 0;
+    heat_phase_change_curve = 0;
+    phase = 0;
 }
 
 /**************************************************************************
@@ -500,13 +530,16 @@ bool MFPRead(const std::string &file_base_name, std::vector<CFluidProperties*> &
     mfp_file.seekg(0L,std::ios::beg);
     //========================================================================
     // Keyword loop
-    std::cout << "MFPRead" << std::endl;
+    std::cout << "MFPRead ... " << std::flush;
     while (!mfp_file.eof())
     {
         mfp_file.getline(line,MAX_ZEILE);
         line_string = line;
-        if(line_string.find("#STOP") != std::string::npos)
-            return true;
+        if(line_string.find("#STOP") != std::string::npos) {
+            std::cout << "done, read " << mfp_vector.size() << " fluid properties" <<
+            std::endl;
+           return true;
+        }
         //----------------------------------------------------------------------
         // keyword found
         if(line_string.find("#FLUID_PROPERTIES") != std::string::npos)

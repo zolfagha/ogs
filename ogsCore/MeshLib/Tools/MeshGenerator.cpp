@@ -13,8 +13,11 @@
 #include "MeshGenerator.h"
 
 #include <memory>
+#include <set>
+#include <cstddef>
 #include "GeoLib/Point.h"
-#include "MeshLib/Topology/Topology.h"
+#include "MeshLib/Topology/TopologySequentialNodes2Elements.h"
+#include "MeshLib/Tools/Tools.h"
 
 namespace MeshLib
 {
@@ -108,7 +111,7 @@ void MeshGenerator::generateSubMesh(const MeshLib::IMesh &src, const std::vector
     MeshLib::UnstructuredMesh* new_msh = new MeshLib::UnstructuredMesh(src.getGeometricProperty()->getCoordinateSystem().getType());
     std::set<size_t> list_nodes_subset;
     for (size_t i=0; i<list_e.size(); i++) {
-        const MeshLib::IElement *e = src.getElemenet(list_e[i]);
+        const MeshLib::IElement *e = src.getElement(list_e[i]);
         for (size_t j=0; j<e->getNumberOfNodes(); j++) {
             list_nodes_subset.insert(e->getNodeID(j));
         }
@@ -122,7 +125,7 @@ void MeshGenerator::generateSubMesh(const MeshLib::IMesh &src, const std::vector
     }
 
     for (size_t i=0; i<list_e.size(); i++) {
-        const MeshLib::IElement *e = src.getElemenet(list_e[i]);
+        const MeshLib::IElement *e = src.getElement(list_e[i]);
         MeshLib::IElement *new_e = e->clone();
         for (size_t j=0; j<e->getNumberOfNodes(); j++) {
             new_e->setNodeID(j, map_global2local.mapAtoB(e->getNodeID(j)));
@@ -130,6 +133,76 @@ void MeshGenerator::generateSubMesh(const MeshLib::IMesh &src, const std::vector
         new_msh->addElement(new_e);
     }
     dest = new_msh;
+}
+
+/**
+ * generate higher order mesh
+ */
+void MeshGenerator::generateHigherOrderUnstrucuredMesh(UnstructuredMesh &msh, size_t order)
+{
+    assert(order<3);
+
+    TopologySequentialNodes2Elements nod2ele(msh);
+
+    if (msh.getNumberOfEdges()==0) {
+        createEdgeElements(&msh);
+    }
+
+    // make all edges higher order
+    for (size_t i=0; i<msh.getNumberOfEdges(); i++) {
+        IElement* e = msh.getEdgeElement(i);
+        double const* const pnt0(msh.getNodeCoordinatesRef(e->getNodeID(0))->getData());
+        double const* const pnt1(msh.getNodeCoordinatesRef(e->getNodeID(1))->getData());
+        e->setMaximumOrder(order);
+        if (order==2) {
+            // add midpoint
+            GeoLib::Point p(.5 * (pnt0[0] + pnt1[0]), 0.5 * (pnt0[1] + pnt1[1]), 0.5 * (pnt0[2] + pnt1[2]));
+            size_t nod_id = msh.addNode(p, 2);
+            //size_t nod_id = msh.addNode(GeoLib::Point(.5 * (pnt0[0] + pnt1[0]), 0.5 * (pnt0[1] + pnt1[1]), 0.5 * (pnt0[2] + pnt1[2])), 2);
+            e->setNodeID(2, nod_id);
+        } else {
+            //
+            std::cout << "***Error: order (" << order << ") is not supported in generateHigherOrderUnstrucuredMesh()" << std::endl;
+        }
+    }
+
+    // set the new node ids to all elements
+    for (size_t i=0; i<msh.getNumberOfElements(); i++) {
+        IElement* e = msh.getElement(i);
+        size_t e_nnodes1 = e->getNumberOfNodes(1);
+        e->setMaximumOrder(order);
+        // for each edge
+        for (size_t j=0; j<e->getNumberOfEdges(); j++) {
+            IElement *edge = e->getEdge(j);
+            size_t new_nod = edge->getNodeID(2);
+            size_t local_id = e_nnodes1 + j;
+            e->setNodeID(local_id, new_nod);
+        }
+
+        // Quad 9
+        if (e->getShapeType() == ElementShape::QUAD || e->getNumberOfNodes(2)==9)
+        {
+            double x0, y0, z0;
+            x0 = y0 = z0 = 0.0;
+            std::vector<size_t> list_e_nodes;
+            e->getNodeIDList(1, list_e_nodes);
+            for (size_t i = 0; i < list_e_nodes.size(); i++) // Nodes
+            {
+                const GeoLib::Point* pt = msh.getNodeCoordinatesRef(list_e_nodes[i]);
+                double const* const pnt_i(pt->getData());
+                x0 += pnt_i[0];
+                y0 += pnt_i[1];
+                z0 += pnt_i[2];
+            }
+            x0 /= (double) e_nnodes1;
+            y0 /= (double) e_nnodes1;
+            z0 /= (double) e_nnodes1;
+            GeoLib::Point p(x0,y0,z0);
+            size_t nodid = msh.addNode(p,2);
+            //size_t nodid = msh.addNode(GeoLib::Point(x0,y0,z0),2);
+            e->setNodeID(8, nodid);
+        }
+    }
 }
 
 }

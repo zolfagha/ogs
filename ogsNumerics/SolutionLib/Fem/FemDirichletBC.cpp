@@ -19,6 +19,20 @@
 namespace SolutionLib
 {
 
+FemDirichletBC::FemDirichletBC(const MeshLib::IMesh* msh, const GeoLib::GeoObject* geo, NumLib::ITXFunction* bc_func)
+    : _msh(msh), _geo(geo), _bc_func(bc_func)
+{
+    _is_transient = !bc_func->isTemporallyConst();
+    _do_setup = true;
+}
+
+FemDirichletBC::FemDirichletBC(const std::vector<size_t> &vec_node_id, const std::vector<double> &vec_node_values)
+    : _msh(NULL), _geo(NULL), _bc_func(NULL), _vec_nodes(vec_node_id), _vec_values(vec_node_values)
+{
+    _is_transient = false;
+    _do_setup = false;
+}
+
 /// setup B.C.
 void FemDirichletBC::setup(size_t order)
 {

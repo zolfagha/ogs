@@ -16,7 +16,7 @@
 
 #include "GeoLib/Point.h"
 #include "MeshLib/Tools/Tools.h"
-#include "FemLib/Core/DataType.h"
+#include "MathLib/DataType.h"
 
 namespace FemLib
 {
@@ -51,7 +51,7 @@ NeumannBC2FEM::NeumannBC2FEM(const MeshLib::IMesh &msh, LagrangianFeObjectContai
                 e->setCurrentOrder(msh.getCurrentOrder());
                 const size_t edge_nnodes = e->getNumberOfNodes();
                 // set values at nodes
-                LocalVector nodal_val(edge_nnodes);
+                MathLib::LocalVector  nodal_val(edge_nnodes);
                 for (size_t i_nod=0; i_nod<edge_nnodes; i_nod++) {
                     const GeoLib::Point* x = msh.getNodeCoordinatesRef(e->getNodeID(i_nod));
                     double v;
@@ -62,11 +62,11 @@ NeumannBC2FEM::NeumannBC2FEM(const MeshLib::IMesh &msh, LagrangianFeObjectContai
                 IFiniteElement *fe_edge = feObjects.getFeObject(*e, msh.getCurrentOrder());
                 fe_edge->getIntegrationMethod()->initialize(*e, 2);
                 //IFiniteElement *fe_edge = _var->getFiniteElement(*e);
-                LocalVector result(edge_nnodes);
-                LocalMatrix M = LocalMatrix::Zero(edge_nnodes, edge_nnodes);
+                MathLib::LocalVector  result(edge_nnodes);
+                MathLib::LocalMatrix M = MathLib::LocalMatrix::Zero(edge_nnodes, edge_nnodes);
                 IFemNumericalIntegration *q = fe_edge->getIntegrationMethod();
                 double x_ref[3];
-                LocalMatrix fac(1,1);
+                MathLib::LocalMatrix fac(1,1);
                 fac(0,0) = 1;
                 for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
                     q->getSamplingPoint(j, x_ref);

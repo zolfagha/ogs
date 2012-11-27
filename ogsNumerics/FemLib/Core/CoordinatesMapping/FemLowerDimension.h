@@ -73,8 +73,8 @@ public:
         // calculate mapping functions in natural coordinates
         CoordinateMappingProperty* prop = const_cast<CoordinateMappingProperty*>(FemNaturalCoordinates::compute(natural_pt));
         // modify derivatives of shape functions
-        const LocalMatrix &matR = getRotationMatrix();
-        LocalMatrix dshape_local = LocalMatrix::Zero(matR.rows(), prop->dshape_dx->cols());
+        const MathLib::LocalMatrix &matR = getRotationMatrix();
+        MathLib::LocalMatrix dshape_local = MathLib::LocalMatrix::Zero(matR.rows(), prop->dshape_dx->cols());
         dshape_local.topLeftCorner(prop->dshape_dx->rows(), prop->dshape_dx->cols()) = (*prop->dshape_dx);
         (*prop->dshape_dx) =  matR * dshape_local;
         //(*prop->dshape_dx) =  matR.transpose() * dshape_local;
@@ -85,12 +85,12 @@ public:
     /// map natural coordinates to physical coordinates
     virtual void mapToPhysicalCoordinates(const double* natural_pt, double* physical_pt)
     {
-        LocalVector x_local(_msh_dim);
+        MathLib::LocalVector x_local(_msh_dim);
         FemNaturalCoordinates::mapToPhysicalCoordinates(natural_pt, (double*)&x_local[0]);
 
-        const LocalMatrix &matR = getRotationMatrix();
+        const MathLib::LocalMatrix &matR = getRotationMatrix();
         assert((unsigned)matR.rows() == _msh_dim);
-        LocalVector x_global(_msh_dim);
+        MathLib::LocalVector x_global(_msh_dim);
         x_global = matR * x_local;
         for (size_t i=0; i<_msh_dim; i++)
             physical_pt[i] = x_global[i];
@@ -99,24 +99,24 @@ public:
     /// map physical coordinates to natural coordinates
     virtual void mapFromPhysicalCoordinates(const double* physical_pt, double* natural_pt)
     {
-        LocalVector x_global(_msh_dim);
+        MathLib::LocalVector x_global(_msh_dim);
         for (size_t i=0; i<_msh_dim; i++)
             x_global[i] = physical_pt[i];
-        const LocalMatrix &matR = getRotationMatrix();
-        assert(matR.rows() == _msh_dim);
-        LocalVector x_local(_msh_dim);
+        const MathLib::LocalMatrix &matR = getRotationMatrix();
+        assert(static_cast<size_t>(matR.rows()) == _msh_dim);
+        MathLib::LocalVector x_local(_msh_dim);
         x_local = matR.transpose() * x_global;
 
         FemNaturalCoordinates::mapFromPhysicalCoordinates(x_local.data(), natural_pt);
     }
 
 private:
-    const LocalMatrix& getRotationMatrix()
+    const MathLib::LocalMatrix& getRotationMatrix()
     {
         MeshLib::IElement* ele = FemNaturalCoordinates::getElement();
         MeshLib::ElementCoordinatesMappingLocal* ele_local_coord;
         ele_local_coord = (MeshLib::ElementCoordinatesMappingLocal*)ele->getMappedCoordinates();
-        const LocalMatrix &matR = ele_local_coord->getRotationMatrixToOriginal();
+        const MathLib::LocalMatrix &matR = ele_local_coord->getRotationMatrixToOriginal();
         return matR;
     }
 private:

@@ -16,7 +16,7 @@
 
 #include "DiscreteLib/Utils/DiscreteSystemContainerPerMesh.h"
 #include "Ogs6FemData.h"
-#include "FemLinearElasticTools.h"
+#include "PhysicsLib/FemLinearElasticTools.h"
 
 template <class T>
 size_t FunctionElementStressStrain<T>::getNumberOfStrainComponents() const
@@ -31,13 +31,13 @@ bool FunctionElementStressStrain<T>::initialize(const BaseLib::Options &option)
 {
     Ogs6FemData* femData = Ogs6FemData::getInstance();
 
-    size_t msh_id = option.getOption<size_t>("MeshID");
+    size_t msh_id = option.getOptionAsNum<size_t>("MeshID");
     MeshLib::IMesh* msh = femData->list_mesh[msh_id];
     _dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
     const size_t n_strain_components = getNumberOfStrainComponents();
 
     // create strain, stress vectors
-    NumLib::LocalVector v0(n_strain_components);
+    MathLib::LocalVector v0(n_strain_components);
     v0 *= .0;
     _strain = new MyIntegrationPointFunctionVector();
     _strain->initialize(_dis, v0);
@@ -51,9 +51,9 @@ bool FunctionElementStressStrain<T>::initialize(const BaseLib::Options &option)
         _vec_stress_components.push_back(new IntegrationPointScalarWrapper(_stress, i));
     }
     for (size_t i=0; i<n_strain_components; i++) {
-        OutputVariableInfo var1(this->getOutputParameterName(Strain) + getStressStrainComponentPostfix(i), OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_strain_components[i]);
+        OutputVariableInfo var1(this->getOutputParameterName(Strain) + getStressStrainComponentPostfix(i), msh_id, OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_strain_components[i]);
         femData->outController.setOutput(var1.name, var1);
-        OutputVariableInfo var2(this->getOutputParameterName(Stress) + getStressStrainComponentPostfix(i), OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_stress_components[i]);
+        OutputVariableInfo var2(this->getOutputParameterName(Stress) + getStressStrainComponentPostfix(i), msh_id, OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_stress_components[i]);
         femData->outController.setOutput(var2.name, var2);
     }
 
@@ -70,10 +70,11 @@ void FunctionElementStressStrain<T>::accept(const NumLib::TimeStep &/*time*/)
     //update data for output
     const size_t n_strain_components = getNumberOfStrainComponents();
     Ogs6FemData* femData = Ogs6FemData::getInstance();
+    const size_t msh_id = _dis->getMesh()->getID();
     for (size_t i=0; i<n_strain_components; i++) {
-        OutputVariableInfo var1(this->getOutputParameterName(Strain) + getStressStrainComponentPostfix(i), OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_strain_components[i]);
+        OutputVariableInfo var1(this->getOutputParameterName(Strain) + getStressStrainComponentPostfix(i), msh_id, OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_strain_components[i]);
         femData->outController.setOutput(var1.name, var1);
-        OutputVariableInfo var2(this->getOutputParameterName(Stress) + getStressStrainComponentPostfix(i), OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_stress_components[i]);
+        OutputVariableInfo var2(this->getOutputParameterName(Stress) + getStressStrainComponentPostfix(i), msh_id, OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _vec_stress_components[i]);
         femData->outController.setOutput(var2.name, var2);
     }
 };
@@ -98,7 +99,7 @@ int FunctionElementStressStrain<T>::solveTimeStep(const NumLib::TimeStep &/*time
     for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++)
     {
         // element setup
-        MeshLib::IElement* e = msh->getElemenet(i_e);
+        MeshLib::IElement* e = msh->getElement(i_e);
         const size_t nnodes = e->getNumberOfNodes();
         FemLib::IFiniteElement *fe = feObjects->getFeObject(*e);
         FemLib::IFemNumericalIntegration *integral = fe->getIntegrationMethod();
@@ -109,10 +110,10 @@ int FunctionElementStressStrain<T>::solveTimeStep(const NumLib::TimeStep &/*time
 
         MaterialLib::Solid *solidphase = femData->list_solid[e->getGroupID()];
         // set D
-        NumLib::LocalMatrix matD = NumLib::LocalMatrix::Zero(n_strain_components, n_strain_components);
+        MathLib::LocalMatrix matD = MathLib::LocalMatrix::Zero(n_strain_components, n_strain_components);
         //matD *= .0;
-        NumLib::LocalMatrix nv(1,1);
-        NumLib::LocalMatrix E(1,1);
+        MathLib::LocalMatrix nv(1,1);
+        MathLib::LocalMatrix E(1,1);
         solidphase->poisson_ratio->eval(e_pos, nv);
         solidphase->Youngs_modulus->eval(e_pos, E);
         double Lambda, G, K;
@@ -120,7 +121,7 @@ int FunctionElementStressStrain<T>::solveTimeStep(const NumLib::TimeStep &/*time
         MaterialLib::setElasticConsitutiveTensor(dim, Lambda, G, matD);
 
         // local u
-        NumLib::LocalVector local_u(dim*nnodes);
+        MathLib::LocalVector local_u(dim*nnodes);
         for (size_t j=0; j<nnodes; j++) {
             const size_t node_id = e->getNodeID(j);
             for (size_t k=0; k<dim; k++)
@@ -128,15 +129,15 @@ int FunctionElementStressStrain<T>::solveTimeStep(const NumLib::TimeStep &/*time
         }
 
         // for each integration points
-        NumLib::LocalMatrix matB = NumLib::LocalMatrix::Zero(n_strain_components, nnodes*dim);
-        NumLib::LocalMatrix matN = NumLib::LocalMatrix::Zero(dim, nnodes*dim);
+        MathLib::LocalMatrix matB = MathLib::LocalMatrix::Zero(n_strain_components, nnodes*dim);
+        MathLib::LocalMatrix matN = MathLib::LocalMatrix::Zero(dim, nnodes*dim);
         double r[3] = {};
         double x[3] = {};
         for (size_t ip=0; ip<n_gp; ip++) {
             integral->getSamplingPoint(ip, r);
             fe->computeBasisFunctions(r);
-            NumLib::LocalMatrix &N = *fe->getBasisFunction();
-            const NumLib::LocalMatrix &dN = *fe->getGradBasisFunction();
+            MathLib::LocalMatrix &N = *fe->getBasisFunction();
+            const MathLib::LocalMatrix &dN = *fe->getGradBasisFunction();
             fe->getRealCoordinates(x);
 
             // set N,B
@@ -144,12 +145,12 @@ int FunctionElementStressStrain<T>::solveTimeStep(const NumLib::TimeStep &/*time
             setB_Matrix_byPoint(dim, nnodes, dN, matB);
 
             // strain
-            NumLib::LocalVector gp_strain(n_strain_components);
+            MathLib::LocalVector gp_strain(n_strain_components);
             gp_strain.noalias() = matB * local_u;
             strain->setIntegrationPointValue(i_e, ip, gp_strain);
 
             // stress
-            NumLib::LocalVector gp_stress(n_strain_components);
+            MathLib::LocalVector gp_stress(n_strain_components);
             gp_stress = matD * gp_strain;
             stress->setIntegrationPointValue(i_e, ip, gp_stress);
 

@@ -27,73 +27,199 @@
 #include "NumLib/TimeStepping/TimeStep.h"
 #include "MaterialLib/PorousMedia.h"
 #include "MaterialLib/Compound.h"
-
+#include "ChemLib/chemReductionKin.h"
+#include "Concentrations.h"
 #include "Ogs6FemData.h"
 
+template <class T_NODAL_FUNCTION_SCALAR, class T_FUNCTION_DATA>
 class NonLinearReactiveTransportJacobianLocalAssembler: public NumLib::IElementWiseTransientJacobianLocalAssembler
 {
 public:
-    NonLinearReactiveTransportJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
-        : _feObjects(*feObjects), _vel(NULL)
+	NonLinearReactiveTransportJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects, ogsChem::chemReductionKin* ReductionScheme, T_FUNCTION_DATA* concentrations)
+        : _feObjects(*feObjects), _vel(NULL), _reductionKin(ReductionScheme), _concentrations(concentrations), _xi_mob_rates(NULL), _xi_immob_rates(NULL)
     {
     };
 
-    virtual ~NonLinearReactiveTransportJacobianLocalAssembler() {};
+    virtual ~NonLinearReactiveTransportJacobianLocalAssembler()
+    {
+        _vel              = NULL;
+        _reductionKin     = NULL; 
+        _concentrations   = NULL;
+        _xi_mob_rates     = NULL;
+        _xi_mob_rates_old = NULL;
+        _xi_immob_rates   = NULL;
+        _drates_dxi       = NULL;
+    };
 
     void setVelocity(const NumLib::ITXFunction *vel)
     {
         _vel = const_cast<NumLib::ITXFunction*>(vel);
     }
 
-    void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &, const NumLib::LocalVector &/*u1*/, const NumLib::LocalVector &/*u0*/, NumLib::LocalMatrix &localJ)
+	void set_xi_mob_rates(   std::vector<T_NODAL_FUNCTION_SCALAR*> * xi_mob_rates )
+	{
+	    _xi_mob_rates = xi_mob_rates; 
+	}
+    
+	void set_xi_immob_rates( std::vector<T_NODAL_FUNCTION_SCALAR*> * xi_immob_rates )
+	{
+	    _xi_immob_rates = xi_immob_rates; 
+	}
+
+	void set_xi_mob_drate_dxi( std::vector<T_NODAL_FUNCTION_SCALAR*> * drates_dxi )
+	{
+	    _drates_dxi = drates_dxi; 
+	}
+
+	T_FUNCTION_DATA* get_function_data(void)
+	{
+	    return _concentrations; 
+	}
+
+	void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &, const MathLib::LocalVector & u1, const MathLib::LocalVector & u0, MathLib::LocalMatrix & localJ)
     {
-        FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
-        size_t mat_id = e.getGroupID();
+		size_t i, j, k, m, n, node_idx; 
+  		size_t n_nodes = e.getNumberOfNodes(); 
+		size_t n_xi_mob = _xi_mob_rates->size(); 
+        size_t mat_id  = e.getGroupID(); 
+		const size_t n_dim = e.getDimension();
+ 
+        // clear the local Jacobian matrix
+        localJ = MathLib::LocalMatrix::Zero(n_nodes*n_xi_mob, n_nodes*n_xi_mob);
+
+		FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
         MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];
         double cmp_mol_diffusion = .0;
         // _cmp->molecular_diffusion->eval(0, cmp_mol_diffusion);
+        double dt = time.getTimeStepSize();  // time step size
+        double theta = 1.0;
 
-        NumLib::LocalMatrix matM(localJ);
-        NumLib::LocalMatrix matDiff(localJ);
-        NumLib::LocalMatrix matAdv(localJ);
+        MathLib::LocalMatrix matM(n_nodes, n_nodes);
+        MathLib::LocalMatrix matDiff(n_nodes, n_nodes);
+        MathLib::LocalMatrix matAdv(n_nodes, n_nodes);
+        MathLib::LocalMatrix mat_dR(n_nodes, n_nodes); 
+		MathLib::LocalVector vec_drates_dxi_value = MathLib::LocalVector::Zero(n_nodes);
 
         FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
-        double gp_x[3], real_x[3];
-        NumLib::LocalMatrix poro(1,1);
-        NumLib::LocalMatrix d_poro(1,1);
+
+		size_t n_sp    = q->getNumberOfSamplingPoints();  // number of sampling points
+		double gp_x[3], real_x[3];
+        MathLib::LocalMatrix poro(1,1);
+        MathLib::LocalMatrix d_poro = MathLib::LocalMatrix::Zero(3,3);   // HS, change size to 1 by 3
+        double disp_l = 0.0; 
+        double disp_t = 0.0; 
+        MathLib::LocalMatrix d_rate(1,1); 
+        MathLib::LocalMatrix localJ_tmp = MathLib::LocalMatrix::Zero(n_nodes, n_nodes);
         NumLib::ITXFunction::DataType v;
+		NumLib::ITXFunction::DataType v2;
+		
+        for (i=0; i<n_xi_mob; i++) {
 
-        for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
-            q->getSamplingPoint(j, gp_x);
-            fe->computeBasisFunctions(gp_x);
-            fe->getRealCoordinates(real_x);
+			matM    = MathLib::LocalMatrix::Zero(n_nodes, n_nodes);
+			matDiff = MathLib::LocalMatrix::Zero(n_nodes, n_nodes);
+			matAdv  = MathLib::LocalMatrix::Zero(n_nodes, n_nodes);
 
-            pm->porosity->eval(real_x, poro);
-            d_poro(0,0) = cmp_mol_diffusion * poro(0,0);
-            _vel->eval(real_x, v);
+			for (j=0; j<n_sp; j++) {
+				q->getSamplingPoint(j, gp_x);
+				fe->computeBasisFunctions(gp_x);
+				fe->getRealCoordinates(real_x);
+                NumLib::TXPosition gp_pos(NumLib::TXPosition::IntegrationPoint, e.getID(), j, real_x);
 
-            fe->integrateWxN(j, poro, matM);
-            fe->integrateDWxDN(j, d_poro, matDiff);
-            fe->integrateWxDN(j, v, matAdv);
-        }
+				pm->porosity->eval(real_x, poro);
+                pm->dispersivity_long->eval(gp_pos, disp_l);
+                pm->dispersivity_trans->eval(gp_pos, disp_t);
 
-        double dt = time.getTimeStepSize();
-        double theta = 1.0;
-        matM *= 1.0 / dt;
-        matDiff *= theta;
-        matAdv *= theta;
-        localJ = matM;
-        localJ += matDiff;
-        localJ += matAdv;
+                d_poro(0,0) = cmp_mol_diffusion * poro(0,0);
+                d_poro(1,1) = cmp_mol_diffusion * poro(0,0);
+                d_poro(2,2) = cmp_mol_diffusion * poro(0,0);
 
-        //std::cout << "M="; localM.write(std::cout); std::cout << std::endl;
-        //std::cout << "L="; matDiff.write(std::cout); std::cout << std::endl;
-        //std::cout << "A="; matAdv.write(std::cout); std::cout << std::endl;
-    }
+				_vel->eval(real_x, v);
+				v2 = v.topRows(n_dim).transpose();
+                
+                NumLib::ITXFunction::DataType dispersion_diffusion = NumLib::ITXFunction::DataType::Identity(n_dim, n_dim); 
+                dispersion_diffusion *= disp_l * v.norm(); 
+                dispersion_diffusion += (disp_l - disp_t) * ( v2.transpose() * v2 ) / v.norm(); 
+                dispersion_diffusion += d_poro.topLeftCorner(n_dim, n_dim);
+				
+                fe->integrateWxN(j, poro, matM);
+				fe->integrateDWxDN(j, dispersion_diffusion, matDiff);
+				fe->integrateWxDN(j, v2, matAdv); 
+            
+				// now dealing with the rate change terms
+				// each location has n_xi_mob * n_xi_mob dR/dxi entries
+				for (m=0; m<n_xi_mob; m++)
+				{
+					for (n=0; n<n_xi_mob; n++)
+					{
+						mat_dR = MathLib::LocalMatrix::Zero(n_nodes, n_nodes); 
+						// loop over all the adjacent nodes to get the right drate/dxi value
+               			for (k=0; k<n_nodes; k++)
+             			{
+							node_idx = e.getNodeID( k ); 
+             				vec_drates_dxi_value( k ) = _drates_dxi->at(i*n_xi_mob*n_xi_mob + m*n_xi_mob+n)->getValue( node_idx ); 
+						}  // end of for k<n_nodes
+						// get the mean value
+						d_rate(0,0) = vec_drates_dxi_value.mean(); 
+						fe->integrateWxN(j, d_rate, mat_dR);
+						// plugging mat_dR to the corresponding Jacobian matrix position
+						localJ.block(n_nodes*m,n_nodes*n,n_nodes,n_nodes) -= mat_dR;
+					}  // end of for n
+				}  // end of for m
+			}  // end of for j
+
+			matM *= 1.0 / dt;
+			matDiff *= theta;
+			matAdv *= theta;
+			localJ_tmp = matM;
+			localJ_tmp += matDiff;
+			localJ_tmp += matAdv;
+            
+            localJ.block(n_nodes*i,n_nodes*i,n_nodes,n_nodes) += localJ_tmp;
+
+        }  // end of for i
+
+    }  // end of function assembly
 
 private:
+    /**
+      * FEM object
+      */ 
     FemLib::LagrangianFeObjectContainer _feObjects;
+
+    /**
+      * velocity function
+      */ 
     NumLib::ITXFunction* _vel;
+
+    /**
+      * pointer to the reduction scheme
+      */ 
+	ogsChem::chemReductionKin* _reductionKin; 
+
+    /**
+      * concentration data
+      */ 
+	T_FUNCTION_DATA* _concentrations; 
+
+    /**
+      * nodal xi_mob rate values
+      */ 
+	std::vector<T_NODAL_FUNCTION_SCALAR*> * _xi_mob_rates;
+
+    /**
+      * nodal xi_mob rate old values
+      */ 
+    std::vector<T_NODAL_FUNCTION_SCALAR*> * _xi_mob_rates_old;
+    
+    /**
+      * nodal xi_immob rate values
+      */ 
+    std::vector<T_NODAL_FUNCTION_SCALAR*> * _xi_immob_rates;
+	
+    /**
+      * nodal drates over dxi values
+      */ 
+    std::vector<T_NODAL_FUNCTION_SCALAR*> * _drates_dxi;
 };
 
 #endif  // end of ifndef

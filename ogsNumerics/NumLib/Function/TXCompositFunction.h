@@ -38,7 +38,7 @@ template <class T1, class T2, template <typename> class T_OPERATOR>
 class TXCompositFunction : public ITXFunction
 {
 public:
-    TXCompositFunction(T1 &f1, T2 &f2) : _f1(&f1), _f2(&f2) {};
+    TXCompositFunction(T1* f1, T2* f2) : _f1(f1), _f2(f2) {};
     virtual ~TXCompositFunction() {};
 
     virtual void eval(const TXPosition &x, DataType &val) const
@@ -61,12 +61,12 @@ public:
 
     virtual TXCompositFunction* clone() const
     {
-        return new TXCompositFunction<T1, T2, T_OPERATOR>(*_f1, *_f2);
+        return new TXCompositFunction<T1, T2, T_OPERATOR>(_f1, _f2);
     }
 
 private:
-    T1 *_f1;
-    T2 *_f2;
+    T1* _f1;
+    T2* _f2;
 };
 
 } //end

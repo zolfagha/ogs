@@ -19,7 +19,7 @@
 #include "MeshLib/Core/UnstructuredMesh.h"
 #include "MeshLib/Core/IElementCoordinatesMapping.h"
 #include "MeshLib/Core/ElementCoordinatesMappingLocal.h"
-#include "MeshLib/Topology/Topology.h"
+#include "MeshLib/Topology/TopologyNode2NodesConnectedByEdges.h"
 #include "MeshLib/Tools/MeshGenerator.h"
 #include "MeshLib/Tools/Tools.h"
 
@@ -32,7 +32,7 @@ using namespace MeshLib;
 TEST(Mesh, topoN2N)
 {
     IMesh* msh = MeshGenerator::generateStructuredRegularQuadMesh(2.0, 2, .0, .0, .0);
-    TopologyNode2NodesConnectedByEdges topo_node2nodes(msh);
+    TopologyNode2NodesConnectedByEdges topo_node2nodes(*msh);
 
     ASSERT_EQ(topo_node2nodes.getNumberOfNodes(), msh->getNumberOfNodes());
 //    size_t expected_conn_nodes0[] = {1,3};
@@ -74,7 +74,7 @@ UnstructuredMesh * createTriangleElement(GeoLib::Point pt1, GeoLib::Point pt2, G
 TEST(Mesh, MappingLineX1)
 {
     UnstructuredMesh* msh = createLineElement(GeoLib::Point(1,0,0), GeoLib::Point(3,0,0), CoordinateSystemType::X);
-    ElementCoordinatesMappingLocal emap(msh, *msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    ElementCoordinatesMappingLocal emap(msh, *msh->getElement(0), msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -88,7 +88,7 @@ TEST(Mesh, MappingLineX1)
 //TEST(Mesh, MappingLineX2)
 //{
 //    UnstructuredMesh* msh = createLineElement(GeoLib::Point(1,0,0), GeoLib::Point(3,0,0), CoordinateSystemType::X);
-//    ElementCoordinatesMappingLocal emap(msh, *msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+//    ElementCoordinatesMappingLocal emap(msh, *msh->getElement(0), msh->getGeometricProperty()->getCoordinateSystem());
 //
 //    GeoLib::Point* p1 = emap.getNodePoint(0);
 //    GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -100,7 +100,7 @@ TEST(Mesh, MappingLineX1)
 //TEST(Mesh, MappingLineX3)
 //{
 //    UnstructuredMesh* msh = createLineElement(GeoLib::Point(3,0,0), GeoLib::Point(1,0,0), CoordinateSystemType::X);
-//    ElementCoordinatesMappingLocal emap(msh, *msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+//    ElementCoordinatesMappingLocal emap(msh, *msh->getElement(0), msh->getGeometricProperty()->getCoordinateSystem());
 //
 //    GeoLib::Point* p1 = emap.getNodePoint(0);
 //    GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -112,7 +112,7 @@ TEST(Mesh, MappingLineX1)
 TEST(Mesh, MappingLineY1)
 {
     UnstructuredMesh* msh = createLineElement(GeoLib::Point(0,1,0), GeoLib::Point(0,3,0), CoordinateSystemType::Y);
-    ElementCoordinatesMappingLocal emap(msh, *msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    ElementCoordinatesMappingLocal emap(msh, *msh->getElement(0), msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -126,7 +126,7 @@ TEST(Mesh, MappingLineY1)
 //TEST(Mesh, MappingLineY2)
 //{
 //    UnstructuredMesh* msh = createLineElement(GeoLib::Point(0,1,0), GeoLib::Point(0,3,0), CoordinateSystemType::Y);
-//    ElementCoordinatesMappingLocal emap(msh, *msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+//    ElementCoordinatesMappingLocal emap(msh, *msh->getElement(0), msh->getGeometricProperty()->getCoordinateSystem());
 //
 //    GeoLib::Point* p1 = emap.getNodePoint(0);
 //    GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -138,7 +138,7 @@ TEST(Mesh, MappingLineY1)
 //TEST(Mesh, MappingLineY3)
 //{
 //    UnstructuredMesh* msh = createLineElement(GeoLib::Point(0,3,0), GeoLib::Point(0,1,0), CoordinateSystemType::Y);
-//    ElementCoordinatesMappingLocal emap(msh, *msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+//    ElementCoordinatesMappingLocal emap(msh, *msh->getElement(0), msh->getGeometricProperty()->getCoordinateSystem());
 //
 //    GeoLib::Point* p1 = emap.getNodePoint(0);
 //    GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -151,7 +151,7 @@ TEST(Mesh, MappingLineY1)
 TEST(Mesh, MappingLineZ1)
 {
     UnstructuredMesh* msh = createLineElement(GeoLib::Point(0,0,1), GeoLib::Point(0,0,3), CoordinateSystemType::Z);
-    ElementCoordinatesMappingLocal emap(msh, *msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    ElementCoordinatesMappingLocal emap(msh, *msh->getElement(0), msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -166,7 +166,7 @@ TEST(Mesh, MappingLineZ1)
 //TEST(Mesh, MappingLineZ2)
 //{
 //    UnstructuredMesh* msh = createLineElement(GeoLib::Point(0,0,1), GeoLib::Point(0,0,3), CoordinateSystemType::Z);
-//    ElementCoordinatesMappingLocal emap(msh, *msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+//    ElementCoordinatesMappingLocal emap(msh, *msh->getElement(0), msh->getGeometricProperty()->getCoordinateSystem());
 //
 //    GeoLib::Point* p1 = emap.getNodePoint(0);
 //    GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -178,7 +178,7 @@ TEST(Mesh, MappingLineZ1)
 //TEST(Mesh, MappingLineZ3)
 //{
 //    UnstructuredMesh* msh = createLineElement(GeoLib::Point(0,0,3), GeoLib::Point(0,0,1), CoordinateSystemType::Z);
-//    ElementCoordinatesMappingLocal emap(msh, *msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+//    ElementCoordinatesMappingLocal emap(msh, *msh->getElement(0), msh->getGeometricProperty()->getCoordinateSystem());
 //
 //    GeoLib::Point* p1 = emap.getNodePoint(0);
 //    GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -190,7 +190,7 @@ TEST(Mesh, MappingLineZ1)
 TEST(Mesh, MappingLineXY1)
 {
     UnstructuredMesh* msh = createLineElement(GeoLib::Point(0,3,0), GeoLib::Point(0,1,0), CoordinateSystemType::XY);
-    ElementCoordinatesMappingLocal emap(msh, *msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    ElementCoordinatesMappingLocal emap(msh, *msh->getElement(0), msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -202,7 +202,7 @@ TEST(Mesh, MappingLineXY1)
 TEST(Mesh, MappingLineXY2)
 {
     UnstructuredMesh* msh = createLineElement(GeoLib::Point(1,1,0), GeoLib::Point(2,2,0), CoordinateSystemType::XY);
-    ElementCoordinatesMappingLocal emap(msh, *msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    ElementCoordinatesMappingLocal emap(msh, *msh->getElement(0), msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -214,7 +214,7 @@ TEST(Mesh, MappingLineXY2)
 TEST(Mesh, MappingLineXZ1)
 {
     UnstructuredMesh* msh = createLineElement(GeoLib::Point(0,0,3), GeoLib::Point(0,0,1), CoordinateSystemType::XZ);
-    ElementCoordinatesMappingLocal emap(msh, *msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    ElementCoordinatesMappingLocal emap(msh, *msh->getElement(0), msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -226,7 +226,7 @@ TEST(Mesh, MappingLineXZ1)
 TEST(Mesh, MappingLineXZ2)
 {
     UnstructuredMesh* msh = createLineElement(GeoLib::Point(1,0,1), GeoLib::Point(2,0,2), CoordinateSystemType::XZ);
-    ElementCoordinatesMappingLocal emap(msh, *msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    ElementCoordinatesMappingLocal emap(msh, *msh->getElement(0), msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -238,7 +238,7 @@ TEST(Mesh, MappingLineXZ2)
 TEST(Mesh, MappingTriXY1)
 {
     UnstructuredMesh* msh = createTriangleElement(GeoLib::Point(1,1,0), GeoLib::Point(3,1,0), GeoLib::Point(1,3,0), CoordinateSystemType::XY);
-    ElementCoordinatesMappingLocal emap(msh, *msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    ElementCoordinatesMappingLocal emap(msh, *msh->getElement(0), msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -256,7 +256,7 @@ TEST(Mesh, MappingTriXY1)
 //TEST(Mesh, MappingTriXY2)
 //{
 //    UnstructuredMesh* msh = createTriangleElement(GeoLib::Point(3,1,0), GeoLib::Point(1,3,0), GeoLib::Point(1,1,0), CoordinateSystemType::XY);
-//    ElementCoordinatesMappingLocal emap(msh, *msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+//    ElementCoordinatesMappingLocal emap(msh, *msh->getElement(0), msh->getGeometricProperty()->getCoordinateSystem());
 //
 //    GeoLib::Point* p1 = emap.getNodePoint(0);
 //    GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -270,7 +270,7 @@ TEST(Mesh, MappingTriXY1)
 //TEST(Mesh, MappingTriXY3)
 //{
 //    UnstructuredMesh* msh = createTriangleElement(GeoLib::Point(1,3,0), GeoLib::Point(1,1,0), GeoLib::Point(3,1,0), CoordinateSystemType::XY);
-//    ElementCoordinatesMappingLocal emap(msh, *msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+//    ElementCoordinatesMappingLocal emap(msh, *msh->getElement(0), msh->getGeometricProperty()->getCoordinateSystem());
 //
 //    GeoLib::Point* p1 = emap.getNodePoint(0);
 //    GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -284,7 +284,7 @@ TEST(Mesh, MappingTriXY1)
 TEST(Mesh, MappingTriXZ1)
 {
     UnstructuredMesh* msh = createTriangleElement(GeoLib::Point(1,0,1), GeoLib::Point(3,0,1), GeoLib::Point(1,0,3), CoordinateSystemType::XZ);
-    ElementCoordinatesMappingLocal emap(msh, *msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    ElementCoordinatesMappingLocal emap(msh, *msh->getElement(0), msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -302,7 +302,7 @@ TEST(Mesh, MappingTriXZ1)
 TEST(Mesh, MappingTriYZ1)
 {
     UnstructuredMesh* msh = createTriangleElement(GeoLib::Point(0,1,1), GeoLib::Point(0,3,1), GeoLib::Point(0,1,3), CoordinateSystemType::YZ);
-    ElementCoordinatesMappingLocal emap(msh, *msh->getElemenet(0), msh->getGeometricProperty()->getCoordinateSystem());
+    ElementCoordinatesMappingLocal emap(msh, *msh->getElement(0), msh->getGeometricProperty()->getCoordinateSystem());
 
     GeoLib::Point* p1 = emap.getNodePoint(0);
     GeoLib::Point* p2 = emap.getNodePoint(1);
@@ -322,25 +322,25 @@ TEST(Mesh, HigherOrderLine1)
     UnstructuredMesh* msh = createLineElement(GeoLib::Point(0,0,0), GeoLib::Point(1,0,0), CoordinateSystemType::X);
     std::vector<IElement*> vec_edge;
     createEdgeElements(msh);
-    ASSERT_EQ(1, msh->getNumberOfEdges());
-    generateHigherOrderUnstrucuredMesh(*msh, 2);
+    ASSERT_EQ(1u, msh->getNumberOfEdges());
+    MeshGenerator::generateHigherOrderUnstrucuredMesh(*msh, 2);
 
     IElement* e = 0;
-    ASSERT_EQ(2, msh->getNumberOfNodes(1));
-    ASSERT_EQ(3, msh->getNumberOfNodes(2));
+    ASSERT_EQ(2u, msh->getNumberOfNodes(1));
+    ASSERT_EQ(3u, msh->getNumberOfNodes(2));
     msh->setCurrentOrder(1);
-    e = msh->getElemenet(0);
-    ASSERT_EQ(2, msh->getNumberOfNodes(1));
-    ASSERT_EQ(2, e->getNumberOfNodes());
+    e = msh->getElement(0);
+    ASSERT_EQ(2u, msh->getNumberOfNodes(1));
+    ASSERT_EQ(2u, e->getNumberOfNodes());
     msh->setCurrentOrder(2);
-    e = msh->getElemenet(0);
-    ASSERT_EQ(3, msh->getNumberOfNodes(2));
-    ASSERT_EQ(3, e->getNumberOfNodes());
+    e = msh->getElement(0);
+    ASSERT_EQ(3u, msh->getNumberOfNodes(2));
+    ASSERT_EQ(3u, e->getNumberOfNodes());
 
     e->setCurrentOrder(1);
-    ASSERT_EQ(2, e->getNumberOfNodes());
+    ASSERT_EQ(2u, e->getNumberOfNodes());
     e->setCurrentOrder(2);
-    ASSERT_EQ(3, e->getNumberOfNodes());
+    ASSERT_EQ(3u, e->getNumberOfNodes());
 
     const GeoLib::Point* p = msh->getNodeCoordinatesRef(2);
     ASSERT_DOUBLE_EQ(0.5, (*p)[0]);
@@ -354,25 +354,25 @@ TEST(Mesh, HigherOrderTriangle1)
     UnstructuredMesh* msh = createTriangleElement(GeoLib::Point(1,1,0), GeoLib::Point(3,1,0), GeoLib::Point(1,3,0), CoordinateSystemType::XY);
     std::vector<IElement*> vec_edge;
     createEdgeElements(msh);
-    ASSERT_EQ(3, msh->getNumberOfEdges());
-    generateHigherOrderUnstrucuredMesh(*msh, 2);
+    ASSERT_EQ(3u, msh->getNumberOfEdges());
+    MeshGenerator::generateHigherOrderUnstrucuredMesh(*msh, 2);
 
     IElement* e = 0;
-    ASSERT_EQ(3, msh->getNumberOfNodes(1));
-    ASSERT_EQ(6, msh->getNumberOfNodes(2));
+    ASSERT_EQ(3u, msh->getNumberOfNodes(1));
+    ASSERT_EQ(6u, msh->getNumberOfNodes(2));
     msh->setCurrentOrder(1);
-    e = msh->getElemenet(0);
-    ASSERT_EQ(3, msh->getNumberOfNodes(1));
-    ASSERT_EQ(3, e->getNumberOfNodes());
+    e = msh->getElement(0);
+    ASSERT_EQ(3u, msh->getNumberOfNodes(1));
+    ASSERT_EQ(3u, e->getNumberOfNodes());
     msh->setCurrentOrder(2);
-    e = msh->getElemenet(0);
-    ASSERT_EQ(6, msh->getNumberOfNodes(2));
-    ASSERT_EQ(6, e->getNumberOfNodes());
+    e = msh->getElement(0);
+    ASSERT_EQ(6u, msh->getNumberOfNodes(2));
+    ASSERT_EQ(6u, e->getNumberOfNodes());
 
     e->setCurrentOrder(1);
-    ASSERT_EQ(3, e->getNumberOfNodes());
+    ASSERT_EQ(3u, e->getNumberOfNodes());
     e->setCurrentOrder(2);
-    ASSERT_EQ(6, e->getNumberOfNodes());
+    ASSERT_EQ(6u, e->getNumberOfNodes());
 
     {
         const GeoLib::Point* p = msh->getNodeCoordinatesRef(3);
@@ -400,25 +400,25 @@ TEST(Mesh, HigherOrderQuadUnstructure)
     MeshLib::UnstructuredMesh *msh = MeshGenerator::generateRegularQuadMesh(2.0, 2, .0, .0, .0);
     std::vector<IElement*> vec_edge;
     createEdgeElements(msh);
-    ASSERT_EQ(12, msh->getNumberOfEdges());
-    generateHigherOrderUnstrucuredMesh(*msh, 2);
+    ASSERT_EQ(12u, msh->getNumberOfEdges());
+    MeshGenerator::generateHigherOrderUnstrucuredMesh(*msh, 2);
 
     IElement* e = 0;
-    ASSERT_EQ(9, msh->getNumberOfNodes(1));
-    ASSERT_EQ(25, msh->getNumberOfNodes(2));
+    ASSERT_EQ(9u, msh->getNumberOfNodes(1));
+    ASSERT_EQ(25u, msh->getNumberOfNodes(2));
     msh->setCurrentOrder(1);
-    e = msh->getElemenet(0);
-    ASSERT_EQ(9, msh->getNumberOfNodes(1));
-    ASSERT_EQ(4, e->getNumberOfNodes());
+    e = msh->getElement(0);
+    ASSERT_EQ(9u, msh->getNumberOfNodes(1));
+    ASSERT_EQ(4u, e->getNumberOfNodes());
     msh->setCurrentOrder(2);
-    e = msh->getElemenet(0);
-    ASSERT_EQ(25, msh->getNumberOfNodes(2));
-    ASSERT_EQ(9, e->getNumberOfNodes());
+    e = msh->getElement(0);
+    ASSERT_EQ(25u, msh->getNumberOfNodes(2));
+    ASSERT_EQ(9u, e->getNumberOfNodes());
 
     e->setCurrentOrder(1);
-    ASSERT_EQ(4, e->getNumberOfNodes());
+    ASSERT_EQ(4u, e->getNumberOfNodes());
     e->setCurrentOrder(2);
-    ASSERT_EQ(9, e->getNumberOfNodes());
+    ASSERT_EQ(9u, e->getNumberOfNodes());
 
     {
         const GeoLib::Point* p = msh->getNodeCoordinatesRef(9);
@@ -465,21 +465,21 @@ TEST(Mesh, HigherOrderQuadStructure)
     msh->setMaxiumOrder(2);
 
     IElement* e = 0;
-    ASSERT_EQ(9, msh->getNumberOfNodes(1));
-    ASSERT_EQ(25, msh->getNumberOfNodes(2));
+    ASSERT_EQ(9u, msh->getNumberOfNodes(1));
+    ASSERT_EQ(25u, msh->getNumberOfNodes(2));
     msh->setCurrentOrder(1);
-    e = msh->getElemenet(0);
-    ASSERT_EQ(9, msh->getNumberOfNodes(1));
-    ASSERT_EQ(4, e->getNumberOfNodes());
+    e = msh->getElement(0);
+    ASSERT_EQ(9u, msh->getNumberOfNodes(1));
+    ASSERT_EQ(4u, e->getNumberOfNodes());
     msh->setCurrentOrder(2);
-    e = msh->getElemenet(0);
-    ASSERT_EQ(25, msh->getNumberOfNodes(2));
-    ASSERT_EQ(9, e->getNumberOfNodes());
+    e = msh->getElement(0);
+    ASSERT_EQ(25u, msh->getNumberOfNodes(2));
+    ASSERT_EQ(9u, e->getNumberOfNodes());
 
     e->setCurrentOrder(1);
-    ASSERT_EQ(4, e->getNumberOfNodes());
+    ASSERT_EQ(4u, e->getNumberOfNodes());
     e->setCurrentOrder(2);
-    ASSERT_EQ(9, e->getNumberOfNodes());
+    ASSERT_EQ(9u, e->getNumberOfNodes());
 
     {
         const GeoLib::Point* p = msh->getNodeCoordinatesRef(9);

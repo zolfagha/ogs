@@ -16,7 +16,7 @@
 
 #include "MeshLib/Core/IMesh.h"
 #include "DiscreteLib/Utils/DofEquationIdTable.h"
-#include "DiscreteLib/Core/LocalDataType.h"
+#include "MathLib/DataType.h"
 #include "DiscreteLib/Core/IDiscreteVectorAssembler.h"
 #include "DiscreteLib/Core/IElemenetWiseVectorLocalAssembler.h"
 
@@ -60,7 +60,7 @@ void SequentialElementWiseVectorAssembler<T1,T2>::assembly(const MeshLib::IMesh 
     const size_t n_ele = msh.getNumberOfElements();
 
     for (size_t i=0; i<n_ele; i++) {
-        MeshLib::IElement *e = msh.getElemenet(i);
+        MeshLib::IElement *e = msh.getElement(i);
         _e_assembler->update(*e, dofEquationIdTable, globalVec);
     }
 };

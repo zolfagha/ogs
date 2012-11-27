@@ -52,6 +52,11 @@ CInitialCondition::CInitialCondition()
     SubNumber = 0;
     this->setProcess(NULL);               //OK
 
+    geo_node_value = .0;
+    gradient_ref_depth = .0;
+    gradient_ref_depth_gradient = .0;
+    gradient_ref_depth_value = .0;
+
 }
 
 
@@ -100,13 +105,16 @@ bool ICRead(const std::string& file_base_name,
     std::ios::pos_type position;
 
     // Keyword loop
-    std::cout << "ICRead" << std::endl;
+    std::cout << "ICRead ... " << std::flush;
     while (!ic_file.eof())
     {
         ic_file.getline(line, MAX_ZEILE);
         line_string = line;
-        if (line_string.find("#STOP") != string::npos)
-            return true;
+        if(line_string.find("#STOP") != std::string::npos) {
+            std::cout << "done, read " << ic_vector.size() << " initial conditions" <<
+            std::endl;
+           return true;
+        }
 
         // keyword found
         if (line_string.find("#INITIAL_CONDITION") != std::string::npos)

@@ -53,7 +53,6 @@ bool OUTRead(const std::string& file_base_name,
     char line[MAX_ZEILE];
     std::string line_string;
     ios::pos_type position;
-    bool output_version = false; // 02.2011. WW
 
     // File handling
     std::string out_file_name = file_base_name + OUT_FILE_EXTENSION;
@@ -63,22 +62,25 @@ bool OUTRead(const std::string& file_base_name,
     out_file.seekg(0L, ios::beg);
 
     // Keyword loop
-    cout << "OUTRead" << endl;
+    cout << "OUTRead ... " << std::flush;
     while (!out_file.eof())
     {
         out_file.getline(line, MAX_ZEILE);
         line_string = line;
-        if (line_string.find("#STOP") != string::npos)
-            return true;
+        if(line_string.find("#STOP") != std::string::npos) {
+            std::cout << "done, read " << out_vector.size() << " output settings" <<
+            std::endl;
+           return true;
+        }
 
-        COutput* out(new COutput(out_vector.size()));
-        //15.01.2008. WW
-        if (line_string.find("#VERSION") != string::npos)
-            output_version = true;  // 02.2011. WW
+//        //15.01.2008. WW
+//        if (line_string.find("#VERSION") != string::npos)
+//            output_version = true;  // 02.2011. WW
         //----------------------------------------------------------------------
         // keyword found
         if (line_string.find("#OUTPUT") != string::npos)
         {
+            COutput* out(new COutput(out_vector.size()));
             position = out->Read(out_file);
             out_vector.push_back(out);
             out_file.seekg(position, ios::beg);

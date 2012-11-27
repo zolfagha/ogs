@@ -28,9 +28,9 @@ namespace MeshLib
 {
 
 /**
- * \brief Template class for element
+ * \brief Template class for various mesh element types
  * 
- * \tparam T_TOPO topological rule
+ * \tparam T_TOPO   topological rule of this element
  */
 template <typename T_TOPO>
 class TemplateElement : public IElement
@@ -38,28 +38,34 @@ class TemplateElement : public IElement
 public:
     ///
     TemplateElement() 
+    : _coord_map(NULL)
     {
         reset();
     };
 
     ///
     explicit TemplateElement(size_t element_id) 
+    : _coord_map(NULL)
     {
         reset();
         this->setID(element_id);
     };
 
     ///
-    virtual ~TemplateElement() {};
+    virtual ~TemplateElement()
+    {
+        BaseLib::releaseObject(_coord_map);
+    };
 
     ///
     void reset() 
     {
+        BaseLib::releaseObject(_coord_map);
+
         _element_id = 0;
         _group_id = 0;
         _order = 1;
         _max_order = _order;
-        _coord_map = 0;
         _list_node_id.resize(getNumberOfNodes(_order), 0);
         std::fill(_list_node_id.begin(), _list_node_id.end(), 0);
         _list_edges.clear();

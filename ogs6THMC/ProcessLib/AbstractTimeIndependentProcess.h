@@ -13,6 +13,7 @@
 #pragma once
 
 #include <string>
+#include <limits>
 #include "Process.h"
 
 namespace ProcessLib
@@ -32,7 +33,7 @@ public:
 
     virtual ~AbstractTimeIndependentProcess() {};
 
-    double suggestNext(const NumLib::TimeStep &/*time_current*/) { return .0; }
+    double suggestNext(const NumLib::TimeStep &/*time_current*/) { return std::numeric_limits<double>::max(); }
 
     bool isAwake(const NumLib::TimeStep &/*time*/) { return true;  }
 

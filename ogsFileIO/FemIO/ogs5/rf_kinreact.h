@@ -36,11 +36,11 @@ namespace ogs5
 {
 
 /* residual for linearisation of critical functions */
-#define residual 1.E-20
-#define maxMonod 5
-#define maxInhibition 5
-#define maxBioReactions 30
-#define maxNumber_of_Components 30
+//#define residual 1.E-20
+//#define maxMonod 5
+//#define maxInhibition 5
+//#define maxBioReactions 30
+//#define maxNumber_of_Components 30
 
 #define KRC_FILE_EXTENSION ".krc"
 
@@ -133,6 +133,7 @@ public:
 	std::vector <double> stochmet;        /* stochiometric coefficients for each reactionpartner stored here */
 	double rateconstant;                  /* rateconstant */
 	double rateorder;                     /* order of reaction */
+    double decay_rate;                    /* rate of decay */
 	int number_monod;                     /* Number of Monod terms */
 	int number_inhibit;                   /* Number of inhibition terms */
 	int number_production;                /* number of production terms */

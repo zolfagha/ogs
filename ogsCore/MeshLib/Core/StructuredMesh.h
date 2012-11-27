@@ -144,7 +144,7 @@ public:
         else return 0;
     }
     /// get an element
-    IElement* getElemenet( size_t element_id ) const;
+    IElement* getElement( size_t element_id ) const;
 
     //--- edges ---
     /// add a new element
@@ -186,7 +186,7 @@ private:
 };
 
 template<> void StructuredMesh<ElementShape::QUAD>::construct();
-template<> IElement* StructuredMesh<ElementShape::QUAD>::getElemenet( size_t element_id ) const; 
+template<> IElement* StructuredMesh<ElementShape::QUAD>::getElement( size_t element_id ) const;
 template<> Node* StructuredMesh<ElementShape::QUAD>::getNode( size_t id ) const; 
 template<> void StructuredMesh<ElementShape::QUAD>::getNodeCoordinates(size_t id,  GeoLib::Point* p) const;
 

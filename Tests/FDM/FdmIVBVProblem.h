@@ -99,7 +99,7 @@ public:
     };
 
     ///
-    void addDirichletBC(int, GeoLib::GeoObject &geo, bool is_transient, NumLib::ITXFunction& bc1)
+    void addDirichletBC(int, const GeoLib::GeoObject &geo, bool is_transient, NumLib::ITXFunction& bc1)
     {
         addDirichletBC(*new FdmLib::FdmDirichletBC<double>(_map_var, &geo, is_transient, &bc1));
     }
@@ -122,7 +122,7 @@ public:
     };
 
     ///
-    void addNeumannBC(int, GeoLib::GeoObject &geo, bool is_transient, NumLib::ITXFunction& bc2)
+    void addNeumannBC(int, const GeoLib::GeoObject &geo, bool is_transient, NumLib::ITXFunction& bc2)
     {
         addNeumannBC(*new FdmLib::FdmNeumannBC<double, double>(_map_var, &geo, is_transient, &bc2));
     }

@@ -23,16 +23,20 @@ namespace MathLib
 {
 
 /**
- * Compressible row storage
+ * \brief Compressible row storage
  */
 template <class T>
 struct SparseTableCRS 
 {
     size_t dimension; 
     size_t nonzero;
-    T *row_ptr;
-    T *col_idx;
-    double *data;
+    T* row_ptr;
+    T* col_idx;
+    double* data;
+
+    SparseTableCRS()
+    : dimension(0), nonzero(0), row_ptr(NULL), col_idx(NULL), data(NULL)
+    {};
 };
 
 typedef struct SparseTableCRS<unsigned> CRSUnsigned;
@@ -42,43 +46,42 @@ typedef struct SparseTableCRS<signed> CRSSigned;
  * convert row-major sparsity to CRS data
  */
 template<class INTTYPE>
-MathLib::SparseTableCRS<INTTYPE>* convertRowMajorSparsityToCRS(RowMajorSparsity &row_major_entries)
+void convertRowMajorSparsityToCRS(const RowMajorSparsity &row_major_entries, MathLib::SparseTableCRS<INTTYPE> &crs)
 {
     const size_t n_rows = row_major_entries.size();
     assert(n_rows > 0);
-    if (n_rows==0) return 0;
+    if (n_rows==0) return;
          
 
     //get number of nonzero 
-    std::vector<INTTYPE> *ptr = new std::vector<INTTYPE>(n_rows+1);
-    std::vector<INTTYPE> *vec_col_idx = new std::vector<INTTYPE>();
+    INTTYPE* ptr = new INTTYPE[n_rows+1];
+    std::vector<INTTYPE> vec_col_idx;
     size_t counter_ptr = 0;
     size_t cnt_row = 0;
 
     for (size_t i=0; i<n_rows; i++) {
-        (*ptr)[cnt_row++] = counter_ptr;         // starting point of the row
+        ptr[cnt_row++] = counter_ptr;         // starting point of the row
 
         // entries at the i th row
-        std::set<size_t> &setConnection = row_major_entries[i];
+        const std::set<size_t> &setConnection = row_major_entries[i];
         //
         for (std::set<size_t>::iterator it=setConnection.begin(); it!=setConnection.end(); it++) {
-            vec_col_idx->push_back(*it);
+            vec_col_idx.push_back(*it);
             ++counter_ptr;
         }
     }
 
-    (*ptr)[n_rows] = counter_ptr;
+    ptr[n_rows] = counter_ptr;
 
-    MathLib::SparseTableCRS<INTTYPE> *crs(new MathLib::SparseTableCRS<INTTYPE>);
-    crs->dimension = n_rows;
-    crs->row_ptr = &(*ptr)[0];
-    crs->col_idx = &(*vec_col_idx)[0];
-    crs->nonzero = vec_col_idx->size();
-    crs->data = new double[vec_col_idx->size()];
-    for (size_t i=0; i<vec_col_idx->size(); i++)
-        crs->data[i] = .0;
-
-    return crs;
+    crs.dimension = n_rows;
+    crs.row_ptr = ptr;
+    crs.col_idx = new INTTYPE[vec_col_idx.size()];
+    for (size_t i=0; i<vec_col_idx.size(); i++)
+        crs.col_idx[i] = vec_col_idx[i];
+    crs.nonzero = vec_col_idx.size();
+    crs.data = new double[vec_col_idx.size()];
+    for (size_t i=0; i<vec_col_idx.size(); i++)
+        crs.data[i] = .0;
 }
 
 template<class INTTYPE>

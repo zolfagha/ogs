@@ -92,7 +92,7 @@ struct DiscreteExample1
 
     class TestElementAssembler : public DiscreteLib::IElemenetWiseLinearEquationLocalAssembler
     {
-        DiscreteLib::LocalMatrix _m;
+        MathLib::LocalMatrix _m;
     public:
         TestElementAssembler()
         {
@@ -105,7 +105,7 @@ struct DiscreteExample1
                 for (size_t j=0; j<i; j++) _m(i,j) = _m(j,i);
             _m *= 1.e-11/6.0;
         }
-        void assembly(const MeshLib::IElement &/*e*/, DiscreteLib::LocalEquation &eqs)
+        void assembly(const MeshLib::IElement &/*e*/, MathLib::LocalEquation &eqs)
         {
             (*eqs.getA()) = _m;
         }
@@ -171,7 +171,7 @@ TEST(Discrete, NDDCSSVec1)
     IDiscreteVector<double>* v = dis.createVector<double>(ddc->getTotalNumberOfDecomposedObjects());
     for (size_t i=0; i<v->size(); ++i)
         (*v)[i] = i;
-    ASSERT_EQ(9, v->size());
+    ASSERT_EQ(9u, v->size());
     double expected[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
     ASSERT_DOUBLE_ARRAY_EQ(expected, *v, 9);
 }
@@ -188,7 +188,7 @@ TEST(Discrete, NDDCSSVec2)
     IDiscreteVector<double>* v = dis.createVector<double>(ddc->getTotalNumberOfDecomposedObjects());
     for (size_t i=0; i<v->size(); ++i)
         (*v)[i] = i;
-    ASSERT_EQ(9, v->size());
+    ASSERT_EQ(9u, v->size());
     double expected[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
     ASSERT_DOUBLE_ARRAY_EQ(expected, *v, 9);
 }
@@ -216,8 +216,8 @@ TEST(Discrete, NDDCSSEqs2)
     IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<LisLinearEquation, SparsityBuilderFromNodeConnectivity>(&lis, &dofManager);
     linear_eq->initialize();
     linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
-    typedef typename DiscreteLib::ElementWiseLinearEquationUpdater<DiscreteExample1::TestElementAssembler,LisLinearEquation> MyUpdater;
-    typedef typename SerialNodeDdcSharedDiscreteSystem::MyLinearEquationAssembler<MyUpdater,LisLinearEquation>::type MyGlobalAssembler;
+    typedef DiscreteLib::ElementWiseLinearEquationUpdater<DiscreteExample1::TestElementAssembler,LisLinearEquation> MyUpdater;
+    typedef SerialNodeDdcSharedDiscreteSystem::MyLinearEquationAssembler<MyUpdater,LisLinearEquation>::type MyGlobalAssembler;
     MyUpdater updater(msh, &ele_assembler);
     MyGlobalAssembler assembler(&updater);
     linear_eq->construct(assembler);
@@ -253,8 +253,8 @@ TEST(Discrete, NDDCSDEqs2)
     IDiscreteLinearEquation* linear_eq = dis.createLinearEquation<LisLinearEquation, SparsityBuilderFromNodeConnectivity>(&lis, &dofManager);
     linear_eq->initialize();
     linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
-    typedef typename DiscreteLib::ElementWiseLinearEquationUpdater<DiscreteExample1::TestElementAssembler,LisLinearEquation> MyUpdater;
-    typedef typename SerialNodeDdcSharedDiscreteSystem::MyLinearEquationAssembler<MyUpdater,LisLinearEquation>::type MyGlobalAssembler;
+    typedef DiscreteLib::ElementWiseLinearEquationUpdater<DiscreteExample1::TestElementAssembler,LisLinearEquation> MyUpdater;
+    typedef SerialNodeDdcSharedDiscreteSystem::MyLinearEquationAssembler<MyUpdater,LisLinearEquation>::type MyGlobalAssembler;
     MyUpdater updater(msh, &ele_assembler);
     MyGlobalAssembler assembler(&updater);
     linear_eq->construct(assembler);
@@ -274,7 +274,7 @@ TEST(Discrete, VecSingle1)
     double expected[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
     std::copy(expected, expected+9, v->begin());
     
-    ASSERT_EQ(9, v->size());
+    ASSERT_EQ(9u, v->size());
     ASSERT_DOUBLE_ARRAY_EQ(expected, *v, 9);
 }
 
@@ -355,8 +355,8 @@ TEST(Discrete, Lis1)
         // solve the equation
         linear_eq->initialize();
         linear_eq->setPrescribedDoF(0, ex1.list_dirichlet_bc_id, ex1.list_dirichlet_bc_value);
-        typedef typename DiscreteLib::ElementWiseLinearEquationUpdater<DiscreteExample1::TestElementAssembler,LisLinearEquation> MyUpdater;
-        typedef typename SerialNodeDdcSharedDiscreteSystem::MyLinearEquationAssembler<MyUpdater,LisLinearEquation>::type MyGlobalAssembler;
+        typedef DiscreteLib::ElementWiseLinearEquationUpdater<DiscreteExample1::TestElementAssembler,LisLinearEquation> MyUpdater;
+        typedef SerialNodeDdcSharedDiscreteSystem::MyLinearEquationAssembler<MyUpdater,LisLinearEquation>::type MyGlobalAssembler;
         MyUpdater updater(msh, &ele_assembler);
         MyGlobalAssembler assembler(&updater);
         linear_eq->construct(assembler);

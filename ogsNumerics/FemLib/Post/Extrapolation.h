@@ -15,7 +15,7 @@
 #include <cmath>
 #include <limits>
 
-#include "MeshLib/Topology/Topology.h"
+#include "MeshLib/Topology/TopologySequentialNodes2Elements.h"
 #include "FemLib/Function/FemFunction.h"
 #include "FemLib/Core/Integration/Integration.h"
 
@@ -51,7 +51,7 @@ public:
         (*node_vec) = v0;
 
         for (size_t i=0; i<msh->getNumberOfElements(); i++) {
-            MeshLib::IElement* e = msh->getElemenet(i);
+            MeshLib::IElement* e = msh->getElement(i);
             const typename TemplateFEMIntegrationPointFunction<T_DIS_SYS, Tvalue>::IntegrationPointVectorType &gp_values = ele_var.getIntegrationPointValues(i);
             std::vector<Tvalue> vec_gp_values(&gp_values[0], &gp_values[0]+gp_values.size());
             const size_t e_nnodes = e->getNumberOfNodes();
@@ -86,8 +86,10 @@ public:
         switch (tp) {
             case FEMExtrapolationMethod::Average:
                 return new FemExtrapolationAverage<T_DIS_SYS,Tvalue>();
+            default:
+                return NULL;
         }
-        return 0;
+        return NULL;
     };
 };
 

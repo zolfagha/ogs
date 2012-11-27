@@ -19,23 +19,23 @@ namespace SolutionLib
 {
 
 /**
- *
+ * \brief Common interface of Neumann BC and ST
  */
 class IFemNeumannBC
 {
 public:
+
     ///
     virtual ~IFemNeumannBC() {};
 
-    //virtual void setOrder(size_t order) = 0;
-
     /// setup B.C.
+    /// \param order Polynomial order
     virtual void setup(size_t order) = 0;
 
-    ///
+    /// get a list of boundary condition nodes
     virtual std::vector<size_t>& getListOfBCNodes() = 0;
 
-    ///
+    /// get a list of boundary condition values
     virtual std::vector<double>& getListOfBCValues() = 0;
 };
 

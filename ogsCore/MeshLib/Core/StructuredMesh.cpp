@@ -37,7 +37,7 @@ template<> void StructuredMesh<ElementShape::QUAD>::construct()
 }
 
 
-template<> IElement* StructuredMesh<ElementShape::QUAD>::getElemenet( size_t element_id ) const 
+template<> IElement* StructuredMesh<ElementShape::QUAD>::getElement( size_t element_id ) const
 {
     //set e
     _e->reset();

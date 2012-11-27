@@ -27,7 +27,7 @@ TEST(BaseLib, Options)
 
     const BaseLib::Options* op = options.getSubGroup("some group name");
     ASSERT_EQ("some value", op->getOption("testStr"));
-    ASSERT_EQ(123, op->getOption<int>("testInt"));
-    ASSERT_EQ(0.11, op->getOption<double>("testDouble"));
+    ASSERT_EQ(123, op->getOptionAsNum<int>("testInt"));
+    ASSERT_EQ(0.11, op->getOptionAsNum<double>("testDouble"));
 }
 

@@ -72,16 +72,19 @@ public:
     /// has z dimension
     bool hasX() const;
 
+    /// get index of x components
     size_t getIndexOfX() const;
 
     /// has z dimension
     bool hasY() const;
 
+    /// get index of y components
     size_t getIndexOfY() const;
 
     /// has z dimension
     bool hasZ() const;
 
+    /// get index of z components
     size_t getIndexOfZ() const;
 
 private:
