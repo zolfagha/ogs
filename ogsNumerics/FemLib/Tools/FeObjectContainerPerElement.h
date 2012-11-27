@@ -17,7 +17,7 @@
 #include "BaseLib/CodingTools.h"
 
 #include "FemLib/Core/Element/IFemElement.h"
-#include "FemLib/Core/Element/FemElementFactory.h"
+#include "FemLib/Tools/FemElementFactory.h"
 #include "IFeObjectContainer.h"
 
 namespace FemLib
