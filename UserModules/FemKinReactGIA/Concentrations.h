@@ -135,7 +135,7 @@ public:
     typedef typename MyKinReductionProblemType::MyVariable MyVariableConc;
 
     FunctionConcentrations() 
-        : Process("KIN_REACT_GIA", 1, 1),
+        : Process("KIN_REACT_GIA", 1, 0),
           _feObjects(0)
     {
         // set default parameter name

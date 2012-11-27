@@ -24,6 +24,7 @@ class TXFunctionDirect : public ITXDiscreteFunction<T>
 {
 public:
     typedef DiscreteLib::IDiscreteVector<T> MyVector;
+    typedef MathLib::LocalMatrix DataType;
     
     explicit TXFunctionDirect(const MyVector* direct_data)
     : _direct_data(direct_data)

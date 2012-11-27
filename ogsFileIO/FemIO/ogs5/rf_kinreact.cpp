@@ -1397,6 +1397,13 @@ bool CKinReact::Read(std::ifstream* rfd_file)
 			in.clear();
 		}
 
+        if (line_string.find("$DECAYTERM") != string::npos)
+        {
+            in.str(readNonBlankLineFromInputStream(*rfd_file)); 
+            in >> decay_rate;
+            in.clear();
+        }
+
 		//....................................................................
 		// subkeyword found
 		if (line_string.find("$NAPL_PROPERTIES") != string::npos)
