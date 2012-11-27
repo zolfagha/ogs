@@ -15,8 +15,9 @@
 #include "BaseLib/CodingTools.h"
 
 #include "FemLib/Core/Element/IFemElement.h"
-#include "IFeObjectContainer.h"
-#include "FeObjectCachePerFeType.h"
+#include "FeObjectContainerPerElementShapeType.h"
+#include "FemElementCatalog.h"
+#include "LagrangeFemElementCatalogBuilder.h"
 
 namespace FemLib
 {
@@ -24,31 +25,58 @@ namespace FemLib
 /**
  * \brief Lagrangian finite element object containers
  */
-class LagrangianFeObjectContainer : public FeObjectCachePerFeType, public IFeObjectContainer
+class LagrangianFeObjectContainer
+ : public FeObjectContainerPerElementShapeType
 {
 public:
-    explicit LagrangianFeObjectContainer(MeshLib::IMesh* msh) :  FeObjectCachePerFeType(msh), _order(1) {};
-
-    LagrangianFeObjectContainer(const LagrangianFeObjectContainer &src)
-    : FeObjectCachePerFeType(src.getMesh())
+    /**
+     *
+     * @param msh
+     */
+    explicit LagrangianFeObjectContainer(MeshLib::IMesh* msh)
+    :  FeObjectContainerPerElementShapeType(&_fe_catalog, &_shape2fetype, msh), _order(1)
     {
-        _order = src._order;
+        LagrangeFemElementCatalogBuilder::construct(_fe_catalog, _shape2fetype);
+    };
+
+    /**
+     * Copy constructor
+     * @param src
+     */
+    LagrangianFeObjectContainer(const LagrangianFeObjectContainer &src)
+    : FeObjectContainerPerElementShapeType(src), _fe_catalog(src._fe_catalog), _shape2fetype(src._shape2fetype), _order(src._order)
+    {
     }
 
+    /**
+     *
+     */
     virtual ~LagrangianFeObjectContainer() {};
 
+    /**
+     * set polynomial order
+     * @param order
+     */
     void setPolynomialOrder(size_t order) { _order = order; };
 
+    /**
+     * get FE object
+     * @param e
+     * @return
+     */
     virtual IFiniteElement* getFeObject(const MeshLib::IElement &e);
 
+    /**
+     * get FE object
+     * @param e
+     * @param order
+     * @return
+     */
     virtual IFiniteElement* getFeObject(const MeshLib::IElement &e, size_t order);
 
 private:
-    FiniteElementType::type getFeType(MeshLib::ElementShape::type ele_type, size_t order);
-
-    //DISALLOW_COPY_AND_ASSIGN(LagrangianFeObjectContainer);
-
-private:
+    FemElementCatalog _fe_catalog;
+    MeshElementShapeToFemElementType _shape2fetype;
     size_t _order;
 };
 
