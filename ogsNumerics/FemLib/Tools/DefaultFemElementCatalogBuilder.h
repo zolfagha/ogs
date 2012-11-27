@@ -26,7 +26,7 @@ namespace FemLib
 class DefaultFemElementCatalogBuilder
 {
 public:
-    static void construct(FemElementCatalog& feCatalog)
+    static void construct(FemElementCatalog &feCatalog)
     {
         feCatalog.registerFeType<LINE2>(FiniteElementType::LINE2);
         feCatalog.registerFeType<LINE3>(FiniteElementType::LINE3);
