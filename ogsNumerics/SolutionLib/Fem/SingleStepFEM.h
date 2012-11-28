@@ -53,7 +53,8 @@ namespace SolutionLib
 template <
     class T_USER_FEM_PROBLEM,
     class T_LINEAR_SOLVER,
-    class T_NL_SOLVER_FACTORY=NumLib::DiscreteNonlinearSolverFactory
+    class T_NL_SOLVER_FACTORY=NumLib::DiscreteNonlinearSolverFactory,
+    class T_FE_CONTAINER=FemLib::LagrangianFeObjectContainer
     >
 class SingleStepFEM
     : public AbstractTimeSteppingAlgorithm
@@ -136,15 +137,16 @@ private:
     SolutionVector *_x_n1_0;
     SolutionVector *_x_n1;
     SolutionVector *_x_st;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::IFeObjectContainer* _feObjects;
 };
 
 template <
     class T_USER_FEM_PROBLEM,
     class T_LINEAR_SOLVER,
-    class T_NL_SOLVER_FACTORY
+    class T_NL_SOLVER_FACTORY,
+    class T_FE_CONTAINER
     >
-SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY>::SingleStepFEM(MyDiscreteSystem* dis, UserFemProblem* problem, MyNonlinearSolverFactory* nl_solver_factory)
+SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY,T_FE_CONTAINER>::SingleStepFEM(MyDiscreteSystem* dis, UserFemProblem* problem, MyNonlinearSolverFactory* nl_solver_factory)
     : AbstractTimeSteppingAlgorithm(*problem->getTimeSteppingFunction()),
       _problem(problem), _discrete_system(dis)
 {
@@ -164,7 +166,7 @@ SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY>::SingleSte
     const size_t n_total_dofs = _dofManager.getTotalNumberOfActiveDoFs();
     INFO("* Total number of DoFs = %d", n_total_dofs);
 
-    _feObjects = new FemLib::LagrangianFeObjectContainer(msh);
+    _feObjects = new T_FE_CONTAINER(msh);
 
     // setup IC
     _vec_u_n1.resize(n_var, 0);
@@ -212,9 +214,10 @@ SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY>::SingleSte
 template <
     class T_USER_FEM_PROBLEM,
     class T_LINEAR_SOLVER,
-    class T_NL_SOLVER_FACTORY
+    class T_NL_SOLVER_FACTORY,
+    class T_FE_CONTAINER
     >
-int SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY>::solveTimeStep(const NumLib::TimeStep &t_n1)
+int SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY,T_FE_CONTAINER>::solveTimeStep(const NumLib::TimeStep &t_n1)
 {
     // time step
     double dt = t_n1.getTime() - AbstractTimeSteppingAlgorithm::getTimeStepFunction()->getPrevious();
