@@ -34,10 +34,10 @@ public:
      * @param msh
      * @param ele_size
      */
-    FeObjectContainerPerElement(const FemElementCatalog* fe_catalog, MeshLib::IMesh* msh, size_t ele_size)
+    FeObjectContainerPerElement(const FemElementCatalog* fe_catalog, MeshLib::IMesh* msh)
     : _fe_catalog(fe_catalog), _msh(msh)
     {
-        _vec_fem.resize(ele_size);
+        _vec_fem.resize(msh->getNumberOfElements());
     }
 
     ///
