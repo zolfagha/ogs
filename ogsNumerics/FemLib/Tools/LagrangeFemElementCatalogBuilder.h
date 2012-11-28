@@ -18,6 +18,7 @@
 #include "FemLib/Core/Element/FiniteElementType.h"
 #include "FemLib/Core/Element/C0IsoparametricElements.h"
 #include "FemElementCatalog.h"
+#include "MeshElementShapeToFemElementType.h"
 
 namespace FemLib
 {
