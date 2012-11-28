@@ -35,14 +35,13 @@ public:
     void pre_process(const T_X &/*dx*/, const T_X &/*x_new*/, F_RESIDUALS & f_residuals, F_DX &/*f_dx*/)
     {
 		// local ode problem
-		_assemblerJ->get_function_data()->calc_nodal_xi_immob_ode( f_residuals.getTimeStepSize() ); 
+		_assemblerJ->get_function_data()->calc_nodal_xi_immob_ode( f_residuals.getTimeStepSize()->getTimeStepSize() ); 
 
         // update the rate calculation
         _assemblerJ->get_function_data()->update_node_kin_reaction_rates(); 
 
         // calculate change of rates over change of xi_mob
 		_assemblerJ->get_function_data()->update_node_kin_reaction_drates_dxi(); 
-
     };
 
     template<class T_X, class F_RESIDUALS, class F_DX>
