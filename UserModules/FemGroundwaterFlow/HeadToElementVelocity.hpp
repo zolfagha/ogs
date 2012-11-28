@@ -29,7 +29,7 @@ bool FunctionHeadToElementVelocity<T>::initialize(const BaseLib::Options &option
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
 
-    _feObjects = new FemLib::LagrangianFeObjectContainer(msh);
+    _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
     _dis = dis;
     _vel = new MyIntegrationPointFunctionVector();
     _vel->initialize(dis);
@@ -63,7 +63,7 @@ int FunctionHeadToElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &/*ti
 
     const MeshLib::IMesh *msh = _dis->getMesh();
     const MeshLib::CoordinateSystem coord = msh->getGeometricProperty()->getCoordinateSystem();
-    FemLib::LagrangianFeObjectContainer* feObjects = _feObjects;
+    FemLib::LagrangeFeObjectContainer* feObjects = _feObjects;
     const MyNodalFunctionScalar* head = (MyNodalFunctionScalar*)getInput(Head);
     MyIntegrationPointFunctionVector *vel = _vel;;
 

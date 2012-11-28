@@ -118,7 +118,7 @@ GWFdmProblem* defineGWProblem4FDM(DiscreteSystem &dis, double h, GeoLib::Line &l
 
 MyFunctionConcentration::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Line &line, Geo::PorousMedia &pm, Geo::Compound &comp)
 {
-    LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(dis.getMesh());
+    LagrangeFeObjectContainer* _feObjects = new LagrangeFeObjectContainer(dis.getMesh());
     //equations
     MyFunctionConcentration::MassFemEquation::LinearAssemblerType* linear_assembler = new MyFunctionConcentration::MassFemEquation::LinearAssemblerType(*_feObjects, pm, comp);
     MyFunctionConcentration::MassFemEquation::ResidualAssemblerType* r_assembler = new MyFunctionConcentration::MassFemEquation::ResidualAssemblerType(*_feObjects, pm, comp);

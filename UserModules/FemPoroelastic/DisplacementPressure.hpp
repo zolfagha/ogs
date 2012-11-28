@@ -55,7 +55,7 @@ bool FunctionDisplacementPressure<T1,T2>::initialize(const BaseLib::Options &opt
     INFO("* mesh id %d: order=%d, nodes=%d, elements=%d", msh_id, msh->getMaxiumOrder(), msh->getNumberOfNodes(msh->getMaxiumOrder()), msh->getNumberOfElements());
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
-    _feObjects = new FemLib::LagrangianFeObjectContainer(msh);
+    _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
 
     //--------------------------------------------------------------------------
     // set up problem

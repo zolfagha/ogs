@@ -29,7 +29,7 @@ bool FunctionPressureToElementVelocity<T>::initialize(const BaseLib::Options &op
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
 
-    _feObjects = new FemLib::LagrangianFeObjectContainer(msh);
+    _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
     _dis = dis;
     _vel = new MyIntegrationPointFunctionVector();
     _vel->initialize(dis);
@@ -68,7 +68,7 @@ int FunctionPressureToElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &
 
     MaterialLib::Fluid* fluidphase = Ogs6FemData::getInstance()->list_fluid[0];
 
-    FemLib::LagrangianFeObjectContainer* feObjects = _feObjects;
+    FemLib::LagrangeFeObjectContainer* feObjects = _feObjects;
     //calculate vel (vel=f(h))
     for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
         MeshLib::IElement* e = msh->getElement(i_e);

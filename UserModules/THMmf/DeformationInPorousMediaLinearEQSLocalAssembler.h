@@ -31,7 +31,7 @@ class DeformationInPorousMediaLinearEQSLocalAssembler
 public:
 
     DeformationInPorousMediaLinearEQSLocalAssembler(
-                const FemLib::LagrangianFeObjectContainer* feObjects,
+                const FemLib::LagrangeFeObjectContainer* feObjects,
                 const size_t n_var,
                 const std::vector<size_t> &vec_order,
                 const MeshLib::CoordinateSystem &problem_coordinates
@@ -55,7 +55,7 @@ protected:
                 );
 
 private:
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::LagrangeFeObjectContainer _feObjects;
     const MeshLib::CoordinateSystem _problem_coordinates;
 };
 

@@ -19,7 +19,7 @@
 class FemPoroelasticResidualLocalAssembler : public NumLib::ElementWiseTransientCoupledResidualLocalAssembler
 {
 public:
-    FemPoroelasticResidualLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects, size_t n_var, const std::vector<size_t> &vec_order)
+    FemPoroelasticResidualLocalAssembler(FemLib::LagrangeFeObjectContainer* feObjects, size_t n_var, const std::vector<size_t> &vec_order)
     : NumLib::ElementWiseTransientCoupledResidualLocalAssembler(n_var, vec_order), _feObjects(*feObjects)
     {
     };
@@ -36,5 +36,5 @@ protected:
                             );
 
 private:
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::LagrangeFeObjectContainer _feObjects;
 };

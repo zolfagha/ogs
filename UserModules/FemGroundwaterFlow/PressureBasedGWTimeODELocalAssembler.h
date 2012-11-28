@@ -28,7 +28,7 @@ public:
     typedef MathLib::LocalVector LocalVector;
     typedef MathLib::LocalMatrix LocalMatrix;
 
-    explicit PressureBasedGWTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, const MeshLib::CoordinateSystem &problem_coordinates)
+    explicit PressureBasedGWTimeODELocalAssembler(FemLib::LagrangeFeObjectContainer &feObjects, const MeshLib::CoordinateSystem &problem_coordinates)
     : _feObjects(feObjects), _problem_coordinates(problem_coordinates)
     {
     };
@@ -105,7 +105,7 @@ protected:
     }
 
 private:
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::LagrangeFeObjectContainer _feObjects;
     MeshLib::CoordinateSystem _problem_coordinates;
 };
 

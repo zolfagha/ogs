@@ -50,7 +50,7 @@ public:
     std::vector<double> vec_bc1_vals;
     std::vector<size_t> vec_bc2_nodes;
     std::vector<double> vec_bc2_vals;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangeFeObjectContainer* _feObjects;
 
     ~GWFemTest()
     {
@@ -71,7 +71,7 @@ public:
         //mesh
         this->msh = msh;
         dis = new DiscreteLib::DiscreteSystem(msh);
-        _feObjects = new FemLib::LagrangianFeObjectContainer(msh);
+        _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
         //discretization
         head = new MyNodalFunctionScalar();
         head->initialize(*dis, FemLib::PolynomialOrder::Linear);

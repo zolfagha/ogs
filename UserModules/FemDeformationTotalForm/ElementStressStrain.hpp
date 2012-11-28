@@ -43,7 +43,7 @@ bool FunctionElementStressStrain<T>::initialize(const BaseLib::Options &option)
     _strain->initialize(_dis, v0);
     _stress = new MyIntegrationPointFunctionVector();
     _stress->initialize(_dis, v0);
-    _feObjects = new FemLib::LagrangianFeObjectContainer(msh);
+    _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
 
     // set initial output
     for (size_t i=0; i<n_strain_components; i++) {
@@ -88,7 +88,7 @@ int FunctionElementStressStrain<T>::solveTimeStep(const NumLib::TimeStep &/*time
     MyNodalFunctionVector* u = (MyNodalFunctionVector*)getInput(Displacement);
     MyIntegrationPointFunctionVector* strain = _strain;
     MyIntegrationPointFunctionVector* stress = _stress;
-    FemLib::LagrangianFeObjectContainer* feObjects = _feObjects;
+    FemLib::LagrangeFeObjectContainer* feObjects = _feObjects;
 
     const size_t dim = msh->getDimension();
     const size_t n_strain_components = getNumberOfStrainComponents();

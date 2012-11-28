@@ -77,7 +77,7 @@ private:
     DISALLOW_COPY_AND_ASSIGN(FunctionXFEM_EXAMPLE_CRACK1);
 
 private:
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangeFeObjectContainer* _feObjects;
     NumLib::DiscreteDataConvergenceCheck _checker;
     MyNodalFunctionVector* _displacement;
     MyNodalFunctionVector* _exact_displacement;

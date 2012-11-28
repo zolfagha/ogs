@@ -206,7 +206,7 @@ private:
     MySolution* _sol_u;
     DiscreteSystem* _dis;
     Geo::PorousMedia* _pm;
-    LagrangianFeObjectContainer* _feObjects;
+    LagrangeFeObjectContainer* _feObjects;
     MyIntegrationPointFunctionVector* _strain;
     MyIntegrationPointFunctionVector* _stress;
 

@@ -33,7 +33,7 @@
 class LinearTransportJacobianLocalAssembler: public NumLib::IElementWiseTransientJacobianLocalAssembler
 {
 public:
-    LinearTransportJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
+    LinearTransportJacobianLocalAssembler(FemLib::LagrangeFeObjectContainer* feObjects)
         : _feObjects(*feObjects), _vel(NULL)
     {
     };
@@ -92,7 +92,7 @@ public:
     }
 
 private:
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::LagrangeFeObjectContainer _feObjects;
     NumLib::ITXFunction* _vel;
 };
 

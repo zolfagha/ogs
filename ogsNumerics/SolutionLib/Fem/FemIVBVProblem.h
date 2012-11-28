@@ -62,7 +62,7 @@ public:
     MyVariable* addVariable(const std::string &name, FemLib::PolynomialOrder::type initial_order = FemLib::PolynomialOrder::Linear)
     {
         MyVariable* var = new MyVariable(_variables.size(), name, initial_order);
-        FemLib::LagrangianFeObjectContainer* feContainer = new FemLib::LagrangianFeObjectContainer(_discrete_system->getMesh());
+        FemLib::LagrangeFeObjectContainer* feContainer = new FemLib::LagrangeFeObjectContainer(_discrete_system->getMesh());
         var->setFeObjectContainer(feContainer);
         _variables.push_back(var);
         return var;

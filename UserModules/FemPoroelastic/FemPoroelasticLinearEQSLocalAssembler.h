@@ -30,7 +30,7 @@ public:
     typedef MathLib::LocalVector LocalVectorType;
     typedef MathLib::LocalMatrix LocalMatrixType;
 
-    explicit FemPoroelasticLinearEQSLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects, size_t n_var, const std::vector<size_t> &vec_order)
+    explicit FemPoroelasticLinearEQSLocalAssembler(FemLib::LagrangeFeObjectContainer* feObjects, size_t n_var, const std::vector<size_t> &vec_order)
     : NumLib::ElementWiseTransientCoupledLinearEQSLocalAssembler(n_var, vec_order), _feObjects(*feObjects)
     {
     };
@@ -48,6 +48,6 @@ protected:
                             );
 
 private:
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::LagrangeFeObjectContainer _feObjects;
 };
 

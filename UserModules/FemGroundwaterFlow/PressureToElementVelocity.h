@@ -63,7 +63,7 @@ public:
 private:
     DiscreteLib::IDiscreteSystem* _dis;
     MyIntegrationPointFunctionVector* _vel;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangeFeObjectContainer* _feObjects;
     NumLib::DiscreteDataConvergenceCheck _checker;
     My3DIntegrationPointFunctionVector* _vel_3d;
 

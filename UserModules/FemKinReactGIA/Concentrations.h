@@ -187,7 +187,7 @@ private:
 	MyKinReductionProblemType* _problem; 
 	MyKinReductionSolution*    _solution; 
 
-    FemLib::LagrangianFeObjectContainer* _feObjects; 
+    FemLib::LagrangeFeObjectContainer* _feObjects; 
     
 	NumLib::DiscreteDataConvergenceCheck _checker;
 

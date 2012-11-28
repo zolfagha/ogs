@@ -36,7 +36,7 @@ public:
     typedef MathLib::LocalVector LocalVectorType;
     typedef MathLib::LocalMatrix LocalMatrixType;
 
-    LinearTransportTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
+    LinearTransportTimeODELocalAssembler(FemLib::LagrangeFeObjectContainer* feObjects)
         : _feObjects(*feObjects), _vel(NULL)
     {
     };
@@ -90,7 +90,7 @@ protected:
     }
 
 private:
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::LagrangeFeObjectContainer _feObjects;
     NumLib::ITXFunction* _vel;
 };
 

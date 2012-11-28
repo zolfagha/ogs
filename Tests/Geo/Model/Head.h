@@ -113,7 +113,7 @@ private:
     SolutionForHead* _solHead;
     GeoLib::Rectangle *_rec;
     //FemNodalFunctionScalar *_head;
-    LagrangianFeObjectContainer* _feObjects;
+    LagrangeFeObjectContainer* _feObjects;
 
     DISALLOW_COPY_AND_ASSIGN(FunctionHead);
 };

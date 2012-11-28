@@ -37,7 +37,7 @@ public:
      *
      * @param feObjects
      */
-    explicit HeatTransportInPorousMediaTimeODELocalAssembler(const FemLib::LagrangianFeObjectContainer &feObjects)
+    explicit HeatTransportInPorousMediaTimeODELocalAssembler(const FemLib::LagrangeFeObjectContainer &feObjects)
         : _feObjects(feObjects), _vel(NULL)
     {
     };
@@ -71,7 +71,7 @@ protected:
     virtual void assembleODE(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const MathLib::LocalVector &/*u1*/, const MathLib::LocalVector &/*u0*/, MathLib::LocalMatrix &localM, MathLib::LocalMatrix &localK, MathLib::LocalVector &/*localF*/);
 
 private:
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::LagrangeFeObjectContainer _feObjects;
     NumLib::ITXFunction* _vel;
 };
 

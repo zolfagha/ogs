@@ -37,7 +37,7 @@ public:
      *
      * @param feObjects
      */
-    HeatTransportInFractureTimeODELocalAssembler(const FemLib::LagrangianFeObjectContainer &feObjects, const MeshLib::CoordinateSystem &problem_coordinates)
+    HeatTransportInFractureTimeODELocalAssembler(const FemLib::LagrangeFeObjectContainer &feObjects, const MeshLib::CoordinateSystem &problem_coordinates)
     : _feObjects(feObjects), _problem_coordinates(problem_coordinates), _vel(NULL)
     {
     };
@@ -71,7 +71,7 @@ protected:
     virtual void assembleODE(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const MathLib::LocalVector &/*u1*/, const MathLib::LocalVector &/*u0*/, MathLib::LocalMatrix &localM, MathLib::LocalMatrix &localK, MathLib::LocalVector &/*localF*/);
 
 private:
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::LagrangeFeObjectContainer _feObjects;
     const MeshLib::CoordinateSystem _problem_coordinates;
     NumLib::ITXFunction* _vel;
 };

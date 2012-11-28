@@ -19,7 +19,7 @@
 class FemLinearElasticJacobianLocalAssembler: public NumLib::IElementWiseTransientJacobianLocalAssembler
 {
 public:
-    explicit FemLinearElasticJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
+    explicit FemLinearElasticJacobianLocalAssembler(FemLib::LagrangeFeObjectContainer* feObjects)
     : _feObjects(*feObjects)
     {
     };
@@ -29,5 +29,5 @@ public:
     void assembly(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &localDofManager, const MathLib::LocalVector &/*u1*/, const MathLib::LocalVector &/*u0*/,  MathLib::LocalMatrix &localJ);
 
 private:
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::LagrangeFeObjectContainer _feObjects;
 };

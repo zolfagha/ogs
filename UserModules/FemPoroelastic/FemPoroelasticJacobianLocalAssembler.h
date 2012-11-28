@@ -20,7 +20,7 @@ class FemPoroelasticJacobianLocalAssembler
 : public NumLib::ElementWiseTransientCoupledJacobianLocalAssembler
 {
 public:
-    FemPoroelasticJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects, size_t n_var, const std::vector<size_t> &vec_order)
+    FemPoroelasticJacobianLocalAssembler(FemLib::LagrangeFeObjectContainer* feObjects, size_t n_var, const std::vector<size_t> &vec_order)
     : NumLib::ElementWiseTransientCoupledJacobianLocalAssembler(n_var, vec_order), _feObjects(*feObjects)
     {
     };
@@ -36,5 +36,5 @@ public:
                             );
 
 private:
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::LagrangeFeObjectContainer _feObjects;
 };

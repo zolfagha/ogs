@@ -36,7 +36,7 @@ bool FunctionConcentration<T1,T2>::initialize(const BaseLib::Options &option)
     MeshLib::IMesh* msh = femData->list_mesh[msh_id];
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
-    _feObjects = new FemLib::LagrangianFeObjectContainer(msh);
+    _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
 
     //Compound
     size_t compound_id = option.getOptionAsNum<size_t>("CompoundID");
