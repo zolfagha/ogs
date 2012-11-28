@@ -82,8 +82,8 @@ public:
     virtual void configure( MeshLib::IElement &e )
     {
         e.setCurrentOrder(getOrder());
-        FemLib::TemplateFeBase<T_FETYPE, N_VARIABLES>::setElement(&e);
-        const MeshLib::IMesh* msh = FemLib::TemplateFeBase<T_FETYPE, N_VARIABLES>::getMesh();
+        FemLib::TemplateFeBase<N_VARIABLES>::setElement(&e);
+        const MeshLib::IMesh* msh = FemLib::TemplateFeBase<N_VARIABLES>::getMesh();
         msh->setCurrentOrder(getOrder());
         if (e.getMappedCoordinates()==NULL) {
             MeshLib::IElementCoordinatesMapping* ele_map;
@@ -147,7 +147,7 @@ public:
         const FemLib::CoordinateMappingProperty *prop = _mapping->compute(natural_pt);
         double *N = &(*prop->shape_r)(0,0);
         double v = .0;
-        for (size_t i=0; i<FemLib::TemplateFeBase<T_FETYPE, N_VARIABLES>::getNumberOfVariables(); i++)
+        for (size_t i=0; i<FemLib::TemplateFeBase<N_VARIABLES>::getNumberOfVariables(); i++)
             v+=N[i]*nodal_values[i];
         return v;
     }
