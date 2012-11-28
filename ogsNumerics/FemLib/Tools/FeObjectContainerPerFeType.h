@@ -18,7 +18,7 @@
 #include "IFeObjectContainer.h"
 #include "FeObjectCachePerFeType.h"
 #include "FemElementCatalog.h"
-#include "MeshElementShapeToFemElementType.h"
+#include "IMeshElementToFemElementType.h"
 
 namespace FemLib
 {
@@ -36,8 +36,8 @@ public:
      * @param shape2feType  Link between shape type and FE type
      * @param msh           Mesh
      */
-    FeObjectContainerPerFeType(const FemElementCatalog* fe_catalog, const MeshElementShapeToFemElementType* shape2feType, MeshLib::IMesh* msh)
-    : _cache(fe_catalog, msh), _shape2feType(shape2feType)
+    FeObjectContainerPerFeType(const FemElementCatalog* fe_catalog, const IMeshElementToFemElementType* ele2feType, MeshLib::IMesh* msh)
+    : _cache(fe_catalog, msh), _ele2feType(ele2feType)
     {
     };
 
@@ -46,7 +46,7 @@ public:
      * @param src
      */
     FeObjectContainerPerFeType(const FeObjectContainerPerFeType &src)
-    : _cache(src._cache), _shape2feType(src._shape2feType)
+    : _cache(src._cache), _ele2feType(src._ele2feType)
     {
     }
 
@@ -71,7 +71,7 @@ public:
      */
     virtual IFiniteElement* getFeObject(const MeshLib::IElement &e)
     {
-        int fe_type = _shape2feType->getFeType(e, e.getCurrentOrder());
+        int fe_type = _ele2feType->getFeType(e, e.getCurrentOrder());
         IFiniteElement* fe = _cache.getFeObject(fe_type);
         fe->configure(*const_cast<MeshLib::IElement*>(&e));
         return fe;
@@ -79,7 +79,7 @@ public:
 
 private:
     FeObjectCachePerFeType _cache;
-    const MeshElementShapeToFemElementType* _shape2feType;
+    const IMeshElementToFemElementType* _ele2feType;
 };
 
 
