@@ -19,7 +19,7 @@
 namespace SolutionLib
 {
 
-FemNeumannBC::FemNeumannBC(const MeshLib::IMesh *msh, FemLib::LagrangianFeObjectContainer* feObjects, const GeoLib::GeoObject *geo, NumLib::ITXFunction *func)
+FemNeumannBC::FemNeumannBC(const MeshLib::IMesh *msh, FemLib::IFeObjectContainer* feObjects, const GeoLib::GeoObject *geo, NumLib::ITXFunction *func)
 : _msh(msh), _feObjects(feObjects), _geo(geo), _bc_func(func->clone())
 {
     _is_transient = false;

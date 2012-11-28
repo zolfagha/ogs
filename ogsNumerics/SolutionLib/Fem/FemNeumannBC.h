@@ -18,7 +18,7 @@
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Tools/Tools.h"
 #include "NumLib/Function/ITXFunction.h"
-#include "FemLib/Tools/LagrangeFeObjectContainer.h"
+#include "FemLib/Tools/IFeObjectContainer.h"
 
 #include "IFemNeumannBC.h"
 
@@ -34,7 +34,7 @@ class FemNeumannBC : public IFemNeumannBC
 {
 public:
     /// 
-    FemNeumannBC(const MeshLib::IMesh *msh, FemLib::LagrangianFeObjectContainer* feObjects, const GeoLib::GeoObject *geo, NumLib::ITXFunction *func);
+    FemNeumannBC(const MeshLib::IMesh *msh, FemLib::IFeObjectContainer* feObjects, const GeoLib::GeoObject *geo, NumLib::ITXFunction *func);
 
     ///
     FemNeumannBC(const std::vector<size_t> &vec_node_id, const std::vector<double> &vec_node_values);
@@ -54,7 +54,7 @@ public:
 
 private:
     const MeshLib::IMesh* _msh;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::IFeObjectContainer* _feObjects;
     const GeoLib::GeoObject *_geo;
     NumLib::ITXFunction *_bc_func;
     std::vector<size_t> _vec_nodes;

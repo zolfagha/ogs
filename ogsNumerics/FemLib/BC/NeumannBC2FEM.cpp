@@ -21,7 +21,7 @@
 namespace FemLib
 {
 
-NeumannBC2FEM::NeumannBC2FEM(const MeshLib::IMesh &msh, LagrangianFeObjectContainer &feObjects, const GeoLib::GeoObject &_geo, const NumLib::ITXFunction &_bc_func, std::vector<size_t> &_vec_nodes, std::vector<double> &_vec_values)
+NeumannBC2FEM::NeumannBC2FEM(const MeshLib::IMesh &msh, IFeObjectContainer &feObjects, const GeoLib::GeoObject &_geo, const NumLib::ITXFunction &_bc_func, std::vector<size_t> &_vec_nodes, std::vector<double> &_vec_values)
 {
     // pickup nodes on geo
     MeshLib::findNodesOnGeometry(&msh, &_geo, &_vec_nodes);
@@ -59,7 +59,8 @@ NeumannBC2FEM::NeumannBC2FEM(const MeshLib::IMesh &msh, LagrangianFeObjectContai
                     nodal_val[i_nod] = v;
                 }
                 // compute integrals
-                IFiniteElement *fe_edge = feObjects.getFeObject(*e, msh.getCurrentOrder());
+                e->setCurrentOrder(msh.getCurrentOrder());
+                IFiniteElement *fe_edge = feObjects.getFeObject(*e);
                 fe_edge->getIntegrationMethod()->initialize(*e, 2);
                 //IFiniteElement *fe_edge = _var->getFiniteElement(*e);
                 MathLib::LocalVector  result(edge_nnodes);
