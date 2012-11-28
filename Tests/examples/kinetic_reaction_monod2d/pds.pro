@@ -4,6 +4,7 @@
 	<P algorithm="Serial" convergence="FemFunctionConvergenceCheck" max_itr="1" epsilon="1e-4">
 		<out>HEAD</out>
 		<out>VELOCITY</out>
+		<out>Tracer</out>
 		<problems>
 			<M name="GROUNDWATER_FLOW">
 				<out>HEAD</out>
@@ -14,6 +15,7 @@
 			</M>
 			<M name="KIN_REACT_GIA">
 				<in>VELOCITY</in>
+			    <out>Tracer</out>
 			</M>
 		</problems>
 	</P>
