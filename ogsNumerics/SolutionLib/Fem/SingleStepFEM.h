@@ -53,8 +53,7 @@ namespace SolutionLib
 template <
     class T_USER_FEM_PROBLEM,
     class T_LINEAR_SOLVER,
-    class T_NL_SOLVER_FACTORY=NumLib::DiscreteNonlinearSolverFactory,
-    class T_FE_CONTAINER=FemLib::LagrangianFeObjectContainer
+    class T_NL_SOLVER_FACTORY=NumLib::DiscreteNonlinearSolverFactory
     >
 class SingleStepFEM
     : public AbstractTimeSteppingAlgorithm
@@ -91,7 +90,6 @@ public:
         BaseLib::releaseObject(_f_r);
         BaseLib::releaseObject(_f_dx);
         BaseLib::releaseObject(_f_nonlinear);
-        BaseLib::releaseObject(_feObjects);
     }
 
     /// solve 
@@ -137,16 +135,14 @@ private:
     SolutionVector *_x_n1_0;
     SolutionVector *_x_n1;
     SolutionVector *_x_st;
-    FemLib::IFeObjectContainer* _feObjects;
 };
 
 template <
     class T_USER_FEM_PROBLEM,
     class T_LINEAR_SOLVER,
-    class T_NL_SOLVER_FACTORY,
-    class T_FE_CONTAINER
+    class T_NL_SOLVER_FACTORY
     >
-SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY,T_FE_CONTAINER>::SingleStepFEM(MyDiscreteSystem* dis, UserFemProblem* problem, MyNonlinearSolverFactory* nl_solver_factory)
+SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY>::SingleStepFEM(MyDiscreteSystem* dis, UserFemProblem* problem, MyNonlinearSolverFactory* nl_solver_factory)
     : AbstractTimeSteppingAlgorithm(*problem->getTimeSteppingFunction()),
       _problem(problem), _discrete_system(dis)
 {
@@ -166,8 +162,6 @@ SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY,T_FE_CONTAI
     const size_t n_total_dofs = _dofManager.getTotalNumberOfActiveDoFs();
     INFO("* Total number of DoFs = %d", n_total_dofs);
 
-    _feObjects = new T_FE_CONTAINER(msh);
-
     // setup IC
     _vec_u_n1.resize(n_var, 0);
     for (size_t i=0; i<n_var; i++) {
@@ -175,9 +169,9 @@ SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY,T_FE_CONTAI
         FemIC* femIC = femVar->getIC();
         MyNodalFunctionScalar* u0 = new MyNodalFunctionScalar();
         u0->initialize(*dis, femVar->getCurrentOrder(), 0);
-        //u0->setFeObjectContainer(_feObjects);
+        assert (femVar->getFeObjectContainer() != NULL);
+        u0->setFeObjectContainer(femVar->getFeObjectContainer());
         femIC->setup(*u0);
-        u0->setFeObjectContainer(_feObjects);
         _vec_u_n1[i] = u0; //u0->clone()
     }
     
@@ -214,10 +208,9 @@ SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY,T_FE_CONTAI
 template <
     class T_USER_FEM_PROBLEM,
     class T_LINEAR_SOLVER,
-    class T_NL_SOLVER_FACTORY,
-    class T_FE_CONTAINER
+    class T_NL_SOLVER_FACTORY
     >
-int SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY,T_FE_CONTAINER>::solveTimeStep(const NumLib::TimeStep &t_n1)
+int SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY>::solveTimeStep(const NumLib::TimeStep &t_n1)
 {
     // time step
     double dt = t_n1.getTime() - AbstractTimeSteppingAlgorithm::getTimeStepFunction()->getPrevious();
