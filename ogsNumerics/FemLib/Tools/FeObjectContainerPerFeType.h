@@ -5,7 +5,7 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file FeObjectContainerPerElementShapeType.h
+ * \file FeObjectContainerPerFeType.h
  *
  * Created on 2012-11-27 by Norihiro Watanabe
  */
@@ -26,7 +26,7 @@ namespace FemLib
 /**
  * \brief Finite element object containers based on element shape types
  */
-class FeObjectContainerPerElementShapeType
+class FeObjectContainerPerFeType
  : public IFeObjectContainer
 {
 public:
@@ -36,7 +36,7 @@ public:
      * @param shape2feType  Link between shape type and FE type
      * @param msh           Mesh
      */
-    FeObjectContainerPerElementShapeType(const FemElementCatalog* fe_catalog, const MeshElementShapeToFemElementType* shape2feType, MeshLib::IMesh* msh)
+    FeObjectContainerPerFeType(const FemElementCatalog* fe_catalog, const MeshElementShapeToFemElementType* shape2feType, MeshLib::IMesh* msh)
     : _cache(fe_catalog, msh), _shape2feType(shape2feType)
     {
     };
@@ -45,7 +45,7 @@ public:
      * Copy constructor
      * @param src
      */
-    FeObjectContainerPerElementShapeType(const FeObjectContainerPerElementShapeType &src)
+    FeObjectContainerPerFeType(const FeObjectContainerPerFeType &src)
     : _cache(src._cache), _shape2feType(src._shape2feType)
     {
     }
@@ -53,7 +53,7 @@ public:
     /**
      *
      */
-    virtual ~FeObjectContainerPerElementShapeType() {};
+    virtual ~FeObjectContainerPerFeType() {};
 
     /**
      *
