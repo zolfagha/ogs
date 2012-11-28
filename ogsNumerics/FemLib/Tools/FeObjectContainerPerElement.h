@@ -40,10 +40,29 @@ public:
         _vec_fem.resize(msh->getNumberOfElements());
     }
 
+    /**
+     * Copy constructor
+     * @param src
+     */
+    FeObjectContainerPerElement(const FeObjectContainerPerElement &src)
+    : _fe_catalog(src._fe_catalog), _msh(src._msh), _vec_fem(src._vec_fem)
+    {
+
+    }
+
     ///
     virtual ~FeObjectContainerPerElement()
     {
         BaseLib::releaseObjectsInStdVector(_vec_fem);
+    }
+
+    /**
+     *
+     * @return
+     */
+    virtual FeObjectContainerPerElement* clone() const
+    {
+        return new FeObjectContainerPerElement(*this);
     }
 
     /**
@@ -65,9 +84,6 @@ public:
     {
         return _vec_fem[e.getID()];
     }
-
-private:
-    DISALLOW_COPY_AND_ASSIGN(FeObjectContainerPerElement);
 
 private:
     const FemElementCatalog* _fe_catalog;

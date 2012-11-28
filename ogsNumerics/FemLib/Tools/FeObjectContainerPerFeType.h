@@ -56,6 +56,15 @@ public:
     virtual ~FeObjectContainerPerFeType() {};
 
     /**
+     * return a copy
+     * @return
+     */
+    virtual FeObjectContainerPerFeType* clone() const
+    {
+        return new FeObjectContainerPerFeType(*this);
+    }
+
+    /**
      *
      * @param e     Mesh element
      * @return a pointer to IFiniteElement object

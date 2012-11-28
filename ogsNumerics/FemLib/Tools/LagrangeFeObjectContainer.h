@@ -52,6 +52,11 @@ public:
      */
     virtual ~LagrangeFeObjectContainer() {};
 
+    virtual LagrangeFeObjectContainer* clone() const
+    {
+        return new LagrangeFeObjectContainer(*this);
+    }
+
     /**
      * set polynomial order
      * @param order

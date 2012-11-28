@@ -26,6 +26,8 @@ public:
     virtual ~IFeObjectContainer() {};
     /// get a finite element object for the given mesh element
     virtual IFiniteElement* getFeObject(const MeshLib::IElement &e) = 0;
+    /// return a clone of this object
+    virtual IFeObjectContainer* clone() const = 0;
 };
 
 }
