@@ -81,7 +81,7 @@ public:
     /// @param r residual
     void eval(const SolutionVector &u_n1, SolutionVector &r);
 
-	const NumLib::TimeStep* getTimeStepSize(void)
+	const NumLib::TimeStep* getTimeStepObj(void)
 	{
 		return _t_n1; 	
 	}
