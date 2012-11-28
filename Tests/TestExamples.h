@@ -101,7 +101,7 @@ public:
         double* globalRHS = eqs.getRHS();
 
         //assembly
-        FemLib::LagrangianFeObjectContainer* feObjects = gw.head->getFeObjectContainer();
+        FemLib::IFeObjectContainer* feObjects = gw.head->getFeObjectContainer();
         MathLib::LocalMatrix localK;
         std::vector<size_t> e_node_id_list;
         double gp_x[3], real_x[3];
@@ -148,7 +148,7 @@ public:
     static void calculateVelocity(GWFemTest &gw)
     {
         const MeshLib::IMesh *msh = gw.msh;
-        FemLib::LagrangianFeObjectContainer* feObjects = gw.head->getFeObjectContainer();
+        FemLib::IFeObjectContainer* feObjects = gw.head->getFeObjectContainer();
         //calculate vel (vel=f(h))
         for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
             MeshLib::IElement* e = msh->getElement(i_e);
