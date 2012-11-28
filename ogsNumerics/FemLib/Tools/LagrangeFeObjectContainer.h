@@ -15,7 +15,7 @@
 #include "BaseLib/CodingTools.h"
 
 #include "FemLib/Core/Element/IFemElement.h"
-#include "FeObjectContainerPerElementShapeType.h"
+#include "FeObjectContainerPerFeType.h"
 #include "FemElementCatalog.h"
 #include "LagrangeFemElementCatalogBuilder.h"
 
@@ -26,7 +26,7 @@ namespace FemLib
  * \brief Lagrangian finite element object containers
  */
 class LagrangianFeObjectContainer
- : public FeObjectContainerPerElementShapeType
+ : public FeObjectContainerPerFeType
 {
 public:
     /**
@@ -34,7 +34,7 @@ public:
      * @param msh
      */
     explicit LagrangianFeObjectContainer(MeshLib::IMesh* msh)
-    :  FeObjectContainerPerElementShapeType(&_fe_catalog, &_shape2fetype, msh), _order(1)
+    : FeObjectContainerPerFeType(&_fe_catalog, &_shape2fetype, msh), _order(1)
     {
         LagrangeFemElementCatalogBuilder::construct(_fe_catalog, _shape2fetype);
     };
@@ -44,7 +44,7 @@ public:
      * @param src
      */
     LagrangianFeObjectContainer(const LagrangianFeObjectContainer &src)
-    : FeObjectContainerPerElementShapeType(src), _fe_catalog(src._fe_catalog), _shape2fetype(src._shape2fetype), _order(src._order)
+    : FeObjectContainerPerFeType(src), _shape2fetype(src._shape2fetype), _order(src._order)
     {
     }
 

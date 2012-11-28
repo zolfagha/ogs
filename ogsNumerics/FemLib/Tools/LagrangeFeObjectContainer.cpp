@@ -19,7 +19,7 @@ namespace FemLib
 IFiniteElement* LagrangianFeObjectContainer::getFeObject(const MeshLib::IElement &e)
 {
     e.setCurrentOrder(_order);
-    IFiniteElement* fe = FeObjectContainerPerElementShapeType::getFeObject(e);
+    IFiniteElement* fe = FeObjectContainerPerFeType::getFeObject(e);
     fe->configure(*const_cast<MeshLib::IElement*>(&e));
     return fe;
 }
