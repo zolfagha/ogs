@@ -15,8 +15,6 @@
 
 #include <cstddef>
 
-#include <cstddef>
-
 namespace MathLib
 {
 

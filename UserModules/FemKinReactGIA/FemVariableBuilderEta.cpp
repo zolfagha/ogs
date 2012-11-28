@@ -35,7 +35,7 @@ void FemVariableBuilderEta::doit(const std::string &given_var_name, const BaseLi
         const GeoLib::GeoObject* geo_obj = geo->searchGeoByName(geo_unique_name, geo_type, geo_name);
         std::string dis_name = opIC->getOption("DistributionType");
         double dis_v = opIC->getOptionAsNum<double>("DistributionValue");
-        NumLib::ITXFunction* f_ic =  f_builder.create(dis_name, dis_v);
+        NumLib::ITXFunction* f_ic =  f_builder.create(*opIC);
         var_ic->addDistribution(geo_obj, f_ic);
     }
     var->setIC(var_ic);
@@ -52,7 +52,7 @@ void FemVariableBuilderEta::doit(const std::string &given_var_name, const BaseLi
         const GeoLib::GeoObject* geo_obj = geo->searchGeoByName(geo_unique_name, geo_type, geo_name);
         std::string dis_name = opBC->getOption("DistributionType");
         double dis_v = opBC->getOptionAsNum<double>("DistributionValue");
-        NumLib::ITXFunction* f_bc =  f_builder.create(dis_name, dis_v);
+        NumLib::ITXFunction* f_bc =  f_builder.create(*opBC);
         var->addDirichletBC(new SolutionLib::FemDirichletBC(msh, geo_obj, f_bc));
     }
     // ST
@@ -72,7 +72,7 @@ void FemVariableBuilderEta::doit(const std::string &given_var_name, const BaseLi
         if (st_type.compare("NEUMANN")==0) {
             dis_v *= -1; // user set inflow as positive sign but internally negative
         }
-        NumLib::ITXFunction* f_st =  f_builder.create(dis_name, dis_v);
+        NumLib::ITXFunction* f_st =  f_builder.create(*opST);
         if (f_st!=NULL) {
             SolutionLib::IFemNeumannBC *femSt = 0;
             if (st_type.compare("NEUMANN")==0) {
