@@ -21,7 +21,7 @@
 namespace THMmf
 {
 
-typedef TemplateInterfaceFe<THMmfFiniteElementType::IE_QUAD4, 2, 4, 1, FemShapeInterfaceGoodmanQuad4, FemLib::FemIntegrationGaussQuad, FemLib::FeExtrapolationGaussLinear> IE_QUAD4;
-typedef TemplateInterfaceFe<THMmfFiniteElementType::IE_TRI3,  2, 3, 1, FemShapeInterfaceGoodmanTri3, FemLib::FemIntegrationGaussTriangle, FemLib::FeExtrapolationGaussLinear> IE_TRI3;
+typedef TemplateInterfaceFe<2, 4, 1, FemShapeInterfaceGoodmanQuad4, FemLib::FemIntegrationGaussQuad, FemLib::FeExtrapolationGaussLinear> IE_QUAD4;
+typedef TemplateInterfaceFe<2, 3, 1, FemShapeInterfaceGoodmanTri3, FemLib::FemIntegrationGaussTriangle, FemLib::FeExtrapolationGaussLinear> IE_TRI3;
 
 }

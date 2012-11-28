@@ -41,7 +41,6 @@ namespace THMmf
  * \tparam T_EXTRAPOLATE
  */
 template <
-    THMmfFiniteElementType::type T_FETYPE,
     size_t N_ELE_DIM,
     size_t N_VARIABLES,
     size_t N_ORDER,
@@ -49,12 +48,12 @@ template <
     class T_INTEGRAL,
     class T_EXTRAPOLATE
     >
-class TemplateInterfaceFe : public FemLib::TemplateFeBase<T_FETYPE, N_VARIABLES>
+class TemplateInterfaceFe : public FemLib::TemplateFeBase<N_VARIABLES>
 {
 public:
     ///
     explicit TemplateInterfaceFe(MeshLib::IMesh* msh)
-    : FemLib::TemplateFeBase<T_FETYPE, N_VARIABLES>(msh)
+    : FemLib::TemplateFeBase<N_VARIABLES>(msh)
     {
         const size_t mesh_dim = msh->getDimension();
         if (mesh_dim == N_ELE_DIM)
