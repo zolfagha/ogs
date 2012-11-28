@@ -13,7 +13,6 @@
 #include "TRI3CONST.h"
 
 #include "GeoLib/Point.h"
-#include "NumLib/Function/Function.h"
 
 namespace FemLib
 {

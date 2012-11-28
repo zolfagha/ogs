@@ -16,7 +16,6 @@
 
 #include "MathLib/DataType.h"
 #include "MeshLib/Core/IElement.h"
-#include "NumLib/Function/Function.h"
 
 #include "FemLib/Core/Integration/Integration.h"
 #include "FemLib/Core/ShapeFunction/ShapeFunction.h"
