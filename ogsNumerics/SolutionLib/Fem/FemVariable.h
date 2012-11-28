@@ -92,7 +92,11 @@ public:
     //----------------------------------------------------------------------
     void setCurrentOrder(FemLib::PolynomialOrder::type order) {_current_order = order;};
     FemLib::PolynomialOrder::type getCurrentOrder() const {return _current_order;};
-    void setFeObjectContainer(FemLib::IFeObjectContainer* feContainer) {_fe_container = feContainer;};
+    void setFeObjectContainer(FemLib::IFeObjectContainer* feContainer) 
+    {
+        if (_fe_container!=NULL) delete _fe_container;
+        _fe_container = feContainer;
+    };
     FemLib::IFeObjectContainer* getFeObjectContainer() const { return _fe_container;};
 
 private:
