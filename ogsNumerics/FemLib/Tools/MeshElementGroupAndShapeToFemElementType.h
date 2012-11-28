@@ -24,8 +24,10 @@ namespace FemLib
 class MeshElementGroupAndShapeToFemElementType
 : public IMeshElementToFemElementType
 {
-    typedef std::pair<MeshLib::ElementShape::type, int> MyKeySub;
-    typedef std::pair<int, MyKeySub> MyKey;
+    typedef int OrderType;
+    typedef size_t GroupIdType;
+    typedef std::pair<MeshLib::ElementShape::type, OrderType> MyKeySub;
+    typedef std::pair<GroupIdType, MyKeySub> MyKey;
     typedef std::map<MyKey, int> MyTable;
 public:
     virtual ~MeshElementGroupAndShapeToFemElementType() {};
@@ -44,6 +46,19 @@ public:
             return itr->second;
         else
             return -1;
+    }
+
+    /**
+     * register FE type
+     * @param group_id
+     * @param shape_type
+     * @param order
+     * @param fe_type
+     */
+    void addFeType(size_t group_id, MeshLib::ElementShape::type shape_type, int order, int fe_type)
+    {
+        MyKey key(group_id, MyKeySub(shape_type, order));
+        _map_ele2fetype[key] = fe_type;
     }
 
 private:
