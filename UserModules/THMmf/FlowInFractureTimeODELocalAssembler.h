@@ -29,15 +29,18 @@ public:
      * @param feObjects
      * @param problem_coordinates
      */
-    FlowInFractureTimeODELocalAssembler(const FemLib::LagrangianFeObjectContainer &feObjects, const MeshLib::CoordinateSystem &problem_coordinates)
-    : _feObjects(feObjects), _problem_coordinates(problem_coordinates)
+    FlowInFractureTimeODELocalAssembler(const FemLib::IFeObjectContainer* feObjects, const MeshLib::CoordinateSystem &problem_coordinates)
+    : _feObjects(feObjects->clone()), _problem_coordinates(problem_coordinates)
     {
     };
 
     /**
      *
      */
-    virtual ~FlowInFractureTimeODELocalAssembler() {};
+    virtual ~FlowInFractureTimeODELocalAssembler()
+    {
+        BaseLib::releaseObject(_feObjects);
+    };
 
 protected:
     /**
@@ -53,7 +56,7 @@ protected:
     virtual void assembleODE(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const MathLib::LocalVector &/*u1*/, const MathLib::LocalVector &/*u0*/, MathLib::LocalMatrix &localM, MathLib::LocalMatrix &localK, MathLib::LocalVector &localF);
 
 private:
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::IFeObjectContainer* _feObjects;
     const MeshLib::CoordinateSystem _problem_coordinates;
 };
 
@@ -80,7 +83,7 @@ void FlowInFractureTimeODELocalAssembler<T>::assembleODE(const NumLib::TimeStep 
     }
 
     // numerical integrations
-    FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
+    FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
     FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
     double gp_x[3], real_x[3];
     for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {

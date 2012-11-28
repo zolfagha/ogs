@@ -32,17 +32,20 @@ public:
      * @param problem_coordinates
      */
     FlowInPorousMediaTimeODELocalAssembler (
-            const FemLib::LagrangianFeObjectContainer &feObjects,
+            const FemLib::IFeObjectContainer* feObjects,
             const MeshLib::CoordinateSystem &problem_coordinates
             )
-    : _feObjects(feObjects), _problem_coordinates(problem_coordinates)
+    : _feObjects(feObjects->clone()), _problem_coordinates(problem_coordinates)
     {
     };
 
     /**
      *
      */
-    virtual ~FlowInPorousMediaTimeODELocalAssembler() {};
+    virtual ~FlowInPorousMediaTimeODELocalAssembler()
+    {
+        BaseLib::releaseObject(_feObjects);
+    };
 
 protected:
     /**
@@ -59,7 +62,7 @@ protected:
     virtual void assembleODE(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const MathLib::LocalVector &/*u1*/, const MathLib::LocalVector &/*u0*/, MathLib::LocalMatrix &localM, MathLib::LocalMatrix &localK, MathLib::LocalVector &localF);
 
 private:
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::IFeObjectContainer* _feObjects;
     const MeshLib::CoordinateSystem _problem_coordinates;
 };
 
@@ -83,7 +86,7 @@ void FlowInPorousMediaTimeODELocalAssembler<T>::assembleODE(const NumLib::TimeSt
     }
 
     // numerical integration
-    FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
+    FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
     FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
     double gp_x[3], real_x[3];
     for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
