@@ -25,15 +25,14 @@ namespace FemLib
 /**
  * \brief Lagrangian finite element object containers
  */
-class LagrangianFeObjectContainer
- : public FeObjectContainerPerFeType
+class LagrangeFeObjectContainer: public FeObjectContainerPerFeType
 {
 public:
     /**
      *
      * @param msh
      */
-    explicit LagrangianFeObjectContainer(MeshLib::IMesh* msh)
+    explicit LagrangeFeObjectContainer(MeshLib::IMesh* msh)
     : FeObjectContainerPerFeType(&_fe_catalog, &_shape2fetype, msh), _order(1)
     {
         LagrangeFemElementCatalogBuilder::construct(_fe_catalog, _shape2fetype);
@@ -43,7 +42,7 @@ public:
      * Copy constructor
      * @param src
      */
-    LagrangianFeObjectContainer(const LagrangianFeObjectContainer &src)
+    LagrangeFeObjectContainer(const LagrangeFeObjectContainer &src)
     : FeObjectContainerPerFeType(src), _shape2fetype(src._shape2fetype), _order(src._order)
     {
     }
@@ -51,7 +50,7 @@ public:
     /**
      *
      */
-    virtual ~LagrangianFeObjectContainer() {};
+    virtual ~LagrangeFeObjectContainer() {};
 
     /**
      * set polynomial order

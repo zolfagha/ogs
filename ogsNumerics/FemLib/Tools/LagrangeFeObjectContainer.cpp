@@ -16,7 +16,7 @@
 namespace FemLib
 {
 
-IFiniteElement* LagrangianFeObjectContainer::getFeObject(const MeshLib::IElement &e)
+IFiniteElement* LagrangeFeObjectContainer::getFeObject(const MeshLib::IElement &e)
 {
     e.setCurrentOrder(_order);
     IFiniteElement* fe = FeObjectContainerPerFeType::getFeObject(e);
@@ -24,7 +24,7 @@ IFiniteElement* LagrangianFeObjectContainer::getFeObject(const MeshLib::IElement
     return fe;
 }
 
-IFiniteElement* LagrangianFeObjectContainer::getFeObject(const MeshLib::IElement &e, size_t order)
+IFiniteElement* LagrangeFeObjectContainer::getFeObject(const MeshLib::IElement &e, size_t order)
 {
     setPolynomialOrder(order);
     return getFeObject(e);
