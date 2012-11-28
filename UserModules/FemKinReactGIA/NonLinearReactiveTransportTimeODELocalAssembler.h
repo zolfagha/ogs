@@ -90,12 +90,12 @@ protected:
 		n_xi_mob = _xi_mob_rates->size(); 
 		n_nodes  = e.getNumberOfNodes(); 
         n_sp     = q->getNumberOfSamplingPoints();  // number of sampling points
-		LocalMatrixType node_xi_mob_values(n_nodes, n_xi_mob ); // TODO
+		LocalMatrixType node_xi_mob_rate_values(n_nodes, n_xi_mob ); // TODO
 		for (i=0; i<n_nodes; i++)
 		{
 		    node_idx = e.getNodeID( i ); 
 			for (k=0; k<n_xi_mob; k++)
-			    node_xi_mob_values( i, k ) = _xi_mob_rates->at(k)->getValue( node_idx ); 
+			    node_xi_mob_rate_values( i, k ) = _xi_mob_rates->at(k)->getValue( node_idx ); 
 		} // end of for i
 
         LocalMatrixType localDispersion_tmp = LocalMatrixType::Zero(n_nodes, n_nodes); 
@@ -144,7 +144,7 @@ protected:
             // localK
             localK.block(n_nodes*k,n_nodes*k,n_nodes,n_nodes) = localK_tmp; 
             // localF 
-            rate_xi_mob_gp = Np * node_xi_mob_values.col(k); 
+            rate_xi_mob_gp = Np * node_xi_mob_rate_values.col(k); 
 		    // right hand side xi_mob rates
 		    localF.segment(n_nodes*k,n_nodes).noalias() += Np.transpose() * rate_xi_mob_gp * fe->getDetJ() * q->getWeight(j);
         }  // end of for k

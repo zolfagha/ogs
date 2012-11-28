@@ -106,10 +106,12 @@ public:
         BaseLib::releaseObject(_non_linear_problem);
         BaseLib::releaseObject(_nlin_solution);
         BaseLib::releaseObject(_function_data);
+
         BaseLib::releaseObjectsInStdVector( _linear_problem );
         BaseLib::releaseObjectsInStdVector( _lin_solutions );
         BaseLib::releaseObjectsInStdVector( _vec_u_n1 ); 
 
+        BaseLib::releaseObjectsInStdMap( _bc_info ); 
     }
 
     /**

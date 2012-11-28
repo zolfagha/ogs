@@ -47,8 +47,8 @@ public:
     template<class T_X, class F_RESIDUALS, class F_DX>
     void post_process(const T_X &/*dx*/, const T_X &/*x_new*/, F_RESIDUALS &/*f_residuals*/, F_DX &/*f_dx*/)
     {
-		// calculate the local ode
-        // _assemblerJ->// TODO
+		// update the xi_mob values using x_new
+        //_assemblerJ->get_function_data()->set
     };
 
 private:

@@ -166,23 +166,6 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
         FemVariableBuilder var_builder;
         var_builder.doit(femData->map_ChemComp[i]->second->get_name(), option, msh, femData->geo, femData->geo_unique_name, _feObjects, comp_conc);
 	}
-	// set IC for concentrations
-	const BaseLib::Options* opICList = option.getSubGroup("ICList");
-    std::vector<const BaseLib::Options*> vec_opIC = opICList->getSubGroupList("IC"); 
-    SolutionLib::FemIC* var_ic = new SolutionLib::FemIC(msh);
-    for (size_t i=0; i<vec_opIC.size(); i++)
-    {
-        const BaseLib::Options* opIC = vec_opIC[i];
-        std::string var_name = opIC->getOption("Variable");
-        std::string geo_type = opIC->getOption("GeometryType");
-        std::string geo_name = opIC->getOption("GeometryName");
-        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
-        assert(opIC->hasOption("DistributionType"));
-        NumLib::ITXFunction* f_ic = NumLib::TXFunctionBuilder::create(*opIC);
-        var_ic->addDistribution(geo_obj, f_ic);
-        size_t comp_idx = femData->map_ChemComp.find( var_name )->second->getIndex(); 
-        _problem->getVariable(comp_idx)->setIC(var_ic);
-    }
     
 	// backward flushing global vector of concentrations
 	MyNodalFunctionScalar* tmp_conc; 
@@ -222,54 +205,6 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 		xi_mob_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _xi_mob[i]->getDiscreteData() ) ); 
 		_non_linear_problem->getVariable(i)->setIC( xi_mob_ic ); 
 	}
-
-    // set BC for concentrations
-    const BaseLib::Options* opBCList = option.getSubGroup("BCList");
-    std::vector<const BaseLib::Options*> vec_opBC = opICList->getSubGroupList("BC"); 
-    for (size_t i=0; i<vec_opBC.size(); i++)
-    {
-        const BaseLib::Options* opBC = vec_opBC[i];
-        std::string var_name = opBC->getOption("Variable");
-        std::string geo_type = opBC->getOption("GeometryType");
-        std::string geo_name = opBC->getOption("GeometryName");
-        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
-        assert(opBC->hasOption("DistributionType"));
-        NumLib::ITXFunction* f_bc = NumLib::TXFunctionBuilder::create(*opBC);
-        size_t comp_idx = femData->map_ChemComp.find( var_name )->second->getIndex(); 
-        _problem->getVariable(comp_idx)->addDirichletBC(new SolutionLib::FemDirichletBC(msh, geo_obj, f_bc));
-    }
-    
-    // set ST for concentrations
-	const BaseLib::Options* opSTList = option.getSubGroup("STList");
-    std::vector<const BaseLib::Options*> vec_opST = opSTList->getSubGroupList("ST");
-    for (size_t i=0; i<vec_opST.size(); i++)
-    {
-        const BaseLib::Options* opST = vec_opST[i];
-		std::string var_name = opST->getOption("Variable");
-        std::string geo_type = opST->getOption("GeometryType");
-        std::string geo_name = opST->getOption("GeometryName");
-        const GeoLib::GeoObject* geo_obj = femData->geo->searchGeoByName(femData->geo_unique_name, geo_type, geo_name);
-        std::string st_type = opST->getOption("STType");
-        assert(opST->hasOption("DistributionType"));
-        NumLib::ITXFunction* f_st = NumLib::TXFunctionBuilder::create(*opST);
-        double dis_v = opST->getOptionAsNum<double>("DistributionValue");
-        if (st_type.compare("NEUMANN")==0) {
-            // user set inflow as positive sign but internally negative
-            f_st = new NumLib::TXCompositFunction
-            <
-                NumLib::ITXFunction, NumLib::TXFunctionConstant,
-                NumLib::Multiplication
-            >(f_st, new NumLib::TXFunctionConstant(-1.));
-        }
-        SolutionLib::IFemNeumannBC *femSt = 0;
-        if (st_type.compare("NEUMANN")==0) {
-            femSt = new SolutionLib::FemNeumannBC(msh, _feObjects, geo_obj, f_st);
-        } else if (st_type.compare("SOURCESINK")==0) {
-            femSt = new SolutionLib::FemSourceTerm(msh, geo_obj, f_st);
-        }
-        size_t comp_idx = femData->map_ChemComp.find( var_name )->second->getIndex(); 
-        _problem->getVariable(comp_idx)->addNeumannBC(femSt); 
-    }
 
     // set up linear solution
 	for ( i=0; i < n_eta_mob; i++ )

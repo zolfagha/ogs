@@ -29,6 +29,11 @@ ReductionKinNodeInfo::ReductionKinNodeInfo(size_t node_id,
 	_xi_immob  = MathLib::LocalVector::Zero( _n_xi_immob ); 
 }
 
+ReductionKinNodeInfo::~ReductionKinNodeInfo()
+{
+
+}
+
 void ReductionKinNodeInfo::set_comp_conc( size_t comp_idx, double val )
 {
 	_Comp_Conc(comp_idx) = val; 

@@ -78,10 +78,10 @@ public:
 
 	void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &, const MathLib::LocalVector & u1, const MathLib::LocalVector & u0, MathLib::LocalMatrix & localJ)
     {
-		size_t i, j, k, m, n, node_idx; 
-  		size_t n_nodes = e.getNumberOfNodes(); 
-		size_t n_xi_mob = _xi_mob_rates->size(); 
-        size_t mat_id  = e.getGroupID(); 
+		size_t i, j, k, m, node_idx; 
+  		const size_t n_nodes = e.getNumberOfNodes(); 
+		const size_t n_xi_mob = _xi_mob_rates->size(); 
+        const size_t mat_id  = e.getGroupID(); 
 		const size_t n_dim = e.getDimension();
  
         // clear the local Jacobian matrix
@@ -147,23 +147,22 @@ public:
             
 				// now dealing with the rate change terms
 				// each location has n_xi_mob * n_xi_mob dR/dxi entries
-				for (m=0; m<n_xi_mob; m++)
+				for (m=0; m<n_xi_mob; m++)  // this is to which derivative term
 				{
-					for (n=0; n<n_xi_mob; n++)
-					{
-						mat_dR = MathLib::LocalMatrix::Zero(n_nodes, n_nodes); 
-						// loop over all the adjacent nodes to get the right drate/dxi value
-               			for (k=0; k<n_nodes; k++)
-             			{
-							node_idx = e.getNodeID( k ); 
-             				vec_drates_dxi_value( k ) = _drates_dxi->at(i*n_xi_mob*n_xi_mob + m*n_xi_mob+n)->getValue( node_idx ); 
-						}  // end of for k<n_nodes
-						// get the mean value
-						d_rate(0,0) = vec_drates_dxi_value.mean(); 
-						fe->integrateWxN(j, d_rate, mat_dR);
-						// plugging mat_dR to the corresponding Jacobian matrix position
-						localJ.block(n_nodes*m,n_nodes*n,n_nodes,n_nodes) -= mat_dR;
-					}  // end of for n
+					mat_dR = MathLib::LocalMatrix::Zero(n_nodes, n_nodes); 
+					// loop over all the adjacent nodes to get the right drate/dxi value
+           			for (k=0; k<n_nodes; k++)
+           			{
+                        node_idx = e.getNodeID( k ); 
+                        vec_drates_dxi_value( k ) = _drates_dxi->at(i*n_xi_mob+m)->getValue( node_idx ); 
+                    }  // end of for k<n_nodes
+                    
+                    // get mean value
+                    d_rate(0,0) = vec_drates_dxi_value.mean(); 
+					fe->integrateWxN(j, d_rate, mat_dR);
+					
+                    // plugging mat_dR to the corresponding Jacobian matrix position
+					localJ.block(n_nodes*i, n_nodes*m, n_nodes, n_nodes) -= mat_dR;
 				}  // end of for m
 			}  // end of for j
 
