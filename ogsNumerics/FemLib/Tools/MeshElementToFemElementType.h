@@ -44,7 +44,7 @@ public:
     {
         const size_t ele_id = e.getID();
         assert (ele_id < _ele2fetype.size());
-        assert ((unsigned)order < _ele2fetype[ele_id].size());
+        assert ((unsigned)order < _ele2fetype[ele_id].size()+1);
 
         return _ele2fetype[ele_id][order];
     }
@@ -58,7 +58,7 @@ public:
     void addFeType(const size_t ele_id, int order, int fe_type)
     {
         assert (ele_id < _ele2fetype.size());
-        assert ((unsigned)order < _ele2fetype[ele_id].size());
+        assert ((unsigned)order < _ele2fetype[ele_id].size()+1);
         _ele2fetype[ele_id][order] = fe_type;
     }
 
