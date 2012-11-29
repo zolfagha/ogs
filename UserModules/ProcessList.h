@@ -32,6 +32,7 @@
 #include "THMmf/Pmf.h"
 #include "THMmf/Tmf.h"
 #include "THMmf/Umf.h"
+#include "FemDeformationIncrementalForm/IncrementalDisplacement.h"
 //#include "ProcessBuilder.h"
 
 //OGS_LINK_PROCESS(GROUNDWATER_FLOW, FunctionHead);
