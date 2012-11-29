@@ -68,6 +68,7 @@ public:
             > SolutionForHead;
 
     FunctionHead() 
+    : _problem(NULL), _solHead(NULL), _rec(NULL), _feObjects(NULL)
     {
         AbstractTransientMonolithicSystem::resizeOutputParameter(1);
     };

@@ -38,6 +38,7 @@ public:
     typedef FemLib::FemNodalFunctionScalar<DiscreteLib::DiscreteSystem>::type MyNodalFunctionScalar;
     
     FunctionVelocity() 
+    : _dis(NULL), _vel(NULL), _K(NULL)
     {
         AbstractTransientMonolithicSystem::resizeInputParameter(1);
         AbstractTransientMonolithicSystem::resizeOutputParameter(1);
