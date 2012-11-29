@@ -248,16 +248,22 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
         femData->outController.setOutput(var1.name, var1);
     }
     for (i=0; i<_xi_mob.size(); i++) {
-        std::stringstream str_tmp;
-		str_tmp << "xi_mob_" << i ;
-        OutputVariableInfo var1(str_tmp.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob[i]);
+        std::stringstream str_tmp1, str_tmp2;
+		str_tmp1 << "xi_mob_" << i ;
+        OutputVariableInfo var1(str_tmp1.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob[i]);
         femData->outController.setOutput(var1.name, var1);
+        str_tmp2 << "xi_mob_rate_" << i; 
+        OutputVariableInfo var2(str_tmp2.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob_rates[i]);
+        femData->outController.setOutput(var2.name, var2);
     }
     for (i=0; i<_xi_immob.size(); i++) {
-        std::stringstream str_tmp;
-		str_tmp << "xi_immob_" << i ;
-        OutputVariableInfo var1(str_tmp.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob[i]);
+        std::stringstream str_tmp1, str_tmp2;
+		str_tmp1 << "xi_immob_" << i ;
+        OutputVariableInfo var1(str_tmp1.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob[i]);
         femData->outController.setOutput(var1.name, var1);
+        str_tmp2 << "xi_immob_rate_" << i; 
+        OutputVariableInfo var2(str_tmp2.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob_rates[i]);
+        femData->outController.setOutput(var2.name, var2);
     }
     // -----------------end of debugging-----------------------------
 
@@ -322,16 +328,22 @@ void FunctionConcentrations<T1, T2>::output(const NumLib::TimeStep &/*time*/)
         femData->outController.setOutput(var1.name, var1);
     }
     for (i=0; i<_xi_mob.size(); i++) {
-        std::stringstream str_tmp;
-		str_tmp << "xi_mob_" << i ;
-        OutputVariableInfo var1(str_tmp.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob[i]);
+        std::stringstream str_tmp1, str_tmp2;
+		str_tmp1 << "xi_mob_" << i ;
+        OutputVariableInfo var1(str_tmp1.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob[i]);
         femData->outController.setOutput(var1.name, var1);
+        str_tmp2 << "xi_mob_rate_" << i; 
+        OutputVariableInfo var2(str_tmp2.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob_rates[i]);
+        femData->outController.setOutput(var2.name, var2);
     }
     for (i=0; i<_xi_immob.size(); i++) {
-        std::stringstream str_tmp;
-		str_tmp << "xi_immob_" << i ;
-        OutputVariableInfo var1(str_tmp.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob[i]);
+        std::stringstream str_tmp1, str_tmp2;
+		str_tmp1 << "xi_immob_" << i ;
+        OutputVariableInfo var1(str_tmp1.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob[i]);
         femData->outController.setOutput(var1.name, var1);
+        str_tmp2 << "xi_immob_rate_" << i; 
+        OutputVariableInfo var2(str_tmp2.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob_rates[i]);
+        femData->outController.setOutput(var2.name, var2);
     }
     // -----------end of debugging----------------------------------
 }
@@ -578,7 +590,7 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_rates(void)
 template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
 {
-	const double epsilon = 1.0e-6;
+	const double epsilon = 1.0e-10;
 
     size_t node_idx, i, j;
 	size_t n_eta_mob, n_eta_immob, n_xi_mob, n_xi_immob; 
@@ -630,31 +642,30 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
                                            loc_xi_immob, 
                                            loc_xi_mob_rates_base,
                                            loc_xi_immob_rates );
-		// loop over all xi_mob
-		for (i=0; i < n_xi_mob; i++)
-		{
-            // loop over each xi_mob, 
-            for (j=0; j < n_xi_mob; j++)
-            {
-                // get a clean copy of the origiinal xi_mob
-                loc_xi_mob_tmp = loc_xi_mob; 
+		
+        // loop over each xi_mob, 
+        for (j=0; j < n_xi_mob; j++)
+        {
+            // get a clean copy of the origiinal xi_mob
+            loc_xi_mob_tmp = loc_xi_mob; 
 
-    			// give an increment to the xi value
-                loc_xi_mob_tmp(j) += epsilon * loc_xi_mob_tmp(j);
+    		// give an increment to the xi value
+            loc_xi_mob_tmp(j) += epsilon * loc_xi_mob_tmp(j);
 
-    			// calculate the new rate
-                this->_ReductionKin->Calc_Xi_Rate( loc_eta_mob, 
-                                                   loc_eta_immob, 
-                                                   loc_xi_mob, 
-                                                   loc_xi_immob, 
-                                                   loc_xi_mob_rates_new,
-                                                   loc_xi_immob_rates );
-
+    		// calculate the new rate
+            this->_ReductionKin->Calc_Xi_Rate( loc_eta_mob, 
+                                                loc_eta_immob, 
+                                                loc_xi_mob, 
+                                                loc_xi_immob, 
+                                                loc_xi_mob_rates_new,
+                                                loc_xi_immob_rates );
+            // loop over all xi_mob
+		    for (i=0; i < n_xi_mob; i++)
+		    {
     			// divide the rate value by delta_xi to get derivative
-                _xi_mob_drates_dxi[i*n_xi_mob+j]->setValue( node_idx, ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) / epsilon / loc_xi_mob_tmp(j) ); 
-	
-            }  // end of for j
-		}  // end of for i
+                _xi_mob_drates_dxi[i*n_xi_mob+j]->setValue( node_idx, ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) / ( epsilon * loc_xi_mob(j) ) ); 
+	        }  // end of for i
+		}  // end of for j
 	}  // end of for node_idx
 
     // setting the rates 
@@ -712,7 +723,8 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 			for (i=0; i < n_xi_mob; i++)
 				loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
 			for (i=0; i < n_xi_immob; i++)
-				loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
+				// loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
+                loc_xi_immob[i] = this->_xi_immob_new[i]->getValue(node_idx); 
 		
 			// get the right reference values to ODE RHS function
 			this->_local_ode_xi_immob->update_eta_xi( loc_eta_mob, loc_eta_immob, loc_xi_mob, loc_xi_immob); 
