@@ -57,6 +57,10 @@ double chemReactionKin::calcReactionRateMonod(ogsChem::LocalVector & vec_Comp_Co
 	{
 		comp_idx = _vec_Monod_Comps_Idx[i]; 
 		conc = vec_Comp_Conc( comp_idx ); 
+        // non-negative protection --------------------
+        if (conc < 0.0)
+            conc = 0.0; 
+        // end of non-negative protection -------------
 		// rate *= [ c / ( c + k_c) ]^order
 		rate *= pow( conc / (conc + this->_vec_Monod_Comps_Conc[i]), this->_vec_Monod_Comps_order[i] ); 
 	}  // end of for i
