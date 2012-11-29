@@ -18,6 +18,7 @@
 #include "NumLib/Function/TXFunction.h"
 #include "NumLib/TimeStepping/TimeStepFunction.h"
 #include "MaterialLib/Fluid.h"
+#include "MaterialLib/Fracture.h"
 #include "SolutionLib/Fem/FemDirichletBC.h"
 #include "SolutionLib/Fem/FemNeumannBC.h"
 #include "GeoProcessBuilder.h"
@@ -105,6 +106,24 @@ void convertPorousMediumProperty(const CMediumProperties &mmp, MaterialLib::Poro
     pm.geo_area = new NumLib::TXFunctionConstant(mmp.geo_area);
 }
 
+
+void convertFractureProperty(const CMediumProperties &mmp, MaterialLib::Fracture &pm)
+{
+    if (mmp.permeability_model==1) {
+        pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(mmp.permeability_tensor[0]);
+        pm.permeability = new NumLib::TXFunctionConstant(mmp.permeability_tensor[0]);
+    }
+
+    if (mmp.porosity_model==1) {
+        pm.porosity = new NumLib::TXFunctionConstant(mmp.porosity_model_values[0]);
+    }
+
+    if (mmp.storage_model==1) {
+        pm.storage = new NumLib::TXFunctionConstant(mmp.storage_model_values[0]);
+    }
+
+    pm.geo_area = new NumLib::TXFunctionConstant(mmp.geo_area);
+}
 void convertCompoundProperty(const CompProperties &mcp, MaterialLib::Compound &new_cp)
 {
     new_cp.name = mcp.compname;
@@ -208,9 +227,19 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
     for (size_t i=0; i<ogs5fem.mmp_vector.size(); i++)
     {
         CMediumProperties* mmp = ogs5fem.mmp_vector[i];
-        MaterialLib::PorousMedia* pm = new MaterialLib::PorousMedia();
-        ogs6fem.list_pm.push_back(pm);
-        convertPorousMediumProperty(*mmp, *pm);
+        MaterialLib::IMedium* mmp_ogs6 = NULL;
+        if (mmp->is_fracture) {
+            MaterialLib::Fracture* frac = new MaterialLib::Fracture();
+            convertFractureProperty(*mmp, *frac);
+            ogs6fem.list_pm.push_back(NULL);
+            mmp_ogs6 = frac;
+        } else {
+            MaterialLib::PorousMedia* pm = new MaterialLib::PorousMedia();
+            convertPorousMediumProperty(*mmp, *pm);
+            ogs6fem.list_pm.push_back(pm);
+            mmp_ogs6 = pm;
+        }
+        ogs6fem.list_medium.push_back(mmp_ogs6);
     }
 
     // MCP
