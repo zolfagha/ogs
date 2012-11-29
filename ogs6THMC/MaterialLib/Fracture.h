@@ -5,9 +5,9 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file PorousMedia.h
+ * \file Fracture.h
  *
- * Created on 2012-08-03 by Norihiro Watanabe
+ * Created on 2012-11-29 by Norihiro Watanabe
  */
 
 #pragma once
@@ -23,7 +23,7 @@ class ITXFunction;
 namespace MaterialLib
 {
 
-struct PorousMedia : public IMedium
+struct Fracture : public IMedium
 {
     NumLib::ITXFunction* hydraulic_conductivity;
     NumLib::ITXFunction* permeability;
@@ -31,7 +31,7 @@ struct PorousMedia : public IMedium
     NumLib::ITXFunction* storage;
     NumLib::ITXFunction* geo_area;
 
-    PorousMedia()
+    Fracture()
     {
         BaseLib::zeroObject(
                 hydraulic_conductivity,
@@ -42,7 +42,7 @@ struct PorousMedia : public IMedium
                 );
     }
 
-    virtual ~PorousMedia()
+    virtual ~Fracture()
     {
         BaseLib::releaseObject(
                 hydraulic_conductivity,
@@ -53,7 +53,7 @@ struct PorousMedia : public IMedium
                 );
     }
 
-    virtual MediumType getMediumType() const {return MediumType::PorousMedium;};
+    virtual MediumType getMediumType() const {return MediumType::Fracture;};
 };
 
 } //end
