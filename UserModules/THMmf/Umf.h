@@ -113,7 +113,7 @@ private:
 private:
     MyProblemType* _problem;
     MySolutionType* _solution;
-    FemLib::LagrangeFeObjectContainer* _feObjects;
+    FemLib::IFeObjectContainer* _feObjects;
     NumLib::DiscreteDataConvergenceCheck _checker;
     MyNodalFunctionVector* _displacement;
     std::vector<NodalPointScalarWrapper*> _vec_u_components;

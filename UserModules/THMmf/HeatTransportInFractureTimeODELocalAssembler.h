@@ -37,15 +37,18 @@ public:
      *
      * @param feObjects
      */
-    HeatTransportInFractureTimeODELocalAssembler(const FemLib::LagrangeFeObjectContainer &feObjects, const MeshLib::CoordinateSystem &problem_coordinates)
-    : _feObjects(feObjects), _problem_coordinates(problem_coordinates), _vel(NULL)
+    HeatTransportInFractureTimeODELocalAssembler(const FemLib::IFeObjectContainer* feObjects, const MeshLib::CoordinateSystem &problem_coordinates)
+    : _feObjects(feObjects->clone()), _problem_coordinates(problem_coordinates), _vel(NULL)
     {
     };
 
     /**
      *
      */
-    virtual ~HeatTransportInFractureTimeODELocalAssembler() {};
+    virtual ~HeatTransportInFractureTimeODELocalAssembler()
+    {
+        BaseLib::releaseObject(_feObjects);
+    };
 
     /**
      *
@@ -71,7 +74,7 @@ protected:
     virtual void assembleODE(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const MathLib::LocalVector &/*u1*/, const MathLib::LocalVector &/*u0*/, MathLib::LocalMatrix &localM, MathLib::LocalMatrix &localK, MathLib::LocalVector &/*localF*/);
 
 private:
-    FemLib::LagrangeFeObjectContainer _feObjects;
+    FemLib::IFeObjectContainer* _feObjects;
     const MeshLib::CoordinateSystem _problem_coordinates;
     NumLib::ITXFunction* _vel;
 };
@@ -95,7 +98,7 @@ void HeatTransportInFractureTimeODELocalAssembler<T>::assembleODE(const NumLib::
     // numerical integration
     MathLib::LocalMatrix localDispersion = MathLib::LocalMatrix::Zero(localK.rows(), localK.cols());
     MathLib::LocalMatrix localAdvection = MathLib::LocalMatrix::Zero(localK.rows(), localK.cols());
-    FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
+    FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
     FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
     double gp_x[3], real_x[3];
     for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {

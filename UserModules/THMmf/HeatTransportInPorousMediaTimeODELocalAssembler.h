@@ -37,15 +37,18 @@ public:
      *
      * @param feObjects
      */
-    explicit HeatTransportInPorousMediaTimeODELocalAssembler(const FemLib::LagrangeFeObjectContainer &feObjects)
-        : _feObjects(feObjects), _vel(NULL)
+    explicit HeatTransportInPorousMediaTimeODELocalAssembler(const FemLib::IFeObjectContainer* feObjects)
+        : _feObjects(feObjects->clone()), _vel(NULL)
     {
     };
 
     /**
      *
      */
-    virtual ~HeatTransportInPorousMediaTimeODELocalAssembler() {};
+    virtual ~HeatTransportInPorousMediaTimeODELocalAssembler()
+    {
+        BaseLib::releaseObject(_feObjects);
+    };
 
     /**
      *
@@ -71,7 +74,7 @@ protected:
     virtual void assembleODE(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const MathLib::LocalVector &/*u1*/, const MathLib::LocalVector &/*u0*/, MathLib::LocalMatrix &localM, MathLib::LocalMatrix &localK, MathLib::LocalVector &/*localF*/);
 
 private:
-    FemLib::LagrangeFeObjectContainer _feObjects;
+    FemLib::IFeObjectContainer* _feObjects;
     NumLib::ITXFunction* _vel;
 };
 
@@ -90,7 +93,7 @@ void HeatTransportInPorousMediaTimeODELocalAssembler<T>::assembleODE(const NumLi
     // numerical integration
     MathLib::LocalMatrix localDispersion = MathLib::LocalMatrix::Zero(localK.rows(), localK.cols());
     MathLib::LocalMatrix localAdvection = MathLib::LocalMatrix::Zero(localK.rows(), localK.cols());
-    FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
+    FemLib::IFiniteElement* fe = _feObjects->getFeObject(e);
     FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
     double gp_x[3], real_x[3];
     for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {

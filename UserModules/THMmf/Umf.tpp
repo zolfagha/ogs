@@ -25,6 +25,8 @@
 #include "PhysicsLib/FemLinearElasticTools.h"
 #include "Ogs6FemData.h"
 #include "FemVariableBuilder.h"
+#include "THMmfFemElementCatalogBuilder.h"
+#include "THMmfMeshElement2FeTypeBuilder.h"
 
 namespace THMmf
 {
@@ -72,7 +74,9 @@ bool Umf<T1,T2>::initialize(const BaseLib::Options &option)
     }
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
-    _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
+    FemLib::FemElementCatalog* feCatalog = THMmfFemElementCatalogBuilder::construct();
+    FemLib::MeshElementToFemElementType* eleTofe = THMmfMeshElement2FeTypeBuilder::construct(*msh, FemLib::PolynomialOrder::Quadratic, femData->list_medium);
+    _feObjects = new FemLib::FeObjectContainerPerFeType(feCatalog, eleTofe, msh);
     const size_t dim = msh->getDimension();
 
     //--------------------------------------------------------------------------
@@ -87,10 +91,13 @@ bool Umf<T1,T2>::initialize(const BaseLib::Options &option)
     //--------------------------------------------------------------------------
     // definitions
     MyVariable* u_x = _problem->addVariable("u_x", msh_order);
+    u_x->setFeObjectContainer(_feObjects);
     MyVariable* u_y = _problem->addVariable("u_y", msh_order);
+    u_y->setFeObjectContainer(_feObjects);
     MyVariable* u_z = NULL;
     if (dim==3) {
         u_z = _problem->addVariable("u_z", msh_order);
+        u_z->setFeObjectContainer(_feObjects);
     }
     FemVariableBuilder var_builder;
     var_builder.doit(this->getOutputParameterName(Displacement)+"_X1", option, msh, femData->geo, femData->geo_unique_name, _feObjects, u_x);
