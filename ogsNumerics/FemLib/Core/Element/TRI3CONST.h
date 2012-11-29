@@ -44,7 +44,7 @@ private:
     void computeGradBasisFunction(const double *x,  MathLib::LocalMatrix &mat);
 public:
     explicit TRI3CONST(MeshLib::IMesh* msh)
-    : TemplateFeBase<3>(msh), _shape(1,3), _dshape(2,3) {};
+    : TemplateFeBase<3>(msh), _ele(NULL), A(.0), _shape(1,3), _dshape(2,3) {};
 
     /// initialize object for given mesh elements
     void configure( MeshLib::IElement &e );
