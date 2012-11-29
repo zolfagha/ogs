@@ -17,6 +17,8 @@
 
 #include "MeshLib/Core/IMesh.h"
 #include "FemLib/Tools/MeshElementToFemElementType.h"
+#include "MaterialLib/IMedium.h"
+#include "MaterialLib/MediumType.h"
 #include "THMmfFiniteElementType.h"
 
 namespace THMmf
@@ -25,8 +27,15 @@ namespace THMmf
 class THMmfMeshElement2FeTypeBuilder
 {
 public:
-    static FemLib::MeshElementToFemElementType* construct(const MeshLib::IMesh &msh, const size_t max_order, std::set<size_t> set_matno_ie)
+    static FemLib::MeshElementToFemElementType* construct(const MeshLib::IMesh &msh, const size_t max_order, std::vector<MaterialLib::IMedium*> list_mmp)
     {
+        std::set<size_t> set_matno_ie;
+        for (size_t i=0; i<list_mmp.size(); i++) {
+            if (list_mmp[i]->getMediumType() == MaterialLib::MediumType::Fracture) {
+                set_matno_ie.insert(i);
+            }
+        }
+
         const size_t n_ele = msh.getNumberOfElements();
         FemLib::MeshElementToFemElementType* ele2fetype = new FemLib::MeshElementToFemElementType(n_ele, max_order);
         for (size_t i=0; i<n_ele; ++i) {
