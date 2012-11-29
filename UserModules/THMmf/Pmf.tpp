@@ -15,6 +15,7 @@
 #include "DiscreteLib/Utils/DiscreteSystemContainerPerMesh.h"
 #include "FemLib/Function/FemNodalFunction.h"
 #include "FemLib/Tools/FeObjectContainerPerFeType.h"
+#include "FemLib/Tools/MeshElementToFemElementType.h"
 #include "NumLib/Function/TXFunctionBuilder.h"
 #include "OutputIO/OutputBuilder.h"
 #include "OutputIO/OutputTimingBuilder.h"
@@ -22,6 +23,7 @@
 #include "Ogs6FemData.h"
 #include "FemVariableBuilder.h"
 #include "THMmfFemElementCatalogBuilder.h"
+#include "THMmfMeshElement2FeTypeBuilder.h"
 
 namespace THMmf
 {
@@ -39,13 +41,9 @@ bool Pmf<T1,T2>::initialize(const BaseLib::Options &option)
     MeshLib::setMeshElementCoordinatesMapping(*msh);
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
-    //TODO how do you know which mesh elements use which FE types
-    std::vector<size_t> vec_m_group_id;
-    std::vector<size_t> vec_ie_group_id;
-    FemLib::FemElementCatalog* feCatalog = new FemLib::FemElementCatalog();
-    FemLib::MeshElementGroupAndShapeToFemElementType* shpTofe = new FemLib::MeshElementGroupAndShapeToFemElementType();
-    THMmfFemElementCatalogBuilder::construct(vec_m_group_id, vec_ie_group_id, *feCatalog, *shpTofe);
-    _feObjects = new FemLib::FeObjectContainerPerFeType(feCatalog, shpTofe, msh);
+    FemLib::FemElementCatalog* feCatalog = THMmfFemElementCatalogBuilder::construct();
+    FemLib::MeshElementToFemElementType* eleTofe = THMmfMeshElement2FeTypeBuilder::construct(*msh, FemLib::PolynomialOrder::Quadratic, femData->list_medium);
+    _feObjects = new FemLib::FeObjectContainerPerFeType(feCatalog, eleTofe, msh);
 
     // local assemblers
     MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType();
