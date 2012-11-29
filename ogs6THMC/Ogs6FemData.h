@@ -19,6 +19,7 @@
 //#include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "NumLib/Function/TXFunction.h"
 #include "NumLib/TimeStepping/TimeStepFunction.h"
+#include "MaterialLib/IMedium.h"
 #include "MaterialLib/PorousMedia.h"
 #include "MaterialLib/Solid.h"
 #include "MaterialLib/Fluid.h"
@@ -49,6 +50,7 @@ private:
 
 public:
     //material data
+    std::vector<MaterialLib::IMedium*> list_medium;
     std::vector<MaterialLib::PorousMedia*> list_pm;
     std::vector<MaterialLib::Solid*> list_solid;
     std::vector<MaterialLib::Fluid*> list_fluid;
@@ -76,7 +78,8 @@ public:
     ~Ogs6FemData()
     {
         BaseLib::releaseObject(geo);
-        BaseLib::releaseObjectsInStdVector(list_pm);
+        BaseLib::releaseObjectsInStdVector(list_medium);
+        //BaseLib::releaseObjectsInStdVector(list_pm);
         BaseLib::releaseObjectsInStdVector(list_solid);
         BaseLib::releaseObjectsInStdVector(list_fluid);
         BaseLib::releaseObjectsInStdVector(list_mesh);
