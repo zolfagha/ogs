@@ -651,7 +651,7 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
                                                    loc_xi_immob_rates );
 
     			// divide the rate value by delta_xi to get derivative
-                _xi_mob_drates_dxi[i*n_xi_mob+j]->setValue( node_idx, ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) / epsilon * loc_xi_mob_tmp(j) ); 
+                _xi_mob_drates_dxi[i*n_xi_mob+j]->setValue( node_idx, ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) / epsilon / loc_xi_mob_tmp(j) ); 
 	
             }  // end of for j
 		}  // end of for i
