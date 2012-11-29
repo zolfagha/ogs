@@ -21,6 +21,8 @@ struct PolynomialOrder
     enum type {
         Linear = 1,
         Quadratic = 2,
+        Cubic = 3,
+        Quartic = 4,
         INVALID = -1
     };
 };
