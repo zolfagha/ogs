@@ -14,6 +14,8 @@
 
 #include <string>
 #include "logog.hpp"
+#include "MathLib/Interpolation/LinearInterpolation.h"
+#include "Multiplication.h"
 
 namespace NumLib
 {
@@ -46,6 +48,31 @@ ITXFunction* TXFunctionBuilder::create(const BaseLib::Options &opDistribution)
             {
                 std::string str_f_exp =opDistribution.getOption("DistributionFunction");
                 f_bc = new NumLib::TXFunctionAnalytical(str_f_exp);
+            }
+            break;
+        case NumLib::TXFunctionType::T_LINEAR:
+            {
+                std::vector<double> vec_t, vec_val;
+                {
+                    std::vector<const BaseLib::OptionGroup*> list_opDistLinear = opDistribution.getSubGroupList("TimeValue");
+                    for (size_t j=0; j<list_opDistLinear.size(); j++) {
+                        double pt_t = list_opDistLinear[j]->getOptionAsNum<double>("Time");
+                        double pt_val = list_opDistLinear[j]->getOptionAsNum<double>("Value");
+                        vec_t.push_back(pt_t);
+                        vec_val.push_back(pt_val);
+                    }
+                }
+                MathLib::LinearInterpolation* time_curve = new MathLib::LinearInterpolation(vec_t, vec_val);
+                f_bc = new NumLib::TXFunctionTimeCurve<MathLib::LinearInterpolation>(time_curve);
+            }
+            break;
+        case NumLib::TXFunctionType::TX:
+            {
+                const BaseLib::Options* opTF = opDistribution.getSubGroup("Temporal");
+                ITXFunction* fT = create(*opTF);
+                const BaseLib::Options* opXF = opDistribution.getSubGroup("Spatial");
+                ITXFunction* fX= create(*opXF);
+                f_bc = new NumLib::TXCompositFunction<ITXFunction,ITXFunction, Multiplication>(fT, fX);
             }
             break;
         default:
