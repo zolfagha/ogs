@@ -239,7 +239,7 @@ void PointVec::makePntsUnique (std::vector<GeoLib::Point*>* pnt_vec, std::vector
 void PointVec::calculateShortestDistance ()
 {
     size_t i, j;
-    BruteForceClosestPair (*_pnt_vec, i, j);
+    BruteForceClosestPair brute(*_pnt_vec, i, j);
     _sqr_shortest_dist = GeoLib::sqrDist ((*_pnt_vec)[i], (*_pnt_vec)[j]);
 }
 
