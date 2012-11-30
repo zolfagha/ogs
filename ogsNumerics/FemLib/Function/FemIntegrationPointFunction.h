@@ -69,10 +69,10 @@ public:
 
     ///
     explicit TemplateFEMIntegrationPointFunction(const TemplateFEMIntegrationPointFunction &src)
+    : _discrete_system(0), _values(0)
     {
         initialize((MyDiscreteSystem*)src._discrete_system, src._values);
         //TODO (*this->_values) = (*src._values);
-        _values = 0;
     };
 
     ///
