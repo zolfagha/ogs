@@ -23,6 +23,7 @@ namespace MathLib
  */
 class NewtonCotes
 {
+public:
     /// midpoint integration
     double middpoint(double (*fun)(double), double a, double b, std::size_t n);
 

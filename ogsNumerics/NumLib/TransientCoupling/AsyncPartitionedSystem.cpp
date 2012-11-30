@@ -58,7 +58,7 @@ int AsyncPartitionedSystem::solveTimeStep(const TimeStep &time)
 
         // solve
         for (size_t i=0; i<list_active_problems.size(); i++) {
-            ITransientCoupledSystem *solution = (ITransientCoupledSystem*)list_active_problems[i];
+            ITransientCoupledSystem *solution = static_cast<ITransientCoupledSystem*>(list_active_problems[i]);
             solution->setCurrentTime(time);
         }
         // set parameter state

@@ -22,6 +22,10 @@ ChemComp::ChemComp(void):
     // set pointers to zero
     _mPhase    = 0;
     _mReaction = 0;
+    _index = 0;
+    _mole_volume = .0;
+    neg_gamma_1 = .0;
+    neg_gamma_2 = .0;
 }
 
 ChemComp::ChemComp(MaterialLib::Compound* mCompund):
@@ -31,6 +35,10 @@ ChemComp::ChemComp(MaterialLib::Compound* mCompund):
     // set pointers to zero
     _mPhase    = 0;
     _mReaction = 0;
+    _index = 0;
+    _mole_volume = .0;
+    neg_gamma_1 = .0;
+    neg_gamma_2 = .0;
 }
 
 ChemComp::~ChemComp(void)

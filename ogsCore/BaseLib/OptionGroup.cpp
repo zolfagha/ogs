@@ -18,7 +18,7 @@ namespace BaseLib
 ///
 OptionGroup::~OptionGroup()
 {
-    for (DictionaryType::iterator itr=_dictionary.begin(); itr!=_dictionary.end(); itr++)
+    for (DictionaryType::iterator itr=_dictionary.begin(); itr!=_dictionary.end(); ++itr)
         if (itr->second!=NULL) delete itr->second;
 }
 

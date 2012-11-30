@@ -152,7 +152,7 @@ IElement* findEdgeElement(const std::vector<IElement*> &edges, std::vector<size_
     std::sort(vec_edge_nodes.begin(), vec_edge_nodes.end());
 
     IElement *e_edge = 0;
-    for (std::vector<IElement*>::const_iterator itr=edges.begin(); itr!=edges.end(); itr++) {
+    for (std::vector<IElement*>::const_iterator itr=edges.begin(); itr!=edges.end(); ++itr) {
         if ((*itr)->hasNodeIds(vec_edge_nodes)) {
             e_edge = *itr;
             break;

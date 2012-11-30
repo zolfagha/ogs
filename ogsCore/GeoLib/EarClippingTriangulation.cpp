@@ -200,7 +200,7 @@ void EarClippingTriangulation::clipEars()
         bool nfound(true);
         it = _vertex_list.begin();
         prev = _vertex_list.end();
-        prev--;
+        --prev;
         while (nfound && it != _vertex_list.end()) {
             if (*it == ear) {
                 nfound = false;
@@ -209,7 +209,7 @@ void EarClippingTriangulation::clipEars()
                 if (next == _vertex_list.end()) {
                     next = _vertex_list.begin();
                     prev = _vertex_list.end();
-                    prev--;
+                    --prev;
                 }
                 // add triangle
                 _triangles.push_back(GeoLib::Triangle(_pnts, *prev, ear, *next));
@@ -221,7 +221,7 @@ void EarClippingTriangulation::clipEars()
                 } else {
                     prevprev = prev;
                 }
-                prevprev--;
+                --prevprev;
 
                 // apply changes to _convex_vertex_list and _ear_list looking "backward"
                 GeoLib::Orientation orientation = getOrientation(_pnts[*prevprev], _pnts[*prev],
@@ -244,9 +244,9 @@ void EarClippingTriangulation::clipEars()
                         prev = _vertex_list.erase(prev);
                         if (prev == _vertex_list.begin()) {
                             prev = _vertex_list.end();
-                            prev--;
+                            --prev;
                         } else {
-                            prev--;
+                            --prev;
                         }
                     }
                 }
@@ -259,7 +259,7 @@ void EarClippingTriangulation::clipEars()
                     nextnext = _vertex_list.begin();
                 } else {
                     nextnext = next;
-                    nextnext++;
+                    ++nextnext;
                 }
 
                 // apply changes to _convex_vertex_list and _ear_list looking "forward"
@@ -287,7 +287,7 @@ void EarClippingTriangulation::clipEars()
                 }
             } else {
                 prev = it;
-                it++;
+                ++it;
             }
         }
 
@@ -295,9 +295,9 @@ void EarClippingTriangulation::clipEars()
     // add last triangle
     next = _vertex_list.begin();
     prev = next;
-    next++;
+    ++next;
     it = next;
-    next++;
+    ++next;
     if (getOrientation(_pnts[*prev], _pnts[*it], _pnts[*next]) == CCW)
         _triangles.push_back(GeoLib::Triangle(_pnts, *prev, *next, *it));
     else

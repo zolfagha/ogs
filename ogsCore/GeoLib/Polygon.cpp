@@ -74,10 +74,10 @@ bool Polygon::isPntInPolygon (GeoLib::Point const & pnt) const
     if (pnt[0] < min_aabb_pnt[0] || max_aabb_pnt[0] < pnt[0] || pnt[1] < min_aabb_pnt[1] || max_aabb_pnt[1] < pnt[1])
         return false;
 
-    size_t n_intersections (0);
     GeoLib::Point s;
 
     if (_simple_polygon_list.empty ()) {
+        size_t n_intersections (0);
         const size_t n_nodes (getNumberOfPoints()-1);
         for (size_t k(0); k<n_nodes; k++) {
             if (((*(getPoint(k)))[1] <= pnt[1] && pnt[1] <= (*(getPoint(k+1)))[1]) ||

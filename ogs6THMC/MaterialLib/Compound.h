@@ -25,8 +25,8 @@ struct Compound
     NumLib::ITXFunction* molecular_diffusion;
 
     Compound()
+    : is_mobile(true), molecular_diffusion(nullptr)
     {
-        BaseLib::zeroObject(molecular_diffusion);
     }
     ~Compound()
     {

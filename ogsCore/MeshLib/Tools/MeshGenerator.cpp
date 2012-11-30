@@ -151,10 +151,10 @@ void MeshGenerator::generateHigherOrderUnstrucuredMesh(UnstructuredMesh &msh, si
     // make all edges higher order
     for (size_t i=0; i<msh.getNumberOfEdges(); i++) {
         IElement* e = msh.getEdgeElement(i);
-        double const* const pnt0(msh.getNodeCoordinatesRef(e->getNodeID(0))->getData());
-        double const* const pnt1(msh.getNodeCoordinatesRef(e->getNodeID(1))->getData());
         e->setMaximumOrder(order);
         if (order==2) {
+            double const* const pnt0(msh.getNodeCoordinatesRef(e->getNodeID(0))->getData());
+            double const* const pnt1(msh.getNodeCoordinatesRef(e->getNodeID(1))->getData());
             // add midpoint
             GeoLib::Point p(.5 * (pnt0[0] + pnt1[0]), 0.5 * (pnt0[1] + pnt1[1]), 0.5 * (pnt0[2] + pnt1[2]));
             size_t nod_id = msh.addNode(p, 2);
