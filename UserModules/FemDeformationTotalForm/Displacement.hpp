@@ -10,7 +10,7 @@
 #include "SolutionLib/Fem/FemSourceTerm.h"
 #include "MaterialLib/PorousMedia.h"
 #include "MaterialLib/Solid.h"
-#include "PhysicsLib/FemLinearElasticTools.h"
+#include "PhysicsLib/DeformationTools.h"
 #include "Ogs6FemData.h"
 #include "FemVariableBuilder.h"
 
