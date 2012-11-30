@@ -46,7 +46,7 @@ public:
      */
     double getCurveValue(int methode, double punkt, int& gueltig);
 
-private:
+public:
     struct StuetzStellen
     {
         double punkt;
