@@ -33,7 +33,7 @@ void createRowMajorSparsityFromNodeConnectivity(const MeshLib::ITopologyNode2Nod
         std::set<size_t> &setConnection = row_major_entries[i];
         setConnection.insert(i);
         const std::set<size_t> connected_nodes = topo_node2nodes.getConnectedNodes(i);
-        for (std::set<size_t>::const_iterator it=connected_nodes.begin(); it!=connected_nodes.end(); it++) {
+        for (std::set<size_t>::const_iterator it=connected_nodes.begin(); it!=connected_nodes.end(); ++it) {
             setConnection.insert(*it);
         }
     }
@@ -92,7 +92,7 @@ void createRowMajorSparsityFromNodeConnectivity(const MeshLib::ITopologyNode2Nod
             }
             // add DoFs defined in connected nodes
             const std::set<size_t> connected_nodes = topo_node2nodes_max_order.getConnectedNodes(pt_id);
-            for (std::set<size_t>::const_iterator it=connected_nodes.begin(); it!=connected_nodes.end(); it++) {
+            for (std::set<size_t>::const_iterator it=connected_nodes.begin(); it!=connected_nodes.end(); ++it) {
                 for (size_t l=0; l<n_var; l++) {
                     size_t col_id = local_dofTable.mapEqsID(l, mesh_id, *it);
                     if (col_id != BaseLib::index_npos)
@@ -122,7 +122,7 @@ void createRowMajorSparsityFromNodeConnectivity(const MeshLib::ITopologyNode2Nod
                 setConnection.insert(col_id);
             }
             // add DoFs defined in connected nodes
-            for (std::set<size_t>::const_iterator it=connected_nodes.begin(); it!=connected_nodes.end(); it++) {
+            for (std::set<size_t>::const_iterator it=connected_nodes.begin(); it!=connected_nodes.end(); ++it) {
                 const size_t global_pt_id = pt_mapping.local2global(*it);
                 for (size_t l=0; l<global_dofTable.getNumberOfVariables(); l++) {
                     size_t col_id = global_dofTable.mapEqsID(l, mesh_id, global_pt_id);

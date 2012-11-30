@@ -35,7 +35,7 @@ void DofEquationIdTable::construct(long offset)
         long eqs_id = offset;
         if (_is_seq_address) {
             assert(_ghost_pt.size()==0);
-            for (std::map<size_t, std::vector<size_t> >::iterator itr=_map_msh2var.begin(); itr!=_map_msh2var.end(); itr++) {
+            for (std::map<size_t, std::vector<size_t> >::iterator itr=_map_msh2var.begin(); itr!=_map_msh2var.end(); ++itr) {
                 size_t mesh_id = itr->first;
                 std::vector<size_t> &list_var = itr->second;
                 for (size_t i=0; i<list_var.size(); i++) {
@@ -47,7 +47,7 @@ void DofEquationIdTable::construct(long offset)
             _total_dofs_without_ghosts = eqs_id; //TODO
             _total_dofs = eqs_id;
         } else { //random address
-            for (std::map<size_t, std::vector<size_t> >::iterator itr=_map_msh2var.begin(); itr!=_map_msh2var.end(); itr++) {
+            for (std::map<size_t, std::vector<size_t> >::iterator itr=_map_msh2var.begin(); itr!=_map_msh2var.end(); ++itr) {
                 size_t mesh_id = itr->first;
                 std::vector<size_t> &list_var = itr->second;
                 // get range of point id
