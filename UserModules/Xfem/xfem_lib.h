@@ -503,7 +503,7 @@ void BuildMatRhs_Hooke(
     // Loop over integration points.
     for (size_t i=0; i<nQ; i++) {
 
-        double lambda, mu;
+        double lambda =.0 , mu = .0;
         if (ffInt(i) > 0) {
             lambda = lambda1;
             mu = mu1;
