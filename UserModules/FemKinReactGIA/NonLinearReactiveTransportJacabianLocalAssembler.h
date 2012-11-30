@@ -163,6 +163,7 @@ public:
 					
                     // plugging mat_dR to the corresponding Jacobian matrix position
 					localJ.block(n_nodes*i, n_nodes*m, n_nodes, n_nodes) -= mat_dR;
+                    
 				}  // end of for m
 			}  // end of for j
 

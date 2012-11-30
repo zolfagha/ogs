@@ -234,6 +234,7 @@ public:
 	void set_eta_mob_node_values     ( size_t eta_mob_idx,   MyNodalFunctionScalar* new_eta_mob_node_values   ); 
 	void set_eta_immob_node_values   ( size_t eta_immob_idx, MyNodalFunctionScalar* new_eta_immob_node_values ); 
 	void set_xi_mob_node_values      ( size_t xi_mob_idx,    MyNodalFunctionScalar* new_xi_mob_node_values    ); 
+    void update_xi_mob_nodal_values  ( void ); 
 	void update_xi_immob_node_values ( void ); 
 
 	/**

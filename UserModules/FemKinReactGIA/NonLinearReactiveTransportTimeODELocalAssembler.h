@@ -103,7 +103,7 @@ protected:
         LocalMatrixType localM_tmp          = LocalMatrixType::Zero(n_nodes, n_nodes); 
         LocalMatrixType localK_tmp          = LocalMatrixType::Zero(n_nodes, n_nodes); 
 
-    	for (j=0; j<n_sp; j++) 
+        for (j=0; j<n_sp; j++) 
         {
 			q->getSamplingPoint(j, gp_x);
 			fe->computeBasisFunctions(gp_x);
@@ -132,21 +132,24 @@ protected:
 			fe->integrateDWxDN(j, dispersion_diffusion, localDispersion_tmp);
 			// advection
 			fe->integrateWxDN(j, v2, localAdvection_tmp);
+
+            LocalMatrixType &Np = *fe->getBasisFunction(); // HS
+         	for (k=0; k<n_xi_mob; k++)
+            {
+                // localF 
+                rate_xi_mob_gp = Np * node_xi_mob_rate_values.col(k); 
+                // right hand side xi_mob rates
+                localF.segment(n_nodes*k,n_nodes).noalias() += Np.transpose() * rate_xi_mob_gp * fe->getDetJ() * q->getWeight(j);
+            }
 	    }  // end of for j
         localK_tmp = localDispersion_tmp + localAdvection_tmp; 
 
-
-        LocalMatrixType &Np = *fe->getBasisFunction(); // HS
 		for (k=0; k<n_xi_mob; k++)
         {
             // localM
             localM.block(n_nodes*k,n_nodes*k,n_nodes,n_nodes) = localM_tmp; 
             // localK
             localK.block(n_nodes*k,n_nodes*k,n_nodes,n_nodes) = localK_tmp; 
-            // localF 
-            rate_xi_mob_gp = Np * node_xi_mob_rate_values.col(k); 
-		    // right hand side xi_mob rates
-		    localF.segment(n_nodes*k,n_nodes).noalias() += Np.transpose() * rate_xi_mob_gp * fe->getDetJ() * q->getWeight(j);
         }  // end of for k
 
     }

@@ -505,6 +505,15 @@ void FunctionConcentrations<T1, T2>::set_xi_mob_node_values( size_t xi_mob_idx, 
 }
 
 template <class T1, class T2>
+void FunctionConcentrations<T1, T2>::update_xi_mob_nodal_values( void )
+{
+    size_t i; 
+    for (i=0; i < this->_xi_mob.size(); i++)
+        this->set_xi_mob_node_values( i, _non_linear_solution->getCurrentSolution(i) );
+
+}
+
+template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::update_xi_immob_node_values( void ) 
 {
     size_t i, node_idx; 
@@ -583,6 +592,12 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_rates(void)
                 this->_xi_immob_rates[i]->setValue( node_idx, loc_xi_immob_rates[i] );
 
 		}  // end of for node_idx
+
+        _non_linear_problem->getEquation()->getResidualAssembler()->set_xi_mob_rates(   & _xi_mob_rates );
+        _non_linear_problem->getEquation()->getResidualAssembler()->set_xi_immob_rates( & _xi_mob_rates );
+
+        _non_linear_problem->getEquation()->getJacobianAssembler()->set_xi_mob_rates(   & _xi_mob_rates );
+        _non_linear_problem->getEquation()->getJacobianAssembler()->set_xi_immob_rates( & _xi_mob_rates );
 	}  // end of if _ReductionKin
 }
 
@@ -590,7 +605,8 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_rates(void)
 template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
 {
-	const double epsilon = 1.0e-10;
+	const double epsilon = 1.0e-6;
+    double drates_dxi_tmp;
 
     size_t node_idx, i, j;
 	size_t n_eta_mob, n_eta_immob, n_xi_mob, n_xi_immob; 
@@ -654,16 +670,17 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
 
     		// calculate the new rate
             this->_ReductionKin->Calc_Xi_Rate( loc_eta_mob, 
-                                                loc_eta_immob, 
-                                                loc_xi_mob, 
-                                                loc_xi_immob, 
-                                                loc_xi_mob_rates_new,
-                                                loc_xi_immob_rates );
+                                               loc_eta_immob, 
+                                               loc_xi_mob_tmp, 
+                                               loc_xi_immob, 
+                                               loc_xi_mob_rates_new,
+                                               loc_xi_immob_rates );
             // loop over all xi_mob
 		    for (i=0; i < n_xi_mob; i++)
 		    {
     			// divide the rate value by delta_xi to get derivative
-                _xi_mob_drates_dxi[i*n_xi_mob+j]->setValue( node_idx, ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) / ( epsilon * loc_xi_mob(j) ) ); 
+                drates_dxi_tmp = ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) / ( epsilon * loc_xi_mob(j) );
+                _xi_mob_drates_dxi[i*n_xi_mob+j]->setValue( node_idx, drates_dxi_tmp ); 
 	        }  // end of for i
 		}  // end of for j
 	}  // end of for node_idx
