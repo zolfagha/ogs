@@ -18,6 +18,10 @@
 
 namespace MathLib {
 
+LinearInterpolation::LinearInterpolation(const LinearInterpolation &src)
+    : _supporting_points (src._supporting_points), _values_at_supp_pnts (src._values_at_supp_pnts)
+{}
+
 LinearInterpolation::LinearInterpolation(const std::vector<double>& supporting_points, const std::vector<double>& values_at_supp_pnts)
     : _supporting_points (supporting_points), _values_at_supp_pnts (values_at_supp_pnts)
 {}
