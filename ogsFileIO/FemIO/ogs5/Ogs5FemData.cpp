@@ -35,6 +35,8 @@ Ogs5FemData::~Ogs5FemData()
 	BaseLib::releaseObjectsInStdVector(KinReact_vector);
 	BaseLib::releaseObjectsInStdVector(KinReactData_vector);
 	BaseLib::releaseObjectsInStdVector(KinBlob_vector);
+
+	BaseLib::releaseObjectsInStdVector(kurven_vector);
 }
 
 }

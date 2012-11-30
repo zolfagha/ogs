@@ -30,6 +30,7 @@
 #include "rf_num_new.h"
 #include "Output.h"
 #include "rf_kinreact.h"
+#include "rf_cur.h"
 
 namespace ogs5
 {
@@ -38,7 +39,7 @@ class Ogs5FemData
 {
 
 public:
-    Ogs5FemData() : geo_obj(NULL) {};
+    Ogs5FemData() : geo_obj(nullptr) {};
     ~Ogs5FemData();
 
 public:
@@ -53,6 +54,7 @@ public:
     std::vector<CSolidProperties*> msp_vector;
     std::vector<CMediumProperties*> mmp_vector;
     std::vector<CNumerics*>num_vector;
+    std::vector<Kurven*> kurven_vector;
     GeoLib::GEOObjects* geo_obj;
     std::string geo_unique_name;
     std::vector<MeshLib::IMesh*> list_mesh;
