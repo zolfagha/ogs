@@ -333,7 +333,7 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             CBoundaryCondition* rfbc = ogs5fem.bc_vector[i];
             std::string bc_pcs_name = FiniteElement::convertProcessTypeToString(rfbc->getProcessType());
             if ( bc_pcs_name.compare(pcs_name)==0 )
-				for ( size_t j=0; j<var_name.size(); j++ )
+				for ( size_t j=0; j<var_name.size(); j++ ) {
 					if ( rfbc->primaryvariable_name.find(var_name[j])!=std::string::npos) {
 						BaseLib::Options* optBc = optBcList->addSubGroup("BC");
 						optBc->addOption("Variable", rfbc->primaryvariable_name);
@@ -367,6 +367,7 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
                                 break;
 						}
 					}  // end of if rfbc
+				}
         }  // end of for i
 
         //ST
@@ -376,23 +377,47 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             CSourceTerm* rfst = ogs5fem.st_vector[i];
             std::string st_pcs_name = FiniteElement::convertProcessTypeToString(rfst->getProcessType());
             if (st_pcs_name.compare(pcs_name)==0 )
-				for (size_t j=0; j<var_name.size(); j++ )
+				for (size_t j=0; j<var_name.size(); j++ ) {
 					if ( rfst->primaryvariable_name.find(var_name[j])!=std::string::npos) {
 						BaseLib::Options* optSt = optStList->addSubGroup("ST");
 						optSt->addOption("Variable", rfst->primaryvariable_name);
 						optSt->addOption("GeometryType", rfst->geo_type_name);
 						optSt->addOption("GeometryName", rfst->geo_name);
-						std::string ogs5distype = FiniteElement::convertDisTypeToString(rfst->getProcessDistributionType());
-						std::string ogs6distype = ogs5distype;
-						if (ogs5distype.find("_NEUMANN")!=std::string::npos) {
-							optSt->addOption("STType", "NEUMANN");
-							ogs6distype = BaseLib::replaceString("_NEUMANN", "", ogs6distype);
-						} else {
-							optSt->addOption("STType", "SOURCESINK");
-						}  // end of if-else
+                        std::string ogs5distype = FiniteElement::convertDisTypeToString(rfst->getProcessDistributionType());
+                        std::string ogs6sp_distype = ogs5distype;
+                        bool isNeumannBC = (ogs5distype.find("_NEUMANN")!=std::string::npos);
+                        if (isNeumannBC) {
+                            optSt->addOption("STType", "NEUMANN");
+                            ogs6sp_distype = BaseLib::replaceString("_NEUMANN", "", ogs6sp_distype);
+                        } else {
+                            optSt->addOption("STType", "SOURCESINK");
+                        }
+                        bool isTransientST = (rfst->CurveIndex>0);
+                        std::string ogs6distype;
+                        if (isTransientST) {
+                            // spatial
+                            BaseLib::Options* opStSpace = optSt->addSubGroup("Spatial");
+                            opStSpace->addOption("DistributionType", ogs6sp_distype);
+                            opStSpace->addOptionAsNum("DistributionValue", rfst->geo_node_value);
+                            // temporal
+                            BaseLib::Options* opStTime = optSt->addSubGroup("Temporal");
+                            std::string ogs6tim_distype = NumLib::convertTXFunctionTypeToString(NumLib::TXFunctionType::T_LINEAR);
+                            opStTime->addOption("DistributionType", ogs6tim_distype);
+                            BaseLib::Options* opStTimeValue = opStTime->addSubGroup("TimeValue");
+                            ogs5::Kurven* curv = ogs5fem.kurven_vector[rfst->CurveIndex-1];
+                            for (size_t i_pt=0; i<curv->stuetzstellen.size(); i++) {
+                                opStTimeValue->addOptionAsNum("Time", curv->stuetzstellen[i_pt]->punkt);
+                                opStTimeValue->addOptionAsNum("Value", curv->stuetzstellen[i_pt]->wert);
+                            }
+
+                            ogs6distype = NumLib::convertTXFunctionTypeToString(NumLib::TXFunctionType::TX);
+                        } else {
+                            ogs6distype = ogs6sp_distype;
+                            optSt->addOptionAsNum("DistributionValue", rfst->geo_node_value);
+                        }
 						optSt->addOption("DistributionType", ogs6distype);
-						optSt->addOptionAsNum("DistributionValue", rfst->geo_node_value);
 					}  // end of if rfst
+				}
 		}  // end of for i
 
         // NUM
