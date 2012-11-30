@@ -37,14 +37,14 @@ public:
     virtual ~AbstractProcessBuilder() {};
 
     /// register a process to this builder
-    ProcessInfo* registerProcess(const std::string &pcs_name, ProcessFactoryBase* pcs_buid);
+    ProcessInfo* registerProcess(const std::string &pcs_type, ProcessFactoryBase* pcs_buid);
 
     /// check if a process has been already registered
-    bool hasRegisterd(const std::string &pcs_name) const;
+    bool hasRegisterd(const std::string &pcs_type) const;
 
     /// create the new instance of a specified process
     /// @return return 0 if a process is not found
-    Process* create(const std::string &pcs_name) const;
+    Process* create(const std::string &pcs_type) const;
 
     /// list available processes to standard IO
     void output() const;
