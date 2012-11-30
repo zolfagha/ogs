@@ -17,6 +17,7 @@
 #include "MathLib/LinAlg/LinearEquation/DenseLinearEquation.h"
 #include "NRCheckConvergence.h"
 #include "NRErrorAbsResMNormOrRelDxMNorm.h"
+#include "NRErrorAbsResMNorm.h"
 #include "NewtonFunctionDXVector.h"
 #include "NewtonFunctionDXScalar.h"
 #include "NRIterationStepInitializerDummy.h"
