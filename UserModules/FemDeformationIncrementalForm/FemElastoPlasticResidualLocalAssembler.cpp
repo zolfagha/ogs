@@ -15,6 +15,7 @@
 #include "FemLib/Core/Element/IFemElement.h"
 #include "MaterialLib/Solid.h"
 #include "PhysicsLib/FemLinearElasticTools.h"
+#include "PhysicsLib/SmallDeformationMedia.h"
 #include "Ogs6FemData.h"
 
 
@@ -45,15 +46,9 @@ void FemElastoPlasticResidualLocalAssembler::assembly(
     //---------------------------------------------------------------
     // compute elastic matrix (assuming it is invariant with gauss points)
     //---------------------------------------------------------------
-    MathLib::LocalMatrix matDe = MathLib::LocalMatrix::Zero(n_strain_components,
-            n_strain_components);
-    double nv;
-    MathLib::LocalMatrix E(1, 1);
+    double nv, E;
     solidphase->poisson_ratio->eval(e_pos, nv);
     solidphase->Youngs_modulus->eval(e_pos, E);
-    double Lambda, G, K;
-    MaterialLib::calculateLameConstant(nv, E(0, 0), Lambda, G, K);
-    MaterialLib::setElasticConsitutiveTensor(dim, Lambda, G, matDe);
 
     //---------------------------------------------------------------
     // compute at each integration point
@@ -97,9 +92,12 @@ void FemElastoPlasticResidualLocalAssembler::assembly(
         MathLib::LocalMatrix stress_n = MathLib::LocalMatrix::Zero(n_strain_components, 1);
         _previous_stress->eval(gp_pos, stress_n);
         // incremental stress: dS_n+1 = D B du_n+1
-        MathLib::LocalVector dStress = matDe * matB * local_du_n1;
+        PhysicsLib::SmallDeformationMedia sdMedia(dim, nv, E);
+        sdMedia.setInitialStress(stress_n);
+        const MathLib::LocalVector dStrain = matB * local_du_n1;
+        sdMedia.incrementStrain(dStrain);
         // total stress: S_n+1 = dS + S_n
-        MathLib::LocalVector stress_n1 = dStress + stress_n;
+        const MathLib::LocalVector stress_n1 = sdMedia.getTotalStress();
 
         //---------------------------------------------------------------
         // get body force
@@ -125,3 +123,5 @@ void FemElastoPlasticResidualLocalAssembler::assembly(
 
     local_r.noalias() = localInternalForce;
 }
+
+

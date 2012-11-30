@@ -66,10 +66,12 @@ public:
 
     ///
     FunctionIncrementalDisplacement()
-            : ProcessLib::AbstractTransientProcess("INCREMENTAL_DEFORMATION", 0, 3),
-              _problem(nullptr), _solution(nullptr), _feObjects(nullptr),
-              _displacement(nullptr), _strain(nullptr), _previous_stress(nullptr),
-              _current_stress(nullptr)
+            : ProcessLib::AbstractTransientProcess("INCREMENTAL_DEFORMATION", 0,
+                    3), _problem(nullptr), _solution(nullptr), _feObjects(
+                    nullptr), _delta_displacement(nullptr), _previous_displacement(
+                    nullptr), _current_displacement(nullptr), _previous_strain(
+                    nullptr), _current_strain(nullptr), _previous_stress(
+                    nullptr), _current_stress(nullptr)
     {
         // set default parameter name
         this->setOutputParameterName(Displacement, "Displacement");
@@ -82,7 +84,10 @@ public:
     virtual ~FunctionIncrementalDisplacement()
     {
         BaseLib::releaseObject(_problem, _solution, _feObjects);
-        BaseLib::releaseObject(_displacement, _strain, _previous_stress, _current_stress);
+        BaseLib::releaseObject(_delta_displacement, _previous_displacement,
+                _current_displacement);
+        BaseLib::releaseObject(_previous_strain, _current_strain,
+                _previous_stress, _current_stress);
     }
 
     /// initialize this process
@@ -100,8 +105,9 @@ public:
     }
 
 protected:
-    virtual void initializeTimeStep(const NumLib::TimeStep &/*time*/);
-
+    virtual void initializeTimeStep(const NumLib::TimeStep &time);
+    virtual void postSolutionAlgorithm(const NumLib::TimeStep &time);
+    virtual void postTimeStep(const NumLib::TimeStep &time);
     virtual void updateOutputParameter(const NumLib::TimeStep &time);
 
     virtual MySolutionType* getSolution()
@@ -112,9 +118,6 @@ protected:
     virtual void output(const NumLib::TimeStep &time);
 
 private:
-    MyVariable* getDisplacementComponent(MyVariable *u_x, MyVariable* u_y,
-            MyVariable* u_z, const std::string &var_name);
-    void calculateStrainStress(MyNodalFunctionVector* u, MyIntegrationPointFunctionVector* strain, MyIntegrationPointFunctionVector* stress);
 
     DISALLOW_COPY_AND_ASSIGN(FunctionIncrementalDisplacement);
 
@@ -123,8 +126,11 @@ private:
     MySolutionType* _solution;
     FemLib::LagrangeFeObjectContainer* _feObjects;
     NumLib::DiscreteDataConvergenceCheck _checker;
-    MyNodalFunctionVector* _displacement;
-    MyIntegrationPointFunctionVector* _strain;
+    MyNodalFunctionVector* _delta_displacement;
+    MyNodalFunctionVector* _previous_displacement;
+    MyNodalFunctionVector* _current_displacement;
+    MyIntegrationPointFunctionVector* _previous_strain;
+    MyIntegrationPointFunctionVector* _current_strain;
     MyIntegrationPointFunctionVector* _previous_stress;
     MyIntegrationPointFunctionVector* _current_stress;
     std::vector<NodalPointScalarWrapper*> _vec_u_components;
