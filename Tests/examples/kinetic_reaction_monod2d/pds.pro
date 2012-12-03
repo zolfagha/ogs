@@ -15,7 +15,7 @@
 			</M>
 			<M name="KIN_REACT_GIA">
 				<in>VELOCITY</in>
-			    <out>Tracer</out>
+				<out>Tracer</out>
 			</M>
 		</problems>
 	</P>

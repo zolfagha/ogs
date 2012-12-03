@@ -9,8 +9,11 @@ GeoSys-OUT: Output ------------------------------------------------
   Biomass
   eta_mob_0
   eta_mob_1
+  eta_mob_2
   xi_mob_0
   xi_immob_0
+  xi_mob_rate_0
+  xi_immob_rate_0
  $ELE_VALUES
   VELOCITY
  $GEO_TYPE
@@ -30,8 +33,11 @@ GeoSys-OUT: Output ------------------------------------------------
   Biomass
   eta_mob_0
   eta_mob_1
+  eta_mob_2
   xi_mob_0
   xi_immob_0
+  xi_mob_rate_0
+  xi_immob_rate_0
  $ELE_VALUES
   VELOCITY
  $GEO_TYPE
