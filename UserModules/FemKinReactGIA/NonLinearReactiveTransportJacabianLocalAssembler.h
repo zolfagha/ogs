@@ -145,6 +145,7 @@ public:
 				fe->integrateDWxDN(j, dispersion_diffusion, matDiff);
 				fe->integrateWxDN(j, v2, matAdv); 
             
+                MathLib::LocalMatrix &Np = *fe->getBasisFunction(); // HS
 				// now dealing with the rate change terms
 				// each location has n_xi_mob * n_xi_mob dR/dxi entries
 				for (m=0; m<n_xi_mob; m++)  // this is to which derivative term
@@ -158,14 +159,17 @@ public:
                     }  // end of for k<n_nodes
                     
                     // get mean value
-                    d_rate(0,0) = vec_drates_dxi_value.mean(); 
+                    // HS, disable now and try using basis function -----------
+                    // d_rate(0,0) = vec_drates_dxi_value.mean(); 
+                    // --------------------------------------------------------
+                    d_rate = Np * vec_drates_dxi_value; 
 					fe->integrateWxN(j, d_rate, mat_dR);
 					
                     // plugging mat_dR to the corresponding Jacobian matrix position
 					localJ.block(n_nodes*i, n_nodes*m, n_nodes, n_nodes) -= mat_dR;
                     
 				}  // end of for m
-			}  // end of for j
+			}  // end of for j (sp)
 
 			matM *= 1.0 / dt;
 			matDiff *= theta;

@@ -29,12 +29,12 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 {
 	size_t i;  // index
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    size_t msh_id = option.getOptionAsNum<size_t>("MeshID");
+    _msh_id = option.getOptionAsNum<size_t>("MeshID");
     size_t time_id = option.getOptionAsNum<size_t>("TimeGroupID");
     NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
         
     //mesh and FE objects
-    MeshLib::IMesh* msh = femData->list_mesh[msh_id];
+    MeshLib::IMesh* msh = femData->list_mesh[_msh_id];
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
     _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
@@ -224,10 +224,14 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
     this->_non_linear_solution->getDofEquationIdTable()->setNumberingType(DiscreteLib::DofNumberingType::BY_POINT);  // global order
     this->_non_linear_solution->getDofEquationIdTable()->setLocalNumberingType(DiscreteLib::DofNumberingType::BY_VARIABLE);  // local order
 	const BaseLib::Options* optNum = option.getSubGroup("Numerics");
+
+    // linear solver
 	MyLinearSolver* linear_solver = this->_non_linear_solution->getLinearEquationSolver(); 
 	linear_solver->setOption(*optNum);
 	// set nonlinear solver options
 	this->_non_linear_solution->getNonlinearSolver()->setOption(*optNum);
+    // get the nonlinear solution dof manager
+    this->_nl_sol_dofManager = this->_non_linear_solution->getDofEquationIdTable(); 
 
 	// set up solution
     _solution = new MyKinReductionSolution(dis, _problem, this, _linear_problems, _linear_solutions, _non_linear_problem, _non_linear_solution);
@@ -236,7 +240,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 
     // set initial output parameter
 	for (i=0; i<_concentrations.size(); i++) {
-		OutputVariableInfo var1(this->getOutputParameterName(i), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
+		OutputVariableInfo var1(this->getOutputParameterName(i), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
         femData->outController.setOutput(var1.name, var1);
     }
 
@@ -244,25 +248,25 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
     for (i=0; i<_eta_mob.size(); i++) {
         std::stringstream str_tmp;
 		str_tmp << "eta_mob_" << i ;
-        OutputVariableInfo var1(str_tmp.str(), msh_id,  OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_mob[i]);
+        OutputVariableInfo var1(str_tmp.str(), _msh_id,  OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_mob[i]);
         femData->outController.setOutput(var1.name, var1);
     }
     for (i=0; i<_xi_mob.size(); i++) {
         std::stringstream str_tmp1, str_tmp2;
 		str_tmp1 << "xi_mob_" << i ;
-        OutputVariableInfo var1(str_tmp1.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob[i]);
+        OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob[i]);
         femData->outController.setOutput(var1.name, var1);
         str_tmp2 << "xi_mob_rate_" << i; 
-        OutputVariableInfo var2(str_tmp2.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob_rates[i]);
+        OutputVariableInfo var2(str_tmp2.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob_rates[i]);
         femData->outController.setOutput(var2.name, var2);
     }
     for (i=0; i<_xi_immob.size(); i++) {
         std::stringstream str_tmp1, str_tmp2;
 		str_tmp1 << "xi_immob_" << i ;
-        OutputVariableInfo var1(str_tmp1.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob[i]);
+        OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob[i]);
         femData->outController.setOutput(var1.name, var1);
         str_tmp2 << "xi_immob_rate_" << i; 
-        OutputVariableInfo var2(str_tmp2.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob_rates[i]);
+        OutputVariableInfo var2(str_tmp2.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob_rates[i]);
         femData->outController.setOutput(var2.name, var2);
     }
     // -----------------end of debugging-----------------------------
@@ -313,10 +317,10 @@ void FunctionConcentrations<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 
     // update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    size_t msh_id = this->_problem->getDiscreteSystem()->getMesh()->getID(); 
+    this->_msh_id = this->_problem->getDiscreteSystem()->getMesh()->getID(); 
 	// set the new output
 	for (i=0; i<_concentrations.size(); i++) {
-		OutputVariableInfo var1(this->getOutputParameterName(i), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
+		OutputVariableInfo var1(this->getOutputParameterName(i), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
         femData->outController.setOutput(var1.name, var1);
     }
 
@@ -324,25 +328,25 @@ void FunctionConcentrations<T1, T2>::output(const NumLib::TimeStep &/*time*/)
     for (i=0; i<_eta_mob.size(); i++) {
         std::stringstream str_tmp;
 		str_tmp << "eta_mob_" << i ;
-        OutputVariableInfo var1(str_tmp.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_mob[i]);
+        OutputVariableInfo var1(str_tmp.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_mob[i]);
         femData->outController.setOutput(var1.name, var1);
     }
     for (i=0; i<_xi_mob.size(); i++) {
         std::stringstream str_tmp1, str_tmp2;
 		str_tmp1 << "xi_mob_" << i ;
-        OutputVariableInfo var1(str_tmp1.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob[i]);
+        OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob[i]);
         femData->outController.setOutput(var1.name, var1);
         str_tmp2 << "xi_mob_rate_" << i; 
-        OutputVariableInfo var2(str_tmp2.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob_rates[i]);
+        OutputVariableInfo var2(str_tmp2.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob_rates[i]);
         femData->outController.setOutput(var2.name, var2);
     }
     for (i=0; i<_xi_immob.size(); i++) {
         std::stringstream str_tmp1, str_tmp2;
 		str_tmp1 << "xi_immob_" << i ;
-        OutputVariableInfo var1(str_tmp1.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob[i]);
+        OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob[i]);
         femData->outController.setOutput(var1.name, var1);
         str_tmp2 << "xi_immob_rate_" << i; 
-        OutputVariableInfo var2(str_tmp2.str(), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob_rates[i]);
+        OutputVariableInfo var2(str_tmp2.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob_rates[i]);
         femData->outController.setOutput(var2.name, var2);
     }
     // -----------end of debugging----------------------------------
@@ -505,11 +509,17 @@ void FunctionConcentrations<T1, T2>::set_xi_mob_node_values( size_t xi_mob_idx, 
 }
 
 template <class T1, class T2>
-void FunctionConcentrations<T1, T2>::update_xi_mob_nodal_values( void )
+template <class T_X>
+void FunctionConcentrations<T1, T2>::update_xi_mob_nodal_values( const T_X & x_new )
 {
-    size_t i; 
-    for (i=0; i < this->_xi_mob.size(); i++)
-        this->set_xi_mob_node_values( i, _non_linear_solution->getCurrentSolution(i) );
+    size_t n_var; 
+    n_var = this->_xi_mob.size(); 
+
+    // T_X xi_mob_new_sol; 
+    // distribute solution vector to local vector for each variable
+    for (size_t i=0; i<n_var; i++) {
+        DiscreteLib::setLocalVector( *_nl_sol_dofManager, i, _msh_id, x_new, *this->_xi_mob[i]->getDiscreteData() );
+    }
 
 }
 
@@ -740,8 +750,7 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 			for (i=0; i < n_xi_mob; i++)
 				loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
 			for (i=0; i < n_xi_immob; i++)
-				// loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
-                loc_xi_immob[i] = this->_xi_immob_new[i]->getValue(node_idx); 
+				loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); // HS, here are always the old xi_immob values. 
 		
 			// get the right reference values to ODE RHS function
 			this->_local_ode_xi_immob->update_eta_xi( loc_eta_mob, loc_eta_immob, loc_xi_mob, loc_xi_immob); 

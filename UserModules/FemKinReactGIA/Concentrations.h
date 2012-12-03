@@ -33,7 +33,7 @@
 #include "Local_ODE_Xi_immob.h"
 
 
-template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER>
+template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER >
 class FunctionConcentrations
 	: public ProcessLib::Process
 {
@@ -234,8 +234,11 @@ public:
 	void set_eta_mob_node_values     ( size_t eta_mob_idx,   MyNodalFunctionScalar* new_eta_mob_node_values   ); 
 	void set_eta_immob_node_values   ( size_t eta_immob_idx, MyNodalFunctionScalar* new_eta_immob_node_values ); 
 	void set_xi_mob_node_values      ( size_t xi_mob_idx,    MyNodalFunctionScalar* new_xi_mob_node_values    ); 
-    void update_xi_mob_nodal_values  ( void ); 
-	void update_xi_immob_node_values ( void ); 
+    
+    template <class T_X>
+    void update_xi_mob_nodal_values  ( const T_X & x_new ); 
+	
+    void update_xi_immob_node_values ( void ); 
 
 	/**
       * calculate the reaction rates on each node
@@ -394,6 +397,16 @@ private:
       * nodal xi_immobile reaction rates
       */ 
     std::vector<MyNodalFunctionScalar*> _xi_immob_rates;
+
+    /**
+      * degree of freedom equation ID talbe for the nonlinear problem
+      */ 
+    DiscreteLib::DofEquationIdTable * _nl_sol_dofManager; 
+
+    /**
+      * the id of the msh applied in this process
+      */ 
+    size_t _msh_id; 
 }; 
 
 #include "Concentrations.hpp"
