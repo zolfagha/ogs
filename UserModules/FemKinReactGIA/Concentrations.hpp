@@ -571,35 +571,47 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_rates(void)
 			 node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd()  ; 
 			 node_idx++ )
 		{
-			// put the local eta and xi into the global vector
-			// fill in eta_mob
-			for (i=0; i < n_eta_mob; i++)
-				loc_eta_mob[i] = this->_eta_mob[i]->getValue(node_idx); 
-			// fill in eta_immob
-			for (i=0; i < n_eta_immob; i++)
-				loc_eta_immob[i] = this->_eta_immob[i]->getValue(node_idx); 
-			// fill in xi
-			// this->_xi->setNodalValues( &loc_xi, node_idx*n_xi, n_xi ); 
-			for (i=0; i < n_xi_mob; i++)
-				loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
-		    for (i=0; i < n_xi_immob; i++)
-				// loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
-                loc_xi_immob[i] = this->_xi_immob_new[i]->getValue(node_idx); // using new rates instead! // HS 26.11.2012
-
-            // calculate rates; 
-            this->_ReductionKin->Calc_Xi_Rate( loc_eta_mob, 
-                                               loc_eta_immob, 
-                                               loc_xi_mob, 
-                                               loc_xi_immob, 
-                                               loc_xi_mob_rates,
-                                               loc_xi_immob_rates );
-
-            // write the rates into the global nodal vector
-            for (i=0; i < n_xi_mob; i++)
-                this->_xi_mob_rates[i]->setValue( node_idx, loc_xi_mob_rates[i] ); 
-
-            for (i=0; i < n_xi_immob; i++)
-                this->_xi_immob_rates[i]->setValue( node_idx, loc_xi_immob_rates[i] );
+            if ( ! this->_solution->isBCNode(node_idx) )
+            {
+                // put the local eta and xi into the global vector
+                // fill in eta_mob
+                for (i=0; i < n_eta_mob; i++)
+                    loc_eta_mob[i] = this->_eta_mob[i]->getValue(node_idx); 
+                // fill in eta_immob
+                for (i=0; i < n_eta_immob; i++)
+                    loc_eta_immob[i] = this->_eta_immob[i]->getValue(node_idx); 
+                // fill in xi			
+                // this->_xi->setNodalValues( &loc_xi, node_idx*n_xi, n_xi ); 
+                for (i=0; i < n_xi_mob; i++)
+                    loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
+                for (i=0; i < n_xi_immob; i++)
+                    // loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
+                    loc_xi_immob[i] = this->_xi_immob_new[i]->getValue(node_idx); // using new rates instead! // HS 26.11.2012
+                
+                // calculate rates; 
+                this->_ReductionKin->Calc_Xi_Rate( loc_eta_mob, 
+                                                   loc_eta_immob,  
+                                                   loc_xi_mob, 
+                                                   loc_xi_immob, 
+                                                   loc_xi_mob_rates,
+                                                   loc_xi_immob_rates );
+                
+                // write the rates into the global nodal vector
+                for (i=0; i < n_xi_mob; i++)
+                    this->_xi_mob_rates[i]->setValue( node_idx, loc_xi_mob_rates[i] ); 
+                
+                for (i=0; i < n_xi_immob; i++)
+                    this->_xi_immob_rates[i]->setValue( node_idx, loc_xi_immob_rates[i] );
+            }  // end of if boundary node
+            else
+            {
+                // if is boundary node, then set rates to zero. 
+                for (i=0; i < n_xi_mob; i++)
+                    this->_xi_mob_rates[i]->setValue( node_idx, 0.0 ); 
+                
+                for (i=0; i < n_xi_immob; i++)
+                    this->_xi_immob_rates[i]->setValue( node_idx, 0.0 );
+            }
 
 		}  // end of for node_idx
 
@@ -615,8 +627,8 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_rates(void)
 template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
 {
-	const double epsilon = 1.0e-6;
-    double drates_dxi_tmp;
+	const double epsilon  = 1.0e-6;
+    double drates_dxi_tmp = 0.0;
 
     size_t node_idx, i, j;
 	size_t n_eta_mob, n_eta_immob, n_xi_mob, n_xi_immob; 
@@ -649,51 +661,66 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
 	     node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd()  ; 
 		 node_idx++)
 	{
-        // read the local values
-        for (i=0; i < n_eta_mob; i++)
-			loc_eta_mob[i] = this->_eta_mob[i]->getValue(node_idx); 
-		// fill in eta_immob
-		for (i=0; i < n_eta_immob; i++)
-			loc_eta_immob[i] = this->_eta_immob[i]->getValue(node_idx); 
-		for (i=0; i < n_xi_mob; i++)
-			loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
-	    for (i=0; i < n_xi_immob; i++)
-			// loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
-            loc_xi_immob[i] = this->_xi_immob_new[i]->getValue(node_idx);  // HS, use the new immob values after ODE calculation
-
-        // calculate rates; 
-        this->_ReductionKin->Calc_Xi_Rate( loc_eta_mob, 
-                                           loc_eta_immob, 
-                                           loc_xi_mob, 
-                                           loc_xi_immob, 
-                                           loc_xi_mob_rates_base,
-                                           loc_xi_immob_rates );
-		
-        // loop over each xi_mob, 
-        for (j=0; j < n_xi_mob; j++)
+        // if not boundary nodes, calculates its drate/dxi. 
+        if ( ! this->_solution->isBCNode(node_idx) )
         {
-            // get a clean copy of the origiinal xi_mob
-            loc_xi_mob_tmp = loc_xi_mob; 
+            // read the local values
+            for (i=0; i < n_eta_mob; i++)			
+                loc_eta_mob[i] = this->_eta_mob[i]->getValue(node_idx); 
+            // fill in eta_immob
+            for (i=0; i < n_eta_immob; i++)
+                loc_eta_immob[i] = this->_eta_immob[i]->getValue(node_idx); 
+            for (i=0; i < n_xi_mob; i++)
+                loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
+            for (i=0; i < n_xi_immob; i++)
+                loc_xi_immob[i] = this->_xi_immob_new[i]->getValue(node_idx);  // HS, use the new immob values after ODE calculation
+                // loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx);
 
-    		// give an increment to the xi value
-            // loc_xi_mob_tmp(j) += epsilon * loc_xi_mob_tmp(j);
-            loc_xi_mob_tmp(j) += epsilon ;  // use the most traditional way. 
-
-    		// calculate the new rate
+            // calculate rates; 
             this->_ReductionKin->Calc_Xi_Rate( loc_eta_mob, 
                                                loc_eta_immob, 
-                                               loc_xi_mob_tmp, 
+                                               loc_xi_mob, 
                                                loc_xi_immob, 
-                                               loc_xi_mob_rates_new,
+                                               loc_xi_mob_rates_base,
                                                loc_xi_immob_rates );
-            // loop over all xi_mob
-		    for (i=0; i < n_xi_mob; i++)
-		    {
-    			// divide the rate value by delta_xi to get derivative
-                drates_dxi_tmp = ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) / ( epsilon );
-                _xi_mob_drates_dxi[i*n_xi_mob+j]->setValue( node_idx, drates_dxi_tmp ); 
-	        }  // end of for i
-		}  // end of for j
+            
+            // loop over each xi_mob, 
+            for (j=0; j < n_xi_mob; j++)
+            {
+                // get a clean copy of the origiinal xi_mob
+                loc_xi_mob_tmp = loc_xi_mob; 
+                // give an increment to the xi value
+                if ( loc_xi_mob(j) != 0.0 )
+                    loc_xi_mob_tmp(j) += epsilon * abs( loc_xi_mob(j) );  
+                else
+                    loc_xi_mob_tmp(j) += epsilon; 
+                
+                // calculate the new rate
+                this->_ReductionKin->Calc_Xi_Rate( loc_eta_mob, 
+                                                   loc_eta_immob, 
+                                                   loc_xi_mob_tmp, 
+                                                   loc_xi_immob, 
+                                                   loc_xi_mob_rates_new,
+                                                   loc_xi_immob_rates );
+                // loop over all xi_mob
+                for (i=0; i < n_xi_mob; i++)
+                {
+                    // calculate derivative
+                    if ( loc_xi_mob(j) != 0.0 )
+                        drates_dxi_tmp = ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) / epsilon /  abs( loc_xi_mob(j) );
+                    else
+                        drates_dxi_tmp = ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) /  epsilon ;
+                    _xi_mob_drates_dxi[i*n_xi_mob+j]->setValue( node_idx, drates_dxi_tmp ); 
+                }  // end of for i
+            }  // end of for j
+        }  // end of if boundary node
+        else
+        {
+            // if boundary node, then set drates/dxi to zeros
+            for (i=0; i < n_xi_mob; i++)
+                for (j=0; j < n_xi_mob; j++)
+                    _xi_mob_drates_dxi[i*n_xi_mob+j]->setValue( node_idx, 0.0 ); 
+        }  // end of else
 	}  // end of for node_idx
 
     // setting the rates 
@@ -767,7 +794,7 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
         {
             // if it is boundary nodes, then xi_immob_new is equal to xi_immob. 
             for (i=0; i < n_xi_immob; i++)
-				_xi_immob_new[i] = _xi_immob[i]; 
+				_xi_immob_new[i]->setValue(node_idx, _xi_immob[i]->getValue( node_idx ) ); 
         }
 
 	}  // end of for node_idx
