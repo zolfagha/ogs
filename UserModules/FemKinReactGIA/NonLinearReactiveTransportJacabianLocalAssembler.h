@@ -108,7 +108,7 @@ public:
         MathLib::LocalMatrix d_poro = MathLib::LocalMatrix::Zero(3,3);   // HS, change size to 1 by 3
         double disp_l = 0.0; 
         double disp_t = 0.0; 
-        MathLib::LocalMatrix d_rate(1,1); 
+        MathLib::LocalMatrix d_rate = MathLib::LocalMatrix::Zero(1,1); 
         MathLib::LocalMatrix localJ_tmp = MathLib::LocalMatrix::Zero(n_nodes, n_nodes);
         NumLib::ITXFunction::DataType v;
 		NumLib::ITXFunction::DataType v2;

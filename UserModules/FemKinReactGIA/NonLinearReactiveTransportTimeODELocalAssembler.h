@@ -90,7 +90,7 @@ protected:
 		n_xi_mob = _xi_mob_rates->size(); 
 		n_nodes  = e.getNumberOfNodes(); 
         n_sp     = q->getNumberOfSamplingPoints();  // number of sampling points
-		LocalMatrixType node_xi_mob_rate_values(n_nodes, n_xi_mob ); // TODO
+		LocalMatrixType node_xi_mob_rate_values = LocalMatrixType::Zero(n_nodes, n_xi_mob ); // TODO
 		for (i=0; i<n_nodes; i++)
 		{
 		    node_idx = e.getNodeID( i ); 
