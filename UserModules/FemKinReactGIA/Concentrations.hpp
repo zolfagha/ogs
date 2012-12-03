@@ -604,10 +604,10 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_rates(void)
 		}  // end of for node_idx
 
         _non_linear_problem->getEquation()->getResidualAssembler()->set_xi_mob_rates(   & _xi_mob_rates );
-        _non_linear_problem->getEquation()->getResidualAssembler()->set_xi_immob_rates( & _xi_mob_rates );
+        _non_linear_problem->getEquation()->getResidualAssembler()->set_xi_immob_rates( & _xi_immob_rates );
 
         _non_linear_problem->getEquation()->getJacobianAssembler()->set_xi_mob_rates(   & _xi_mob_rates );
-        _non_linear_problem->getEquation()->getJacobianAssembler()->set_xi_immob_rates( & _xi_mob_rates );
+        _non_linear_problem->getEquation()->getJacobianAssembler()->set_xi_immob_rates( & _xi_immob_rates );
 	}  // end of if _ReductionKin
 }
 
@@ -676,7 +676,8 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
             loc_xi_mob_tmp = loc_xi_mob; 
 
     		// give an increment to the xi value
-            loc_xi_mob_tmp(j) += epsilon * loc_xi_mob_tmp(j);
+            // loc_xi_mob_tmp(j) += epsilon * loc_xi_mob_tmp(j);
+            loc_xi_mob_tmp(j) += epsilon ;  // use the most traditional way. 
 
     		// calculate the new rate
             this->_ReductionKin->Calc_Xi_Rate( loc_eta_mob, 
@@ -689,7 +690,7 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
 		    for (i=0; i < n_xi_mob; i++)
 		    {
     			// divide the rate value by delta_xi to get derivative
-                drates_dxi_tmp = ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) / ( epsilon * loc_xi_mob(j) );
+                drates_dxi_tmp = ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) / ( epsilon );
                 _xi_mob_drates_dxi[i*n_xi_mob+j]->setValue( node_idx, drates_dxi_tmp ); 
 	        }  // end of for i
 		}  // end of for j
