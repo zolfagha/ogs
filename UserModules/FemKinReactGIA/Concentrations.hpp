@@ -41,7 +41,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 
 	// get the transformation class instance here
 	this->_ReductionKin = femData->m_KinReductScheme; 
-	// make sure the reduction scheme is already initialized. 
+    // make sure the reduction scheme is already initialized. 
 	if ( !(this->_ReductionKin->IsInitialized()) ) 
 	{
 		// error msg
@@ -51,38 +51,34 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	}
 
 	// first get the number of components
-	size_t n_Comp = femData->map_ChemComp.size(); 
+	_n_Comp = femData->map_ChemComp.size(); 
+    // also get the size of secondary variables
+    _n_eta_mob   = this->_ReductionKin->get_n_eta_mob  (); 
+	_n_eta_immob = this->_ReductionKin->get_n_eta_immob();
+	_n_xi_mob    = this->_ReductionKin->get_n_xi_mob   (); 
+	_n_xi_immob  = this->_ReductionKin->get_n_xi_immob (); 
 
 	// set concentrations of all components as output
-	for ( i=0; i < n_Comp; i++ )
+	for ( i=0; i < _n_Comp; i++ )
 		this->setOutputParameterName( i, femData->map_ChemComp[i]->second->get_name() ); 
-
-	// tell me how many eta and how many xi we have
-	size_t n_eta, n_xi_mob, n_xi_immob, n_eta_mob, n_eta_immob; 
-	// get n_eta and n_xi
-	n_eta       = this->_ReductionKin->get_n_eta();
-	n_eta_mob   = this->_ReductionKin->get_n_eta_mob(); 
-	n_eta_immob = n_eta - n_eta_mob; 
-	n_xi_mob    = this->_ReductionKin->get_n_xi_mob(); 
-	n_xi_immob  = this->_ReductionKin->get_n_xi_immob(); 
 
 	// creating local memory space to store IC and BC
 	// initialize eta_mob, 
-	for (i=0; i<n_eta_mob ; i++)
+	for ( i=0; i < _n_eta_mob ; i++)
 	{
 		MyNodalFunctionScalar* eta_i = new MyNodalFunctionScalar(); 
 		eta_i->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0 );
 	    _eta_mob.push_back(eta_i); 
 	}
 	// initialize eta_immob, 
-	for (i=0; i<n_eta_immob; i++)
+	for ( i=0; i < _n_eta_immob; i++)
 	{
 		MyNodalFunctionScalar* eta_i = new MyNodalFunctionScalar(); 
 	    eta_i->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0 );
 		_eta_immob.push_back(eta_i); 
 	}
 	// initialize xi_mob
-	for ( i=0; i < n_xi_mob ; i++ )
+	for ( i=0; i < _n_xi_mob ; i++ )
 	{
 		MyNodalFunctionScalar* xi_mob_tmp       = new MyNodalFunctionScalar();  // xi_mob
         MyNodalFunctionScalar* xi_mob_rates_tmp = new MyNodalFunctionScalar();  // xi_mob_rates
@@ -92,14 +88,14 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
         _xi_mob_rates.push_back(xi_mob_rates_tmp); 
 	}
 	// initialize drates_dxi
-	for ( i=0; i < n_xi_mob ; i++ )
+	for ( i=0; i < _n_xi_mob ; i++ )
 	{
 		MyNodalFunctionScalar* drate_dxi_tmp = new MyNodalFunctionScalar();  // drate_dxi instances
 		drate_dxi_tmp->initialize(       *dis, FemLib::PolynomialOrder::Linear, 0.0  );
 		_xi_mob_drates_dxi.push_back(drate_dxi_tmp); 
 	}
 	// initialize xi_mob
-	for ( i=0; i < n_xi_immob ; i++ )
+	for ( i=0; i < _n_xi_immob ; i++ )
 	{
 		MyNodalFunctionScalar* xi_immob_tmp       = new MyNodalFunctionScalar();  // xi_immob
         MyNodalFunctionScalar* xi_immob_rates_tmp = new MyNodalFunctionScalar();  // xi_mob_rates
@@ -124,7 +120,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	_local_ode_xi_immob = new Local_ODE_Xi_immob( this->_ReductionKin ); 
 
 	// for the linear transport problem, variables are eta_mobile
-	for ( i=0; i < n_eta_mob ; i++ )
+	for ( i=0; i < _n_eta_mob ; i++ )
 	{
 		// set up problem
 		MyLinearTransportProblemType* linear_problem = new MyLinearTransportProblemType(dis);
@@ -147,7 +143,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	_non_linear_eqs->initialize( non_linear_assembler, non_linear_r_assembler, non_linear_j_assembler ); 
 	_non_linear_problem->setTimeSteppingFunction(*tim); 
 	// for nonlinear coupled transport problem, variables are xi_mobile species
-	for ( i=0; i < n_xi_mob ; i++ )
+	for ( i=0; i < _n_xi_mob ; i++ )
 	{
 		std::stringstream str_tmp;
 		str_tmp << "xi_mob_" << i ;
@@ -160,7 +156,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	// add variables to the KinReduction problem class
 	// for the KinReduction problem, variables are the concentrations of all chemical components
 	// add all concentrations to discretized memory space
-	for ( i=0; i<n_Comp; i++ )
+	for ( i=0; i < _n_Comp; i++ )
 	{
 		MyVariableConc* comp_conc = _problem->addVariable( femData->map_ChemComp[i]->second->get_name() );
         FemVariableBuilder var_builder;
@@ -169,7 +165,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
     
 	// backward flushing global vector of concentrations
 	MyNodalFunctionScalar* tmp_conc; 
-	for (i=0; i < n_Comp; i++)
+	for (i=0; i < _n_Comp; i++)
 	{
 		SolutionLib::FemIC* femIC = _problem->getVariable(i)->getIC();
 	    tmp_conc = new MyNodalFunctionScalar();
@@ -192,14 +188,14 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	convert_conc_to_eta_xi();
 
 	// set IC for eta_mob
-	for ( i=0; i < n_eta_mob; i++ )
+	for ( i=0; i < _n_eta_mob; i++ )
 	{
 		SolutionLib::FemIC* eta_ic = new SolutionLib::FemIC(msh);
 		eta_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _eta_mob[i]->getDiscreteData() ) ); 
 		_linear_problems[i]->getVariable(0)->setIC( eta_ic );  // be careful, here each linear problem only has one variable "eta". 
 	}
 	// set IC for xi_mob
-	for ( i=0; i < n_xi_mob; i++ )
+	for ( i=0; i < _n_xi_mob; i++ )
 	{
 		SolutionLib::FemIC* xi_mob_ic = new SolutionLib::FemIC(msh); 
 		xi_mob_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _xi_mob[i]->getDiscreteData() ) ); 
@@ -207,7 +203,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
 	}
 
     // set up linear solution
-	for ( i=0; i < n_eta_mob; i++ )
+	for ( i=0; i < _n_eta_mob; i++ )
 	{
 		MyLinearSolutionType* linear_solution = new MyLinearSolutionType( dis, this->_linear_problems[i] ); 
 		MyLinearSolver* linear_solver = linear_solution->getLinearEquationSolver();
@@ -244,14 +240,21 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
         femData->outController.setOutput(var1.name, var1);
     }
 
+#ifdef _DEBUG
     // -----------debugging, output eta and xi----------------------
-    for (i=0; i<_eta_mob.size(); i++) {
+    for (i=0; i < _n_eta_mob; i++) {
         std::stringstream str_tmp;
 		str_tmp << "eta_mob_" << i ;
         OutputVariableInfo var1(str_tmp.str(), _msh_id,  OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_mob[i]);
         femData->outController.setOutput(var1.name, var1);
     }
-    for (i=0; i<_xi_mob.size(); i++) {
+    for (i=0; i < _n_eta_immob; i++) {
+        std::stringstream str_tmp;
+		str_tmp << "eta_immob_" << i ;
+        OutputVariableInfo var1(str_tmp.str(), _msh_id,  OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_immob[i]);
+        femData->outController.setOutput(var1.name, var1);
+    }
+    for (i=0; i < _n_xi_mob; i++) {
         std::stringstream str_tmp1, str_tmp2;
 		str_tmp1 << "xi_mob_" << i ;
         OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob[i]);
@@ -260,7 +263,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
         OutputVariableInfo var2(str_tmp2.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob_rates[i]);
         femData->outController.setOutput(var2.name, var2);
     }
-    for (i=0; i<_xi_immob.size(); i++) {
+    for (i=0; i < _n_xi_immob; i++) {
         std::stringstream str_tmp1, str_tmp2;
 		str_tmp1 << "xi_immob_" << i ;
         OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob[i]);
@@ -270,6 +273,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
         femData->outController.setOutput(var2.name, var2);
     }
     // -----------------end of debugging-----------------------------
+#endif
 
     linear_solver = NULL;
     optNum = NULL;
@@ -324,14 +328,21 @@ void FunctionConcentrations<T1, T2>::output(const NumLib::TimeStep &/*time*/)
         femData->outController.setOutput(var1.name, var1);
     }
 
+#ifdef _DEBUG
     // -----------debugging, output eta and xi----------------------
-    for (i=0; i<_eta_mob.size(); i++) {
+    for (i=0; i < _n_eta_mob; i++) {
         std::stringstream str_tmp;
 		str_tmp << "eta_mob_" << i ;
         OutputVariableInfo var1(str_tmp.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_mob[i]);
         femData->outController.setOutput(var1.name, var1);
     }
-    for (i=0; i<_xi_mob.size(); i++) {
+    for (i=0; i < _n_eta_immob; i++) {
+        std::stringstream str_tmp;
+		str_tmp << "eta_immob_" << i ;
+        OutputVariableInfo var1(str_tmp.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_immob[i]);
+        femData->outController.setOutput(var1.name, var1);
+    }
+    for (i=0; i < _n_xi_mob; i++) {
         std::stringstream str_tmp1, str_tmp2;
 		str_tmp1 << "xi_mob_" << i ;
         OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob[i]);
@@ -340,7 +351,7 @@ void FunctionConcentrations<T1, T2>::output(const NumLib::TimeStep &/*time*/)
         OutputVariableInfo var2(str_tmp2.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob_rates[i]);
         femData->outController.setOutput(var2.name, var2);
     }
-    for (i=0; i<_xi_immob.size(); i++) {
+    for (i=0; i < _n_xi_immob; i++) {
         std::stringstream str_tmp1, str_tmp2;
 		str_tmp1 << "xi_immob_" << i ;
         OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob[i]);
@@ -350,19 +361,13 @@ void FunctionConcentrations<T1, T2>::output(const NumLib::TimeStep &/*time*/)
         femData->outController.setOutput(var2.name, var2);
     }
     // -----------end of debugging----------------------------------
+#endif
 }
 
 template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::convert_conc_to_eta_xi(void)
 {
 	size_t node_idx, i; 
-	size_t n_comp, n_eta_mob, n_eta_immob, n_xi_mob, n_xi_immob; 
-
-	n_comp      = this->_ReductionKin->get_n_Comp();
-	n_eta_mob   = this->_ReductionKin->get_n_eta_mob(); 
-    n_eta_immob = this->_ReductionKin->get_n_eta_immob();
-	n_xi_mob    = this->_ReductionKin->get_n_xi_mob(); 
-	n_xi_immob  = this->_ReductionKin->get_n_xi_immob(); 
 
 	// only when the reduction scheme is fully initialized
 	if ( this->_ReductionKin->IsInitialized() )
@@ -374,18 +379,18 @@ void FunctionConcentrations<T1, T2>::convert_conc_to_eta_xi(void)
 		LocalVector loc_xi_immob;
 		LocalVector loc_conc; 
 		// allocate the memory for local vectors
-		loc_eta_mob     = LocalVector::Zero( this->_ReductionKin->get_n_eta_mob() ); 
-		loc_eta_immob   = LocalVector::Zero( this->_ReductionKin->get_n_eta() - this->_ReductionKin->get_n_eta_mob() ); 
-		loc_xi_mob      = LocalVector::Zero( this->_ReductionKin->get_n_xi_mob() ); 
-		loc_xi_immob    = LocalVector::Zero( this->_ReductionKin->get_n_xi_immob() ); 
-		loc_conc        = LocalVector::Zero( this->_ReductionKin->get_n_Comp() );
+		loc_eta_mob     = LocalVector::Zero( _n_eta_mob ); 
+		loc_eta_immob   = LocalVector::Zero( _n_eta_immob ); 
+		loc_xi_mob      = LocalVector::Zero( _n_xi_mob ); 
+		loc_xi_immob    = LocalVector::Zero( _n_xi_immob ); 
+		loc_conc        = LocalVector::Zero( _n_Comp );
 
 		// for each nodes, 
 		for (node_idx=_concentrations[0]->getDiscreteData()->getRangeBegin(); 
 			 node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd(); 
 			 node_idx++ )
 		{
-			for (i=0; i < n_comp; i++)
+			for (i=0; i < _n_Comp; i++)
 			{
 				// gether all the concentrations 
 				loc_conc[i] = _concentrations[i]->getValue(node_idx); 
@@ -397,15 +402,15 @@ void FunctionConcentrations<T1, T2>::convert_conc_to_eta_xi(void)
 			
 			// put the local eta and xi into the global vector
 			// fill in eta_mob
-			for (i=0; i < n_eta_mob; i++)
+			for (i=0; i < _n_eta_mob; i++)
 				this->_eta_mob[i]->setValue(node_idx, loc_eta_mob[i]); 
 			// fill in eta_immob
-			for (i=0; i < n_eta_immob; i++)
+			for (i=0; i < _n_eta_immob; i++)
 				this->_eta_immob[i]->setValue(node_idx, loc_eta_immob[i]); 
 			// fill in xi_mob
-			for (i=0; i < n_xi_mob; i++)
+			for (i=0; i < _n_xi_mob; i++)
 				this->_xi_mob[i]->setValue(node_idx, loc_xi_mob[i]); 
-			for (i=0; i < n_xi_immob; i++)
+			for (i=0; i < _n_xi_immob; i++)
             {
 				this->_xi_immob[i]->setValue(node_idx, loc_xi_immob[i]); 
                 // also over-write xi_immob_new
@@ -421,13 +426,7 @@ template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::convert_eta_xi_to_conc(void)
 {
 	size_t node_idx, i; 
-	size_t n_comp, n_eta_mob, n_eta_immob, n_xi_mob, n_xi_immob; 
 
-	n_comp      = this->_ReductionKin->get_n_Comp();
-	n_eta_mob   = this->_ReductionKin->get_n_eta_mob(); 
-    n_eta_immob = this->_ReductionKin->get_n_eta_immob();
-	n_xi_mob    = this->_ReductionKin->get_n_xi_mob(); 
-	n_xi_immob    = this->_ReductionKin->get_n_xi_immob(); 
 	// only when the reduction scheme is fully initialized
 	if ( this->_ReductionKin->IsInitialized() )
 	{
@@ -438,11 +437,11 @@ void FunctionConcentrations<T1, T2>::convert_eta_xi_to_conc(void)
 		LocalVector loc_xi_immob;
 		LocalVector loc_conc; 
 		// allocate the memory for local vectors
-		loc_eta_mob     = LocalVector::Zero( this->_ReductionKin->get_n_eta_mob() ); 
-		loc_eta_immob   = LocalVector::Zero( this->_ReductionKin->get_n_eta() - this->_ReductionKin->get_n_eta_mob() ); 
-		loc_xi_mob      = LocalVector::Zero( this->_ReductionKin->get_n_xi_mob() ); 
-		loc_xi_immob    = LocalVector::Zero( this->_ReductionKin->get_n_xi_immob() ); 
-		loc_conc        = LocalVector::Zero( this->_ReductionKin->get_n_Comp() );
+		loc_eta_mob     = LocalVector::Zero( _n_eta_mob ); 
+		loc_eta_immob   = LocalVector::Zero( _n_eta_immob ); 
+		loc_xi_mob      = LocalVector::Zero( _n_xi_mob ); 
+		loc_xi_immob    = LocalVector::Zero( _n_xi_immob ); 
+		loc_conc        = LocalVector::Zero( _n_Comp );
 
 		// for each nodes, 
 		for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin(); 
@@ -451,25 +450,24 @@ void FunctionConcentrations<T1, T2>::convert_eta_xi_to_conc(void)
 		{
 			// put the local eta and xi into the global vector
 			// fill in eta_mob
-			for (i=0; i < n_eta_mob; i++)
+			for (i=0; i < _n_eta_mob; i++)
 				loc_eta_mob[i] = this->_eta_mob[i]->getValue(node_idx); 
 			// fill in eta_immob
-			for (i=0; i < n_eta_immob; i++)
+			for (i=0; i < _n_eta_immob; i++)
 				loc_eta_immob[i] = this->_eta_immob[i]->getValue(node_idx); 
 			// fill in xi
 			// this->_xi->setNodalValues( &loc_xi, node_idx*n_xi, n_xi ); 
-			for (i=0; i < n_xi_mob; i++)
+			for (i=0; i < _n_xi_mob; i++)
 				loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
-		    for (i=0; i < n_xi_immob; i++)
-				// loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
-                // using the xi_immob_new values
+		    for (i=0; i < _n_xi_immob; i++)
+				// using the xi_immob_new values
                 loc_xi_immob[i] = this->_xi_immob_new[i]->getValue(node_idx); 
 
 			// pass them to the transform function in the reductionKin class
 			// and thet the loc_eta_mob, local_eta_immob and local_xi
 			this->_ReductionKin->EtaXi2Conc(loc_eta_mob, loc_eta_immob, loc_xi_mob, loc_xi_immob, loc_conc);
 
-			for (i=0; i < n_comp; i++)
+			for (i=0; i < _n_Comp; i++)
 			{
 				// gether all the concentrations 
 				_concentrations[i]->setValue(node_idx, loc_conc[i]); 
@@ -538,13 +536,7 @@ template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::update_node_kin_reaction_rates(void)
 {
 	size_t node_idx, i; 
-	size_t n_comp, n_eta_mob, n_eta_immob, n_xi_mob, n_xi_immob; 
 
-	n_comp      = this->_ReductionKin->get_n_Comp();
-	n_eta_mob   = this->_ReductionKin->get_n_eta_mob(); 
-	n_eta_immob = this->_ReductionKin->get_n_eta() - this->_ReductionKin->get_n_eta_mob() ;
-	n_xi_mob    = this->_ReductionKin->get_n_xi_mob(); 
-	n_xi_immob    = this->_ReductionKin->get_n_xi_immob(); 
 	// only when the reduction scheme is fully initialized
 	if ( this->_ReductionKin->IsInitialized() )
 	{
@@ -558,13 +550,13 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_rates(void)
         LocalVector loc_xi_immob_rates; 
 
 		// allocate the memory for local vectors
-		loc_eta_mob        = LocalVector::Zero( n_eta_mob ); 
-		loc_eta_immob      = LocalVector::Zero( n_eta_immob ); 
-		loc_xi_mob         = LocalVector::Zero( n_xi_mob ); 
-		loc_xi_immob       = LocalVector::Zero( n_xi_immob ); 
-		loc_conc           = LocalVector::Zero( n_comp );
-        loc_xi_mob_rates   = LocalVector::Zero( n_xi_mob );
-        loc_xi_immob_rates = LocalVector::Zero( n_xi_immob );
+		loc_eta_mob        = LocalVector::Zero( _n_eta_mob ); 
+		loc_eta_immob      = LocalVector::Zero( _n_eta_immob ); 
+		loc_xi_mob         = LocalVector::Zero( _n_xi_mob ); 
+		loc_xi_immob       = LocalVector::Zero( _n_xi_immob ); 
+		loc_conc           = LocalVector::Zero( _n_Comp );
+        loc_xi_mob_rates   = LocalVector::Zero( _n_xi_mob );
+        loc_xi_immob_rates = LocalVector::Zero( _n_xi_immob );
 
 		// for each nodes, 
 		for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin(); 
@@ -575,16 +567,16 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_rates(void)
             {
                 // put the local eta and xi into the global vector
                 // fill in eta_mob
-                for (i=0; i < n_eta_mob; i++)
+                for (i=0; i < _n_eta_mob; i++)
                     loc_eta_mob[i] = this->_eta_mob[i]->getValue(node_idx); 
                 // fill in eta_immob
-                for (i=0; i < n_eta_immob; i++)
+                for (i=0; i < _n_eta_immob; i++)
                     loc_eta_immob[i] = this->_eta_immob[i]->getValue(node_idx); 
                 // fill in xi			
                 // this->_xi->setNodalValues( &loc_xi, node_idx*n_xi, n_xi ); 
-                for (i=0; i < n_xi_mob; i++)
+                for (i=0; i < _n_xi_mob; i++)
                     loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
-                for (i=0; i < n_xi_immob; i++)
+                for (i=0; i < _n_xi_immob; i++)
                     // loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); 
                     loc_xi_immob[i] = this->_xi_immob_new[i]->getValue(node_idx); // using new rates instead! // HS 26.11.2012
                 
@@ -597,19 +589,19 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_rates(void)
                                                    loc_xi_immob_rates );
                 
                 // write the rates into the global nodal vector
-                for (i=0; i < n_xi_mob; i++)
+                for (i=0; i < _n_xi_mob; i++)
                     this->_xi_mob_rates[i]->setValue( node_idx, loc_xi_mob_rates[i] ); 
                 
-                for (i=0; i < n_xi_immob; i++)
+                for (i=0; i < _n_xi_immob; i++)
                     this->_xi_immob_rates[i]->setValue( node_idx, loc_xi_immob_rates[i] );
             }  // end of if boundary node
             else
             {
                 // if is boundary node, then set rates to zero. 
-                for (i=0; i < n_xi_mob; i++)
+                for (i=0; i < _n_xi_mob; i++)
                     this->_xi_mob_rates[i]->setValue( node_idx, 0.0 ); 
                 
-                for (i=0; i < n_xi_immob; i++)
+                for (i=0; i < _n_xi_immob; i++)
                     this->_xi_immob_rates[i]->setValue( node_idx, 0.0 );
             }
 
@@ -631,7 +623,6 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
     double drates_dxi_tmp = 0.0;
 
     size_t node_idx, i, j;
-	size_t n_eta_mob, n_eta_immob, n_xi_mob, n_xi_immob; 
 
 	LocalVector loc_eta_mob;
 	LocalVector loc_eta_immob;
@@ -642,19 +633,14 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
     LocalVector loc_xi_mob_rates_new; 
     LocalVector loc_xi_immob_rates; 
 
-	n_eta_mob   = this->_ReductionKin->get_n_eta_mob(); 
-	n_eta_immob = this->_ReductionKin->get_n_eta_immob();
-	n_xi_mob    = this->_ReductionKin->get_n_xi_mob(); 
-	n_xi_immob    = this->_ReductionKin->get_n_xi_immob(); 
-
 	// initialize the local vector
-	loc_eta_mob           = LocalVector::Zero( n_eta_mob ); 
-	loc_eta_immob         = LocalVector::Zero( n_eta_immob ); 
-	loc_xi_mob            = LocalVector::Zero( n_xi_mob ); 
-	loc_xi_immob          = LocalVector::Zero( n_xi_immob );
-    loc_xi_mob_rates_base = LocalVector::Zero( n_xi_mob );
-    loc_xi_mob_rates_new  = LocalVector::Zero( n_xi_mob );
-    loc_xi_immob_rates    = LocalVector::Zero( n_xi_immob );
+	loc_eta_mob           = LocalVector::Zero( _n_eta_mob ); 
+	loc_eta_immob         = LocalVector::Zero( _n_eta_immob ); 
+	loc_xi_mob            = LocalVector::Zero( _n_xi_mob ); 
+	loc_xi_immob          = LocalVector::Zero( _n_xi_immob );
+    loc_xi_mob_rates_base = LocalVector::Zero( _n_xi_mob );
+    loc_xi_mob_rates_new  = LocalVector::Zero( _n_xi_mob );
+    loc_xi_immob_rates    = LocalVector::Zero( _n_xi_immob );
 
 	// loop over all nodes
 	for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin(); 
@@ -665,16 +651,15 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
         if ( ! this->_solution->isBCNode(node_idx) )
         {
             // read the local values
-            for (i=0; i < n_eta_mob; i++)			
+            for (i=0; i < _n_eta_mob; i++)			
                 loc_eta_mob[i] = this->_eta_mob[i]->getValue(node_idx); 
             // fill in eta_immob
-            for (i=0; i < n_eta_immob; i++)
+            for (i=0; i < _n_eta_immob; i++)
                 loc_eta_immob[i] = this->_eta_immob[i]->getValue(node_idx); 
-            for (i=0; i < n_xi_mob; i++)
+            for (i=0; i < _n_xi_mob; i++)
                 loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
-            for (i=0; i < n_xi_immob; i++)
+            for (i=0; i < _n_xi_immob; i++)
                 loc_xi_immob[i] = this->_xi_immob_new[i]->getValue(node_idx);  // HS, use the new immob values after ODE calculation
-                // loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx);
 
             // calculate rates; 
             this->_ReductionKin->Calc_Xi_Rate( loc_eta_mob, 
@@ -685,7 +670,7 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
                                                loc_xi_immob_rates );
             
             // loop over each xi_mob, 
-            for (j=0; j < n_xi_mob; j++)
+            for (j=0; j < _n_xi_mob; j++)
             {
                 // get a clean copy of the origiinal xi_mob
                 loc_xi_mob_tmp = loc_xi_mob; 
@@ -703,23 +688,23 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
                                                    loc_xi_mob_rates_new,
                                                    loc_xi_immob_rates );
                 // loop over all xi_mob
-                for (i=0; i < n_xi_mob; i++)
+                for (i=0; i < _n_xi_mob; i++)
                 {
                     // calculate derivative
                     if ( abs( loc_xi_mob(j) ) >= 1.0e-16 )  // loc_xi_mob(j) != 0.0
                         drates_dxi_tmp = ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) / epsilon /  abs( loc_xi_mob(j) );
                     else
                         drates_dxi_tmp = ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) /  epsilon ;
-                    _xi_mob_drates_dxi[i*n_xi_mob+j]->setValue( node_idx, drates_dxi_tmp ); 
+                    _xi_mob_drates_dxi[i*_n_xi_mob+j]->setValue( node_idx, drates_dxi_tmp ); 
                 }  // end of for i
             }  // end of for j
         }  // end of if boundary node
         else
         {
             // if boundary node, then set drates/dxi to zeros
-            for (i=0; i < n_xi_mob; i++)
-                for (j=0; j < n_xi_mob; j++)
-                    _xi_mob_drates_dxi[i*n_xi_mob+j]->setValue( node_idx, 0.0 ); 
+            for (i=0; i < _n_xi_mob; i++)
+                for (j=0; j < _n_xi_mob; j++)
+                    _xi_mob_drates_dxi[i*_n_xi_mob+j]->setValue( node_idx, 0.0 ); 
         }  // end of else
 	}  // end of for node_idx
 
@@ -731,7 +716,7 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
 template <class T1, class T2>
 void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 {
-	size_t i; 
+	size_t i, node_idx; 
 	
 	// initialize the local vector
 	MathLib::LocalVector loc_eta_mob; 
@@ -740,19 +725,12 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 	MathLib::LocalVector loc_xi_immob;
 	MathLib::LocalVector loc_xi_immob_new; 
 
-	// parameter initialization
-	size_t node_idx; 
-	size_t n_eta_mob   = this->_ReductionKin->get_n_eta_mob(); 
-	size_t n_eta_immob = this->_ReductionKin->get_n_eta_immob();
-	size_t n_xi_mob    = this->_ReductionKin->get_n_xi_mob(); 
-	size_t n_xi_immob  = this->_ReductionKin->get_n_xi_immob(); 
-
 	// initialize the local vector
-	loc_eta_mob        = LocalVector::Zero( n_eta_mob ); 
-	loc_eta_immob      = LocalVector::Zero( n_eta_immob ); 
-	loc_xi_mob         = LocalVector::Zero( n_xi_mob ); 
-	loc_xi_immob       = LocalVector::Zero( n_xi_immob );
-	loc_xi_immob_new   = LocalVector::Zero( n_xi_immob );
+	loc_eta_mob        = LocalVector::Zero( _n_eta_mob ); 
+	loc_eta_immob      = LocalVector::Zero( _n_eta_immob ); 
+	loc_xi_mob         = LocalVector::Zero( _n_xi_mob ); 
+	loc_xi_immob       = LocalVector::Zero( _n_xi_immob );
+	loc_xi_immob_new   = LocalVector::Zero( _n_xi_immob );
 
 	// signal, solving local ODEs of xi_immob
 	INFO("--Solving local ODE problem of xi_immob...");
@@ -770,14 +748,14 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 		{
 			// on each node, get the right start value
 			// get the right set of eta and xi
-			for (i=0; i < n_eta_mob; i++)
+			for (i=0; i < _n_eta_mob; i++)
 				loc_eta_mob[i] = this->_eta_mob[i]->getValue(node_idx); 
 			// fill in eta_immob
-			for (i=0; i < n_eta_immob; i++)
+			for (i=0; i < _n_eta_immob; i++)
 				loc_eta_immob[i] = this->_eta_immob[i]->getValue(node_idx); 
-			for (i=0; i < n_xi_mob; i++)
+			for (i=0; i < _n_xi_mob; i++)
 				loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx); 
-			for (i=0; i < n_xi_immob; i++)
+			for (i=0; i < _n_xi_immob; i++)
 				loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); // HS, here are always the old xi_immob values. 
 		
 			// get the right reference values to ODE RHS function
@@ -787,13 +765,13 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 			rk4->solve( *_local_ode_xi_immob, 0.0, dt, loc_xi_immob, loc_xi_immob_new); 
 		
 			// collect the xi_immob_new
-			for (i=0; i < n_xi_immob; i++)
+			for (i=0; i < _n_xi_immob; i++)
 				_xi_immob_new[i]->setValue(node_idx, loc_xi_immob_new[i]); 
 		} // end of if
         else 
         {
             // if it is boundary nodes, then xi_immob_new is equal to xi_immob. 
-            for (i=0; i < n_xi_immob; i++)
+            for (i=0; i < _n_xi_immob; i++)
 				_xi_immob_new[i]->setValue(node_idx, _xi_immob[i]->getValue( node_idx ) ); 
         }
 

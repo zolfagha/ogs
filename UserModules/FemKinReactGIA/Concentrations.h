@@ -407,6 +407,16 @@ private:
       * the id of the msh applied in this process
       */ 
     size_t _msh_id; 
+
+    /**
+      * the size of eta_mob, eta_immob, xi_mob and xi_immob vector
+      */
+    size_t _n_eta_mob, _n_eta_immob, _n_xi_mob, _n_xi_immob; 
+
+    /**
+      * number of components
+      */
+    size_t _n_Comp; 
 }; 
 
 #include "Concentrations.hpp"
