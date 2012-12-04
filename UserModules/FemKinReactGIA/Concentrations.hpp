@@ -761,6 +761,7 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 	MathLib::RungeKutta4<Local_ODE_Xi_immob, MathLib::LocalVector>* rk4 = new MathLib::RungeKutta4<Local_ODE_Xi_immob, MathLib::LocalVector>(); 
 
 	// loop over all the nodes
+    for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin();
 	     node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd(); 
 		 node_idx++ )
 	{
