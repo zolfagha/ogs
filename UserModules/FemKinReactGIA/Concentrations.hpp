@@ -690,7 +690,7 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
                 // get a clean copy of the origiinal xi_mob
                 loc_xi_mob_tmp = loc_xi_mob; 
                 // give an increment to the xi value
-                if ( loc_xi_mob(j) != 0.0 )
+                if ( abs( loc_xi_mob(j) ) >= 1.0e-16 )  // loc_xi_mob(j) != 0.0
                     loc_xi_mob_tmp(j) += epsilon * abs( loc_xi_mob(j) );  
                 else
                     loc_xi_mob_tmp(j) += epsilon; 
@@ -706,7 +706,7 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
                 for (i=0; i < n_xi_mob; i++)
                 {
                     // calculate derivative
-                    if ( loc_xi_mob(j) != 0.0 )
+                    if ( abs( loc_xi_mob(j) ) >= 1.0e-16 )  // loc_xi_mob(j) != 0.0
                         drates_dxi_tmp = ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) / epsilon /  abs( loc_xi_mob(j) );
                     else
                         drates_dxi_tmp = ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) /  epsilon ;
@@ -761,7 +761,6 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 	MathLib::RungeKutta4<Local_ODE_Xi_immob, MathLib::LocalVector>* rk4 = new MathLib::RungeKutta4<Local_ODE_Xi_immob, MathLib::LocalVector>(); 
 
 	// loop over all the nodes
-	for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin(); 
 	     node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd(); 
 		 node_idx++ )
 	{
