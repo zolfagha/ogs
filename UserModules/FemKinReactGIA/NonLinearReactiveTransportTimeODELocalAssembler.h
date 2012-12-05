@@ -147,9 +147,9 @@ protected:
 		for (k=0; k<n_xi_mob; k++)
         {
             // localM
-            localM.block(n_nodes*k,n_nodes*k,n_nodes,n_nodes) = localM_tmp; 
+            localM.block(n_nodes*k,n_nodes*k,n_nodes,n_nodes) = localM_tmp.block(0, 0, n_nodes, n_nodes);
             // localK
-            localK.block(n_nodes*k,n_nodes*k,n_nodes,n_nodes) = localK_tmp; 
+            localK.block(n_nodes*k,n_nodes*k,n_nodes,n_nodes) = localK_tmp.block(0, 0, n_nodes, n_nodes);
         }  // end of for k
 
     }
