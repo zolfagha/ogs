@@ -154,13 +154,26 @@ public:
             : _assemblerR(assemblerR), _assemblerJ(assemblerJ) {};
 
     /**
-     * do pre-post processing
+     * do pre processing
      *
      * \param dx        solution increment
      * \param x_new     new solution
      */
     template<class T_X, class F_RESIDUALS, class F_DX>
-    void doit(const T_X &/*dx*/, const T_X &/*x_new*/, F_RESIDUALS &/*f_residuals*/, F_DX &/*f_dx*/)
+    void pre_process(const T_X &/*dx*/, const T_X &/*x_new*/, F_RESIDUALS &/*f_residuals*/, F_DX &/*f_dx*/)
+    {
+        _assemblerJ->setTest(1.0);
+    }
+
+    /**
+     * do post processing
+     * @param
+     * @param
+     * @param
+     * @param
+     */
+    template<class T_X, class F_RESIDUALS, class F_DX>
+    void post_process(const T_X &/*dx*/, const T_X &/*x_new*/, F_RESIDUALS &/*f_residuals*/, F_DX &/*f_dx*/)
     {
         _assemblerJ->setTest(1.0);
     }
