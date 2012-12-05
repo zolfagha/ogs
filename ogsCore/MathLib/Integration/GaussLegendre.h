@@ -10,8 +10,7 @@
  * Created on 2012-06-25 by Norihiro Watanabe
  */
 
-#ifndef MATHLIB_GAUSSLEGENDRE_H
-#define MATHLIB_GAUSSLEGENDRE_H
+#pragma once
 
 #include <vector>
 #include <cstddef>
@@ -59,4 +58,3 @@ public:
 
 }
 
-#endif

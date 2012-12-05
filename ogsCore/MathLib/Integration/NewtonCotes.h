@@ -10,8 +10,7 @@
  * Created on 2012-06-25 by Norihiro Watanabe
  */
 
-#ifndef MATHLIB_NEWTONCOTES_H
-#define MATHLIB_NEWTONCOTES_H
+#pragma once
 
 #include <cstddef>
 
@@ -36,4 +35,3 @@ class NewtonCotes
 
 }
 
-#endif  // MATHLIB_NEWTONCOTES_H
