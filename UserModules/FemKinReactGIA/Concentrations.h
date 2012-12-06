@@ -150,27 +150,32 @@ public:
 		BaseLib::releaseObject(myNRIterator);
         BaseLib::releaseObject(myNSolverFactory);
         
-        BaseLib::releaseObject(_non_linear_solution);
-
-        BaseLib::releaseObject(_solution); 
         BaseLib::releaseObject(_problem); 
-		BaseLib::releaseObject(_feObjects);
+        BaseLib::releaseObject(_solution); 
+		
         BaseLib::releaseObject(_ReductionKin);
 		BaseLib::releaseObject(_local_ode_xi_immob); 
-		
-        BaseLib::releaseObjectsInStdVector(_concentrations);
+
+        BaseLib::releaseObject(_non_linear_eqs);
+        BaseLib::releaseObject(_non_linear_problem); 
+		BaseLib::releaseObject(_non_linear_solution);
+        
         BaseLib::releaseObjectsInStdVector(_linear_problems); 
         BaseLib::releaseObjectsInStdVector(_linear_solutions); 
-        BaseLib::releaseObjectsInStdVector(_eta_mob); 
+        
+        BaseLib::releaseObjectsInStdVector(_concentrations);
+		BaseLib::releaseObjectsInStdVector(_eta_mob); 
         BaseLib::releaseObjectsInStdVector(_eta_immob);
-
-		BaseLib::releaseObjectsInStdVector(_xi_mob); 
+        BaseLib::releaseObjectsInStdVector(_xi_mob); 
         BaseLib::releaseObjectsInStdVector(_xi_mob_rates);
         BaseLib::releaseObjectsInStdVector(_xi_mob_drates_dxi); 
 		BaseLib::releaseObjectsInStdVector(_xi_immob); 
 		BaseLib::releaseObjectsInStdVector(_xi_immob_new); 
         BaseLib::releaseObjectsInStdVector(_xi_immob_rates); 
-		
+
+        BaseLib::releaseObject(_nl_sol_dofManager);
+        BaseLib::releaseObject(_feObjects);
+
     };
 
     /**

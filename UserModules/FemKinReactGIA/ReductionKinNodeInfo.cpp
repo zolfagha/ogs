@@ -31,7 +31,7 @@ ReductionKinNodeInfo::ReductionKinNodeInfo(size_t node_id,
 
 ReductionKinNodeInfo::~ReductionKinNodeInfo()
 {
-
+    _ReductionKin = NULL;
 }
 
 void ReductionKinNodeInfo::set_comp_conc( size_t comp_idx, double val )

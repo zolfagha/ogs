@@ -47,10 +47,7 @@ public:
     template<class T_X, class F_RESIDUALS, class F_DX>
     void post_process(const T_X &/*dx*/, const T_X & x_new, F_RESIDUALS &/*f_residuals*/, F_DX &/*f_dx*/)
     {
-		// update the xi_mob values using x_new
-        // _assemblerJ->get_function_data()->update_xi_mob_nodal_values(x_new); 
 
-        // _assemblerJ->get_function_data()->update_node_kin_reaction_rates(); 
     };
 
 private:

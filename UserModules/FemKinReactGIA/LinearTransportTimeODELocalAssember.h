@@ -42,6 +42,9 @@ public:
     LinearTransportTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
         : _feObjects(*feObjects), _vel(NULL)
     {
+        poro                 = MathLib::LocalMatrix::Zero(1,1); 
+        d_poro               = MathLib::LocalMatrix::Zero(3,3);
+        dispersion_diffusion = MathLib::LocalMatrix::Identity(3,3);
     };
 
     /**
@@ -49,6 +52,10 @@ public:
       */ 
     virtual ~LinearTransportTimeODELocalAssembler() 
     {
+        _vel       = NULL;
+        _fe        = NULL; 
+        _pm        = NULL;
+        _q         = NULL;
     };
 
     /**
@@ -66,43 +73,43 @@ protected:
       */ 
     virtual void assembleODE(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const LocalVectorType &/*u1*/, const LocalVectorType &/*u0*/, LocalMatrixType &localM, LocalMatrixType &localK, LocalVectorType &/*localF*/)
     {
-        FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
+        _fe = _feObjects.getFeObject(e);
         const size_t n_dim = e.getDimension();
         size_t mat_id = e.getGroupID();
-        MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];
+        _pm = Ogs6FemData::getInstance()->list_pm[mat_id];
 
-        LocalMatrixType localDispersion(localK);
-        LocalMatrixType localAdvection(localK);
+        localDispersion.setZero(localK.rows(), localK.cols());
+        localAdvection.setZero (localK.rows(), localK.cols());
+
         double cmp_mol_diffusion = .0;
         // _cmp->molecular_diffusion->eval(0, cmp_mol_diffusion);
 
-        FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
+        _q = _fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
-        MathLib::LocalMatrix poro(1,1);
-        MathLib::LocalMatrix d_poro = MathLib::LocalMatrix::Zero(3,3);   // HS, change size to 1 by 3
+        poro.setZero(); 
+        d_poro.setZero();
         double disp_l = 0.0; 
         double disp_t = 0.0; 
-        NumLib::ITXFunction::DataType v;
-
-        for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
-            q->getSamplingPoint(j, gp_x);
-            fe->computeBasisFunctions(gp_x);
-            fe->getRealCoordinates(real_x);
+        
+        for (size_t j=0; j < _q->getNumberOfSamplingPoints(); j++) {
+            _q->getSamplingPoint(j, gp_x);
+            _fe->computeBasisFunctions(gp_x);
+            _fe->getRealCoordinates(real_x);
             NumLib::TXPosition gp_pos(NumLib::TXPosition::IntegrationPoint, e.getID(), j, real_x);
 
-            pm->porosity->eval(gp_pos, poro);
-            pm->dispersivity_long->eval(gp_pos, disp_l); 
-            pm->dispersivity_trans->eval(gp_pos, disp_t);
+            _pm->porosity->eval(gp_pos, poro);
+            _pm->dispersivity_long->eval(gp_pos, disp_l); 
+            _pm->dispersivity_trans->eval(gp_pos, disp_t);
 
             d_poro(0,0) = cmp_mol_diffusion * poro(0,0);
             d_poro(1,1) = cmp_mol_diffusion * poro(0,0);
             d_poro(2,2) = cmp_mol_diffusion * poro(0,0);
             _vel->eval(gp_pos, v);
-            NumLib::ITXFunction::DataType v2 = v.topRows(n_dim).transpose();
+            v2 = v.topRows(n_dim).transpose();
 
             // calculating dispersion tensor according to Benchmark book p219, Eq. 10.15
             // D_{ij} = \alpha_T |v| \delta_{ij} + (\alpha_L - \alpha_T) \frac{v_i v_j}{|v|} + D^{d}_{ii} 
-            NumLib::ITXFunction::DataType dispersion_diffusion = NumLib::ITXFunction::DataType::Identity(n_dim, n_dim); 
+            dispersion_diffusion.setIdentity(n_dim, n_dim); 
             dispersion_diffusion *= disp_l * v.norm(); 
             dispersion_diffusion += (disp_l - disp_t) * ( v2.transpose() * v2 ) / v.norm(); 
             dispersion_diffusion += d_poro.topLeftCorner(n_dim, n_dim);
@@ -111,9 +118,9 @@ protected:
             // std::cout << dispersion_diffusion << std::endl;
             // --------end of debugging-------
 
-            fe->integrateWxN(j, poro, localM);
-            fe->integrateDWxDN(j, dispersion_diffusion, localDispersion); 
-            fe->integrateWxDN(j, v2, localAdvection);
+            _fe->integrateWxN(j, poro, localM);
+            _fe->integrateDWxDN(j, dispersion_diffusion, localDispersion); 
+            _fe->integrateWxDN(j, v2, localAdvection);
         }
 
         localK = localDispersion + localAdvection;
@@ -129,6 +136,56 @@ private:
       * velocity function
       */ 
     NumLib::ITXFunction* _vel;
+
+    /**
+      * pointer to finite element class
+      */
+    FemLib::IFiniteElement* _fe; 
+
+    /**
+      * pointer to porous media class
+      */
+    MaterialLib::PorousMedia* _pm;
+
+    /**
+      * pointer to integrater
+      */
+    FemLib::IFemNumericalIntegration * _q;
+
+    /**
+      * to store porosity value
+      */
+    MathLib::LocalMatrix poro;
+
+    /**
+      * to store porosity value
+      */
+    MathLib::LocalMatrix d_poro;
+
+    /**
+      * velocity values
+      */
+    MathLib::LocalMatrix v;
+
+    /**
+      * velocity values
+      */
+    MathLib::LocalMatrix v2;
+
+    /**
+      * dispersion diffusion values
+      */
+    MathLib::LocalMatrix dispersion_diffusion;
+
+    /**
+      * local dispersion matrix
+      */
+    MathLib::LocalMatrix localDispersion;
+
+     /**
+      * local advection matrix
+      */
+    MathLib::LocalMatrix localAdvection;
 };
 
 

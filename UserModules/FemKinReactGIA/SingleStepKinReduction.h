@@ -96,20 +96,21 @@ public:
       */ 
     virtual ~SingleStepKinReduction()
     {
-        // size_t i; 
+        BaseLib::releaseObject(_problem); 
+        
+        BaseLib::releaseObjectsInStdVector( _vec_u_n1 ); 
         _discrete_system->deleteVector(_x_n0);
         _discrete_system->deleteVector(_x_n1);
         _discrete_system->deleteVector(_x_n1_0);
         _discrete_system->deleteVector(_x_st);
+        BaseLib::releaseObject(_discrete_system);
 
         BaseLib::releaseObject(_feObjects);
+        BaseLib::releaseObjectsInStdVector( _linear_problem );
+        BaseLib::releaseObjectsInStdVector( _lin_solutions );
         BaseLib::releaseObject(_non_linear_problem);
         BaseLib::releaseObject(_nlin_solution);
         BaseLib::releaseObject(_function_data);
-
-        BaseLib::releaseObjectsInStdVector( _linear_problem );
-        BaseLib::releaseObjectsInStdVector( _lin_solutions );
-        BaseLib::releaseObjectsInStdVector( _vec_u_n1 ); 
 
         BaseLib::releaseObjectsInStdMap( _bc_info ); 
     }

@@ -23,6 +23,7 @@
 #include "Ogs6FemData.h"
 #include "NestedOdeNRIterationStepInitializer.h"
 #include "MathLib/ODE/RungeKutta4.h"
+#include "StepperBulischStoer.h"
 
 template <class T1, class T2>
 bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
@@ -718,11 +719,14 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 {
 	size_t i, node_idx; 
 	
+    double t0 = 0.0;
+
 	// initialize the local vector
 	MathLib::LocalVector loc_eta_mob; 
 	MathLib::LocalVector loc_eta_immob; 
 	MathLib::LocalVector loc_xi_mob; 
 	MathLib::LocalVector loc_xi_immob;
+    MathLib::LocalVector loc_xi_immob_rate; 
 	MathLib::LocalVector loc_xi_immob_new; 
 
 	// initialize the local vector
@@ -730,13 +734,24 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 	loc_eta_immob      = LocalVector::Zero( _n_eta_immob ); 
 	loc_xi_mob         = LocalVector::Zero( _n_xi_mob ); 
 	loc_xi_immob       = LocalVector::Zero( _n_xi_immob );
+    loc_xi_immob_rate  = LocalVector::Zero( _n_xi_immob ); 
 	loc_xi_immob_new   = LocalVector::Zero( _n_xi_immob );
 
 	// signal, solving local ODEs of xi_immob
 	INFO("--Solving local ODE problem of xi_immob...");
 
 	// initialize the ODE Runge-Kutta solution class
-	MathLib::RungeKutta4<Local_ODE_Xi_immob, MathLib::LocalVector>* rk4 = new MathLib::RungeKutta4<Local_ODE_Xi_immob, MathLib::LocalVector>(); 
+	// MathLib::RungeKutta4<Local_ODE_Xi_immob, MathLib::LocalVector>* rk4 = new MathLib::RungeKutta4<Local_ODE_Xi_immob, MathLib::LocalVector>(); 
+    // or using the StepperBulischStoer class
+    MathLib::StepperBulischStoer<Local_ODE_Xi_immob>* sbs 
+        = new MathLib::StepperBulischStoer<Local_ODE_Xi_immob>(loc_xi_immob,
+                                                               loc_xi_immob_rate, 
+                                                               t0,
+                                                               1.0e-6, 
+                                                               1.0e-6, 
+                                                               true); 
+
+
 
 	// loop over all the nodes
     for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin();
@@ -760,9 +775,14 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 		
 			// get the right reference values to ODE RHS function
 			this->_local_ode_xi_immob->update_eta_xi( loc_eta_mob, loc_eta_immob, loc_xi_mob, loc_xi_immob); 
+            loc_xi_immob_rate = (*_local_ode_xi_immob)(dt, loc_xi_immob);
+            sbs->set_y(loc_xi_immob); 
+            sbs->set_dydx(loc_xi_immob_rate); 
 
 			// solve the local ODE problem using RK
-			rk4->solve( *_local_ode_xi_immob, 0.0, dt, loc_xi_immob, loc_xi_immob_new); 
+			// rk4->solve( *_local_ode_xi_immob, 0.0, dt, loc_xi_immob, loc_xi_immob_new); 
+            sbs->step( dt, _local_ode_xi_immob ); 
+            loc_xi_immob_new = sbs->get_y(); 
 		
 			// collect the xi_immob_new
 			for (i=0; i < _n_xi_immob; i++)
@@ -777,5 +797,6 @@ void FunctionConcentrations<T1, T2>::calc_nodal_xi_immob_ode(double dt)
 
 	}  // end of for node_idx
 
-    delete rk4; 
+    // delete rk4; 
+    delete sbs; 
 }
