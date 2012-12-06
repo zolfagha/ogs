@@ -241,6 +241,7 @@ int SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY>::solve
         MyVariable* var = _problem->getVariable(i_var);
         for (size_t i=0; i<var->getNumberOfNeumannBC(); i++) {
             SolutionLib::IFemNeumannBC *bc2 = var->getNeumannBC(i);
+            bc2->initCurrentTime(this_t_n1.getTime());
             bc2->setup(var->getCurrentOrder());
             std::vector<size_t> &list_bc_nodes = bc2->getListOfBCNodes();
             std::vector<double> &list_bc_values = bc2->getListOfBCValues();

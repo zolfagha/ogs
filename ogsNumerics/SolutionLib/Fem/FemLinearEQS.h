@@ -122,7 +122,9 @@ void TemplateTransientLinearFEMFunction<T1, T2, T3>::eval(const SolutionVector &
         }
         _linear_eqs->setPrescribedDoF(i, var_bc_id, var_bc_val);
         for (size_t j=0; j<var->getNumberOfNeumannBC(); j++) {
-            var->getNeumannBC(j)->setup(var->getCurrentOrder());
+            IFemNeumannBC* st = var->getNeumannBC(j);
+            st->initCurrentTime(t_n1.getTime());
+            st->setup(var->getCurrentOrder());
         }
     }
 
