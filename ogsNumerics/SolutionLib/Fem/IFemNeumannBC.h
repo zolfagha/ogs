@@ -32,11 +32,20 @@ public:
     /// \param order Polynomial order
     virtual void setup(size_t order) = 0;
 
+    /**
+     * set current time
+     * @param t
+     */
+    virtual void initCurrentTime(double t) = 0;
+
     /// get a list of boundary condition nodes
     virtual std::vector<size_t>& getListOfBCNodes() = 0;
 
     /// get a list of boundary condition values
     virtual std::vector<double>& getListOfBCValues() = 0;
+
+protected:
+    IFemNeumannBC() {};
 };
 
 }

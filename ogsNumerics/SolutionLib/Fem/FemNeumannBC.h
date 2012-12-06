@@ -39,12 +39,27 @@ public:
     ///
     FemNeumannBC(const std::vector<size_t> &vec_node_id, const std::vector<double> &vec_node_values);
 
+    /**
+     * Copy constructor
+     * @param src
+     */
+    FemNeumannBC(const FemNeumannBC &src);
+
+    ///
+    virtual ~FemNeumannBC();
+
     /// clone this object
-    FemNeumannBC* clone() const;
+    virtual FemNeumannBC* clone() const;
 
     /// setup B.C.
     /// \param order Polynomial order
     virtual void setup(size_t order);
+
+    /**
+     * set current time
+     * @param t
+     */
+    virtual void initCurrentTime(double t);
 
     /// get a list of boundary condition nodes
     virtual std::vector<size_t>& getListOfBCNodes() {return _vec_nodes;};
@@ -59,6 +74,7 @@ private:
     NumLib::ITXFunction *_bc_func;
     std::vector<size_t> _vec_nodes;
     std::vector<double> _vec_values;
+    double _t;
     bool _is_transient;
     bool _do_setup;
 
