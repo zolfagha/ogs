@@ -340,7 +340,7 @@ private:
 	/**
       * FEM object
       */
-    FemLib::LagrangianFeObjectContainer* _feObjects; 
+    FemLib::LagrangeFeObjectContainer* _feObjects;
     
 	/**
       * convergence checker

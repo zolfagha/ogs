@@ -38,7 +38,7 @@ public:
     typedef MathLib::LocalVector LocalVectorType;
     typedef MathLib::LocalMatrix LocalMatrixType;
 
-    NonLinearReactiveTransportTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects, ogsChem::chemReductionKin* ReductionScheme)
+    NonLinearReactiveTransportTimeODELocalAssembler(FemLib::LagrangeFeObjectContainer* feObjects, ogsChem::chemReductionKin* ReductionScheme)
         : _feObjects(*feObjects), _vel(NULL), _reductionKin(ReductionScheme), _xi_mob_rates(NULL), _xi_immob_rates(NULL)
     {
     };
@@ -155,7 +155,7 @@ protected:
     }
 
 private:
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::LagrangeFeObjectContainer _feObjects;
     NumLib::ITXFunction* _vel;
 	ogsChem::chemReductionKin* _reductionKin; 
 

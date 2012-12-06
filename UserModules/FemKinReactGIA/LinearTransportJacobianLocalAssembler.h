@@ -33,7 +33,7 @@
 class LinearTransportJacobianLocalAssembler: public NumLib::IElementWiseTransientJacobianLocalAssembler
 {
 public:
-    LinearTransportJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
+    LinearTransportJacobianLocalAssembler(FemLib::LagrangeFeObjectContainer* feObjects)
         : _feObjects(*feObjects), _vel(NULL)
     {
     };
@@ -113,7 +113,7 @@ private:
     /**
       * FEM object
       */ 
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::LagrangeFeObjectContainer _feObjects;
 
     /**
       * velocity function

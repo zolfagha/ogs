@@ -23,6 +23,7 @@
 #include "DiscreteLib/Core/IDiscreteLinearEquation.h"
 #include "DiscreteLib/Utils/SparsityBuilderFromNodeConnectivity.h"
 #include "FemLib/Function/FemFunction.h"
+#include "FemLib/Tools/LagrangeFeObjectContainer.h"
 #include "NumLib/Nonlinear/TemplateDiscreteNonlinearSolver.h"
 
 #include "SolutionLib/DataType.h"
@@ -182,7 +183,7 @@ private:
     /**
       * pointer to FEM object
       */ 
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangeFeObjectContainer* _feObjects;
     
     /**
       * pointer to linear problems
@@ -253,7 +254,7 @@ SingleStepKinReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
     const size_t n_total_dofs = _dofManager.getTotalNumberOfActiveDoFs();
     INFO("* Total number of DoFs = %d", n_total_dofs);
 
-    _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
+    _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
 
     // set up initial condition
     _vec_u_n1.resize(n_var, 0);
