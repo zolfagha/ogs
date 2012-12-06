@@ -39,6 +39,7 @@ bool Ogs5FemIO::read(const std::string &proj_path, Ogs5FemData &ogs5data)
 	KRRead( proj_path, ogs5data.KinReact_vector, 
 		               ogs5data.KinReactData_vector, 
 					   ogs5data.KinBlob_vector); 
+	CURRead(proj_path, ogs5data.kurven_vector);
 
     // set primary variable name
     size_t mass_transport_count = 0;

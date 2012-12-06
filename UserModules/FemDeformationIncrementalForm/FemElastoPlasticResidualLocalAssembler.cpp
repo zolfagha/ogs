@@ -54,9 +54,9 @@ void FemElastoPlasticResidualLocalAssembler::assembly(
     // compute at each integration point
     //---------------------------------------------------------------
     MathLib::LocalVector localInternalForce = MathLib::LocalVector::Zero(local_r.rows());
-    MathLib::LocalMatrix matB = MathLib::LocalVector::Zero(n_strain_components,
+    MathLib::LocalMatrix matB = MathLib::LocalMatrix::Zero(n_strain_components,
             nnodes * dim);
-    MathLib::LocalMatrix matN = MathLib::LocalVector::Zero(dim, nnodes * dim);
+    MathLib::LocalMatrix matN = MathLib::LocalMatrix::Zero(dim, nnodes * dim);
     FemLib::IFemNumericalIntegration *q = fe->getIntegrationMethod();
     double gp_x[3], real_x[3];
     for (size_t j = 0; j < q->getNumberOfSamplingPoints(); j++) {

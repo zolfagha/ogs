@@ -43,7 +43,7 @@ public:
     virtual ~ITXFunction() {};
 
     /// evaluate this function at the given position and return vector data
-
+    ///
     /// \param x  position in space and time
     /// \param v  evaluated vector
     virtual void eval(const TXPosition /*x*/, DataType &/*v*/) const {};

@@ -36,6 +36,15 @@ public:
     }
 
     /**
+     * Copy constructor
+     * @param src
+     */
+    FemElastoPlasticLinearLocalAssembler(const FemElastoPlasticLinearLocalAssembler &src)
+    : _feObjects(src._feObjects->clone())
+    {
+    }
+
+    /**
      *
      */
     virtual ~FemElastoPlasticLinearLocalAssembler()
@@ -56,7 +65,7 @@ public:
             const MeshLib::IElement &e,
             const DiscreteLib::DofEquationIdTable &localDofManager,
             const MathLib::LocalVector &local_u_n1,
-            const MathLib::LocalVector &local_u_n, MathLib::LocalEquation &eqs);
+            const MathLib::LocalVector &local_u_n, MathLib::LocalEquation &eqs) OGS_DECL_OVERRIDE;
 
 private:
     FemLib::IFeObjectContainer* _feObjects;

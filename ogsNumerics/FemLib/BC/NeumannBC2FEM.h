@@ -29,7 +29,7 @@ class NeumannBC2FEM
 {
 public:
     /// 
-    NeumannBC2FEM(const MeshLib::IMesh &msh, IFeObjectContainer &feObjects, const GeoLib::GeoObject &_geo, const NumLib::ITXFunction &_bc_func, std::vector<size_t> &_vec_nodes, std::vector<double> &_vec_values);
+    NeumannBC2FEM(const MeshLib::IMesh &msh, const double &current_time, IFeObjectContainer &feObjects, const GeoLib::GeoObject &_geo, const NumLib::ITXFunction &_bc_func, std::vector<size_t> &_vec_nodes, std::vector<double> &_vec_values);
 };
 
 

@@ -5,19 +5,29 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file TXFunction.h
+ * \file Multiplication.h
  *
  * Created on 2012-08-03 by Norihiro Watanabe
  */
 
 #pragma once
 
-#include "ITXFunction.h"
-#include "TXFunctionConstant.h"
-#include "TXFunctionGeoSpace.h"
-#include "TXFunctionAnalytical.h"
-#include "TXCompositFunction.h"
-#include "TXVectorFunctionAsColumnData.h"
-#include "TXFunctionTimeCurve.h"
-#include "TXFunctionType.h"
-#include "Multiplication.h"
+namespace NumLib
+{
+
+/**
+ *
+ */
+template <typename Tval>
+class Multiplication
+{
+public:
+    void doit(const Tval &v1, const Tval &v2, Tval &val)
+    {
+        val = v1 * v2;
+    }
+};
+
+} //end
+
+

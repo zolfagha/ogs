@@ -33,7 +33,7 @@ bool FunctionLiquidPressure<T1,T2>::initialize(const BaseLib::Options &option)
     MeshLib::IMesh* msh = femData->list_mesh[msh_id];
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
-    _feObjects = new FemLib::LagrangeFeObjectContainer(*msh);
+    _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
 
     // local assemblers
     MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(*_feObjects, msh->getGeometricProperty()->getCoordinateSystem());
@@ -58,7 +58,7 @@ bool FunctionLiquidPressure<T1,T2>::initialize(const BaseLib::Options &option)
     _solution->getNonlinearSolver()->setOption(*optNum);
 
     // set initial output
-    OutputVariableInfo var(this->getOutputParameterName(Pressure), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
+    OutputVariableInfo var(this->getOutputParameterName(Pressure), _problem->getDiscreteSystem()->getMesh()->getID(), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput(var.name, var);
 
     // initial output parameter
@@ -78,6 +78,6 @@ void FunctionLiquidPressure<T1,T2>::output(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    OutputVariableInfo var(this->getOutputParameterName(Pressure), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
+    OutputVariableInfo var(this->getOutputParameterName(Pressure), _problem->getDiscreteSystem()->getMesh()->getID(), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput(var.name, var);
 };

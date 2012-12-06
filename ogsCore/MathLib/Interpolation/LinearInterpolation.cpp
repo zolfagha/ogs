@@ -15,16 +15,25 @@
 #include "BaseLib/swap.h"
 
 #include <iostream>
+#include <cassert>
 
 namespace MathLib {
 
-LinearInterpolation::LinearInterpolation(const std::vector<double>& supporting_points, const std::vector<double>& values_at_supp_pnts)
-    : _supporting_points (supporting_points), _values_at_supp_pnts (values_at_supp_pnts)
+LinearInterpolation::LinearInterpolation(const LinearInterpolation &src)
+    : _supporting_points (src._supporting_points), _values_at_supp_pnts (src._values_at_supp_pnts)
 {}
+
+LinearInterpolation::LinearInterpolation(const std::vector<double>& supporting_points, const std::vector<double>& values_at_supp_pnts)
+    : _supporting_points(supporting_points), _values_at_supp_pnts(values_at_supp_pnts)
+{
+    assert (_supporting_points.size() > 1 && _supporting_points.size() == _values_at_supp_pnts.size());
+}
 
 LinearInterpolation::LinearInterpolation(const std::vector<double>& supporting_points, const std::vector<double>& values_at_supp_pnts, const std::vector<double>& points_to_interpolate, std::vector<double>& values_at_interpol_pnts)
     : _supporting_points (supporting_points), _values_at_supp_pnts (values_at_supp_pnts)
 {
+    assert (supporting_points.size() > 1 && supporting_points.size() == values_at_supp_pnts.size());
+
 //    std::cout << "LinearInterpolation::LinearInterpolation support_points, values_at_supp_pnts: " << std::endl;
 //    for (size_t k(0); k<supporting_points.size(); k++) {
 //        std::cout << supporting_points[k] << " " << values_at_supp_pnts[k] << std::endl;
