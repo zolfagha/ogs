@@ -82,7 +82,7 @@ public:
         NumLib::TXFunctionConstant f_bc1(.0);
         FemLib::DirichletBC2FEM bc1(*msh, poly_right, f_bc1, vec_bc1_nodes, vec_bc1_vals);
         NumLib::TXFunctionConstant f_bc2(-1e-5);
-        FemLib::NeumannBC2FEM bc2(*msh, *_feObjects, poly_left, f_bc2, vec_bc2_nodes, vec_bc2_vals);
+        FemLib::NeumannBC2FEM bc2(*msh, 0, *_feObjects, poly_left, f_bc2, vec_bc2_nodes, vec_bc2_vals);
         // mat
         _K = (K!=0) ? K : new NumLib::TXFunctionConstant(1.e-11);
     }
