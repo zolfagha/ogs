@@ -19,29 +19,41 @@
 namespace SolutionLib
 {
 
-FemNeumannBC::FemNeumannBC(const MeshLib::IMesh *msh, FemLib::LagrangianFeObjectContainer* feObjects, const GeoLib::GeoObject *geo, NumLib::ITXFunction *func)
-: _msh(msh), _feObjects(feObjects), _geo(geo), _bc_func(func->clone())
+FemNeumannBC::FemNeumannBC(const MeshLib::IMesh *msh, FemLib::IFeObjectContainer* feObjects, const GeoLib::GeoObject *geo, NumLib::ITXFunction *func)
+: _msh(msh), _feObjects(feObjects), _geo(geo), _bc_func(func->clone()), _t(.0)
 {
-    _is_transient = false;
+    _is_transient = _bc_func->isTemporallyConst();
     _do_setup = true;
 }
 
 FemNeumannBC::FemNeumannBC(const std::vector<size_t> &vec_node_id, const std::vector<double> &vec_node_values)
-: _msh(NULL), _feObjects(NULL), _geo(NULL), _bc_func(NULL), _vec_nodes(vec_node_id), _vec_values(vec_node_values)
+: _msh(NULL), _feObjects(NULL), _geo(NULL), _bc_func(NULL), _vec_nodes(vec_node_id), _vec_values(vec_node_values), _t(.0)
 {
     _is_transient = false;
     _do_setup = false;
 }
 
+FemNeumannBC::FemNeumannBC(const FemNeumannBC &src)
+: _msh(src._msh), _feObjects(src._feObjects), _geo(src._geo), _bc_func(src._bc_func->clone()),
+  _vec_nodes(src._vec_nodes), _vec_values(src._vec_values), _t(src._t),
+  _is_transient(src._is_transient), _do_setup(src._do_setup)
+{
+}
+
+FemNeumannBC::~FemNeumannBC()
+{
+    BaseLib::releaseObject(_bc_func);
+}
+
 FemNeumannBC* FemNeumannBC::clone() const
 {
-    FemNeumannBC* f = NULL;
-    if (_msh!=NULL)
-        f = new FemNeumannBC(_msh, _feObjects, _geo, _bc_func);
-    else 
-        f = new FemNeumannBC(_vec_nodes, _vec_values);
+    return new FemNeumannBC(*this);
+}
 
-    return f;
+void FemNeumannBC::initCurrentTime(double t)
+{
+    _t = t;
+    _do_setup = true;
 }
 
 /// setup BC.
@@ -51,7 +63,7 @@ void FemNeumannBC::setup(size_t order)
     if (!_is_transient) _do_setup = false;
 
     _msh->setCurrentOrder(order);
-    FemLib::NeumannBC2FEM convert(*_msh, *_feObjects, *_geo, *_bc_func, _vec_nodes, _vec_values);
+    FemLib::NeumannBC2FEM convert(*_msh, _t, *_feObjects, *_geo, *_bc_func, _vec_nodes, _vec_values);
     if (_vec_nodes.size()==0)
         INFO("***INFO: No Neumann BC found in FemDirichletBC::setup()");
 

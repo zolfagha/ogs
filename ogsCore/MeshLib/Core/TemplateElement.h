@@ -23,6 +23,7 @@
 #include "CoordinateSystem.h"
 #include "IMesh.h"
 #include "ElementTopology.h"
+#include "IElementCoordinatesMapping.h"
 
 namespace MeshLib
 {

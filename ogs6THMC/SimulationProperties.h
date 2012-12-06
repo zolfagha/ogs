@@ -65,7 +65,13 @@ inline bool readSimulationProperties(const std::string &xml_file, BaseLib::Optio
     BaseLib::Options* optProcessData = properties.addSubGroup("ProcessData");
     for (e = doc.FirstChildElement("ProcessData")->FirstChildElement("Process"); e != 0; e->NextSibling()) {
         const char* pcs_type = e->Attribute("type");
+        if (pcs_type==0) {
+            ERR("Error in reading a XML file: attribute \"type\" in Process tag must be specified.");
+            return false;
+        }
         const char* pcs_name = e->Attribute("name");
+        if (pcs_name == 0)
+            pcs_name = pcs_type;
         int tim_id = -1;
         e->QueryIntAttribute("time_group_id", &tim_id);
         

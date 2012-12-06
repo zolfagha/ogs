@@ -37,7 +37,7 @@ bool FunctionXFEM_EXAMPLE_CRACK1::initialize(const BaseLib::Options &option)
     const size_t msh_id = option.getOptionAsNum<size_t>("MeshID");
     _msh = femData->list_mesh[msh_id];
     _dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(_msh);
-    _feObjects = new FemLib::LagrangianFeObjectContainer(*_msh);
+    _feObjects = new FemLib::LagrangeFeObjectContainer(_msh);
 
     // initialize node values for simulated and exact displacements
     _displacement = new MyNodalFunctionVector();

@@ -18,6 +18,7 @@
 #include "NumLib/Function/TXFunction.h"
 #include "NumLib/TimeStepping/TimeStepFunction.h"
 #include "MaterialLib/Fluid.h"
+#include "MaterialLib/Fracture.h"
 #include "SolutionLib/Fem/FemDirichletBC.h"
 #include "SolutionLib/Fem/FemNeumannBC.h"
 #include "GeoProcessBuilder.h"
@@ -110,6 +111,24 @@ void convertPorousMediumProperty(const CMediumProperties &mmp, MaterialLib::Poro
     pm.geo_area = new NumLib::TXFunctionConstant(mmp.geo_area);
 }
 
+
+void convertFractureProperty(const CMediumProperties &mmp, MaterialLib::Fracture &pm)
+{
+    if (mmp.permeability_model==1) {
+        pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(mmp.permeability_tensor[0]);
+        pm.permeability = new NumLib::TXFunctionConstant(mmp.permeability_tensor[0]);
+    }
+
+    if (mmp.porosity_model==1) {
+        pm.porosity = new NumLib::TXFunctionConstant(mmp.porosity_model_values[0]);
+    }
+
+    if (mmp.storage_model==1) {
+        pm.storage = new NumLib::TXFunctionConstant(mmp.storage_model_values[0]);
+    }
+
+    pm.geo_area = new NumLib::TXFunctionConstant(mmp.geo_area);
+}
 void convertCompoundProperty(const CompProperties &mcp, MaterialLib::Compound &new_cp)
 {
     new_cp.name = mcp.compname;
@@ -213,9 +232,19 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
     for (size_t i=0; i<ogs5fem.mmp_vector.size(); i++)
     {
         CMediumProperties* mmp = ogs5fem.mmp_vector[i];
-        MaterialLib::PorousMedia* pm = new MaterialLib::PorousMedia();
-        ogs6fem.list_pm.push_back(pm);
-        convertPorousMediumProperty(*mmp, *pm);
+        MaterialLib::IMedium* mmp_ogs6 = NULL;
+        if (mmp->is_fracture) {
+            MaterialLib::Fracture* frac = new MaterialLib::Fracture();
+            convertFractureProperty(*mmp, *frac);
+            ogs6fem.list_pm.push_back(NULL);
+            mmp_ogs6 = frac;
+        } else {
+            MaterialLib::PorousMedia* pm = new MaterialLib::PorousMedia();
+            convertPorousMediumProperty(*mmp, *pm);
+            ogs6fem.list_pm.push_back(pm);
+            mmp_ogs6 = pm;
+        }
+        ogs6fem.list_medium.push_back(mmp_ogs6);
     }
 
     // MCP
@@ -309,7 +338,7 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             CBoundaryCondition* rfbc = ogs5fem.bc_vector[i];
             std::string bc_pcs_name = FiniteElement::convertProcessTypeToString(rfbc->getProcessType());
             if ( bc_pcs_name.compare(pcs_name)==0 )
-				for ( size_t j=0; j<var_name.size(); j++ )
+				for ( size_t j=0; j<var_name.size(); j++ ) {
 					if ( rfbc->primaryvariable_name.find(var_name[j])!=std::string::npos) {
 						BaseLib::Options* optBc = optBcList->addSubGroup("BC");
 						optBc->addOption("Variable", rfbc->primaryvariable_name);
@@ -343,6 +372,7 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
                                 break;
 						}
 					}  // end of if rfbc
+				}
         }  // end of for i
 
         //ST
@@ -352,23 +382,48 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             CSourceTerm* rfst = ogs5fem.st_vector[i];
             std::string st_pcs_name = FiniteElement::convertProcessTypeToString(rfst->getProcessType());
             if (st_pcs_name.compare(pcs_name)==0 )
-				for (size_t j=0; j<var_name.size(); j++ )
+				for (size_t j=0; j<var_name.size(); j++ ) {
 					if ( rfst->primaryvariable_name.find(var_name[j])!=std::string::npos) {
 						BaseLib::Options* optSt = optStList->addSubGroup("ST");
 						optSt->addOption("Variable", rfst->primaryvariable_name);
 						optSt->addOption("GeometryType", rfst->geo_type_name);
 						optSt->addOption("GeometryName", rfst->geo_name);
-						std::string ogs5distype = FiniteElement::convertDisTypeToString(rfst->getProcessDistributionType());
-						std::string ogs6distype = ogs5distype;
-						if (ogs5distype.find("_NEUMANN")!=std::string::npos) {
-							optSt->addOption("STType", "NEUMANN");
-							ogs6distype = BaseLib::replaceString("_NEUMANN", "", ogs6distype);
-						} else {
-							optSt->addOption("STType", "SOURCESINK");
-						}  // end of if-else
+                        std::string ogs5distype = FiniteElement::convertDisTypeToString(rfst->getProcessDistributionType());
+                        std::string ogs6sp_distype = ogs5distype;
+                        bool isNeumannBC = (ogs5distype.find("_NEUMANN")!=std::string::npos);
+                        if (isNeumannBC) {
+                            optSt->addOption("STType", "NEUMANN");
+                            ogs6sp_distype = BaseLib::replaceString("_NEUMANN", "", ogs6sp_distype);
+                        } else {
+                            optSt->addOption("STType", "SOURCESINK");
+                        }
+                        bool isTransientST = (rfst->CurveIndex>0);
+                        std::string ogs6distype;
+                        if (isTransientST) {
+                            // spatial
+                            BaseLib::Options* opStSpace = optSt->addSubGroup("Spatial");
+                            opStSpace->addOption("DistributionType", ogs6sp_distype);
+                            opStSpace->addOptionAsNum("DistributionValue", rfst->geo_node_value);
+                            // temporal
+                            BaseLib::Options* opStTime = optSt->addSubGroup("Temporal");
+                            std::string ogs6tim_distype = NumLib::convertTXFunctionTypeToString(NumLib::TXFunctionType::T_LINEAR);
+                            opStTime->addOption("DistributionType", ogs6tim_distype);
+                            BaseLib::Options* opStTimeValue = opStTime->addSubGroup("TimeValue");
+                            ogs5::Kurven* curv = ogs5fem.kurven_vector[rfst->CurveIndex-1];
+                            for (size_t i_pt=0; i_pt<curv->stuetzstellen.size(); i_pt++) {
+                                BaseLib::Options* opStTimeValuePoint = opStTimeValue->addSubGroup("Point");
+                                opStTimeValuePoint->addOptionAsNum("Time", curv->stuetzstellen[i_pt]->punkt);
+                                opStTimeValuePoint->addOptionAsNum("Value", curv->stuetzstellen[i_pt]->wert);
+                            }
+
+                            ogs6distype = NumLib::convertTXFunctionTypeToString(NumLib::TXFunctionType::TX);
+                        } else {
+                            ogs6distype = ogs6sp_distype;
+                            optSt->addOptionAsNum("DistributionValue", rfst->geo_node_value);
+                        }
 						optSt->addOption("DistributionType", ogs6distype);
-						optSt->addOptionAsNum("DistributionValue", rfst->geo_node_value);
 					}  // end of if rfst
+				}
 		}  // end of for i
 
         // NUM

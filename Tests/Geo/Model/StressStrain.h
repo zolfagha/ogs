@@ -63,7 +63,7 @@ public:
         FemLib::FemNodalFunctionScalar *head = (FemLib::FemNodalFunctionScalar*)getInput(Head);
         FemLib::FEMIntegrationPointFunctionVector *vel = _vel;;
 
-        FemLib::LagrangianFeObjectContainer* feObjects = head->getFeObjectContainer();
+        FemLib::LagrangeFeObjectContainer* feObjects = head->getFeObjectContainer();
         //calculate vel (vel=f(h))
         for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
             MeshLib::IElement* e = msh->getElement(i_e);

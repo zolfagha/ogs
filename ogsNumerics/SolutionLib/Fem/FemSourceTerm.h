@@ -38,8 +38,16 @@ public:
     ///
     FemSourceTerm(const std::vector<size_t> &vec_node_id, const std::vector<double> &vec_node_values);
 
+    ///
+    FemSourceTerm(const FemSourceTerm &src);
+
+    ///
+    virtual ~FemSourceTerm();
+
     /// clone this object
     FemSourceTerm* clone() const;
+
+    virtual void initCurrentTime(double t);
 
     /// setup  
     virtual void setup(size_t order);
@@ -57,6 +65,7 @@ private:
     NumLib::ITXFunction *_bc_func;
     std::vector<size_t> _vec_nodes;
     std::vector<double> _vec_values;
+    double _t;
     bool _is_transient;
     bool _do_setup;
 };

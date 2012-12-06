@@ -44,6 +44,7 @@ public:
         INFO("Solving %s...", getProcessName().c_str());
         initializeTimeStep(time);
         getSolution()->solveTimeStep(time);
+        postSolutionAlgorithm(time);
         updateOutputParameter(time);
         return 0;
     }
@@ -63,6 +64,7 @@ public:
     ///
     virtual void accept(const NumLib::TimeStep &time)
     {
+        postTimeStep(time);
         output(time);
         getSolution()->accept(time);
     };
@@ -73,7 +75,11 @@ protected:
     ///
     virtual void initializeTimeStep(const NumLib::TimeStep &/*time*/) {};
     ///
+    virtual void postSolutionAlgorithm(const NumLib::TimeStep &/*time*/) {};
+    ///
     virtual void updateOutputParameter(const NumLib::TimeStep &time) = 0;
+    ///
+    virtual void postTimeStep(const NumLib::TimeStep &/*time*/) {};
     ///
     virtual void output(const NumLib::TimeStep &time) = 0;
 };

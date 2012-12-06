@@ -68,6 +68,7 @@ public:
             > SolutionForHead;
 
     FunctionHead() 
+    : _problem(NULL), _solHead(NULL), _rec(NULL), _feObjects(NULL)
     {
         AbstractTransientMonolithicSystem::resizeOutputParameter(1);
     };
@@ -113,7 +114,7 @@ private:
     SolutionForHead* _solHead;
     GeoLib::Rectangle *_rec;
     //FemNodalFunctionScalar *_head;
-    LagrangianFeObjectContainer* _feObjects;
+    LagrangeFeObjectContainer* _feObjects;
 
     DISALLOW_COPY_AND_ASSIGN(FunctionHead);
 };

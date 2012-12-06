@@ -116,7 +116,7 @@ private:
 
     SolutionForConc* _solConc;
     //FemNodalFunctionScalar *_conc;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangeFeObjectContainer* _feObjects;
 };
 
 } //end

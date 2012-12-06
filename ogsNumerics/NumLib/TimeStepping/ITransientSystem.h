@@ -29,6 +29,7 @@ namespace NumLib
 class ITransientSystem
 {
 public:
+    ITransientSystem() : _current_time(nullptr) {};
     /// 
     virtual ~ITransientSystem() {};
 

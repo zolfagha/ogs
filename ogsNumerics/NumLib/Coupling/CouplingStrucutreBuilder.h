@@ -69,9 +69,10 @@ private:
     T_M* buildMonolithicSystem(const BaseLib::Options *option, T_EQS_FACTORY &eqs_fac)
     {
         std::string eqs_name = option->getOption("name");
-        T_M* eqs = eqs_fac.create(eqs_name);
+        std::string eqs_type = option->getOption("type");
+        T_M* eqs = eqs_fac.create(eqs_type);
         if (eqs==NULL) {
-            ERR("***Error: %s is not found. Please check your compilation setting.", eqs_name.c_str());
+            ERR("***Error: %s is not found. Please check your compilation setting.", eqs_type.c_str());
             return NULL;
         }
         if (option->hasOption("in")) {

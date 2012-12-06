@@ -103,7 +103,7 @@ private:
 private:
     MyProblemType* _problem;
     MySolutionType* _solution;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangeFeObjectContainer* _feObjects;
     MaterialLib::Compound* _compound;
     NumLib::DiscreteDataConvergenceCheck _checker;
 };

@@ -37,12 +37,12 @@ public:
 
     virtual ~TXFunctionAnalytical() {};
 
-    virtual void eval(const TXPosition x, double &val) const
+    virtual void eval(const TXPosition x, double &val) const OGS_DECL_OVERRIDE
     {
         val = getValue(x.getSpace()[0], x.getSpace()[1], x.getSpace()[2]);
     }
 
-    virtual TXFunctionAnalytical* clone() const
+    virtual TXFunctionAnalytical* clone() const OGS_DECL_OVERRIDE
     {
         return new TXFunctionAnalytical(_exp);
     }

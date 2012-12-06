@@ -28,10 +28,11 @@ namespace BaseLib {
 class RunTime : public TimeMeasurementBase
 {
 public:
+    RunTime() {};
 	virtual void start();
 	virtual void stop();
 	virtual double elapsed();
-	~RunTime() {};
+	virtual ~RunTime() {};
 private:
 #ifndef _MSC_VER
 	timeval _start;

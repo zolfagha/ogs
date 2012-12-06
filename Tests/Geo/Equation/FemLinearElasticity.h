@@ -144,12 +144,12 @@ class FemLinearElasticLinearLocalAssembler: public NumLib::IElementWiseTransient
 {
 private:
     PorousMedia* _pm;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangeFeObjectContainer* _feObjects;
 public:
     typedef MathLib::LocalVector LocalVectorType;
     typedef MathLib::LocalMatrix LocalMatrixType;
 
-    FemLinearElasticLinearLocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, PorousMedia &pm)
+    FemLinearElasticLinearLocalAssembler(FemLib::LagrangeFeObjectContainer &feObjects, PorousMedia &pm)
     : _pm(&pm), _feObjects(&feObjects)
     {
     };
@@ -213,9 +213,9 @@ class FemLinearElasticResidualLocalAssembler : public NumLib::IElementWiseTransi
 {
 private:
     PorousMedia* _pm;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangeFeObjectContainer* _feObjects;
 public:
-    FemLinearElasticResidualLocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, PorousMedia &pm)
+    FemLinearElasticResidualLocalAssembler(FemLib::LagrangeFeObjectContainer &feObjects, PorousMedia &pm)
     : _pm(&pm), _feObjects(&feObjects)
     {
     };
@@ -238,9 +238,9 @@ class FemLinearElasticJacobianLocalAssembler: public NumLib::IElementWiseTransie
 {
 private:
     PorousMedia* _pm;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangeFeObjectContainer* _feObjects;
 public:
-    FemLinearElasticJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, PorousMedia &pm)
+    FemLinearElasticJacobianLocalAssembler(FemLib::LagrangeFeObjectContainer &feObjects, PorousMedia &pm)
     : _pm(&pm), _feObjects(&feObjects)
     {
     };

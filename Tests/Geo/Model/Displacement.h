@@ -102,7 +102,7 @@ public:
         MyNodalFunctionScalar *uy = _sol_u->getCurrentSolution(1);
         MyIntegrationPointFunctionVector* strain = _strain;
         MyIntegrationPointFunctionVector* stress = _stress;
-        FemLib::LagrangianFeObjectContainer* feObjects = ux->getFeObjectContainer();
+        FemLib::IFeObjectContainer* feObjects = ux->getFeObjectContainer();
 
         const size_t dim = msh->getDimension();
         const size_t n_strain_components = (dim==2 ? 4 : 6);
@@ -206,7 +206,7 @@ private:
     MySolution* _sol_u;
     DiscreteSystem* _dis;
     Geo::PorousMedia* _pm;
-    LagrangianFeObjectContainer* _feObjects;
+    LagrangeFeObjectContainer* _feObjects;
     MyIntegrationPointFunctionVector* _strain;
     MyIntegrationPointFunctionVector* _stress;
 

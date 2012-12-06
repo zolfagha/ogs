@@ -94,7 +94,6 @@ void readMesh(std::string const& fileName, std::vector<MeshLib::IMesh*> &vec_mes
       else  if (line_string.find("$ELEMENTS") != std::string::npos)
       {
         size_t no_elements, idx, group_id, idummy;
-        int grid_adaptation;
         if_file >> no_elements >> std::ws;
         for (size_t i = 0; i < no_elements; i++)
         {
@@ -104,7 +103,7 @@ void readMesh(std::string const& fileName, std::vector<MeshLib::IMesh*> &vec_mes
           if_file >> buffer;
     
           if (buffer.find("-1") != std::string::npos) {
-            grid_adaptation = strtol(buffer.data(), NULL, 0);
+            //int grid_adaptation = strtol(buffer.data(), NULL, 0);
             if_file >> name;
           } else {
             name = buffer;

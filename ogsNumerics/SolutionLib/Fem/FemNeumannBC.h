@@ -18,7 +18,7 @@
 #include "MeshLib/Core/IMesh.h"
 #include "MeshLib/Tools/Tools.h"
 #include "NumLib/Function/ITXFunction.h"
-#include "FemLib/Tools/LagrangeFeObjectContainer.h"
+#include "FemLib/Tools/IFeObjectContainer.h"
 
 #include "IFemNeumannBC.h"
 
@@ -34,17 +34,32 @@ class FemNeumannBC : public IFemNeumannBC
 {
 public:
     /// 
-    FemNeumannBC(const MeshLib::IMesh *msh, FemLib::LagrangianFeObjectContainer* feObjects, const GeoLib::GeoObject *geo, NumLib::ITXFunction *func);
+    FemNeumannBC(const MeshLib::IMesh *msh, FemLib::IFeObjectContainer* feObjects, const GeoLib::GeoObject *geo, NumLib::ITXFunction *func);
 
     ///
     FemNeumannBC(const std::vector<size_t> &vec_node_id, const std::vector<double> &vec_node_values);
 
+    /**
+     * Copy constructor
+     * @param src
+     */
+    FemNeumannBC(const FemNeumannBC &src);
+
+    ///
+    virtual ~FemNeumannBC();
+
     /// clone this object
-    FemNeumannBC* clone() const;
+    virtual FemNeumannBC* clone() const;
 
     /// setup B.C.
     /// \param order Polynomial order
     virtual void setup(size_t order);
+
+    /**
+     * set current time
+     * @param t
+     */
+    virtual void initCurrentTime(double t);
 
     /// get a list of boundary condition nodes
     virtual std::vector<size_t>& getListOfBCNodes() {return _vec_nodes;};
@@ -54,11 +69,12 @@ public:
 
 private:
     const MeshLib::IMesh* _msh;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::IFeObjectContainer* _feObjects;
     const GeoLib::GeoObject *_geo;
     NumLib::ITXFunction *_bc_func;
     std::vector<size_t> _vec_nodes;
     std::vector<double> _vec_values;
+    double _t;
     bool _is_transient;
     bool _do_setup;
 

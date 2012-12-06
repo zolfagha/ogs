@@ -77,7 +77,7 @@ private:
     std::vector<IntegrationPointScalarWrapper*> _vec_strain_components;
     std::vector<IntegrationPointScalarWrapper*> _vec_stress_components;
     NumLib::DiscreteDataConvergenceCheck _checker;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangeFeObjectContainer* _feObjects;
 };
 
 #include "ElementStressStrain.hpp"

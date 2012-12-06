@@ -13,7 +13,7 @@ ELSEIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     SET(COMPILER_IS_INTEL TRUE)
 ELSEIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     SET(COMPILER_IS_MSVC TRUE)
-ENDIF () # CMAKE_CXX_COMPILER_ID
+ENDIF()
 
 ### GNU C/CXX compiler
 IF(COMPILER_IS_GCC)
@@ -35,20 +35,18 @@ ENDIF() # COMPILER_IS_GCC
 
 ### Intel compiler
 IF (COMPILER_IS_INTEL)
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
         IF( NOT CMAKE_BUILD_TYPE STREQUAL "Debug" )
                 MESSAGE(STATUS "Set Intel release flags")
-                SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
+                SET(CMAKE_CXX_FLAGS "-O3 -DNDEBUG")
         ENDIF()
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -xHOST -O3 -no-prec-div -DNDEBUG")
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wall")
 ENDIF() # COMPILER_IS_INTEL
 
 ### Clang compiler
 IF (COMPILER_IS_CLANG)
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
         IF( NOT CMAKE_BUILD_TYPE STREQUAL "Debug" )
                 MESSAGE(STATUS "Set Clang release flags")
-                SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
+                SET(CMAKE_CXX_FLAGS "-O3 -DNDEBUG")
         ENDIF()
          # need -std=gnu89 to avoid linking errors of multiple definitions
         SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu89")
@@ -94,4 +92,19 @@ IF(MSVC)
 	ADD_DEFINITIONS(-DOPENMP_LOOP_TYPE=int)
 ELSE()
 	ADD_DEFINITIONS(-DOPENMP_LOOP_TYPE=unsigned)
+ENDIF()
+
+# Use override and final keywords if a compiler supports them
+SET(ENABLE_C11_OVERRIDE_FINAL FALSE)
+IF(COMPILER_IS_GCC)
+        get_gcc_version(GCC_VERSION)
+        IF(GCC_VERSION VERSION_GREATER "4.6")
+            SET(ENABLE_C11_OVERRIDE_FINAL TRUE)
+        ENDIF()
+ENDIF()
+IF(COMPILER_IS_MSVC)
+    SET(ENABLE_C11_OVERRIDE_FINAL TRUE)
+ENDIF()
+IF(ENABLE_C11_OVERRIDE_FINAL)
+    ADD_DEFINITIONS(-DOGS_ENABLE_DECL_OVERRIDE_FINAL)
 ENDIF()

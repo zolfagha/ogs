@@ -43,7 +43,7 @@ public:
     void extrapolate(TemplateFEMIntegrationPointFunction<T_DIS_SYS,Tvalue> &ele_var, TemplateFEMNodalFunction<T_DIS_SYS,Tvalue> &nod_var)
     {
         const MeshLib::IMesh* msh = ele_var.getMesh();
-        LagrangianFeObjectContainer* feObjects = nod_var.getFeObjectContainer();
+        IFeObjectContainer* feObjects = nod_var.getFeObjectContainer();
         MeshLib::TopologySequentialNodes2Elements node2eles(*msh);
         Tvalue v0 = ele_var.getIntegrationPointValues(0)[0];
         v0 *= .0;

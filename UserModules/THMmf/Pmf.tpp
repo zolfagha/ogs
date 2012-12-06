@@ -5,7 +5,7 @@
  *              http://www.opengeosys.com/LICENSE.txt
  *
  *
- * \file Pmf.hpp
+ * \file Pmf.tpp
  *
  * Created on 2012-10-24 by Norihiro Watanabe
  */
@@ -14,12 +14,19 @@
 #include "MeshLib/Tools/Tools.h"
 #include "DiscreteLib/Utils/DiscreteSystemContainerPerMesh.h"
 #include "FemLib/Function/FemNodalFunction.h"
+#include "FemLib/Tools/FeObjectContainerPerFeType.h"
+#include "FemLib/Tools/MeshElementToFemElementType.h"
 #include "NumLib/Function/TXFunctionBuilder.h"
 #include "OutputIO/OutputBuilder.h"
 #include "OutputIO/OutputTimingBuilder.h"
 #include "SolutionLib/Fem/FemSourceTerm.h"
 #include "Ogs6FemData.h"
 #include "FemVariableBuilder.h"
+#include "THMmfFemElementCatalogBuilder.h"
+#include "THMmfMeshElement2FeTypeBuilder.h"
+
+namespace THMmf
+{
 
 template <class T1, class T2>
 bool Pmf<T1,T2>::initialize(const BaseLib::Options &option)
@@ -34,12 +41,14 @@ bool Pmf<T1,T2>::initialize(const BaseLib::Options &option)
     MeshLib::setMeshElementCoordinatesMapping(*msh);
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
-    _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
+    FemLib::FemElementCatalog* feCatalog = THMmfFemElementCatalogBuilder::construct();
+    FemLib::MeshElementToFemElementType* eleTofe = THMmfMeshElement2FeTypeBuilder::construct(*msh, FemLib::PolynomialOrder::Quadratic, femData->list_medium);
+    _feObjects = new FemLib::FeObjectContainerPerFeType(feCatalog, eleTofe, msh);
 
     // local assemblers
     MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType();
-    MyLinearAssemblerTypeForPorousMedia* linear_assembler_pm = new MyLinearAssemblerTypeForPorousMedia(*_feObjects, msh->getGeometricProperty()->getCoordinateSystem());
-    MyLinearAssemblerTypeForFracture* linear_assembler_frac = new MyLinearAssemblerTypeForFracture(*_feObjects, msh->getGeometricProperty()->getCoordinateSystem());
+    MyLinearAssemblerTypeForPorousMedia* linear_assembler_pm = new MyLinearAssemblerTypeForPorousMedia(_feObjects, msh->getGeometricProperty()->getCoordinateSystem());
+    MyLinearAssemblerTypeForFracture* linear_assembler_frac = new MyLinearAssemblerTypeForFracture(_feObjects, msh->getGeometricProperty()->getCoordinateSystem());
     const MeshLib::CoordinateSystem coord = msh->getGeometricProperty()->getCoordinateSystem();
     linear_assembler->addLocalAssembler(coord.getDimension(), linear_assembler_pm);
     linear_assembler->addLocalAssembler(coord.getDimension()-1, linear_assembler_frac);
@@ -51,6 +60,7 @@ bool Pmf<T1,T2>::initialize(const BaseLib::Options &option)
     _problem->setTimeSteppingFunction(*tim);
     // set up variable
     typename MyProblemType::MyVariable* head = _problem->addVariable("pressure"); //internal name
+    head->setFeObjectContainer(_feObjects);
     FemVariableBuilder varBuilder;
     varBuilder.doit(this->getOutputParameterName(Pressure), option, msh, femData->geo, femData->geo_unique_name, _feObjects, head);
 
@@ -86,3 +96,5 @@ void Pmf<T1,T2>::output(const NumLib::TimeStep &/*time*/)
     OutputVariableInfo var(this->getOutputParameterName(Pressure), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput(var.name, var);
 };
+
+}

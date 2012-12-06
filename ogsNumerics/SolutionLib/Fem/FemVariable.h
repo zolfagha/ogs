@@ -46,15 +46,14 @@ public:
      * @param order     polynomial order
      */
     FemVariable(size_t id, const std::string &name, FemLib::PolynomialOrder::type initial_order = FemLib::PolynomialOrder::Linear)
-    : _id(id), _name(name), /* _f_ic(NULL)*/ _ic(NULL), _current_order(initial_order)
+    : _id(id), _name(name), _ic(NULL), _current_order(initial_order), _fe_container(NULL)
     {
     }
 
     ///
     ~FemVariable()
     {
-        //BaseLib::releaseObject(_f_ic);
-        BaseLib::releaseObject(_ic);
+        BaseLib::releaseObject(_ic, _fe_container);
         BaseLib::releaseObjectsInStdVector(_map_bc1);
         BaseLib::releaseObjectsInStdVector(_map_bc2);
     }
@@ -90,8 +89,15 @@ public:
         return _map_bc2[bc_id];
     };
 
+    //----------------------------------------------------------------------
     void setCurrentOrder(FemLib::PolynomialOrder::type order) {_current_order = order;};
     FemLib::PolynomialOrder::type getCurrentOrder() const {return _current_order;};
+    void setFeObjectContainer(FemLib::IFeObjectContainer* feContainer) 
+    {
+        if (_fe_container!=NULL) delete _fe_container;
+        _fe_container = feContainer;
+    };
+    FemLib::IFeObjectContainer* getFeObjectContainer() const { return _fe_container;};
 
 private:
     size_t _id;
@@ -100,6 +106,7 @@ private:
     std::vector<FemDirichletBC*> _map_bc1;
     std::vector<IFemNeumannBC*> _map_bc2;
     FemLib::PolynomialOrder::type _current_order;
+    FemLib::IFeObjectContainer* _fe_container;
 };
 
 } //end

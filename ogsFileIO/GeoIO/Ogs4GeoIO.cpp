@@ -170,7 +170,7 @@ std::string readPolyline(std::istream &in,
         if (line.find("$NAME") != std::string::npos) // subkeyword found
         {
             in >> line;
-            name_of_ply = line.substr(0); // read value
+            name_of_ply = line; // read value
         }
         //....................................................................
         if (line.find("$TYPE") != std::string::npos) // subkeyword found
@@ -333,7 +333,7 @@ std::string readSurface(std::istream &in,
         if (line.find("$NAME") != std::string::npos) // subkeyword found
         {
             in >> line; // read value
-            name = line.substr(0);
+            name = line;
         }
         //....................................................................
         if (line.find("$TYPE") != std::string::npos) // subkeyword found

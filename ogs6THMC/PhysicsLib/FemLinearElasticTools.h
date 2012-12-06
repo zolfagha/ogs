@@ -16,16 +16,6 @@
 #include <string>
 #include "MathLib/DataType.h"
 
-inline size_t getNumberOfStrainComponents(size_t dim) {return (dim==2 ? 4 : 6);};
-
-inline MathLib::LocalMatrix get_m(const size_t dim)
-{
-    MathLib::LocalMatrix m = MathLib::LocalMatrix::Zero(getNumberOfStrainComponents(dim),1);
-    for (size_t i=0; i<dim; i++)
-        m(i,0) = 1.0;
-    return m;
-}
-
 template <class T_MATRIX>
 inline void setNu_Matrix_byPoint(const size_t dim, const size_t nnodes, const T_MATRIX &N, T_MATRIX &matN)
 {
@@ -190,27 +180,5 @@ inline void setB_Matrix4axisymmetry(const size_t dim, double radius, double dsha
     (*B_matrix)(3,1) = dshape_dx;
 }
 
-inline const std::string getStressStrainComponentPostfix(size_t i)
-{
-    switch (i) {
-    case 0: return "_XX";
-    case 1: return "_YY";
-    case 2: return "_ZZ";
-    case 3: return "_XY";
-    case 4: return "_XZ";
-    case 5: return "_YZ";
-    }
-    return "";
-}
-
-inline const std::string getDisplacementComponentPostfix(size_t i)
-{
-    switch (i) {
-    case 0: return "_X";
-    case 1: return "_Y";
-    case 2: return "_Z";
-    }
-    return "";
-}
 
 

@@ -14,39 +14,59 @@
 
 #include <string>
 
-#include "logog.hpp"
-
-#include "BaseLib/Options.h"
 #include "NumLib/TransientCoupling/TransientMonolithicSystem.h"
 
 namespace ProcessLib
 {
 
 /**
- * \brief Interface definition of process class
- *
- */
-//typedef NumLib::AbstractTransientMonolithicSystem Process;
-
-/**
- * \brief Interface definition of process class
+ * \brief Interface of Process object
  *
  */
 class Process : public NumLib::AbstractTransientMonolithicSystem
 {
 public:
-    Process(const std::string &pcs_name, size_t n_in_parameters, size_t n_out_parameters)
-        : _pcs_name(pcs_name)
+    /**
+     *
+     * @param pcs_name          default process name
+     * @param n_in_parameters   the number of input parameters
+     * @param n_out_parameters  the number of output parameters
+     */
+    Process(const std::string &pcs_type, size_t n_in_parameters, size_t n_out_parameters)
+        : _pcs_type(pcs_type)
     {
         resizeInputParameter(n_in_parameters);
         resizeOutputParameter(n_out_parameters);
     }
 
+    /**
+     *
+     */
     virtual ~Process() {};
 
+    /**
+     * get type name of this process
+     * @return
+     */
+    const std::string& getProcessType() const {return _pcs_type;};
+
+    /**
+     * set this process name
+     * @param pcs_name
+     */
+    void setProcessName(const std::string &pcs_name)
+    {
+        _pcs_name = pcs_name;
+    }
+
+    /**
+     * set this process name
+     * @return
+     */
     const std::string& getProcessName() const {return _pcs_name;};
 
 private:
+    const std::string _pcs_type;
     std::string _pcs_name;
 };
 
