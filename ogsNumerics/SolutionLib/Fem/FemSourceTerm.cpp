@@ -21,7 +21,7 @@ namespace SolutionLib
 FemSourceTerm::FemSourceTerm(const MeshLib::IMesh *msh, const GeoLib::GeoObject *geo, NumLib::ITXFunction *func)
 : _msh(msh), _geo(geo), _bc_func(func->clone()), _t(.0)
 {
-    _is_transient = false;
+    _is_transient = !_bc_func->isTemporallyConst();
     _do_setup = true;
 }
 
@@ -51,7 +51,7 @@ FemSourceTerm* FemSourceTerm::clone() const
 
 void FemSourceTerm::initCurrentTime(double t)
 {
-    if (_t != t) {
+    if (_is_transient && _t != t) {
         _t = t;
         _do_setup = true;
     }
@@ -61,7 +61,7 @@ void FemSourceTerm::initCurrentTime(double t)
 void FemSourceTerm::setup(size_t order)
 {
     if (!_do_setup) return;
-    if (!_is_transient) _do_setup = false;
+    _do_setup = false;
 
     _vec_nodes.clear();
     _msh->setCurrentOrder(order);

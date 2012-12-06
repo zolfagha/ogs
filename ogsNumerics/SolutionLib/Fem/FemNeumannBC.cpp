@@ -22,7 +22,7 @@ namespace SolutionLib
 FemNeumannBC::FemNeumannBC(const MeshLib::IMesh *msh, FemLib::IFeObjectContainer* feObjects, const GeoLib::GeoObject *geo, NumLib::ITXFunction *func)
 : _msh(msh), _feObjects(feObjects), _geo(geo), _bc_func(func->clone()), _t(.0)
 {
-    _is_transient = _bc_func->isTemporallyConst();
+    _is_transient = !_bc_func->isTemporallyConst();
     _do_setup = true;
 }
 
@@ -52,7 +52,7 @@ FemNeumannBC* FemNeumannBC::clone() const
 
 void FemNeumannBC::initCurrentTime(double t)
 {
-    if (_t != t) {
+    if (_is_transient && _t != t) {
         _t = t;
         _do_setup = true;
     }
@@ -61,8 +61,9 @@ void FemNeumannBC::initCurrentTime(double t)
 /// setup BC.
 void FemNeumannBC::setup(size_t order)
 {
-    if (!_do_setup) return;
-    if (!_is_transient) _do_setup = false;
+    if (!_do_setup)
+        return;
+    _do_setup = false;
 
     _msh->setCurrentOrder(order);
     _vec_nodes.clear();
