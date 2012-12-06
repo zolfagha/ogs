@@ -405,9 +405,10 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
                             opStTime->addOption("DistributionType", ogs6tim_distype);
                             BaseLib::Options* opStTimeValue = opStTime->addSubGroup("TimeValue");
                             ogs5::Kurven* curv = ogs5fem.kurven_vector[rfst->CurveIndex-1];
-                            for (size_t i_pt=0; i<curv->stuetzstellen.size(); i++) {
-                                opStTimeValue->addOptionAsNum("Time", curv->stuetzstellen[i_pt]->punkt);
-                                opStTimeValue->addOptionAsNum("Value", curv->stuetzstellen[i_pt]->wert);
+                            for (size_t i_pt=0; i_pt<curv->stuetzstellen.size(); i_pt++) {
+                                BaseLib::Options* opStTimeValuePoint = opStTimeValue->addSubGroup("Point");
+                                opStTimeValuePoint->addOptionAsNum("Time", curv->stuetzstellen[i_pt]->punkt);
+                                opStTimeValuePoint->addOptionAsNum("Value", curv->stuetzstellen[i_pt]->wert);
                             }
 
                             ogs6distype = NumLib::convertTXFunctionTypeToString(NumLib::TXFunctionType::TX);
