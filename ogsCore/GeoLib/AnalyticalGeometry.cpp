@@ -17,7 +17,7 @@
 #include <fstream>
 
 // Base
-#include "BaseLib/swap.h"
+#include <algorithm>
 #include "BaseLib/quicksort.h"
 
 // MathLib
