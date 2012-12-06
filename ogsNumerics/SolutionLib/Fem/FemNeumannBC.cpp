@@ -52,8 +52,10 @@ FemNeumannBC* FemNeumannBC::clone() const
 
 void FemNeumannBC::initCurrentTime(double t)
 {
-    _t = t;
-    _do_setup = true;
+    if (_t != t) {
+        _t = t;
+        _do_setup = true;
+    }
 }
 
 /// setup BC.
@@ -63,12 +65,11 @@ void FemNeumannBC::setup(size_t order)
     if (!_is_transient) _do_setup = false;
 
     _msh->setCurrentOrder(order);
+    _vec_nodes.clear();
+    _vec_values.clear();
     FemLib::NeumannBC2FEM convert(*_msh, _t, *_feObjects, *_geo, *_bc_func, _vec_nodes, _vec_values);
     if (_vec_nodes.size()==0)
         INFO("***INFO: No Neumann BC found in FemDirichletBC::setup()");
-
-    if (!_is_transient)
-        _do_setup = false;
 }
 
 }

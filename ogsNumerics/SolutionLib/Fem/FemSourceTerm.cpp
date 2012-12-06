@@ -51,7 +51,10 @@ FemSourceTerm* FemSourceTerm::clone() const
 
 void FemSourceTerm::initCurrentTime(double t)
 {
-    _t = t;
+    if (_t != t) {
+        _t = t;
+        _do_setup = true;
+    }
 }
 
 /// setup
@@ -60,6 +63,7 @@ void FemSourceTerm::setup(size_t order)
     if (!_do_setup) return;
     if (!_is_transient) _do_setup = false;
 
+    _vec_nodes.clear();
     _msh->setCurrentOrder(order);
     MeshLib::findNodesOnGeometry(_msh, _geo, &_vec_nodes);
     _vec_values.resize(_vec_nodes.size());
@@ -69,8 +73,6 @@ void FemSourceTerm::setup(size_t order)
         _bc_func->eval(pos, _vec_values[i]);
     }
 
-    if (!_is_transient)
-        _do_setup = false;
 }
 
 }
