@@ -44,22 +44,27 @@ public:
      * @param src
      */
     TXFunctionTimeCurve(const TXFunctionTimeCurve &src)
-    : _interpolate(src._interpolate)
+    : _interpolate(new T_INTERPOLATION(*src._interpolate))
     {
-
+        ITXFunction::isConst(false);
+        ITXFunction::isTemporallyConst(false);
+        ITXFunction::isSpatiallyConst(true);
     }
 
     /**
      *
      */
-    virtual ~TXFunctionTimeCurve() {};
+    virtual ~TXFunctionTimeCurve()
+    {
+        BaseLib::releaseObject(_interpolate);
+    };
 
     /**
      *
      * @param x
      * @param val
      */
-    virtual void eval(const TXPosition x, double &val) const
+    virtual void eval(const TXPosition x, double &val) const OGS_DECL_OVERRIDE
     {
         val = _interpolate->getValue(x.getTime());
     }
@@ -68,7 +73,7 @@ public:
      *
      * @return
      */
-    virtual TXFunctionTimeCurve* clone() const
+    virtual TXFunctionTimeCurve* clone() const OGS_DECL_OVERRIDE
     {
         return new TXFunctionTimeCurve(*this);
     }
