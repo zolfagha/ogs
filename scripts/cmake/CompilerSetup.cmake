@@ -35,18 +35,20 @@ ENDIF() # COMPILER_IS_GCC
 
 ### Intel compiler
 IF (COMPILER_IS_INTEL)
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
         IF( NOT CMAKE_BUILD_TYPE STREQUAL "Debug" )
                 MESSAGE(STATUS "Set Intel release flags")
-                SET(CMAKE_CXX_FLAGS "-O3 -DNDEBUG")
+                SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
         ENDIF()
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wall")
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -xHOST -no-prec-div")
 ENDIF() # COMPILER_IS_INTEL
 
 ### Clang compiler
 IF (COMPILER_IS_CLANG)
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
         IF( NOT CMAKE_BUILD_TYPE STREQUAL "Debug" )
                 MESSAGE(STATUS "Set Clang release flags")
-                SET(CMAKE_CXX_FLAGS "-O3 -DNDEBUG")
+                SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
         ENDIF()
          # need -std=gnu89 to avoid linking errors of multiple definitions
         SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu89")

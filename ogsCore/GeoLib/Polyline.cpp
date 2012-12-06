@@ -11,7 +11,7 @@
  */
 
 // Base
-#include "BaseLib/swap.h"
+#include <algorithm>
 
 #include "Polyline.h"
 
@@ -251,13 +251,13 @@ bool containsEdge (const Polyline& ply, size_t id0, size_t id1)
         std::cerr << "no valid edge id0 == id1 == " << id0 << std::endl;
         return false;
     }
-    if (id0 > id1) BaseLib::swap (id0,id1);
+    if (id0 > id1) std::swap (id0,id1);
     const size_t n (ply.getNumberOfPoints() - 1);
     for (size_t k(0); k<n; k++) {
         size_t ply_pnt0 (ply.getPointID (k));
         size_t ply_pnt1 (ply.getPointID (k+1));
         if (ply_pnt0 > ply_pnt1)
-            BaseLib::swap (ply_pnt0, ply_pnt1);
+            std::swap (ply_pnt0, ply_pnt1);
         if (ply_pnt0 == id0 && ply_pnt1 == id1)
             return true;
     }

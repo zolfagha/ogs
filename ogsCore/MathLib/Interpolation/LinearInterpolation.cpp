@@ -12,7 +12,7 @@
 
 #include "LinearInterpolation.h"
 #include "BaseLib/binarySearch.h"
-#include "BaseLib/swap.h"
+#include <algorithm>
 
 #include <iostream>
 #include <cassert>

@@ -14,7 +14,7 @@
 #include <vector>
 
 // BASELIB
-#include "BaseLib/swap.h"
+#include <algorithm>
 #include "BaseLib/printList.h"
 #include "BaseLib/uniqueListInsert.h"
 
@@ -124,7 +124,7 @@ void EarClippingTriangulation::ensureCWOrientation ()
     if (_original_orient == GeoLib::CCW) {
         // switch orientation
         for (size_t k(0); k<n_pnts/2; k++) {
-            BaseLib::swap (_pnts[k], _pnts[n_pnts-1-k]);
+            std::swap (_pnts[k], _pnts[n_pnts-1-k]);
         }
     }
 }
