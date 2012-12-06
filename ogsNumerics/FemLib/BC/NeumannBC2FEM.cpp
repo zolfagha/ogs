@@ -35,7 +35,8 @@ NeumannBC2FEM::NeumannBC2FEM(const MeshLib::IMesh &msh, const double &current_ti
             // get discrete values at nodes
             for (size_t i=0; i<_vec_nodes.size(); i++) {
                 const GeoLib::Point* x = msh.getNodeCoordinatesRef(_vec_nodes[i]);
-                _bc_func.eval(x->getData(), _vec_values[i]);
+                NumLib::TXPosition pos(current_time, x->getData());
+                _bc_func.eval(pos, _vec_values[i]);
             }
             break;
         }
