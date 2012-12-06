@@ -35,7 +35,7 @@ public:
 
     virtual ~TXFunctionDirect() {};
 
-    virtual void eval(const TXPosition x, DataType &v) const
+    virtual void eval(const TXPosition x, DataType &v) const OGS_DECL_OVERRIDE
     {
         switch (x.getIdObjectType()) {
         case NumLib::TXPosition::Node:
@@ -49,7 +49,7 @@ public:
         }
     }
     
-    virtual TXFunctionDirect<T>* clone() const
+    virtual TXFunctionDirect<T>* clone() const OGS_DECL_OVERRIDE
     {
         return new TXFunctionDirect<T>(_direct_data);
     }
