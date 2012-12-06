@@ -54,10 +54,15 @@ ITXFunction* TXFunctionBuilder::create(const BaseLib::Options &opDistribution)
             {
                 std::vector<double> vec_t, vec_val;
                 {
-                    std::vector<const BaseLib::OptionGroup*> list_opDistLinear = opDistribution.getSubGroupList("TimeValue");
-                    for (size_t j=0; j<list_opDistLinear.size(); j++) {
-                        double pt_t = list_opDistLinear[j]->getOptionAsNum<double>("Time");
-                        double pt_val = list_opDistLinear[j]->getOptionAsNum<double>("Value");
+                    // structure is assumed
+                    // + TimeValue
+                    //     + Point: Time=0, Value=0
+                    //     + Point: Time=10, Value=20
+                    const BaseLib::OptionGroup* opDistLinear = opDistribution.getSubGroup("TimeValue");
+                    std::vector<const BaseLib::OptionGroup*> list_opDistTime = opDistLinear->getSubGroupList("Point");
+                    for (size_t j=0; j<list_opDistTime.size(); j++) {
+                        double pt_t = list_opDistTime[j]->getOptionAsNum<double>("Time");
+                        double pt_val = list_opDistTime[j]->getOptionAsNum<double>("Value");
                         vec_t.push_back(pt_t);
                         vec_val.push_back(pt_val);
                     }
