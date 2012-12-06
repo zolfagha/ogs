@@ -43,7 +43,7 @@ bool FunctionPressureToHead<T>::initialize(const BaseLib::Options &option)
     _h->initialize(*dis, FemLib::PolynomialOrder::Linear, .0);
     
     // set initial output
-    OutputVariableInfo var(this->getOutputParameterName(Head), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _h);
+    OutputVariableInfo var(this->getOutputParameterName(Head), _dis->getMesh()->getID(), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _h);
     femData->outController.setOutput(var.name, var); 
 
     // initial output parameter
@@ -59,7 +59,7 @@ void FunctionPressureToHead<T>::accept(const NumLib::TimeStep &/*time*/)
     //_vel->printout();
     //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    OutputVariableInfo var(this->getOutputParameterName(Head), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _h);
+    OutputVariableInfo var(this->getOutputParameterName(Head), _dis->getMesh()->getID(), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _h);
     femData->outController.setOutput(var.name, var); 
 
 };

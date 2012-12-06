@@ -13,6 +13,7 @@
 #pragma once
 
 #include <vector>
+#include <cstddef>
 
 namespace MathLib
 {
@@ -56,3 +57,4 @@ public:
 
 
 }
+
