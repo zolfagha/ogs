@@ -60,7 +60,7 @@ public:
     {
         _delta_strain = dStrain;
         _total_strain += _delta_strain;
-        _delta_stress = _matDe * _total_strain;
+        _delta_stress = _matDe * _delta_strain;
         _total_stress += _delta_stress;
     }
 
