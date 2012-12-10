@@ -34,7 +34,7 @@ bool FunctionTemperature<T1,T2>::initialize(const BaseLib::Options &option)
     MeshLib::IMesh* msh = femData->list_mesh[msh_id];
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
-    _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
+    _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
 
     // equations
     MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_feObjects);
@@ -59,7 +59,7 @@ bool FunctionTemperature<T1,T2>::initialize(const BaseLib::Options &option)
     _solution->getNonlinearSolver()->setOption(*optNum);
 
     // set initial output
-    OutputVariableInfo var(this->getOutputParameterName(Temperature), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
+    OutputVariableInfo var(this->getOutputParameterName(Temperature), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput(var.name, var); 
 
     // initial output parameter
@@ -88,6 +88,6 @@ void FunctionTemperature<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();
-    OutputVariableInfo var(this->getOutputParameterName(Temperature), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
+    OutputVariableInfo var(this->getOutputParameterName(Temperature), _problem->getDiscreteSystem()->getMesh()->getID(), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput(var.name, var); 
 };

@@ -149,6 +149,7 @@ public:
     int vol_bio_model;                    // CB
     double vol_bio;                       //SB
     double foc;                           // organic carbon content
+    bool is_fracture; //NW
 };
 
 

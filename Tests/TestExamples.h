@@ -50,7 +50,7 @@ public:
     std::vector<double> vec_bc1_vals;
     std::vector<size_t> vec_bc2_nodes;
     std::vector<double> vec_bc2_vals;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangeFeObjectContainer* _feObjects;
 
     ~GWFemTest()
     {
@@ -71,7 +71,7 @@ public:
         //mesh
         this->msh = msh;
         dis = new DiscreteLib::DiscreteSystem(msh);
-        _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
+        _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
         //discretization
         head = new MyNodalFunctionScalar();
         head->initialize(*dis, FemLib::PolynomialOrder::Linear);
@@ -82,7 +82,7 @@ public:
         NumLib::TXFunctionConstant f_bc1(.0);
         FemLib::DirichletBC2FEM bc1(*msh, poly_right, f_bc1, vec_bc1_nodes, vec_bc1_vals);
         NumLib::TXFunctionConstant f_bc2(-1e-5);
-        FemLib::NeumannBC2FEM bc2(*msh, *_feObjects, poly_left, f_bc2, vec_bc2_nodes, vec_bc2_vals);
+        FemLib::NeumannBC2FEM bc2(*msh, 0, *_feObjects, poly_left, f_bc2, vec_bc2_nodes, vec_bc2_vals);
         // mat
         _K = (K!=0) ? K : new NumLib::TXFunctionConstant(1.e-11);
     }
@@ -101,7 +101,7 @@ public:
         double* globalRHS = eqs.getRHS();
 
         //assembly
-        FemLib::LagrangianFeObjectContainer* feObjects = gw.head->getFeObjectContainer();
+        FemLib::IFeObjectContainer* feObjects = gw.head->getFeObjectContainer();
         MathLib::LocalMatrix localK;
         std::vector<size_t> e_node_id_list;
         double gp_x[3], real_x[3];
@@ -148,7 +148,7 @@ public:
     static void calculateVelocity(GWFemTest &gw)
     {
         const MeshLib::IMesh *msh = gw.msh;
-        FemLib::LagrangianFeObjectContainer* feObjects = gw.head->getFeObjectContainer();
+        FemLib::IFeObjectContainer* feObjects = gw.head->getFeObjectContainer();
         //calculate vel (vel=f(h))
         for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
             MeshLib::IElement* e = msh->getElement(i_e);

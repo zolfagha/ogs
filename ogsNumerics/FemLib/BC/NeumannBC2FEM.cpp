@@ -21,7 +21,7 @@
 namespace FemLib
 {
 
-NeumannBC2FEM::NeumannBC2FEM(const MeshLib::IMesh &msh, LagrangianFeObjectContainer &feObjects, const GeoLib::GeoObject &_geo, const NumLib::ITXFunction &_bc_func, std::vector<size_t> &_vec_nodes, std::vector<double> &_vec_values)
+NeumannBC2FEM::NeumannBC2FEM(const MeshLib::IMesh &msh, const double &current_time, IFeObjectContainer &feObjects, const GeoLib::GeoObject &_geo, const NumLib::ITXFunction &_bc_func, std::vector<size_t> &_vec_nodes, std::vector<double> &_vec_values)
 {
     // pickup nodes on geo
     MeshLib::findNodesOnGeometry(&msh, &_geo, &_vec_nodes);
@@ -35,7 +35,8 @@ NeumannBC2FEM::NeumannBC2FEM(const MeshLib::IMesh &msh, LagrangianFeObjectContai
             // get discrete values at nodes
             for (size_t i=0; i<_vec_nodes.size(); i++) {
                 const GeoLib::Point* x = msh.getNodeCoordinatesRef(_vec_nodes[i]);
-                _bc_func.eval(x->getData(), _vec_values[i]);
+                NumLib::TXPosition pos(current_time, x->getData());
+                _bc_func.eval(pos, _vec_values[i]);
             }
             break;
         }
@@ -54,12 +55,14 @@ NeumannBC2FEM::NeumannBC2FEM(const MeshLib::IMesh &msh, LagrangianFeObjectContai
                 MathLib::LocalVector  nodal_val(edge_nnodes);
                 for (size_t i_nod=0; i_nod<edge_nnodes; i_nod++) {
                     const GeoLib::Point* x = msh.getNodeCoordinatesRef(e->getNodeID(i_nod));
-                    double v;
-                    _bc_func.eval(x->getData(), v);
+                    NumLib::TXPosition pos(current_time, x->getData());
+                    double v = .0;
+                    _bc_func.eval(pos, v);
                     nodal_val[i_nod] = v;
                 }
                 // compute integrals
-                IFiniteElement *fe_edge = feObjects.getFeObject(*e, msh.getCurrentOrder());
+                e->setCurrentOrder(msh.getCurrentOrder());
+                IFiniteElement *fe_edge = feObjects.getFeObject(*e);
                 fe_edge->getIntegrationMethod()->initialize(*e, 2);
                 //IFiniteElement *fe_edge = _var->getFiniteElement(*e);
                 MathLib::LocalVector  result(edge_nnodes);

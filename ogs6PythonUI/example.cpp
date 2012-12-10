@@ -39,7 +39,7 @@ double Square::perimeter(void) {
 
 Geo::GWFemProblem* defineGWProblem1D(DiscreteSystem &dis, GeoLib::Line &line, Geo::PorousMedia &pm)
 {
-    LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
+    LagrangeFeObjectContainer* _feObjects = new LagrangeFeObjectContainer(*dis.getMesh());
     //equations
     Geo::GWFemProblem::LinearAssemblerType* linear_assembler = new Geo::GWFemProblem::LinearAssemblerType(*_feObjects, pm);
     Geo::GWFemProblem::ResidualAssemblerType* r_assembler = new Geo::GWFemProblem::ResidualAssemblerType(*_feObjects, pm);

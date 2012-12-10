@@ -23,7 +23,7 @@
 
 // Base
 #include "BaseLib/quicksort.h"
-#include "BaseLib/swap.h"
+#include <algorithm>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -74,10 +74,10 @@ bool Polygon::isPntInPolygon (GeoLib::Point const & pnt) const
     if (pnt[0] < min_aabb_pnt[0] || max_aabb_pnt[0] < pnt[0] || pnt[1] < min_aabb_pnt[1] || max_aabb_pnt[1] < pnt[1])
         return false;
 
-    size_t n_intersections (0);
     GeoLib::Point s;
 
     if (_simple_polygon_list.empty ()) {
+        size_t n_intersections (0);
         const size_t n_nodes (getNumberOfPoints()-1);
         for (size_t k(0); k<n_nodes; k++) {
             if (((*(getPoint(k)))[1] <= pnt[1] && pnt[1] <= (*(getPoint(k+1)))[1]) ||
@@ -274,7 +274,7 @@ void Polygon::ensureCWOrientation ()
         size_t tmp_n_pnts (n_pnts);
         tmp_n_pnts++; // include last point of polygon (which is identical to the first)
         for (size_t k(0); k<tmp_n_pnts/2; k++) {
-            BaseLib::swap (_ply_pnt_ids[k], _ply_pnt_ids[tmp_n_pnts-1-k]);
+            std::swap (_ply_pnt_ids[k], _ply_pnt_ids[tmp_n_pnts-1-k]);
         }
     }
 
@@ -295,7 +295,7 @@ void Polygon::splitPolygonAtIntersection (std::list<Polygon*>::iterator polygon_
             const_cast<std::vector<Point*>& >(_ply_pnts).push_back (intersection_pnt);
 
             // split Polygon
-            if (idx0 > idx1) BaseLib::swap (idx0, idx1);
+            if (idx0 > idx1) std::swap (idx0, idx1);
 
             GeoLib::Polygon* polygon0 (new GeoLib::Polygon((*polygon_it)->getPointsVec(), false));
             for (size_t k(0); k<=idx0; k++) polygon0->addPoint ((*polygon_it)->getPointID (k));
@@ -350,7 +350,7 @@ void Polygon::splitPolygonAtPoint (std::list<GeoLib::Polygon*>::iterator polygon
             delete [] perm;
             delete [] id_vec;
 
-            if (idx0 > idx1) BaseLib::swap (idx0, idx1);
+            if (idx0 > idx1) std::swap (idx0, idx1);
 
             // create two closed polylines
             GeoLib::Polygon* polygon0 (new GeoLib::Polygon((*polygon_it)->getPointsVec()));

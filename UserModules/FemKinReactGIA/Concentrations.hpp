@@ -38,7 +38,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
     MeshLib::IMesh* msh = femData->list_mesh[_msh_id];
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
-    _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
+    _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
 
 	// get the transformation class instance here
 	this->_ReductionKin = femData->m_KinReductScheme; 

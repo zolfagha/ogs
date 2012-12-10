@@ -14,7 +14,6 @@
 
 #include <algorithm>
 #include "MeshLib/Core/Element.h"
-#include "FiniteElementType.h"
 #include "TemplateFeBase.h"
 
 namespace FemLib
@@ -31,11 +30,10 @@ namespace FemLib
  * - Given coefficients are assumed to be constant over a element.
  * - Axisymmetric model is not supported!
  */    
-class TRI3CONST : public TemplateFeBase<FiniteElementType::TRI3CONST, 3>
+class TRI3CONST : public TemplateFeBase<3>
 {
 private:
     MeshLib::Triangle *_ele;
-    MeshLib::IMesh *_msh;
     double a[3], b[3], c[3];
     double A;
     FemIntegrationAnalytical _integration;
@@ -46,7 +44,7 @@ private:
     void computeGradBasisFunction(const double *x,  MathLib::LocalMatrix &mat);
 public:
     explicit TRI3CONST(MeshLib::IMesh* msh)
-    : TemplateFeBase<FiniteElementType::TRI3CONST, 3>(msh), _shape(1,3), _dshape(2,3) {};
+    : TemplateFeBase<3>(msh), _ele(NULL), A(.0), _shape(1,3), _dshape(2,3) {};
 
     /// initialize object for given mesh elements
     void configure( MeshLib::IElement &e );

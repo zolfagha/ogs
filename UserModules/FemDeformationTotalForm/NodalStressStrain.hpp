@@ -37,7 +37,7 @@ bool FunctionNodalStressStrain<T>::initialize(const BaseLib::Options &option)
     MeshLib::IMesh* msh = femData->list_mesh[msh_id];
     _dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
     const size_t n_strain_components = getNumberOfStrainComponents();
-    _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
+    _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
 
     // create strain, stress vectors
     MathLib::LocalVector v0(n_strain_components);

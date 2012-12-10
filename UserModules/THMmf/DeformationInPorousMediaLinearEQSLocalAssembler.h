@@ -13,10 +13,11 @@
 
 #pragma once
 
+#include "MeshLib/Core/CoordinateSystem.h"
 #include "MeshLib/Core/IElement.h"
 #include "DiscreteLib/Utils/DofEquationIdTable.h"
 #include "DiscreteLib/Utils/Tools.h"
-#include "FemLib/Tools/LagrangeFeObjectContainer.h"
+#include "FemLib/Tools/IFeObjectContainer.h"
 #include "NumLib/TransientAssembler/IElementWiseTransientLinearEQSLocalAssembler.h"
 #include "NumLib/TransientAssembler/ElementWiseTransientCoupledLinearEQSLocalAssembler.h"
 #include "NumLib/TimeStepping/TimeStep.h"
@@ -30,17 +31,20 @@ class DeformationInPorousMediaLinearEQSLocalAssembler
 public:
 
     DeformationInPorousMediaLinearEQSLocalAssembler(
-                const FemLib::LagrangianFeObjectContainer* feObjects,
+                const FemLib::IFeObjectContainer* feObjects,
                 const size_t n_var,
                 const std::vector<size_t> &vec_order,
                 const MeshLib::CoordinateSystem &problem_coordinates
                 )
     : NumLib::ElementWiseTransientCoupledLinearEQSLocalAssembler(n_var, vec_order),
-      _feObjects(*feObjects), _problem_coordinates(problem_coordinates)
+      _feObjects(feObjects->clone()), _problem_coordinates(problem_coordinates)
     {
     };
 
-    virtual ~DeformationInPorousMediaLinearEQSLocalAssembler() {};
+    virtual ~DeformationInPorousMediaLinearEQSLocalAssembler()
+    {
+        BaseLib::releaseObject(_feObjects);
+    };
 
 protected:
     virtual void assembleComponents(
@@ -54,7 +58,7 @@ protected:
                 );
 
 private:
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::IFeObjectContainer* _feObjects;
     const MeshLib::CoordinateSystem _problem_coordinates;
 };
 

@@ -90,7 +90,6 @@ public:
         BaseLib::releaseObject(_f_r);
         BaseLib::releaseObject(_f_dx);
         BaseLib::releaseObject(_f_nonlinear);
-        BaseLib::releaseObject(_feObjects);
     }
 
     /// solve 
@@ -136,7 +135,6 @@ private:
     SolutionVector *_x_n1_0;
     SolutionVector *_x_n1;
     SolutionVector *_x_st;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
 };
 
 template <
@@ -164,8 +162,6 @@ SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY>::SingleSte
     const size_t n_total_dofs = _dofManager.getTotalNumberOfActiveDoFs();
     INFO("* Total number of DoFs = %d", n_total_dofs);
 
-    _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
-
     // setup IC
     _vec_u_n1.resize(n_var, 0);
     for (size_t i=0; i<n_var; i++) {
@@ -173,9 +169,9 @@ SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY>::SingleSte
         FemIC* femIC = femVar->getIC();
         MyNodalFunctionScalar* u0 = new MyNodalFunctionScalar();
         u0->initialize(*dis, femVar->getCurrentOrder(), 0);
-        //u0->setFeObjectContainer(_feObjects);
+        assert (femVar->getFeObjectContainer() != NULL);
+        u0->setFeObjectContainer(femVar->getFeObjectContainer());
         femIC->setup(*u0);
-        u0->setFeObjectContainer(_feObjects);
         _vec_u_n1[i] = u0; //u0->clone()
     }
     
@@ -245,6 +241,7 @@ int SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY>::solve
         MyVariable* var = _problem->getVariable(i_var);
         for (size_t i=0; i<var->getNumberOfNeumannBC(); i++) {
             SolutionLib::IFemNeumannBC *bc2 = var->getNeumannBC(i);
+            bc2->initCurrentTime(this_t_n1.getTime());
             bc2->setup(var->getCurrentOrder());
             std::vector<size_t> &list_bc_nodes = bc2->getListOfBCNodes();
             std::vector<double> &list_bc_values = bc2->getListOfBCValues();

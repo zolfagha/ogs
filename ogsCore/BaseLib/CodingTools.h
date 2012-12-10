@@ -22,6 +22,14 @@
 #define RETURN_ENUM_IF_SAME_STRING(TypeName,str) \
     if (str.compare(#TypeName)==0) return TypeName;
 
+#ifdef OGS_ENABLE_DECL_OVERRIDE_FINAL
+#define OGS_DECL_OVERRIDE override
+#define OGS_DECL_FINAL final
+#else
+#define OGS_DECL_OVERRIDE
+#define OGS_DECL_FINAL
+#endif
+
 namespace BaseLib
 {
 

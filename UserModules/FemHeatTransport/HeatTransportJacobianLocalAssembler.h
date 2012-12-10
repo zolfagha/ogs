@@ -26,7 +26,7 @@
 class HeatTransportJacobianLocalAssembler: public NumLib::IElementWiseTransientJacobianLocalAssembler
 {
 public:
-    HeatTransportJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
+    HeatTransportJacobianLocalAssembler(FemLib::LagrangeFeObjectContainer* feObjects)
         : _feObjects(*feObjects), _vel(NULL)
     {
     };
@@ -103,6 +103,6 @@ public:
     }
 
 private:
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::LagrangeFeObjectContainer _feObjects;
     NumLib::ITXFunction* _vel;
 };

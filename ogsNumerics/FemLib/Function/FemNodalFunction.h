@@ -176,12 +176,12 @@ public:
     }
 
     /// get Finite element object container
-    LagrangianFeObjectContainer* getFeObjectContainer() const
+    IFeObjectContainer* getFeObjectContainer() const
     {
         return _feObjects;
     }
 
-    void setFeObjectContainer(LagrangianFeObjectContainer *fe)
+    void setFeObjectContainer(IFeObjectContainer *fe)
     {
         _feObjects = fe;
     }
@@ -226,7 +226,7 @@ private:
     MyDiscreteSystem* _discrete_system;
     MyVector* _nodal_values;
     PolynomialOrder::type _order;
-    LagrangianFeObjectContainer* _feObjects;
+    IFeObjectContainer* _feObjects;
 };
 
 template <class T_DIS_SYS>
@@ -332,12 +332,12 @@ public:
     }
 
     /// get Finite element object container
-    LagrangianFeObjectContainer* getFeObjectContainer() const
+    IFeObjectContainer* getFeObjectContainer() const
     {
         return _feObjects;
     }
 
-    void setFeObjectContainer(LagrangianFeObjectContainer *fe)
+    void setFeObjectContainer(IFeObjectContainer *fe)
     {
         _feObjects = fe;
     }
@@ -384,7 +384,7 @@ private:
     MyDiscreteSystem* _discrete_system;
     MyVector* _nodal_values;
     PolynomialOrder::type _order;
-    LagrangianFeObjectContainer* _feObjects;
+    IFeObjectContainer* _feObjects;
 };
 
 ///// evaluate this function at the given point

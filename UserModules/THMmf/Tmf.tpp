@@ -22,6 +22,11 @@
 #include "SolutionLib/Fem/FemSourceTerm.h"
 #include "Ogs6FemData.h"
 #include "FemVariableBuilder.h"
+#include "THMmfFemElementCatalogBuilder.h"
+#include "THMmfMeshElement2FeTypeBuilder.h"
+
+namespace THMmf
+{
 
 template <class T1, class T2>
 bool Tmf<T1,T2>::initialize(const BaseLib::Options &option)
@@ -36,12 +41,14 @@ bool Tmf<T1,T2>::initialize(const BaseLib::Options &option)
     MeshLib::setMeshElementCoordinatesMapping(*msh);
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
-    _feObjects = new FemLib::LagrangianFeObjectContainer(*msh);
+    FemLib::FemElementCatalog* feCatalog = THMmfFemElementCatalogBuilder::construct();
+    FemLib::MeshElementToFemElementType* eleTofe = THMmfMeshElement2FeTypeBuilder::construct(*msh, FemLib::PolynomialOrder::Quadratic, femData->list_medium);
+    _feObjects = new FemLib::FeObjectContainerPerFeType(feCatalog, eleTofe, msh);
 
     // equations
     MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType();
-    MyLinearAssemblerTypeForPorousMedia* linear_assembler_pm = new MyLinearAssemblerTypeForPorousMedia(*_feObjects);
-    MyLinearAssemblerTypeForFracture* linear_assembler_frac = new MyLinearAssemblerTypeForFracture(*_feObjects, msh->getGeometricProperty()->getCoordinateSystem());
+    MyLinearAssemblerTypeForPorousMedia* linear_assembler_pm = new MyLinearAssemblerTypeForPorousMedia(_feObjects);
+    MyLinearAssemblerTypeForFracture* linear_assembler_frac = new MyLinearAssemblerTypeForFracture(_feObjects, msh->getGeometricProperty()->getCoordinateSystem());
     const MeshLib::CoordinateSystem coord = msh->getGeometricProperty()->getCoordinateSystem();
     linear_assembler->addLocalAssembler(coord.getDimension(), linear_assembler_pm);
     linear_assembler->addLocalAssembler(coord.getDimension()-1, linear_assembler_frac);
@@ -52,9 +59,10 @@ bool Tmf<T1,T2>::initialize(const BaseLib::Options &option)
     eqs->initialize(linear_assembler);
     _problem->setTimeSteppingFunction(*tim);
     // set up variable
-    typename MyProblemType::MyVariable* concentration = _problem->addVariable("T");
+    typename MyProblemType::MyVariable* var_T = _problem->addVariable("T");
+    var_T->setFeObjectContainer(_feObjects);
     FemVariableBuilder varBuilder;
-    varBuilder.doit(this->getOutputParameterName(Temperature), option, msh, femData->geo, femData->geo_unique_name, _feObjects, concentration);
+    varBuilder.doit(this->getOutputParameterName(Temperature), option, msh, femData->geo, femData->geo_unique_name, _feObjects, var_T);
 
     // set up solution
     _solution = new MySolutionType(dis, _problem);
@@ -68,7 +76,7 @@ bool Tmf<T1,T2>::initialize(const BaseLib::Options &option)
     femData->outController.setOutput(var.name, var); 
 
     // initial output parameter
-    this->setOutput(Temperature, _solution->getCurrentSolution(concentration->getID()));
+    this->setOutput(Temperature, _solution->getCurrentSolution(var_T->getID()));
 
     return true;
 }
@@ -100,3 +108,6 @@ void Tmf<T1, T2>::output(const NumLib::TimeStep &/*time*/)
     OutputVariableInfo var(this->getOutputParameterName(Temperature), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
     femData->outController.setOutput(var.name, var); 
 };
+
+} // end THMmf
+

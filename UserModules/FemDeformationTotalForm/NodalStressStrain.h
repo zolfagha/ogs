@@ -78,7 +78,7 @@ private:
     MyNodalFunctionVector* _nodal_stress;
     std::vector<NodalPointScalarWrapper*> _vec_nodal_strain_components;
     std::vector<NodalPointScalarWrapper*> _vec_nodal_stress_components;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangeFeObjectContainer* _feObjects;
     NumLib::DiscreteDataConvergenceCheck _checker;
 };
 

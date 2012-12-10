@@ -25,12 +25,12 @@ class GroundwaterFlowTimeODELocalAssembler: public T
 {
 private:
     PorousMedia* _pm;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangeFeObjectContainer* _feObjects;
 public:
     typedef MathLib::LocalVector LocalVector;
     typedef MathLib::LocalMatrix LocalMatrix;
 
-    GroundwaterFlowTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, PorousMedia &pm)
+    GroundwaterFlowTimeODELocalAssembler(FemLib::LagrangeFeObjectContainer &feObjects, PorousMedia &pm)
     : _pm(&pm), _feObjects(&feObjects)
     {
     };
@@ -62,9 +62,9 @@ class GroundwaterFlowJacobianLocalAssembler: public NumLib::IElementWiseTransien
 {
 private:
     PorousMedia* _pm;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangeFeObjectContainer* _feObjects;
 public:
-    GroundwaterFlowJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, PorousMedia &pm)
+    GroundwaterFlowJacobianLocalAssembler(FemLib::LagrangeFeObjectContainer &feObjects, PorousMedia &pm)
     : _pm(&pm), _feObjects(&feObjects)
     {
     };

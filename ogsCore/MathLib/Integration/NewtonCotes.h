@@ -10,8 +10,7 @@
  * Created on 2012-06-25 by Norihiro Watanabe
  */
 
-#ifndef MATHLIB_NEWTONCOTES_H
-#define MATHLIB_NEWTONCOTES_H
+#pragma once
 
 #include <cstddef>
 
@@ -24,6 +23,7 @@ namespace MathLib
  */
 class NewtonCotes
 {
+public:
     /// midpoint integration
     double middpoint(double (*fun)(double), double a, double b, std::size_t n);
 
@@ -36,4 +36,3 @@ class NewtonCotes
 
 }
 
-#endif  // MATHLIB_NEWTONCOTES_H

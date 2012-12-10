@@ -134,6 +134,8 @@ CMediumProperties::CMediumProperties() :
     transfer_coefficient = .0;
     rill_epsilon = .0;
     rill_height = .0;
+
+    is_fracture = false; //NW
 }
 
 /**************************************************************************
@@ -1621,6 +1623,13 @@ std::ios::pos_type CMediumProperties::Read(std::ifstream* mmp_file)
             string file_name = porosity_file;
 
             in.clear();
+            continue;
+        }
+
+        //subkeyword found
+        if(line_string.find("$FRACTURE") != std::string::npos)
+        {
+            is_fracture = true; //NW
             continue;
         }
     }

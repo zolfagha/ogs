@@ -66,7 +66,7 @@ void convertRowMajorSparsityToCRS(const RowMajorSparsity &row_major_entries, Mat
         const std::set<size_t> &setConnection = row_major_entries[i];
         //
         for (std::set<size_t>::iterator it=setConnection.begin(); it!=setConnection.end(); it++) {
-            vec_col_idx.push_back(*it);
+            vec_col_idx.push_back(static_cast<INTTYPE>(*it));
             ++counter_ptr;
         }
     }

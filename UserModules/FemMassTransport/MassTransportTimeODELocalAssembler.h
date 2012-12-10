@@ -32,7 +32,7 @@ public:
     typedef MathLib::LocalVector LocalVectorType;
     typedef MathLib::LocalMatrix LocalMatrixType;
 
-    MassTransportTimeODELocalAssembler(MaterialLib::Compound* cmp, FemLib::LagrangianFeObjectContainer* feObjects)
+    MassTransportTimeODELocalAssembler(MaterialLib::Compound* cmp, FemLib::LagrangeFeObjectContainer* feObjects)
         : _cmp(cmp), _feObjects(*feObjects), _vel(NULL)
     {
     };
@@ -89,6 +89,6 @@ protected:
 
 private:
     MaterialLib::Compound* _cmp;
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::LagrangeFeObjectContainer _feObjects;
     NumLib::ITXFunction* _vel;
 };

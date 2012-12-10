@@ -18,5 +18,6 @@
 #include "TXFunctionAnalytical.h"
 #include "TXCompositFunction.h"
 #include "TXVectorFunctionAsColumnData.h"
+#include "TXFunctionTimeCurve.h"
 #include "TXFunctionType.h"
-
+#include "Multiplication.h"

@@ -16,10 +16,8 @@
 // STL
 #include <cstddef>
 #include <vector>
+#include <algorithm>
 
-
-// Base
-#include "swap.h"
 
 namespace BaseLib
 {
@@ -41,12 +39,12 @@ size_t partition_(T* array, size_t beg, size_t end, size_t *perm)
 
         if (i >= j)
             break;
-        BaseLib::swap(array[i], array[j]);
-        BaseLib::swap(perm[i], perm[j]);
+        std::swap(array[i], array[j]);
+        std::swap(perm[i], perm[j]);
     }
 
-    BaseLib::swap(array[beg], array[j]);
-    BaseLib::swap(perm[beg], perm[j]);
+    std::swap(array[beg], array[j]);
+    std::swap(perm[beg], perm[j]);
     return j;
 }
 
@@ -85,12 +83,12 @@ private:
 
             if (i >= j)
                 break;
-            BaseLib::swap(array[i], array[j]);
-            BaseLib::swap(perm[i], perm[j]);
+            std::swap(array[i], array[j]);
+            std::swap(perm[i], perm[j]);
         }
 
-        BaseLib::swap(array[beg], array[j]);
-        BaseLib::swap(perm[beg], perm[j]);
+        std::swap(array[beg], array[j]);
+        std::swap(perm[beg], perm[j]);
         return j;
     }
 
@@ -133,12 +131,12 @@ private:
 
             if (i >= j)
                 break;
-            BaseLib::swap(array[i], array[j]);
-            BaseLib::swap(perm[i], perm[j]);
+            std::swap(array[i], array[j]);
+            std::swap(perm[i], perm[j]);
         }
 
-        BaseLib::swap(array[beg], array[j]);
-        BaseLib::swap(perm[beg], perm[j]);
+        std::swap(array[beg], array[j]);
+        std::swap(perm[beg], perm[j]);
         return j;
     }
 
@@ -165,12 +163,12 @@ private:
 
             if (i >= j)
                 break;
-            BaseLib::swap(perm[i], perm[j]);
-            BaseLib::swap(array[i], array[j]);
+            std::swap(perm[i], perm[j]);
+            std::swap(array[i], array[j]);
         }
 
-        BaseLib::swap(perm[beg], perm[j]);
-        BaseLib::swap(array[beg], array[j]);
+        std::swap(perm[beg], perm[j]);
+        std::swap(array[beg], array[j]);
         return j;
     }
 

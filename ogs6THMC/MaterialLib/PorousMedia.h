@@ -13,7 +13,7 @@
 #pragma once
 
 #include "BaseLib/CodingTools.h"
-
+#include "IMedium.h"
 
 namespace NumLib
 {
@@ -23,7 +23,7 @@ class ITXFunction;
 namespace MaterialLib
 {
 
-struct PorousMedia
+struct PorousMedia : public IMedium
 {
     NumLib::ITXFunction* hydraulic_conductivity;
     NumLib::ITXFunction* permeability;
@@ -44,7 +44,7 @@ struct PorousMedia
                 );
     }
 
-    ~PorousMedia()
+    virtual ~PorousMedia()
     {
         BaseLib::releaseObject(
                 hydraulic_conductivity,
@@ -54,6 +54,8 @@ struct PorousMedia
                 geo_area
                 );
     }
+
+    virtual MediumType getMediumType() const {return MediumType::PorousMedium;};
 };
 
 } //end

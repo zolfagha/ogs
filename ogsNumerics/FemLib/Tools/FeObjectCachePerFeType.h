@@ -15,10 +15,10 @@
 #include <map>
 
 #include "BaseLib/CodingTools.h"
+#include "MeshLib/Core/IMesh.h"
 
 #include "FemLib/Core/Element/IFemElement.h"
-#include "FemLib/Core/Element/FemElementFactory.h"
-
+#include "FemElementCatalog.h"
 
 namespace FemLib
 {
@@ -29,22 +29,51 @@ namespace FemLib
 class FeObjectCachePerFeType
 {
 public:
-    explicit FeObjectCachePerFeType(MeshLib::IMesh &msh) : _msh(&msh) {};
+    /**
+     *
+     * @param fe_catalog
+     * @param msh
+     */
+    explicit FeObjectCachePerFeType(const FemElementCatalog* fe_catalog, MeshLib::IMesh* msh)
+    : _fe_catalog(fe_catalog), _msh(msh) {};
 
+    /**
+     *
+     * @param src
+     */
+    FeObjectCachePerFeType(const FeObjectCachePerFeType& src);
+
+    /**
+     *
+     */
     virtual ~FeObjectCachePerFeType()
     {
         BaseLib::releaseObjectsInStdMap(_mapFeObj);
     }
 
-    IFiniteElement* getFeObject(FiniteElementType::type fe_type);
+    /**
+     * get a finite element object
+     * @param fe_type
+     * @return
+     */
+    IFiniteElement* getFeObject(const int fe_type);
 
+    /**
+     * get a pointer to this mesh
+     * @return
+     */
     MeshLib::IMesh* getMesh() const {return _msh;};
 
-private:
-    std::map<FiniteElementType::type, IFiniteElement*> _mapFeObj;
-    MeshLib::IMesh *_msh;
+    /**
+     * get a pointer to FE catalog
+     * @return
+     */
+    const FemElementCatalog* getCatalog() const {return _fe_catalog;};
 
-    DISALLOW_COPY_AND_ASSIGN(FeObjectCachePerFeType);
+private:
+    const FemElementCatalog* _fe_catalog;
+    MeshLib::IMesh* _msh;
+    std::map<int, IFiniteElement*> _mapFeObj;
 };
 
 }

@@ -103,10 +103,11 @@ private:
 private:
     MyProblemType* _problem;
     MySolutionType* _solution;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::IFeObjectContainer* _feObjects;
     NumLib::DiscreteDataConvergenceCheck _checker;
 };
 
+} //THMmf
+
 #include "Tmf.tpp"
 
-} //THMmf

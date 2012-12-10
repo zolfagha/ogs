@@ -16,7 +16,6 @@
 
 #include "MathLib/DataType.h"
 #include "MeshLib/Core/IElement.h"
-#include "NumLib/Function/Function.h"
 
 #include "FemLib/Core/Integration/Integration.h"
 #include "FemLib/Core/ShapeFunction/ShapeFunction.h"
@@ -42,7 +41,7 @@ public:
     virtual void configure(MeshLib::IElement &e ) = 0;
 
     /// return finite element type
-    virtual FiniteElementType::type getFeType() const = 0;
+    virtual int getFeType() const = 0;
 
     /// return this mesh element
     virtual MeshLib::IElement* getElement() const = 0;

@@ -69,11 +69,18 @@ public:
 
     ///
     explicit TemplateFEMIntegrationPointFunction(const TemplateFEMIntegrationPointFunction &src)
+    : _discrete_system(0), _values(0)
     {
         initialize((MyDiscreteSystem*)src._discrete_system, src._values);
         //TODO (*this->_values) = (*src._values);
-        _values = 0;
     };
+
+    /// vector operation: set data
+    virtual TemplateFEMIntegrationPointFunction& operator= (const TemplateFEMIntegrationPointFunction &src)
+    {
+        initialize((MyDiscreteSystem*)src._discrete_system, src._values);
+        return *this;
+    }
 
     ///
     TemplateFEMIntegrationPointFunction<T_DIS_SYS, Tvalue>* clone() const
@@ -99,7 +106,7 @@ public:
                 size_t ele_id = x.getId(0);
                 size_t gp_id = x.getId(1);
                 IntegrationPointVectorType &gp_values = (*_values)[ele_id];
-                if (gp_values.size()==0) return;
+                if (gp_values.size()<gp_id+1) return;
                 v = gp_values[gp_id]; 
             }
             break;

@@ -26,19 +26,19 @@ namespace ogs5
 {
 
 COutput::COutput() :
-    ProcessInfo(), _id(0), out_amplifier(0.0),
+    ProcessInfo(), tim_type_name("TIMES"), _id(0), out_amplifier(0.0),
     nSteps(-1), _new_file_opened(false), dat_type_name("TECPLOT")
 {
-    tim_type_name = "TIMES";
     VARIABLESHARING = false;    //BG
+    _time = .0;
 }
 
 COutput::COutput(size_t id) :
-    ProcessInfo(), _id(id), out_amplifier(0.0),
+    ProcessInfo(), tim_type_name("TIMES"), _id(id), out_amplifier(0.0),
     nSteps(-1), _new_file_opened(false), dat_type_name("TECPLOT")
 {
-    tim_type_name = "TIMES";
     VARIABLESHARING = false;    //BG
+    _time = .0;
 }
 
 COutput::~COutput()
@@ -91,12 +91,11 @@ ios::pos_type COutput::Read(std::ifstream& in_str)
     bool new_keyword = false;
     ios::pos_type position;
     bool new_subkeyword = false;
-    std::string tec_file_name;
     ios::pos_type position_line;
     bool ok = true;
-    std::stringstream in;
     string name;
     ios::pos_type position_subkeyword;
+    std::stringstream in;
 
     // Schleife ueber alle Phasen bzw. Komponenten
     while (!new_keyword)

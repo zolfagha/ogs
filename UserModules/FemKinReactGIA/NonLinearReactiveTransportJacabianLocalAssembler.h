@@ -35,7 +35,7 @@ template <class T_NODAL_FUNCTION_SCALAR, class T_FUNCTION_DATA>
 class NonLinearReactiveTransportJacobianLocalAssembler: public NumLib::IElementWiseTransientJacobianLocalAssembler
 {
 public:
-	NonLinearReactiveTransportJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects, ogsChem::chemReductionKin* ReductionScheme, T_FUNCTION_DATA* concentrations)
+	NonLinearReactiveTransportJacobianLocalAssembler(FemLib::LagrangeFeObjectContainer* feObjects, ogsChem::chemReductionKin* ReductionScheme, T_FUNCTION_DATA* concentrations)
         : _feObjects(*feObjects), _vel(NULL), _reductionKin(ReductionScheme), _concentrations(concentrations), _xi_mob_rates(NULL), _xi_immob_rates(NULL)
     {
     };
@@ -188,7 +188,7 @@ private:
     /**
       * FEM object
       */ 
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::LagrangeFeObjectContainer _feObjects;
 
     /**
       * velocity function

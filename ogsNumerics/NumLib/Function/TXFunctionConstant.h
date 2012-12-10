@@ -24,6 +24,10 @@ namespace NumLib
 class TXFunctionConstant : public ITXFunction
 {
 public:
+    /**
+     *
+     * @param val
+     */
     explicit TXFunctionConstant(double val) : _vec(1,1)
     {
         _vec(0,0) = val;
@@ -31,23 +35,80 @@ public:
         ITXFunction::isTemporallyConst(true);
         ITXFunction::isSpatiallyConst(true);
     };
+
+    /**
+     *
+     * @param val
+     */
     explicit TXFunctionConstant(const DataType &val) : _vec(val) {};
 
+    /**
+     * Copy constructor
+     * @param src
+     */
+    TXFunctionConstant(const TXFunctionConstant &src) : _vec(src._vec) {};
+
+    /**
+     *
+     */
     virtual ~TXFunctionConstant() {};
 
-    virtual void eval(const TXPosition /*x*/, DataType &v) const { v = _vec;}
-    void eval(double &v) const { v = _vec(0,0); };
-    void eval(DataType &v) const { v = _vec; };
-    virtual void eval(const double* /*x*/, double &val) const
+    /**
+     *
+     * @return
+     */
+    virtual TXFunctionConstant* clone() const OGS_DECL_OVERRIDE
+    {
+        return new TXFunctionConstant(*this);
+    }
+
+    /**
+     *
+     * @param
+     * @param v
+     */
+    virtual void eval(const TXPosition /*x*/, DataType &v) const OGS_DECL_OVERRIDE
+    {
+        v = _vec;
+    }
+
+    /**
+     *
+     * @param
+     * @param val
+     */
+    virtual void eval(const TXPosition /*x*/, double &val) const OGS_DECL_OVERRIDE
     {
         val = _vec(0,0);
     }
 
-    virtual TXFunctionConstant* clone() const { return new TXFunctionConstant(_vec); }
+    /**
+     *
+     * @param
+     * @param val
+     */
+    virtual void eval(const double* /*x*/, double &val) const OGS_DECL_OVERRIDE
+    {
+        val = _vec(0,0);
+    }
 
-    //virtual bool isConst() const {return true;};
-    //virtual bool isTemporallyConst() const {return true;};
-    //virtual bool isSpatiallyConst() const {return true;};
+    /**
+     *
+     * @param v
+     */
+    void eval(double &v) const
+    {
+        v = _vec(0,0);
+    };
+
+    /**
+     *
+     * @param v
+     */
+    void eval(DataType &v) const
+    {
+        v = _vec;
+    };
 
 private:
     DataType _vec;

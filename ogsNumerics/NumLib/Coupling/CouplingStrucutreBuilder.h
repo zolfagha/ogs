@@ -68,10 +68,14 @@ private:
     template <class T_EQS_FACTORY>
     T_M* buildMonolithicSystem(const BaseLib::Options *option, T_EQS_FACTORY &eqs_fac)
     {
-        std::string eqs_name = option->getOption("name");
-        T_M* eqs = eqs_fac.create(eqs_name);
+        std::string eqs_type = option->getOption("type");
+        if (eqs_type.empty()) {
+            ERR("***Error in TemplateCouplingStrucutreBuilder: attribute \"type\" is not found.");
+            return NULL;
+        }
+        T_M* eqs = eqs_fac.create(eqs_type);
         if (eqs==NULL) {
-            ERR("***Error: %s is not found. Please check your compilation setting.", eqs_name.c_str());
+            ERR("***Error in TemplateCouplingStrucutreBuilder: Monolithic system type <%s> is not found.", eqs_type.c_str());
             return NULL;
         }
         if (option->hasOption("in")) {
@@ -87,6 +91,7 @@ private:
             }
         }
         _vec_m.push_back(eqs);
+        std::string eqs_name = option->getOption("name");
         _vec_m_name.push_back(eqs_name);
         return eqs;
     }

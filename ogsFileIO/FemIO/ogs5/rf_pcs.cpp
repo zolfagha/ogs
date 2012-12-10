@@ -95,14 +95,15 @@ bool PCSRead(const std::string& file_base_name, std::vector<CRFProcess*> &pcs_ve
 }
 
 CRFProcess::CRFProcess()
-: mesh_id(0), timegroup_id(0)
+: Deactivated_SubDomain(0), mesh_id(0), timegroup_id(0)
 {
 
 }
 
 CRFProcess::~CRFProcess()
 {
-
+    if (Deactivated_SubDomain!=NULL)
+        delete [] Deactivated_SubDomain;
 }
 
 /**************************************************************************

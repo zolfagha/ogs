@@ -128,7 +128,7 @@ public:
     }
 #endif
 
-    virtual TXFunctionLinear* clone() const
+    virtual TXFunctionLinear* clone() const OGS_DECL_OVERRIDE
     {
         return new TXFunctionLinear(_sfc, _list_pt_val);
     }

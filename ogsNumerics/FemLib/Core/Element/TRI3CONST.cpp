@@ -13,7 +13,6 @@
 #include "TRI3CONST.h"
 
 #include "GeoLib/Point.h"
-#include "NumLib/Function/Function.h"
 
 namespace FemLib
 {
@@ -24,13 +23,13 @@ void TRI3CONST::configure( MeshLib::IElement &e )
     double nodes_x[3], nodes_y[3], nodes_z[3];
     // xyz
     for (size_t i=0; i<3; i++) {
-        const GeoLib::Point *pt = _msh->getNodeCoordinatesRef(_ele->getNodeID(i));
+        const GeoLib::Point *pt = getMesh()->getNodeCoordinatesRef(_ele->getNodeID(i));
         nodes_x[i] = pt->getData()[0];
         nodes_y[i] = pt->getData()[1];
         nodes_z[i] = pt->getData()[2];
     }
     // area
-    A = GeoLib::triangleArea(_msh->getNodeCoordinates(_ele->getNodeID(0)),_msh->getNodeCoordinates(_ele->getNodeID(1)),_msh->getNodeCoordinates(_ele->getNodeID(2)));
+    A = GeoLib::triangleArea(getMesh()->getNodeCoordinates(_ele->getNodeID(0)),getMesh()->getNodeCoordinates(_ele->getNodeID(1)),getMesh()->getNodeCoordinates(_ele->getNodeID(2)));
     // set a,b,c
     a[0] = 0.5/A*(nodes_x[1]*nodes_y[2]-nodes_x[2]*nodes_y[1]);
     b[0] = 0.5/A*(nodes_y[1]-nodes_y[2]);

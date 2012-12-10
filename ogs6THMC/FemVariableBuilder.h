@@ -16,7 +16,7 @@
 #include "BaseLib/Options.h"
 #include "GeoLib/GEOObjects.h"
 #include "MeshLib/Core/IMesh.h"
-#include "FemLib/Tools/LagrangeFeObjectContainer.h"
+#include "FemLib/Tools/IFeObjectContainer.h"
 #include "SolutionLib/Fem/FemVariable.h"
 
 /**
@@ -35,5 +35,5 @@ public:
      * @param _feObjects        Pointer to FE objects
      * @param var               Pointer to a variable to be configured
      */
-    void doit(const std::string &given_var_name, const BaseLib::Options &option, const MeshLib::IMesh* msh, const GeoLib::GEOObjects *geo, const std::string &geo_unique_name, FemLib::LagrangianFeObjectContainer* _feObjects, SolutionLib::FemVariable* var) const;
+    void doit(const std::string &given_var_name, const BaseLib::Options &option, const MeshLib::IMesh* msh, const GeoLib::GEOObjects *geo, const std::string &geo_unique_name, FemLib::IFeObjectContainer* _feObjects, SolutionLib::FemVariable* var) const;
 };

@@ -27,7 +27,7 @@
 class MassTransportJacobianLocalAssembler: public NumLib::IElementWiseTransientJacobianLocalAssembler
 {
 public:
-    MassTransportJacobianLocalAssembler(MaterialLib::Compound* cmp, FemLib::LagrangianFeObjectContainer* feObjects)
+    MassTransportJacobianLocalAssembler(MaterialLib::Compound* cmp, FemLib::LagrangeFeObjectContainer* feObjects)
         : _cmp(cmp), _feObjects(*feObjects), _vel(NULL)
     {
     };
@@ -85,6 +85,6 @@ public:
 
 private:
     MaterialLib::Compound* _cmp;
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::LagrangeFeObjectContainer _feObjects;
     NumLib::ITXFunction* _vel;
 };

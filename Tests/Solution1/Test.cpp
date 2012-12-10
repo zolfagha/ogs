@@ -94,7 +94,7 @@ typedef MyFunctionDisplacement::FemLinearElasticEquation FemLinearElasticEquatio
 
 Geo::GWFemProblem* createGWProblem(DiscreteSystem &dis, Geo::PorousMedia &pm)
 {
-    LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
+    LagrangeFeObjectContainer* _feObjects = new LagrangeFeObjectContainer(dis.getMesh());
     //equations
     Geo::GWFemEquation::LinearAssemblerType* linear_assembler = new Geo::GWFemEquation::LinearAssemblerType(*_feObjects, pm);
     Geo::GWFemEquation::ResidualAssemblerType* r_assembler = new Geo::GWFemEquation::ResidualAssemblerType(*_feObjects, pm);
@@ -107,7 +107,7 @@ Geo::GWFemProblem* createGWProblem(DiscreteSystem &dis, Geo::PorousMedia &pm)
 }
 
 
-Geo::GWFemProblem* defineGWProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec, Geo::PorousMedia &pm, FemLib::LagrangianFeObjectContainer* feObjects)
+Geo::GWFemProblem* defineGWProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec, Geo::PorousMedia &pm, FemLib::LagrangeFeObjectContainer* feObjects)
 {
     Geo::GWFemProblem* _problem = createGWProblem(dis, pm);
     // var
@@ -128,7 +128,7 @@ Geo::GWFemProblem* defineGWProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec,
     return _problem;
 }
 
-Geo::GWFemProblem* defineGWProblem1D(DiscreteSystem &dis, GeoLib::Line &line, Geo::PorousMedia &pm, FemLib::LagrangianFeObjectContainer* feObjects)
+Geo::GWFemProblem* defineGWProblem1D(DiscreteSystem &dis, GeoLib::Line &line, Geo::PorousMedia &pm, FemLib::LagrangeFeObjectContainer* feObjects, double p_out, double q_in)
 {
     Geo::GWFemProblem* _problem = createGWProblem(dis, pm);
     // var
@@ -142,15 +142,15 @@ Geo::GWFemProblem* defineGWProblem1D(DiscreteSystem &dis, GeoLib::Line &line, Ge
     var_ic->addDistribution(new GeoLib::GeoDomain(), new  NumLib::TXFunctionConstant(.0));
     head->setIC(var_ic);
     //BC
-    head->addDirichletBC(new FemDirichletBC(dis.getMesh(), &line.getPoint2(), new NumLib::TXFunctionConstant(.0)));
-    head->addNeumannBC(new FemNeumannBC(dis.getMesh(), feObjects, &line.getPoint1(), new NumLib::TXFunctionConstant(-1e-5)));
+    head->addDirichletBC(new FemDirichletBC(dis.getMesh(), &line.getPoint2(), new NumLib::TXFunctionConstant(p_out)));
+    head->addNeumannBC(new FemNeumannBC(dis.getMesh(), feObjects, &line.getPoint1(), new NumLib::TXFunctionConstant(-q_in)));
 
     return _problem;
 }
 
-Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec, Geo::PorousMedia &pm, Geo::Compound &comp, FemLib::LagrangianFeObjectContainer* /*feObjects*/)
+Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec, Geo::PorousMedia &pm, Geo::Compound &comp, FemLib::LagrangeFeObjectContainer* /*feObjects*/)
 {
-    LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
+    LagrangeFeObjectContainer* _feObjects = new LagrangeFeObjectContainer(dis.getMesh());
     //equations
     Geo::MassFemEquation::LinearAssemblerType* linear_assembler = new Geo::MassFemEquation::LinearAssemblerType(*_feObjects, pm, comp);
     Geo::MassFemEquation::ResidualAssemblerType* r_assembler = new Geo::MassFemEquation::ResidualAssemblerType(*_feObjects, pm, comp);
@@ -176,9 +176,9 @@ Geo::MassFemProblem* defineMassTransportProblem(DiscreteSystem &dis, GeoLib::Rec
     return _problem;
 }
 
-Geo::FemLinearElasticProblem* defineLinearElasticProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec, Geo::PorousMedia &pm, FemLib::LagrangianFeObjectContainer* /*feObjects*/)
+Geo::FemLinearElasticProblem* defineLinearElasticProblem(DiscreteSystem &dis, GeoLib::Rectangle &_rec, Geo::PorousMedia &pm, FemLib::LagrangeFeObjectContainer* /*feObjects*/)
 {
-    LagrangianFeObjectContainer* _feObjects = new LagrangianFeObjectContainer(*dis.getMesh());
+    LagrangeFeObjectContainer* _feObjects = new LagrangeFeObjectContainer(dis.getMesh());
     //equations
     Geo::FemLinearElasticEquation::LinearAssemblerType* linear_assembler = new Geo::FemLinearElasticEquation::LinearAssemblerType(*_feObjects, pm);
     Geo::FemLinearElasticEquation::ResidualAssemblerType* r_assembler = new Geo::FemLinearElasticEquation::ResidualAssemblerType(*_feObjects, pm);
@@ -230,7 +230,7 @@ TEST(Solution, CouplingFem2D)
         pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
         pm.porosity = new NumLib::TXFunctionConstant(0.2);
         DiscreteSystem dis(msh);
-        FemLib::LagrangianFeObjectContainer feObjects(*msh);
+        FemLib::LagrangeFeObjectContainer feObjects(msh);
         Geo::GWFemProblem* pGW = defineGWProblem(dis, *_rec, pm, &feObjects);
         TimeStepFunctionConstant tim(.0, 100.0, 10.0);
         pGW->setTimeSteppingFunction(tim);
@@ -296,14 +296,18 @@ TEST(Solution, line)
         const double len = 2.0;
         const size_t div = 2;
         const double h = len / div;
+        const double p_out = .0;
+        const double q_in = 1e-5;
+        const double k = 1e-11;
+        const double poro = 0.2;
         MeshLib::IMesh *msh = MeshGenerator::generateLineMesh(len, div, .0, .0, .0);
-        GeoLib::Line* line = new GeoLib::Line(Point(0.0, 0.0, 0.0),  Point(2.0, 0.0, 0.0));
+        GeoLib::Line* line = new GeoLib::Line(Point(0.0, 0.0, 0.0),  Point(len, 0.0, 0.0));
         Geo::PorousMedia pm;
-        pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(1.e-11);
-        pm.porosity = new NumLib::TXFunctionConstant(0.2);
+        pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(k);
+        pm.porosity = new NumLib::TXFunctionConstant(poro);
         DiscreteSystem dis(msh);
-        FemLib::LagrangianFeObjectContainer feObjects(*msh);
-        Geo::GWFemProblem* pGW = defineGWProblem1D(dis, *line, pm, &feObjects);
+        FemLib::LagrangeFeObjectContainer feObjects(msh);
+        Geo::GWFemProblem* pGW = defineGWProblem1D(dis, *line, pm, &feObjects, p_out, q_in);
         TimeStepFunctionConstant tim(.0, 10.0, 10.0);
         pGW->setTimeSteppingFunction(tim);
         // options
@@ -349,9 +353,10 @@ TEST(Solution, line)
 
         std::vector<double> expected;
         expected.resize(div+1);
-        const double p_left = 2.e+6;
-        const double p_right = .0;
-        const double x_len = 2.0;
+        //const double p_left = 2.e+6;
+        const double p_left = p_out + q_in * len / k;
+        const double p_right = p_out;
+        const double x_len = len;
         for (size_t i=0; i<expected.size(); i++) {
             double x = i*h;
             expected[i] = (p_right-p_left) / x_len * x + p_left;
@@ -388,7 +393,7 @@ TEST(Solution, CouplingFem2)
         tracer.molecular_diffusion = new NumLib::TXFunctionConstant(mol_diff);
         //problems
         DiscreteSystem dis(msh);
-        FemLib::LagrangianFeObjectContainer feObjects(*msh);
+        FemLib::LagrangeFeObjectContainer feObjects(msh);
         Geo::GWFemProblem* pGW = defineGWProblem(dis, *_rec, pm, &feObjects);
         Geo::MassFemProblem* pMass = defineMassTransportProblem(dis, *_rec, pm, tracer, &feObjects);
         pGW->setTimeSteppingFunction(tim);
@@ -517,7 +522,7 @@ TEST(Solution, LinearElastic2D)
         solid.Youngs_modulus = 10e+9;
         pm.solidphase = &solid;
         DiscreteSystem dis(msh);
-        FemLib::LagrangianFeObjectContainer feObjects(*msh);
+        FemLib::LagrangeFeObjectContainer feObjects(msh);
         Geo::FemLinearElasticProblem* pDe = defineLinearElasticProblem(dis, *_rec, pm, &feObjects);
         TimeStepFunctionConstant tim(.0, 10.0, 10.0);
         pDe->setTimeSteppingFunction(tim);

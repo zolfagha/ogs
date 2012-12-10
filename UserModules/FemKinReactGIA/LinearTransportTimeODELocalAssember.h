@@ -39,7 +39,7 @@ public:
     /**
       * constructor
       */ 
-    LinearTransportTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer* feObjects)
+    LinearTransportTimeODELocalAssembler(FemLib::LagrangeFeObjectContainer* feObjects)
         : _feObjects(*feObjects), _vel(NULL)
     {
         poro                 = MathLib::LocalMatrix::Zero(1,1); 
@@ -130,7 +130,7 @@ private:
     /**
       * FEM object
       */ 
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::LagrangeFeObjectContainer _feObjects;
     
     /**
       * velocity function

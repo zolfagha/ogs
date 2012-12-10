@@ -28,7 +28,7 @@ public:
     typedef MathLib::LocalMatrix LocalMatrix;
 
     explicit HeadBasedGWTimeODELocalAssembler(
-                FemLib::LagrangianFeObjectContainer &feObjects)
+                FemLib::LagrangeFeObjectContainer &feObjects)
     : _feObjects(feObjects)
     {};
 
@@ -64,6 +64,6 @@ protected:
     }
 
 private:
-    FemLib::LagrangianFeObjectContainer _feObjects;
+    FemLib::LagrangeFeObjectContainer _feObjects;
 };
 

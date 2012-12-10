@@ -30,7 +30,7 @@ public:
     typedef MathLib::LocalVector LocalVectorType;
     typedef MathLib::LocalMatrix LocalMatrixType;
 
-    MassTransportTimeODELocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, PorousMedia &pm, Compound &cmp)
+    MassTransportTimeODELocalAssembler(FemLib::LagrangeFeObjectContainer &feObjects, PorousMedia &pm, Compound &cmp)
     : _pm(&pm), _cmp(&cmp), _feObjects(&feObjects)
     {
         BaseLib::zeroObject(_vel);
@@ -88,7 +88,7 @@ protected:
 private:
     PorousMedia* _pm;
     Compound* _cmp;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangeFeObjectContainer* _feObjects;
     NumLib::ITXFunction* _vel;
 };
 
@@ -97,7 +97,7 @@ private:
 class MassTransportJacobianLocalAssembler: public NumLib::IElementWiseTransientJacobianLocalAssembler
 {
 public:
-    MassTransportJacobianLocalAssembler(FemLib::LagrangianFeObjectContainer &feObjects, PorousMedia &pm, Compound &cmp)
+    MassTransportJacobianLocalAssembler(FemLib::LagrangeFeObjectContainer &feObjects, PorousMedia &pm, Compound &cmp)
     : _pm(&pm), _cmp(&cmp), _feObjects(&feObjects)
     {
         BaseLib::zeroObject(_vel);
@@ -157,7 +157,7 @@ public:
 private:
     PorousMedia* _pm;
     Compound* _cmp;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangeFeObjectContainer* _feObjects;
     NumLib::ITXFunction* _vel;
 };
 } //end

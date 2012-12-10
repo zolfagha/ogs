@@ -38,27 +38,6 @@ struct ElementShape
     };
 };
 
-/// List of available element types
-struct ElementType
-{
-    enum type {
-        LINE2 = 1,
-        QUAD4 = 2,
-        HEXAHEDRON8 = 3,
-        TRIANGLE3 = 4,
-        TETRAHEDRON4 = 5,
-        PRISM6 = 6,
-        PYRAMID5 = 7,
-        LINE3 = 8,
-        QUAD8 = 9,
-        QUAD9 = 10,
-        HEXAHEDRON20 = 11,
-        TRIANGLE6 = 12,
-        TETRAHEDRON10 = 13,
-        INVALID = -1
-    };
-};
-
 /**
  * \brief Interface of element classes
  *

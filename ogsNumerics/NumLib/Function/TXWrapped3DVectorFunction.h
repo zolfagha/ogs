@@ -37,7 +37,7 @@ public:
 
     void resetVectorFunction(F_VECTOR* f_vec) {_f_vec = f_vec; };
 
-    virtual void eval(const TXPosition x, DataType &v) const
+    virtual void eval(const TXPosition x, DataType &v) const OGS_DECL_OVERRIDE
     {
         DataType tmp_v;
         _f_vec->eval(x, tmp_v);
@@ -52,7 +52,7 @@ public:
         }
     }
 
-    virtual TXWrapped3DVectorFunction<F_VECTOR>* clone() const
+    virtual TXWrapped3DVectorFunction<F_VECTOR>* clone() const OGS_DECL_OVERRIDE
     {
         return new TXWrapped3DVectorFunction<F_VECTOR>(_f_vec, _coord_type);
     }

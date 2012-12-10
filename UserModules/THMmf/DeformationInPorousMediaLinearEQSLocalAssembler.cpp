@@ -18,7 +18,7 @@
 #include "MaterialLib/PorousMedia.h"
 #include "MaterialLib/Solid.h"
 #include "MaterialLib/Fluid.h"
-
+#include "PhysicsLib/DeformationTools.h"
 #include "PhysicsLib/FemLinearElasticTools.h"
 #include "Ogs6FemData.h"
 
@@ -117,7 +117,8 @@ void DeformationInPorousMediaLinearEQSLocalAssembler::assembleComponents(
     const LocalMatrixType m = get_m(dim);
 
     //
-    FemLib::IFiniteElement* fe_u = _feObjects.getFeObject(e, u_order);
+    e.setCurrentOrder(u_order);
+    FemLib::IFiniteElement* fe_u = _feObjects->getFeObject(e);
     FemLib::IFemNumericalIntegration *q_u = fe_u->getIntegrationMethod();
     double gp_x[3], real_x[3];
     for (size_t j=0; j<q_u->getNumberOfSamplingPoints(); j++) {

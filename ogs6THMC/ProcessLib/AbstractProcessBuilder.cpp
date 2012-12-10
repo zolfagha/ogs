@@ -19,25 +19,25 @@
 namespace ProcessLib
 {
 
-ProcessInfo* AbstractProcessBuilder::registerProcess(const std::string &pcs_name, ProcessFactoryBase* pcs_buid)
+ProcessInfo* AbstractProcessBuilder::registerProcess(const std::string &pcs_type, ProcessFactoryBase* pcs_buid)
 {
-    this->_map_pcs_name2new[pcs_name] = pcs_buid;
+    this->_map_pcs_name2new[pcs_type] = pcs_buid;
     //ProcessInfo* pcs_info = new ProcessInfo();
     //return pcs_info;
 
     return NULL;
 }
 
-bool AbstractProcessBuilder::hasRegisterd(const std::string &pcs_name) const
+bool AbstractProcessBuilder::hasRegisterd(const std::string &pcs_type) const
 {
-    return _map_pcs_name2new.count(pcs_name)>0;
+    return _map_pcs_name2new.count(pcs_type)>0;
 }
 
-Process* AbstractProcessBuilder::create(const std::string &pcs_name) const
+Process* AbstractProcessBuilder::create(const std::string &pcs_type) const
 {
-    if (!hasRegisterd(pcs_name)) return 0;
+    if (!hasRegisterd(pcs_type)) return 0;
 
-    std::map<std::string, ProcessFactoryBase*>::const_iterator itr = this->_map_pcs_name2new.find(pcs_name);
+    std::map<std::string, ProcessFactoryBase*>::const_iterator itr = this->_map_pcs_name2new.find(pcs_type);
     return itr->second->createProcess();
 }
 

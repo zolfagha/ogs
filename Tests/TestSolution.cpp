@@ -58,7 +58,7 @@ public:
     typedef MathLib::LocalVector LocalVectorType;
     typedef MathLib::LocalMatrix LocalMatrixType;
 
-    GWTimeODEAssembler(FemLib::LagrangianFeObjectContainer &feObjects, NumLib::ITXFunction &mat)
+    GWTimeODEAssembler(FemLib::LagrangeFeObjectContainer &feObjects, NumLib::ITXFunction &mat)
     : _matK(&mat), _feObjects(&feObjects)
     {
     };
@@ -85,18 +85,18 @@ protected:
     }
 private:
     NumLib::ITXFunction* _matK;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangeFeObjectContainer* _feObjects;
 };
 
 class GWJacobianAssembler : public NumLib::IElementWiseTransientJacobianLocalAssembler
 {
 private:
     NumLib::ITXFunction* _matK;
-    FemLib::LagrangianFeObjectContainer* _feObjects;
+    FemLib::LagrangeFeObjectContainer* _feObjects;
     typedef MathLib::LocalMatrix LocalMatrixType;
     typedef MathLib::LocalVector LocalVectorType;
 public:
-    GWJacobianAssembler(FemLib::LagrangianFeObjectContainer &feObjects, NumLib::ITXFunction &mat)
+    GWJacobianAssembler(FemLib::LagrangeFeObjectContainer &feObjects, NumLib::ITXFunction &mat)
     : _matK(&mat), _feObjects(&feObjects), test(.0)
     {
     };
@@ -154,13 +154,26 @@ public:
             : _assemblerR(assemblerR), _assemblerJ(assemblerJ) {};
 
     /**
-     * do pre-post processing
+     * do pre processing
      *
      * \param dx        solution increment
      * \param x_new     new solution
      */
     template<class T_X, class F_RESIDUALS, class F_DX>
-    void doit(const T_X &/*dx*/, const T_X &/*x_new*/, F_RESIDUALS &/*f_residuals*/, F_DX &/*f_dx*/)
+    void pre_process(const T_X &/*dx*/, const T_X &/*x_new*/, F_RESIDUALS &/*f_residuals*/, F_DX &/*f_dx*/)
+    {
+        _assemblerJ->setTest(1.0);
+    }
+
+    /**
+     * do post processing
+     * @param
+     * @param
+     * @param
+     * @param
+     */
+    template<class T_X, class F_RESIDUALS, class F_DX>
+    void post_process(const T_X &/*dx*/, const T_X &/*x_new*/, F_RESIDUALS &/*f_residuals*/, F_DX &/*f_dx*/)
     {
         _assemblerJ->setTest(1.0);
     }
@@ -245,7 +258,7 @@ public:
     {
         MeshLib::IMesh *msh = dis.getMesh();
         //size_t nnodes = msh->getNumberOfNodes();
-        _feObjects = new LagrangianFeObjectContainer(*msh);
+        _feObjects = new LagrangeFeObjectContainer(msh);
         //equations
         typename GWFemEquation::LinearAssemblerType* local_linear = new typename GWFemEquation::LinearAssemblerType(*_feObjects, K);
         typename GWFemEquation::ResidualAssemblerType* local_r = new typename GWFemEquation::ResidualAssemblerType(*_feObjects, K);
@@ -298,7 +311,7 @@ private:
     SolutionForHead* _solHead; 
     GeoLib::Rectangle *_rec;
     FemLib::FemNodalFunctionScalar<DiscreteSystem>::type *_head;
-    LagrangianFeObjectContainer* _feObjects;
+    LagrangeFeObjectContainer* _feObjects;
 
     DISALLOW_COPY_AND_ASSIGN(GWFemTestSystem);
 };

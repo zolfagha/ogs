@@ -266,7 +266,7 @@ BaseLib::Options* defineOption4SteadyCoupling()
     BaseLib::Options* P1_sub = P1->addSubGroup("problems");
     BaseLib::Options* M1 = P1_sub->addSubGroup("M");
     {
-    M1->addOption("name", "EQS1");
+    M1->addOption("type", "EQS1");
 //    std::vector<std::string> out_var;
 //    out_var.push_back("a");
 //    std::vector<std::string> in_var;
@@ -280,7 +280,7 @@ BaseLib::Options* defineOption4SteadyCoupling()
     }
     BaseLib::Options* M2 = P1_sub->addSubGroup("M");
     {
-    M2->addOption("name", "EQS2");
+    M2->addOption("type", "EQS2");
 //    std::vector<std::string> out_var;
 //    out_var.push_back("b");
 //    std::vector<std::string> in_var;
@@ -294,7 +294,7 @@ BaseLib::Options* defineOption4SteadyCoupling()
     }
     BaseLib::Options* M3 = P2_sub->addSubGroup("M");
     {
-    M3->addOption("name", "EQS3");
+    M3->addOption("type", "EQS3");
 //    std::vector<std::string> out_var;
 //    out_var.push_back("c");
 //    std::vector<std::string> in_var;
@@ -763,7 +763,7 @@ BaseLib::Options* defineOption4TransientCoupling()
     BaseLib::Options* P1_sub = P1->addSubGroup("problems");
     BaseLib::Options* M1 = P1_sub->addSubGroup("M");
     {
-    M1->addOption("name", "EQS1");
+    M1->addOption("type", "EQS1");
 //    std::vector<std::string> out_var;
 //    out_var.push_back("a");
 //    std::vector<std::string> in_var;
@@ -777,7 +777,7 @@ BaseLib::Options* defineOption4TransientCoupling()
     }
     BaseLib::Options* M2 = P1_sub->addSubGroup("M");
     {
-    M2->addOption("name", "EQS2");
+    M2->addOption("type", "EQS2");
 //    std::vector<std::string> out_var;
 //    out_var.push_back("b");
 //    std::vector<std::string> in_var;
@@ -791,7 +791,7 @@ BaseLib::Options* defineOption4TransientCoupling()
     }
     BaseLib::Options* M3 = P2_sub->addSubGroup("M");
     {
-    M3->addOption("name", "EQS3");
+    M3->addOption("type", "EQS3");
 //    std::vector<std::string> out_var;
 //    out_var.push_back("c");
 //    std::vector<std::string> in_var;

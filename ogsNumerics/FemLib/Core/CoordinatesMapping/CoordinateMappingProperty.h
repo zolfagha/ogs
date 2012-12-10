@@ -44,6 +44,7 @@ struct CoordinateMappingProperty
         dshape_dx = new MathLib::LocalMatrix();
         jacobian_dxdr = new MathLib::LocalMatrix();
         inv_jacobian_drdx = new MathLib::LocalMatrix();
+        det_jacobian = .0;
     }
 
     ~CoordinateMappingProperty()
