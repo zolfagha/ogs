@@ -125,7 +125,12 @@ CKinReact::CKinReact(void)
    02/2006 SB Implementation
 ***************************************************************************/
 CKinReact::~CKinReact(void)
-{}
+{
+    size_t i; 
+    for (i=0; i < ProdStochhelp.size(); i++)
+        delete ProdStochhelp[i];
+    ProdStochhelp.clear();  
+}
 
 
 
