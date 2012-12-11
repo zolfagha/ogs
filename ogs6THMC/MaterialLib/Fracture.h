@@ -53,7 +53,7 @@ struct Fracture : public IMedium
                 );
     }
 
-    virtual MediumType getMediumType() const {return MediumType::Fracture;};
+    virtual MediumType::type getMediumType() const {return MediumType::Fracture;};
 };
 
 } //end

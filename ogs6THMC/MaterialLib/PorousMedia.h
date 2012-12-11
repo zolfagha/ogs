@@ -55,7 +55,7 @@ struct PorousMedia : public IMedium
                 );
     }
 
-    virtual MediumType getMediumType() const {return MediumType::PorousMedium;};
+    virtual MediumType::type getMediumType() const {return MediumType::PorousMedium;};
 };
 
 } //end

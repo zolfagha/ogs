@@ -15,10 +15,13 @@
 namespace MaterialLib
 {
 
-enum class MediumType
+struct MediumType
 {
-    PorousMedium,
-    Fracture
+    enum type
+    {
+        PorousMedium,
+        Fracture
+    };
 };
 
 } //end

@@ -23,7 +23,7 @@ namespace MaterialLib
 struct IMedium
 {
     virtual ~IMedium() {};
-    virtual MediumType getMediumType() const = 0;
+    virtual MediumType::type getMediumType() const = 0;
 };
 
 } //end
