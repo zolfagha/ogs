@@ -47,7 +47,11 @@ public:
     template<class T_X, class F_RESIDUALS, class F_DX>
     void post_process(const T_X &/*dx*/, const T_X & x_new, F_RESIDUALS &/*f_residuals*/, F_DX &/*f_dx*/)
     {
-
+        // very important is, now we have x_new, 
+        // the data in the FunctionConcentrations needs to be updated, 
+        // so that the in the next Newton iteration, concentrations are calculated
+        // based on the new x_new values
+        _assemblerJ->get_function_data()->update_xi_mob_nodal_values( x_new ); 
     };
 
 private:
