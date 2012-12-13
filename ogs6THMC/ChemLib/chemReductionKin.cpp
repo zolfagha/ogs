@@ -245,6 +245,14 @@ void chemReductionKin::EtaXi2Conc(ogsChem::LocalVector &local_eta_mob,
 	local_conc.topRows( this->_I_mob ) = local_c_mob; 
 	local_conc.bottomRows( this->_I_sorp + this->_I_min ) = local_c_immob; 
 
+    // testing if the non-negative stablilization will help?
+    for (size_t i=0; i < local_conc.size(); i++)
+    {
+        if ( local_conc(i) < 0.0 )
+            local_conc(i) = 1.0e-99;     
+    }
+    // end of testing
+
 }
 
 void chemReductionKin::Calc_Xi_mob_Rate(ogsChem::LocalVector &local_eta_mob, 
