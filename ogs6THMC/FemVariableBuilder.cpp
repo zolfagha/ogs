@@ -74,11 +74,14 @@ void FemVariableBuilder::doit(const std::string &given_var_name, const BaseLib::
             NumLib::ITXFunction* f_st = NumLib::TXFunctionBuilder::create(*opST);
             if (st_type.compare("NEUMANN")==0) {
                 // user set inflow as positive sign but internally negative
+                NumLib::ITXFunction* f_st_old = f_st;
+                NumLib::TXFunctionConstant constantFunction(-1.);
                 f_st = new NumLib::TXCompositFunction
                 <
                     NumLib::ITXFunction, NumLib::TXFunctionConstant,
                     NumLib::Multiplication
-                >(f_st, new NumLib::TXFunctionConstant(-1.));
+                >(f_st, &constantFunction);
+                delete f_st_old;
             }
             SolutionLib::IFemNeumannBC *femSt = 0;
             if (st_type.compare("NEUMANN")==0) {
@@ -86,6 +89,7 @@ void FemVariableBuilder::doit(const std::string &given_var_name, const BaseLib::
             } else if (st_type.compare("SOURCESINK")==0) {
                 femSt = new SolutionLib::FemSourceTerm(msh, geo_obj, f_st);
             }
+            delete f_st;
             var->addNeumannBC(femSt);
         }
     }
