@@ -6,14 +6,14 @@
 		<out>VELOCITY</out>
 		<out>Tracer</out>
 		<problems>
-			<M name="GROUNDWATER_FLOW">
+			<M name="GROUNDWATER_FLOW" type="GROUNDWATER_FLOW">
 				<out>HEAD</out>
 			</M>
-			<M name="HEAD_TO_ELEMENT_VELOCITY">
+			<M name="HEAD_TO_ELEMENT_VELOCITY" type="HEAD_TO_ELEMENT_VELOCITY">
 				<in>HEAD</in>
 				<out>VELOCITY</out>
 			</M>
-			<M name="MASS_TRANSPORT">
+			<M name="MASS_TRANSPORT" type="MASS_TRANSPORT">
 				<in>VELOCITY</in>
 				<out>Tracer</out>
 			</M>
