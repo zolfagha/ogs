@@ -37,7 +37,7 @@ inline void ASSERT_DOUBLE_ARRAY_EQ(GeoLib::Point Expected, GeoLib::Point Actual,
     for (size_t i=0; i<3; i++) \
         ASSERT_NEAR(Expected[i], Actual[i], epsilon); 
 }
-//
+
 template<typename T1, typename T2>
 inline void ASSERT_DOUBLE_ARRAY_EQ(T1 &Expected, T2 &Actual, size_t N, double epsilon=1.0e-8) {
     for (size_t i=0; i<N; i++) \
