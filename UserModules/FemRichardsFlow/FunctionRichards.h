@@ -22,8 +22,8 @@
 #include "ProcessLib/AbstractTransientProcess.h"
 
 #include "MaterialLib/Compound.h"
-#include "../FemMassTransport/MassTransportTimeODELocalAssembler.h"
-#include "../FemMassTransport/MassTransportJacobianLocalAssembler.h"
+#include "RichardsFlowTimeODELocalAssember.h"
+#include "RichardsFlowJacobianLocalAssembler.h"
 
 
 
@@ -41,9 +41,9 @@ public:
     typedef T_DISCRETE_SYSTEM MyDiscreteSystem;
     typedef T_LINEAR_SOLVER MyLinearSolver;
     // local assembler // Todo this assembler must be changed later, after we setup some for Richards flow
-    typedef MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler> MyLinearAssemblerType;
-    typedef MassTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyResidualAssemblerType;
-    typedef MassTransportJacobianLocalAssembler MyJacobianAssemblerType;
+    typedef RichardsFlowTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler> MyLinearAssemblerType;
+    typedef RichardsFlowTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyResidualAssemblerType;
+    typedef RichardsFlowJacobianLocalAssembler MyJacobianAssemblerType;
     // Equation definition
     typedef SolutionLib::TemplateFemEquation<
             MyDiscreteSystem,

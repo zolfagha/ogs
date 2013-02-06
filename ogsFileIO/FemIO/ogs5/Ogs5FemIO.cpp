@@ -52,6 +52,9 @@ bool Ogs5FemIO::read(const std::string &proj_path, Ogs5FemData &ogs5data)
         case FiniteElement::LIQUID_FLOW:
             pcs->primary_variable_name.push_back("PRESSURE1");
             break;
+		case FiniteElement::RICHARDS_FLOW:
+            pcs->primary_variable_name.push_back("PRESSURE1"); 
+            break; 
         case FiniteElement::HEAT_TRANSPORT:
             pcs->primary_variable_name.push_back("TEMPERATURE1");
             break;

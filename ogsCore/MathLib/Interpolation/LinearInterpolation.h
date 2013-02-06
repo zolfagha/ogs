@@ -54,9 +54,11 @@ public:
     /**
      *
      * @param pnt_to_interpolate
+	 * @return the slope at pnt_to_interpolate
      * @return
      */
     double getValue ( double pnt_to_interpolate );
+	double getSlope ( double pnt_to_interpolate );
 
 private:
     const std::vector<double> _supporting_points;
