@@ -26,7 +26,8 @@ protected:
         // get pointer to corresponding fluid (water) class
         MaterialLib::Fluid* fluid = Ogs6FemData::getInstance()->list_fluid[0];
         // whether include gravity
-        const bool hasGravityEffect = _problem_coordinates.hasZ();
+        // const bool hasGravityEffect = _problem_coordinates.hasZ();
+        const bool hasGravityEffect = true;
 
         MathLib::LocalMatrix mass_mat_coeff    = MathLib::LocalMatrix::Zero(1,1);  // coefficient of mass matrix
         MathLib::LocalMatrix Pw                = MathLib::LocalMatrix::Zero(1,1);  // water pressure 
@@ -95,8 +96,8 @@ protected:
             if (hasGravityEffect) { 
                 // since no primary vairable involved
                 // directly assemble to the Right-Hand-Side
-                // F += dNp^T * K * rho * gz
-                localF.noalias() += dNp.transpose() * local_k_mu * rho_w * vec_g;
+                // F += dNp^T * K * gz
+                localF.noalias() += dNp.transpose() * local_k_mu  * vec_g;
             } // end of if hasGravityEffect
         } // end of for GP
     }  // end of assemble ODE
