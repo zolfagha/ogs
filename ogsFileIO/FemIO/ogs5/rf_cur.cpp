@@ -171,5 +171,19 @@ double Kurven::getCurveValue(int methode, double punkt, int& gueltig)
     }
 }
 
+void Kurven::exportCurveValues(std::vector<double> & vec_t, std::vector<double> & vec_v)
+{
+    vec_t.clear();
+    vec_v.clear();
+    for (size_t i=0; i<stuetzstellen.size(); i++)
+    {
+        double t, v; 
+        t = stuetzstellen[i]->punkt; 
+        v = stuetzstellen[i]->wert; 
+        vec_t.push_back(t); 
+        vec_v.push_back(v);
+    }
+
+}
 } //ogs5
 

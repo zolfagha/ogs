@@ -28,6 +28,10 @@ public:
     {
         v = _linear->getValue(x);
     };
+    virtual void eval_slope(const double &x, double &slope)
+    {
+        slope = _linear->getSlope(x); 
+    };
     virtual TemplateFunction<double,double>* clone() const
     {
         FunctionLinear1D* obj = new FunctionLinear1D(_linear);

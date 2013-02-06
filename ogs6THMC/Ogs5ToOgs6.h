@@ -27,7 +27,7 @@ namespace Ogs5ToOgs6
 
 void convertSolidProperty(const ogs5::CSolidProperties &msp, MaterialLib::Solid &solid);
 
-void convertPorousMediumProperty(const ogs5::CMediumProperties &mmp, MaterialLib::PorousMedia &pm);
+void convertPorousMediumProperty(const ogs5::Ogs5FemData &ogs5fem, const ogs5::CMediumProperties &mmp, MaterialLib::PorousMedia &pm);
 
 bool convert(const ogs5::Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options &option);
 };

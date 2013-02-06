@@ -27,16 +27,16 @@
 template <class T1, class T2>
 bool FunctionRichards<T1,T2>::initialize(const BaseLib::Options &option)
 {
-    //Ogs6FemData* femData = Ogs6FemData::getInstance();
-    //size_t msh_id = option.getOptionAsNum<size_t>("MeshID");
-    //size_t time_id = option.getOptionAsNum<size_t>("TimeGroupID");
-    //NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
+    Ogs6FemData* femData = Ogs6FemData::getInstance();
+    size_t msh_id = option.getOptionAsNum<size_t>("MeshID");
+    size_t time_id = option.getOptionAsNum<size_t>("TimeGroupID");
+    NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
 
-    ////mesh and FE objects
-    //MeshLib::IMesh* msh = femData->list_mesh[msh_id];
-    //MyDiscreteSystem* dis = 0;
-    //dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
-    //_feObjects = new FemLib::LagrangeFeObjectContainer(msh);
+    //mesh and FE objects
+    MeshLib::IMesh* msh = femData->list_mesh[msh_id];
+    MyDiscreteSystem* dis = 0;
+    dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
+    _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
 
     ////Compound
     //size_t compound_id = option.getOptionAsNum<size_t>("CompoundID");
@@ -46,59 +46,60 @@ bool FunctionRichards<T1,T2>::initialize(const BaseLib::Options &option)
     //}
     //_compound = femData->list_compound[compound_id];
 
-    //// equations
-    //MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_compound, _feObjects);
-    //MyResidualAssemblerType* r_assembler = new MyResidualAssemblerType(_compound, _feObjects);
-    //MyJacobianAssemblerType* j_eqs = new MyJacobianAssemblerType(_compound, _feObjects);
+    // local assemblers
+    MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_feObjects, msh->getGeometricProperty()->getCoordinateSystem());
+    MyResidualAssemblerType* r_assembler = new MyResidualAssemblerType(_feObjects, msh->getGeometricProperty()->getCoordinateSystem());
+    MyJacobianAssemblerType* j_eqs = new MyJacobianAssemblerType(_feObjects);
+	
+    // set up problem
+    _problem = new MyProblemType(dis);
+    MyEquationType* eqs = _problem->createEquation();
+    eqs->initialize(linear_assembler, r_assembler, j_eqs);
+    _problem->setTimeSteppingFunction(*tim);
+    // set up variable
+    typename MyProblemType::MyVariable* pressure_w = _problem->addVariable("PRESSURE1");
+    FemVariableBuilder varBuilder;
+    varBuilder.doit("PRESSURE1", option, msh, femData->geo, femData->geo_unique_name, _feObjects, pressure_w);
 
-    //// set up problem
-    //_problem = new MyProblemType(dis);
-    //MyEquationType* eqs = _problem->createEquation();
-    //eqs->initialize(linear_assembler, r_assembler, j_eqs);
-    //_problem->setTimeSteppingFunction(*tim);
-    //// set up variable
-    //typename MyProblemType::MyVariable* concentration = _problem->addVariable("concentration");
-    //FemVariableBuilder varBuilder;
-    //varBuilder.doit(this->getOutputParameterName(Concentration), option, msh, femData->geo, femData->geo_unique_name, _feObjects, concentration);
+    // set up solution
+    _solution = new MySolutionType(dis, _problem);
+    MyLinearSolver* linear_solver = _solution->getLinearEquationSolver();
+    const BaseLib::Options* optNum = option.getSubGroup("Numerics");
+    linear_solver->setOption(*optNum);
+    _solution->getNonlinearSolver()->setOption(*optNum);
 
-    //// set up solution
-    //_solution = new MySolutionType(dis, _problem);
-    //MyLinearSolver* linear_solver = _solution->getLinearEquationSolver();
-    //const BaseLib::Options* optNum = option.getSubGroup("Numerics");
-    //linear_solver->setOption(*optNum);
-    //_solution->getNonlinearSolver()->setOption(*optNum);
+    // set initial output
+    OutputVariableInfo var(this->getOutputParameterName(Pressure), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
+    //OutputVariableInfo var(this->getOutputParameterName(Pressure), _problem->getDiscreteSystem()->getMesh()->getID(), OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
 
-    //// set initial output
-    //OutputVariableInfo var(this->getOutputParameterName(Concentration), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
-    //femData->outController.setOutput(var.name, var); 
+	femData->outController.setOutput(var.name, var); 
 
-    //// initial output parameter
-    //this->setOutput(Concentration, _solution->getCurrentSolution(concentration->getID()));
+    // initial output parameter
+    this->setOutput(Pressure, _solution->getCurrentSolution(pressure_w->getID()));
 
-    //return true;
+    return true;
 }
 
 template <class T1, class T2>
 void FunctionRichards<T1, T2>::initializeTimeStep(const NumLib::TimeStep &/*time*/)
 {
-    //const NumLib::ITXFunction *vel = this->getInput<NumLib::ITXFunction>(Velocity);
-    //this->_problem->getEquation()->getLinearAssembler()->setVelocity(vel);
-    //this->_problem->getEquation()->getResidualAssembler()->setVelocity(vel);
-    //this->_problem->getEquation()->getJacobianAssembler()->setVelocity(vel);
+  
 }
 
 template <class T1, class T2>
 void FunctionRichards<T1, T2>::updateOutputParameter(const NumLib::TimeStep &/*time*/)
 {
-    //setOutput(Concentration, _solution->getCurrentSolution(0));
+    setOutput(Pressure, _solution->getCurrentSolution(0));
 }
 
 template <class T1, class T2>
 void FunctionRichards<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 {
-    ////update data for output
-    //const size_t msh_id = _problem->getDiscreteSystem()->getMesh()->getID();
-    //Ogs6FemData* femData = Ogs6FemData::getInstance();
-    //OutputVariableInfo var(this->getOutputParameterName(Concentration), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
-    //femData->outController.setOutput(var.name, var); 
+    //update data for output
+    const size_t msh_id = _problem->getDiscreteSystem()->getMesh()->getID();
+    Ogs6FemData* femData = Ogs6FemData::getInstance();
+    OutputVariableInfo var(this->getOutputParameterName(Pressure), msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _solution->getCurrentSolution(0));
+    femData->outController.setOutput(var.name, var); 
+
+
 };

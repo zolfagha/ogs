@@ -53,6 +53,8 @@ public:
         double wert;
     };
     std::vector<StuetzStellen*> stuetzstellen;
+
+    void exportCurveValues(std::vector<double> & vec_t, std::vector<double> & vec_v); 
 };
 
 

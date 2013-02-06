@@ -1004,7 +1004,7 @@ std::ios::pos_type CMediumProperties::Read(std::ifstream* mmp_file)
         //------------------------------------------------------------------------
         if(line_string.find("$PERMEABILITY_SATURATION") != std::string::npos)
         {
-            int num_phases = 0;
+            num_phases = 2;
             //if(H3_Process)
             //    num_phases = 3; // the existence of additional fluids in the .mfp file is not an indicator of a 4-phase system.
             //else if(H2_Process)

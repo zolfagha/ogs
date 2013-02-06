@@ -52,6 +52,7 @@ void convertFluidProperty(const CFluidProperties &mfp, MaterialLib::Fluid &fluid
 {
     if (mfp.density_model==1) {
         fluid.density = new NumLib::TXFunctionConstant(mfp.rho_0);
+		fluid.drho_dp = new NumLib::TXFunctionConstant(mfp.drho_dp);
     }
 
     if (mfp.viscosity_model==1) {
@@ -88,7 +89,7 @@ void convertSolidProperty(const CSolidProperties &msp, MaterialLib::Solid &solid
     }
 }
 
-void convertPorousMediumProperty(const CMediumProperties &mmp, MaterialLib::PorousMedia &pm)
+void convertPorousMediumProperty(const Ogs5FemData &ogs5fem, const CMediumProperties &mmp, MaterialLib::PorousMedia &pm)
 {
     if (mmp.permeability_model==1) {
         pm.hydraulic_conductivity = new NumLib::TXFunctionConstant(mmp.permeability_tensor[0]);
@@ -106,6 +107,45 @@ void convertPorousMediumProperty(const CMediumProperties &mmp, MaterialLib::Poro
     if (mmp.mass_dispersion_model==1) {
         pm.dispersivity_long  = new NumLib::TXFunctionConstant(mmp.mass_dispersion_longitudinal); 
         pm.dispersivity_trans = new NumLib::TXFunctionConstant(mmp.mass_dispersion_transverse);
+    }
+
+	//Run through all liquid phases
+	for (int i=0; i<mmp.num_phases; i++) {
+
+		if (mmp.permeability_saturation_model[i] == 0) {  // this is a curve
+            size_t perm_sat_model; 
+            perm_sat_model = (size_t)mmp.permeability_saturation_model[i]; 
+            pm.perm_saturation_model.push_back(perm_sat_model); 
+            // get the curve number
+            size_t curve_idx; 
+            std::vector<double> vec_x, vec_y;
+            curve_idx = (size_t)mmp.perm_saturation_value[i]; 
+            // read the curve 
+            ogs5fem.kurven_vector[curve_idx-1]->exportCurveValues(vec_x, vec_y);
+            // create ITXFunction
+            NumLib::FunctionLinear1D* f_perm_sat = NULL;
+            MathLib::LinearInterpolation* xy_curve = new                      
+            MathLib::LinearInterpolation(vec_x, vec_y);
+            f_perm_sat = new NumLib::FunctionLinear1D(xy_curve); 
+            // add it into the list
+            pm.perm_saturation_curve.push_back( f_perm_sat ); 
+        }
+
+	}
+
+	if (mmp.capillary_pressure_model == 0) {  
+        // capillary pressure vs saturation curve
+        pm.capp_sat_model = (size_t)mmp.capillary_pressure_model; 
+        // get the curve number
+        size_t curve_idx; 
+        std::vector<double> vec_x, vec_y; 
+        curve_idx = (size_t)mmp.capillary_pressure_values[0]; 
+        // read the curve
+        ogs5fem.kurven_vector[curve_idx-1]->exportCurveValues(vec_x, vec_y);
+        // create ITXFunction
+        MathLib::LinearInterpolation* xy_curve = new 
+        MathLib::LinearInterpolation(vec_x, vec_y);
+        pm.capp_sat_curve = new NumLib::FunctionLinear1D(xy_curve); 
     }
 
     pm.geo_area = new NumLib::TXFunctionConstant(mmp.geo_area);
@@ -240,7 +280,7 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             mmp_ogs6 = frac;
         } else {
             MaterialLib::PorousMedia* pm = new MaterialLib::PorousMedia();
-            convertPorousMediumProperty(*mmp, *pm);
+            convertPorousMediumProperty(ogs5fem, *mmp, *pm);
             ogs6fem.list_pm.push_back(pm);
             mmp_ogs6 = pm;
         }

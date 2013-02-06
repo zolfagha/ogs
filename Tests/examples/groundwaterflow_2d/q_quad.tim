@@ -4,7 +4,7 @@ GeoSys-OUT: Output ------------------------------------------------
   GROUNDWATER_FLOW
  $TIME_STEPS
   10  600
-;  30  60
+  30  60
  $TIME_END
   1e+99
  $TIME_START
