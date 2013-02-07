@@ -100,6 +100,7 @@ public:
     int permeability_strain_model_value[3]; //WX:permeability fuction strain model value. 05.2010
     //
     // Relative permeability (JT)
+	int num_phases;  // number of phases TK2013
     int permeability_saturation_model[MAX_FLUID_PHASES];
     double minimum_relative_permeability;
     double residual_saturation[MAX_FLUID_PHASES];

@@ -21,6 +21,7 @@
 #include "FemGroundwaterFlow/PressureToHead.h"
 #include "FemGroundwaterFlow/PressureToElementVelocity.h"
 #include "FemGroundwaterFlow/LiquidPressure.h"
+#include "FemRichardsFlow/FunctionRichards.h"
 #include "FemMassTransport/Concentration.h"
 #include "FemHeatTransport/Temperature.h"
 #include "FemKinReactGIA/Concentrations.h"
@@ -36,3 +37,5 @@
 //#include "ProcessBuilder.h"
 
 //OGS_LINK_PROCESS(GROUNDWATER_FLOW, FunctionHead);
+
+

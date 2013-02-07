@@ -24,6 +24,7 @@ struct Fluid
     NumLib::ITXFunction* dynamic_viscosity;
     NumLib::ITXFunction* specific_heat;
     NumLib::ITXFunction* thermal_conductivity;
+	NumLib::ITXFunction* drho_dp;
 
     Fluid()
     {
@@ -31,7 +32,8 @@ struct Fluid
                 density,
                 dynamic_viscosity,
                 specific_heat,
-                thermal_conductivity
+                thermal_conductivity,
+				drho_dp
                 );
     }
     ~Fluid()
@@ -40,7 +42,8 @@ struct Fluid
                 density,
                 dynamic_viscosity,
                 specific_heat,
-                thermal_conductivity
+                thermal_conductivity,
+				drho_dp
                 );
     }
 };
