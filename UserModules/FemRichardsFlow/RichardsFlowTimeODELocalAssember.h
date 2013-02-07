@@ -87,6 +87,16 @@ protected:
             mass_mat_coeff(0,0) = storage * Sw + poro * Sw * drhow_dp - poro * dSwdPc; 
             // multiply shape shape 
             fe->integrateWxN(j, mass_mat_coeff, localM);
+
+            // testing mass lumping----------------------------
+            for (size_t idx_ml=0; idx_ml < localM.cols(); idx_ml++ )
+            {
+                double mass_lump_val;
+                mass_lump_val = localM.col(idx_ml).sum();
+                localM.col(idx_ml).setZero(); 
+                localM(idx_ml, idx_ml) = mass_lump_val; 
+            }
+            // end of testing mass lumping---------------------
             
             // calculate laplace matrix coefficient
             local_k_mu *= k * k_rel / mu; 
