@@ -58,6 +58,7 @@ protected:
             MathLib::LocalMatrix &Np  = *fe->getBasisFunction(); // get basis function
             MathLib::LocalMatrix &dNp = *fe->getGradBasisFunction(); // get gradient basis function
             local_k_mu = MathLib::LocalMatrix::Identity(e.getDimension(), e.getDimension());
+            double fac = fe->getDetJ() * q->getWeight(j);
 
             // geting variables and parameters
             // get porosity
@@ -88,16 +89,6 @@ protected:
             // multiply shape shape 
             fe->integrateWxN(j, mass_mat_coeff, localM);
 
-            // testing mass lumping----------------------------
-            for (size_t idx_ml=0; idx_ml < localM.cols(); idx_ml++ )
-            {
-                double mass_lump_val;
-                mass_lump_val = localM.col(idx_ml).sum();
-                localM.col(idx_ml).setZero(); 
-                localM(idx_ml, idx_ml) = mass_lump_val; 
-            }
-            // end of testing mass lumping---------------------
-            
             // calculate laplace matrix coefficient
             local_k_mu *= k * k_rel / mu; 
             // multiply dshape dshape
@@ -107,9 +98,26 @@ protected:
                 // since no primary vairable involved
                 // directly assemble to the Right-Hand-Side
                 // F += dNp^T * K * gz
-                localF.noalias() += dNp.transpose() * local_k_mu  * vec_g;
+                localF.noalias() += fac * dNp.transpose() * local_k_mu * rho_w * vec_g;
             } // end of if hasGravityEffect
         } // end of for GP
+
+        // testing mass lumping----------------------------
+        // std::cout << "Local Mass Matrix before lumping: " << std::endl; 
+        // std::cout << localM << std::endl; 
+        for (size_t idx_ml=0; idx_ml < localM.cols(); idx_ml++ )
+        {
+            double mass_lump_val;
+            mass_lump_val = localM.col(idx_ml).sum();
+            localM.col(idx_ml).setZero(); 
+            localM(idx_ml, idx_ml) = mass_lump_val; 
+        }
+        // std::cout << "Local Mass Matrix after lumping: " << std::endl; 
+        // std::cout << localM << std::endl; 
+        // std::cout << "Local K Matrix: " << std::endl; 
+        // std::cout << localK << std::endl; 
+        //end of testing mass lumping---------------------
+
     }  // end of assemble ODE
 
 
