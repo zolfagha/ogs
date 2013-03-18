@@ -11,9 +11,11 @@ OGS_ADD_PROCESS_SYS_SOLVER(DEFORMATION, FunctionDisplacement, DiscreteLib::Discr
 OGS_ADD_PROCESS_SYS(ELEMENT_STRESS_STRAIN, FunctionElementStressStrain, DiscreteLib::DiscreteSystem);
 OGS_ADD_PROCESS_SYS(NODAL_STRESS_STRAIN, FunctionNodalStressStrain, DiscreteLib::DiscreteSystem);
 OGS_ADD_PROCESS_SYS_SOLVER(DEFORMATION_FLOW, FunctionDisplacementPressure, DiscreteLib::DiscreteSystem, MathLib::LisLinearEquation);
+/*
 OGS_ADD_PROCESS(XFEM_EXAMPLE_CRACK1, xfem::FunctionXFEM_EXAMPLE_CRACK1);
 OGS_ADD_PROCESS_SYS_SOLVER(LIQUID_FLOW, THMmf::Pmf, DiscreteLib::DiscreteSystem, MathLib::LisLinearEquation);
 OGS_ADD_PROCESS_SYS_SOLVER(HEAT_TRANSPORT, THMmf::Tmf, DiscreteLib::DiscreteSystem, MathLib::LisLinearEquation);
 OGS_ADD_PROCESS_SYS_SOLVER(DEFORMATION, THMmf::Umf, DiscreteLib::DiscreteSystem, MathLib::LisLinearEquation);
 OGS_ADD_PROCESS_SYS_SOLVER(INCREMENTAL_DEFORMATION, FunctionIncrementalDisplacement, DiscreteLib::DiscreteSystem, MathLib::LisLinearEquation);
+*/
 OGS_ADD_PROCESS_SYS_SOLVER(RICHARDS_FLOW, FunctionRichards, DiscreteLib::DiscreteSystem, MathLib::LisLinearEquation);//
