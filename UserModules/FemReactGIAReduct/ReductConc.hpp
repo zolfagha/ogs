@@ -364,9 +364,9 @@ void FunctionReductConc<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 //#endif
 }
 
-//template <class T1, class T2>
-//void FunctionConcentrations<T1, T2>::convert_conc_to_eta_xi(void)
-//{
+template <class T1, class T2>
+void FunctionReductConc<T1, T2>::convert_conc_to_eta_xi(void)
+{
 //	size_t node_idx, i; 
 //
 //	// only when the reduction scheme is fully initialized
@@ -419,12 +419,11 @@ void FunctionReductConc<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 //		}  // end of for node_idx
 //	
 //	}  // end of if _ReductionKin
-//}
-//
-//
-//template <class T1, class T2>
-//void FunctionConcentrations<T1, T2>::convert_eta_xi_to_conc(void)
-//{
+}
+
+template <class T1, class T2>
+void FunctionReductConc<T1, T2>::convert_eta_xi_to_conc(void)
+{
 //	size_t node_idx, i; 
 //
 //	// only when the reduction scheme is fully initialized
@@ -474,8 +473,8 @@ void FunctionReductConc<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 //			}  // end of for i
 //		}  // end of for node_idx
 //	}  // end of if _ReductionKin
-//}
-//
+}
+
 //template <class T1, class T2>
 //void FunctionConcentrations<T1, T2>::set_eta_mob_node_values( size_t eta_mob_idx, MyNodalFunctionScalar* new_eta_mob_node_values )
 //{

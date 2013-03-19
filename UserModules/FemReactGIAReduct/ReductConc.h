@@ -10,8 +10,8 @@
  * Created on    2013-03-18 by Haibing Shao
  */
 
-#ifndef REDUCTCONC_H
-#define REDUCTCONC_H
+#ifndef REDUCT_CONC_H
+#define REDUCT_CONC_H
 
 #include "BaseLib/CodingTools.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
@@ -26,6 +26,8 @@
 #include "FemGIARedSolution.h"
 #include "SingleStepGIAReduction.h"
 #include "NestedLocalProbNRIterationStepInitializer.h"
+#include "UserModules/FemKinReactGIA/LinearTransportTimeODELocalAssember.h"
+#include "UserModules/FemKinReactGIA/LinearTransportJacobianLocalAssembler.h"
 
 
 template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER >
@@ -159,8 +161,8 @@ public:
   //      BaseLib::releaseObjectsInStdVector(_linear_solutions); 
   //      
   //      BaseLib::releaseObjectsInStdVector(_concentrations);
-		//BaseLib::releaseObjectsInStdVector(_eta_mob); 
-  //      BaseLib::releaseObjectsInStdVector(_eta_immob);
+		  BaseLib::releaseObjectsInStdVector(_eta_mob); 
+          BaseLib::releaseObjectsInStdVector(_eta_immob);
   //      BaseLib::releaseObjectsInStdVector(_xi_mob); 
   //      BaseLib::releaseObjectsInStdVector(_xi_mob_rates);
   //      BaseLib::releaseObjectsInStdVector(_xi_mob_drates_dxi); 
@@ -280,12 +282,12 @@ private:
     /**
       * convert nodal concentration values to eta and xi
       */ 
-	//virtual void convert_conc_to_eta_xi(void); 
+	virtual void convert_conc_to_eta_xi(void); 
 
     /**
       * convert nodal eta and xi values to concentrations
       */ 
-	//virtual void convert_eta_xi_to_conc(void); 
+	virtual void convert_eta_xi_to_conc(void); 
 
     /**
       * linear problems
@@ -356,17 +358,17 @@ private:
       * concentrations vector
       * including all components in the MCP data structure
       */
-	//std::vector<MyNodalFunctionScalar*> _concentrations; 
+	std::vector<MyNodalFunctionScalar*> _concentrations; 
 
     /**
       * nodal eta_mobile values
       */ 
-    //std::vector<MyNodalFunctionScalar*> _eta_mob; 
+    std::vector<MyNodalFunctionScalar*> _eta_mob; 
 
     /**
       * nodal eta_immobile values
       */ 
-	//std::vector<MyNodalFunctionScalar*> _eta_immob;
+	std::vector<MyNodalFunctionScalar*> _eta_immob;
     
     /**
       * nodal xi_mobile values

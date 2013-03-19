@@ -106,7 +106,7 @@ private:
     /**
       * pointer to reduction scheme
       */ 
-	ogsChem::chemReductionKin* _ReductionKin;
+	ogsChem::chemReductionKin* _ReductionKin; // TO BE CHANGED. 
 
 };
 

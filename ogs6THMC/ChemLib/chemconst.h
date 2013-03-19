@@ -59,6 +59,13 @@ namespace ogsChem
         KIN_ARB_RATE /* - kinetic reaction with arbitarily defined rate expression. */
     };
 
+    // type of equilibrium reaction
+    enum EqReactType {
+        MOB_EQ_REACT,   /* - equilibrium reaction involves only mobile components */
+        SORP_EQ_REACT,  /* - equilibrium reaction involves a sorption reaction */
+        MIN_EQ_REACT    /* - equilibrium reaction involves a mineral reaction */
+    };
+
 	// type of kinetic reactions
 	enum KinReactType {
 		Monod,             /* - monod reaction */ 
