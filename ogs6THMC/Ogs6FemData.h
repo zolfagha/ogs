@@ -24,6 +24,7 @@
 #include "MaterialLib/Solid.h"
 #include "MaterialLib/Fluid.h"
 #include "MaterialLib/Compound.h"
+#include "ChemLib/chemReactionEq.h"
 #include "ChemLib/chemReactionKin.h"
 #include "ChemLib/chemReductionKin.h"
 #include "ChemLib/chemcomp.h"
@@ -65,6 +66,7 @@ public:
 	// kinetic reactions // HS 09.2012
 	BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> map_ChemComp; 
 	std::vector<ogsChem::chemReactionKin*> list_kin_reactions; 
+    std::vector<ogsChem::chemReactionEq*> list_eq_reactions; 
 	ogsChem::chemReductionKin* m_KinReductScheme; 
     //process
     BaseLib::OrderedMap<std::string, ProcessLib::Process*> list_pcs;
