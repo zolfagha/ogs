@@ -593,6 +593,7 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         {  // initialize the full reduction scheme
            // TODO
         }  // end of if else
+    }  // end of if ( n_KinReactions > 0 )
 
     // -------------------------------------------------------------------------
     // Coupling
