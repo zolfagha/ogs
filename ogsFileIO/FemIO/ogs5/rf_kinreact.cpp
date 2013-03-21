@@ -76,6 +76,7 @@ CKinReact::CKinReact(void)
 	rateconstant = 0.0;
 	rateorder = 0.0;
     decay_rate = 0.0; // HS
+    eq_const_k = 1.0000001; // HS
 	number_monod = 0;
 	number_inhibit = 0;
 	number_production = 0;
@@ -1186,6 +1187,13 @@ bool CKinReact::Read(std::ifstream* rfd_file)
 		{
 			in.str(readNonBlankLineFromInputStream(*rfd_file));
 			in >> rateconstant >> rateorder;
+			in.clear();
+		}
+        // subkeyword found
+		if (line_string.find("$EQ_CONSTANT") != string::npos)
+		{
+			in.str(readNonBlankLineFromInputStream(*rfd_file));
+			in >> eq_const_k;
 			in.clear();
 		}
 		//....................................................................
