@@ -24,7 +24,7 @@
 
 #COMPONENT_PROPERTIES  ; comp3
   $NAME
- C4 ;
+  C4 ;
  $MOBILE
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION

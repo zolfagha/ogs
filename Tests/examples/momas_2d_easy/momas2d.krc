@@ -19,7 +19,7 @@ GeoSys Kinetic Reactions
  $TYPE
    MOB_EQ_REACT;
  $EQUATION
-   =  1 C1 + 1 X2; 
+   -1 C1 =  1 X2; 
  $EQ_CONSTANT
  1.0e-12         ; K values
 
