@@ -38,6 +38,7 @@ public:
     double eval(ogsChem::LocalVector & vec_log_Conc)
     {
         // TODO
+        return 0.0; 
     };
 };
 
