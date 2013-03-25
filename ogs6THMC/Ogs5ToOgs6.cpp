@@ -24,6 +24,9 @@
 #include "GeoProcessBuilder.h"
 #include "ChemLib/chemReactionKin.h"
 #include "ChemLib/chemReductionKin.h"
+#include "ChemLib/chemReactionEqMob.h"
+#include "ChemLib/chemReactionEqSorp.h"
+#include "ChemLib/chemReactionEqMin.h"
 
 using namespace ogs5;
 
@@ -532,21 +535,65 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 		{
 			// add reactions one after another
 			ogs5::CKinReact* rfKinReact = ogs5fem.KinReact_vector[i];
-			// creating reaction instance 
-			ogsChem::chemReactionKin* mKinReaction; 
-			mKinReaction = new ogsChem::chemReactionKin(); 
-			// convert the ogs5 KRC data structure into ogs6 Kinetic reactions
-			mKinReaction->readReactionKRC( ogs6fem.map_ChemComp, rfKinReact ); 
-			// adding the instance of one single kinetic reaction
-			ogs6fem.list_kin_reactions.push_back(mKinReaction); 
-		}  // end of for
+            // check which type of reaction it is. 
+            if ( rfKinReact->getType().find( "EQ_REACT" ) != std::string::npos )
+            {   // if it is an equilibrium reaction
+                // eq_mob?
+                if ( rfKinReact->getType().find( "MOB_EQ_REACT" ) == 0 )
+                {
+                    ogsChem::chemReactionEqMob* mEqReaction; 
+                    mEqReaction = new ogsChem::chemReactionEqMob(); 
+                    // reading the reaction stoichiometry
+                    mEqReaction->readReactionKRC( ogs6fem.map_ChemComp, rfKinReact );
+                    // adding the instance into the list
+                    ogs6fem.list_eq_reactions.push_back(mEqReaction); 
+                }
+                // eq_sorp?
+                else if ( rfKinReact->getType().find( "SORP_EQ_REACT" ) == 0 )
+                {
+                    ogsChem::chemReactionEqSorp* mEqReaction; 
+                    mEqReaction = new ogsChem::chemReactionEqSorp(); 
+                    // reading the reaction stoichiometry
+                    mEqReaction->readReactionKRC( ogs6fem.map_ChemComp, rfKinReact );
+                    // adding the instance into the list
+                    ogs6fem.list_eq_reactions.push_back(mEqReaction); 
+                }
+                // eq_min?
+                else if ( rfKinReact->getType().find( "MIN_EQ_REACT" ) == 0 )
+                {
+                    ogsChem::chemReactionEqMin* mEqReaction; 
+                    mEqReaction = new ogsChem::chemReactionEqMin(); 
+                    // reading the reaction stoichiometry
+                    mEqReaction->readReactionKRC( ogs6fem.map_ChemComp, rfKinReact );
+                    // adding the instance into the list
+                    ogs6fem.list_eq_reactions.push_back(mEqReaction); 
+                }
+            }
+            else 
+            {   // if it is kinetic reaction
+                // creating reaction instance 
+                ogsChem::chemReactionKin* mKinReaction; 
+                mKinReaction = new ogsChem::chemReactionKin(); 
+                // convert the ogs5 KRC data structure into ogs6 Kinetic reactions
+                mKinReaction->readReactionKRC( ogs6fem.map_ChemComp, rfKinReact ); 
+                // adding the instance of one single kinetic reaction
+                ogs6fem.list_kin_reactions.push_back(mKinReaction); 
+            }  // end of if else
+        }  // end of for
 
-		// at last, initialize the reduction scheme 
-		ogsChem::chemReductionKin* mReductionScheme; 
-		mReductionScheme = new ogsChem::chemReductionKin(ogs6fem.map_ChemComp, ogs6fem.list_kin_reactions); 
-		ogs6fem.m_KinReductScheme = mReductionScheme; 
-		mReductionScheme = NULL;
-	}  // end of if ( n_KinReactions > 0 )
+        // if only kinetic but no equilibrium reactions
+		if ( ogs6fem.list_eq_reactions.size() == 0 && ogs6fem.list_kin_reactions.size() > 0 )
+        {   // initialize the kin-reduction scheme 
+            ogsChem::chemReductionKin* mReductionScheme; 
+            mReductionScheme = new ogsChem::chemReductionKin( ogs6fem.map_ChemComp, ogs6fem.list_kin_reactions ); 
+            ogs6fem.m_KinReductScheme = mReductionScheme; 
+            mReductionScheme = NULL;
+        }
+        else if ( ogs6fem.list_eq_reactions.size() > 0 )
+        {  // initialize the full reduction scheme
+           // TODO
+        }  // end of if else
+    }  // end of if ( n_KinReactions > 0 )
 
     // -------------------------------------------------------------------------
     // Coupling
