@@ -12,7 +12,7 @@ GeoSys-OUT: Output ------------------------------------------------
  $GEO_TYPE
   DOMAIN
  $DAT_TYPE
-  vtk
+  PVD
  $TIM_TYPE
   STEPS 1
 #STOP
