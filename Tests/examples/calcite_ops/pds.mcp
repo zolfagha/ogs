@@ -1,6 +1,6 @@
 #COMPONENT_PROPERTIES  ; comp0
  $NAME
-  C(4) ;
+  H+ ;
  $MOBILE
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
@@ -8,7 +8,7 @@
 
 #COMPONENT_PROPERTIES  ; comp1
  $NAME
-  Ca ;
+  Ca2+ ;
  $MOBILE
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
@@ -16,7 +16,7 @@
 
 #COMPONENT_PROPERTIES  ; comp2
   $NAME
-  Mg ;
+  Mg2+ ;
  $MOBILE
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
@@ -24,20 +24,36 @@
 
 #COMPONENT_PROPERTIES  ; comp3
  $NAME  ; 
-  Cl ; 
+  Cl- ; 
  $MOBILE
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
   1  0.0e-9             	; diffusion model type, diffusion constant
 
 #COMPONENT_PROPERTIES  ; comp4
+ $NAME  ; 
+  CO32- ; 
+ $MOBILE
+  1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
+ $DIFFUSION
+  1  0.0e-9             	; diffusion model type, diffusion constant
+
+#COMPONENT_PROPERTIES  ; comp5
+ $NAME  ; 
+  HCO3- ; 
+ $MOBILE
+  1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
+ $DIFFUSION
+  1  0.0e-9             	; diffusion model type, diffusion constant
+  
+#COMPONENT_PROPERTIES  ; comp6
  $NAME
   Calcite ;
  $MOBILE
   0; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
   0             	; diffusion model type, diffusion constant
-#COMPONENT_PROPERTIES  ; comp5
+#COMPONENT_PROPERTIES  ; comp7
  $NAME
   Dolomite(dis) ;
  $MOBILE
