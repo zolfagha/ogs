@@ -26,17 +26,17 @@
 template <class T1, class T2>
 bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
 {
-//	size_t i;  // index
-//    Ogs6FemData* femData = Ogs6FemData::getInstance();
-//    _msh_id = option.getOptionAsNum<size_t>("MeshID");
-//    size_t time_id = option.getOptionAsNum<size_t>("TimeGroupID");
-//    NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
-//        
-//    //mesh and FE objects
-//    MeshLib::IMesh* msh = femData->list_mesh[_msh_id];
-//    MyDiscreteSystem* dis = 0;
-//    dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
-//    _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
+    size_t i;  // index
+    Ogs6FemData* femData = Ogs6FemData::getInstance();
+    _msh_id = option.getOptionAsNum<size_t>("MeshID");
+    size_t time_id = option.getOptionAsNum<size_t>("TimeGroupID");
+    NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
+        
+    //mesh and FE objects
+    MeshLib::IMesh* msh = femData->list_mesh[_msh_id];
+    MyDiscreteSystem* dis = 0;
+    dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
+    _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
 //
 //	// get the transformation class instance here
 //	this->_ReductionKin = femData->m_KinReductScheme; 
