@@ -43,6 +43,32 @@ public:
       * get the number of components
       */
 	size_t get_n_Comp(void) {return _I; }; 
+
+    /**
+      * calculate the total mass using 
+      * the concentration vector of basis, and
+      * the concentration vector of secondary variables
+      */
+    void calc_tot_mass(LocalVector & vec_conc_basis, 
+                       LocalVector & vec_conc_second, 
+                       LocalVector & vec_tot_mass); 
+    /**
+      * calculate the residual of the reaction system using 
+      * the concentration vector of all components and
+      * the total concentration constrain of the basis species
+      */
+    void calc_residual(LocalVector & vec_ln_conc, 
+                       LocalVector & vec_tot_mass_constrain);
+    
+    /**
+      * calculate the Jacobi of the reaction system analytically using 
+      * the concentration vector of all components, 
+      * the total concentration constrain of the basis species, 
+      * and an already calculated residual vector
+      */
+    void calc_Jacobi_ana(LocalVector & vec_ln_conc,
+                         LocalVector & vec_tot_mass_constrain,
+                         LocalVector & vec_res_base);
 	
 private:
 	/**
@@ -60,6 +86,15 @@ private:
       */	
 	LocalMatrix _matStoi; 
 
+    /**
+      * stoichiometric matrix from the input reactions
+      */	
+	LocalMatrix _matStoi_input;
+
+    /**
+      * vector of natural log K values
+      */	
+    LocalVector _vec_lnK; 
 	/**
       * _I is the number of components and _J is the number of reactions
       */
@@ -73,7 +108,29 @@ private:
     /**
       * number of mobile, sorption and mineral components
       */
-	size_t _I_mob, _I_sorp, _I_min;
+	size_t _I_mob, _I_sec_mob, _I_sec_sorp, _I_sec_min;
+
+    /**
+      * number of basis components
+      */
+	size_t _I_basis;
+
+    /**
+      * number of secondary components
+      */
+	size_t _I_second;
+
+    /**
+      * vector of system residual
+      * its size is equal to the number of components
+      */
+    ogsChem::LocalVector _vec_res; 
+
+    /**
+      * matrix of system Jacobi
+      * its size is equal to the n_components by n_components
+      */
+    ogsChem::LocalVector _mat_Jacobi; 
 
 	/**
       * construct stoichiometric matrix out of list of components and reactions
@@ -81,10 +138,20 @@ private:
 	void buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & list_chemComp, 
 		           std::vector<ogsChem::chemReactionEq*>                & list_eq_reactions);
 
+    /**
+      * reading in the logK values oaf each equilibrium reactions
+      */
+    void read_logK(std::vector<ogsChem::chemReactionEq*>                & list_eq_reactions);
+
 	/**
-      * count how many mobile and immobile components
+      * count how many mobile, sorption and mineral components
       */
 	void countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp); 
+
+    /**
+      * count how many mobile, sorption and mineral reactions
+      */
+    void countReactions(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp, std::vector<ogsChem::chemReactionEq*> & list_eq_reactions);
 
 };
 
