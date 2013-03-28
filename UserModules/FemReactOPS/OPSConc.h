@@ -22,10 +22,12 @@
 #include "SolutionLib/Fem/SingleStepFEM.h"
 #include "ProcessLib/AbstractTransientProcess.h"
 #include "MathLib/DataType.h"
+#include "ChemLib/chemEqReactSys.h"
 #include "NumLib/Nonlinear/DiscreteNRSolverWithStepInitFactory.h"
 #include "UserModules/FemKinReactGIA/LinearTransportTimeODELocalAssember.h"
 #include "UserModules/FemKinReactGIA/LinearTransportJacobianLocalAssembler.h"
-
+#include "FemReactOPSsolution.h"
+#include "SingleStepReactOPS.h"
 
 template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER >
 class FunctionOPSConc
@@ -119,14 +121,14 @@ public:
     /**
 	  * the general reduction problem part
 	  */
-	typedef SolutionLib::FemGIARedSolution<MyDiscreteSystem> MyGIAReductionProblemType; 
-	typedef SolutionLib::SingleStepGIAReduction<MyFunctionData, 
-		                                        MyGIAReductionProblemType,
-		                                        MyLinearTransportProblemType, 
-		                                        MyLinearSolutionType, 
-												MyNonLinearReactiveTransportProblemType, 
-	                                            MyNonLinearSolutionType> MyReductionGIASolution; 
-    typedef typename MyGIAReductionProblemType::MyVariable MyVariableConc;
+	typedef SolutionLib::FemReactOPSsolution<MyDiscreteSystem> MyReactOPSProblemType; 
+	typedef SolutionLib::SingleStepReactOPS<MyFunctionData, 
+                                            MyReactOPSProblemType,
+                                            MyLinearTransportProblemType, 
+                                            MyLinearSolutionType, 
+                                            MyNonLinearReactiveTransportProblemType, 
+                                            MyNonLinearSolutionType> MyReactOPSSolution; 
+    typedef typename MyReactOPSProblemType::MyVariable MyVariableConc;
 
     FunctionOPSConc() 
         : Process("REACT_TRANS_OPS", 1, 1),
@@ -199,18 +201,6 @@ public:
 		 getSolution()->accept(time);
     };
 
-    /**
-	  * set function for eta and xi
-	  */
-	//void set_eta_mob_node_values     ( size_t eta_mob_idx,   MyNodalFunctionScalar* new_eta_mob_node_values   ); 
-	//void set_eta_immob_node_values   ( size_t eta_immob_idx, MyNodalFunctionScalar* new_eta_immob_node_values ); 
-	//void set_xi_mob_node_values      ( size_t xi_mob_idx,    MyNodalFunctionScalar* new_xi_mob_node_values    ); 
-    
-    //template <class T_X>
-    //void update_xi_mob_nodal_values  ( const T_X & x_new ); 
-	
-    //void update_xi_immob_node_values ( void ); 
-
 	/**
       * calculate the reaction rates on each node
       */
@@ -237,7 +227,7 @@ protected:
     /**
       * get the pointer of solution class for current problem
       */ 
-    virtual MyReductionGIASolution* getSolution() {return _solution;};
+    virtual MyReactOPSSolution* getSolution() {return _solution;};
 
     /**
       * output the result of current solution
@@ -251,52 +241,28 @@ private:
     /**
       * linear problems
       */
-	//std::vector<MyLinearTransportProblemType*> _linear_problems;
+	std::vector<MyLinearTransportProblemType*> _linear_problems;
 
     /**
       * linear solutions
       */
-    //std::vector<MyLinearSolutionType*>         _linear_solutions;
+    std::vector<MyLinearSolutionType*>         _linear_solutions;
 
-    /**
-      * Nonlinear iterator
-      */
-	//MyNRIterationStepInitializer*              myNRIterator; 
-	
-    /**
-      * Nonlinear solver factory
-      */
-    //MyDiscreteNonlinearSolverFactory*          myNSolverFactory;
-    
-    /**
-      * nonlinear equation
-      */ 
-	//MyNonLinearEquationType*                  _non_linear_eqs; 
-    
-    /**
-      * non-linear problem
-      */ 
-	//MyNonLinearReactiveTransportProblemType * _non_linear_problem;
-
-    /**
-      * non-linear solution
-      */
-	//MyNonLinearSolutionType*                  _non_linear_solution; 
 
 	/**
-      * the nested local ODE problem
+      * the local equilibrium reactions system
       */ 
-	//Local_ODE_Xi_immob*                       _local_ode_xi_immob; 
+	ogsChem::chemEqReactSys*                   _local_eq_react_sys; 
 	
 	/**
-      * reduction problem
+      * reactive transport operator splitting problem
       */ 
-	//MyKinReductionProblemType* _problem; 
+	MyReactOPSProblemType* _problem; 
 
     /** 
       * reduction solution
       */
-	MyReductionGIASolution*    _solution; 
+	MyReactOPSSolution*    _solution; 
 
 	/**
       * FEM object

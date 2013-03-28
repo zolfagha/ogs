@@ -37,87 +37,52 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
     _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
-//
-//	// get the transformation class instance here
-//	this->_ReductionKin = femData->m_KinReductScheme; 
-//    // make sure the reduction scheme is already initialized. 
-//	if ( !(this->_ReductionKin->IsInitialized()) ) 
-//	{
-//		// error msg
-//	    ERR("While initialize the Global Implicit Reactive Transport Process, the reduction class has not been correctly initialized! ");
-//		// then stop the program
-//		exit(1);
-//	}
-//
-//	// first get the number of components
-//	_n_Comp = femData->map_ChemComp.size(); 
-//    // also get the size of secondary variables
-//    _n_eta_mob   = this->_ReductionKin->get_n_eta_mob  (); 
-//	_n_eta_immob = this->_ReductionKin->get_n_eta_immob();
-//	_n_xi_mob    = this->_ReductionKin->get_n_xi_mob   (); 
-//	_n_xi_immob  = this->_ReductionKin->get_n_xi_immob (); 
-//
-//	// set concentrations of all components as output
-//	for ( i=0; i < _n_Comp; i++ )
-//		this->setOutputParameterName( i, femData->map_ChemComp[i]->second->get_name() ); 
-//
-//	// creating local memory space to store IC and BC
-//	// initialize eta_mob, 
-//	for ( i=0; i < _n_eta_mob ; i++)
-//	{
-//		MyNodalFunctionScalar* eta_i = new MyNodalFunctionScalar(); 
-//		eta_i->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0 );
-//	    _eta_mob.push_back(eta_i); 
-//	}
-//	// initialize eta_immob, 
-//	for ( i=0; i < _n_eta_immob; i++)
-//	{
-//		MyNodalFunctionScalar* eta_i = new MyNodalFunctionScalar(); 
-//	    eta_i->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0 );
-//		_eta_immob.push_back(eta_i); 
-//	}
-//	// initialize xi_mob
-//	for ( i=0; i < _n_xi_mob ; i++ )
-//	{
-//		MyNodalFunctionScalar* xi_mob_tmp       = new MyNodalFunctionScalar();  // xi_mob
-//        MyNodalFunctionScalar* xi_mob_rates_tmp = new MyNodalFunctionScalar();  // xi_mob_rates
-//		xi_mob_tmp->initialize(       *dis, FemLib::PolynomialOrder::Linear, 0.0  );
-//        xi_mob_rates_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
-//		_xi_mob.push_back(xi_mob_tmp); 
-//        _xi_mob_rates.push_back(xi_mob_rates_tmp); 
-//	}
-//	// initialize drates_dxi
-//	for ( i=0; i < _n_xi_mob ; i++ )
-//	{
-//		MyNodalFunctionScalar* drate_dxi_tmp = new MyNodalFunctionScalar();  // drate_dxi instances
-//		drate_dxi_tmp->initialize(       *dis, FemLib::PolynomialOrder::Linear, 0.0  );
-//		_xi_mob_drates_dxi.push_back(drate_dxi_tmp); 
-//	}
-//	// initialize xi_mob
-//	for ( i=0; i < _n_xi_immob ; i++ )
-//	{
-//		MyNodalFunctionScalar* xi_immob_tmp       = new MyNodalFunctionScalar();  // xi_immob
-//        MyNodalFunctionScalar* xi_immob_rates_tmp = new MyNodalFunctionScalar();  // xi_mob_rates
-//		MyNodalFunctionScalar* xi_immob_new_tmp   = new MyNodalFunctionScalar();  // xi_mob_rates
-//		xi_immob_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
-//        xi_immob_rates_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
-//		xi_immob_new_tmp->initialize(*dis, FemLib::PolynomialOrder::Linear, 0.0  );
-//		_xi_immob.push_back(xi_immob_tmp); 
-//        _xi_immob_rates.push_back(xi_immob_rates_tmp); 
-//		_xi_immob_new.push_back(xi_immob_new_tmp); 
-//	}
-//
-//	// linear assemblers
-//    MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_feObjects);
-//    MyLinearResidualAssemblerType* linear_r_assembler = new MyLinearResidualAssemblerType(_feObjects);
-//    MyLinearJacobianAssemblerType* linear_j_eqs = new MyLinearJacobianAssemblerType(_feObjects);
-//
-//	MyNonLinearAssemblerType* non_linear_assembler = new MyNonLinearAssemblerType(_feObjects, this->_ReductionKin );
-//	MyNonLinearResidualAssemblerType* non_linear_r_assembler = new MyNonLinearResidualAssemblerType(_feObjects, this->_ReductionKin );
-//	MyNonLinearJacobianAssemblerType* non_linear_j_assembler = new MyNonLinearJacobianAssemblerType(_feObjects, this->_ReductionKin, this);
-//
-//	_local_ode_xi_immob = new Local_ODE_Xi_immob( this->_ReductionKin ); 
-//
+
+	// get the transformation class instance here
+    this->_local_eq_react_sys = femData->m_EqReactSys; 
+    // make sure the reduction scheme is already initialized. 
+    if ( !(this->_local_eq_react_sys->IsInitialized()) ) 
+	{
+		// error msg
+	    ERR("While initialize the OPS Reactive Transport Process, the chemEqReactSys class has not been correctly initialized! ");
+		// then stop the program
+		exit(1);
+	}
+
+    // first get the number of components
+    _n_Comp = this->_local_eq_react_sys->get_n_Comp(); 
+
+	// set concentrations of all components as output
+	for ( i=0; i < _n_Comp; i++ )
+		this->setOutputParameterName( i, femData->map_ChemComp[i]->second->get_name() ); 
+
+	// creating local memory space to store IC and BC
+	MyNodalFunctionScalar* tmp_conc; 
+	for (i=0; i < _n_Comp; i++)
+	{
+		SolutionLib::FemIC* femIC = _problem->getVariable(i)->getIC();
+	    tmp_conc = new MyNodalFunctionScalar();
+		if ( femIC )
+		{
+			// FemIC vector is not empty
+			tmp_conc->initialize(*dis, _problem->getVariable(i)->getCurrentOrder(), 0.0);
+			femIC->setup(*tmp_conc);
+		}
+		else
+		{
+			// FemIC vector is empty
+			// initialize the vector with zeros
+			tmp_conc->initialize(*dis, _problem->getVariable(i)->getCurrentOrder(), 0.0);
+		}	
+		_concentrations.push_back( tmp_conc ); 
+	}
+
+	// linear assemblers
+    MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_feObjects);
+    MyLinearResidualAssemblerType* linear_r_assembler = new MyLinearResidualAssemblerType(_feObjects);
+    MyLinearJacobianAssemblerType* linear_j_eqs = new MyLinearJacobianAssemblerType(_feObjects);
+
+
 //	// for the linear transport problem, variables are eta_mobile
 //	for ( i=0; i < _n_eta_mob ; i++ )
 //	{
@@ -136,19 +101,7 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
 //		_linear_problems.push_back(linear_problem); 
 //	}
 //	
-//	// define nonlinear problem
-//	_non_linear_problem = new MyNonLinearReactiveTransportProblemType(dis);  
-//	_non_linear_eqs     = _non_linear_problem->createEquation(); 
-//	_non_linear_eqs->initialize( non_linear_assembler, non_linear_r_assembler, non_linear_j_assembler ); 
-//	_non_linear_problem->setTimeSteppingFunction(*tim); 
-//	// for nonlinear coupled transport problem, variables are xi_mobile species
-//	for ( i=0; i < _n_xi_mob ; i++ )
-//	{
-//		std::stringstream str_tmp;
-//		str_tmp << "xi_mob_" << i ;
-//		_non_linear_problem->addVariable( str_tmp.str() );  	
-//	}
-//
+
 //	// reduction problem
 //	_problem = new MyKinReductionProblemType( dis, _ReductionKin ); 
 //	_problem->setTimeSteppingFunction(*tim);  // applying the same time stepping function for all linear, non-linear and reduction problems
@@ -161,75 +114,21 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
 //        FemVariableBuilder var_builder;
 //        var_builder.doit(femData->map_ChemComp[i]->second->get_name(), option, msh, femData->geo, femData->geo_unique_name, _feObjects, comp_conc);
 //	}
-//    
-//	// backward flushing global vector of concentrations
-//	MyNodalFunctionScalar* tmp_conc; 
-//	for (i=0; i < _n_Comp; i++)
-//	{
-//		SolutionLib::FemIC* femIC = _problem->getVariable(i)->getIC();
-//	    tmp_conc = new MyNodalFunctionScalar();
-//		if ( femIC )
-//		{
-//			// FemIC vector is not empty
-//			tmp_conc->initialize(*dis, _problem->getVariable(i)->getCurrentOrder(), 0.0);
-//			femIC->setup(*tmp_conc);
-//		}
-//		else
-//		{
-//			// FemIC vector is empty
-//			// initialize the vector with zeros
-//			tmp_conc->initialize(*dis, _problem->getVariable(i)->getCurrentOrder(), 0.0);
-//		}	
-//		_concentrations.push_back( tmp_conc ); 
-//	}
-//
-//	// convert IC _concentrations to eta and xi
-//	convert_conc_to_eta_xi();
-//
-//	// set IC for eta_mob
-//	for ( i=0; i < _n_eta_mob; i++ )
-//	{
-//		SolutionLib::FemIC* eta_ic = new SolutionLib::FemIC(msh);
-//		eta_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _eta_mob[i]->getDiscreteData() ) ); 
-//		_linear_problems[i]->getVariable(0)->setIC( eta_ic );  // be careful, here each linear problem only has one variable "eta". 
-//	}
-//	// set IC for xi_mob
-//	for ( i=0; i < _n_xi_mob; i++ )
-//	{
-//		SolutionLib::FemIC* xi_mob_ic = new SolutionLib::FemIC(msh); 
-//		xi_mob_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _xi_mob[i]->getDiscreteData() ) ); 
-//		_non_linear_problem->getVariable(i)->setIC( xi_mob_ic ); 
-//	}
-//
-//    // set up linear solution
-//	for ( i=0; i < _n_eta_mob; i++ )
-//	{
-//		MyLinearSolutionType* linear_solution = new MyLinearSolutionType( dis, this->_linear_problems[i] ); 
-//		MyLinearSolver* linear_solver = linear_solution->getLinearEquationSolver();
-//		const BaseLib::Options* optNum = option.getSubGroup("Numerics");
-//		linear_solver->setOption(*optNum);
-//		this->_linear_solutions.push_back( linear_solution ); 
-//	}
-//	
-//	// set up non-linear solution
-//	// NRIterationStepInitializer
-//	myNRIterator = new MyNRIterationStepInitializer(non_linear_r_assembler, non_linear_j_assembler); 
-//	myNSolverFactory = new MyDiscreteNonlinearSolverFactory( myNRIterator ); 
-//	this->_non_linear_solution = new MyNonLinearSolutionType( dis, this->_non_linear_problem, myNSolverFactory ); 
-//    this->_non_linear_solution->getDofEquationIdTable()->setNumberingType(DiscreteLib::DofNumberingType::BY_POINT);  // global order
-//    this->_non_linear_solution->getDofEquationIdTable()->setLocalNumberingType(DiscreteLib::DofNumberingType::BY_VARIABLE);  // local order
-//	const BaseLib::Options* optNum = option.getSubGroup("Numerics");
-//
-//    // linear solver
-//	MyLinearSolver* linear_solver = this->_non_linear_solution->getLinearEquationSolver(); 
-//	linear_solver->setOption(*optNum);
-//	// set nonlinear solver options
-//	this->_non_linear_solution->getNonlinearSolver()->setOption(*optNum);
-//    // get the nonlinear solution dof manager
-//    this->_nl_sol_dofManager = this->_non_linear_solution->getDofEquationIdTable(); 
-//
-//	// set up solution
-//    _solution = new MyKinReductionSolution(dis, _problem, this, _linear_problems, _linear_solutions, _non_linear_problem, _non_linear_solution);
+
+
+    // set up linear solution
+	for ( i=0; i < _n_Comp; i++ )
+	{
+		MyLinearSolutionType* linear_solution = new MyLinearSolutionType( dis, this->_linear_problems[i] ); 
+		MyLinearSolver* linear_solver = linear_solution->getLinearEquationSolver();
+		const BaseLib::Options* optNum = option.getSubGroup("Numerics");
+		linear_solver->setOption(*optNum);
+		this->_linear_solutions.push_back( linear_solution ); 
+	}
+
+
+	// set up solution
+    // _solution = new MyKinReductionSolution(dis, _problem, this, _linear_problems, _linear_solutions, _non_linear_problem, _non_linear_solution);
 //	
 //    this->setOutput(Concentrations, _solution->getCurrentSolution(0));
 //
@@ -283,27 +182,15 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
 template <class T1, class T2>
 void FunctionOPSConc<T1, T2>::initializeTimeStep(const NumLib::TimeStep &/*time*/)
 {
-	//size_t i; 
- //   const NumLib::ITXFunction *vel = this->getInput<NumLib::ITXFunction>(Velocity);
+	size_t i; 
+    const NumLib::ITXFunction *vel = this->getInput<NumLib::ITXFunction>(Velocity);
 
-	//// set velocity for linear problem
-	//for ( i=0; i < _linear_problems.size(); i++ ) {
-	//	_linear_problems[i]->getEquation()->getLinearAssembler()->setVelocity(vel);
-	//	_linear_problems[i]->getEquation()->getResidualAssembler()->setVelocity(vel);
-	//	_linear_problems[i]->getEquation()->getJacobianAssembler()->setVelocity(vel);
-	//}
-	//// set velocity for nonlinear problem as well
-	//_non_linear_problem->getEquation()->getLinearAssembler()->setVelocity(vel); 
- //   _non_linear_problem->getEquation()->getResidualAssembler()->setVelocity(vel); 
-	//_non_linear_problem->getEquation()->getJacobianAssembler()->setVelocity(vel); 
- //   // set xi_mob_rates for non-linear problem
-	//_non_linear_problem->getEquation()->getLinearAssembler()  ->set_xi_mob_rates( &_xi_mob_rates ); 
-	//_non_linear_problem->getEquation()->getResidualAssembler()->set_xi_mob_rates( &_xi_mob_rates ); 
-	//_non_linear_problem->getEquation()->getJacobianAssembler()->set_xi_mob_rates( &_xi_mob_rates ); 
- //   // set xi_immob_rates for non-linear problem
-	//_non_linear_problem->getEquation()->getLinearAssembler()  ->set_xi_immob_rates( &_xi_immob_rates ); 
-	//_non_linear_problem->getEquation()->getResidualAssembler()->set_xi_immob_rates( &_xi_immob_rates ); 
-	//_non_linear_problem->getEquation()->getJacobianAssembler()->set_xi_immob_rates( &_xi_immob_rates ); 
+	// set velocity for linear problem
+	for ( i=0; i < _linear_problems.size(); i++ ) {
+		_linear_problems[i]->getEquation()->getLinearAssembler()->setVelocity(vel);
+		_linear_problems[i]->getEquation()->getResidualAssembler()->setVelocity(vel);
+		_linear_problems[i]->getEquation()->getJacobianAssembler()->setVelocity(vel);
+	}
 }
 
 template <class T1, class T2>
