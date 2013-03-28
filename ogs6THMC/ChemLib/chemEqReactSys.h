@@ -130,7 +130,7 @@ private:
       * matrix of system Jacobi
       * its size is equal to the n_components by n_components
       */
-    ogsChem::LocalVector _mat_Jacobi; 
+    ogsChem::LocalMatrix _mat_Jacobi; 
 
 	/**
       * construct stoichiometric matrix out of list of components and reactions
