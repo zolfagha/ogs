@@ -28,6 +28,7 @@
 #include "ChemLib/chemReactionKin.h"
 #include "ChemLib/chemReductionKin.h"
 #include "ChemLib/chemcomp.h"
+#include "ChemLib/chemEqReactSys.h"
 #include "SolutionLib/Fem/FemDirichletBC.h"
 #include "SolutionLib/Fem/FemNeumannBC.h"
 #include "GeoLib/GEOObjects.h"
@@ -68,6 +69,7 @@ public:
 	std::vector<ogsChem::chemReactionKin*> list_kin_reactions; 
     std::vector<ogsChem::chemReactionEq*> list_eq_reactions; 
 	ogsChem::chemReductionKin* m_KinReductScheme; 
+    ogsChem::chemEqReactSys*   m_EqReactSys; 
     //process
     BaseLib::OrderedMap<std::string, ProcessLib::Process*> list_pcs;
     //
@@ -90,6 +92,8 @@ public:
         BaseLib::releaseObjectsInStdMap(list_pcs);
 		BaseLib::releaseObjectsInStdMap(map_ChemComp); 
 		BaseLib::releaseObjectsInStdVector(list_kin_reactions);
+        BaseLib::releaseObjectsInStdVector(list_eq_reactions);
 		BaseLib::releaseObject(m_KinReductScheme); 
+        BaseLib::releaseObject(m_EqReactSys); 
     }
 };
