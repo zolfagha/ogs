@@ -237,6 +237,7 @@ void chemEqReactSys::buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemCom
 void chemEqReactSys::read_logK(std::vector<ogsChem::chemReactionEq*>                & list_eq_reactions)
 {
     size_t i; 
+    _vec_lnK = ogsChem::LocalVector::Zero(_J); 
     for ( i=0 ; i < list_eq_reactions.size(); i++ )
         _vec_lnK(i) = list_eq_reactions[i]->get_ln_K(); 
 }
