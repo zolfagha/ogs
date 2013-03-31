@@ -20,7 +20,7 @@
 #include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "SolutionLib/Core/TimeSteppingProblem.h"
 #include "SolutionLib/Fem/FemVariable.h"
-// #include "ChemLib/chemReductionKin.h"
+#include "ChemLib/chemEqReactSys.h"
 
 namespace SolutionLib
 {
@@ -45,8 +45,8 @@ public:
     /**
       * constructor
       */
-    explicit FemReactOPSsolution(MyDiscreteSystem* dis /*, ogsChem::chemReductionKin* myReductionKin */ )
-     : _discrete_system(dis) /*, _ReductionKin(myReductionKin)*/
+    explicit FemReactOPSsolution(MyDiscreteSystem* dis, ogsChem::chemEqReactSys* mychemEqReactSys  )
+     : _discrete_system(dis), _EqReactSys(mychemEqReactSys)
     {
     }
 
@@ -56,7 +56,7 @@ public:
     virtual ~FemReactOPSsolution()
     {
         BaseLib::releaseObjectsInStdVector(_variables);
-        // _ReductionKin = NULL;
+        _EqReactSys = NULL;
         _discrete_system = NULL;
     }
 
@@ -85,9 +85,9 @@ public:
     size_t getNumberOfVariables() const { return _variables.size(); }
 
 	/**
-      * get the pointer to reduction scheme
+      * get the pointer to the equilibrium reaction system
       */
-	// ogsChem::chemReductionKin* getReductionScheme() const { return _ReductionKin; }
+    ogsChem::chemEqReactSys* getEqReactSys() const { return _EqReactSys; }
 
 private:
     DISALLOW_COPY_AND_ASSIGN(FemReactOPSsolution);
@@ -104,9 +104,9 @@ private:
     std::vector<MyVariable*> _variables;
 
     /**
-      * pointer to reduction scheme
+      * pointer to equilibrium reaction system
       */ 
-	// ogsChem::chemReductionKin* _ReductionKin; // TO BE CHANGED. 
+	ogsChem::chemEqReactSys* _EqReactSys; // TO BE CHANGED. 
 
 };
 

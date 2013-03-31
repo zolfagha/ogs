@@ -32,7 +32,7 @@
 #include "SolutionLib/Fem/FemDirichletBC.h"
 #include "SolutionLib/Fem/FemNeumannBC.h"
 
-// #include "ReductionKinNodeInfo.h"
+#include "ConcNodeInfo.h"
 
 // class ReductionKinNodeInfo; 
 
@@ -84,13 +84,11 @@ public:
       * - prepare linear and nonlinear equations
       * - prepare linear and nonlinear solutions
       */
-    SingleStepReactOPS(MyDiscreteSystem*                dis, 
+    SingleStepReactOPS(MyDiscreteSystem*                    dis, 
 		                   UserFemProblem*                  problem, 
 						   UserFunctionData*                function_data, 
                            std::vector<UserLinearProblem*>  linear_problem,
-						   std::vector<UserLinearSolution*> linear_solutions,
-                           UserNonLinearProblem*            non_linear_problem,
-						   UserNonLinearSolution*           non_linear_solution);
+						   std::vector<UserLinearSolution*> linear_solutions);
 
     /**
       * destructor, reclaiming the memory
@@ -109,8 +107,6 @@ public:
         BaseLib::releaseObject(_feObjects);
         BaseLib::releaseObjectsInStdVector( _linear_problem );
         BaseLib::releaseObjectsInStdVector( _lin_solutions );
-        BaseLib::releaseObject(_non_linear_problem);
-        BaseLib::releaseObject(_nlin_solution);
         BaseLib::releaseObject(_function_data);
 
         BaseLib::releaseObjectsInStdMap( _bc_info ); 
@@ -197,16 +193,6 @@ private:
 	std::vector<UserLinearSolution*> _lin_solutions; 
 
     /**
-      * pointer to non-linear problem
-      */ 
-	UserNonLinearProblem*            _non_linear_problem;
-
-    /**
-      * pointer to non-linear solution
-      */ 
-    UserNonLinearSolution*           _nlin_solution; 
-
-    /**
       * pointer to the function concentrations
       */ 
 	UserFunctionData*                _function_data; 
@@ -214,7 +200,7 @@ private:
     /**
       * boundary condition values
       */ 
-	std::map<size_t, ReductionKinNodeInfo*> _bc_info; 
+	std::map<size_t, ConcNodeInfo*>  _bc_info; 
 };
 
 template <
@@ -227,154 +213,131 @@ template <
     >
 SingleStepReactOPS<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBLEM, T_USER_LINEAR_SOLUTION, T_USER_NON_LINEAR_PROBLEM, T_USER_NON_LINEAR_SOLUTION>
     ::SingleStepReactOPS(MyDiscreteSystem*                dis, 
-                             UserFemProblem*                  problem, 
-							 UserFunctionData*                function_data, 
-                             std::vector<UserLinearProblem*>  linear_problem,
-						     std::vector<UserLinearSolution*> linear_solutions,
-                             UserNonLinearProblem*            non_linear_problem,
-						     UserNonLinearSolution*           non_linear_solution)
+                         UserFemProblem*                  problem, 
+						 UserFunctionData*                function_data, 
+                         std::vector<UserLinearProblem*>  linear_problem,
+						 std::vector<UserLinearSolution*> linear_solutions)
     : AbstractTimeSteppingAlgorithm(*problem->getTimeSteppingFunction()),
       _problem(problem), _discrete_system(dis), _function_data(function_data), 
-      _linear_problem(linear_problem), _lin_solutions(linear_solutions), 
-      _non_linear_problem(non_linear_problem), _nlin_solution(non_linear_solution)
+      _linear_problem(linear_problem), _lin_solutions(linear_solutions)
 {
-    INFO("->Setting up a solution algorithm SingleStepKinReduction");
+    INFO("->Setting up a solution algorithm for Reactive Transport OPS problem.");
 
- //   size_t i, j, i_var; 
- //   const size_t n_var = problem->getNumberOfVariables();
- //   MeshLib::IMesh* msh = dis->getMesh();
+    size_t i, j, i_var; 
+    const size_t n_var = problem->getNumberOfVariables();
+    MeshLib::IMesh* msh = dis->getMesh();
 
- //   // create dof map
- //   for (size_t i=0; i<n_var; i++) {
- //       MyVariable* var = problem->getVariable(i);
- //       size_t n_dof_per_var = msh->getNumberOfNodes(var->getCurrentOrder());
- //       _dofManager.addVariableDoFs(msh->getID(), 0, n_dof_per_var);
- //       INFO("* Variable %d: name=%s, order=%d, n_dof=%d", i, var->getName().c_str(), var->getCurrentOrder(), n_dof_per_var);
- //   }
- //   _dofManager.construct();
- //   const size_t n_total_dofs = _dofManager.getTotalNumberOfActiveDoFs();
- //   INFO("* Total number of DoFs = %d", n_total_dofs);
+    // create dof map
+    for (size_t i=0; i<n_var; i++) {
+        MyVariable* var = problem->getVariable(i);
+        size_t n_dof_per_var = msh->getNumberOfNodes(var->getCurrentOrder());
+        _dofManager.addVariableDoFs(msh->getID(), 0, n_dof_per_var);
+        INFO("* Variable %d: name=%s, order=%d, n_dof=%d", i, var->getName().c_str(), var->getCurrentOrder(), n_dof_per_var);
+    }
+    _dofManager.construct();
+    const size_t n_total_dofs = _dofManager.getTotalNumberOfActiveDoFs();
+    INFO("* Total number of DoFs = %d", n_total_dofs);
 
- //   _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
+    _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
 
- //   // set up initial condition
- //   _vec_u_n1.resize(n_var, 0);
- //   for (size_t i=0; i<n_var; i++) {
- //       MyVariable* femVar = problem->getVariable(i);
- //       FemIC* femIC = femVar->getIC();
- //       MyNodalFunctionScalar* u0 = new MyNodalFunctionScalar();
- //       u0->initialize(*dis, femVar->getCurrentOrder(), 0);
- //       //u0->setFeObjectContainer(_feObjects);
- //       femIC->setup(*u0);
- //       u0->setFeObjectContainer(_feObjects);
- //       _vec_u_n1[i] = u0; //u0->clone()
- //   }
+    // set up initial condition
+    _vec_u_n1.resize(n_var, 0);
+    for (size_t i=0; i<n_var; i++) {
+        MyVariable* femVar = problem->getVariable(i);
+        FemIC* femIC = femVar->getIC();
+        MyNodalFunctionScalar* u0 = new MyNodalFunctionScalar();
+        u0->initialize(*dis, femVar->getCurrentOrder(), 0);
+        //u0->setFeObjectContainer(_feObjects);
+        femIC->setup(*u0);
+        u0->setFeObjectContainer(_feObjects);
+        _vec_u_n1[i] = u0; //u0->clone()
+    }
 
- //   // initialize vectors for solution and ST
- //   _x_n0 = dis->template createVector<double>(n_total_dofs);
- //   _x_n1 = dis->template createVector<double>(n_total_dofs);
- //   _x_n1_0 = dis->template createVector<double>(n_total_dofs);
- //   _x_st = dis->template createVector<double>(n_total_dofs);
+    // initialize vectors for solution and ST
+    _x_n0 = dis->template createVector<double>(n_total_dofs);
+    _x_n1 = dis->template createVector<double>(n_total_dofs);
+    _x_n1_0 = dis->template createVector<double>(n_total_dofs);
+    _x_st = dis->template createVector<double>(n_total_dofs);
 
- //   // copy values of each variable to one solution vector
- //   for ( i=0; i<n_var; i++) {
- //       SolutionVector* vec_var = _vec_u_n1[i]->getDiscreteData();
- //       DiscreteLib::setGlobalVector(_dofManager, i, msh->getID(), *vec_var, *_x_n0);
- //   }
+    // copy values of each variable to one solution vector
+    for ( i=0; i<n_var; i++) {
+        SolutionVector* vec_var = _vec_u_n1[i]->getDiscreteData();
+        DiscreteLib::setGlobalVector(_dofManager, i, msh->getID(), *vec_var, *_x_n0);
+    }
 
- //   // setup functions
- //   std::vector<MyVariable*> list_var(n_var);
- //   for ( i=0; i<n_var; i++) 
-	//	list_var[i] = problem->getVariable(i);
+    // setup functions
+    std::vector<MyVariable*> list_var(n_var);
+    for ( i=0; i<n_var; i++) 
+		list_var[i] = problem->getVariable(i);
 
-	//// getting the boundary conditions of concentrations for all components, 
- //   const size_t msh_id = _discrete_system->getMesh()->getID();
- //   std::vector<size_t> list_bc1_eqs_id;
- //   std::vector<double> list_bc1_val;
- //   for ( i_var=0; i_var < n_var; i_var++ ) {
- //       MyVariable* var = _problem->getVariable(i_var);
- //       for ( i=0; i < var->getNumberOfDirichletBC(); i++ ) {
- //           SolutionLib::FemDirichletBC *bc1 = var->getDirichletBC(i);
- //           bc1->setup(var->getCurrentOrder());
- //           std::vector<size_t> &list_bc_nodes = bc1->getListOfBCNodes();
- //           std::vector<double> &list_bc_values = bc1->getListOfBCValues();
- //           
-	//        // now loop over this vector
-	//	    for ( j=0; j < list_bc_nodes.size(); j++ )
-	//	    {
-	//			size_t node_id = list_bc_nodes[j]; 
-	//			double node_value = list_bc_values[j]; 
- //               std::map<size_t, ReductionKinNodeInfo*>::iterator my_bc; 
-	//			my_bc = _bc_info.find( node_id ); 
- //               // now check whether this node has already been in the BC info
- //               if ( my_bc != _bc_info.end() )
- //               {   // this node is already there
-	//				my_bc->second->set_comp_conc(i_var, node_value); 	             
- //               }
- //               else  // create a new structure and fill it in 
-	//			{
-	//				my_bc = _bc_info.begin(); 
-	//				ReductionKinNodeInfo* bc_node = new ReductionKinNodeInfo( node_id, 
-	//					                                                      this->_problem->getReductionScheme()->get_n_Comp(), 
-	//					                                                      this->_problem->getReductionScheme()->get_n_eta_mob(), 
-	//																		  this->_problem->getReductionScheme()->get_n_eta_immob(), 
-	//																		  this->_problem->getReductionScheme()->get_n_xi_mob(), 
-	//																		  this->_problem->getReductionScheme()->get_n_xi_immob(), 
-	//																		  this->_problem->getReductionScheme() ); 
-	//				bc_node->set_comp_conc( i_var, node_value ); 
-	//				_bc_info.insert( my_bc, std::pair<size_t, ReductionKinNodeInfo*>(node_id, bc_node) ); 
-	//			}  // end of if else
-	//        }  // end of for j
- //       }  // end of for i
- //   }  // end of for i_var
+	// getting the boundary conditions of concentrations for all components, 
+    const size_t msh_id = _discrete_system->getMesh()->getID();
+    std::vector<size_t> list_bc1_eqs_id;
+    std::vector<double> list_bc1_val;
+    for ( i_var=0; i_var < n_var; i_var++ ) {
+        MyVariable* var = _problem->getVariable(i_var);
+        for ( i=0; i < var->getNumberOfDirichletBC(); i++ ) {
+            SolutionLib::FemDirichletBC *bc1 = var->getDirichletBC(i);
+            bc1->setup(var->getCurrentOrder());
+            std::vector<size_t> &list_bc_nodes = bc1->getListOfBCNodes();
+            std::vector<double> &list_bc_values = bc1->getListOfBCValues();
+            
+	        // now loop over this vector
+		    for ( j=0; j < list_bc_nodes.size(); j++ )
+		    {
+				size_t node_id = list_bc_nodes[j]; 
+				double node_value = list_bc_values[j]; 
+                std::map<size_t, ConcNodeInfo*>::iterator my_bc; 
+				my_bc = _bc_info.find( node_id ); 
+                // now check whether this node has already been in the BC info
+                if ( my_bc != _bc_info.end() )
+                {   // this node is already there
+					my_bc->second->set_comp_conc(i_var, node_value); 	             
+                }
+                else  // create a new structure and fill it in 
+				{
+					my_bc = _bc_info.begin(); 
+					ConcNodeInfo* bc_node = new ConcNodeInfo( node_id, 
+                                                              this->_problem->getEqReactSys()->get_n_Comp(), 
+                                                              this->_problem->getEqReactSys() ); 
+					bc_node->set_comp_conc( i_var, node_value ); 
+					_bc_info.insert( my_bc, std::pair<size_t, ConcNodeInfo*>(node_id, bc_node) ); 
+				}  // end of if else
+	        }  // end of for j
+        }  // end of for i
+    }  // end of for i_var
 
 
- //   // loop over all the boundary nodes, and 
-	//// transform these concentrations to eta and xi values
- //   std::map<size_t, ReductionKinNodeInfo*>::iterator bc_node_it; 
- //   std::vector<size_t> vec_bc_node_idx; 
- //   std::vector<std::vector<double>> vec_node_eta_values;
- //   std::vector<std::vector<double>> vec_node_xi_values; 
+    // loop over all the boundary nodes, and 
+	// transform these concentrations to eta and xi values
+    std::map<size_t, ConcNodeInfo*>::iterator bc_node_it; 
+    std::vector<size_t> vec_bc_node_idx; 
+    std::vector<std::vector<double>> vec_node_c_mob_values;
 
- //   for ( i=0; i < _linear_problem.size(); i++ )
- //   {
- //       std::vector<double> vec_eta_mob; 
- //       vec_node_eta_values.push_back(vec_eta_mob); 
- //   }
- //   
- //   for ( i=0; i < _non_linear_problem->getNumberOfVariables(); i++ )
- //   {
- //       std::vector<double> vec_xi;
- //       vec_node_xi_values.push_back(vec_xi); 
- //   }
+    for ( i=0; i < _linear_problem.size(); i++ )
+    {
+        std::vector<double> vec_c_mob; 
+        vec_node_c_mob_values.push_back(vec_c_mob); 
+    }
+    
+    // Boundary condition
+    for ( bc_node_it = _bc_info.begin(); bc_node_it != _bc_info.end(); bc_node_it++ )
+    {
+        // bc_node_it->second->transform(); 
+        size_t node_idx = bc_node_it->second->get_node_id(); 
+        vec_bc_node_idx.push_back(node_idx);
 
+        for ( i=0; i < _linear_problem.size(); i++ )
+        {
+            double c_mob_value = bc_node_it->second->get_comp_conc(i);
+            vec_node_c_mob_values[i].push_back(c_mob_value); 
+        }
+    }
 
- //   for ( bc_node_it = _bc_info.begin(); bc_node_it != _bc_info.end(); bc_node_it++ )
- //   {
- //       bc_node_it->second->transform(); 
- //       size_t node_idx = bc_node_it->second->get_node_id(); 
- //       vec_bc_node_idx.push_back(node_idx);
+    // imposing BC for eta
+    for ( i=0; i < _linear_problem.size(); i++ )
+     	_linear_problem[i]->getVariable(0)->addDirichletBC( new SolutionLib::FemDirichletBC( vec_bc_node_idx,  vec_node_c_mob_values[i] ) ); 
 
- //       for ( i=0; i < _linear_problem.size(); i++ )
- //       {
- //           double eta_mob_value = bc_node_it->second->get_eta_mob_value(i);
- //           vec_node_eta_values[i].push_back(eta_mob_value); 
- //       }
-
- //       for ( i=0; i < _non_linear_problem->getNumberOfVariables(); i++ )
- //       {
-	//		double xi_value = bc_node_it->second->get_xi_mob_value(i);
- //           vec_node_xi_values[i].push_back(xi_value); 
- //       }
- //   }
-
- //   // imposing BC for eta
- //   for ( i=0; i < _linear_problem.size(); i++ )
- //    	_linear_problem[i]->getVariable(0)->addDirichletBC( new SolutionLib::FemDirichletBC( vec_bc_node_idx,  vec_node_eta_values[i] ) ); 
-
- //   // imposing BC for xi
-	//for ( i=0; i < _non_linear_problem->getNumberOfVariables(); i++ )
-	//	_non_linear_problem->getVariable(i)->addDirichletBC( new SolutionLib::FemDirichletBC( vec_bc_node_idx,  vec_node_xi_values[i] ) ); 
 };
 
 template <

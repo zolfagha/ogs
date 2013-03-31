@@ -143,6 +143,8 @@ public:
 	  */
     virtual ~FunctionOPSConc()
     {
+        BaseLib::releaseObject(_problem); 
+        BaseLib::releaseObjectsInStdVector(_linear_problems);
         BaseLib::releaseObjectsInStdVector(_concentrations);
     };
 
@@ -212,9 +214,9 @@ public:
 	//void update_node_kin_reaction_drates_dxi(void); 
 
 	/**
-      * calculate nodal local ode problem of xi_immob
+      * calculate nodal equilibrium reaction system
       */
-	//void calc_nodal_xi_immob_ode(double dt);
+	void calc_nodal_eq_react_sys(double dt);
 	
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
@@ -275,11 +277,6 @@ private:
 	NumLib::DiscreteDataConvergenceCheck _checker;
 
     /**
-      * pointer to the reduction scheme. 
-      */
-	//ogsChem::chemReductionKin* _ReductionKin; 
-
-    /**
       * concentrations vector
       * including all components in the MCP data structure
       */
@@ -291,9 +288,16 @@ private:
     size_t _msh_id; 
 
     /**
-      * number of components
+      * number of chemical components
       */
     size_t _n_Comp; 
+
+    /**
+      * number of mobile components
+      */
+    size_t _n_Comp_mob; 
+
+
 }; 
 
 #include "OPSConc.hpp"
