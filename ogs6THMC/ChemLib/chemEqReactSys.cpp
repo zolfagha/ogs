@@ -79,13 +79,13 @@ void chemEqReactSys::calc_residual(LocalVector & vec_ln_conc,
     ln_c_sec_min  = vec_ln_conc.segment(_I_basis+_I_sec_mob+_I_sec_sorp, _I_sec_min); 
     
     // part 1), _J_mob + _J_sorp  mass action reactions
-    for ( i=1; i <  _J_mob ; i++ )
+    for ( i=0; i <  _J_mob ; i++ )
     {
         res_tmp  = -1.0 * _vec_lnK(i) + _matStoi.row(i).dot( ln_c_basis ) - ln_c_sec_mob(i);
         res_idx  = i; 
         _vec_res(res_idx) = res_tmp; 
     }
-    for ( i=1; i <  _J_sorp ; i++ )
+    for ( i=0; i <  _J_sorp ; i++ )
     {
         res_idx  = i + _J_mob; 
         res_tmp  = -1.0 * _vec_lnK(res_idx) + _matStoi.row(res_idx).dot( ln_c_basis ) - ln_c_sec_sorp(i);
@@ -93,7 +93,7 @@ void chemEqReactSys::calc_residual(LocalVector & vec_ln_conc,
     }
 
     // part 2), n_react_min mass action reactions
-    for ( i=1; i < _J_min; i++ )
+    for ( i=0; i < _J_min; i++ )
     {
         res_idx  = i + _J_mob + _J_sorp; 
         // attention, this is spectial for mineral reactions
@@ -102,13 +102,13 @@ void chemEqReactSys::calc_residual(LocalVector & vec_ln_conc,
     }
     
     // part 3), n_basis mass balance equations
-    for ( i=1; i < _I_basis   ; i++ )
+    for ( i=0; i < _I_basis   ; i++ )
         vec_conc_basis(i)                         = exp( ln_c_basis(i)   ); 
-    for ( i=1; i < _I_sec_mob ; i++ )
+    for ( i=0; i < _I_sec_mob ; i++ )
         vec_conc_second(i)                        = exp( ln_c_sec_mob(i) ); 
-    for ( i=1; i < _I_sec_sorp; i++ )
+    for ( i=0; i < _I_sec_sorp; i++ )
         vec_conc_second(_I_sec_mob+i)             = exp( ln_c_sec_sorp(i)); 
-    for ( i=1; i < _I_sec_min ; i++ )
+    for ( i=0; i < _I_sec_min ; i++ )
         vec_conc_second(_I_sec_mob+_I_sec_sorp+i) = exp( ln_c_sec_min(i) );
 
     this->calc_tot_mass(vec_conc_basis, 
@@ -150,7 +150,7 @@ void chemEqReactSys::calc_Jacobi_ana(LocalVector & vec_ln_conc,
     // now the mass balance part
     mass_balance_res_base = vec_res_base.tail(_I_basis);
     // using the numerical increment method to construct Jacobi matrix 
-    for ( i=1; i < _I ; i++ )
+    for ( i=0; i < _I ; i++ )
     {
         // increment the vec_unknown
         vec_unknown_tmp = vec_ln_conc; 
@@ -162,7 +162,7 @@ void chemEqReactSys::calc_Jacobi_ana(LocalVector & vec_ln_conc,
         {
             vec_unknown_tmp(i) += delta * vec_unknown_tmp(i);
             
-            for ( j=1; j < _I ; j++ )
+            for ( j=0; j < _I ; j++ )
                 vec_conc_tmp(j) = exp( vec_unknown_tmp(j) ); 
                         
             vec_conc_basis  = vec_conc_tmp.head(_I_basis);
@@ -221,7 +221,7 @@ void chemEqReactSys::buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemCom
     // number of basis components
     _I_basis = _I - _I_second; 
     // number of secondary mobile components
-    _I_sec_mob = _I - _I_basis; 
+    _I_sec_mob = _I_mob - _I_basis; 
     // organize which components are basis
     // and which are secondary
     _matStoi = _matStoi_input.topRows( _I_basis ).transpose(); 
@@ -301,6 +301,74 @@ void chemEqReactSys::countReactions(BaseLib::OrderedMap<std::string, ogsChem::Ch
     _J = _J_mob + _J_sorp + _J_min;
 }
 
+void chemEqReactSys::solve_EqSys_Newton(LocalVector & vec_conc, double iter_tol, double max_iter, size_t & result)
+{
+    LocalVector x;
+    LocalVector dx; 
+    LocalVector tot_mass_basis; 
+    LocalVector conc_basis; 
+    LocalVector conc_second; 
+    // number of iterations
+    size_t i, iter; 
+    x              = LocalVector::Zero( this->_I       ); 
+    dx             = LocalVector::Zero( this->_I       ); 
+    tot_mass_basis = LocalVector::Zero( this->_I_basis ); 
+    // calculate the bulk composition 
+    // in terms of basis species
+    conc_basis  = vec_conc.head( this->_I_basis  ); 
+    conc_second = vec_conc.tail( this->_I_second ); 
+    this->calc_tot_mass( conc_basis, conc_second, tot_mass_basis ); 
+
+    std::cout << "Total mass for the basis: " << std::endl;
+    std::cout << tot_mass_basis << std::endl; 
+
+    // start solving the system
+    iter = 0; 
+    dx = LocalVector::Ones(this->_I); 
+    // unknown vector is composed of 
+    // natural log of aqueous mobile species
+    // and the amount of mineral
+    for ( i=0; i < this->_I ; i++ )
+        x(i) = std::log( vec_conc(i) );
+    while (true)
+    {
+        // evaluate residual
+        this->calc_residual(x, tot_mass_basis); 
+        #ifdef _DEBUG
+            // display the residual
+            std::cout << "Iteration #" << iter << "||res|| = " << _vec_res.norm() << "||delta_x|| = " << dx.norm() << std::endl; 
+        #endif
+        // convergence criteria
+        if ( _vec_res.norm() < iter_tol ||  dx.norm() < std::numeric_limits<double>::epsilon() )
+        {
+            #ifdef _DEBUG
+                std::cout << "Newton iteration successfully converged!\n"; 
+            #endif
+            result = 0;
+            for ( i=0; i < this->_I ; i++ )
+                vec_conc(i) = std::exp(x(i)); 
+            break;  // break the loop
+        }
+        else if ( iter > max_iter )
+        {
+            #ifdef _DEBUG
+                std::cout << "ERROR! Newton iterationan does not converge! Simulation stops!\n"; 
+            #endif
+            result = 1; 
+            return; // stop the program
+        }
+        // form Jacobian matrix
+        this->calc_Jacobi_ana(x, tot_mass_basis, _vec_res); 
+        // solving for increment
+        // dx = J \ -res; 
+        dx = _mat_Jacobi.fullPivHouseholderQr().solve( -1.0 * _vec_res ); 
+        // increment of unkowns
+        x += dx; 
+        // increase the iteration count
+        iter++; 
+    }
+
+}
 
 
 }  // end of namespace

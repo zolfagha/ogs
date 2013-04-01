@@ -45,6 +45,11 @@ public:
 	size_t get_n_Comp(void) {return _I; }; 
 
     /**
+      * get the number of mobile components
+      */
+	size_t get_n_Comp_mob(void) {return _I_mob; }; 
+
+    /**
       * calculate the total mass using 
       * the concentration vector of basis, and
       * the concentration vector of secondary variables
@@ -69,6 +74,19 @@ public:
     void calc_Jacobi_ana(LocalVector & vec_ln_conc,
                          LocalVector & vec_tot_mass_constrain,
                          LocalVector & vec_res_base);
+
+    /**
+      * solve the equilibrium reaction system 
+      * using the Newton iterations, input values are
+      * the vector of concentration values
+      * the convergence tolerance, 
+      * the maximum number of iterations. 
+      * and the status of convergence
+      */
+    void solve_EqSys_Newton(LocalVector & vec_conc, 
+                            double iter_tol, 
+                            double max_iter, 
+                            size_t & result); 
 	
 private:
 	/**
