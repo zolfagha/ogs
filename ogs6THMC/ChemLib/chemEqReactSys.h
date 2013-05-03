@@ -62,8 +62,9 @@ public:
       * the concentration vector of all components and
       * the total concentration constrain of the basis species
       */
-    void calc_residual(LocalVector & vec_ln_conc, 
-                       LocalVector & vec_tot_mass_constrain);
+    void calc_residual(LocalVector & vec_unknowns, 
+                       LocalVector & vec_tot_mass_constrain, 
+                       LocalVector & vec_residual);
     
     /**
       * calculate the Jacobi of the reaction system analytically using 
@@ -71,9 +72,9 @@ public:
       * the total concentration constrain of the basis species, 
       * and an already calculated residual vector
       */
-    void calc_Jacobi_ana(LocalVector & vec_ln_conc,
-                         LocalVector & vec_tot_mass_constrain,
-                         LocalVector & vec_res_base);
+    void calc_Jacobi(LocalVector & vec_unknowns,
+                     LocalVector & vec_tot_mass_constrain,
+                     LocalVector & vec_res_base);
 
     /**
       * solve the equilibrium reaction system 
@@ -84,9 +85,30 @@ public:
       * and the status of convergence
       */
     void solve_EqSys_Newton(LocalVector & vec_conc, 
-                            double iter_tol, 
-                            double max_iter, 
-                            size_t & result); 
+                            size_t & result, 
+                            size_t & node_idx, 
+                            double iter_tol,
+                            double rel_tol,
+                            double max_iter); 
+
+    /**
+      * solve the system J*dx = -b
+      *
+      * inputs are: 
+      *    - idx_node is the index of node
+      *    - J is Jacobi marix
+      *    - b is residual vector
+      * 
+      * if rank of J is equal to number of b and dx, 
+      * using direct solver provided by eigen
+      * if rank of J is smaller than number of b, 
+      * using minimization method
+      * delta_x is the returned result. 
+      */
+    void Min_solv(size_t      & idx_node, 
+                  LocalMatrix & J, 
+                  LocalVector & b, 
+                  LocalVector & delta_x); 
 	
 private:
 	/**
@@ -142,7 +164,15 @@ private:
       * vector of system residual
       * its size is equal to the number of components
       */
-    ogsChem::LocalVector _vec_res; 
+    ogsChem::LocalVector _vec_res;
+
+    /**
+      * vector of staturation index
+      * size of this vector is equal to the amount of minerals
+      * if AI = 1, meaning the mineral is saturated and present
+      * if AI = 0, meaning the mineral is under-saturated and not present
+      */
+    ogsChem::LocalVector _AI;
 
     /**
       * matrix of system Jacobi
@@ -170,7 +200,35 @@ private:
       * count how many mobile, sorption and mineral reactions
       */
     void countReactions(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp, std::vector<ogsChem::chemReactionEq*> & list_eq_reactions);
+    
+    /**
+      * increment the unknown with a damping factor
+      * to prevent the concentrations falling into negative values
+      */    
+    void increment_unknown(LocalVector & x_old, 
+                           LocalVector & delta_x, 
+                           LocalVector & x_new);
 
+    /** 
+      * update the saturation index of minerals
+      */
+    void update_AI(LocalVector & vec_unknowns);
+    
+    /**
+      * update the concentration of minerals
+      */
+    void update_minerals(LocalVector & vec_unknowns, LocalVector & mass_constrain);
+    
+    /**
+      * calcuate one particular mineral concentration 
+      * by the amount of basis concentration and total mass constrain
+      */
+    double chemEqReactSys::cal_cbarmin_by_total_mass(size_t idx_min, LocalVector & c_basis, LocalVector & tot_mass);
+
+    /**
+      * update all concentrations based on p
+      */
+    void update_concentations(LocalVector & vec_unknowns, LocalVector & vec_concentrations);
 };
 
 }

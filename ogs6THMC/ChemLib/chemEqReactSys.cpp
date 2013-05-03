@@ -34,11 +34,14 @@ chemEqReactSys::chemEqReactSys(BaseLib::OrderedMap<std::string, ogsChem::ChemCom
         // read the logK values
         read_logK(list_eq_reactions); 
         // allocate memory for local residual vector
-        _vec_res    = ogsChem::LocalVector::Zero( _I ); 
+        _vec_res    = ogsChem::LocalVector::Zero( _I_basis + _I_sec_min ); 
         // allocate memory for local Jacobi matrix
         _mat_Jacobi = ogsChem::LocalMatrix::Zero( _I, _I ); 
-		// flip the initialization flag
-		isInitialized = true; 
+		// allocate memory for vector AI
+        if ( this->_I_sec_min > 0 )
+            _AI = ogsChem::LocalVector::Zero(_I_sec_min); 
+        // flip the initialization flag
+        isInitialized = true; 
 	}
 }
 
@@ -52,130 +55,109 @@ void chemEqReactSys::calc_tot_mass(LocalVector & vec_conc_basis,
     vec_tot_mass = vec_conc_basis + _matStoi.transpose() * vec_conc_second; 
 }
 
-void chemEqReactSys::calc_residual(LocalVector & vec_ln_conc, 
-                                   LocalVector & vec_tot_mass_constrain)
+void chemEqReactSys::calc_residual(LocalVector & vec_unknowns, 
+                                   LocalVector & vec_tot_mass_constrain,
+                                   LocalVector & vec_residual)
 {
     size_t i; 
-    ogsChem::LocalVector ln_c_basis, ln_c_sec_mob, ln_c_sec_sorp, ln_c_sec_min; 
+    double res_tmp;
+    ogsChem::LocalVector c_basis, c_sec_min, c_second; 
+    ogsChem::LocalVector ln_c_basis, ln_c_sec_mob, ln_c_sec_sorp; 
+    ogsChem::LocalVector vec_conc_basis; 
     ogsChem::LocalVector vec_cur_mass_balance;
-    ogsChem::LocalVector vec_conc_basis;
-    ogsChem::LocalVector vec_conc_second;
-    vec_cur_mass_balance = ogsChem::LocalVector::Zero( _I_basis  ); 
-    vec_conc_basis       = ogsChem::LocalVector::Zero( _I_basis  ); 
-    vec_conc_second      = ogsChem::LocalVector::Zero( _I_second ); 
-    // clean the residual vector
-    _vec_res.setZero();
-    double res_tmp; 
-    size_t res_idx; 
-    // residual vector is composed of 3 parts
-    // 1) mass action expression of mobile and sorption reactions
-    // 2) mass action expression of mineral reactions
-    // 3) mass balance expression of basis species
-    
-    // first split the ln(conc) vector
-    ln_c_basis    = vec_ln_conc.head(_I_basis); 
-    ln_c_sec_mob  = vec_ln_conc.segment(_I_basis, _I_sec_mob); 
-    ln_c_sec_sorp = vec_ln_conc.segment(_I_basis+_I_sec_mob, _I_sec_sorp);  
-    ln_c_sec_min  = vec_ln_conc.segment(_I_basis+_I_sec_mob+_I_sec_sorp, _I_sec_min); 
-    
-    // part 1), _J_mob + _J_sorp  mass action reactions
-    for ( i=0; i <  _J_mob ; i++ )
-    {
-        res_tmp  = -1.0 * _vec_lnK(i) + _matStoi.row(i).dot( ln_c_basis ) - ln_c_sec_mob(i);
-        res_idx  = i; 
-        _vec_res(res_idx) = res_tmp; 
-    }
-    for ( i=0; i <  _J_sorp ; i++ )
-    {
-        res_idx  = i + _J_mob; 
-        res_tmp  = -1.0 * _vec_lnK(res_idx) + _matStoi.row(res_idx).dot( ln_c_basis ) - ln_c_sec_sorp(i);
-        _vec_res(res_idx) = res_tmp; 
-    }
+    ogsChem::LocalVector lnK_min;
+    ogsChem::LocalMatrix Stoi_mob, Stoi_sorp, Stoi_min; 
 
-    // part 2), n_react_min mass action reactions
+    vec_cur_mass_balance = ogsChem::LocalVector::Zero( _I_basis  ); 
+    ln_c_basis           = ogsChem::LocalVector::Zero( _I_basis );
+    vec_conc_basis       = ogsChem::LocalVector::Zero( _I_basis  ); 
+    c_second             = ogsChem::LocalVector::Zero( _I_second );
+
+    // now updating the saturation index and minerals
+    // this->update_AI( vec_unknowns ); 
+    // this->update_minerals( vec_unknowns, vec_tot_mass_constrain );
+
+    // now split the unknown vector
+    c_basis    = vec_unknowns.head(_I_basis); 
+    for (i=0; i < (size_t)c_basis.size(); i++)
+        ln_c_basis(i) = std::log(c_basis(i));
+    c_sec_min  = vec_unknowns.tail(_I_sec_min); 
+
+    // part 0), calculate the concentration of secondary 
+    // non-mineral components
+    Stoi_mob  = _matStoi.topRows(    _J_mob );
+    Stoi_sorp = _matStoi.middleRows( _J_mob, _J_sorp ); 
+    Stoi_min  = _matStoi.bottomRows( _J_min );
+    
+    // calculate the secondary mobile component concentrations
+    ln_c_sec_mob  = -1.0 * _vec_lnK.head( _J_mob ) + Stoi_mob * ln_c_basis; 
+    // calculate the secondary sorption component concentrations
+    ln_c_sec_sorp = -1.0 * _vec_lnK.segment( _J_mob, _J_sorp ) + Stoi_sorp * ln_c_basis; 
+    lnK_min = _vec_lnK.tail(_J_min); 
+    
+    // fill in the secondary concentrations
+    for (i=0; i < (size_t)ln_c_sec_mob.size(); i++)
+        c_second( i ) = std::exp( ln_c_sec_mob(i) );
+    for (i=0; i < (size_t)ln_c_sec_sorp.size(); i++)
+        c_second( _I_sec_mob + i ) = std::exp( ln_c_sec_sorp(i) ); 
+    c_second.tail( _I_sec_min )  = c_sec_min;
+    // part 1), n_basis mass balance equations
+    this->calc_tot_mass( c_basis, c_second, vec_cur_mass_balance ); 
+    vec_residual.head( _I_basis ) = vec_tot_mass_constrain - vec_cur_mass_balance; 
+
+    // part 2), n_react_min mineral reactions, 
+    // AKA, the "complementary problem".
     for ( i=0; i < _J_min; i++ )
     {
-        res_idx  = i + _J_mob + _J_sorp; 
-        // attention, this is spectial for mineral reactions
-        res_tmp  = -1.0 * _vec_lnK(res_idx) + _matStoi.row(res_idx).dot( ln_c_basis ) - ln_c_sec_min(i);
-        _vec_res(res_idx) = std::min(res_tmp, exp(ln_c_sec_min(i))); 
-    }
-    
-    // part 3), n_basis mass balance equations
-    for ( i=0; i < _I_basis   ; i++ )
-        vec_conc_basis(i)                         = exp( ln_c_basis(i)   ); 
-    for ( i=0; i < _I_sec_mob ; i++ )
-        vec_conc_second(i)                        = exp( ln_c_sec_mob(i) ); 
-    for ( i=0; i < _I_sec_sorp; i++ )
-        vec_conc_second(_I_sec_mob+i)             = exp( ln_c_sec_sorp(i)); 
-    for ( i=0; i < _I_sec_min ; i++ )
-        vec_conc_second(_I_sec_mob+_I_sec_sorp+i) = exp( ln_c_sec_min(i) );
-
-    this->calc_tot_mass(vec_conc_basis, 
-                        vec_conc_second, 
-                        vec_cur_mass_balance); 
-    _vec_res.tail(_I_basis) = vec_tot_mass_constrain - vec_cur_mass_balance; 
-}
-
-void chemEqReactSys::calc_Jacobi_ana(LocalVector & vec_ln_conc,
-                         LocalVector & vec_tot_mass_constrain,
-                         LocalVector & vec_res_base)
-{
-    size_t i, j; 
-    const double delta = 1.0e-6; 
-    ogsChem::LocalVector ln_c_basis, ln_c_sec_mob, ln_c_sec_sorp, ln_c_sec_min;
-    ogsChem::LocalVector vec_unknown_tmp;
-    ogsChem::LocalVector vec_conc_tmp; 
-    ogsChem::LocalVector mass_balance_res_base; 
-    ogsChem::LocalVector mass_balance_res_tmp;
-    ogsChem::LocalVector vec_conc_basis;
-    ogsChem::LocalVector vec_conc_second;
-    vec_conc_tmp          = ogsChem::LocalVector::Zero(_I); 
-    mass_balance_res_base = ogsChem::LocalVector::Zero(_I_basis); 
-    mass_balance_res_tmp  = ogsChem::LocalVector::Zero(_I_basis); 
-    // clean the residual vector
-    _mat_Jacobi.setZero(); 
-
-    // first split the ln(conc) vector
-    ln_c_basis    = vec_ln_conc.head(_I_basis); 
-    ln_c_sec_mob  = vec_ln_conc.segment(_I_basis, _I_sec_mob); 
-    ln_c_sec_sorp = vec_ln_conc.segment(_I_basis+_I_sec_mob, _I_sec_sorp);  
-    ln_c_sec_min  = vec_ln_conc.segment(_I_basis+_I_sec_mob+_I_sec_sorp, _I_sec_min); 
-    
-    // fill in the analytical part
-    _mat_Jacobi.topLeftCorner (_J, _I_basis) = _matStoi; 
-    _mat_Jacobi.topRightCorner(_J, _J).setIdentity(); 
-    _mat_Jacobi.topRightCorner(_J, _J) *= -1.0; 
-    
-    // now the mass balance part
-    mass_balance_res_base = vec_res_base.tail(_I_basis);
-    // using the numerical increment method to construct Jacobi matrix 
-    for ( i=0; i < _I ; i++ )
-    {
-        // increment the vec_unknown
-        vec_unknown_tmp = vec_ln_conc; 
-        if ( abs(vec_unknown_tmp(i)) < std::numeric_limits<double>::epsilon() )
+        if ( _AI(i) == 1 )
         {
-            _mat_Jacobi.col(i).tail(_I_basis).setZero(); 
+            // attention, this is spectial for mineral reactions
+            res_tmp  = -1.0 * lnK_min(i) + Stoi_min.row(i) * ln_c_basis;
         }
         else
         {
-            vec_unknown_tmp(i) += delta * vec_unknown_tmp(i);
-            
-            for ( j=0; j < _I ; j++ )
-                vec_conc_tmp(j) = exp( vec_unknown_tmp(j) ); 
-                        
-            vec_conc_basis  = vec_conc_tmp.head(_I_basis);
-            vec_conc_second = vec_conc_tmp.tail(_I_second);
-            calc_tot_mass( vec_conc_basis, vec_conc_second, mass_balance_res_tmp); 
-            mass_balance_res_tmp = vec_tot_mass_constrain - mass_balance_res_tmp; 
-            _mat_Jacobi.col(i).tail(_I_basis) = ( mass_balance_res_tmp - mass_balance_res_base ) / (delta * vec_unknown_tmp(i));
-        }  // end of if else
-    }  // end of for i
+            res_tmp  = 0.0; 
+        }
+        vec_residual(_I_basis+i) = res_tmp; 
+    }  // end of for
 
+}  // end of function calc_residual
+
+void chemEqReactSys::calc_Jacobi(LocalVector & vec_unknowns,
+                                 LocalVector & vec_tot_mass_constrain,
+                                 LocalVector & vec_res_base)
+{
+    const double epsilon = 1.0e-6; 
+    size_t i; 
+    LocalVector vec_unknown_tmp; 
+    LocalVector vec_res_tmp; 
+    // Jacobi matrix is a square matrix, 
+    // with n_cols and n_rows equal to the number of concentrations
+    size_t n_unknowns(vec_unknowns.size()); 
+    vec_res_tmp = LocalVector::Zero( n_unknowns ); 
+    this->_mat_Jacobi = ogsChem::LocalMatrix::Zero(n_unknowns, n_unknowns); 
+
+    // using the numerical increment method to construct Jacobi matrix 
+    for (i=0; i<n_unknowns; i++)
+    {
+        // increment the vec_unknown
+        vec_unknown_tmp = vec_unknowns; 
+        if ( vec_unknown_tmp.norm() < std::numeric_limits<double>::epsilon() )
+        {
+            vec_unknown_tmp(i) = epsilon;
+            this->calc_residual(vec_unknown_tmp, vec_tot_mass_constrain, vec_res_tmp); 
+            _mat_Jacobi.col(i) = ( vec_res_tmp - vec_res_base ) / epsilon ;
+        }
+        else
+        {
+            vec_unknown_tmp(i) = vec_unknown_tmp(i) + epsilon * vec_unknown_tmp.norm();
+            this->calc_residual(vec_unknown_tmp, vec_tot_mass_constrain, vec_res_tmp); 
+            _mat_Jacobi.col(i) = ( vec_res_tmp - vec_res_base ) / (epsilon * vec_unknown_tmp.norm());
+        }  // end of else
+    }  // end of for loop
 #ifdef _DEBUG
 	// debugging--------------------------
-	std::cout << "Jacobi Matrix: " << std::endl; 
+	std::cout << "Jacobi Matrix: \n"; 
 	std::cout << _mat_Jacobi << std::endl;
 	// end of debugging-------------------
 #endif
@@ -301,74 +283,383 @@ void chemEqReactSys::countReactions(BaseLib::OrderedMap<std::string, ogsChem::Ch
     _J = _J_mob + _J_sorp + _J_min;
 }
 
-void chemEqReactSys::solve_EqSys_Newton(LocalVector & vec_conc, double iter_tol, double max_iter, size_t & result)
+void chemEqReactSys::solve_EqSys_Newton(LocalVector & vec_conc, size_t & result, size_t & node_idx , double iter_tol, double rel_tol, double max_iter)
 {
-    LocalVector x;
+    LocalVector x, x_new;
     LocalVector dx; 
-    LocalVector tot_mass_basis; 
+    LocalVector total_mass; 
     LocalVector conc_basis; 
     LocalVector conc_second; 
     // number of iterations
-    size_t i, iter; 
-    x              = LocalVector::Zero( this->_I       ); 
-    dx             = LocalVector::Zero( this->_I       ); 
-    tot_mass_basis = LocalVector::Zero( this->_I_basis ); 
+    size_t j, iter, n_unkowns;
+    double d_norm, d1_norm; 
+
+    n_unkowns      = _I_basis + _I_sec_min; 
+    x              = LocalVector::Zero( n_unkowns ); 
+    x_new          = LocalVector::Zero( n_unkowns );
+    dx             = LocalVector::Zero( n_unkowns );
+    total_mass     = LocalVector::Zero( _I_basis ); 
     // calculate the bulk composition 
     // in terms of basis species
-    conc_basis  = vec_conc.head( this->_I_basis  ); 
-    conc_second = vec_conc.tail( this->_I_second ); 
-    this->calc_tot_mass( conc_basis, conc_second, tot_mass_basis ); 
+    conc_basis  = vec_conc.head( _I_basis  ); 
+    conc_second = vec_conc.tail( _I_second ); 
+    this->calc_tot_mass( conc_basis, conc_second, total_mass ); 
 
-    std::cout << "Total mass for the basis: " << std::endl;
-    std::cout << tot_mass_basis << std::endl; 
+    #ifdef _DEBUG
+        /*
+        std::cout << "Total mass for the basis: \n";
+        std::cout << total_mass << "\n"; 
+        std::cout << "Conc_basis: \n";
+        std::cout << conc_basis << "\n"; 
+        std::cout << "Conc_second: \n";
+        std::cout << conc_second << std::endl; 
+        */
+    #endif
+
+    // unknown vector is composed of 
+    // aqueous mobile basis species
+    x.head( _I_basis   ) = conc_basis; 
+    // and the amount of mineral
+    x.tail( _I_sec_min ) = conc_second.tail( _I_sec_min );  
 
     // start solving the system
     iter = 0; 
     dx = LocalVector::Ones(this->_I); 
-    // unknown vector is composed of 
-    // natural log of aqueous mobile species
-    // and the amount of mineral
-    for ( i=0; i < this->_I ; i++ )
-        x(i) = std::log( vec_conc(i) );
+    // now updating the saturation index and minerals
+    this->update_AI( x ); 
+    this->update_minerals( x, total_mass );
+    // evaluate the residual
+    this->calc_residual(x, total_mass, _vec_res); 
+    d_norm = _vec_res.norm(); 
     while (true)
     {
-        // evaluate residual
-        this->calc_residual(x, tot_mass_basis); 
         #ifdef _DEBUG
             // display the residual
-            std::cout << "Iteration #" << iter << "||res|| = " << _vec_res.norm() << "||delta_x|| = " << dx.norm() << std::endl; 
+            // std::cout << "Iteration #" << iter << "||res|| = " << _vec_res.norm() << "||delta_x|| = " << dx.norm() << std::endl; 
         #endif
         // convergence criteria
-        if ( _vec_res.norm() < iter_tol ||  dx.norm() < std::numeric_limits<double>::epsilon() )
+        if ( d_norm < iter_tol )
         {
             #ifdef _DEBUG
-                std::cout << "Newton iteration successfully converged!\n"; 
+                // std::cout << "Newton iteration successfully converged!\n"; 
             #endif
             result = 0;
-            for ( i=0; i < this->_I ; i++ )
-                vec_conc(i) = std::exp(x(i)); 
+            // update concentrations
+            this->update_concentations( x, vec_conc );
+            break;  // break the loop
+        }
+        else if ( dx.norm() < rel_tol )
+        {
+            #ifdef _DEBUG
+            std::cout << "Warning, Newton iteration stagnent on Node #" << node_idx << "! Exit the iteration!\n" ; 
+            #endif
+            result = 0;
+            // update concentrations
+            // this->update_concentations( x, vec_conc );
             break;  // break the loop
         }
         else if ( iter > max_iter )
         {
             #ifdef _DEBUG
-                std::cout << "ERROR! Newton iterationan does not converge! Simulation stops!\n"; 
+            std::cout << "ERROR! Node #" << node_idx  << "Newton iterationan does not converge! Simulation stops!\n"; 
             #endif
             result = 1; 
             return; // stop the program
         }
         // form Jacobian matrix
-        this->calc_Jacobi_ana(x, tot_mass_basis, _vec_res); 
+        this->calc_Jacobi(x, total_mass, _vec_res); 
         // solving for increment
-        // dx = J \ -res; 
-        dx = _mat_Jacobi.fullPivHouseholderQr().solve( -1.0 * _vec_res ); 
+        this->Min_solv( node_idx, _mat_Jacobi, _vec_res, dx );
+
         // increment of unkowns
-        x += dx; 
+        this->increment_unknown( x, dx, x_new ); 
+
+        // this->update_AI( x_new ); 
+        // this->update_minerals( x_new, total_mass );
+        // evaluate residual with x_new
+        this->calc_residual(x_new, total_mass, _vec_res); 
+
+        // line search begins
+        j = 0; 
+        while ( j < max_iter )
+        {
+            // d1_norm = norm(res,inf);
+            d1_norm = _vec_res.norm(); 
+            
+            if (d1_norm < d_norm)
+                break;
+            
+            // cut into half
+            dx = dx * 0.5;
+            
+            // increment of unkowns
+            this->increment_unknown( x, dx, x_new ); 
+            // now updating the saturation index and minerals
+            this->update_AI( x_new ); 
+            this->update_minerals( x_new, total_mass );
+            // evaluate residual with x_new
+            this->calc_residual(x_new, total_mass, _vec_res); 
+            
+            j++;
+        }  // end of while
+        d_norm = d1_norm; 
+        x = x_new; 
+
         // increase the iteration count
         iter++; 
     }
+}
+
+
+void chemEqReactSys::Min_solv(size_t      & idx_node, 
+                              LocalMatrix & J,  
+                              LocalVector & res,  
+                              LocalVector & delta_x)
+{
+    size_t n_J_rows, r; 
+    size_t n_R_cols;
+    size_t n_V; 
+    ogsChem::LocalMatrix Q, R, P; 
+    ogsChem::LocalMatrix Q2, R2;
+    ogsChem::LocalMatrix B; 
+    ogsChem::LocalMatrix V, Vsize; 
+    ogsChem::LocalVector b, b2, z; 
+    ogsChem::LocalVector y1, y2, y; 
+    
+    b = -1.0 * res; 
+    n_J_rows = J.rows(); 
+    
+    Eigen::FullPivHouseholderQR<Eigen::MatrixXd> qr_decomp; 
+
+    // perform the QR decompostion
+    qr_decomp.compute(J); 
+
+    Q = qr_decomp.matrixQ(); 
+
+    // TO check, is this right?
+    R = qr_decomp.matrixQR(); 
+    // TO check, is this right?
+    P = qr_decomp.colsPermutation(); 
+
+    // rank revealing
+    r = qr_decomp.rank(); 
+    
+    if ( r == n_J_rows )
+    {
+        // using the standard direct solver
+        delta_x = J.fullPivHouseholderQr().solve( b ); 
+    }  // end of if
+    else if ( r < n_J_rows )
+    {
+        // n_R_cols = size( R, 2); 
+        n_R_cols = R.cols(); 
+        
+        // R2 = R(1:r, 1:r);
+        R2 = R.topLeftCorner(r, r);
+        
+        // B  = R(1:r, r+1:n_R_cols);
+        B = R.topRightCorner(r, n_R_cols - r);
+        
+        // V = R2 \ B; 
+        V = R2.fullPivHouseholderQr().solve( B );
+        
+        // Vsize = V'*V;
+        Vsize = V.transpose() * V; 
+        
+        // n_V = size(Vsize,1);
+        n_V = Vsize.rows(); 
+        
+        // Q2 = Q.topLeftCorner(1:r, 1:r);
+        Q2 = Q.topLeftCorner(r, r);
+
+        // b2 = b(1:r, :);
+        b2 = b.head(r); 
+        
+        // z = R2 \ (Q2'*b2);
+        z = R2.fullPivHouseholderQr().solve( Q2.transpose() * b2 );
+
+        // y2 = (eye(n_V)+V'*V)\(V' * z);
+        ogsChem::LocalMatrix eye = ogsChem::LocalMatrix::Identity( n_V, n_V );
+        y2 = ( eye + V.transpose() * V ).fullPivHouseholderQr().solve( V.transpose()*z ); 
+    
+        // y1 = z - V*y2; 
+        y1 = z - V * y2; 
+
+        // y = [y1;y2];
+        y = LocalVector::Zero( y1.size() + y2.size() );
+        y.head( y1.size() ) = y1;
+        y.tail( y2.size() ) = y2; 
+        // delta_x = P* y;
+        delta_x = P * y; 
+    }  // end of else if
 
 }
+
+void chemEqReactSys::increment_unknown(LocalVector & x_old, 
+                                       LocalVector & delta_x, 
+                                       LocalVector & x_new)
+{
+    size_t i, n_unknowns;
+    double damp_factor; 
+
+    n_unknowns = x_old.size(); 
+    // increment with a damping factor for everyone
+    for (i=0; i<n_unknowns; i++)
+    {
+        damp_factor = 1.0 / std::max(1.0, -1.33*delta_x(i) / x_old(i) );
+        x_new(i) = x_old(i) + damp_factor * delta_x(i);
+    }  // end of for
+
+}  // end of func increment_unknown
+
+
+void chemEqReactSys::update_AI(LocalVector & vec_unknowns)
+{
+    size_t i; 
+    double phi;
+    ogsChem::LocalMatrix Stoi_min; 
+    ogsChem::LocalVector logK_min;
+    ogsChem::LocalVector c_sec_min; 
+    ogsChem::LocalVector c_basis; 
+    ogsChem::LocalVector ln_c_basis; 
+
+    Stoi_min = this->_matStoi.bottomRows(_I_sec_min);
+    logK_min = this->_vec_lnK.tail(_I_sec_min); 
+
+    // take the first section which is basis concentration
+    c_basis    = vec_unknowns.head( _I_basis   );
+    ln_c_basis = LocalVector::Zero( c_basis.size() ); 
+    for (i=0; i < (size_t)c_basis.size(); i++)
+        ln_c_basis(i) = std::log( c_basis(i) );
+    // and the minerals
+    c_sec_min  = vec_unknowns.tail( _I_sec_min ); 
+
+    for ( i=0; i < _I_sec_min ; i++ )
+    {
+        // calculate the phi
+        phi  = -logK_min(i) + Stoi_min.row(i) * ln_c_basis;
+
+        if ( phi < c_sec_min(i) )
+        {
+            // mineral is present
+            _AI(i) = 1; 
+        }
+        else
+        {
+            // mineral is not present
+            _AI(i) = 0; 
+        }
+    }
+
+}
+
+void chemEqReactSys::update_minerals(LocalVector & vec_unknowns, 
+                                     LocalVector & mass_constrain)
+{
+    size_t i, idx; 
+    double cbarmin, phi; 
+    ogsChem::LocalMatrix Stoi_min; 
+    ogsChem::LocalVector logK_min;
+    ogsChem::LocalVector c_sec_min; 
+    ogsChem::LocalVector c_basis; 
+    ogsChem::LocalVector ln_c_basis; 
+
+    Stoi_min = this->_matStoi.bottomRows(_I_sec_min);
+    logK_min = this->_vec_lnK.tail(_I_sec_min); 
+
+    // take the first section which is basis concentration
+    c_basis    = vec_unknowns.head( _I_basis   );
+    ln_c_basis = LocalVector::Zero( c_basis.size() ); 
+    for (i=0; i < (size_t)c_basis.size(); i++)
+        ln_c_basis(i) = std::log( c_basis(i) );
+    // and the minerals
+    c_sec_min  = vec_unknowns.tail( _I_sec_min ); 
+
+    for ( i=0; i < _I_sec_min; i++ )
+    {
+        idx = _I_basis + i; 
+        if ( _AI(i) == 1 )
+        {
+            cbarmin = cal_cbarmin_by_total_mass(i, c_basis, mass_constrain);
+        }  // end of if AI(i)
+
+        phi  = -logK_min(i) + Stoi_min.row(i) * ln_c_basis;
+        
+        if ( phi > cbarmin )
+        {
+            _AI(i) = 0;
+            cbarmin = 0.0; 
+            vec_unknowns(idx) = cbarmin;
+        }
+        else
+        {
+            if ( _AI(i) == 0 )
+            {
+                cbarmin = cal_cbarmin_by_total_mass(i, c_basis, mass_constrain);
+                vec_unknowns(idx) = cbarmin;
+            }
+            _AI(i) = 1; 
+        }  // end of else
+
+    }  // end of for 
+
+}  // end of function update_minerals
+
+void chemEqReactSys::update_concentations(LocalVector & vec_unknowns, LocalVector & vec_concentrations)
+{
+    size_t i; 
+    ogsChem::LocalVector c_basis, c_second, c_sec_min; 
+    ogsChem::LocalVector ln_c_basis, ln_c_sec_mob, ln_c_sec_sorp; 
+    ogsChem::LocalMatrix Stoi_mob, Stoi_sorp; 
+
+    c_basis      = ogsChem::LocalVector::Zero( this->_I_basis    ); 
+    c_second     = ogsChem::LocalVector::Zero( this->_I_second   );
+    c_sec_min    = ogsChem::LocalVector::Zero( this->_I_sec_min  ); 
+    ln_c_basis   = ogsChem::LocalVector::Zero( this->_I_basis    );
+    ln_c_sec_mob = ogsChem::LocalVector::Zero( this->_I_sec_mob  ); 
+    ln_c_sec_sorp= ogsChem::LocalVector::Zero( this->_I_sec_sorp ); 
+
+    c_sec_min  = vec_unknowns.tail(_I_sec_min); 
+    c_basis    = vec_unknowns.head(_I_basis); 
+    for (i=0; i < (size_t)c_basis.size(); i++)
+        ln_c_basis(i) = std::log(c_basis(i));
+
+    Stoi_mob  = _matStoi.topRows(    _J_mob );
+    Stoi_sorp = _matStoi.middleRows( _J_mob, _J_sorp ); 
+    // calculate the secondary mobile component concentrations
+    ln_c_sec_mob  = -1.0 * _vec_lnK.head( _J_mob ) + Stoi_mob * ln_c_basis; 
+    // calculate the secondary sorption component concentrations
+    ln_c_sec_sorp = -1.0 * _vec_lnK.segment( _J_mob, _J_sorp ) + Stoi_sorp * ln_c_basis; 
+
+    // fill in the secondary concentrations
+    for (i=0; i < (size_t)ln_c_sec_mob.size(); i++)
+        c_second( i ) = std::exp( ln_c_sec_mob(i) );
+    for (i=0; i < (size_t)ln_c_sec_sorp.size(); i++)
+        c_second( _I_sec_mob + i ) = std::exp( ln_c_sec_sorp(i) ); 
+    c_second.tail( _I_sec_min )  = c_sec_min;
+
+    vec_concentrations.head( _I_basis  ) = c_basis;
+    vec_concentrations.tail( _I_second ) = c_second; 
+}
+
+double chemEqReactSys::cal_cbarmin_by_total_mass(size_t        idx_min, 
+                                                 LocalVector & c_basis, 
+                                                 LocalVector & tot_mass)
+{
+    double cbarmin;
+    ogsChem::LocalVector conc_second, res_tmp;
+    ogsChem::LocalMatrix matStoi_trans; 
+    conc_second = ogsChem::LocalVector::Zero( _I_second ); 
+    res_tmp     = ogsChem::LocalVector::Zero( _I_basis );
+    
+    matStoi_trans = _matStoi.transpose(); 
+    res_tmp       = tot_mass - c_basis; 
+
+    // conc_second = matStoi_trans.fullPivHouseholderQr().solve( res_tmp ); 
+    conc_second = matStoi_trans.householderQr().solve( res_tmp ); 
+    cbarmin = conc_second( _I_sec_mob + _I_sec_sorp + idx_min);
+return cbarmin;
+}  // end of function cal_cbarmin_by_total_mass
 
 
 }  // end of namespace
