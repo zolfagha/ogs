@@ -1,15 +1,20 @@
 GeoSys-OUT: Output ------------------------------------------------
 #OUTPUT // profile
- $PCS_TYPE
-  RICHARDS_FLOW
  $NOD_VALUES
-  PRESSURE1
+  HEAD
+  H+
+  Ca2+
+  Mg2+
+  CO32-
+  Cl-
+  HCO3-
+  Calcite
+  Dolomite(dis)
  $GEO_TYPE
   DOMAIN
- $TIM_TYPE
- STEPS 10
  $DAT_TYPE
   PVD
+ $TIM_TYPE
+  STEPS 1
 #STOP
-
 

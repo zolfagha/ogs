@@ -3,9 +3,9 @@ GeoSys-OUT: Output ------------------------------------------------
  $PCS_TYPE
   RICHARDS_FLOW
  $TIME_STEPS
-  1  10
+  1000  10
  $TIME_END
-  10.0
+  10000.0
  $TIME_START
   0.0
 #STOP
