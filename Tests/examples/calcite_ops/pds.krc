@@ -29,9 +29,9 @@ GeoSys Reactions
  $TYPE
    MIN_EQ_REACT;
  $EQUATION
-   1 Calcite =  1 CO32- + 1 Ca2+ ;
+   1 CO32- + 1 Ca2+ = 1 Calcite;
  $EQ_CONSTANT
- 3.548134e-9           ; K values
+ 2.818382846e+08           ; K values
 
 #REACTION ; 
  $NAME
@@ -39,8 +39,8 @@ GeoSys Reactions
  $TYPE
    MIN_EQ_REACT;
  $EQUATION
-   1 Dolomite(dis) =  2 CO32- + 1 Ca2+ + 1 Mg2+; 
+   2 CO32- + 1 Ca2+ + 1 Mg2+ = 1 Dolomite(dis); 
  $EQ_CONSTANT
- 4.365158e-17          ; K values
+ 2.290867822e+16          ; K values
    
 #STOP

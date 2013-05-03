@@ -17,7 +17,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
  $GEO_TYPE
   DOMAIN
  $DIS_TYPE
-  CONSTANT  1.23e-10
+  CONSTANT  1.99e-8
 
 #INITIAL_CONDITION
  $PCS_TYPE
@@ -27,7 +27,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
  $GEO_TYPE
   DOMAIN
  $DIS_TYPE
-  CONSTANT  1.23e-4
+  CONSTANT  1.23e-2
 
 #INITIAL_CONDITION
  $PCS_TYPE
@@ -37,7 +37,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
  $GEO_TYPE
   DOMAIN
  $DIS_TYPE
-  CONSTANT 1.0e-12  //0.0
+  CONSTANT 1.0e-10  //0.0
 
 #INITIAL_CONDITION
  $PCS_TYPE
@@ -47,7 +47,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
  $GEO_TYPE
   DOMAIN
  $DIS_TYPE
-  CONSTANT 1.0e-12  //0.0
+  CONSTANT 2.0e-10  //0.0
 
 #INITIAL_CONDITION
  $PCS_TYPE
@@ -57,7 +57,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
  $GEO_TYPE
   DOMAIN
  $DIS_TYPE
-  CONSTANT  1.23e-10
+  CONSTANT  2.8847e-7
 
 #INITIAL_CONDITION
  $PCS_TYPE
@@ -87,7 +87,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
  $GEO_TYPE
   DOMAIN
  $DIS_TYPE
-  CONSTANT 1.0e-10
+  CONSTANT 9.0949e-029
 
 #STOP
 

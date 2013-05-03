@@ -1,6 +1,7 @@
 GeoSys-OUT: Output ------------------------------------------------
 #OUTPUT // profile
  $NOD_VALUES
+  HEAD
   H+
   Ca2+
   Mg2+
