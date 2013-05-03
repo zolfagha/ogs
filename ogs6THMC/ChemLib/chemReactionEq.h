@@ -38,6 +38,11 @@ public:
       */
 	double get_ln_K(void) { return _ln_K; }
 
+    /**
+      * return the type of equilibrium reaction. 
+      */
+    EqReactType get_type(void) { return _eqReactType;}
+
 	/**
       * override reading str function
       */

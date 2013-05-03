@@ -27,6 +27,7 @@
 #include "ChemLib/chemReactionEqMob.h"
 #include "ChemLib/chemReactionEqSorp.h"
 #include "ChemLib/chemReactionEqMin.h"
+#include "ChemLib/chemEqReactSys.h"
 
 using namespace ogs5;
 
@@ -589,10 +590,13 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             ogs6fem.m_KinReductScheme = mReductionScheme; 
             mReductionScheme = NULL;
         }
-        else if ( ogs6fem.list_eq_reactions.size() > 0 )
-        {  // initialize the full reduction scheme
-           // TODO
-        }  // end of if else
+        else if ( ogs6fem.list_eq_reactions.size() > 0 && ogs6fem.list_kin_reactions.size() == 0 )
+        {   // initialize the equilibrium reduction system
+            ogsChem::chemEqReactSys* mEqReactSys; 
+            mEqReactSys = new ogsChem::chemEqReactSys( ogs6fem.map_ChemComp, ogs6fem.list_eq_reactions ); 
+            ogs6fem.m_EqReactSys = mEqReactSys; 
+            mEqReactSys = NULL;
+        }  // end of else if
     }  // end of if ( n_KinReactions > 0 )
 
     // -------------------------------------------------------------------------

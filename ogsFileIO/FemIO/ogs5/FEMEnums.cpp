@@ -45,6 +45,10 @@ ProcessType convertProcessType ( const std::string& pcs_type_string )
         return MASS_TRANSPORT;
 	if (pcs_type_string.compare ("KIN_REACT_GIA") == 0)  // HS 09.2012
         return KIN_REACT_GIA;
+    if (pcs_type_string.compare ("REACT_TRANS_OPS") == 0)  // HS 03.2013
+        return REACT_TRANS_OPS; 
+    if (pcs_type_string.compare ("REACT_GIA_REDUCT") == 0)  // HS 03.2013
+        return REACT_GIA_REDUCT; 
 	if (pcs_type_string.compare ("MULTI_PHASE_FLOW") == 0)
         return MULTI_PHASE_FLOW;
     if (pcs_type_string.compare ("DEFORMATION_H2") == 0)
@@ -95,6 +99,10 @@ std::string convertProcessTypeToString ( ProcessType pcs_type )
         return "MASS_TRANSPORT";
 	if (pcs_type == KIN_REACT_GIA)  // HS 09.2012
 		return "KIN_REACT_GIA";  
+    if (pcs_type == REACT_GIA_REDUCT)  // HS 03.2013
+		return "REACT_GIA_REDUCT";
+    if (pcs_type == REACT_TRANS_OPS)   // HS 03.2013
+		return "REACT_TRANS_OPS"; 
     if (pcs_type == MULTI_PHASE_FLOW)
         return "MULTI_PHASE_FLOW";
     if (pcs_type == DEFORMATION_H2)
