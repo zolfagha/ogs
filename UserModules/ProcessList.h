@@ -25,6 +25,8 @@
 #include "FemMassTransport/Concentration.h"
 #include "FemHeatTransport/Temperature.h"
 #include "FemKinReactGIA/Concentrations.h"
+#include "FemReactGIAReduct/ReductConc.h"
+#include "FemReactOPS/OPSConc.h"
 #include "FemDeformationTotalForm/Displacement.h"
 #include "FemDeformationTotalForm/ElementStressStrain.h"
 #include "FemDeformationTotalForm/NodalStressStrain.h"

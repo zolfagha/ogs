@@ -1,15 +1,26 @@
 GeoSys-OUT: Output ------------------------------------------------
 #OUTPUT // profile
- $PCS_TYPE
-  RICHARDS_FLOW
  $NOD_VALUES
-  PRESSURE1
+  HEAD
+  C1
+  C2
+  C3
+  C4
+  C5
+  X1
+  X2
+  X3
+  X4
+  S
+  CS1
+  CS2
+ $ELE_VALUES
+  VELOCITY
  $GEO_TYPE
   DOMAIN
- $TIM_TYPE
- STEPS 10
  $DAT_TYPE
   PVD
+ $TIM_TYPE
+  STEPS 1
 #STOP
-
 
