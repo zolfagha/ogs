@@ -122,13 +122,11 @@ public:
 	  */
     virtual void accept(const NumLib::TimeStep &t)
     {
-        //// this solution itself
-        //AbstractTimeSteppingAlgorithm::accept(t);
-        //// call all linear solutions
-        //for (size_t i=0; i < _lin_solutions.size(); i++ )
-        //    _lin_solutions[i]->accept(t); 
-        //// the non-linear solution
-        //_nlin_solution->accept(t); 
+        // this solution itself
+        AbstractTimeSteppingAlgorithm::accept(t);
+        // call all linear solutions
+        for (size_t i=0; i < _lin_solutions.size(); i++ )
+            _lin_solutions[i]->accept(t); 
     }
 
     /** 
@@ -310,33 +308,33 @@ SingleStepReactOPS<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBL
 
     // loop over all the boundary nodes, and 
 	// transform these concentrations to eta and xi values
-    std::map<size_t, ConcNodeInfo*>::iterator bc_node_it; 
-    std::vector<size_t> vec_bc_node_idx; 
-    std::vector<std::vector<double>> vec_node_c_mob_values;
+    //std::map<size_t, ConcNodeInfo*>::iterator bc_node_it; 
+    //std::vector<size_t> vec_bc_node_idx; 
+    //std::vector<std::vector<double>> vec_node_c_mob_values;
 
-    for ( i=0; i < _linear_problem.size(); i++ )
-    {
-        std::vector<double> vec_c_mob; 
-        vec_node_c_mob_values.push_back(vec_c_mob); 
-    }
+    //for ( i=0; i < _linear_problem.size(); i++ )
+    //{
+    //    std::vector<double> vec_c_mob; 
+    //    vec_node_c_mob_values.push_back(vec_c_mob); 
+    //}
     
-    // Boundary condition
-    for ( bc_node_it = _bc_info.begin(); bc_node_it != _bc_info.end(); bc_node_it++ )
-    {
-        // bc_node_it->second->transform(); 
-        size_t node_idx = bc_node_it->second->get_node_id(); 
-        vec_bc_node_idx.push_back(node_idx);
+    //// Boundary condition
+    //for ( bc_node_it = _bc_info.begin(); bc_node_it != _bc_info.end(); bc_node_it++ )
+    //{
+    //    // bc_node_it->second->transform(); 
+    //    size_t node_idx = bc_node_it->second->get_node_id(); 
+    //    vec_bc_node_idx.push_back(node_idx);
 
-        for ( i=0; i < _linear_problem.size(); i++ )
-        {
-            double c_mob_value = bc_node_it->second->get_comp_conc(i);
-            vec_node_c_mob_values[i].push_back(c_mob_value); 
-        }
-    }
+    //    for ( i=0; i < _linear_problem.size(); i++ )
+    //    {
+    //        double c_mob_value = bc_node_it->second->get_comp_conc(i);
+    //        vec_node_c_mob_values[i].push_back(c_mob_value); 
+    //    }
+    //}
 
-    // imposing BC for eta
-    for ( i=0; i < _linear_problem.size(); i++ )
-     	_linear_problem[i]->getVariable(0)->addDirichletBC( new SolutionLib::FemDirichletBC( vec_bc_node_idx,  vec_node_c_mob_values[i] ) ); 
+    //// imposing BC for eta
+    //for ( i=0; i < _linear_problem.size(); i++ )
+    // 	_linear_problem[i]->getVariable(0)->addDirichletBC( new SolutionLib::FemDirichletBC( vec_bc_node_idx,  vec_node_c_mob_values[i] ) ); 
 
 };
 
@@ -351,70 +349,22 @@ template <
 int SingleStepReactOPS<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBLEM, T_USER_LINEAR_SOLUTION, T_USER_NON_LINEAR_PROBLEM, T_USER_NON_LINEAR_SOLUTION>
     ::solveTimeStep(const NumLib::TimeStep &t_n1)
 {
-	//size_t i; 
+	size_t i; 
 
-	//// solving linear problems one after the other
-	//for ( i=0; i < _lin_solutions.size(); i++)
-	//{
-	//	// print solving information
-	//	INFO("--Solving linear equation for eta_%d: ", i ); 
-	//	_lin_solutions[i]->solveTimeStep( t_n1 );
+	// solving linear problems one after the other
+	for ( i=0; i < _lin_solutions.size(); i++)
+	{
+        // read in the concentration value as initial condition
+        _lin_solutions[i]->overwriteLastTimeStepValue( _function_data->get_concentrations(i) ); 
 
-	//	// if solution is accepted, 
-	//	// if ( _lin_solutions[i]->accepted() )
-	//	_function_data->set_eta_mob_node_values( i, _lin_solutions[i]->getCurrentSolution(0) ); 
-	//}
-	//// calcuate the reaction rates on each node
-	//_function_data->update_node_kin_reaction_rates(); 
-
-	//// solving the non-linear problem
-	//INFO("--Solving non-linear equations for xi:"); 
-	//_nlin_solution->solveTimeStep( t_n1 ); 
-
-	//// getting result
- //   // xi_mob
-	//for ( i=0; i < _nlin_solution->getProblem()->getNumberOfVariables(); i++)
-	//    _function_data->set_xi_mob_node_values( i, _nlin_solution->getCurrentSolution(i) ); 
- //   // xi_immob
- //   _function_data->update_xi_immob_node_values(); 
-
-    //// st
-    //std::vector<size_t> list_st_eqs_id;
-    //std::vector<double> list_st_val;
-    //for (size_t i_var=0; i_var<n_var; i_var++) {
-    //    MyVariable* var = _problem->getVariable(i_var);
-    //    for (size_t i=0; i<var->getNumberOfNeumannBC(); i++) {
-    //        SolutionLib::IFemNeumannBC *bc2 = var->getNeumannBC(i);
-    //        bc2->setup(var->getCurrentOrder());
-    //        std::vector<size_t> &list_bc_nodes = bc2->getListOfBCNodes();
-    //        std::vector<double> &list_bc_values = bc2->getListOfBCValues();
-    //        DiscreteLib::convertToEqsValues(_dofManager, i_var, msh_id, list_bc_nodes, list_bc_values, list_st_eqs_id, list_st_val);
-    //    }
-    //}
-    //(*_x_st) = .0;
-    //for (size_t i=0; i<list_st_eqs_id.size(); i++) {
-    //    (*_x_st)[list_st_eqs_id[i]] = list_st_val[i];
-    //}
-
-    // setup functions
-    //_f_linear->reset(&t_n1, _x_n0);
-    //_f_r->reset(&t_n1, _x_n0, _x_st);
-    //_f_dx->reset(&t_n1, _x_n0);
-
-    //// initial guess
-    //*_x_n1_0 = *_x_n0;
-    //for (size_t i=0; i<list_bc1_eqs_id.size(); i++) {
-    //    (*_x_n1_0)[list_bc1_eqs_id[i]] = list_bc1_val[i];
-    //}
-
-    // solve
-    //_f_nonlinear->solve(*_x_n1_0, *_x_n1);
-
-    //// distribute solution vector to local vector for each variable
-    //for (size_t i=0; i<n_var; i++) {
-    //    //SolutionVector* vec_var = _problem->getVariable(i)->getIC()->getNodalValues();
-    //    DiscreteLib::setLocalVector(_dofManager, i, msh_id, *_x_n1, *_vec_u_n1[i]->getDiscreteData());
-    //}
+		// print solving information
+        INFO("--Solving linear equation for the transport of Comp #%s. \n",  this->_linear_problem[i]->getVariable(0)->getName().c_str() ); 
+		_lin_solutions[i]->solveTimeStep( t_n1 );
+        
+        _function_data->set_concentrations( i, _lin_solutions[i]->getCurrentSolution(0) ); 
+	}
+	// calcuate the equilibrium reaction system on each node
+	_function_data->calc_nodal_eq_react_sys(0.0); // to be switched on later
 
     return 0;
 }

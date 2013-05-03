@@ -141,9 +141,6 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
     // run equilibrium reactions on each node that is not on boundary
     this->calc_nodal_eq_react_sys( 0.0 ); 
 
-    // update the values in the linear problem correspondingly. 
-    // TODO
-
     // set initial output parameter
 	for (i=0; i<_concentrations.size(); i++) {
 		OutputVariableInfo var1(this->getOutputParameterName(i), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
@@ -195,7 +192,7 @@ void FunctionOPSConc<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 template <class T1, class T2>
 void FunctionOPSConc<T1, T2>::calc_nodal_eq_react_sys(double dt)
 {
-    size_t i, node_idx; 
+    size_t i, node_idx, err_node_count; 
     size_t result = 1; 
 	
 	// initialize the local vector
@@ -205,6 +202,8 @@ void FunctionOPSConc<T1, T2>::calc_nodal_eq_react_sys(double dt)
 	// signal, solving local equilibrium reaction system
 	INFO("--Solving local equilibrium reaction system...");
 
+    // clear the counter
+    err_node_count = 0; 
     // loop over all the nodes
     for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin();
 	     node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd(); 
@@ -220,21 +219,33 @@ void FunctionOPSConc<T1, T2>::calc_nodal_eq_react_sys(double dt)
 
 			// solve the local equilibrium system
             this->_local_eq_react_sys->solve_EqSys_Newton( loc_conc, 
+                                                           result, 
+                                                           node_idx, 
 		                                                   1.0e-10, 
-                                                           50, 
-                                                           result); 
+                                                           1.0e-16,
+                                                           50 ); 
         	// if the iteration converged. 
             if ( result == 0 )
                 // collect the solved concentrations
     			for (i=0; i < _n_Comp; i++) 
     				this->_concentrations[i]->setValue(node_idx, loc_conc[i]); 
+            else 
+                err_node_count++; 
 		} // end of if
         else 
         {
-            // if it is boundary nodes, then xi_immob_new is equal to xi_immob. 
-            // TODO
+            // if it is boundary nodes
+            // then do nothing, using the originally set concentrations
         }
 
 	}  // end of for node_idx
 
+    if ( err_node_count == 0 )
+    {
+        INFO("--Solution of chemical system all converged...");
+    }
+    else
+    {
+        INFO("--Solution of chemical system failed on %i nodes...", err_node_count);
+    }
 }

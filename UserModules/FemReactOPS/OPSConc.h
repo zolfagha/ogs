@@ -204,14 +204,30 @@ public:
     };
 
 	/**
-      * calculate the reaction rates on each node
-      */
-	//void update_node_kin_reaction_rates(void); 
-
-	/**
       * update the change of kinetic reaction rate over the change of xi_mob
       */
-	//void update_node_kin_reaction_drates_dxi(void); 
+	void set_concentrations(size_t conc_idx, MyNodalFunctionScalar* new_conc_nodal_values)
+    {
+        size_t node_idx; 
+        double nodal_conc; 
+
+        for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin();
+             node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd(); 
+             node_idx++ )
+        {
+            nodal_conc = new_conc_nodal_values->getValue(node_idx); 
+            if ( nodal_conc < std::numeric_limits<double>::epsilon() )
+                nodal_conc = 1.0e-36; 
+            
+            this->_concentrations[conc_idx]->setValue( node_idx, nodal_conc );        
+        }
+    
+    }; 
+
+    MyNodalFunctionScalar* get_concentrations(size_t idx_conc)
+    {
+        return _concentrations[idx_conc];
+    };
 
 	/**
       * calculate nodal equilibrium reaction system
