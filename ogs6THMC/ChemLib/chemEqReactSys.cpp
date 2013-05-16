@@ -7,7 +7,7 @@
  *
  * \file chemEqReactSys.cpp
  *
- * Created on 2013-03-26 by Haibing Shao
+ * Created on 2013-03-26 by Haibing Shao & Reza Zolfaghari
  */
 
 #include "chemEqReactSys.h"
@@ -79,7 +79,7 @@ void chemEqReactSys::calc_residual(LocalVector & vec_unknowns,
 
     // now split the unknown vector
     c_basis    = vec_unknowns.head(_I_basis); 
-    for (i=0; i < (size_t)c_basis.size(); i++)
+    for (i=0; i < (size_t)c_basis.rows(); i++)
         ln_c_basis(i) = std::log(c_basis(i));
     c_sec_min  = vec_unknowns.tail(_I_sec_min); 
 
@@ -96,9 +96,9 @@ void chemEqReactSys::calc_residual(LocalVector & vec_unknowns,
     lnK_min = _vec_lnK.tail(_J_min); 
     
     // fill in the secondary concentrations
-    for (i=0; i < (size_t)ln_c_sec_mob.size(); i++)
+    for (i=0; i < (size_t)ln_c_sec_mob.rows(); i++)
         c_second( i ) = std::exp( ln_c_sec_mob(i) );
-    for (i=0; i < (size_t)ln_c_sec_sorp.size(); i++)
+    for (i=0; i < (size_t)ln_c_sec_sorp.rows(); i++)
         c_second( _I_sec_mob + i ) = std::exp( ln_c_sec_sorp(i) ); 
     c_second.tail( _I_sec_min )  = c_sec_min;
     // part 1), n_basis mass balance equations
@@ -133,7 +133,7 @@ void chemEqReactSys::calc_Jacobi(LocalVector & vec_unknowns,
     LocalVector vec_res_tmp; 
     // Jacobi matrix is a square matrix, 
     // with n_cols and n_rows equal to the number of concentrations
-    size_t n_unknowns(vec_unknowns.size()); 
+    size_t n_unknowns(vec_unknowns.rows());
     vec_res_tmp = LocalVector::Zero( n_unknowns ); 
     this->_mat_Jacobi = ogsChem::LocalMatrix::Zero(n_unknowns, n_unknowns); 
 
@@ -486,9 +486,9 @@ void chemEqReactSys::Min_solv(size_t      & idx_node,
         y1 = z - V * y2; 
 
         // y = [y1;y2];
-        y = LocalVector::Zero( y1.size() + y2.size() );
-        y.head( y1.size() ) = y1;
-        y.tail( y2.size() ) = y2; 
+        y = LocalVector::Zero( y1.rows() + y2.rows() );
+        y.head( y1.rows() ) = y1;
+        y.tail( y2.rows() ) = y2;
         // delta_x = P* y;
         delta_x = P * y; 
     }  // end of else if
@@ -502,7 +502,7 @@ void chemEqReactSys::increment_unknown(LocalVector & x_old,
     size_t i, n_unknowns;
     double damp_factor; 
 
-    n_unknowns = x_old.size(); 
+    n_unknowns = x_old.rows();
     // increment with a damping factor for everyone
     for (i=0; i<n_unknowns; i++)
     {
@@ -528,8 +528,8 @@ void chemEqReactSys::update_AI(LocalVector & vec_unknowns)
 
     // take the first section which is basis concentration
     c_basis    = vec_unknowns.head( _I_basis   );
-    ln_c_basis = LocalVector::Zero( c_basis.size() ); 
-    for (i=0; i < (size_t)c_basis.size(); i++)
+    ln_c_basis = LocalVector::Zero( c_basis.rows() );
+    for (i=0; i < (size_t)c_basis.rows(); i++)
         ln_c_basis(i) = std::log( c_basis(i) );
     // and the minerals
     c_sec_min  = vec_unknowns.tail( _I_sec_min ); 
@@ -569,8 +569,8 @@ void chemEqReactSys::update_minerals(LocalVector & vec_unknowns,
 
     // take the first section which is basis concentration
     c_basis    = vec_unknowns.head( _I_basis   );
-    ln_c_basis = LocalVector::Zero( c_basis.size() ); 
-    for (i=0; i < (size_t)c_basis.size(); i++)
+    ln_c_basis = LocalVector::Zero( c_basis.rows() );
+    for (i=0; i < (size_t)c_basis.rows(); i++)
         ln_c_basis(i) = std::log( c_basis(i) );
     // and the minerals
     c_sec_min  = vec_unknowns.tail( _I_sec_min ); 
@@ -621,7 +621,7 @@ void chemEqReactSys::update_concentations(LocalVector & vec_unknowns, LocalVecto
 
     c_sec_min  = vec_unknowns.tail(_I_sec_min); 
     c_basis    = vec_unknowns.head(_I_basis); 
-    for (i=0; i < (size_t)c_basis.size(); i++)
+    for (i=0; i < (size_t)c_basis.rows(); i++)
         ln_c_basis(i) = std::log(c_basis(i));
 
     Stoi_mob  = _matStoi.topRows(    _J_mob );
@@ -632,9 +632,9 @@ void chemEqReactSys::update_concentations(LocalVector & vec_unknowns, LocalVecto
     ln_c_sec_sorp = -1.0 * _vec_lnK.segment( _J_mob, _J_sorp ) + Stoi_sorp * ln_c_basis; 
 
     // fill in the secondary concentrations
-    for (i=0; i < (size_t)ln_c_sec_mob.size(); i++)
+    for (i=0; i < (size_t)ln_c_sec_mob.rows(); i++)
         c_second( i ) = std::exp( ln_c_sec_mob(i) );
-    for (i=0; i < (size_t)ln_c_sec_sorp.size(); i++)
+    for (i=0; i < (size_t)ln_c_sec_sorp.rows(); i++)
         c_second( _I_sec_mob + i ) = std::exp( ln_c_sec_sorp(i) ); 
     c_second.tail( _I_sec_min )  = c_sec_min;
 

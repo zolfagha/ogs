@@ -358,6 +358,11 @@ private:
 	ogsChem::chemReductionKin* _ReductionKin; 
 
     /**
+      * pointer to the reduction scheme.
+      */
+	ogsChem::chemReductionKin* _ReductionGIA; //Reza
+
+    /**
       * concentrations vector
       * including all components in the MCP data structure
       */

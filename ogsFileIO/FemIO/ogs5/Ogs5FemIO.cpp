@@ -72,14 +72,10 @@ bool Ogs5FemIO::read(const std::string &proj_path, Ogs5FemData &ogs5data)
 		case FiniteElement::KIN_REACT_GIA:
 			for (size_t i=0; i<ogs5data.cp_vector.size() ; i++)
 				pcs->primary_variable_name.push_back( ogs5data.cp_vector[i]->compname); 
-			break; 
-        case FiniteElement::REACT_GIA_REDUCT:
+			break;
+		case FiniteElement::REACT_GIA:
 			for (size_t i=0; i<ogs5data.cp_vector.size() ; i++)
-				pcs->primary_variable_name.push_back( ogs5data.cp_vector[i]->compname); 
-			break; 
-        case FiniteElement::REACT_TRANS_OPS:
-			for (size_t i=0; i<ogs5data.cp_vector.size() ; i++)
-				pcs->primary_variable_name.push_back( ogs5data.cp_vector[i]->compname); 
+				pcs->primary_variable_name.push_back( ogs5data.cp_vector[i]->compname);
 			break; 
 		default:
 		    break;

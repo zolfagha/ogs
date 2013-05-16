@@ -27,8 +27,8 @@
 #include "ChemLib/chemReactionEq.h"
 #include "ChemLib/chemReactionKin.h"
 #include "ChemLib/chemReductionKin.h"
+#include "ChemLib/chemReductionGIA.h"
 #include "ChemLib/chemcomp.h"
-#include "ChemLib/chemEqReactSys.h"
 #include "SolutionLib/Fem/FemDirichletBC.h"
 #include "SolutionLib/Fem/FemNeumannBC.h"
 #include "GeoLib/GEOObjects.h"
@@ -48,7 +48,7 @@ private:
     static Ogs6FemData* _obj;
 
 private:
-    Ogs6FemData(): geo(NULL), m_KinReductScheme(NULL) {};
+    Ogs6FemData(): geo(NULL),m_KinReductScheme(NULL), m_GIA_ReductScheme(NULL) {};
 
 public:
     //material data
@@ -68,8 +68,8 @@ public:
 	BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> map_ChemComp; 
 	std::vector<ogsChem::chemReactionKin*> list_kin_reactions; 
     std::vector<ogsChem::chemReactionEq*> list_eq_reactions; 
-	ogsChem::chemReductionKin* m_KinReductScheme; 
-    ogsChem::chemEqReactSys*   m_EqReactSys; 
+	ogsChem::chemReductionKin* m_KinReductScheme;
+	ogsChem::chemReductionGIA* m_GIA_ReductScheme;
     //process
     BaseLib::OrderedMap<std::string, ProcessLib::Process*> list_pcs;
     //
@@ -92,8 +92,8 @@ public:
         BaseLib::releaseObjectsInStdMap(list_pcs);
 		BaseLib::releaseObjectsInStdMap(map_ChemComp); 
 		BaseLib::releaseObjectsInStdVector(list_kin_reactions);
-        BaseLib::releaseObjectsInStdVector(list_eq_reactions);
-		BaseLib::releaseObject(m_KinReductScheme); 
-        BaseLib::releaseObject(m_EqReactSys); 
+		BaseLib::releaseObjectsInStdVector(list_eq_reactions);
+		BaseLib::releaseObject(m_KinReductScheme);
+		BaseLib::releaseObject(m_GIA_ReductScheme);
     }
 };

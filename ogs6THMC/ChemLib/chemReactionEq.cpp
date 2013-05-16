@@ -7,7 +7,7 @@
  *
  * \file chemReactionEq.h
  *
- * Created on 2013-03-18 by Haibing Shao
+ * Created on 2013-03-18 by Haibing Shao & Reza Zolfaghari
  */
  
 #include "chemReactionEq.h"
@@ -33,6 +33,7 @@ void chemReactionEq::readReactionStr(std::string & reaction_str)
 	// TODO
 	std::string tmp_str;
 }
+
 
 void chemReactionEq::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & list_chemComp, 
                                       ogs5::CKinReact* KRC_reaction)

@@ -98,9 +98,6 @@ public:
     /// get the current solution
     MyNodalFunctionScalar* getCurrentSolution(size_t var_id) { return _vec_u_n1[var_id]; }
 
-    // overwrite the previous time step values
-    void overwriteLastTimeStepValue(MyNodalFunctionScalar* new_nodal_values);
-
     ///
     UserFemProblem* getProblem() {return _problem;};
 
@@ -278,23 +275,5 @@ int SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY>::solve
 
     return 0;
 }
-
-template <
-class T_USER_FEM_PROBLEM,
-class T_LINEAR_SOLVER,
-class T_NL_SOLVER_FACTORY
->
-void SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY>::overwriteLastTimeStepValue(MyNodalFunctionScalar* new_nodal_values)
-{
-    size_t idx_node; 
-
-    for (idx_node = new_nodal_values->getDiscreteData()->getRangeBegin();
-	     idx_node < new_nodal_values->getDiscreteData()->getRangeEnd(); 
-		 idx_node++ )
-    (*_x_n0)[idx_node] = new_nodal_values->getValue(idx_node); 
-
-}
-
-
 
 }
