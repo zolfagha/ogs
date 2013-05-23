@@ -20,7 +20,8 @@
 #include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "SolutionLib/Core/TimeSteppingProblem.h"
 #include "SolutionLib/Fem/FemVariable.h"
-#include "ChemLib/chemReductionKin.h"
+//#include "ChemLib/chemReductionKin.h"
+#include "ChemLib/chemReductionGIA.h"
 
 namespace SolutionLib
 {
@@ -45,8 +46,8 @@ public:
     /**
       * constructor
       */
-    explicit FemGIARedSolution(MyDiscreteSystem* dis, ogsChem::chemReductionKin* myReductionKin )
-     : _discrete_system(dis), _ReductionKin(myReductionKin)
+    explicit FemGIARedSolution(MyDiscreteSystem* dis, ogsChem::chemReductionGIA* myReductionGIA )
+     : _discrete_system(dis), _ReductionGIA(myReductionGIA)
     {
     }
 
@@ -56,7 +57,7 @@ public:
     virtual ~FemGIARedSolution()
     {
         BaseLib::releaseObjectsInStdVector(_variables);
-        _ReductionKin = NULL;
+        _ReductionGIA = NULL;
         _discrete_system = NULL;
     }
 
@@ -87,7 +88,7 @@ public:
 	/**
       * get the pointer to reduction scheme
       */
-	ogsChem::chemReductionKin* getReductionScheme() const { return _ReductionKin; }
+	ogsChem::chemReductionGIA* getReductionScheme() const { return _ReductionGIA; }
 
 private:
     DISALLOW_COPY_AND_ASSIGN(FemGIARedSolution);
@@ -106,7 +107,7 @@ private:
     /**
       * pointer to reduction scheme
       */ 
-	ogsChem::chemReductionKin* _ReductionKin; // TO BE CHANGED. 
+	ogsChem::chemReductionGIA* _ReductionGIA; // TO BE CHANGED.
 
 };
 

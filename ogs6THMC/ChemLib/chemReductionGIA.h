@@ -53,8 +53,8 @@ public:
 	void Conc2EtaXi(ogsChem::LocalVector &local_conc,
 					ogsChem::LocalVector &local_eta,
 					ogsChem::LocalVector &local_eta_bar,
-				    ogsChem::LocalMatrix &local_xi_global,
-					ogsChem::LocalMatrix &local_xi_local);
+				    ogsChem::LocalVector &local_xi_global,
+					ogsChem::LocalVector &local_xi_local);
 
 	/**
       * convert eta and xi vectors to concentration vector
@@ -72,8 +72,8 @@ public:
  */
 	void EtaXi2Conc(ogsChem::LocalVector &local_eta,
 					ogsChem::LocalVector &local_eta_bar,
-					ogsChem::LocalMatrix &local_xi_global,
-					ogsChem::LocalMatrix &local_xi_local,
+					ogsChem::LocalVector &local_xi_global,
+					ogsChem::LocalVector &local_xi_local,
 					ogsChem::LocalVector &local_conc);
     /**
       * whether the reduction scheme has been initialized
@@ -85,8 +85,8 @@ public:
 	 */
 	void Calc_Kin_Rate(ogsChem::LocalVector &local_eta,
 		               ogsChem::LocalVector &local_eta_bar,
-					   ogsChem::LocalMatrix &local_xi_global,
-					   ogsChem::LocalMatrix &local_xi_local,
+					   ogsChem::LocalVector &local_xi_global,
+					   ogsChem::LocalVector &local_xi_local,
 					   ogsChem::LocalVector &local_rate_vec);
 
 	/**
@@ -97,12 +97,23 @@ public:
 	/**
       * get the length of eta_mob
       */
-	size_t get_n_eta_mob(void) {return _n_eta;};
+	size_t get_n_eta(void) {return _n_eta;};
 
 	/**
       * get the length of eta_immob
       */
-	size_t get_n_eta_immob(void) {return _n_eta_bar;};
+	size_t get_n_eta_bar(void) {return _n_eta_bar;};
+
+	/**
+      * get the length of eta_global
+      */
+	size_t get_n_xi_global(void) {return _n_xi_global;};
+
+	/**
+      * get the length of eta_local
+      */
+	size_t get_n_xi_local(void) {return _n_xi_local;};
+
 
 	/**
       * get the length of eta_mob
@@ -189,7 +200,7 @@ private:
 	/**
       * LocalVector sub-vectors of xi and eta,
       */
-	LocalMatrix local_xi_Mob, local_xi_Sorp,local_xi_Sorp_li,local_xi_Sorp_ld,local_xi_Sorp_tilde,local_xi_Sorp_bar,local_xi_Min,local_xi_Min_tilde,local_xi_Min_bar,local_xi_Kin,local_xi_Kin_bar,
+	LocalVector local_xi_Mob, local_xi_Sorp,local_xi_Sorp_li,local_xi_Sorp_ld,local_xi_Sorp_tilde,local_xi_Sorp_bar,local_xi_Min,local_xi_Min_tilde,local_xi_Min_bar,local_xi_Kin,local_xi_Kin_bar,
 	            local_xi,local_xi_bar;
 
 	LocalVector local_conc,local_eta,local_eta_bar;
@@ -221,7 +232,7 @@ private:
 	/**
       * the size of eta and xi vector
       */
-	size_t _n_eta,_n_eta_bar, _n_xi_mobile, _n_xi_immobile, _n_xiLocal,  _n_xiGlobal, _n_xi_Mob, _n_xi_Sorp_tilde,_n_xi_Sorp, _n_xi_Sorp_bar,_n_xi_Min, _n_xi_Min_tilde, _n_xi_Min_bar, _n_xi_Kin, _n_xi_Kin_bar;
+	size_t _n_eta,_n_eta_bar, _n_xi_mobile, _n_xi_immobile, _n_xi_local,  _n_xi_global, _n_xi_Mob, _n_xi_Sorp_tilde,_n_xi_Sorp, _n_xi_Sorp_bar,_n_xi_Min, _n_xi_Min_tilde, _n_xi_Min_bar, _n_xi_Kin, _n_xi_Kin_bar;
 
 	/**
       * _I_tot is the number of all components and _J_tot is the number of all reactions in the system

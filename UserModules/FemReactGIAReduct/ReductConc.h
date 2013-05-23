@@ -7,7 +7,7 @@
  *
  * \file ReductConc.h
  *
- * Created on    2013-03-18 by Haibing Shao
+ * Created on    2013-05-17 by Reza Zolfaghari & Haibing Shao
  */
 
 #ifndef REDUCT_CONC_H
@@ -123,12 +123,13 @@ public:
 	  * the general reduction problem part
 	  */
 	typedef SolutionLib::FemGIARedSolution<MyDiscreteSystem> MyGIAReductionProblemType; 
+
 	typedef SolutionLib::SingleStepGIAReduction<MyFunctionData, 
 		                                        MyGIAReductionProblemType,
 		                                        MyLinearTransportProblemType, 
 		                                        MyLinearSolutionType, 
 												MyNonLinearReactiveTransportProblemType, 
-	                                            MyNonLinearSolutionType> MyReductionGIASolution; 
+	                                            MyNonLinearSolutionType> MyGIAReductionSolution;
     typedef typename MyGIAReductionProblemType::MyVariable MyVariableConc;
 
     FunctionReductConc() 
@@ -139,39 +140,41 @@ public:
 		ProcessLib::Process::setInputParameterName(Velocity, "Velocity");
     };
 	
-	/**
-	  * destructor, reclaim the memory
-	  */
+    /**
+     * destructor, reclaim the memory
+     */
     virtual ~FunctionReductConc()
     {
-		//BaseLib::releaseObject(myNRIterator);
-  //      BaseLib::releaseObject(myNSolverFactory);
-  //      
-  //      BaseLib::releaseObject(_problem); 
-  //      BaseLib::releaseObject(_solution); 
-		//
-  //      BaseLib::releaseObject(_ReductionKin);
-		//BaseLib::releaseObject(_local_ode_xi_immob); 
+    	BaseLib::releaseObject(myNRIterator);
+    	BaseLib::releaseObject(myNSolverFactory);
 
-  //      BaseLib::releaseObject(_non_linear_eqs);
-  //      BaseLib::releaseObject(_non_linear_problem); 
-		//BaseLib::releaseObject(_non_linear_solution);
-  //      
-  //      BaseLib::releaseObjectsInStdVector(_linear_problems); 
-  //      BaseLib::releaseObjectsInStdVector(_linear_solutions); 
-  //      
-  //      BaseLib::releaseObjectsInStdVector(_concentrations);
-		  BaseLib::releaseObjectsInStdVector(_eta_mob); 
-          BaseLib::releaseObjectsInStdVector(_eta_immob);
-  //      BaseLib::releaseObjectsInStdVector(_xi_mob); 
-  //      BaseLib::releaseObjectsInStdVector(_xi_mob_rates);
-  //      BaseLib::releaseObjectsInStdVector(_xi_mob_drates_dxi); 
-		//BaseLib::releaseObjectsInStdVector(_xi_immob); 
-		//BaseLib::releaseObjectsInStdVector(_xi_immob_new); 
-  //      BaseLib::releaseObjectsInStdVector(_xi_immob_rates); 
+    	BaseLib::releaseObject(_problem);
+    	BaseLib::releaseObject(_solution);
 
-  //      BaseLib::releaseObject(_nl_sol_dofManager);
-  //      BaseLib::releaseObject(_feObjects);
+    	BaseLib::releaseObject(_ReductionGIA);
+    	//BaseLib::releaseObject(_local_ode_xi_immob);
+
+    	BaseLib::releaseObject(_non_linear_eqs);
+    	BaseLib::releaseObject(_non_linear_problem);
+    	BaseLib::releaseObject(_non_linear_solution);
+
+    	BaseLib::releaseObjectsInStdVector(_linear_problems);
+    	BaseLib::releaseObjectsInStdVector(_linear_solutions);
+
+    	BaseLib::releaseObjectsInStdVector(_concentrations);
+    	BaseLib::releaseObjectsInStdVector(_eta);
+    	BaseLib::releaseObjectsInStdVector(_eta_bar);
+    	BaseLib::releaseObjectsInStdVector(_xi_global);
+    	BaseLib::releaseObjectsInStdVector(_xi_local);
+    	//        BaseLib::releaseObjectsInStdVector(_rates);
+    	BaseLib::releaseObjectsInStdVector(_kin_rates);
+    	//BaseLib::releaseObjectsInStdVector(_xi_global_drates_dxi);
+    	//BaseLib::releaseObjectsInStdVector(_xi_local);
+    	//BaseLib::releaseObjectsInStdVector(_xi_local_new);
+    	//BaseLib::releaseObjectsInStdVector(_xi_local_rates);
+
+    	BaseLib::releaseObject(_nl_sol_dofManager);
+    	BaseLib::releaseObject(_feObjects);
 
     };
 
@@ -233,29 +236,30 @@ public:
     /**
 	  * set function for eta and xi
 	  */
-	//void set_eta_mob_node_values     ( size_t eta_mob_idx,   MyNodalFunctionScalar* new_eta_mob_node_values   ); 
-	//void set_eta_immob_node_values   ( size_t eta_immob_idx, MyNodalFunctionScalar* new_eta_immob_node_values ); 
-	//void set_xi_mob_node_values      ( size_t xi_mob_idx,    MyNodalFunctionScalar* new_xi_mob_node_values    ); 
+	void set_eta_node_values     	( size_t eta_idx,   MyNodalFunctionScalar* new_eta_node_values   );
+	void set_eta_bar_node_values    ( size_t eta_bar_idx, MyNodalFunctionScalar* new_eta_bar_node_values );
+	void set_xi_global_node_values  ( size_t xi_global_idx,    MyNodalFunctionScalar* new_xi_global_node_values    );
+	//void set_xi_local_node_values   ( size_t xi_local_idx,    MyNodalFunctionScalar* new_xi_local_node_values    );
     
-    //template <class T_X>
-    //void update_xi_mob_nodal_values  ( const T_X & x_new ); 
+    template <class T_X>
+    void update_xi_global_nodal_values  ( const T_X & x_new );
 	
-    //void update_xi_immob_node_values ( void ); 
+    void update_xi_local_node_values ( void );
 
 	/**
       * calculate the reaction rates on each node
       */
-	//void update_node_kin_reaction_rates(void); 
+	void update_node_kin_reaction_rates(void);
 
 	/**
       * update the change of kinetic reaction rate over the change of xi_mob
       */
-	//void update_node_kin_reaction_drates_dxi(void); 
+	void update_node_kin_reaction_drates_dxi(void);
 
 	/**
       * calculate nodal local ode problem of xi_immob
       */
-	//void calc_nodal_xi_immob_ode(double dt);
+	void calc_nodal_xi_immob_ode(double dt);
 	
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
@@ -268,7 +272,7 @@ protected:
     /**
       * get the pointer of solution class for current problem
       */ 
-    virtual MyReductionGIASolution* getSolution() {return _solution;};
+    virtual MyGIAReductionSolution* getSolution() {return _solution;};
 
     /**
       * output the result of current solution
@@ -292,37 +296,37 @@ private:
     /**
       * linear problems
       */
-	//std::vector<MyLinearTransportProblemType*> _linear_problems;
+	std::vector<MyLinearTransportProblemType*> _linear_problems;
 
     /**
       * linear solutions
       */
-    //std::vector<MyLinearSolutionType*>         _linear_solutions;
+    std::vector<MyLinearSolutionType*>         _linear_solutions;
 
     /**
       * Nonlinear iterator
       */
-	//MyNRIterationStepInitializer*              myNRIterator; 
+	MyNRIterationStepInitializer*              myNRIterator;
 	
     /**
       * Nonlinear solver factory
       */
-    //MyDiscreteNonlinearSolverFactory*          myNSolverFactory;
+    MyDiscreteNonlinearSolverFactory*          myNSolverFactory;
     
     /**
       * nonlinear equation
       */ 
-	//MyNonLinearEquationType*                  _non_linear_eqs; 
+	MyNonLinearEquationType*                  _non_linear_eqs;
     
     /**
       * non-linear problem
       */ 
-	//MyNonLinearReactiveTransportProblemType * _non_linear_problem;
+	MyNonLinearReactiveTransportProblemType * _non_linear_problem;
 
     /**
       * non-linear solution
       */
-	//MyNonLinearSolutionType*                  _non_linear_solution; 
+	MyNonLinearSolutionType*                  _non_linear_solution;
 
 	/**
       * the nested local ODE problem
@@ -332,12 +336,12 @@ private:
 	/**
       * reduction problem
       */ 
-	//MyKinReductionProblemType* _problem; 
+	MyGIAReductionProblemType* _problem;
 
     /** 
       * reduction solution
       */
-	MyReductionGIASolution*    _solution; 
+	MyGIAReductionSolution*    _solution;
 
 	/**
       * FEM object
@@ -352,7 +356,7 @@ private:
     /**
       * pointer to the reduction scheme. 
       */
-	//ogsChem::chemReductionKin* _ReductionKin; 
+	ogsChem::chemReductionGIA* _ReductionGIA;
 
     /**
       * concentrations vector
@@ -363,47 +367,52 @@ private:
     /**
       * nodal eta_mobile values
       */ 
-    std::vector<MyNodalFunctionScalar*> _eta_mob; 
+    std::vector<MyNodalFunctionScalar*> _eta;
 
     /**
       * nodal eta_immobile values
       */ 
-	std::vector<MyNodalFunctionScalar*> _eta_immob;
+	std::vector<MyNodalFunctionScalar*> _eta_bar;
     
     /**
       * nodal xi_mobile values
       */ 
-    //std::vector<MyNodalFunctionScalar*> _xi_mob; 
+    std::vector<MyNodalFunctionScalar*> _xi_global;
 
     /**
       * nodal xi_immobile values
       */ 
-    //std::vector<MyNodalFunctionScalar*> _xi_immob; 
+    std::vector<MyNodalFunctionScalar*> _xi_local;
 
     /**
       * nodal xi_immobile values
       */ 
-	//std::vector<MyNodalFunctionScalar*> _xi_immob_new; 
+	std::vector<MyNodalFunctionScalar*> _xi_local_new;
 	
     /**
-      * nodal xi_mobile reaction rates
+      * nodal reaction rates
       */ 
-	//std::vector<MyNodalFunctionScalar*> _xi_mob_rates;
+	std::vector<MyNodalFunctionScalar*> _kin_rates;
 
     /**
       * derivative of nodal xi_mobile rates over xi_mobile
       */ 
-	//std::vector<MyNodalFunctionScalar*> _xi_mob_drates_dxi;
+	std::vector<MyNodalFunctionScalar*> _xi_global_drates_dxi;
 
     /**
-      * nodal xi_immobile reaction rates
+      * nodal xi_global reaction rates
+      */
+    std::vector<MyNodalFunctionScalar*> _xi_global_rates;
+
+    /**
+      * nodal xi_local reaction rates
       */ 
-    //std::vector<MyNodalFunctionScalar*> _xi_immob_rates;
+    std::vector<MyNodalFunctionScalar*> _xi_local_rates;
 
     /**
       * degree of freedom equation ID talbe for the nonlinear problem
       */ 
-    //DiscreteLib::DofEquationIdTable * _nl_sol_dofManager; 
+    DiscreteLib::DofEquationIdTable * _nl_sol_dofManager;
 
     /**
       * the id of the msh applied in this process
@@ -413,7 +422,8 @@ private:
     /**
       * the size of eta_mob, eta_immob, xi_mob and xi_immob vector
       */
-    //size_t _n_eta_mob, _n_eta_immob, _n_xi_mob, _n_xi_immob; 
+	size_t _n_eta,_n_eta_bar, _n_xi_mobile, _n_xi_immobile, _n_xi_local,  _n_xi_global, _n_xi_Mob, _n_xi_Sorp_tilde,_n_xi_Sorp, _n_xi_Sorp_bar
+			,_n_xi_Min, _n_xi_Min_tilde, _n_xi_Min_bar, _n_xi_Kin, _n_xi_Kin_bar;
 
     /**
       * number of components

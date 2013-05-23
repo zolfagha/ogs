@@ -1,0 +1,46 @@
+GeoSys Reactions
+#KINREACTIONDATA      
+ $SOLVER_TYPE
+	1                ; Solver type
+ $RELATIVE_ERROR	
+	1.e-6		 ; rel. Error
+ $MIN_TIMESTEP	
+	1.e-6		; min Timestep
+ $INITIAL_TIMESTEP	
+	1.e-4       ; init Timestep
+ $BACTERIACAPACITY
+  100.0
+ $NO_REACTIONS
+   POLYLINE PLY_BC_LEFT
+
+#REACTION ; 
+ $NAME
+   R1 ;
+ $TYPE
+   MOB_EQ_REACT;
+ $EQUATION
+   1 HCO3- =  1 H+ + CO32-; 
+ $EQ_CONSTANT
+ 4.67735e-11           ; K values
+
+#REACTION ; 
+ $NAME
+   R2 ;
+ $TYPE
+   MIN_EQ_REACT;
+ $EQUATION
+   1 CO32- + 1 Ca2+ = 1 Calcite;
+ $EQ_CONSTANT
+ 2.818382846e+08           ; K values
+
+#REACTION ; 
+ $NAME
+   R3 ;
+ $TYPE
+   MIN_EQ_REACT;
+ $EQUATION
+   2 CO32- + 1 Ca2+ + 1 Mg2+ = 1 Dolomite(dis); 
+ $EQ_CONSTANT
+ 2.290867822e+16          ; K values
+   
+#STOP

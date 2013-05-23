@@ -303,8 +303,8 @@ void chemReductionGIA::update_reductionScheme(void)
 	this->_n_xi_Kin          = _Jkin_ast;
 	this->_n_xi_Kin_bar      = _Jkin_ast;
 
-	this->_n_xiGlobal       = _Jsorp_li + _Jsorp_li + _Jmin + _Jmin + _Jkin_ast;
-	this->_n_xiLocal        = _Jmob + _Jsorp + _Jmin + _Jkin_ast;
+	this->_n_xi_global       = _Jsorp_li + _Jsorp_li + _Jmin + _Jmin + _Jkin_ast;
+	this->_n_xi_local        = _Jmob + _Jsorp + _Jmin + _Jkin_ast;
 	this->_Jeq_li           = _Jmob + _Jsorp_li + _Jmin;
 
 
@@ -385,8 +385,8 @@ void chemReductionGIA::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 void chemReductionGIA::Conc2EtaXi(ogsChem::LocalVector &local_conc,
 								  ogsChem::LocalVector &local_eta,
 								  ogsChem::LocalVector &local_eta_bar,
-								  ogsChem::LocalMatrix &local_xi_global,
-								  ogsChem::LocalMatrix &local_xi_local)
+								  ogsChem::LocalVector &local_xi_global,
+								  ogsChem::LocalVector &local_xi_local)
 {
 	// declare local temp variable
 	ogsChem::LocalVector local_c_mob, local_c_immob;
@@ -405,14 +405,14 @@ void chemReductionGIA::Conc2EtaXi(ogsChem::LocalVector &local_conc,
 	local_eta_bar = _mat_c_immob_2_eta_immob * local_c_immob;
     local_xi_bar  = _mat_c_immob_2_xi_immob  * local_c_immob;
     //0 means it is a vector, one column.
-    local_xi_Mob  = local_xi.block( 0,0,this->_n_xi_Mob,0);
-    local_xi_Sorp = local_xi.block( this->_n_xi_Mob,0,this->_n_xi_Sorp,0);
-    local_xi_Min  = local_xi.block( this->_n_xi_Mob + this->_n_xi_Sorp,0,this->_n_xi_Min,0);
-    local_xi_Kin  =	local_xi.block( this->_n_xi_Mob + this->_n_xi_Sorp + this->_n_xi_Min,0,this->_n_xi_Min,0);
+    local_xi_Mob  = local_xi.segment( 0,this->_n_xi_Mob);
+    local_xi_Sorp = local_xi.segment( this->_n_xi_Mob,this->_n_xi_Sorp);
+    local_xi_Min  = local_xi.segment( this->_n_xi_Mob + this->_n_xi_Sorp,this->_n_xi_Min);
+    local_xi_Kin  =	local_xi.segment( this->_n_xi_Mob + this->_n_xi_Sorp + this->_n_xi_Min,this->_n_xi_Min);
 
-    local_xi_Sorp_bar =  local_xi_bar.block( 0,0,this->_n_xi_Sorp,0);
-    local_xi_Min_bar  =  local_xi_bar.block( this->_n_xi_Sorp_bar,0,this->_n_xi_Min_bar,0);
-    local_xi_Kin_bar  =  local_xi_bar.block( this->_n_xi_Sorp_bar + this->_n_xi_Min_bar,0,this->_n_xi_Kin_bar,0);
+    local_xi_Sorp_bar =  local_xi_bar.segment( 0,this->_n_xi_Sorp);
+    local_xi_Min_bar  =  local_xi_bar.segment( this->_n_xi_Sorp_bar,this->_n_xi_Min_bar);
+    local_xi_Kin_bar  =  local_xi_bar.segment( this->_n_xi_Sorp_bar + this->_n_xi_Min_bar,this->_n_xi_Kin_bar);
 
 
     local_xi_Sorp_bar_li = local_xi_Sorp_bar.topRows(this->_Jsorp_li);
@@ -427,21 +427,21 @@ void chemReductionGIA::Conc2EtaXi(ogsChem::LocalVector &local_conc,
 
 void chemReductionGIA::EtaXi2Conc(ogsChem::LocalVector &local_eta,
 	                              ogsChem::LocalVector &local_eta_bar,
-								  ogsChem::LocalMatrix &local_xi_global,
-								  ogsChem::LocalMatrix &local_xi_local,
+								  ogsChem::LocalVector &local_xi_global,
+								  ogsChem::LocalVector &local_xi_local,
 								  ogsChem::LocalVector &local_conc )
 {
 	// declare local temp variable
 	ogsChem::LocalVector local_c_mob, local_c_immob;
 
-	local_xi_Mob  = local_xi_local.block( 0,0,this->_n_xi_Mob,0);
-	local_xi_Sorp = local_xi_global.block(this->_n_xi_Sorp_tilde + this->_n_xi_Min,0,this->_n_xi_Sorp,0);
-	local_xi_Min  = local_xi_global.block(this->_n_xi_Sorp_tilde + this->_n_xi_Min + this->_n_xi_Sorp,0,this->_n_xi_Min,0);
-	local_xi_Kin  = local_xi_global.block(this->_n_xi_Sorp_tilde + this->_n_xi_Min + this->_n_xi_Sorp+ this->_n_xi_Min-1,0,this->_n_xi_Kin,0);
+	local_xi_Mob  = local_xi_local.segment( 0,this->_n_xi_Mob);
+	local_xi_Sorp = local_xi_global.segment(this->_n_xi_Sorp_tilde + this->_n_xi_Min,this->_n_xi_Sorp);
+	local_xi_Min  = local_xi_global.segment(this->_n_xi_Sorp_tilde + this->_n_xi_Min + this->_n_xi_Sorp,this->_n_xi_Min);
+	local_xi_Kin  = local_xi_global.segment(this->_n_xi_Sorp_tilde + this->_n_xi_Min + this->_n_xi_Sorp+ this->_n_xi_Min,this->_n_xi_Kin);
 
-	local_xi_Sorp_bar = local_xi_local.block(this->_n_xi_Mob-1,0,this->_n_xi_Sorp_bar,0);
-	local_xi_Min_bar  = local_xi_local.block(this->_n_xi_Mob+this->_n_xi_Sorp_bar,0,this->_n_xi_Min,0);
-	local_xi_Kin_bar  = local_xi_local.block(this->_n_xi_Mob+this->_n_xi_Sorp_bar+this->_n_xi_Min_bar,0,this->_n_xi_Kin_bar,0);
+	local_xi_Sorp_bar = local_xi_local.segment(this->_n_xi_Mob,this->_n_xi_Sorp_bar);
+	local_xi_Min_bar  = local_xi_local.segment(this->_n_xi_Mob+this->_n_xi_Sorp_bar,this->_n_xi_Min);
+	local_xi_Kin_bar  = local_xi_local.segment(this->_n_xi_Mob+this->_n_xi_Sorp_bar+this->_n_xi_Min_bar,this->_n_xi_Kin_bar);
 
 	local_xi<<local_xi_Mob,local_xi_Sorp,local_xi_Min,local_xi_Kin;
 	local_xi_bar<<local_xi_Sorp_bar,local_xi_Min_bar,local_xi_Kin_bar;
@@ -465,8 +465,8 @@ void chemReductionGIA::EtaXi2Conc(ogsChem::LocalVector &local_eta,
 
 void chemReductionGIA::Calc_Kin_Rate(ogsChem::LocalVector &local_eta,
 	                                ogsChem::LocalVector &local_eta_bar,
-									ogsChem::LocalMatrix &local_xi_global,
-									ogsChem::LocalMatrix &local_xi_local,
+									ogsChem::LocalVector &local_xi_global,
+									ogsChem::LocalVector &local_xi_local,
 									ogsChem::LocalVector &local_rate_vec)
 {
 	size_t i;
