@@ -79,14 +79,14 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 	}
 	// initialize xi_global
 //	for ( i=0; i < _n_xi_global ; i++ )
-//	{
-//		MyNodalFunctionScalar* xi_global_tmp       = new MyNodalFunctionScalar();  // xi_global
-//        MyNodalFunctionScalar* xi_rates_tmp = new MyNodalFunctionScalar();  // R_kin rates
-//		xi_global_tmp->initialize(       *dis, FemLib::PolynomialOrder::Linear, 0.0  );
-//        xi_rates_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
-//		_xi_global.push_back(xi_global_tmp);
-//        _rates.push_back(xi_rates_tmp);
-//	}
+	{
+		MyNodalFunctionScalar* xi_global_tmp       = new MyNodalFunctionScalar();  // xi_global
+        MyNodalFunctionScalar* xi_rates_tmp = new MyNodalFunctionScalar();  // R_kin rates
+		xi_global_tmp->initialize(       *dis, FemLib::PolynomialOrder::Linear, 0.0  );
+        xi_rates_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
+		_xi_global.push_back(xi_global_tmp);
+        _kin_rates.push_back(xi_rates_tmp);
+	}
 //	// initialize drates_dxi
 //	for ( i=0; i < _n_xi_global; i++ )
 //	{

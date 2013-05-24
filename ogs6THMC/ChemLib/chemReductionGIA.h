@@ -34,7 +34,7 @@ public:
 	/**
       * destructor of the class
       */
-	~chemReductionGIA(void);
+	~chemReductionGIA(void){};
 
     /**
       * convert concentration vector to eta and xi vector

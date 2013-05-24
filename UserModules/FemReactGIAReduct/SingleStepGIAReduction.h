@@ -32,9 +32,9 @@
 #include "SolutionLib/Fem/FemDirichletBC.h"
 #include "SolutionLib/Fem/FemNeumannBC.h"
 
-// #include "ReductionKinNodeInfo.h"
+#include "ReductionGIANodeInfo.h"
 
-// class ReductionKinNodeInfo; 
+// class ReductionGIANodeInfo;
 
 namespace SolutionLib
 {
@@ -214,7 +214,7 @@ private:
     /**
       * boundary condition values
       */ 
-	std::map<size_t, ReductionKinNodeInfo*> _bc_info; 
+	std::map<size_t, ReductionGIANodeInfo*> _bc_info;
 };
 
 template <
@@ -238,7 +238,7 @@ SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
       _linear_problem(linear_problem), _lin_solutions(linear_solutions), 
       _non_linear_problem(non_linear_problem), _nlin_solution(non_linear_solution)
 {
-    INFO("->Setting up a solution algorithm SingleStepKinReduction");
+    INFO("->Setting up a solution algorithm SingleStepGIAReduction");
 
     size_t i, j, i_var;
     const size_t n_var = problem->getNumberOfVariables();
@@ -304,7 +304,7 @@ SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
 		    {
 				size_t node_id = list_bc_nodes[j];
 				double node_value = list_bc_values[j];
-                std::map<size_t, ReductionKinNodeInfo*>::iterator my_bc;
+                std::map<size_t, ReductionGIANodeInfo*>::iterator my_bc;
 				my_bc = _bc_info.find( node_id );
                 // now check whether this node has already been in the BC info
                 if ( my_bc != _bc_info.end() )
@@ -314,15 +314,15 @@ SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
                 else  // create a new structure and fill it in
 				{
 					my_bc = _bc_info.begin();
-					ReductionKinNodeInfo* bc_node = new ReductionKinNodeInfo( node_id,
+					ReductionGIANodeInfo* bc_node = new ReductionGIANodeInfo( node_id,
 						                                                      this->_problem->getReductionScheme()->get_n_Comp(),
-						                                                      this->_problem->getReductionScheme()->get_n_eta_mob(),
-																			  this->_problem->getReductionScheme()->get_n_eta_immob(),
-																			  this->_problem->getReductionScheme()->get_n_xi_mob(),
-																			  this->_problem->getReductionScheme()->get_n_xi_immob(),
+						                                                      this->_problem->getReductionScheme()->get_n_eta(),
+																			  this->_problem->getReductionScheme()->get_n_eta_bar(),
+																			  this->_problem->getReductionScheme()->get_n_xi_global(),
+																			  this->_problem->getReductionScheme()->get_n_xi_local(),
 																			  this->_problem->getReductionScheme() );
 					bc_node->set_comp_conc( i_var, node_value );
-					_bc_info.insert( my_bc, std::pair<size_t, ReductionKinNodeInfo*>(node_id, bc_node) );
+					_bc_info.insert( my_bc, std::pair<size_t, ReductionGIANodeInfo*>(node_id, bc_node) );
 				}  // end of if else
 	        }  // end of for j
         }  // end of for i
@@ -331,15 +331,15 @@ SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
 
     // loop over all the boundary nodes, and
 	// transform these concentrations to eta and xi values
-    std::map<size_t, ReductionKinNodeInfo*>::iterator bc_node_it;
+    std::map<size_t, ReductionGIANodeInfo*>::iterator bc_node_it;
     std::vector<size_t> vec_bc_node_idx;
     std::vector<std::vector<double>> vec_node_eta_values;
     std::vector<std::vector<double>> vec_node_xi_values;
 
     for ( i=0; i < _linear_problem.size(); i++ )
     {
-        std::vector<double> vec_eta_mob;
-        vec_node_eta_values.push_back(vec_eta_mob);
+        std::vector<double> vec_eta;
+        vec_node_eta_values.push_back(vec_eta);
     }
 
     for ( i=0; i < _non_linear_problem->getNumberOfVariables(); i++ )
@@ -357,13 +357,13 @@ SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
 
         for ( i=0; i < _linear_problem.size(); i++ )
         {
-            double eta_mob_value = bc_node_it->second->get_eta_mob_value(i);
+            double eta_mob_value = bc_node_it->second->get_eta_value(i);
             vec_node_eta_values[i].push_back(eta_mob_value);
         }
 
         for ( i=0; i < _non_linear_problem->getNumberOfVariables(); i++ )
         {
-			double xi_value = bc_node_it->second->get_xi_mob_value(i);
+			double xi_value = bc_node_it->second->get_xi_global_value(i);
             vec_node_xi_values[i].push_back(xi_value);
         }
     }
@@ -399,10 +399,10 @@ int SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINE
 
 		// if solution is accepted,
 		// if ( _lin_solutions[i]->accepted() )
-		_function_data->set_eta_mob_node_values( i, _lin_solutions[i]->getCurrentSolution(0) );
+		_function_data->set_eta_node_values( i, _lin_solutions[i]->getCurrentSolution(0) );
 	}
-	// calcuate the reaction rates on each node
-	_function_data->update_node_kin_reaction_rates();
+	// calculate the reaction rates on each node
+	// _function_data->update_node_GIA_reaction_rates();
 
 	// solving the non-linear problem
 	INFO("--Solving non-linear equations for xi:");

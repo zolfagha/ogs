@@ -35,6 +35,8 @@ chemReductionGIA::chemReductionGIA(BaseLib::OrderedMap<std::string, ogsChem::Che
 	}
 }
 
+
+
 void chemReductionGIA::buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp,
 								 std::vector<ogsChem::chemReactionEq*>                & list_eq_reactions,
 								 std::vector<ogsChem::chemReactionKin*>               & list_kin_reactions)
@@ -390,7 +392,7 @@ void chemReductionGIA::Conc2EtaXi(ogsChem::LocalVector &local_conc,
 {
 	// declare local temp variable
 	ogsChem::LocalVector local_c_mob, local_c_immob;
-	ogsChem::LocalMatrix local_xi, local_xi_bar;
+	ogsChem::LocalVector local_xi, local_xi_bar;
 	ogsChem::LocalVector local_xi_Sorp_bar_li, local_xi_Sorp_bar_ld;
 
 	// divide c1 and c2
