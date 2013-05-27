@@ -1,0 +1,49 @@
+#OUTPUT // profile
+ $NOD_VALUES
+  HEAD
+  tracer
+  c12h1
+  so4
+  o2
+ $GEO_TYPE
+  DOMAIN
+ $DAT_TYPE
+  TECPLOT
+ $TIM_TYPE
+  STEPS 100
+#STOP
+
+
+
+
+#OUTPUT // profile
+ $NOD_VALUES
+  HEAD
+  tracer
+  c12h1
+  c13h1
+  c12h2
+  so4
+  o2
+ $GEO_TYPE
+  POLYLINE X_LINE
+ $DAT_TYPE
+  TECPLOT
+ $TIM_TYPE
+  STEPS 10
+#OUTPUT // profile
+ $NOD_VALUES
+  HEAD
+  tracer
+  c12h1
+  c13h1
+  c12h2
+  so4
+  o2
+ $GEO_TYPE
+  POLYLINE Y_LINE
+ $DAT_TYPE
+  TECPLOT
+ $TIM_TYPE
+  STEPS 10
+#STOP

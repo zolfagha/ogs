@@ -1,0 +1,29 @@
+#COMPONENT_PROPERTIES  ; comp1
+ $NAME
+  tracer ;
+ $MOBILE
+  1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
+ $DIFFUSION
+  1  0.0             	; diffusion model type, diffusion constant
+#COMPONENT_PROPERTIES  ; comp2
+ $NAME
+  c12h1 ;
+ $MOBILE
+  1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
+ $DIFFUSION
+  1  0.0             	; diffusion model type, diffusion constant
+#COMPONENT_PROPERTIES  ; comp3
+ $NAME
+  so4 ;
+ $MOBILE
+  1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
+ $DIFFUSION
+  1  0.0             	; diffusion model type, diffusion constant
+#COMPONENT_PROPERTIES  ; comp4
+ $NAME
+  o2 ;
+ $MOBILE
+  1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
+ $DIFFUSION
+  1  0.0             	; diffusion model type, diffusion constant
+#STOP
