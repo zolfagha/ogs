@@ -1,27 +1,55 @@
 #COMPONENT_PROPERTIES  ; comp1
  $NAME
-  tracer ;
+  Tracer ;
  $MOBILE
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
   1  0.0             	; diffusion model type, diffusion constant
 #COMPONENT_PROPERTIES  ; comp2
  $NAME
-  c12h1 ;
+  CH2O ;
  $MOBILE
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
   1  0.0             	; diffusion model type, diffusion constant
 #COMPONENT_PROPERTIES  ; comp3
  $NAME
-  so4 ;
+  SO42- ;
  $MOBILE
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
   1  0.0             	; diffusion model type, diffusion constant
 #COMPONENT_PROPERTIES  ; comp4
  $NAME
-  o2 ;
+  O2 ;
+ $MOBILE
+  1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
+ $DIFFUSION
+  1  0.0             	; diffusion model type, diffusion constant
+#COMPONENT_PROPERTIES  ; comp5
+ $NAME
+  CO2 ;
+ $MOBILE
+  1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
+ $DIFFUSION
+  1  0.0             	; diffusion model type, diffusion constant
+#COMPONENT_PROPERTIES  ; comp6
+ $NAME
+  HCO3- ;
+ $MOBILE
+  1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
+ $DIFFUSION
+  1  0.0             	; diffusion model type, diffusion constant
+#COMPONENT_PROPERTIES  ; comp7
+ $NAME
+  H2S ;
+ $MOBILE
+  1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
+ $DIFFUSION
+  1  0.0             	; diffusion model type, diffusion constant
+#COMPONENT_PROPERTIES  ; comp8
+ $NAME
+  H2O ;
  $MOBILE
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
