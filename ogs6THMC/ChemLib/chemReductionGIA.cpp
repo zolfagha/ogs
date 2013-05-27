@@ -297,6 +297,7 @@ void chemReductionGIA::update_reductionScheme(void)
 	this->_n_xi_Mob          = _Jmob;
 	this->_n_xi_Sorp_bar     = _Jsorp;
 	this->_n_xi_Sorp         = _Jsorp_li;
+	this->_n_xi_Min		     = _Jmin;
 	this->_n_xi_Min_tilde    = _Jmin;
 	this->_n_xi_Min_bar      = _Jmin;
 
@@ -307,7 +308,7 @@ void chemReductionGIA::update_reductionScheme(void)
 
 	this->_n_xi_global       = _Jsorp_li + _Jsorp_li + _Jmin + _Jmin + _Jkin_ast;
 	this->_n_xi_local        = _Jmob + _Jsorp + _Jmin + _Jkin_ast;
-	this->_Jeq_li           = _Jmob + _Jsorp_li + _Jmin;
+	this->_Jeq_li            = _Jmob + _Jsorp_li + _Jmin;
 
 
 	// now calculated A1 and A2
@@ -410,7 +411,7 @@ void chemReductionGIA::Conc2EtaXi(ogsChem::LocalVector &local_conc,
     local_xi_Mob  = local_xi.segment( 0,this->_n_xi_Mob);
     local_xi_Sorp = local_xi.segment( this->_n_xi_Mob,this->_n_xi_Sorp);
     local_xi_Min  = local_xi.segment( this->_n_xi_Mob + this->_n_xi_Sorp,this->_n_xi_Min);
-    local_xi_Kin  =	local_xi.segment( this->_n_xi_Mob + this->_n_xi_Sorp + this->_n_xi_Min,this->_n_xi_Min);
+    local_xi_Kin  =	local_xi.segment( this->_n_xi_Mob + this->_n_xi_Sorp + this->_n_xi_Min,this->_n_xi_Kin);
 
     local_xi_Sorp_bar =  local_xi_bar.segment( 0,this->_n_xi_Sorp);
     local_xi_Min_bar  =  local_xi_bar.segment( this->_n_xi_Sorp_bar,this->_n_xi_Min_bar);
@@ -422,8 +423,16 @@ void chemReductionGIA::Conc2EtaXi(ogsChem::LocalVector &local_conc,
     local_xi_Sorp_tilde  = local_xi_Sorp - local_xi_Sorp_bar.topRows(this->_Jsorp_li);
     local_xi_Min_tilde   = local_xi_Min  - local_xi_Min_bar - (_mat_Ald * local_xi_Sorp_bar_ld);
 
-    local_xi_global<<local_xi_Mob,local_xi_Sorp_bar,local_xi_Min_bar,local_xi_Kin_bar;
-    local_xi_local<<local_xi_Sorp_tilde,local_xi_Min_tilde,local_xi_Sorp,local_xi_Kin;
+    local_xi_local.segment( 0,this->_n_xi_Mob) 				     = local_xi_Mob;
+    local_xi_local.segment(this->_n_xi_Mob,this->_n_xi_Sorp_bar) = local_xi_Sorp_bar;
+    local_xi_local.segment(this->_n_xi_Mob + this->_n_xi_Sorp_bar,this->_n_xi_Min_bar) = local_xi_Min_bar;
+    local_xi_local.segment(this->_n_xi_Mob + this->_n_xi_Sorp_bar + this->_n_xi_Min_bar,this->_n_xi_Kin_bar) = local_xi_Kin_bar;
+
+    local_xi_global.segment( 0,this->_n_xi_Sorp_tilde) 														     = local_xi_Sorp_tilde;
+    local_xi_global.segment( this->_n_xi_Sorp_tilde,this->_n_xi_Min_tilde) 				  					     = local_xi_Min_tilde;
+    local_xi_global.segment( this->_n_xi_Sorp_tilde + this->_n_xi_Min_tilde,this->_n_xi_Sorp) 				     = local_xi_Sorp;
+    local_xi_global.segment( this->_n_xi_Sorp_tilde + this->_n_xi_Min_tilde + this->_n_xi_Sorp,this->_n_xi_Min) 				   = local_xi_Min;
+    local_xi_global.segment( this->_n_xi_Sorp_tilde + this->_n_xi_Min_tilde + this->_n_xi_Sorp + this->_n_xi_Min,this->_n_xi_Kin)  = local_xi_Kin;
 
 }
 

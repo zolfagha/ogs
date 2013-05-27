@@ -78,7 +78,7 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 		_eta_bar.push_back(eta_i);
 	}
 	// initialize xi_global
-//	for ( i=0; i < _n_xi_global ; i++ )
+	for ( i=0; i < _n_xi_global ; i++ )
 	{
 		MyNodalFunctionScalar* xi_global_tmp       = new MyNodalFunctionScalar();  // xi_global
         MyNodalFunctionScalar* xi_rates_tmp = new MyNodalFunctionScalar();  // R_kin rates
@@ -145,12 +145,12 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 //	_non_linear_eqs->initialize( non_linear_assembler, non_linear_r_assembler, non_linear_j_assembler );
 //	_non_linear_problem->setTimeSteppingFunction(*tim);
 	// for nonlinear coupled transport problem, variables are xi_mobile species
-	for ( i=0; i < _n_xi_global ; i++ )
-	{
-		std::stringstream str_tmp;
-		str_tmp << "xi_global_" << i ;
-		_non_linear_problem->addVariable( str_tmp.str() );
-	}
+//	for ( i=0; i < _n_xi_global ; i++ )
+//	{
+//		std::stringstream str_tmp;
+//		str_tmp << "xi_global_" << i ;
+//		_non_linear_problem->addVariable( str_tmp.str() );
+//	}
 
 	// reduction problem
 	_problem = new MyGIAReductionProblemType( dis, _ReductionGIA );
@@ -413,6 +413,7 @@ void FunctionReductConc<T1, T2>::convert_conc_to_eta_xi(void)
 			// fill in xi_mob
 			for (i=0; i < _n_xi_global; i++)
 				this->_xi_global[i]->setValue(node_idx, loc_xi_global[i]);
+
 			for (i=0; i < _n_xi_local; i++)
             {
 				this->_xi_local[i]->setValue(node_idx, loc_xi_local[i]);
@@ -636,13 +637,13 @@ void FunctionReductConc<T1, T2>::update_node_kin_reaction_drates_dxi(void)
     LocalVector loc_xi_local_rates;
 
 	// initialize the local vector
-	loc_eta           = LocalVector::Zero( _n_eta );
-	loc_eta_bar         = LocalVector::Zero( _n_eta_bar );
-	loc_xi_global            = LocalVector::Zero( _n_xi_global );
-	loc_xi_local          = LocalVector::Zero( _n_xi_local );
-    loc_xi_global_rates_base = LocalVector::Zero( _n_xi_global );
-    loc_xi_global_rates_new  = LocalVector::Zero( _n_xi_global );
-    loc_xi_local_rates    = LocalVector::Zero( _n_xi_local );
+	loc_eta         		  = LocalVector::Zero( _n_eta );
+	loc_eta_bar         	  = LocalVector::Zero( _n_eta_bar );
+	loc_xi_global             = LocalVector::Zero( _n_xi_global );
+	loc_xi_local          	  = LocalVector::Zero( _n_xi_local );
+    loc_xi_global_rates_base  = LocalVector::Zero( _n_xi_global );
+    loc_xi_global_rates_new   = LocalVector::Zero( _n_xi_global );
+    loc_xi_local_rates    	  = LocalVector::Zero( _n_xi_local );
 
 	// loop over all nodes
 	for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin();

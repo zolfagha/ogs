@@ -40,7 +40,7 @@ namespace SolutionLib
 {
 
 /**
- * \brief Solution algorithm for kinetic reaction reduction problems using FEM with single time stepping method
+ * \brief Solution algorithm for kinetic and equilibrium reaction reduction problems using FEM with single time stepping method
  *
  * - previous and current time step values
  * - ST values
