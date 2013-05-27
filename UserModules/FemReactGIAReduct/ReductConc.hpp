@@ -21,7 +21,7 @@
 #include "OutputIO/OutputTimingBuilder.h"
 #include "SolutionLib/Fem/FemSourceTerm.h"
 #include "Ogs6FemData.h"
-#include "NestedLocalProbNRIterationStepInitializer.h"
+#include "NestedGIALocalProbNRIterationStepInitializer.h"
 #include "MathLib/ODE/RungeKutta4.h"
 #include "NonLinearGIATimeODELocalAssembler.h"
 //#include "NonLinearGIAJacobianLocalAssembler.h"
@@ -142,17 +142,17 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 
 	// TO DO : xi global
 	// define nonlinear problem
-//	_non_linear_problem = new MyNonLinearReactiveTransportProblemType(dis);
-//	_non_linear_eqs     = _non_linear_problem->createEquation();
-//	_non_linear_eqs->initialize( non_linear_assembler, non_linear_r_assembler, non_linear_j_assembler );
-//	_non_linear_problem->setTimeSteppingFunction(*tim);
+	_non_linear_problem = new MyNonLinearReactiveTransportProblemType(dis);
+	_non_linear_eqs     = _non_linear_problem->createEquation();
+	_non_linear_eqs->initialize( non_linear_assembler, non_linear_r_assembler, non_linear_j_assembler );
+	_non_linear_problem->setTimeSteppingFunction(*tim);
 	// for nonlinear coupled transport problem, variables are xi_mobile species
-//	for ( i=0; i < _n_xi_global ; i++ )
-//	{
-//		std::stringstream str_tmp;
-//		str_tmp << "xi_global_" << i ;
-//		_non_linear_problem->addVariable( str_tmp.str() );
-//	}
+	for ( i=0; i < _n_xi_global ; i++ )
+	{
+		std::stringstream str_tmp;
+		str_tmp << "xi_global_" << i ;
+		_non_linear_problem->addVariable( str_tmp.str() );
+	}
 
 	// reduction problem
 	_problem = new MyGIAReductionProblemType( dis, _ReductionGIA );
@@ -207,12 +207,12 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 	}
 
 	// set IC for xi_local
-	for ( i=0; i < _n_xi_local; i++ )
-	{
-		SolutionLib::FemIC* xi_local_ic = new SolutionLib::FemIC(msh);
-		xi_local_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _xi_local[i]->getDiscreteData() ) );
-		_non_linear_problem->getVariable(i)->setIC( xi_local_ic );
-	}
+//	for ( i=0; i < _n_xi_local; i++ )
+//	{
+//		SolutionLib::FemIC* xi_local_ic = new SolutionLib::FemIC(msh);
+//		xi_local_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _xi_local[i]->getDiscreteData() ) );
+//		_non_linear_problem->getVariable(i)->setIC( xi_local_ic );
+//	}
 
     // set up linear solution
 	for ( i=0; i < _n_eta; i++ )
@@ -227,11 +227,11 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 	//TODO : xi global
 	// set up non-linear solution
 	// NRIterationStepInitializer
-//	myNRIterator = new MyNRIterationStepInitializer(non_linear_r_assembler, non_linear_j_assembler);
-//	myNSolverFactory = new MyDiscreteNonlinearSolverFactory( myNRIterator );
-//	this->_non_linear_solution = new MyNonLinearSolutionType( dis, this->_non_linear_problem, myNSolverFactory );
-//    this->_non_linear_solution->getDofEquationIdTable()->setNumberingType(DiscreteLib::DofNumberingType::BY_POINT);  // global order
-//    this->_non_linear_solution->getDofEquationIdTable()->setLocalNumberingType(DiscreteLib::DofNumberingType::BY_VARIABLE);  // local order
+	myNRIterator = new MyNRIterationStepInitializer(non_linear_r_assembler, non_linear_j_assembler);
+	myNSolverFactory = new MyDiscreteNonlinearSolverFactory( myNRIterator );
+	this->_non_linear_solution = new MyNonLinearSolutionType( dis, this->_non_linear_problem, myNSolverFactory );
+    this->_non_linear_solution->getDofEquationIdTable()->setNumberingType(DiscreteLib::DofNumberingType::BY_POINT);  // global order
+    this->_non_linear_solution->getDofEquationIdTable()->setLocalNumberingType(DiscreteLib::DofNumberingType::BY_VARIABLE);  // local order
 	const BaseLib::Options* optNum = option.getSubGroup("Numerics");
 
     // linear solver

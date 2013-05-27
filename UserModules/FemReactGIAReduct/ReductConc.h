@@ -25,7 +25,7 @@
 #include "NumLib/Nonlinear/DiscreteNRSolverWithStepInitFactory.h"
 #include "FemGIARedSolution.h"
 #include "SingleStepGIAReduction.h"
-#include "NestedLocalProbNRIterationStepInitializer.h"
+#include "NestedGIALocalProbNRIterationStepInitializer.h"
 #include "UserModules/FemKinReactGIA/LinearTransportTimeODELocalAssember.h"
 #include "UserModules/FemKinReactGIA/LinearTransportJacobianLocalAssembler.h"
 #include "NonLinearGIATimeODELocalAssembler.h"
@@ -65,8 +65,8 @@ public:
 
 	//to be changed
 	typedef NonLinearGIAJacobianLocalAssembler<MyNodalFunctionScalar, MyFunctionData>                                    MyNonLinearJacobianAssemblerType;
-	typedef NestedLocalProbNRIterationStepInitializer<MyNodalFunctionScalar, MyFunctionData>                                                 MyNRIterationStepInitializer;
-	typedef NumLib::DiscreteNRSolverWithStepInitFactory<MyNRIterationStepInitializer>                                                  MyDiscreteNonlinearSolverFactory; 
+	typedef NestedGIALocalProbNRIterationStepInitializer<MyNodalFunctionScalar, MyFunctionData>                          MyNRIterationStepInitializer;
+	typedef NumLib::DiscreteNRSolverWithStepInitFactory<MyNRIterationStepInitializer>                                    MyDiscreteNonlinearSolverFactory;
 	
 	/**
       * linear Equation definition

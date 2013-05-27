@@ -15,20 +15,20 @@
  * Created on 2012-10-05 by Haibing Shao
  */
 
-#ifndef NESTED_Local_Prob_NR_ITERATION_STEP_INITIALIZER_H
-#define NESTED_Local_Prob_NR_ITERATION_STEP_INITIALIZER_H
+#ifndef NESTED_GIA_Local_Prob_NR_ITERATION_STEP_INITIALIZER_H
+#define NESTED_GIA_Local_Prob_NR_ITERATION_STEP_INITIALIZER_H
 
-#include "UserModules/FemKinReactGIA/NonLinearReactiveTransportTimeODELocalAssembler.h"  // TO BE CHANGED
-#include "UserModules/FemKinReactGIA/NonLinearReactiveTransportJacabianLocalAssembler.h" // TO BE CHANGED
+#include "NonLinearGIATimeODELocalAssembler.h"  // TO BE CHANGED
+#include "NonLinearGIAJacabianLocalAssembler.h" // TO BE CHANGED
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
 
 template <class T_NODAL_FUNCTION_SCALAR, class T_FUNCTION_DATA>
-class NestedLocalProbNRIterationStepInitializer
+class NestedGIALocalProbNRIterationStepInitializer
 {
 public:
-    NestedLocalProbNRIterationStepInitializer(
-		    NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler, T_NODAL_FUNCTION_SCALAR>* assemblerR,
-            NonLinearReactiveTransportJacobianLocalAssembler<T_NODAL_FUNCTION_SCALAR, T_FUNCTION_DATA> *assemblerJ)
+    NestedGIALocalProbNRIterationStepInitializer(
+		    NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler, T_NODAL_FUNCTION_SCALAR>* assemblerR,
+            NonLinearGIAJacobianLocalAssembler<T_NODAL_FUNCTION_SCALAR, T_FUNCTION_DATA> *assemblerJ)
             : _assemblerR(assemblerR), _assemblerJ(assemblerJ) {};
 
 	template<class T_X, class F_RESIDUALS, class F_DX>
@@ -58,12 +58,12 @@ private:
     /**
       * pointer to assemblerR
       */ 
-    NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler, T_NODAL_FUNCTION_SCALAR>* _assemblerR;
+    NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler, T_NODAL_FUNCTION_SCALAR>* _assemblerR;
 
     /**
       * pointer to assemblerJ
       */ 
-    NonLinearReactiveTransportJacobianLocalAssembler<T_NODAL_FUNCTION_SCALAR, T_FUNCTION_DATA>* _assemblerJ;
+    NonLinearGIAJacobianLocalAssembler<T_NODAL_FUNCTION_SCALAR, T_FUNCTION_DATA>* _assemblerJ;
 };
 
 #endif  // end of ifndef
