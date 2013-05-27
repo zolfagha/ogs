@@ -7,7 +7,7 @@
  *
  * \file Concentration.h
  *
- * Created on 2012-09-06 by Haibing Shao
+ * Created on 2013-05-27 by Reza Zolfaghari & Haibing Shao
  */
 
 #include "logog.hpp"

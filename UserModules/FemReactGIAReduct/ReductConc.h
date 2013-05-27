@@ -28,6 +28,8 @@
 #include "NestedLocalProbNRIterationStepInitializer.h"
 #include "UserModules/FemKinReactGIA/LinearTransportTimeODELocalAssember.h"
 #include "UserModules/FemKinReactGIA/LinearTransportJacobianLocalAssembler.h"
+#include "NonLinearGIATimeODELocalAssembler.h"
+#include "NonLinearGIAJacabianLocalAssembler.h"
 
 
 template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER >
@@ -58,9 +60,11 @@ public:
     typedef LinearTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyLinearResidualAssemblerType; 
     typedef LinearTransportJacobianLocalAssembler MyLinearJacobianAssemblerType;                                        
 	// for the nonlinear part, use different settings
-	typedef NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler, MyNodalFunctionScalar>      MyNonLinearAssemblerType; 
-	typedef NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler, MyNodalFunctionScalar> MyNonLinearResidualAssemblerType; 
-	typedef NonLinearReactiveTransportJacobianLocalAssembler<MyNodalFunctionScalar, MyFunctionData>                                    MyNonLinearJacobianAssemblerType; 
+	typedef NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler, MyNodalFunctionScalar>      MyNonLinearAssemblerType;
+	typedef NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler, MyNodalFunctionScalar> MyNonLinearResidualAssemblerType;
+
+	//to be changed
+	typedef NonLinearGIAJacobianLocalAssembler<MyNodalFunctionScalar, MyFunctionData>                                    MyNonLinearJacobianAssemblerType;
 	typedef NestedLocalProbNRIterationStepInitializer<MyNodalFunctionScalar, MyFunctionData>                                                 MyNRIterationStepInitializer;
 	typedef NumLib::DiscreteNRSolverWithStepInitFactory<MyNRIterationStepInitializer>                                                  MyDiscreteNonlinearSolverFactory; 
 	

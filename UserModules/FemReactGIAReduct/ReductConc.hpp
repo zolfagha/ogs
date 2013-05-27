@@ -23,6 +23,8 @@
 #include "Ogs6FemData.h"
 #include "NestedLocalProbNRIterationStepInitializer.h"
 #include "MathLib/ODE/RungeKutta4.h"
+#include "NonLinearGIATimeODELocalAssembler.h"
+//#include "NonLinearGIAJacobianLocalAssembler.h"
 
 template <class T1, class T2>
 bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
@@ -114,9 +116,9 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
     MyLinearJacobianAssemblerType* linear_j_eqs = new MyLinearJacobianAssemblerType(_feObjects);
 
     //To Do: for xi global
-	//MyNonLinearAssemblerType* non_linear_assembler = new MyNonLinearAssemblerType(_feObjects, this->_ReductionGIA );
-	//MyNonLinearResidualAssemblerType* non_linear_r_assembler = new MyNonLinearResidualAssemblerType(_feObjects, this->_ReductionGIA );
-	//MyNonLinearJacobianAssemblerType* non_linear_j_assembler = new MyNonLinearJacobianAssemblerType(_feObjects, this->_ReductionGIA, this);
+	MyNonLinearAssemblerType* non_linear_assembler = new MyNonLinearAssemblerType(_feObjects, this->_ReductionGIA );
+	MyNonLinearResidualAssemblerType* non_linear_r_assembler = new MyNonLinearResidualAssemblerType(_feObjects, this->_ReductionGIA );
+	MyNonLinearJacobianAssemblerType* non_linear_j_assembler = new MyNonLinearJacobianAssemblerType(_feObjects, this->_ReductionGIA, this);
 
 	//_local_ode_xi_immob = new Local_ODE_Xi_immob( this->_ReductionGIA );
 
@@ -189,19 +191,27 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 	// convert IC _concentrations to eta and xi
 	convert_conc_to_eta_xi();
 
-	// set IC for eta_mob
+	// set IC for eta mobile
 	for ( i=0; i < _n_eta; i++ )
 	{
 		SolutionLib::FemIC* eta_ic = new SolutionLib::FemIC(msh);
 		eta_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _eta[i]->getDiscreteData() ) );
 		_linear_problems[i]->getVariable(0)->setIC( eta_ic );  // be careful, here each linear problem only has one variable "eta".
 	}
-	// set IC for xi_mob
+	// set IC for xi_global
 	for ( i=0; i < _n_xi_global; i++ )
 	{
-		SolutionLib::FemIC* xi_mob_ic = new SolutionLib::FemIC(msh);
-		xi_mob_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _xi_global[i]->getDiscreteData() ) );
-		_non_linear_problem->getVariable(i)->setIC( xi_mob_ic );
+		SolutionLib::FemIC* xi_global_ic = new SolutionLib::FemIC(msh);
+		xi_global_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _xi_global[i]->getDiscreteData() ) );
+		_non_linear_problem->getVariable(i)->setIC( xi_global_ic );
+	}
+
+	// set IC for xi_local
+	for ( i=0; i < _n_xi_local; i++ )
+	{
+		SolutionLib::FemIC* xi_local_ic = new SolutionLib::FemIC(msh);
+		xi_local_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _xi_local[i]->getDiscreteData() ) );
+		_non_linear_problem->getVariable(i)->setIC( xi_local_ic );
 	}
 
     // set up linear solution
@@ -637,13 +647,13 @@ void FunctionReductConc<T1, T2>::update_node_kin_reaction_drates_dxi(void)
     LocalVector loc_xi_local_rates;
 
 	// initialize the local vector
-	loc_eta         		  = LocalVector::Zero( _n_eta );
-	loc_eta_bar         	  = LocalVector::Zero( _n_eta_bar );
-	loc_xi_global             = LocalVector::Zero( _n_xi_global );
-	loc_xi_local          	  = LocalVector::Zero( _n_xi_local );
-    loc_xi_global_rates_base  = LocalVector::Zero( _n_xi_global );
-    loc_xi_global_rates_new   = LocalVector::Zero( _n_xi_global );
-    loc_xi_local_rates    	  = LocalVector::Zero( _n_xi_local );
+	loc_eta           = LocalVector::Zero( _n_eta );
+	loc_eta_bar         = LocalVector::Zero( _n_eta_bar );
+	loc_xi_global            = LocalVector::Zero( _n_xi_global );
+	loc_xi_local          = LocalVector::Zero( _n_xi_local );
+    loc_xi_global_rates_base = LocalVector::Zero( _n_xi_global );
+    loc_xi_global_rates_new  = LocalVector::Zero( _n_xi_global );
+    loc_xi_local_rates    = LocalVector::Zero( _n_xi_local );
 
 	// loop over all nodes
 	for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin();
