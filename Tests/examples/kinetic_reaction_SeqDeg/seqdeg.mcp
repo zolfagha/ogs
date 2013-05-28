@@ -54,4 +54,18 @@
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
   1  0.0             	; diffusion model type, diffusion constant
+#COMPONENT_PROPERTIES  ; comp9
+ $NAME
+  Biomass_oxygen ;
+ $MOBILE
+  0; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
+ $DIFFUSION
+  1  0.0             	; diffusion model type, diffusion constant
+#COMPONENT_PROPERTIES  ; comp10
+ $NAME
+  Biomass_sulfate ;
+ $MOBILE
+  0; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
+ $DIFFUSION
+  1  0.0             	; diffusion model type, diffusion constant
 #STOP
