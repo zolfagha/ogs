@@ -12,6 +12,7 @@
 
 #pragma once
 
+
 #include <cassert>
 
 #include "MeshLib/Core/IElement.h"
@@ -31,7 +32,7 @@ class ElementWiseDimDependentTransientLinearEQSLocalAssembler
 {
 public:
     ElementWiseDimDependentTransientLinearEQSLocalAssembler()
-    : _vec_dim_assembler(3, NULL) {};
+    : _vec_dim_assembler(3, nullptr) {};
 
     virtual ~ElementWiseDimDependentTransientLinearEQSLocalAssembler()
     {
