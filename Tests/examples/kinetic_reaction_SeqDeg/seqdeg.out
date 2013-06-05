@@ -1,10 +1,15 @@
 #OUTPUT // profile
  $NOD_VALUES
   HEAD
-  tracer
-  c12h1
-  so4
-  o2
+  Tracer
+  CH2O
+  SO42-
+  O2
+  CO2
+  HCO3-
+  H2S
+  Biomass_oxygen
+  Biomass_sulfate
  $GEO_TYPE
   DOMAIN
  $DAT_TYPE
