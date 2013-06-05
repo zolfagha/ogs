@@ -1,3 +1,11 @@
+#STOP
+
+
+
+
+
+
+
 #SOURCE_TERM
  $PCS_TYPE
   GROUNDWATER_FLOW
@@ -7,7 +15,7 @@
   POLYLINE LEFT_BOUNDARY
  $DIS_TYPE
   CONSTANT_NEUMANN  1.25e-3 //  unit length value, do not normalize it // por = 0.3
-#STOP
+
 
 
 
