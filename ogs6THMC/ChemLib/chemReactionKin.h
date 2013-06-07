@@ -99,6 +99,21 @@ private:
       * a vector of monod components' order
       */
 	std::vector<double> _vec_Monod_Comps_order; 
+
+    /**
+      * a vector of inhibition rate components
+      */
+	std::vector<size_t> _vec_Inhibition_Comps_Idx; 
+
+    /**
+      * a vector of inhibition components' concentrations
+      */
+	std::vector<double> _vec_Inhibition_Comps_Conc; 
+
+    /**
+      * a vector of inhibition components' order
+      */
+	std::vector<double> _vec_Inhibition_Comps_order; 
 };
 
 }  // end of namespace

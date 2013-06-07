@@ -15,7 +15,7 @@ GeoSys Kinetic Reactions
 
 #REACTION ; 
  $NAME
-   Oxygen Reduction ;
+   Oxygen_Reduction ;
  $TYPE
    monod;
  $BACTERIANAME
@@ -30,16 +30,10 @@ GeoSys Kinetic Reactions
   ;2   ; Number of monod terms in kinetic equation
   CH2O   0.06      1.0 ; for each monod term: species concentration order
   O2     3.125e-4  1.0
- $INHIBITIONTERMS
-  ;0
- $PRODUCTIONSTOCH
-  CH2O  -1.0
-  O2    -1.0
-  CO2   +1.0
-  
+ 
 #REACTION ; 
  $NAME
-   Sulfate Reduction ;
+   Sulfate_Reduction ;
  $TYPE
    monod;
  $BACTERIANAME
@@ -54,17 +48,22 @@ GeoSys Kinetic Reactions
   ;2   ; Number of monod terms in kinetic equation
   CH2O    0.06  1.0 ; for each monod term: species concentration order
   SO42-   0.13  1.0
- $DECAYTERM
-  ; 
  $INHIBITIONTERMS
   ;1
   O2    2.0e-5  1.0
+#STOP
+
+
+
+
+
+ $DECAYTERM
+  ; 
+ $INHIBITIONTERMS
+  ;0
  $PRODUCTIONTERMS
   ;0
   CH2O     -2.0
   SO42-    -2.0
   HCO3-    +2.0
   H2S      +1.0
-#STOP
-
-
