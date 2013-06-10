@@ -758,6 +758,8 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 	_n_xi_Mob				= _ReductionGIA->get_n_xi_Mob();
 	_n_xi_Sorp_bar			= _ReductionGIA->get_n_xi_Sorp_bar();
 	_n_xi_Min_bar			= _ReductionGIA->get_n_xi_Min_bar();
+    _n_xi_Kin               = _ReductionGIA->get_n_xi_Kin();
+    _n_xi_Kin_bar           = _ReductionGIA->get_n_xi_Kin_bar();
 	// initialize the local vector
 	MathLib::LocalVector loc_eta;
 	MathLib::LocalVector loc_etabar;
