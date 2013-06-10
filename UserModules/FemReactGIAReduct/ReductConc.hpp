@@ -91,14 +91,6 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
         _kin_rates.push_back(xi_rates_tmp);
 	}
 
-	// initialize concentration vector,
-	for ( i=0; i < _n_Comp; i++)
-	{
-		MyNodalFunctionScalar* conc_i = new MyNodalFunctionScalar();
-	    conc_i->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0 );
-	    _concentrations.push_back(conc_i);
-	}
-
 //	// initialize drates_dxi
 //	for ( i=0; i < _n_xi_global; i++ )
 //	{
@@ -758,8 +750,8 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 	_n_xi_Mob				= _ReductionGIA->get_n_xi_Mob();
 	_n_xi_Sorp_bar			= _ReductionGIA->get_n_xi_Sorp_bar();
 	_n_xi_Min_bar			= _ReductionGIA->get_n_xi_Min_bar();
-    _n_xi_Kin               = _ReductionGIA->get_n_xi_Kin();
-    _n_xi_Kin_bar           = _ReductionGIA->get_n_xi_Kin_bar();
+    _n_xi_Kin               = _ReductionGIA->get_n_xi_Kin(); 
+    _n_xi_Kin_bar           = _ReductionGIA->get_n_xi_Kin_bar(); 
 	// initialize the local vector
 	MathLib::LocalVector loc_eta;
 	MathLib::LocalVector loc_etabar;
