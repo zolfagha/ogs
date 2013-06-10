@@ -7,7 +7,7 @@
  *
  * \file SingleStepKinReduction.h
  *
- * Created on 2013-03-18 by Haibing Shao
+ * Created on 24.05.2013 by Reza Zolfaghari and Haibing Shao
  */
 
 #ifndef SINGLE_STEP_GIA_REDUCTION_H
@@ -357,8 +357,8 @@ SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
 
         for ( i=0; i < _linear_problem.size(); i++ )
         {
-            double eta_mob_value = bc_node_it->second->get_eta_value(i);
-            vec_node_eta_values[i].push_back(eta_mob_value);
+            double eta_value = bc_node_it->second->get_eta_value(i);
+            vec_node_eta_values[i].push_back(eta_value);
         }
 
         for ( i=0; i < _non_linear_problem->getNumberOfVariables(); i++ )
@@ -401,19 +401,23 @@ int SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINE
 		// if ( _lin_solutions[i]->accepted() )
 		_function_data->set_eta_node_values( i, _lin_solutions[i]->getCurrentSolution(0) );
 	}
+
+	//solve local problem
+	_function_data->calc_nodal_local_problem(t_n1.getTimeStepSize(), 1.0E-8, 1.0E-12, 50);
+
 	// calculate the reaction rates on each node
 	// _function_data->update_node_GIA_reaction_rates();
 
-	// solving the non-linear problem
-	INFO("--Solving non-linear equations for xi:");
-	_nlin_solution->solveTimeStep( t_n1 );
-
-	// getting result
-    // xi_global
-	for ( i=0; i < _nlin_solution->getProblem()->getNumberOfVariables(); i++)
-	    _function_data->set_xi_global_node_values( i, _nlin_solution->getCurrentSolution(i) );
-    // xi_local
-    _function_data->update_xi_local_node_values();
+//	// solving the non-linear problem
+//	INFO("--Solving non-linear equations for xi:");
+//	_nlin_solution->solveTimeStep( t_n1 );
+//
+//	// getting result
+//    // xi_global
+//	for ( i=0; i < _nlin_solution->getProblem()->getNumberOfVariables(); i++)
+//	    _function_data->set_xi_global_node_values( i, _nlin_solution->getCurrentSolution(i) );
+//    // xi_local
+//    _function_data->update_xi_local_node_values();
 
 
     return 0;

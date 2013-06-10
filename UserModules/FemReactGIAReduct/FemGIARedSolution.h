@@ -7,7 +7,7 @@
  *
  * \file FemGIARedSolution.h
  *
- * Created on 2013-03-18 by Haibing Shao
+ * Created on 2013-05-18 by Haibing Shao & Reza Zolfaghari
  */
 
 #ifndef FEM_GIA_RED_SOLUTION_H

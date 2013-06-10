@@ -26,10 +26,12 @@
 #include "FemGIARedSolution.h"
 #include "SingleStepGIAReduction.h"
 #include "NestedGIALocalProbNRIterationStepInitializer.h"
-#include "UserModules/FemKinReactGIA/LinearTransportTimeODELocalAssember.h"
+#include "LinearTransportTimeODELocalAssemberML.h"
 #include "UserModules/FemKinReactGIA/LinearTransportJacobianLocalAssembler.h"
 #include "NonLinearGIATimeODELocalAssembler.h"
 #include "NonLinearGIAJacabianLocalAssembler.h"
+#include "LocalProblem.h"
+#include  "ogs6THMC/ChemLib/chemReductionGIA.h"
 
 
 template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER >
@@ -240,10 +242,10 @@ public:
     /**
 	  * set function for eta and xi
 	  */
-	void set_eta_node_values     	( size_t eta_idx,   MyNodalFunctionScalar* new_eta_node_values   );
-	void set_eta_bar_node_values    ( size_t eta_bar_idx, MyNodalFunctionScalar* new_eta_bar_node_values );
-	void set_xi_global_node_values  ( size_t xi_global_idx,    MyNodalFunctionScalar* new_xi_global_node_values    );
-	//void set_xi_local_node_values   ( size_t xi_local_idx,    MyNodalFunctionScalar* new_xi_local_node_values    );
+	void set_eta_node_values     	( std::size_t eta_idx,   MyNodalFunctionScalar* new_eta_node_values   );
+	void set_eta_bar_node_values    ( std::size_t eta_bar_idx, MyNodalFunctionScalar* new_eta_bar_node_values );
+	void set_xi_global_node_values  ( std::size_t xi_global_idx,    MyNodalFunctionScalar* new_xi_global_node_values    );
+	//void set_xi_local_node_values   ( std::size_t xi_local_idx,    MyNodalFunctionScalar* new_xi_local_node_values    );
     
     template <class T_X>
     void update_xi_global_nodal_values  ( const T_X & x_new );
@@ -261,10 +263,10 @@ public:
 	void update_node_kin_reaction_drates_dxi(void);
 
 	/**
-      * calculate nodal local ode problem of xi_immob
+      * calculate nodal local problem
       */
-	void calc_nodal_xi_immob_ode(double dt);
-	
+	void calc_nodal_local_problem(double dt, const double iter_tol, const double rel_tol, const double max_iter);
+
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
 
@@ -379,14 +381,24 @@ private:
 	std::vector<MyNodalFunctionScalar*> _eta_bar;
     
     /**
-      * nodal xi_mobile values
+      * nodal xi_global values
       */ 
     std::vector<MyNodalFunctionScalar*> _xi_global;
 
     /**
-      * nodal xi_immobile values
+      * nodal xi_local values
       */ 
     std::vector<MyNodalFunctionScalar*> _xi_local;
+
+    /**
+      * nodal concentration values
+      */
+    std::vector<MyNodalFunctionScalar*>  _conc_glob;
+
+    /**
+      * new nodal concentration values
+      */
+    std::vector<MyNodalFunctionScalar*>  _conc_glob_new;
 
     /**
       * nodal xi_immobile values
@@ -418,21 +430,22 @@ private:
       */ 
     DiscreteLib::DofEquationIdTable * _nl_sol_dofManager;
 
+    ogsChem::LocalMatrix _mat_c_mob_2_xi_mob, _mat_c_immob_2_xi_immob;
     /**
       * the id of the msh applied in this process
       */ 
-    size_t _msh_id; 
+    std::size_t _msh_id;
 
     /**
       * the size of eta_mob, eta_immob, xi_mob and xi_immob vector
       */
-	size_t _n_eta,_n_eta_bar, _n_xi_mobile, _n_xi_immobile, _n_xi_local,  _n_xi_global, _n_xi_Mob, _n_xi_Sorp_tilde,_n_xi_Sorp, _n_xi_Sorp_bar
-			,_n_xi_Min, _n_xi_Min_tilde, _n_xi_Min_bar, _n_xi_Kin, _n_xi_Kin_bar;
+	std::size_t _n_eta,_n_eta_bar, _n_xi_mobile, _n_xi_immobile, _n_xi_local,  _n_xi_global, _n_xi_Mob, _n_xi_Sorp_tilde,_n_xi_Sorp, _n_xi_Sorp_bar
+			,_n_xi_Min, _n_xi_Min_tilde, _n_xi_Min_bar, _n_xi_Kin, _n_xi_Kin_bar, _I_mob, _I_sorp, _I_min, _I_NMin_bar;
 
     /**
       * number of components
       */
-    size_t _n_Comp; 
+    std::size_t _n_Comp;
 }; 
 
 #include "ReductConc.hpp"

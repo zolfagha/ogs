@@ -19,10 +19,10 @@ GeoSys Reactions
  $TYPE
    MOB_EQ_REACT;
  $EQUATION
-   1 HCO3- =  1 H+ + CO32-; 
+  ; 1 HCO3- =  1 H+ + CO32-; 
+  1 H+ + CO32- = 1 HCO3-; 
  $EQ_CONSTANT
- 4.67735e-11           ; K values
-
+ 2.138594997219773e+10           ; K values
 #REACTION ; 
  $NAME
    R2 ;

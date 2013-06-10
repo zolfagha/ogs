@@ -11,7 +11,7 @@
  */
 #include "chemReductionGIA.h"
 #include "logog.hpp"
-
+//#define _DEBUG
 namespace ogsChem
 {
 chemReductionGIA::chemReductionGIA(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & list_chemComp,
@@ -30,6 +30,8 @@ chemReductionGIA::chemReductionGIA(BaseLib::OrderedMap<std::string, ogsChem::Che
 		buildStoi(list_chemComp, list_eq_reactions, list_kin_reactions);
 		// calculate the reduction parameters
 		update_reductionScheme();
+		// get the log k values
+		read_logK(list_eq_reactions);
 		// flip the initialization flag
 		isInitialized = true;
 	}
@@ -119,31 +121,37 @@ void chemReductionGIA::update_reductionScheme(void)
 	_Jmob  = 1;
 	_Jsorp = 0;
 	_Jmin  = 2;
-	_Jkin  = 0;
-	_I_immob = _I_sorp + _I_min;
+	_J_tot_kin  = 0;
+	_I_bar = 2;
+	_I_NMin_bar  = _I_bar - _Jmin;
+	_J_tot_eq = _Jmob + _Jsorp + _Jmin;
+
 
 	// divide mobile and immobile parts
 	// S1 =S(1:I,:);
 	_mat_S1 = _matStoi.topRows( _I_mob );
 	// S2 =S(I+1:length(C),:);
-	_mat_S2 = _matStoi.bottomRows( _I_sorp + _I_min );
+	_mat_S2 = _matStoi.bottomRows( _I_NMin_bar + _I_min );
 
 	//preserve the original matrix
 	_mat_S1_preserve = _mat_S1;
 	_mat_S2_preserve = _mat_S2;
+
+	// prepare the matrix for later extraction
 	//extract subspaces of S 1 and 2 matrix
 	_mat_S1mob    =_mat_S1.block(0,0,_I_mob,_Jmob);
 	_mat_S1sorp   =_mat_S1.block(0,_Jmob,_I_mob,_Jsorp);
 	_mat_S1min    =_mat_S1.block(0,_Jmob+_Jsorp,_I_mob,_Jmin);
     _mat_S1kin    =_mat_S1.block(0,_J_tot_eq,_I_mob,_J_tot_kin);
 
-    _mat_S2mob    =_mat_S2.block(0,0,_I_immob,_Jmob);
-    _mat_S2sorp   = _mat_S2.block(0,_Jmob,_I_sorp,_Jsorp);
-	_mat_S2min    =_mat_S2.block(0,_Jmob+_Jsorp,_I_min,_Jmin);
-    _mat_S2kin    =_mat_S2.block(0,_J_tot_eq,_I_immob_nonMin,_J_tot_kin);
+    _mat_S2mob    =_mat_S2.block(0,0,_I_bar,_Jmob);
+    _mat_S2sorp   =_mat_S2.block(0,_Jmob,_I_bar,_Jsorp);
+	_mat_S2min    =_mat_S2.block(0,_Jmob +_Jsorp,_I_bar,_Jmin);
+    _mat_S2kin    =_mat_S2.block(0,_J_tot_eq,_I_bar,_J_tot_kin);
 
     _Jsorp_li = _Jsorp;
     _mat_S1sorp_li = _mat_S1sorp;
+    _matrix_Ssorp  = _matStoi.block(0,_Jmob,_I_mob +_I_NMin_bar,_Jsorp);
 
     if(_Jsorp)
     {
@@ -170,18 +178,22 @@ void chemReductionGIA::update_reductionScheme(void)
 
     	_mat_S1sorp_li.resize(0,0);   //clean the allocated memory
     	_mat_S1sorp_li = _mat_Ssorp_li.topRows(_I_mob);
-    	_mat_S2sorp_li = _mat_Ssorp_li.bottomRows(_I_immob);
+    	_mat_S2sorp_li = _mat_Ssorp_li.bottomRows(_I_bar);
     	_Jsorp_li   = _mat_Ssorp_li.cols();
     	_Jsorp_ld   = _mat_Ssorp_ld.cols();
 
     	_mat_S1sorp = _mat_S1sorp_li; // if _Jsorp_ld = 0
     	_mat_S2sorp = _mat_S2sorp_li; // if _Jsorp_ld = 0
 
+    	// construct the global _mat_Ssorp matrix, right parts contains the linearly independent and left part contains the linearly dependent reactions.
+    	_matrix_Ssorp.leftCols(_Jsorp_li)  = _mat_Ssorp_li;
+    	_matrix_Ssorp.rightCols(_Jsorp_ld) = _mat_Ssorp_ld;
+
 
     	if( _mat_Ssorp_ld.cols())
     	{
     		_mat_S1sorp_ld = _mat_Ssorp_ld.topRows(_I_mob);
-    		_mat_S2sorp_ld = _mat_Ssorp_ld.bottomRows(_I_immob);
+    		_mat_S2sorp_ld = _mat_Ssorp_ld.bottomRows(_I_bar);
 
     		_mat_S1sorp << _mat_S1sorp_li,_mat_S1sorp_ld;
     		_mat_S2sorp << _mat_S2sorp_li,_mat_S2sorp_ld;
@@ -195,10 +207,10 @@ void chemReductionGIA::update_reductionScheme(void)
 	_mat_S1.block(0,_Jmob+_Jsorp,_I_mob,_Jmin) = _mat_S1min;
     _mat_S1.block(0,_J_tot_eq,_I_mob,_J_tot_kin) = _mat_S1kin;
 
-    _mat_S2.block(0,0,_I_immob,_Jmob) = _mat_S2mob;
-    _mat_S2.block(0,_Jmob,_I_sorp,_Jsorp) = _mat_S2sorp;
-	_mat_S2.block(0,_Jmob+_Jsorp,_I_min,_Jmin) = _mat_S2min;
-    _mat_S2.block(0,_J_tot_eq,_I_immob_nonMin,_J_tot_kin) = _mat_S2kin;
+    _mat_S2.block(0,0,_I_bar,_Jmob) = _mat_S2mob;
+    _mat_S2.block(0,_Jmob,_I_bar,_Jsorp) = _mat_S2sorp;
+	_mat_S2.block(0,_Jmob+_Jsorp,_I_bar,_Jmin) = _mat_S2min;
+    _mat_S2.block(0,_J_tot_eq,_I_bar,_J_tot_kin) = _mat_S2kin;
 
     _mat_S1kin_ast = _mat_S1kin;
     _mat_S2kin_ast = _mat_S2kin;
@@ -214,13 +226,13 @@ void chemReductionGIA::update_reductionScheme(void)
     	Eigen::FullPivLU<LocalMatrix> lu_decomp_Skin(_mat_Skin);
     	_mat_Skin_li = lu_decomp_Skin.image(_mat_Skin);
         _mat_S1kin_ast = _mat_Skin_li.topRows(_I_mob);
-        _mat_S2kin_ast = _mat_Skin_li.bottomRows(_I_immob);
+        _mat_S2kin_ast = _mat_Skin_li.bottomRows(_I_bar);
         _Jkin_ast      = _mat_Skin_li.cols();
     }
 
 	// creat the memory for Stoi matrix
 	_mat_S1_ast = LocalMatrix::Zero(_I_mob, _Jmob + _Jsorp_li + _Jmin +_Jkin_ast);
-	_mat_S2_ast = LocalMatrix::Zero(_I_immob, _Jsorp + _Jmin + _Jkin_ast);
+	_mat_S2_ast = LocalMatrix::Zero(_I_bar, _Jsorp + _Jmin + _Jkin_ast);
 
 	// construct S1* and S2* which consists of max linearly independent columns of S1 and 2
     _mat_S1_ast.block(0,0,_I_mob,_Jmob) 							= _mat_S1mob;
@@ -228,23 +240,23 @@ void chemReductionGIA::update_reductionScheme(void)
     _mat_S1_ast.block(0,_Jmob + _Jsorp_li,_I_mob,_Jmin) 			= _mat_S1min;
     _mat_S1_ast.block(0,_Jmob + _Jsorp_li + _Jmin,_I_mob,_Jkin_ast) = _mat_S1kin_ast;
 
-    _mat_S2_ast.block(0,0,_I_sorp,_Jsorp) 						  = _mat_S2sorp;
-    _mat_S2_ast.block(_I_sorp,_Jsorp, _I_min ,_Jmin) 		   	  = _mat_S2min;
-    _mat_S2_ast.block(0,_Jsorp + _Jmin,_I_immob_nonMin,_Jkin_ast) = _mat_S2kin_ast;
+    _mat_S2_ast.block(0,0,_I_bar,_Jsorp) 						  = _mat_S2sorp;
+    _mat_S2_ast.block(0,_Jsorp, _I_bar ,_Jmin) 		   	  = _mat_S2min;
+    _mat_S2_ast.block(0,_Jsorp + _Jmin,_I_bar,_Jkin_ast) = _mat_S2kin_ast;
 
     //the location of these matrices should not be changed. Cut the zero parts
-	_mat_S2sorp = _mat_S2sorp.topRows(_I_immob_nonMin);
-	_mat_S2kin_ast = _mat_S2kin_ast.topRows(_I_immob_nonMin);
+	_mat_S2sorp = _mat_S2sorp.topRows(_I_NMin_bar);
+	_mat_S2kin_ast = _mat_S2kin_ast.topRows(_I_NMin_bar);
 
 #ifdef _DEBUG
     std::cout << "_mat_S1: "    << std::endl;
-	std::cout << _matS_1 << std::endl;
+	std::cout << _mat_S1 << std::endl;
 	std::cout << "_mat_S2: "    << std::endl;
-	std::cout << _matS_2 << std::endl;
+	std::cout << _mat_S2 << std::endl;
 	std::cout << "_mat_S1_ast: "    << std::endl;
-	std::cout << _mat_s_1 << std::endl;
+	std::cout << _mat_S1_ast << std::endl;
 	std::cout << "_mat_S2_ast: "    << std::endl;
-	std::cout << _mat_s_2 << std::endl;
+	std::cout << _mat_S2_ast << std::endl;
 #endif
 
 	// Calculate the s1T = S_i^T matrix consisting of a max set of linearly
@@ -256,9 +268,9 @@ void chemReductionGIA::update_reductionScheme(void)
 
 #ifdef _DEBUG
 	std::cout << "_mat_S1_orth: "    << std::endl;
-	std::cout << _matS_1_ast << std::endl;
+	std::cout << _mat_S1_orth << std::endl;
 	std::cout << "_mat_S2_orth: "    << std::endl;
-	std::cout << _matS_2_ast << std::endl;
+	std::cout << _mat_S2_orth << std::endl;
 #endif
 
 	_mat_c_mob_2_eta_mob     = ( _mat_S1_orth.transpose() * _mat_S1_orth ).fullPivHouseholderQr().solve(_mat_S1_orth.transpose());
@@ -291,7 +303,7 @@ void chemReductionGIA::update_reductionScheme(void)
     _Jsorp_li = _mat_Ssorp_li.cols();
     _Jsorp_ld = _mat_Ssorp_ld.cols();
     _Jkin_ast = _mat_S1kin_ast.cols();
-    _J_tot_li = _Jmob+_Jsorp_li+_Jmin+_Jkin_ast;
+    _J_tot_li = _Jmob + _Jsorp_li + _Jmin + _Jkin_ast;
 
 	//known
 	this->_n_xi_Mob          = _Jmob;
@@ -303,6 +315,8 @@ void chemReductionGIA::update_reductionScheme(void)
 
 	//calculated
 	this->_n_xi_Sorp_tilde   = _Jsorp_li;
+	this->_n_xi_Sorp_bar_ld  = _Jsorp_ld;
+	this->_n_xi_Sorp_bar_li  = _Jsorp_li;
 	this->_n_xi_Kin          = _Jkin_ast;
 	this->_n_xi_Kin_bar      = _Jkin_ast;
 
@@ -317,22 +331,20 @@ void chemReductionGIA::update_reductionScheme(void)
 
 #ifdef _DEBUG
 	std::cout << "A_1: "    << std::endl;
-	std::cout << _matA1 << std::endl;
+	std::cout << _mat_A1 << std::endl;
 	std::cout << "A_2: "    << std::endl;
-	std::cout << _matA2 << std::endl;
+	std::cout << _mat_A2 << std::endl;
 #endif
 
 	//extract the A subspaces
 	_mat_A1sorp       = _mat_A1.block(_Jmob,_J_tot_eq,_Jsorp_li,_J_tot_kin);
 	_mat_A1min        = _mat_A1.block(_Jmob+_Jsorp_li,_J_tot_eq,_Jmin,_J_tot_kin);
 	_mat_A1kin        = _mat_A1.block(_Jmob+_Jsorp_li+_Jmin,_J_tot_eq,_Jkin_ast,_J_tot_kin);
-	_mat_Ald		  = _mat_A1.block(_Jmob+_Jsorp_li,_Jmob+_Jsorp_li,_Jmin,_Jsorp_ld);
-
+	_mat_Ald	      = _mat_A1.block(_Jmob+_Jsorp_li,_Jmob+_Jsorp_li,_Jmin,_Jsorp_ld);
 	_mat_A2sorp       = _mat_A2.block(0,_Jmob+_Jsorp+_Jmin,_Jsorp,_J_tot_kin);
 	_mat_A2sorpli     = _mat_A2sorp.block(0,0,_Jsorp_li,_J_tot_kin);
 	_mat_A2sorpld     = _mat_A2sorp.block(_Jsorp_li,0,_Jsorp_ld,_J_tot_kin);
 	_mat_A2kin        = _mat_A2.block(_Jsorp+_Jmin,_Jmob+_Jsorp+_Jmin,_Jkin_ast,_J_tot_kin);
-
 
 }
 
@@ -359,7 +371,7 @@ LocalMatrix chemReductionGIA::orthcomp( LocalMatrix & inMat )
 void chemReductionGIA::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp)
 {
 	_I_mob = 0;
-	_I_sorp= 0;
+	_I_NMin_bar= 0;
 	_I_min = 0;
 
 	BaseLib::OrderedMap<std::string, ogsChem::ChemComp*>::iterator it;
@@ -371,7 +383,7 @@ void chemReductionGIA::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 			_I_mob++;
 			break;
 		case ogsChem::SORPTION:
-			_I_sorp++;
+			_I_NMin_bar++;
 			break;
 		case ogsChem::MINERAL:
 			_I_min++;
@@ -384,6 +396,19 @@ void chemReductionGIA::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 
 }
 
+void chemReductionGIA::read_logK(std::vector<ogsChem::chemReactionEq*>                & list_eq_reactions)
+{
+    size_t i;
+    ogsChem::LocalVector vec_logK;
+    vec_logK = ogsChem::LocalVector::Zero(_Jmob + _Jsorp + _Jmin);
+
+    for ( i=0 ; i < list_eq_reactions.size(); i++ )
+        vec_logK(i) = list_eq_reactions[i]->get_ln_K();
+
+    _logk_mob  = vec_logK.head(_Jmob);
+    _logk_sorp = vec_logK.segment(_Jmob, _Jsorp);
+    _logk_min  = vec_logK.tail(_Jmin);
+}
 
 void chemReductionGIA::Conc2EtaXi(ogsChem::LocalVector &local_conc,
 								  ogsChem::LocalVector &local_eta,
@@ -398,7 +423,7 @@ void chemReductionGIA::Conc2EtaXi(ogsChem::LocalVector &local_conc,
 
 	// divide c1 and c2
 	local_c_mob   = local_conc.topRows(    this->_I_mob );
-	local_c_immob = local_conc.bottomRows( this->_I_sorp + this->_I_min );
+	local_c_immob = local_conc.bottomRows( this->_I_NMin_bar + this->_I_min );
 
 	// convert eta_mob and xi_mob
 	local_eta   = _mat_c_mob_2_eta_mob * local_c_mob;
@@ -443,25 +468,35 @@ void chemReductionGIA::EtaXi2Conc(ogsChem::LocalVector &local_eta,
 								  ogsChem::LocalVector &local_conc )
 {
 	// declare local temp variable
-	ogsChem::LocalVector local_c_mob, local_c_immob;
+	ogsChem::LocalVector local_xi, local_xi_bar, local_c_mob, local_c_immob;
+	local_xi 	  = ogsChem::LocalVector::Zero(_n_xi_Mob +_n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
+	local_c_mob   = ogsChem::LocalVector::Zero(_I_mob);
+	local_xi_bar  = ogsChem::LocalVector::Zero(_n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
+	local_c_immob = ogsChem::LocalVector::Zero(_I_NMin_bar + _I_min);
 
-	local_xi_Mob  = local_xi_local.segment( 0,this->_n_xi_Mob);
-	local_xi_Sorp = local_xi_global.segment(this->_n_xi_Sorp_tilde + this->_n_xi_Min,this->_n_xi_Sorp);
-	local_xi_Min  = local_xi_global.segment(this->_n_xi_Sorp_tilde + this->_n_xi_Min + this->_n_xi_Sorp,this->_n_xi_Min);
-	local_xi_Kin  = local_xi_global.segment(this->_n_xi_Sorp_tilde + this->_n_xi_Min + this->_n_xi_Sorp+ this->_n_xi_Min,this->_n_xi_Kin);
+	//local_xi_Mob  = local_xi_local.segment( 0,this->_n_xi_Mob);
+	//local_xi_Sorp = local_xi_global.segment(this->_n_xi_Sorp_tilde + this->_n_xi_Min,this->_n_xi_Sorp);
+	//local_xi_Min  = local_xi_global.segment(this->_n_xi_Sorp_tilde + this->_n_xi_Min + this->_n_xi_Sorp,this->_n_xi_Min);
+	//local_xi_Kin  = local_xi_global.segment(this->_n_xi_Sorp_tilde + this->_n_xi_Min + this->_n_xi_Sorp+ this->_n_xi_Min,this->_n_xi_Kin);
 
-	local_xi_Sorp_bar = local_xi_local.segment(this->_n_xi_Mob,this->_n_xi_Sorp_bar);
-	local_xi_Min_bar  = local_xi_local.segment(this->_n_xi_Mob+this->_n_xi_Sorp_bar,this->_n_xi_Min);
-	local_xi_Kin_bar  = local_xi_local.segment(this->_n_xi_Mob+this->_n_xi_Sorp_bar+this->_n_xi_Min_bar,this->_n_xi_Kin_bar);
+	//local_xi_Sorp_bar = local_xi_local.segment(this->_n_xi_Mob,this->_n_xi_Sorp_bar);
+	//local_xi_Min_bar  = local_xi_local.segment(this->_n_xi_Mob+this->_n_xi_Sorp_bar,this->_n_xi_Min_bar);
+	//local_xi_Kin_bar  = local_xi_local.segment(this->_n_xi_Mob+this->_n_xi_Sorp_bar+this->_n_xi_Min_bar,this->_n_xi_Kin_bar);
 
-	local_xi<<local_xi_Mob,local_xi_Sorp,local_xi_Min,local_xi_Kin;
-	local_xi_bar<<local_xi_Sorp_bar,local_xi_Min_bar,local_xi_Kin_bar;
+	local_xi.head	(this->_n_xi_Mob) 					  				   = local_xi_local.segment( 0,this->_n_xi_Mob);;
+	local_xi.segment(this->_n_xi_Mob, this->_n_xi_Sorp) 		           = local_xi_global.segment(this->_n_xi_Sorp + this->_n_xi_Min,this->_n_xi_Sorp);;
+	local_xi.segment(this->_n_xi_Mob + this->_n_xi_Sorp, this->_n_xi_Min ) = local_xi_global.segment(this->_n_xi_Sorp + this->_n_xi_Min + this->_n_xi_Sorp,this->_n_xi_Min);
+	local_xi.tail	(this->_n_xi_Kin) 									   = local_xi_global.segment(this->_n_xi_Sorp + this->_n_xi_Min + this->_n_xi_Sorp+ this->_n_xi_Min,this->_n_xi_Kin);
+
+	local_xi_bar.head	(_n_xi_Sorp_bar) 					 =  local_xi_local.segment(this->_n_xi_Mob,this->_n_xi_Sorp_bar);
+	local_xi_bar.segment(_n_xi_Sorp_bar, _n_xi_Min_bar) 	 =  local_xi_local.segment(this->_n_xi_Mob+this->_n_xi_Sorp_bar,this->_n_xi_Min_bar);
+	local_xi_bar.tail	(_n_xi_Kin_bar) 					 =  local_xi_local.segment(this->_n_xi_Mob+this->_n_xi_Sorp_bar+this->_n_xi_Min_bar,this->_n_xi_Kin_bar);
 
 	local_c_mob   = _mat_S1_ast * local_xi   + _mat_S1_orth * local_eta;
 	local_c_immob = _mat_S2_ast * local_xi_bar + _mat_S2_orth * local_eta_bar;
 
 	local_conc.topRows( this->_I_mob ) = local_c_mob;
-	local_conc.bottomRows( this->_I_sorp + this->_I_min ) = local_c_immob;
+	local_conc.bottomRows( this->_I_NMin_bar + this->_I_min ) = local_c_immob;
 
     // testing if the non-negative stablilization will help?
     for (size_t i=0; i < local_conc.rows(); i++)    {

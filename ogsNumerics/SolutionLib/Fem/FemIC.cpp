@@ -37,6 +37,8 @@ void FemIC::setup(NumLib::ITXDiscreteFunction<double> &u0) const
         std::vector<size_t> vec_node_id;
         std::vector<double> vec_node_value;
         FemLib::IC2FEM ic2fem(*_msh, *_vec_geo[i], *_vec_func[i], vec_node_id, vec_node_value);
+
+
         for (size_t j=0; j<vec_node_id.size(); j++) {
             (*u0_array)[vec_node_id[j]] = vec_node_value[j]; 
         }

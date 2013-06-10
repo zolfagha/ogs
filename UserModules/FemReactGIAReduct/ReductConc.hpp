@@ -7,7 +7,7 @@
  *
  * \file Concentration.h
  *
- * Created on 2012-09-06 by Haibing Shao
+ * Created on 24.05.2013 by Reza Zolfaghari and Haibing Shao
  */
 
 #include "logog.hpp"
@@ -25,6 +25,7 @@
 #include "MathLib/ODE/RungeKutta4.h"
 #include "NonLinearGIATimeODELocalAssembler.h"
 //#include "NonLinearGIAJacobianLocalAssembler.h"
+#define _DEBUG
 
 template <class T1, class T2>
 bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
@@ -89,6 +90,15 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 		_xi_global.push_back(xi_global_tmp);
         _kin_rates.push_back(xi_rates_tmp);
 	}
+
+	// initialize concentration vector,
+	for ( i=0; i < _n_Comp; i++)
+	{
+		MyNodalFunctionScalar* conc_i = new MyNodalFunctionScalar();
+	    conc_i->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0 );
+	    _concentrations.push_back(conc_i);
+	}
+
 //	// initialize drates_dxi
 //	for ( i=0; i < _n_xi_global; i++ )
 //	{
@@ -96,7 +106,7 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 //		drate_dxi_tmp->initialize(       *dis, FemLib::PolynomialOrder::Linear, 0.0  );
 //		_drates_dxi.push_back(drate_dxi_tmp);
 //	}
-	// initialize xi_mob
+	// initialize xi_local
 	for ( i=0; i < _n_xi_local ; i++ )
 	{
 		MyNodalFunctionScalar* xi_local_tmp       = new MyNodalFunctionScalar();  // xi_immob
@@ -206,13 +216,6 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 		_non_linear_problem->getVariable(i)->setIC( xi_global_ic );
 	}
 
-	// set IC for xi_local
-//	for ( i=0; i < _n_xi_local; i++ )
-//	{
-//		SolutionLib::FemIC* xi_local_ic = new SolutionLib::FemIC(msh);
-//		xi_local_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _xi_local[i]->getDiscreteData() ) );
-//		_non_linear_problem->getVariable(i)->setIC( xi_local_ic );
-//	}
 
     // set up linear solution
 	for ( i=0; i < _n_eta; i++ )
@@ -247,20 +250,20 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 
     this->setOutput(Concentrations, _solution->getCurrentSolution(0));
 
-    // set initial output parameter
-	for (i=0; i<_concentrations.size(); i++) {
-		OutputVariableInfo var1(this->getOutputParameterName(i), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
+//    // set initial output parameter
+//	for (i=0; i<_concentrations.size(); i++) {
+//		OutputVariableInfo var1(this->getOutputParameterName(i), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
+//        femData->outController.setOutput(var1.name, var1);
+ //   }
+
+#ifdef _DEBUG
+    // -----------debugging, output eta and xi----------------------
+    for (i=0; i < _n_eta; i++) {
+        std::stringstream str_tmp;
+		str_tmp << "eta_" << i ;
+        OutputVariableInfo var1(str_tmp.str(), _msh_id,  OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta[i]);
         femData->outController.setOutput(var1.name, var1);
     }
-
-//#ifdef _DEBUG
-//    // -----------debugging, output eta and xi----------------------
-//    for (i=0; i < _n_eta_mob; i++) {
-//        std::stringstream str_tmp;
-//		str_tmp << "eta_mob_" << i ;
-//        OutputVariableInfo var1(str_tmp.str(), _msh_id,  OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_mob[i]);
-//        femData->outController.setOutput(var1.name, var1);
-//    }
 //    for (i=0; i < _n_eta_immob; i++) {
 //        std::stringstream str_tmp;
 //		str_tmp << "eta_immob_" << i ;
@@ -276,17 +279,24 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 //        OutputVariableInfo var2(str_tmp2.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob_rates[i]);
 //        femData->outController.setOutput(var2.name, var2);
 //    }
-//    for (i=0; i < _n_xi_immob; i++) {
-//        std::stringstream str_tmp1, str_tmp2;
-//		str_tmp1 << "xi_immob_" << i ;
-//        OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob[i]);
-//        femData->outController.setOutput(var1.name, var1);
+    for (i=0; i < _n_xi_local; i++) {
+        std::stringstream str_tmp1, str_tmp2;
+		str_tmp1 << "xi_local_" << i ;
+        OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_local[i]);
+        femData->outController.setOutput(var1.name, var1);
 //        str_tmp2 << "xi_immob_rate_" << i;
 //        OutputVariableInfo var2(str_tmp2.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob_rates[i]);
 //        femData->outController.setOutput(var2.name, var2);
-//    }
+    }
+
+    for (i=0; i < _n_Comp; i++) {
+        std::stringstream str_tmp1, str_tmp2;
+		str_tmp1 << "conc_" << i ;
+        OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
+        femData->outController.setOutput(var1.name, var1);
+    }
 //    // -----------------end of debugging-----------------------------
-//#endif
+#endif
 
     linear_solver = NULL;
     optNum = NULL;
@@ -297,19 +307,19 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 template <class T1, class T2>
 void FunctionReductConc<T1, T2>::initializeTimeStep(const NumLib::TimeStep &/*time*/)
 {
-	//size_t i; 
- //   const NumLib::ITXFunction *vel = this->getInput<NumLib::ITXFunction>(Velocity);
+	size_t i;
+    const NumLib::ITXFunction *vel = this->getInput<NumLib::ITXFunction>(Velocity);
 
-	//// set velocity for linear problem
-	//for ( i=0; i < _linear_problems.size(); i++ ) {
-	//	_linear_problems[i]->getEquation()->getLinearAssembler()->setVelocity(vel);
-	//	_linear_problems[i]->getEquation()->getResidualAssembler()->setVelocity(vel);
-	//	_linear_problems[i]->getEquation()->getJacobianAssembler()->setVelocity(vel);
-	//}
-	//// set velocity for nonlinear problem as well
-	//_non_linear_problem->getEquation()->getLinearAssembler()->setVelocity(vel); 
- //   _non_linear_problem->getEquation()->getResidualAssembler()->setVelocity(vel); 
-	//_non_linear_problem->getEquation()->getJacobianAssembler()->setVelocity(vel); 
+	// set velocity for linear problem
+	for ( i=0; i < _linear_problems.size(); i++ ) {
+		_linear_problems[i]->getEquation()->getLinearAssembler()->setVelocity(vel);
+		_linear_problems[i]->getEquation()->getResidualAssembler()->setVelocity(vel);
+		_linear_problems[i]->getEquation()->getJacobianAssembler()->setVelocity(vel);
+	}
+	// set velocity for nonlinear problem as well
+	_non_linear_problem->getEquation()->getLinearAssembler()->setVelocity(vel);
+    _non_linear_problem->getEquation()->getResidualAssembler()->setVelocity(vel);
+	_non_linear_problem->getEquation()->getJacobianAssembler()->setVelocity(vel);
  //   // set xi_mob_rates for non-linear problem
 	//_non_linear_problem->getEquation()->getLinearAssembler()  ->set_xi_mob_rates( &_xi_mob_rates ); 
 	//_non_linear_problem->getEquation()->getResidualAssembler()->set_xi_mob_rates( &_xi_mob_rates ); 
@@ -323,8 +333,8 @@ void FunctionReductConc<T1, T2>::initializeTimeStep(const NumLib::TimeStep &/*ti
 template <class T1, class T2>
 void FunctionReductConc<T1, T2>::updateOutputParameter(const NumLib::TimeStep &/*time*/)
 { 
-    // convert eta and xi back to concentrations
-    //convert_eta_xi_to_conc(); 
+   // convert eta and xi back to concentrations
+    convert_eta_xi_to_conc();
 }
 
 template <class T1, class T2>
@@ -340,15 +350,15 @@ void FunctionReductConc<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 		OutputVariableInfo var1(this->getOutputParameterName(i), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
         femData->outController.setOutput(var1.name, var1);
     }
-//
-//#ifdef _DEBUG
-//    // -----------debugging, output eta and xi----------------------
-//    for (i=0; i < _n_eta_mob; i++) {
-//        std::stringstream str_tmp;
-//		str_tmp << "eta_mob_" << i ;
-//        OutputVariableInfo var1(str_tmp.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_mob[i]);
-//        femData->outController.setOutput(var1.name, var1);
-//    }
+
+#ifdef _DEBUG
+    // -----------debugging, output eta and xi----------------------
+    for (i=0; i < _n_eta; i++) {
+        std::stringstream str_tmp;
+		str_tmp << "eta_" << i ;
+        OutputVariableInfo var1(str_tmp.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta[i]);
+        femData->outController.setOutput(var1.name, var1);
+    }
 //    for (i=0; i < _n_eta_immob; i++) {
 //        std::stringstream str_tmp;
 //		str_tmp << "eta_immob_" << i ;
@@ -374,7 +384,7 @@ void FunctionReductConc<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 //        femData->outController.setOutput(var2.name, var2);
 //    }
 //    // -----------end of debugging----------------------------------
-//#endif
+#endif
 }
 
 template <class T1, class T2>
@@ -647,13 +657,13 @@ void FunctionReductConc<T1, T2>::update_node_kin_reaction_drates_dxi(void)
     LocalVector loc_xi_local_rates;
 
 	// initialize the local vector
-	loc_eta           = LocalVector::Zero( _n_eta );
-	loc_eta_bar         = LocalVector::Zero( _n_eta_bar );
-	loc_xi_global            = LocalVector::Zero( _n_xi_global );
-	loc_xi_local          = LocalVector::Zero( _n_xi_local );
-    loc_xi_global_rates_base = LocalVector::Zero( _n_xi_global );
-    loc_xi_global_rates_new  = LocalVector::Zero( _n_xi_global );
-    loc_xi_local_rates    = LocalVector::Zero( _n_xi_local );
+	loc_eta     		      = LocalVector::Zero( _n_eta );
+	loc_eta_bar         	  = LocalVector::Zero( _n_eta_bar );
+	loc_xi_global             = LocalVector::Zero( _n_xi_global );
+	loc_xi_local          	  = LocalVector::Zero( _n_xi_local );
+    loc_xi_global_rates_base  = LocalVector::Zero( _n_xi_global );
+    loc_xi_global_rates_new   = LocalVector::Zero( _n_xi_global );
+    loc_xi_local_rates    	  = LocalVector::Zero( _n_xi_local );
 
 	// loop over all nodes
 	for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin();
@@ -729,88 +739,158 @@ void FunctionReductConc<T1, T2>::update_node_kin_reaction_drates_dxi(void)
 
 
 template <class T1, class T2>
-void FunctionReductConc<T1, T2>::calc_nodal_xi_immob_ode(double dt)
+void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const double iter_tol, const double rel_tol, const double max_iter)
 {
 	size_t i, node_idx;
 
-    double t0 = 0.0;
-
+    //pointer to the local problem
+    LocalProblem* pSolve;
+	//get the transformation matrices
+	_mat_c_mob_2_xi_mob     = _ReductionGIA->get_matrix_C2Xi();
+	_mat_c_immob_2_xi_immob = _ReductionGIA->get_matrix_Cbar2XiBar();
+	_n_xi_Sorp_tilde        = _ReductionGIA->get_n_xi_Sorp_tilde();
+	_n_xi_Min_tilde         = _ReductionGIA->get_n_xi_Min_tilde();
+	_n_xi_Sorp				= _ReductionGIA->get_n_xi_Sorp();
+	_n_xi_Min				= _ReductionGIA->get_n_xi_Min();
+	_I_NMin_bar             = _ReductionGIA->get_n_Comp_NMin_bar();
+	_n_xi_Kin_bar           = _ReductionGIA->get_n_xi_Kin_bar();
+	_I_mob					= _ReductionGIA->get_n_Comp_mob();
+	_n_xi_Mob				= _ReductionGIA->get_n_xi_Mob();
+	_n_xi_Sorp_bar			= _ReductionGIA->get_n_xi_Sorp_bar();
+	_n_xi_Min_bar			= _ReductionGIA->get_n_xi_Min_bar();
 	// initialize the local vector
 	MathLib::LocalVector loc_eta;
-	MathLib::LocalVector loc_eta_bar;
+	MathLib::LocalVector loc_etabar;
 	MathLib::LocalVector loc_xi_global;
 	MathLib::LocalVector loc_xi_local;
-    MathLib::LocalVector loc_xi_local_rate;
-	MathLib::LocalVector loc_xi_local_new;
+	MathLib::LocalVector loc_xi_local_old_dt;
+	MathLib::LocalVector loc_conc;
+	MathLib::LocalVector vec_tot_mass_constrain;
+	MathLib::LocalVector vec_unknowns;
+	MathLib::LocalVector loc_XiSorpTilde, loc_XiMinTilde, loc_XiKin, loc_XiBarKin, loc_XiBarKin_old;
+	MathLib::LocalVector vec_conc, vec_XiBarKin, loc_xi_mobile, vec_xi_mob, loc_xi_immobile, vec_XiSorpBar, vec_XiMinBar, loc_xi_local_new, vec_unknowns_new;
 
 	// initialize the local vector
-	loc_eta        		= LocalVector::Zero( _n_eta );
-	loc_eta_bar         = LocalVector::Zero( _n_eta_bar );
-	loc_xi_global       = LocalVector::Zero( _n_xi_global );
-	loc_xi_local       	= LocalVector::Zero( _n_xi_local );
-    loc_xi_local_rate  	= LocalVector::Zero( _n_xi_local );
-	loc_xi_local_new   	= LocalVector::Zero( _n_xi_local );
+	loc_eta        				= LocalVector::Zero( _n_eta );
+	loc_etabar          		= LocalVector::Zero( _n_eta_bar );
+	loc_xi_global       		= LocalVector::Zero( _n_xi_global );
+	loc_xi_local       			= LocalVector::Zero( _n_xi_local );
+	loc_xi_local_old_dt			= LocalVector::Zero( _n_xi_local );
+	loc_conc	       			= LocalVector::Zero( _n_Comp );
+	vec_tot_mass_constrain	    = LocalVector::Zero( _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_eta_bar + _n_xi_Kin_bar );
+	loc_conc	       			= LocalVector::Zero( _n_Comp + _n_xi_Kin_bar);
+	loc_XiSorpTilde				= LocalVector::Zero( _n_xi_Sorp_tilde);
+	loc_XiMinTilde				= LocalVector::Zero( _n_xi_Min_tilde);
+	loc_XiKin					= LocalVector::Zero( _n_xi_Kin);
+	loc_XiBarKin				= LocalVector::Zero( _n_xi_Kin_bar);
+	loc_XiBarKin_old			= LocalVector::Zero( _n_xi_Kin_bar);
+	vec_unknowns				= LocalVector::Zero(_n_Comp + _n_xi_Kin_bar);
+
+	vec_conc     		= LocalVector::Zero(_n_Comp);
+	vec_XiBarKin		= LocalVector::Zero(_n_xi_Kin_bar);
+	loc_xi_mobile		= LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
+	vec_xi_mob			= LocalVector::Zero(_n_xi_Mob);
+	loc_xi_immobile		= LocalVector::Zero(_n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
+	vec_XiSorpBar		= LocalVector::Zero(_n_xi_Sorp_bar);
+	vec_XiMinBar		= LocalVector::Zero(_n_xi_Min_bar);
+	loc_xi_local_new	= LocalVector::Zero(_n_xi_local);
+	vec_unknowns_new	= LocalVector::Zero(_n_Comp + _n_xi_Kin_bar);
+
 
 	// signal, solving local ODEs of xi_immob
-	INFO("--Solving local ODE problem of xi_immob...");
-
-	// initialize the ODE Runge-Kutta solution class
-	// MathLib::RungeKutta4<Local_ODE_Xi_immob, MathLib::LocalVector>* rk4 = new MathLib::RungeKutta4<Local_ODE_Xi_immob, MathLib::LocalVector>();
-    // or using the StepperBulischStoer class
-//    MathLib::StepperBulischStoer<Local_ODE_Xi_immob>* sbs
-//        = new MathLib::StepperBulischStoer<Local_ODE_Xi_immob>(loc_xi_immob,
-//                                                               loc_xi_immob_rate,
-//                                                               t0,
-//                                                               1.0e-6,
-//                                                               1.0e-6,
-//                                                               true);
+	INFO("--Solving local problem for xi_local and concentrations:");
 
 
 
-//	// loop over all the nodes
-//    for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin();
-//	     node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd();
-//		 node_idx++ )
-//	{
-//		// skip the boundary nodes
-//		if ( ! this->_solution->isBCNode(node_idx) )
-//		{
-//			// on each node, get the right start value
-//			// get the right set of eta and xi
-//			for (i=0; i < _n_eta_mob; i++)
-//				loc_eta_mob[i] = this->_eta_mob[i]->getValue(node_idx);
-//			// fill in eta_immob
-//			for (i=0; i < _n_eta_immob; i++)
-//				loc_eta_immob[i] = this->_eta_immob[i]->getValue(node_idx);
-//			for (i=0; i < _n_xi_mob; i++)
-//				loc_xi_mob[i] = this->_xi_mob[i]->getValue(node_idx);
-//			for (i=0; i < _n_xi_immob; i++)
-//				loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx); // HS, here are always the old xi_immob values.
-//
-//			// get the right reference values to ODE RHS function
-//			this->_local_ode_xi_immob->update_eta_xi( loc_eta_mob, loc_eta_immob, loc_xi_mob, loc_xi_immob);
-//            loc_xi_immob_rate = (*_local_ode_xi_immob)(dt, loc_xi_immob);
-//            sbs->set_y(loc_xi_immob);
-//            sbs->set_dydx(loc_xi_immob_rate);
-//
-//			// solve the local ODE problem using RK
-//			// rk4->solve( *_local_ode_xi_immob, 0.0, dt, loc_xi_immob, loc_xi_immob_new);
-//            sbs->step( dt, _local_ode_xi_immob );
-//            loc_xi_immob_new = sbs->get_y();
-//
-//			// collect the xi_immob_new
-//			for (i=0; i < _n_xi_immob; i++)
-//				_xi_immob_new[i]->setValue(node_idx, loc_xi_immob_new[i]);
-//		} // end of if
-//        else
-//        {
-//            // if it is boundary nodes, then xi_immob_new is equal to xi_immob.
-//            for (i=0; i < _n_xi_immob; i++)
-//				_xi_immob_new[i]->setValue(node_idx, _xi_immob[i]->getValue( node_idx ) );
-//        }
-//
-//	}  // end of for node_idx
+	// loop over all the nodes
+    for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin();
+	     node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd();
+		 node_idx++ )
+	{
 
-    // delete rk4;
-//    delete sbs;
+		// skip the boundary nodes
+		if ( ! this->_solution->isBCNode(node_idx) )
+		{
+
+			// on each node, get the right start value
+			// get the right set of eta and xi
+			for (i=0; i < _n_eta; i++)
+				loc_eta[i] = this->_eta[i]->getValue(node_idx);
+			// fill in eta_immob
+			for (i=0; i < _n_eta_bar; i++)
+				loc_etabar[i] = this->_eta_bar[i]->getValue(node_idx);
+			for (i=0; i < _n_xi_global; i++)
+				loc_xi_global[i] = this->_xi_global[i]->getValue(node_idx);
+			for (i=0; i < _n_xi_local; i++)
+				loc_xi_local[i] = this->_xi_local[i]->getValue(node_idx);
+
+			for (i=0; i < _n_Comp; i++)
+				loc_conc[i] = this->_concentrations[i]->getValue(node_idx);
+
+			// xi global constrains
+			loc_XiSorpTilde  = loc_xi_global.head(_n_xi_Sorp_tilde);
+			loc_XiMinTilde   = loc_xi_global.segment(_n_xi_Sorp_tilde, _n_xi_Min_tilde);
+			loc_XiKin        = loc_xi_global.segment(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Kin);
+
+			loc_XiBarKin     = loc_xi_local.tail(_n_xi_Kin_bar);
+			loc_XiBarKin_old = loc_xi_local_old_dt.tail(_n_xi_Kin_bar);
+
+			// total mass constrain ie xi global and eta and etabar
+			vec_tot_mass_constrain.segment(0,_n_eta) 																						    =  loc_eta;
+			vec_tot_mass_constrain.segment(_n_eta,_n_xi_Sorp_tilde) 																		    =  loc_XiSorpTilde;
+			vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde,_n_xi_Min_tilde) 														    =  loc_XiMinTilde;
+			vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Kin)											    =  loc_XiKin;
+			vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin,_n_eta_bar) 								    =  loc_etabar;
+			vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_eta_bar, _n_xi_Kin_bar)				    =  loc_XiBarKin_old;
+
+
+			vec_unknowns.head (_n_Comp) = loc_conc;
+			vec_unknowns.tail (_n_xi_Kin_bar) = loc_XiBarKin;
+
+
+			pSolve = new LocalProblem( _ReductionGIA);
+
+			// solve the local problem
+			pSolve->solve_LocalProblem_Newton_LineSearch( vec_unknowns, vec_tot_mass_constrain, node_idx , dt, iter_tol, rel_tol, max_iter);
+
+			// re assembling xi local
+			vec_conc   	      =  vec_unknowns.head (_n_Comp);
+		    vec_XiBarKin      =  vec_unknowns.tail (_n_xi_Kin_bar);
+
+		    loc_xi_mobile     = _mat_c_mob_2_xi_mob * vec_conc.head(_I_mob);
+		    vec_xi_mob        =  loc_xi_mobile.head(_n_xi_Mob);
+
+		    loc_xi_immobile   = _mat_c_immob_2_xi_immob * vec_conc.tail(_I_NMin_bar + _n_xi_Min);
+		    vec_XiSorpBar     = loc_xi_immobile.head(_n_xi_Sorp_bar);
+		    vec_XiMinBar	  = loc_xi_immobile.segment(_n_xi_Sorp_bar + _n_xi_Kin_bar, _n_xi_Min_bar);
+
+		    loc_xi_local_new.head   (_n_xi_Mob) 								 = vec_xi_mob;
+		    loc_xi_local_new.segment(_n_xi_Mob, _n_xi_Sorp_bar)				     = vec_XiSorpBar;
+		    loc_xi_local_new.segment(_n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Min_bar)  = vec_XiMinBar;
+		    loc_xi_local_new.tail   (_n_xi_Kin_bar)							     = vec_XiBarKin;
+
+			// collect the xi_local_new
+			for (i=0; i < _n_xi_local; i++)
+				//_xi_local_new[i]->setValue(node_idx, loc_xi_local_new[i]);
+				_xi_local[i]->setValue(node_idx, loc_xi_local_new[i]);
+
+			// collect new concentration values
+			for (i=0; i < _n_Comp; i++)
+				_concentrations[i]->setValue(node_idx, vec_conc[i]);
+		} // end of if
+        else
+        {
+            // if it is boundary nodes, then xi_local_new is equal to xi_local.
+            for (i=0; i < _n_xi_local; i++)
+				//_xi_local_new[i]->setValue(node_idx, _xi_local[i]->getValue( node_idx ) );
+            	_xi_local[i]->setValue(node_idx, _xi_local[i]->getValue( node_idx ) );
+
+            // if it is boundary nodes, then conc_glob_new is equal to conc_glob.
+            for (i=0; i < _n_Comp; i++)
+            	_concentrations[i]->setValue(node_idx, _concentrations[i]->getValue( node_idx ) );
+        }
+
+	}  // end of for node_idx
+
+    delete pSolve;
 }
