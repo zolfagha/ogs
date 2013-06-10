@@ -48,6 +48,11 @@ void chemReductionGIA::buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 	std::string tmp_str;
 	BaseLib::OrderedMap<std::string, ogsChem::ChemComp*>::iterator tmp_Comp;
 
+    // zero the number of different equilibrium reactions
+    _Jmob  = 0; 
+    _Jsorp = 0; 
+    _Jmin  = 0; 
+
 	// obtain the size info
 	_I_tot		 = map_chemComp.size();
 	_J_tot_eq 	 = list_eq_reactions.size();
@@ -62,6 +67,14 @@ void chemReductionGIA::buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 	//Equilibrium reaction
 	for ( j=0; j < list_eq_reactions.size() ; j++ )
 	{	// for each reaction
+        // check which type of equilibrium reaction it is
+        if (      list_eq_reactions[j]->get_type() == ogsChem::EqReactType::MOB_EQ_REACT  )
+            this->_Jmob++; 
+        else if ( list_eq_reactions[j]->get_type() == ogsChem::EqReactType::SORP_EQ_REACT )
+            this->_Jsorp++; 
+        else if ( list_eq_reactions[j]->get_type() == ogsChem::EqReactType::MIN_EQ_REACT  )
+            this->_Jmin++; 
+
 		// find each participating components
 		for ( i=0; i <  list_eq_reactions[j]->get_vecCompNames().size() ; i++ ){
 			tmp_str  = list_eq_reactions[j]->get_vecCompNames()[i];
@@ -116,16 +129,6 @@ void chemReductionGIA::buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 void chemReductionGIA::update_reductionScheme(void)
 {
 	size_t i,j;
-
-	//to be changed
-	_Jmob  = 1;
-	_Jsorp = 0;
-	_Jmin  = 2;
-	_J_tot_kin  = 0;
-	_I_bar = 2;
-	_I_NMin_bar  = _I_bar - _Jmin;
-	_J_tot_eq = _Jmob + _Jsorp + _Jmin;
-
 
 	// divide mobile and immobile parts
 	// S1 =S(1:I,:);
@@ -214,9 +217,9 @@ void chemReductionGIA::update_reductionScheme(void)
 
     _mat_S1kin_ast = _mat_S1kin;
     _mat_S2kin_ast = _mat_S2kin;
-    _Jkin_ast      = _Jkin;
+    _Jkin_ast      = this->_J_tot_kin;  // HS: is this correct?
 
-    if(_Jkin)
+    if( _J_tot_kin > 0 )
     {
     	//clean the memory
     	_mat_S1kin_ast.resize(0,0);
@@ -393,7 +396,7 @@ void chemReductionGIA::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 			break;
 		}
 	}
-
+    _I_bar = _I_NMin_bar + _I_min;
 }
 
 void chemReductionGIA::read_logK(std::vector<ogsChem::chemReactionEq*>                & list_eq_reactions)
