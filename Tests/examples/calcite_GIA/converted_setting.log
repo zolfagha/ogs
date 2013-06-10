@@ -52,6 +52,15 @@ tag: outputList
 			value: 0
 		tag: nodeValue
 			tag: name
+				value: eta_0
+		tag: nodeValue
+			tag: name
+				value: eta_1
+		tag: nodeValue
+			tag: name
+				value: eta_2
+		tag: nodeValue
+			tag: name
 				value: HEAD
 		tag: nodeValue
 			tag: name
@@ -88,9 +97,9 @@ tag: processList
 					value: CONSTANT
 				tag: DistributionValue
 				tag: GeometryName
-					value: POINT0
+					value: PLY_BC_LEFT
 				tag: GeometryType
-					value: POINT
+					value: POLYLINE
 				tag: Variable
 					value: HEAD
 			tag: BC
@@ -98,9 +107,9 @@ tag: processList
 					value: CONSTANT
 				tag: DistributionValue
 				tag: GeometryName
-					value: POINT1
+					value: PLY_BC_RIGHT
 				tag: GeometryType
-					value: POINT
+					value: POLYLINE
 				tag: Variable
 					value: HEAD
 		tag: ICList
@@ -145,9 +154,9 @@ tag: processList
 					value: CONSTANT
 				tag: DistributionValue
 				tag: GeometryName
-					value: POINT0
+					value: PLY_BC_LEFT
 				tag: GeometryType
-					value: POINT
+					value: POLYLINE
 				tag: Variable
 					value: H+
 			tag: BC
@@ -155,9 +164,9 @@ tag: processList
 					value: CONSTANT
 				tag: DistributionValue
 				tag: GeometryName
-					value: POINT0
+					value: PLY_BC_LEFT
 				tag: GeometryType
-					value: POINT
+					value: POLYLINE
 				tag: Variable
 					value: Ca2+
 			tag: BC
@@ -165,9 +174,9 @@ tag: processList
 					value: CONSTANT
 				tag: DistributionValue
 				tag: GeometryName
-					value: POINT0
+					value: PLY_BC_LEFT
 				tag: GeometryType
-					value: POINT
+					value: POLYLINE
 				tag: Variable
 					value: Mg2+
 			tag: BC
@@ -175,9 +184,9 @@ tag: processList
 					value: CONSTANT
 				tag: DistributionValue
 				tag: GeometryName
-					value: POINT0
+					value: PLY_BC_LEFT
 				tag: GeometryType
-					value: POINT
+					value: POLYLINE
 				tag: Variable
 					value: Cl-
 			tag: BC
@@ -185,9 +194,9 @@ tag: processList
 					value: CONSTANT
 				tag: DistributionValue
 				tag: GeometryName
-					value: POINT0
+					value: PLY_BC_LEFT
 				tag: GeometryType
-					value: POINT
+					value: POLYLINE
 				tag: Variable
 					value: CO32-
 			tag: BC
@@ -195,9 +204,9 @@ tag: processList
 					value: CONSTANT
 				tag: DistributionValue
 				tag: GeometryName
-					value: POINT0
+					value: PLY_BC_LEFT
 				tag: GeometryType
-					value: POINT
+					value: POLYLINE
 				tag: Variable
 					value: HCO3-
 			tag: BC
@@ -205,9 +214,9 @@ tag: processList
 					value: CONSTANT
 				tag: DistributionValue
 				tag: GeometryName
-					value: POINT0
+					value: PLY_BC_LEFT
 				tag: GeometryType
-					value: POINT
+					value: POLYLINE
 				tag: Variable
 					value: Calcite
 			tag: BC
@@ -215,9 +224,9 @@ tag: processList
 					value: CONSTANT
 				tag: DistributionValue
 				tag: GeometryName
-					value: POINT0
+					value: PLY_BC_LEFT
 				tag: GeometryType
-					value: POINT
+					value: POLYLINE
 				tag: Variable
 					value: Dolomite(dis)
 		tag: ICList

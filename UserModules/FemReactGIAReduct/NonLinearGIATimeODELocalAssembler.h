@@ -7,7 +7,7 @@
  *
  * \file NonLinearGIATimeODELocalAssembler.h
  *
- * Created on 2012-09-24 by Haibing Shao
+ * Created on Haibing Shao and Reza Zolfaghari
  */
 
 #ifndef NON_LINEAR_GIA_TIME_ODE_LOCAL_ASSEMBLER_H

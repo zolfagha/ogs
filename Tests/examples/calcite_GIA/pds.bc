@@ -5,7 +5,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   HEAD
  $GEO_TYPE
-  POINT POINT0
+  POLYLINE PLY_BC_LEFT
  $DIS_TYPE
   CONSTANT 0.13229
   
@@ -15,7 +15,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   HEAD
  $GEO_TYPE
-  POINT POINT1
+  POLYLINE PLY_BC_RIGHT
  $DIS_TYPE
   CONSTANT 0.0
 
@@ -25,7 +25,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   H+
  $GEO_TYPE
-  POINT POINT0
+  POLYLINE PLY_BC_LEFT
  $DIS_TYPE
   CONSTANT  1.e-07
 
@@ -35,7 +35,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   Ca2+
  $GEO_TYPE
-  POINT POINT0
+  POLYLINE PLY_BC_LEFT
  $DIS_TYPE
   CONSTANT  1.0e-10
 
@@ -45,7 +45,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   Mg2+
  $GEO_TYPE
-  POINT POINT0
+  POLYLINE PLY_BC_LEFT
  $DIS_TYPE
   CONSTANT 1.0e-03  
 
@@ -55,7 +55,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   Cl-
  $GEO_TYPE
-  POINT POINT0
+  POLYLINE PLY_BC_LEFT
  $DIS_TYPE
   CONSTANT 2.0e-03  
 
@@ -65,7 +65,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   CO32-
  $GEO_TYPE
-  POINT POINT0
+  POLYLINE PLY_BC_LEFT
  $DIS_TYPE
   CONSTANT  4.6751e-14
 
@@ -75,7 +75,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   HCO3-
  $GEO_TYPE
-  POINT POINT0
+  POLYLINE PLY_BC_LEFT
  $DIS_TYPE
   CONSTANT  9.9981e-11
 
@@ -85,7 +85,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   Calcite
  $GEO_TYPE
-  POINT POINT0
+  POLYLINE PLY_BC_LEFT
  $DIS_TYPE
   CONSTANT 3.9516e-15  
 
@@ -95,7 +95,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   Dolomite(dis) 
  $GEO_TYPE
-  POINT POINT0
+  POLYLINE PLY_BC_LEFT
  $DIS_TYPE
   CONSTANT 1.1755e-14
 

@@ -93,7 +93,24 @@ public:
       * get the number of components
       */
 	size_t get_n_Comp(void) {return _I_tot; };
+
+	/**
+      * get the number of mobile components
+      */
+	size_t get_n_Comp_mob(void) {return _I_mob; };
+
+	/**
+      * get the number of immobile sorbed components
+      */
+	size_t get_n_Comp_sorb(void) {return _I_sorp; };
 	
+	/**
+      * get the number of immobile mieral components
+      */
+	size_t get_n_Comp_min(void) {return _I_min; };
+
+	size_t get_n_Comp_NMin_bar(void) {return _I_NMin_bar; };
+
 	/**
       * get the length of eta_mob
       */
@@ -152,9 +169,19 @@ public:
 	size_t get_n_xi_Sorp_bar(void) {return _n_xi_Sorp_bar; };
 
 	/**
+      * get the length of xi_Sorp_bar_li = Jsorp_li
+      */
+	size_t get_n_xi_Sorp_bar_li(void) {return _n_xi_Sorp_bar_li; };
+
+	/**
+      * get the length of xi_Sorp_bar_ld = Jsorp_ld
+      */
+	size_t get_n_xi_Sorp_bar_ld(void) {return _n_xi_Sorp_bar_ld; };
+
+	/**
       * get the length of xi_Min_tilde = Jmin
       */
-	size_t get_n_Min_tilde(void) {return _n_xi_Min_tilde; };
+	size_t get_n_xi_Min_tilde(void) {return _n_xi_Min_tilde; };
 
 	/**
       * get the length of xi_Min_bar = Jmin
@@ -170,6 +197,65 @@ public:
       */
 	size_t get_n_xi_Kin_bar(void) {return _n_xi_Kin_bar; };
 
+	/**
+      * get the _mat_c_mob_2_xi_mob
+      */
+	LocalMatrix get_matrix_C2Xi(void) {return _mat_c_mob_2_xi_mob; };
+
+	/**
+      * get the _mat_c_immob_2_xi_immob
+      */
+	LocalMatrix get_matrix_Cbar2XiBar(void) {return _mat_c_immob_2_xi_immob; };
+
+	/**
+      * get the _mat_c_mob_2_eta
+      */
+	LocalMatrix get_matrix_C2Eta(void) {return _mat_c_mob_2_eta_mob; };
+
+	/**
+      * get the _mat_c_mob_2_eta bar
+      */
+	LocalMatrix get_matrix_C2EtaBar(void) {return _mat_c_immob_2_eta_immob; };
+
+	/**
+      * get the _mat_Ald matrix
+      */
+	LocalMatrix get_matrix_Ald(void) {return _mat_Ald; };
+
+	/**
+      * get the _mat_A2kin matrix
+      */
+	LocalMatrix get_matrix_A2kin(void) {return _mat_A2kin; };
+
+	/**
+      * get the _mat_S1min matrix
+      */
+	LocalMatrix get_matrix_S1min(void) {return _mat_S1min; };
+
+
+	/**
+      * get the _mat_S1mob matrix
+      */
+	LocalMatrix get_matrix_S1mob(void) {return _mat_S1mob; };
+
+
+	/**
+      * get the _matrix_Ssorp matrix
+      */
+	LocalMatrix get_matrix_Ssorp(void) {return _matrix_Ssorp; };
+
+	/**
+      * get the log k of equilibrium mobile reactions
+      */
+	LocalMatrix get_logk_mob(void) {return _logk_mob; };
+	/**
+      * get the log k of equilibrium sorbed reactions
+      */
+	LocalMatrix get_logk_sorp(void) {return _logk_sorp; };
+	/**
+      * get the log k of equilibrium mineral reactions
+      */
+	LocalMatrix get_logk_min(void) {return _logk_min; };
 private:
 	/**
       * private flag indicating initialization
@@ -195,7 +281,7 @@ private:
       * sub-matrixes of S, 
       */	
 	LocalMatrix _mat_S1, _mat_S1mob,_mat_S2mob, _mat_Ssorp,_mat_Ssorp_ast,_mat_Ssorp_li,_mat_Ssorp_ld, _mat_S1sorp_li, _mat_S1sorp_ld, _mat_S1sorp, _mat_S1min, _mat_S2min, _mat_S2, _mat_S2sorp, _mat_S1kin, _mat_S2kin,
-	            _mat_Skin,_mat_Skin_li, _mat_S2sorp_li,_mat_S2sorp_ld,_mat_S1_preserve, _mat_S2_preserve;
+	            _mat_Skin,_mat_Skin_li, _mat_S2sorp_li,_mat_S2sorp_ld,_mat_S1_preserve, _mat_S2_preserve, _matrix_Ssorp;
 
 	/**
       * LocalVector sub-vectors of xi and eta,
@@ -230,9 +316,14 @@ private:
 				_mat_c_immob_2_xi_immob;
 
 	/**
+	 *
+	 */
+	LocalVector _logk_mob, _logk_sorp, _logk_min;
+	/**
       * the size of eta and xi vector
       */
-	size_t _n_eta,_n_eta_bar, _n_xi_mobile, _n_xi_immobile, _n_xi_local,  _n_xi_global, _n_xi_Mob, _n_xi_Sorp_tilde,_n_xi_Sorp, _n_xi_Sorp_bar,_n_xi_Min, _n_xi_Min_tilde, _n_xi_Min_bar, _n_xi_Kin, _n_xi_Kin_bar;
+	size_t _n_eta,_n_eta_bar, _n_xi_mobile, _n_xi_immobile, _n_xi_local,  _n_xi_global, _n_xi_Mob, _n_xi_Sorp_tilde,_n_xi_Sorp,
+	       _n_xi_Sorp_bar,_n_xi_Sorp_bar_li,_n_xi_Sorp_bar_ld,_n_xi_Min, _n_xi_Min_tilde, _n_xi_Min_bar, _n_xi_Kin, _n_xi_Kin_bar;
 
 	/**
       * _I_tot is the number of all components and _J_tot is the number of all reactions in the system
@@ -256,7 +347,14 @@ private:
 	/**
       * number of mobile and immobile components and species
       */
-	size_t _I_tot,_I_mob, _I_sorp,_I_min, _I_immob, _I_immob_min, _I_immob_nonMin;
+	size_t _I_bar, _I_NMin_bar, _I_tot,_I_mob, _I_sorp,_I_min, _I_immob, _I_immob_min, _I_immob_nonMin;
+
+    /**
+     * will be moved to the main function
+      * reading in the logK values of each equilibrium reactions
+      */
+    void read_logK(std::vector<ogsChem::chemReactionEq*>                & list_eq_reactions);
+
 
 	/**
       * construct stoichiometric matrix out of list of components and reactions
