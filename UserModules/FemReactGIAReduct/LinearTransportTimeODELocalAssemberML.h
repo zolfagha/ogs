@@ -126,13 +126,6 @@ protected:
         localK = localDispersion + localAdvection;
 
         // mass lumping----------------------------
-//        for (size_t idx_ml=0; idx_ml < localM.cols(); idx_ml++ )
-//        {
-//            double mass_lump_val;
-//            mass_lump_val = localM.col(idx_ml).sum();
-//            localM.col(idx_ml).setZero();
-//            localM(idx_ml, idx_ml) = mass_lump_val;
-//        }
         for (size_t idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
         {
             double mass_lump_val;
