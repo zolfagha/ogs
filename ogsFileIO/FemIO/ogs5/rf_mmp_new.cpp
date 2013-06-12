@@ -136,6 +136,7 @@ CMediumProperties::CMediumProperties() :
     rill_height = .0;
 
     is_fracture = false; //NW
+    num_phases = 1;
 }
 
 /**************************************************************************

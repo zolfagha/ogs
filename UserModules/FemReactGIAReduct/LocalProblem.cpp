@@ -31,7 +31,7 @@ LocalProblem::~LocalProblem()
 {}
 
 
-void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & vec_conc,
+void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & x,
 														ogsChem::LocalVector & vec_tot_mass_constrain,
 														std::size_t & node_idx ,
 														double deltaT,
@@ -39,7 +39,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & v
 														const double rel_tol,
 														const double max_iter)
 {
-    ogsChem::LocalVector x, x_new, vec_residual, vec_AI;
+    ogsChem::LocalVector x_new, vec_residual, vec_AI;
     ogsChem::LocalVector dx;
     ogsChem::LocalVector conc_Mob, conc_NonMin_bar, conc_Min_bar, Xi_Kin_bar;
 //TODO initialize water content and deltaT
@@ -49,11 +49,13 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & v
     double d_norm, d1_norm;
 
     n_unknowns     = _n_Comp + _n_xi_Kin_bar;
-    x              = ogsChem::LocalVector::Ones( n_unknowns );
-    x_new          = ogsChem::LocalVector::Ones( n_unknowns );
+    //x_new          = ogsChem::LocalVector::Ones( n_unknowns );
+    x_new          = ogsChem::LocalVector::Zero( n_unknowns );
     dx             = ogsChem::LocalVector::Ones( n_unknowns );
+    //dx             = ogsChem::LocalVector::Zero( n_unknowns );
     _mat_Jacobian  = ogsChem::LocalMatrix::Zero(n_unknowns, n_unknowns);
-    vec_residual   = ogsChem::LocalVector::Ones( n_unknowns );
+    //vec_residual   = ogsChem::LocalVector::Ones( n_unknowns );
+    vec_residual   = ogsChem::LocalVector::Zero( n_unknowns );
     // initialize the _AI vector
     vec_AI		   = ogsChem::LocalVector::Zero( _I_min );
 
@@ -66,25 +68,12 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & v
 	_vec_XiBarKin_old   = vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_eta_bar, _n_xi_Kin_bar);
 
     //concentration vector components, ie, mobile, sorbed, mineral concentrations
-    conc_Mob     	 = vec_conc.head(_I_mob );
+    conc_Mob     	 = x.head(_I_mob );
     //NonMin refers to sorbed concentrations.
-    conc_NonMin_bar  = vec_conc.segment(_I_mob, _I_NMin_bar );
-    conc_Min_bar     = vec_conc.segment(_I_mob + _I_NMin_bar, _I_min );
+    conc_NonMin_bar  = x.segment(_I_mob, _I_NMin_bar );
+    conc_Min_bar     = x.segment(_I_mob + _I_NMin_bar, _I_min );
     // xi kin bar is both unknown and mass constrain!
-    Xi_Kin_bar       = vec_conc.tail(_n_xi_Kin_bar);
-
-
-    #ifdef _DEBUG
-        /*
-        std::cout << "Total mass for the basis: \n";
-        std::cout << total_mass << "\n"; 
-        std::cout << "Conc_basis: \n";
-        std::cout << conc_basis << "\n"; 
-        std::cout << "Conc_second: \n";
-        std::cout << conc_second << std::endl; 
-        */
-    #endif
-
+    Xi_Kin_bar       = x.tail(_n_xi_Kin_bar);
 
 
     // start solving the system
@@ -92,6 +81,17 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & v
 
     // now updating the saturation index and minerals
     this->update_minerals_conc_AI( x, vec_AI );
+
+#ifdef _DEBUG
+	// debugging--------------------------
+	std::cout << "x Vector: \n";
+	std::cout << x << std::endl;
+
+	std::cout << "vec_AI Vector: \n";
+	std::cout << vec_AI << std::endl;
+	// end of debugging-------------------
+#endif
+
 
     // evaluate the residual
     this->calc_residual(x, vec_AI, vec_residual);
@@ -111,7 +111,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & v
     {
         #ifdef _DEBUG
             // display the residual
-             std::cout << "Iteration #" << iter << "||res|| = " << vec_residual.norm() << "||delta_x|| = " << dx.norm() << std::endl;
+             std::cout << "Iteration #" << iter << "||res|| = " << d_norm << "||delta_x|| = " << dx.norm() << std::endl;
         #endif
         // convergence criteria
         if ( d_norm < iter_tol )
@@ -125,7 +125,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & v
         else if ( dx.norm() < rel_tol )
         {
             #ifdef _DEBUG
-            std::cout << "Warning, Newton iteration stagnent on Node #" << node_idx << "! Exit the iteration!\n" ; 
+            std::cout << "Warning, Newton iteration stagnent on Node #" << node_idx << "! Exit the iteration!\n" ;
             #endif
 
             break;  // break the loop
@@ -133,18 +133,45 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & v
         else if ( iter > max_iter )
         {
             #ifdef _DEBUG
-            std::cout << "ERROR! Node #" << node_idx  << "Newton iterationan does not converge! Simulation stops!\n"; 
+            std::cout << "ERROR! Node #" << node_idx  << "Newton iterationan does not converge! Simulation stops!\n";
             #endif
 
             return; // stop the program
         }
         // form Jacobian matrix
         this->calc_Jacobian(x, vec_AI, vec_residual);
+
+#ifdef _DEBUG
+	// debugging--------------------------
+	std::cout << "_mat_Jacobian: \n";
+	std::cout << _mat_Jacobian << std::endl;
+
+	// end of debugging-------------------
+#endif
+
         // solving for increment
         this->Solv_Minimization( node_idx, _mat_Jacobian, vec_residual, dx );
 
+#ifdef _DEBUG
+	// debugging--------------------------
+	std::cout << "dx Vector: \n";
+	std::cout << dx << std::endl;
+
+	// end of debugging-------------------
+#endif
+
+
         // increment of unkowns
         this->increment_unknown( x, dx, x_new ); 
+
+#ifdef _DEBUG
+	// debugging--------------------------
+	std::cout << "x_new Vector: \n";
+	std::cout << x_new << std::endl;
+
+	// end of debugging-------------------
+#endif
+
 
         // evaluate residual with x_new
         this->calc_residual(x_new, vec_AI, vec_residual);
@@ -170,7 +197,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & v
 
 		#ifdef _DEBUG
             // display the residual
-            std::cout << "Line Search Iteration #" << iter << "||res|| = " << vec_residual.norm() << "||delta_x|| = " << dx.norm() << std::endl;
+            std::cout << "Line Search Iteration #" << iter << "||res|| = " << d1_norm << "||delta_x|| = " << dx.norm() << std::endl;
 		#endif
 
             j++;
@@ -202,103 +229,24 @@ void LocalProblem::calc_residual(ogsChem::LocalVector & vec_unknowns,
 
     // Eq. 3.55
     this->residual_conc_Mob			(conc_Mob, vec_residual);
-
-#ifdef _DEBUG
-	// debugging--------------------------
-	std::cout << "residual_conc_Mob Vector: \n";
-	std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
-
     // Eq. 3.56
     this->residual_Eta				(conc_Mob, vec_residual);
-
-#ifdef _DEBUG
-	// debugging--------------------------
-	std::cout << "residual_Eta Vector: \n";
-	std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
-
     // Eq. 3.57 - 58
     this->residual_xi_Sorp_tilde	(conc_Mob, conc_NonMin_bar, conc_Min_bar, vec_residual);
-
-#ifdef _DEBUG
-	// debugging--------------------------
-	std::cout << "residual_xi_Sorp_tilde Vector: \n";
-	std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
-
     // Eq. 3.59
     this->residual_xi_Min_tilde		(conc_Mob, conc_NonMin_bar, conc_Min_bar, vec_residual);
-
-#ifdef _DEBUG
-	// debugging--------------------------
-	std::cout << "residual_xi_Min_tilde Vector: \n";
-	std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
-
     // Eq. 3.60
     this->residual_xi_Kin			(conc_Mob, vec_residual);
-
-#ifdef _DEBUG
-	// debugging--------------------------
-	std::cout << "residual_xi_Kin Vector: \n";
-	std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
-
     // Eq. 3.61
     this->residual_conc_Sorp		(conc_Mob, conc_NonMin_bar, vec_residual);
-
-#ifdef _DEBUG
-	// debugging--------------------------
-	std::cout << "residual_conc_Sorp Vector: \n";
-	std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
-
     // Eq. 3.62
     this->residual_conc_Min			(conc_Mob, vec_AI, vec_residual);
-
-#ifdef _DEBUG
-	// debugging--------------------------
-	std::cout << "residual_conc_Min Vector: \n";
-	std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
-
     // Eq. 3.63
     this->residual_Eta_bar			(conc_NonMin_bar, conc_Min_bar, vec_residual);
-
-#ifdef _DEBUG
-	// debugging--------------------------
-	std::cout << "residual_Eta_bar Vector: \n";
-	std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
-
     // Eq. 3.64
     this->residual_xi_KinBar_Eq		(conc_NonMin_bar, conc_Min_bar, Xi_Kin_bar, vec_residual);
-
-#ifdef _DEBUG
-	// debugging--------------------------
-	std::cout << "residual_xi_KinBar_Eq Vector: \n";
-	std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
-
     // Eq. 3.65
     this->residual_xi_KinBar_Kin	(conc_Mob, conc_NonMin_bar, conc_Min_bar, Xi_Kin_bar, vec_residual);
-
-#ifdef _DEBUG
-	// debugging--------------------------
-	std::cout << "residual_xi_KinBar_Kin Vector: \n";
-	std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
 
 }  // end of function calc_residual
 
@@ -332,120 +280,15 @@ void LocalProblem::calc_Jacobian(ogsChem::LocalVector & vec_x,
 		}
 	}
 
-//	using namespace std::placeholders; //for _1, _2, _3...
 
-//	_vec_eta			= vec_tot_mass_constrain.segment(0,_n_eta);
-//	_vec_XiSorpTilde    = vec_tot_mass_constrain.segment(_n_eta,_n_xi_Sorp_tilde);
-//	_vec_XiMinTilde     = vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde,_n_xi_Min_tilde);
-//	_vec_Xikin          = vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Kin);
-//	_vec_etabar 		= vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin,_n_eta_bar);
-//	_vec_XiBarKin  	    = vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_eta_bar, _n_xi_Kin_bar);
-//	_vec_XiBarKin_old   = vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_eta_bar + _n_xi_Kin_bar, _n_xi_Kin_bar);
-//
-//    _conc_Mob     	 = vec_unknowns.segment(0, _I_mob );
-//    //NonMin refers to sorbed concentrations.
-//    _conc_NonMin_bar  = vec_unknowns.segment(_I_mob, _I_NMin_bar );
-//    _conc_Min_bar     = vec_unknowns.segment(_I_mob + _I_NMin_bar, _I_min );
-//    _Xi_Kin_bar   	 = vec_unknowns.segment(_I_mob + _I_NMin_bar + _I_min, _n_xi_Kin_bar );
-
-
-
-
-
-    //TODO put them on the right rows of the jacobian matrix
-
-//    // Eq. 3.55
-//    _mat_Jacobi.block(0, 0, _n_xi_Mob,_I_mob)
-//    this->Num_Diff(_n_xi_Mob, _I_mob, _conc_Mob, delta_xi, std::bind(residual_conc_Mob));
-//
-//    //Eq. 3.56
-//    _mat_Jacobi.block(_n_xi_Mob, 0, _n_eta, _I_mob)
-//    this->Num_Diff(_n_eta,_I_mob, _conc_Mob, delta_xi,std::bind(residual_conc_Mob,_2, _vec_eta));
-//
-//    //Eq. 3.57-8
-//    _mat_Jacobi.block(_n_xi_Mob + _n_eta, 0, _n_xi_Sorp_tilde, _I_mob)
-//	this->Num_Diff(_n_xi_Sorp,_I_mob,_conc_Mob, delta_xi,std::bind(residual_xi_Sorp_tilde,_2, _3, _4, _conc_NonMin_bar, conc_Min_bar, _vec_XiSorpTilde));
-//
-//    _mat_Jacobi.block(_n_xi_Mob + _n_eta, _I_mob, _n_xi_Sorp_tilde, _I_NMin_bar)
-//	this->Num_Diff(_n_xi_Sorp,_I_NMin_bar,_conc_NonMin_bar, delta_xi,std::bind(residual_xi_Sorp_tilde,_1, _3, _4, _conc_Mob, conc_Min_bar, _vec_XiSorpTilde));
-//
-//    _mat_Jacobi.block(_n_xi_Mob + _n_eta, _I_mob + _I_NMin_bar, _n_xi_Sorp_tilde, _I_min)
-//	this->Num_Diff(_n_xi_Sorp,_I_min,_conc_Min_bar, delta_xi,std::bind(residual_xi_Sorp_tilde,_1, _2, _4, _conc_Mob, _conc_NonMin_bar, _vec_XiSorpTilde));
-//
-//	// Eq.3.59
-//    _mat_Jacobi.block(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde, 0, _n_xi_Min_tilde, _I_mob)
-//	this->Num_Diff(_n_xi_Min,_I_mob,_conc_Mob,delta_xi,std::bind(residual_xi_Min_tilde, _2, _3, _4, _conc_NonMin_bar, _conc_Min_bar, _vec_XiMinTilde));
-//
-//    _mat_Jacobi.block(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde, _I_mob, _n_xi_Min_tilde, _I_NMin_bar)
-//	this->Num_Diff(_n_xi_Min,_I_NMin_bar,_conc_NonMin_bar,delta_xi,std::bind(residual_xi_Min_tilde, _1, _3, _4, _conc_Mob, _conc_Min_bar, _vec_XiMinTilde));
-//
-//    _mat_Jacobi.block(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde, _I_mob + _I_NMin_bar, _n_xi_Min_tilde, _I_min)
-//	this->Num_Diff(_n_xi_Min,_n_xi_Min,_conc_Min_bar,delta_xi,std::bind(residual_xi_Min_tilde, _1, _2, _4, _conc_Mob, _conc_NonMin_bar, _vec_XiMinTilde));
-//
-//	// Eq. 3.60
-//    _mat_Jacobi.block(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde, 0, _n_xi_Kin, _I_mob)
-//	this->Num_Diff(_n_xi_Kin, _I_mob, _conc_Mob, delta_xi, std::bind(residual_xi_Kin, _2, _vec_Xikin));
-//
-//	//Eq. 3.61
-//    _mat_Jacobi.block(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin , 0, _n_xi_Sorp, _I_mob)
-//	this->Num_Diff(_n_xi_Sorp, _I_mob, _conc_Mob, delta_xi, std::bind(residual_conc_Sorp, _2, _conc_NonMin_bar));
-//
-//    _mat_Jacobi.block(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin , _I_mob, _n_xi_Sorp, _I_NMin_bar)
-//	this->Num_Diff(_n_xi_Sorp, _I_NMin_bar, _conc_NonMin_bar, delta_xi, std::bind(residual_conc_Sorp, _1, _conc_Mob));
-//
-//	//Eq. 3.62
-//    _mat_Jacobi.block(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_xi_Sorp, 0, _n_xi_Min, _I_mob)
-//	this->Num_Diff(_n_xi_Min,_I_mob, _conc_Mob, delta_xi, std::bind(residual_conc_Min, _2, _AI));
-//
-//	//Eq. 3.63
-//    _mat_Jacobi.block(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_xi_Sorp + _n_xi_Min, _I_mob, _n_eta_bar, _I_NMin_bar)
-//	this->Num_Diff(_n_eta_bar, _I_NMin_bar, _conc_NonMin_bar, delta_xi, std::bind(residual_Eta_bar, _2, _3, _conc_Min_bar, _vec_etabar));
-//
-//    _mat_Jacobi.block(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_xi_Sorp + _n_xi_Min, _I_mob + _I_NMin_bar, _n_eta_bar, _I_min)
-//	this->Num_Diff(_n_eta_bar, _I_min, _conc_Min_bar, delta_xi, std::bind(residual_Eta_bar, _1, _3, _conc_NonMin_bar, _vec_etabar));
-//
-//	//Eq. 3.64
-//    _mat_Jacobi.block(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_xi_Sorp + _n_xi_Min + _n_eta_bar, _I_mob , _n_xi_Kin_bar, _I_NMin_bar)
-//	this->Num_Diff(_n_xi_Kin_bar, _I_NMin_bar, _conc_NonMin_bar, delta_xi, std::bind(residual_xi_KinBar_Eq, _2, _3, _conc_Min_bar, _vec_XiBarKin));
-//
-//    _mat_Jacobi.block(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_xi_Sorp + _n_xi_Min + _n_eta_bar, _I_mob + _I_NMin_bar, _n_xi_Kin_bar, _I_min)
-//	this->Num_Diff(_n_xi_Kin_bar, _I_min, _conc_Min_bar, delta_xi, std::bind(residual_xi_KinBar_Eq, _1, _3, _conc_NonMin_bar, _vec_XiBarKin));
-//
-//    _mat_Jacobi.block(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_xi_Sorp + _n_xi_Min + _n_eta_bar, _I_mob + _I_NMin_bar + _I_min, _n_xi_Kin_bar, _n_xi_Kin_bar)
-//	this->Num_Diff(_n_xi_Kin_bar, _n_xi_Kin_bar, _vec_XiBarKin, delta_xi, std::bind(residual_xi_KinBar_Eq, _1, _2, _conc_NonMin_bar, _conc_Min_bar));
-//
-//	//Eq. 3.65
-//    _mat_Jacobi.block(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_xi_Sorp + _n_xi_Min + _n_eta_bar + _n_xi_Kin_bar, 0, _n_xi_Kin_bar, _I_mob)
-//	this->Num_Diff(_n_xi_Kin_bar, _I_mob, _conc_Mob, delta_xi, std::bind(residual_xi_KinBar_Kin, _2, _3, _4, _5, _6, _conc_NonMin_bar, _conc_Min_bar, _vec_XiBarKin, _vec_XiBarKin_old, deltaT));
-//
-//    _mat_Jacobi.block(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_xi_Sorp + _n_xi_Min + _n_eta_bar + _n_xi_Kin_bar, _I_mob, _n_xi_Kin_bar, _I_NMin_bar)
-//	this->Num_Diff(_n_xi_Kin_bar, _I_mob, _conc_NonMin_bar, delta_xi, std::bind(residual_xi_KinBar_Kin, _1, _3, _4, _5, _6, _conc_Mob, _conc_Min_bar, _vec_XiBarKin, _vec_XiBarKin_old, deltaT));
-//
-//    _mat_Jacobi.block(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_xi_Sorp + _n_xi_Min + _n_eta_bar + _n_xi_Kin_bar, _I_mob + _I_NMin_bar, _n_xi_Kin_bar, _I_min)
-//	this->Num_Diff(_n_xi_Kin_bar, _I_mob, _conc_Min_bar, delta_xi, std::bind(residual_xi_KinBar_Kin, _1, _2, _4, _5, _6, _conc_Mob, _conc_NonMin_bar, _vec_XiBarKin, _vec_XiBarKin_old, deltaT));
-//
-//    _mat_Jacobi.block(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_xi_Sorp + _n_xi_Min + _n_eta_bar + _n_xi_Kin_bar, _I_mob + _I_NMin_bar + _I_min, _n_xi_Kin_bar, _n_xi_Kin_bar)
-//	this->Num_Diff(_n_xi_Kin_bar, _I_mob, _conc_Min_bar, delta_xi, std::bind(residual_xi_KinBar_Kin, _1, _2, _3, _5, _6, _conc_Mob, _conc_NonMin_bar, _conc_Min_bar, _vec_XiBarKin_old, deltaT));
-//
-//	return _mat_Jacobi;
 
 #ifdef _DEBUG
 	// debugging--------------------------
-	std::cout << "Jacobi Matrix: \n";
-	std::cout << _mat_Jacobian << std::endl;
+//	std::cout << "Jacobi Matrix: \n";
+//	std::cout << _mat_Jacobian << std::endl;
 	// end of debugging-------------------
 #endif
 }
-
-
-//should be in the main function to avoid repetition
-//void LocalProblem::read_logK(std::vector<ogsChem::chemReactionEq*>      & list_eq_reactions)
-//{
-//    size_t i;
-//    _vec_lnK = ogsChem::LocalVector::Zero(_J);
-//    for ( i=0 ; i < list_eq_reactions.size(); i++ )
-//        _vec_lnK(i) = list_eq_reactions[i]->get_ln_K();
-//}
 
 
 void LocalProblem::Solv_Minimization(size_t      & idx_node,
@@ -669,16 +512,7 @@ void LocalProblem::cal_log_conc_vec(ogsChem::LocalVector & conc_Mob,
 		tmp_x    = conc_Mob(i);
 		logConc_Mob(i)  = std::log(tmp_x);
 	}
-#ifdef _DEBUG
-	// debugging--------------------------
-	std::cout << "conc_Mob Vector: \n";
-	std::cout << conc_Mob << std::endl;
 
-	std::cout << "logConc_Mob Vector: \n";
-	std::cout << logConc_Mob << std::endl;
-
-	// end of debugging-------------------
-#endif
 }
 
 // Eq. 3.55
@@ -692,20 +526,6 @@ void LocalProblem::residual_conc_Mob(ogsChem::LocalVector & conc_Mob,
 	 this->cal_log_conc_vec(conc_Mob, logConc_Mob);
 	vec_residual.head(_n_xi_Mob) 	= - _logk_mob + _mat_S1mob.transpose() * logConc_Mob;
 
-#ifdef _DEBUG
-	// debugging--------------------------
-	std::cout << "_logk_mob Vector: \n";
-	std::cout << _logk_mob << std::endl;
-
-	std::cout << "_mat_S1mob: \n";
-	std::cout << _mat_S1mob << std::endl;
-
-	std::cout << "logConc_Mob vector: \n";
-	std::cout << logConc_Mob << std::endl;
-
-	// end of debugging-------------------
-#endif
-
 }
 
 // Eq. 3.56
@@ -714,6 +534,7 @@ void LocalProblem::residual_Eta(ogsChem::LocalVector & conc_Mob,
 {
 	// eta acts as a constrain
 	vec_residual.segment(_n_xi_Mob, _n_eta)  = - _vec_eta + _mat_c_mob_2_eta_mob * conc_Mob;
+
 }
 
 // Eq. 3.57 - 58
@@ -753,6 +574,7 @@ void LocalProblem::residual_xi_Min_tilde(ogsChem::LocalVector & conc_Mob,
 
 	vec_XiMin        = _mat_c_mob_2_xi_mob * conc_Mob;
 	vec_XiMinBar     = _mat_c_immob_2_xi_immob * conc_bar;
+
 	vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde, _n_xi_Min_tilde) = - _vec_XiMinTilde + vec_XiMin.segment(_n_xi_Mob + _n_xi_Sorp_bar_li, _n_xi_Min) - conc_Min_bar - (_mat_Ald * vec_XiMinBar.tail(_n_xi_Sorp_bar_ld));
 }
 
@@ -763,7 +585,7 @@ void LocalProblem::residual_xi_Kin(ogsChem::LocalVector & conc_Mob,
 	ogsChem::LocalVector   conc_tmp;
 	conc_tmp 		= ogsChem::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
 
-	conc_tmp     = _mat_c_mob_2_xi_mob * conc_Mob;
+	conc_tmp        = _mat_c_mob_2_xi_mob * conc_Mob;
 	vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde , _n_xi_Kin)   = - _vec_Xikin + conc_tmp.segment(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min, _n_xi_Kin);
 }
 

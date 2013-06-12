@@ -12,6 +12,7 @@
 
 #ifndef SINGLE_STEP_GIA_REDUCTION_H
 #define SINGLE_STEP_GIA_REDUCTION_H
+#define _DEBUG
 
 #include <vector>
 #include <map>
@@ -370,7 +371,16 @@ SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
 
     // imposing BC for eta
     for ( i=0; i < _linear_problem.size(); i++ )
+    {
+//#ifdef _DEBUG
+//	std::cout << "vec_node_eta_values: "    << std::endl;
+//	std::cout << vec_node_eta_values[i][0] << std::endl;
+//	std::cout << vec_node_eta_values[i][1] << std::endl;
+//	std::cout << vec_node_eta_values[i][2] << std::endl;
+//
+//#endif
      	_linear_problem[i]->getVariable(0)->addDirichletBC( new SolutionLib::FemDirichletBC( vec_bc_node_idx,  vec_node_eta_values[i] ) );
+    }
 
     // imposing BC for xi
 	for ( i=0; i < _non_linear_problem->getNumberOfVariables(); i++ )

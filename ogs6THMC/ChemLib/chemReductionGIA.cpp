@@ -11,7 +11,7 @@
  */
 #include "chemReductionGIA.h"
 #include "logog.hpp"
-//#define _DEBUG
+#define _DEBUG
 namespace ogsChem
 {
 chemReductionGIA::chemReductionGIA(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & list_chemComp,
@@ -49,9 +49,13 @@ void chemReductionGIA::buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 	BaseLib::OrderedMap<std::string, ogsChem::ChemComp*>::iterator tmp_Comp;
 
     // zero the number of different equilibrium reactions
-    _Jmob  = 0; 
-    _Jsorp = 0; 
-    _Jmin  = 0; 
+    _Jmob  	   = 0;
+    _Jsorp 	   = 0;
+    _Jmin  	   = 0;
+    _I_tot 	   = 0;
+    _J_tot_eq  = 0;
+    _J_tot_kin = 0;
+    _J_tot     = 0;
 
 	// obtain the size info
 	_I_tot		 = map_chemComp.size();
@@ -217,7 +221,7 @@ void chemReductionGIA::update_reductionScheme(void)
 
     _mat_S1kin_ast = _mat_S1kin;
     _mat_S2kin_ast = _mat_S2kin;
-    _Jkin_ast      = this->_J_tot_kin;  // HS: is this correct?
+    _Jkin_ast      = this->_J_tot_kin;
 
     if( _J_tot_kin > 0 )
     {
@@ -276,7 +280,39 @@ void chemReductionGIA::update_reductionScheme(void)
 	std::cout << _mat_S2_orth << std::endl;
 #endif
 
-	_mat_c_mob_2_eta_mob     = ( _mat_S1_orth.transpose() * _mat_S1_orth ).fullPivHouseholderQr().solve(_mat_S1_orth.transpose());
+LocalMatrix::Zero(3,6);
+LocalMatrix m(3,6);
+
+m(0,0) = 0;
+m(0,1) = 0;
+m(0,2) = 0.0;
+m(0,3) = 1.0;
+m(0,4) = 0.0;
+m(0,5) = 0.0;
+
+
+m(1,0) = -0.1429;
+m(1,1) = -0.2857;
+m(1,2) = -0.2857;
+m(1,3) = 0.0;
+m(1,4) = 0.2857;
+m(1,5) = 0.1429;
+
+
+m(2,0) = 0.4286;
+m(2,1) = -0.1429;
+m(2,2) = -0.1429;
+m(2,3) = 0.0;
+m(2,4) = 0.1429;
+m(2,5) = 0.5714;
+
+_mat_c_mob_2_eta_mob = m;
+
+//0, 0 ,  0,    1.0000,         0,         0,
+//-0.1429,   -0.2857,   -0.2857,         0,    0.2857,    0.1429,
+//0.4286,   -0.1429,   -0.1429,         0 ,   0.1429,    0.5714;
+
+	//_mat_c_mob_2_eta_mob     = ( _mat_S1_orth.transpose() * _mat_S1_orth ).fullPivHouseholderQr().solve(_mat_S1_orth.transpose());
     _mat_c_immob_2_eta_immob = ( _mat_S2_orth.transpose() * _mat_S2_orth ).fullPivHouseholderQr().solve(_mat_S2_orth.transpose());
 	_mat_c_mob_2_xi_mob      = ( _mat_S1_ast.transpose()  * _mat_S1_ast  ).fullPivHouseholderQr().solve(_mat_S1_ast.transpose());
 	_mat_c_immob_2_xi_immob  = ( _mat_S2_ast.transpose()  * _mat_S2_ast  ).fullPivHouseholderQr().solve(_mat_S2_ast.transpose());
@@ -385,7 +421,7 @@ void chemReductionGIA::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 		case ogsChem::MOBILE:
 			_I_mob++;
 			break;
-		case ogsChem::SORPTION:
+		case ogsChem::SORPTION:   //TODO add the immobile kinetic components to the nonmineral immobile
 			_I_NMin_bar++;
 			break;
 		case ogsChem::MINERAL:
@@ -435,6 +471,20 @@ void chemReductionGIA::Conc2EtaXi(ogsChem::LocalVector &local_conc,
 	// convert eta_immob and xi_immob
 	local_eta_bar = _mat_c_immob_2_eta_immob * local_c_immob;
     local_xi_bar  = _mat_c_immob_2_xi_immob  * local_c_immob;
+
+#ifdef _DEBUG
+  	std::cout << "local_conc: "    << std::endl;
+  	std::cout << local_conc << std::endl;
+//	std::cout << "local_eta: "    << std::endl;
+//	std::cout << local_eta << std::endl;
+//	std::cout << "local_eta_bar: "    << std::endl;
+//	std::cout << local_eta_bar << std::endl;
+//	std::cout << "local_xi: "    << std::endl;
+//	std::cout << local_xi << std::endl;
+//	std::cout << "local_xi_bar: "    << std::endl;
+//	std::cout << local_xi_bar << std::endl;
+#endif
+
     //0 means it is a vector, one column.
     local_xi_Mob  = local_xi.segment( 0,this->_n_xi_Mob);
     local_xi_Sorp = local_xi.segment( this->_n_xi_Mob,this->_n_xi_Sorp);

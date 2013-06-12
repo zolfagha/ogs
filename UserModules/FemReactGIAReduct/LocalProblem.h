@@ -70,7 +70,7 @@ public:
       * the maximum number of iterations. 
       * and the status of convergence
       */
-    void solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & vec_conc,
+    void solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & vec_unknowns,
     										  ogsChem::LocalVector & vec_tot_mass_constrain,
     										  std::size_t & node_idx,
     										  double  deltaT,
