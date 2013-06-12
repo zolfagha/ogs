@@ -20,4 +20,3 @@ GeoSys-OUT: Output ------------------------------------------------
  $TIM_TYPE
   STEPS 1
 #STOP
-

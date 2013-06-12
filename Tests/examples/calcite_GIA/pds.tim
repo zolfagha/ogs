@@ -5,7 +5,7 @@ GeoSys-TIM: Timestepping ------------------------------------------------
  $TIME_STEPS
    210  10.0
  $TIME_END
-  21000.0
+  2100.0
  $TIME_START
   0.0
 #TIME_STEPPING
@@ -14,7 +14,7 @@ GeoSys-TIM: Timestepping ------------------------------------------------
  $TIME_STEPS
    210  10.0
  $TIME_END
-  21000.0
+  2100.0
  $TIME_START
   0.0
 #STOP

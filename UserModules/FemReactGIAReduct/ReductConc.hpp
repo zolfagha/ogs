@@ -305,8 +305,8 @@ void FunctionReductConc<T1, T2>::initializeTimeStep(const NumLib::TimeStep &/*ti
 	// set velocity for linear problem
 	for ( i=0; i < _linear_problems.size(); i++ ) {
 		_linear_problems[i]->getEquation()->getLinearAssembler()->setVelocity(vel);
-		_linear_problems[i]->getEquation()->getResidualAssembler()->setVelocity(vel);
-		_linear_problems[i]->getEquation()->getJacobianAssembler()->setVelocity(vel);
+	//	_linear_problems[i]->getEquation()->getResidualAssembler()->setVelocity(vel);
+	//	_linear_problems[i]->getEquation()->getJacobianAssembler()->setVelocity(vel);
 	}
 	// set velocity for nonlinear problem as well
 	_non_linear_problem->getEquation()->getLinearAssembler()->setVelocity(vel);
@@ -862,6 +862,18 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 		    loc_xi_local_new.segment(_n_xi_Mob, _n_xi_Sorp_bar)				     = vec_XiSorpBar;
 		    loc_xi_local_new.segment(_n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Min_bar)  = vec_XiMinBar;
 		    loc_xi_local_new.tail   (_n_xi_Kin_bar)							     = vec_XiBarKin;
+
+#ifdef _DEBUG
+	// debugging--------------------------
+//	std::cout << "loc_xi_local_new Vector: \n";
+//	std::cout << loc_xi_local_new << std::endl;
+//
+//	std::cout << "vec_conc Vector: \n";
+//	std::cout << vec_conc << std::endl;
+
+	// end of debugging-------------------
+#endif
+
 
 			// collect the xi_local_new
 			for (i=0; i < _n_xi_local; i++)
