@@ -249,7 +249,7 @@ void chemReductionKin::EtaXi2Conc(ogsChem::LocalVector &local_eta_mob,
     for (size_t i=0; i < local_conc.size(); i++)
     {
         if ( local_conc(i) < 0.0 )
-            local_conc(i) = 1.0e-99;     
+            local_conc(i) = 1.0e-20;     
     }
     // end of testing
 
