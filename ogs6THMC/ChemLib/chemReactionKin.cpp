@@ -64,6 +64,14 @@ double chemReactionKin::calcReactionRateMonod(ogsChem::LocalVector & vec_Comp_Co
 		// rate *= [ c / ( c + k_c) ]^order
 		rate *= pow( conc / (conc + this->_vec_Monod_Comps_Conc[i]), this->_vec_Monod_Comps_order[i] ); 
 	}  // end of for i
+    // loop over all the inhibition term
+    for (i=0; i<this->_vec_Inhibition_Comps_Idx.size(); i++ )
+    {
+        comp_idx = _vec_Inhibition_Comps_Idx[i]; 
+		conc = vec_Comp_Conc( comp_idx ); 
+        // rate *= [ k_inh / ( c + k_inh) ]^order
+        rate *= pow( this->_vec_Inhibition_Comps_Conc[i] / (conc + this->_vec_Inhibition_Comps_Conc[i]), this->_vec_Inhibition_Comps_order[i] ); 
+    }
 	
 	// rate constant
 	rate *= _rate_constant; // mu_max
@@ -119,7 +127,7 @@ void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::
         }
 
 		// loop over the monod term, 
-		for (size_t i=0; i < KRC_reaction->monod.size(); i++ )
+		for ( i=0; i < KRC_reaction->monod.size(); i++ )
 		{
 			size_t monod_comp_idx; 
 			double monod_comp_conc(0.0), monod_term_order(1.0); 
@@ -144,6 +152,35 @@ void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::
 			this->_vec_Monod_Comps_Conc.push_back(  monod_comp_conc  ); 
 			this->_vec_Monod_Comps_order.push_back( monod_term_order ); 
 		}  // end of for i
+
+        // loop over all inhibition terms, 
+        for ( i=0; i < KRC_reaction->inhibit.size(); i++ )
+		{
+            size_t inhibit_comp_idx; 
+			double inhibit_comp_conc(0.0), inhibit_term_order(1.0); 
+			// read the corresponding components
+			std::string comp_str = KRC_reaction->inhibit[i]->species; 
+			// find this component
+            // get its index value in all component list
+            inhibit_comp_idx = list_chemComp.find( comp_str )->second->getIndex();
+
+            if ( inhibit_comp_idx >= list_chemComp.size() )
+            {
+                ERR("When reading Inhibition terms, component name not found! ");
+                exit(1);
+            }
+
+            // read the monod component concentration
+            inhibit_comp_conc = KRC_reaction->inhibit[i]->concentration; 
+			// read the monod term order
+			inhibit_term_order = KRC_reaction->inhibit[i]->order; 
+
+			this->_vec_Inhibition_Comps_Idx.push_back(   inhibit_comp_idx   );
+			this->_vec_Inhibition_Comps_Conc.push_back(  inhibit_comp_conc  ); 
+			this->_vec_Inhibition_Comps_order.push_back( inhibit_term_order ); 
+			
+        }  // end of for i
+
 	}  // end of if KRC_reaction
 	else
 	{

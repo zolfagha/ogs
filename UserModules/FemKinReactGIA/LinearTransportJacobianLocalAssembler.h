@@ -90,7 +90,7 @@ public:
             NumLib::ITXFunction::DataType v2 = v.topRows(n_dim).transpose();
             
             NumLib::ITXFunction::DataType dispersion_diffusion = NumLib::ITXFunction::DataType::Identity(n_dim, n_dim); 
-            dispersion_diffusion *= disp_l * v.norm(); 
+            dispersion_diffusion *= disp_t * v.norm(); 
             dispersion_diffusion += (disp_l - disp_t) * ( v2.transpose() * v2 ) / v.norm(); 
             dispersion_diffusion += d_poro.topLeftCorner(n_dim, n_dim);
             
