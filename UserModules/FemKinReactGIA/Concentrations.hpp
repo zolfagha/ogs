@@ -89,7 +89,7 @@ bool FunctionConcentrations<T1,T2>::initialize(const BaseLib::Options &option)
         _xi_mob_rates.push_back(xi_mob_rates_tmp); 
 	}
 	// initialize drates_dxi
-	for ( i=0; i < _n_xi_mob ; i++ )
+	for ( i=0; i < _n_xi_mob*_n_xi_mob ; i++ )
 	{
 		MyNodalFunctionScalar* drate_dxi_tmp = new MyNodalFunctionScalar();  // drate_dxi instances
 		drate_dxi_tmp->initialize(       *dis, FemLib::PolynomialOrder::Linear, 0.0  );
@@ -676,8 +676,10 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
                 // get a clean copy of the origiinal xi_mob
                 loc_xi_mob_tmp = loc_xi_mob; 
                 // give an increment to the xi value
-                if ( abs( loc_xi_mob(j) ) >= 1.0e-16 )  // loc_xi_mob(j) != 0.0
-                    loc_xi_mob_tmp(j) += epsilon * abs( loc_xi_mob(j) );  
+                // if ( abs( loc_xi_mob(j) ) >= 1.0e-16 )  // loc_xi_mob(j) != 0.0
+                    // loc_xi_mob_tmp(j) += epsilon * abs( loc_xi_mob(j) );  
+                if ( loc_xi_mob.norm()  >= 1.0e-16 )  // loc_xi_mob(j) != 0.0
+                    loc_xi_mob_tmp(j) += epsilon * loc_xi_mob.norm() ;  
                 else
                     loc_xi_mob_tmp(j) += epsilon; 
                 
@@ -693,7 +695,8 @@ void FunctionConcentrations<T1, T2>::update_node_kin_reaction_drates_dxi(void)
                 {
                     // calculate derivative
                     if ( abs( loc_xi_mob(j) ) >= 1.0e-16 )  // loc_xi_mob(j) != 0.0
-                        drates_dxi_tmp = ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) / epsilon /  abs( loc_xi_mob(j) );
+                        // drates_dxi_tmp = ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) / epsilon /  abs( loc_xi_mob(j) );
+                        drates_dxi_tmp = ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) / epsilon /  loc_xi_mob.norm() ;
                     else
                         drates_dxi_tmp = ( loc_xi_mob_rates_new(i) - loc_xi_mob_rates_base(i) ) /  epsilon ;
                     _xi_mob_drates_dxi[i*_n_xi_mob+j]->setValue( node_idx, drates_dxi_tmp ); 

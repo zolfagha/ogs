@@ -3,7 +3,61 @@ GeoSys-TIM: Timestepping ------------------------------------------------
  $PCS_TYPE
   GROUNDWATER_FLOW
  $TIME_STEPS
-   7500  24
+   50    12
+   2000    1
+ $TIME_END
+  18000
+ $TIME_START
+  0.0
+#TIME_STEPPING
+ $PCS_TYPE
+  KIN_REACT_GIA
+ $TIME_STEPS
+   50    12
+   2000    1
+ $TIME_END
+  18000
+ $TIME_START
+  0.0
+#STOP
+
+
+GeoSys-TIM: Timestepping ------------------------------------------------
+#TIME_STEPPING
+ $PCS_TYPE
+  GROUNDWATER_FLOW
+ $TIME_STEPS
+   100    2
+   100    4
+   100    8
+   100    12
+   100    24
+   10000  24
+ $TIME_END
+  18000
+ $TIME_START
+  0.0
+#TIME_STEPPING
+ $PCS_TYPE
+  KIN_REACT_GIA
+ $TIME_STEPS
+   100    2
+   100    4
+   100    8
+   100    12
+   100    24
+   10000  24
+ $TIME_END
+  18000
+ $TIME_START
+  0.0
+
+
+#TIME_STEPPING
+ $PCS_TYPE
+  GROUNDWATER_FLOW
+ $TIME_STEPS
+   750  240
  $TIME_END
   180000
  $TIME_START
@@ -12,9 +66,8 @@ GeoSys-TIM: Timestepping ------------------------------------------------
  $PCS_TYPE
   KIN_REACT_GIA
  $TIME_STEPS
-   7500  24
+   750  240
  $TIME_END
   180000
  $TIME_START
   0.0
-#STOP

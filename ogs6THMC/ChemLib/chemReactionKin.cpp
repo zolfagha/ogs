@@ -41,6 +41,9 @@ void chemReactionKin::calcReactionRate(ogsChem::LocalVector & vec_Comp_Conc)
 		this->_rate = calcReactionRateMonod(vec_Comp_Conc); 
     else
         this->_rate = 0.0; 	
+    // debugging, set rate to zero
+    // this->_rate = 0.0; 
+    // end of debugging
 }
 
 double chemReactionKin::calcReactionRateMonod(ogsChem::LocalVector & vec_Comp_Conc)
