@@ -78,7 +78,7 @@ public:
 
 	void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &, const MathLib::LocalVector & u1, const MathLib::LocalVector & u0, MathLib::LocalMatrix & localJ)
     {
-		size_t i, j, k, m, node_idx; 
+		size_t i, j, k, m, n, node_idx; 
   		const size_t n_nodes = e.getNumberOfNodes(); 
 		const size_t n_xi_mob = _xi_mob_rates->size(); 
         const size_t mat_id  = e.getGroupID(); 
@@ -113,7 +113,7 @@ public:
         NumLib::ITXFunction::DataType v;
 		NumLib::ITXFunction::DataType v2;
 		
-        for (i=0; i<n_xi_mob; i++) {
+        for (i=0; i<n_xi_mob; i++) { // this is to which governing xi equation
 
 			matM    = MathLib::LocalMatrix::Zero(n_nodes, n_nodes);
 			matDiff = MathLib::LocalMatrix::Zero(n_nodes, n_nodes);
@@ -138,7 +138,9 @@ public:
                 
                 NumLib::ITXFunction::DataType dispersion_diffusion = NumLib::ITXFunction::DataType::Identity(n_dim, n_dim); 
                 dispersion_diffusion *= disp_t * v.norm(); 
-                dispersion_diffusion += (disp_l - disp_t) * ( v2.transpose() * v2 ) / v.norm(); 
+                for ( m=0; m < n_dim ; m++ )
+                    for ( n=0; n < n_dim; n++ )
+                        dispersion_diffusion(m,n) += (disp_l - disp_t) * ( v2(m) * v2(n) ) / v.norm(); 
                 dispersion_diffusion += d_poro.topLeftCorner(n_dim, n_dim);
 				
                 fe->integrateWxN(j, poro, matM);

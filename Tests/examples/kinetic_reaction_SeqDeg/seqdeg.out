@@ -10,6 +10,16 @@
   H2S
   Biomass_oxygen
   Biomass_sulfate
+  eta_mob_0
+  eta_mob_1
+  eta_mob_2
+  eta_mob_3
+  eta_mob_4
+  eta_mob_5
+  xi_mob_0
+  xi_mob_1
+  xi_mob_rate_0
+  xi_mob_rate_1
  $GEO_TYPE
   DOMAIN
  $DAT_TYPE

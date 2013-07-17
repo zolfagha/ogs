@@ -54,4 +54,15 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $POINTS
   0
   1
+#POLYLINE
+ $NAME 
+  BOUND
+ $EPSILON
+  1.0e-4
+ $POINTS
+  0
+  2
+  3
+  1
+  0
 #STOP

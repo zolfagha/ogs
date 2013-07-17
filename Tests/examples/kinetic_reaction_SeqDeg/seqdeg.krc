@@ -9,7 +9,7 @@ GeoSys Kinetic Reactions
  $INITIAL_TIMESTEP	
 	1.e-4       ; init Timestep
  $BACTERIACAPACITY
-  100.0
+  1.0
  $NO_REACTIONS
    POLYLINE PLY_BC_LEFT
 
@@ -41,7 +41,7 @@ GeoSys Kinetic Reactions
  $EQUATION
   2 CH2O + 1 SO42- = 2 HCO3- + 1 H2S;
  $RATECONSTANT
- 2.0e-5  1.0   ; max growth rate my_max , exponent
+ 5.0e-5  1.0   ; max growth rate my_max , exponent
  $GROWTH
     1
  $MONODTERMS

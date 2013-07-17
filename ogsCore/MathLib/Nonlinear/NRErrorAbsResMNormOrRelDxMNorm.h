@@ -53,7 +53,9 @@ private:
         if (abs_mnorm_x == .0) {
             return abs_mnorm_r;
         } else {
-            return std::max(abs_mnorm_r, rel_mnorm_dx);
+            // return std::max(abs_mnorm_r, rel_mnorm_dx);
+            // HS temperary testing...
+            return abs_mnorm_r;
         }
     }
 
