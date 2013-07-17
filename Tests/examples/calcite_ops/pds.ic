@@ -47,7 +47,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
  $GEO_TYPE
   DOMAIN
  $DIS_TYPE
-  CONSTANT 1.000000709057e-012
+  CONSTANT 1.000000709057e-010
 
 #INITIAL_CONDITION
  $PCS_TYPE
