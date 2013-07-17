@@ -222,7 +222,7 @@ void FunctionOPSConc<T1, T2>::calc_nodal_eq_react_sys(double dt)
                                                            result, 
                                                            node_idx, 
 		                                                   1.0e-10, 
-                                                           1.0e-16,
+                                                           1.0e-12,
                                                            50 ); 
         	// if the iteration converged. 
             if ( result == 0 )
