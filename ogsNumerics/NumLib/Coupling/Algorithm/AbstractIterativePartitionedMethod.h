@@ -87,7 +87,7 @@ public:
             size_t count_calculated = 0;
             for (size_t i=0; i<n_subproblems; i++) {
                 ICoupledSystem *problem = list_coupled_problems[i];
-                const std::vector<ParameterProblemMappingTable::PairInputVar> &problem_parameters = mapping._list_subproblem_input_source[i];
+                const std::vector<ParameterProblemMappingTable::PairInputVar> &problem_parameters = mapping._list_subproblem_input_source[problem->getID()];
 
                 // calculate all anyway in the 1st iteration
                 //if (i_itr>0 && !isInputParametersUpdated(parameter_table, problem_parameters, problem))
