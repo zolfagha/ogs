@@ -26,6 +26,8 @@ bool FunctionHeadToElementVelocity<T>::initialize(const BaseLib::Options &option
 
     size_t msh_id = option.getOptionAsNum<size_t>("MeshID");
     MeshLib::IMesh* msh = femData->list_mesh[msh_id];
+    size_t tim_id = option.getOptionAsNum<size_t>("TimeGroupID");
+    _tim = femData->list_tim[tim_id];
     MyDiscreteSystem* dis = 0;
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
 
@@ -40,7 +42,7 @@ bool FunctionHeadToElementVelocity<T>::initialize(const BaseLib::Options &option
 
     // initial output parameter
     _vel_3d = new My3DIntegrationPointFunctionVector(_vel, msh->getGeometricProperty()->getCoordinateSystem());
-    this->setOutput(Velocity, _vel_3d);
+    this->setOutput(Velocity, _vel); //_vel_3d
 
     return true;
 }
@@ -54,6 +56,8 @@ void FunctionHeadToElementVelocity<T>::accept(const NumLib::TimeStep &/*time*/)
     Ogs6FemData* femData = Ogs6FemData::getInstance();
     OutputVariableInfo var(this->getOutputParameterName(Velocity), _dis->getMesh()->getID(), OutputVariableInfo::Element, OutputVariableInfo::Real, 3, _vel);
     femData->outController.setOutput(var.name, var);
+
+    _tim->accept();
 };
 
 template <class T>
