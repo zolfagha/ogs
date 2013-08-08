@@ -55,6 +55,7 @@ public:
     size_t getTimeStepCount() const {return _time_stepping_count;};
     double getTime() const {return _time_current;};
     double getTimeStepSize() const {return _dt;};
+    double getPreviousTime() const {return _time_current - _dt;};
 
     void setTime(double t) {_time_current = t;};
     void setTimeStepSize(double dt) {_dt = dt;};
