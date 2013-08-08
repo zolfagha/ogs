@@ -51,6 +51,8 @@ public:
         picard.solve(*_linear_f, x_0, x_new, *_x_old, *_dx, getOption().max_iteration, &check);
     }
 
+    virtual void recordLog(BaseLib::Options& /*opt*/) {};
+
 private:
     F_LINEAR* _linear_f;
     MyDiscreteSystem* _dis_sys;

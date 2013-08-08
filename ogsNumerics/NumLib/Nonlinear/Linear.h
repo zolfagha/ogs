@@ -32,6 +32,9 @@ public:
     {
         _linear_f->eval(x_0, x_new);
     }
+
+    virtual void recordLog(BaseLib::Options& /*opt*/) {};
+
 };
 
 } //end
