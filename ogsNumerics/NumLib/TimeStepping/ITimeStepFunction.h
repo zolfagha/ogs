@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include "BaseLib/Options.h"
+
 #include "TimeUnit.h"
 
 namespace NumLib
@@ -27,6 +29,7 @@ public:
     virtual void accept() = 0;
     virtual ITimeStepFunction* clone() = 0;
     virtual ~ITimeStepFunction() {};
+    virtual void updateLog(BaseLib::Options &log) = 0;
 };
 
 }
