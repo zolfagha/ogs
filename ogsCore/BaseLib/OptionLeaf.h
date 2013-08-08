@@ -72,6 +72,15 @@ public:
     };
 
     /**
+     * set a value
+     * @param val
+     */
+    void setValue(const T &val)
+    {
+        _value = val;
+    };
+
+    /**
      * print out content of this node
      *
      * @param os    output stream
