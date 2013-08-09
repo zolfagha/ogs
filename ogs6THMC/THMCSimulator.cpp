@@ -269,6 +269,7 @@ int THMCSimulator::execute()
     for (size_t i=0; i<list_mono_system.size(); i++) {
         std::string &pcs_name = list_mono_system_name[i];
         ProcessLib::Process* pcs = list_mono_system[i];
+        pcs->setProcessName(pcs_name);
         INFO("PCS %d: name=%s, type=%s (IN=%d, OUT=%d)", i, pcs_name.c_str(), pcs->getProcessType().c_str(), pcs->getNumberOfInputParameters(), pcs->getNumberOfOutputParameters());
         for (size_t j=0; j<pcs->getNumberOfInputParameters(); j++)
             INFO("* IN  %d: %s", j, pcs->getInputParameterName(j).c_str());
