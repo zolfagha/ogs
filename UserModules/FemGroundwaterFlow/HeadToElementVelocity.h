@@ -45,7 +45,7 @@ public:
 
     virtual ~FunctionHeadToElementVelocity()
     {
-        BaseLib::releaseObject(_feObjects, _vel);
+        BaseLib::releaseObject(_feObjects, _vel, _vel_3d);
     };
 
 
@@ -66,7 +66,7 @@ public:
 
 
 private:
-    DiscreteLib::IDiscreteSystem* _dis;
+    MyDiscreteSystem* _dis;
     MyIntegrationPointFunctionVector* _vel;
     FemLib::LagrangeFeObjectContainer* _feObjects;
     NumLib::DiscreteDataConvergenceCheck _checker;
