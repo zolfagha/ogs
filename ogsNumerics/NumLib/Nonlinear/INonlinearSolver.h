@@ -32,6 +32,8 @@ public:
 
     NonlinerSolverOption& getOption() {return _option;};
     void setOption(const NonlinerSolverOption &option) {_option = option;};
+
+    virtual void recordLog(BaseLib::Options& opt) = 0;
 protected:
     NonlinerSolverOption _option;
 };

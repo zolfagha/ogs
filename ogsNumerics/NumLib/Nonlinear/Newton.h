@@ -62,14 +62,24 @@ public:
             _dx = _dis_sys->template createVector<double>(x_0.size());
         }
         MathLib::NRCheckConvergence<VectorType, MathLib::NRErrorAbsResMNormOrRelDxMNorm> check(_option.error_tolerance);
-        MathLib::NewtonRaphsonMethod nr;
-        nr.solve(*_f_r, *_f_dx, x_0, x_new, *_r, *_dx, _option.max_iteration, &check, _nl_step_init);
+        _nr.solve(*_f_r, *_f_dx, x_0, x_new, *_r, *_dx, _option.max_iteration, &check, _nl_step_init);
+    }
+
+    virtual void recordLog(BaseLib::Options& opt)
+    {
+        BaseLib::OptionGroup* opNR = opt.getSubGroup("NewtonRaphson");
+        if (opNR==nullptr) {
+        	opNR = opt.addSubGroup("NewtonRaphson");
+        }
+        opNR->setOptionAsNum<size_t>("iterations", _nr.getNIterations());
+        opNR->setOptionAsNum<double>("error", _nr.getError());
     }
 
 private:
     DISALLOW_COPY_AND_ASSIGN(NewtonRaphson);
 
 private:
+    MathLib::NewtonRaphsonMethod _nr;
     MyDiscreteSystem* _dis_sys;
     F_R* _f_r;
     F_DX* _f_dx;

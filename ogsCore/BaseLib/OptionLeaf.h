@@ -72,12 +72,26 @@ public:
     };
 
     /**
+     * set a value
+     * @param val
+     */
+    void setValue(const T &val)
+    {
+        _value = val;
+    };
+
+    /**
      * print out content of this node
      *
      * @param os    output stream
      * @param depth depth of this node
      */
-    virtual inline void printout(std::ostream &/*os*/, size_t /*depth*/) const {};
+    virtual inline void printout(std::ostream &os, size_t depth) const
+    {
+        for (size_t i=0; i<depth; i++)
+            os << "\t";
+        os << "value: " << getText() << "\n";
+    };
 
 private:
     T _value;
@@ -88,14 +102,6 @@ inline bool OptionLeaf<std::string>::isString() const {return true;};
 
 template <>
 inline std::string OptionLeaf<std::string>::getText() const {return _value;};
-
-template <>
-inline void OptionLeaf<std::string>::printout(std::ostream &os, size_t depth) const
-{
-    for (size_t i=0; i<depth; i++)
-        os << "\t";
-    os << "value: " << _value << std::endl;
-};
 
 template <>
 inline std::string OptionLeaf<double>::getText() const

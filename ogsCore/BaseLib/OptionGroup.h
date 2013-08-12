@@ -89,6 +89,29 @@ public:
         _dictionary.insert(PairType(key, new OptionLeaf<T>(v)));
     }
 
+    /// set option
+    void setOption(const std::string &key, const std::string &v)
+    {
+        DictionaryType::iterator itr = _dictionary.find(key);
+        if (itr==_dictionary.end()) {
+        	addOption(key, v);
+        } else if (itr->second->isValue()) {
+            static_cast<OptionLeaf<std::string>*>(itr->second)->setValue(v);
+        }
+    }
+
+    /// set option as number
+    template<typename T>
+    inline void setOptionAsNum(const std::string &key, T v)
+    {
+        DictionaryType::iterator itr = _dictionary.find(key);
+        if (itr==_dictionary.end()) {
+        	addOptionAsNum<T>(key, v);
+        } else if (itr->second->isValue()) {
+            static_cast<OptionLeaf<T>*>(itr->second)->setValue(v);
+        }
+    }
+
     /// check if there is a value with the given key
     bool hasOption(const std::string &key) const;
 
@@ -130,6 +153,9 @@ public:
 
     /// get a list of sub-group having the given key
     std::vector<const OptionGroup*> getSubGroupList(const std::string &key) const;
+
+    /// get a list of sub-group having the given key
+    std::vector<OptionGroup*> getSubGroupList(const std::string &key);
 
     /// get a list of values related to the given key
     template<typename T>

@@ -366,6 +366,8 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         optPcs->addOptionAsNum("MeshID", rfpcs->mesh_id);
 
         //Time
+        if (rfpcs->timegroup_id<0)
+            rfpcs->timegroup_id = i;
         optPcs->addOptionAsNum("TimeGroupID", rfpcs->timegroup_id);
 
         // IC

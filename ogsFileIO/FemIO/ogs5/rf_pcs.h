@@ -89,7 +89,7 @@ public:
     double ExcavBeginCoordinate;          //WX
 
     size_t mesh_id;
-    size_t timegroup_id;
+    int timegroup_id;
 };
 
 bool PCSRead(const std::string&, std::vector<CRFProcess*> &pcs_vector);

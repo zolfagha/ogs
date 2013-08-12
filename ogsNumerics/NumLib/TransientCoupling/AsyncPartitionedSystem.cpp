@@ -47,6 +47,15 @@ int AsyncPartitionedSystem::solveTimeStep(const TimeStep &time)
     // copy previous time step result to current one
     //_vars_t_n.assign(_vars_t_n1);
     NumLib::UnnamedParameterSet *vars_t_n1 = getParameters();
+    if (time.getTimeStepCount()==1) {
+        // initialize parameter table
+        const size_t n_vars = vars_t_n1->size();
+        for (size_t i=0; i<n_vars; i++) {
+            const NumLib::ParameterProblemMappingTable::PairSysVarId &v = _map._map_paraId2subproblem[i];
+            const NumLib::ICoupledSystem *tmp_problem = v.first;
+            vars_t_n1->set(i, *tmp_problem->getOutput(v.second));
+        }
+    }
     vars_t_n1->move(_vars_t_n);
 
     // list active problems
