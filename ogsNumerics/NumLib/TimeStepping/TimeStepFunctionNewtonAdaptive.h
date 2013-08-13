@@ -39,7 +39,8 @@ protected:
 
     virtual void accept(double t)
     {
-        _dt_pre = t - getPrevious(); 
+        if (t > getPrevious())
+            _dt_pre = t - getPrevious();
         AbstractTimeStepFunction::accept(t);
     }
 
