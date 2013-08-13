@@ -37,9 +37,9 @@ public:
 protected:
     virtual void updateLog(BaseLib::Options &log);
 
-    virtual void accept()
+    virtual void accept(double t)
     {
-        AbstractTimeStepFunction::accept();
+        AbstractTimeStepFunction::accept(t);
     }
 
     virtual double suggestNext(double /*t_current*/);
