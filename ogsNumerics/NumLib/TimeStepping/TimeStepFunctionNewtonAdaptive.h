@@ -39,6 +39,7 @@ protected:
 
     virtual void accept(double t)
     {
+        _dt_pre = t - getPrevious(); 
         AbstractTimeStepFunction::accept(t);
     }
 
@@ -51,6 +52,7 @@ private:
     double _min_ts; 
     double _max_ts; 
     int _iter_times;
+    double _dt_pre;    // previous time step size
 };
 
 
