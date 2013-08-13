@@ -64,8 +64,11 @@ void SequentialElementWiseLinearEquationAssembler<T1, T2>::assembly(const MeshLi
 {
     const size_t n_ele = msh.getNumberOfElements();
     for (size_t i=0; i<n_ele; i++) {
-        MeshLib::IElement *e = msh.getElement(i);
+
+    	MeshLib::IElement *e = msh.getElement(i);
+
         _e_assembler->update(*e, dofEquationIdTable, eqs);
+
     }
 };
 

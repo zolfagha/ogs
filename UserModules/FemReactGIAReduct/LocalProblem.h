@@ -49,7 +49,7 @@ public:
       * the total concentration constrain of the basis species
       */
     void calc_residual(ogsChem::LocalVector & vec_unknowns,
-			 ogsChem::LocalVector & vec_AI,
+	//		 ogsChem::LocalVector & vec_AI,
 			 ogsChem::LocalVector & vec_residual);
     
     /**
@@ -59,7 +59,7 @@ public:
       * and an already calculated residual vector
       */
     void calc_Jacobian(ogsChem::LocalVector & vec_unknowns,
-    				 ogsChem::LocalVector & vec_AI,
+    //				 ogsChem::LocalVector & vec_AI,
     				 ogsChem::LocalVector & vec_residual);
 
     /**
@@ -98,6 +98,15 @@ public:
                   ogsChem::LocalVector & delta_x);
 
     //TODO declare the residual functions
+
+
+    void cal_ln_conc_vec(size_t    		        idx_size,
+    					 ogsChem::LocalVector & conc_Mob,
+    				     ogsChem::LocalVector & ln_conc_Mob);
+
+    void cal_exp_conc_vec(size_t    		    idx_size,
+    					  ogsChem::LocalVector & ln_conc,
+    					  ogsChem::LocalVector & Conc);
 	
 private:
 	/**
@@ -170,9 +179,6 @@ private:
       * its size is equal to the _n_unknowns by _n_unknowns
       */
     ogsChem::LocalMatrix _mat_Jacobian;
-    
-    void cal_log_conc_vec(ogsChem::LocalVector & conc_Mob,
-    					  ogsChem::LocalVector & logConc_Mob);
 
     void reaction_rates(ogsChem::LocalVector & conc,
     					ogsChem::LocalVector & vec_rateKin);

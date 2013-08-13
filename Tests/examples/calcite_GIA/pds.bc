@@ -37,7 +37,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $GEO_TYPE
   POLYLINE PLY_BC_LEFT
  $DIS_TYPE
-  CONSTANT  1.0e-10
+  CONSTANT  1.0e-12
 
 #BOUNDARY_CONDITION
  $PCS_TYPE
@@ -67,7 +67,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $GEO_TYPE
   POLYLINE PLY_BC_LEFT
  $DIS_TYPE
-  CONSTANT  4.6751e-14
+  CONSTANT  4.6738e-12
 
 #BOUNDARY_CONDITION
  $PCS_TYPE
@@ -77,7 +77,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $GEO_TYPE
   POLYLINE PLY_BC_LEFT
  $DIS_TYPE
-  CONSTANT  9.9981e-11
+  CONSTANT  9.9954e-11
 
 #BOUNDARY_CONDITION
  $PCS_TYPE
@@ -87,7 +87,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $GEO_TYPE
   POLYLINE PLY_BC_LEFT
  $DIS_TYPE
-  CONSTANT 3.9516e-15  
+  CONSTANT 3.9516e-12  
 
 #BOUNDARY_CONDITION
  $PCS_TYPE
@@ -97,7 +97,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $GEO_TYPE
   POLYLINE PLY_BC_LEFT
  $DIS_TYPE
-  CONSTANT 1.1755e-14
+  CONSTANT 1.1755e-12
 
 #STOP
 

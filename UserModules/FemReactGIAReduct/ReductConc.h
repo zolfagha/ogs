@@ -58,8 +58,8 @@ public:
 
     // local assembler
 	// for the linear systems, use the same settings as Mass_Transport
-    typedef LinearTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler> MyLinearAssemblerType;          
-    typedef LinearTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyLinearResidualAssemblerType; 
+    typedef LinearTransportTimeODELocalAssemblerML<NumLib::ElementWiseTimeEulerEQSLocalAssembler> MyLinearAssemblerType;
+    typedef LinearTransportTimeODELocalAssemblerML<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyLinearResidualAssemblerType;
     typedef LinearTransportJacobianLocalAssembler MyLinearJacobianAssemblerType;                                        
 	// for the nonlinear part, use different settings
 	typedef NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler, MyNodalFunctionScalar>      MyNonLinearAssemblerType;
@@ -267,6 +267,14 @@ public:
       */
 	void calc_nodal_local_problem(double dt, const double iter_tol, const double rel_tol, const double max_iter);
 
+	/**
+      * calculate node based residual of global problem
+      */
+	void GlobalResidualAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, SolutionLib::SolutionVector & residual_global);
+
+	void assembly(const NumLib::TimeStep & delta_t, const std::size_t _n_xi, MathLib::LocalVector &global_u1_tilde, MathLib::LocalVector &global_u0_tilde, MathLib::LocalVector &global_u1,
+			MathLib::LocalVector &global_u0, MathLib::LocalVector &global_vec_LHS, MathLib::LocalVector &global_vec_RHS);
+
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
 
@@ -299,6 +307,8 @@ private:
       */ 
 	virtual void convert_eta_xi_to_conc(void); 
 
+	DiscreteLib::DofEquationIdTable* _dofManager;
+	MyDiscreteSystem *_dis_sys;
     /**
       * linear problems
       */
@@ -354,6 +364,63 @@ private:
       */
     FemLib::LagrangeFeObjectContainer* _feObjects;
     
+    double _theta;
+
+    /**
+      * velocity function
+      */
+    NumLib::ITXFunction* _vel;
+
+    /**
+      * pointer to finite element class
+      */
+    FemLib::IFiniteElement* _fe;
+
+    /**
+      * pointer to porous media class
+      */
+    MaterialLib::PorousMedia* _pm;
+
+    /**
+      * pointer to integrater
+      */
+    FemLib::IFemNumericalIntegration * _q;
+
+    /**
+      * to store porosity value
+      */
+    MathLib::LocalMatrix poro;
+
+    /**
+      * to store porosity value
+      */
+    MathLib::LocalMatrix d_poro;
+
+    /**
+      * velocity values
+      */
+    MathLib::LocalMatrix v;
+
+    /**
+      * velocity values
+      */
+    MathLib::LocalMatrix v2;
+
+    /**
+      * dispersion diffusion values
+      */
+    MathLib::LocalMatrix dispersion_diffusion;
+
+    /**
+      * local dispersion matrix
+      */
+    MathLib::LocalMatrix localDispersion;
+
+     /**
+      * local advection matrix
+      */
+    MathLib::LocalMatrix localAdvection;
+
 	/**
       * convergence checker
       */
@@ -368,7 +435,15 @@ private:
       * concentrations vector
       * including all components in the MCP data structure
       */
-	std::vector<MyNodalFunctionScalar*> _concentrations; 
+	std::vector<MyNodalFunctionScalar*> _concentrations;
+
+
+    /**
+      * residual vector for the first two global equation 3.43 and  3.44
+      */
+	//std::vector<MyNodalFunctionScalar*> _residual_global_res43;
+	//std::vector<MyNodalFunctionScalar*> _residual_global_res44;
+
 
     /**
       * nodal eta_mobile values
@@ -425,6 +500,29 @@ private:
       */ 
     std::vector<MyNodalFunctionScalar*> _xi_local_rates;
 
+
+    //temp global vectors
+    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Sorp_tilde;
+    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Min_tilde;
+    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Sorp;
+    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Min;
+    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Kin;
+
+    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Sorp_tilde;
+    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Min_tilde;
+    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Sorp;
+    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Min;
+    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Kin;
+
+    std::vector<MyNodalFunctionScalar*> _residual_global_res43;
+    std::vector<MyNodalFunctionScalar*> _residual_global_res44;
+    std::vector<MyNodalFunctionScalar*> _residual_global_res45;
+    std::vector<MyNodalFunctionScalar*> _residual_global_res46;
+    std::vector<MyNodalFunctionScalar*> _global_vec_Rate_45;
+    std::vector<MyNodalFunctionScalar*> _global_vec_Rate_46;
+    std::vector<MyNodalFunctionScalar*> _residual_global;
+    std::vector<MyNodalFunctionScalar*> _global_vec_LHS;
+    std::vector<MyNodalFunctionScalar*> _global_vec_RHS;
     /**
       * degree of freedom equation ID talbe for the nonlinear problem
       */ 
@@ -439,7 +537,7 @@ private:
     /**
       * the size of eta_mob, eta_immob, xi_mob and xi_immob vector
       */
-	std::size_t _n_eta,_n_eta_bar, _n_xi_mobile, _n_xi_immobile, _n_xi_local,  _n_xi_global, _n_xi_Mob, _n_xi_Sorp_tilde,_n_xi_Sorp, _n_xi_Sorp_bar
+	std::size_t _n_eta,_n_eta_bar, _n_xi_mobile, _n_xi_immobile, _n_xi_local,  _n_xi_global, _n_xi_Mob, _n_xi_Sorp_tilde,_n_xi_Sorp, _n_xi_Sorp_bar, _n_xi_Sorp_bar_li, _n_xi_Sorp_bar_ld
 			,_n_xi_Min, _n_xi_Min_tilde, _n_xi_Min_bar, _n_xi_Kin, _n_xi_Kin_bar, _I_mob, _I_sorp, _I_min, _I_NMin_bar;
 
     /**

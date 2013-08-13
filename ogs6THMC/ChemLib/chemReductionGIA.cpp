@@ -269,7 +269,36 @@ void chemReductionGIA::update_reductionScheme(void)
 	// Calculate the s1T = S_i^T matrix consisting of a max set of linearly
 	// independent columns that are orthogonal to each column of S_i^*.
 	// s1T = orthcomp(s1);
-	_mat_S1_orth = orthcomp( _mat_S1_ast );
+	//_mat_S1_orth = orthcomp( _mat_S1_ast );  debuging
+
+	LocalMatrix::Zero(6,3);
+	LocalMatrix m(6,3);
+
+	m(0,0) = 0.0;
+	m(1,0) = 0.0;
+	m(2,0) = 0.0;
+	m(3,0) = 1.0;
+	m(4,0) = 0.0;
+	m(5,0) = 0.0;
+
+
+	m(0,1) = -1.0;
+	m(1,1) = -1.0;
+	m(2,1) = -1.0;
+	m(3,1) = 0.0;
+	m(4,1) = 1.0;
+	m(5,1) = 0.0;
+
+
+	m(0,2) = 1.0;
+	m(1,2) = 0.0;
+	m(2,2) = 0.0;
+	m(3,2) = 0.0;
+	m(4,2) = 0.0;
+	m(5,2) = 1.0;
+
+	_mat_S1_orth = m;
+
     // s2T = orthcomp(s2);
 	_mat_S2_orth = orthcomp( _mat_S2_ast );
 
@@ -280,39 +309,7 @@ void chemReductionGIA::update_reductionScheme(void)
 	std::cout << _mat_S2_orth << std::endl;
 #endif
 
-LocalMatrix::Zero(3,6);
-LocalMatrix m(3,6);
-
-m(0,0) = 0;
-m(0,1) = 0;
-m(0,2) = 0.0;
-m(0,3) = 1.0;
-m(0,4) = 0.0;
-m(0,5) = 0.0;
-
-
-m(1,0) = -0.1429;
-m(1,1) = -0.2857;
-m(1,2) = -0.2857;
-m(1,3) = 0.0;
-m(1,4) = 0.2857;
-m(1,5) = 0.1429;
-
-
-m(2,0) = 0.4286;
-m(2,1) = -0.1429;
-m(2,2) = -0.1429;
-m(2,3) = 0.0;
-m(2,4) = 0.1429;
-m(2,5) = 0.5714;
-
-_mat_c_mob_2_eta_mob = m;
-
-//0, 0 ,  0,    1.0000,         0,         0,
-//-0.1429,   -0.2857,   -0.2857,         0,    0.2857,    0.1429,
-//0.4286,   -0.1429,   -0.1429,         0 ,   0.1429,    0.5714;
-
-	//_mat_c_mob_2_eta_mob     = ( _mat_S1_orth.transpose() * _mat_S1_orth ).fullPivHouseholderQr().solve(_mat_S1_orth.transpose());
+	_mat_c_mob_2_eta_mob     = ( _mat_S1_orth.transpose() * _mat_S1_orth ).fullPivHouseholderQr().solve(_mat_S1_orth.transpose());
     _mat_c_immob_2_eta_immob = ( _mat_S2_orth.transpose() * _mat_S2_orth ).fullPivHouseholderQr().solve(_mat_S2_orth.transpose());
 	_mat_c_mob_2_xi_mob      = ( _mat_S1_ast.transpose()  * _mat_S1_ast  ).fullPivHouseholderQr().solve(_mat_S1_ast.transpose());
 	_mat_c_immob_2_xi_immob  = ( _mat_S2_ast.transpose()  * _mat_S2_ast  ).fullPivHouseholderQr().solve(_mat_S2_ast.transpose());
@@ -459,6 +456,7 @@ void chemReductionGIA::Conc2EtaXi(ogsChem::LocalVector &local_conc,
 	ogsChem::LocalVector local_c_mob, local_c_immob;
 	ogsChem::LocalVector local_xi, local_xi_bar;
 	ogsChem::LocalVector local_xi_Sorp_bar_li, local_xi_Sorp_bar_ld;
+	ogsChem::LocalVector local_xi_Mob, local_xi_Sorp,local_xi_Sorp_li,local_xi_Sorp_ld,local_xi_Sorp_tilde,local_xi_Sorp_bar,local_xi_Min,local_xi_Min_tilde,local_xi_Min_bar,local_xi_Kin,local_xi_Kin_bar;
 
 	// divide c1 and c2
 	local_c_mob   = local_conc.topRows(    this->_I_mob );
@@ -560,13 +558,18 @@ void chemReductionGIA::EtaXi2Conc(ogsChem::LocalVector &local_eta,
 
 }
 
-
-
-void chemReductionGIA::Calc_Kin_Rate(ogsChem::LocalVector &local_eta,
-	                                ogsChem::LocalVector &local_eta_bar,
-									ogsChem::LocalVector &local_xi_global,
-									ogsChem::LocalVector &local_xi_local,
-									ogsChem::LocalVector &local_rate_vec)
+void chemReductionGIA::Calc_Kin_Rate(ogsChem::LocalVector &local_xi_Mob,
+									 ogsChem::LocalVector &local_xi_Sorp,
+			                         ogsChem::LocalVector &local_xi_Sorp_tilde,
+									 ogsChem::LocalVector &local_xi_Sorp_bar,
+									 ogsChem::LocalVector &local_xi_Min,
+									 ogsChem::LocalVector &local_xi_Min_tilde,
+									 ogsChem::LocalVector &local_xi_Min_bar,
+									 ogsChem::LocalVector &local_xi_Kin,
+								     ogsChem::LocalVector &local_xi_Kin_bar,
+									 ogsChem::LocalVector &local_eta,
+									 ogsChem::LocalVector &local_eta_bar,
+									 ogsChem::LocalVector &local_rate_vec)
 {
 	size_t i;
 
@@ -574,6 +577,23 @@ void chemReductionGIA::Calc_Kin_Rate(ogsChem::LocalVector &local_eta,
 	ogsChem::LocalVector vec_rates = ogsChem::LocalVector::Zero(_J_tot_kin);
 	// the local temp concentration vector
 	ogsChem::LocalVector vec_conc = ogsChem::LocalVector::Zero(_I_tot);
+
+	// xi global
+	ogsChem::LocalVector local_xi_global = ogsChem::LocalVector::Zero(_n_xi_global);
+	// xi local
+	ogsChem::LocalVector local_xi_local = ogsChem::LocalVector::Zero(_n_xi_local);
+
+	 local_xi_global.head(_n_xi_Sorp_tilde) 											  = local_xi_Sorp_tilde;
+	 local_xi_global.segment(_n_xi_Sorp_tilde, _n_xi_Min_tilde)							  = local_xi_Min_tilde;
+	 local_xi_global.segment( _n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Sorp)			  = local_xi_Sorp;
+	 local_xi_global.segment( _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Min) = local_xi_Min;
+	 local_xi_global.tail(_n_xi_Kin)													  = local_xi_Kin;
+
+	// current xi local
+	 local_xi_local.head(_n_xi_Mob) 									= local_xi_Mob;
+	 local_xi_local.segment(_n_xi_Mob, _n_xi_Sorp_bar)  				= local_xi_Sorp_bar;
+	 local_xi_local.segment( _n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Min_bar) = local_xi_Min_bar;
+ 	 local_xi_local.tail(_n_xi_Kin_bar) 								= local_xi_Kin_bar;
 
 	// first convert these eta and xi to concentrations
 	EtaXi2Conc( local_eta,
@@ -595,6 +615,40 @@ void chemReductionGIA::Calc_Kin_Rate(ogsChem::LocalVector &local_eta,
 	//xi_mob_rate   = _matA1 * vec_rates;
 	//xi_immob_rate = _matA2 * vec_rates;
 }
+
+//void chemReductionGIA::Calc_Kin_Rate(ogsChem::LocalVector &local_eta,
+//	                                ogsChem::LocalVector &local_eta_bar,
+//									ogsChem::LocalVector &local_xi_global,
+//									ogsChem::LocalVector &local_xi_local,
+//									ogsChem::LocalVector &local_rate_vec)
+//{
+//	size_t i;
+//
+//	// the size of vec_rates is equal to the number of kinetic equations
+//	ogsChem::LocalVector vec_rates = ogsChem::LocalVector::Zero(_J_tot_kin);
+//	// the local temp concentration vector
+//	ogsChem::LocalVector vec_conc = ogsChem::LocalVector::Zero(_I_tot);
+//
+//	// first convert these eta and xi to concentrations
+//	EtaXi2Conc( local_eta,
+//		        local_eta_bar,
+//				local_xi_global,
+//				local_xi_local,
+//				vec_conc );
+//
+//	// then calculate the rates and fill them in the rate vector
+//	for ( i=0; i < this->_J_tot_kin; i++ )
+//	{
+//		// get to the particular kin equation and calculate its rate
+//		this->_list_kin_reactions[i]->calcReactionRate( vec_conc );
+//		vec_rates(i) = this->_list_kin_reactions[i]->getRate();
+//	}
+//
+//	//Note: since A sub spaces are different for different equations, it should be multiplied later
+//	// multiply the rate vector with the A matrix to get rate for xi_mob and xi_immob
+//	//xi_mob_rate   = _matA1 * vec_rates;
+//	//xi_immob_rate = _matA2 * vec_rates;
+//}
 
 
 }  // end of namespace
