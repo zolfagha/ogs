@@ -272,9 +272,20 @@ public:
       */
 	void GlobalResidualAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, SolutionLib::SolutionVector & residual_global);
 
-	void assembly(const NumLib::TimeStep & delta_t, const std::size_t _n_xi, MathLib::LocalVector &global_u1_tilde, MathLib::LocalVector &global_u0_tilde, MathLib::LocalVector &global_u1,
-			MathLib::LocalVector &global_u0, MathLib::LocalVector &global_vec_LHS, MathLib::LocalVector &global_vec_RHS);
+	//void assembly(const NumLib::TimeStep & delta_t, const std::size_t _n_xi, MathLib::LocalVector &global_u1_tilde, MathLib::LocalVector &global_u0_tilde, MathLib::LocalVector &global_u1,
+	//		MathLib::LocalVector &global_u0, std::vector<MyNodalFunctionScalar*> _global_vec_LHS, std::vector<MyNodalFunctionScalar*> _global_vec_RHS);
 
+	void assembly(	const NumLib::TimeStep & delta_t, const std::size_t _n_xi, const SolutionLib::SolutionVector & u_cur_xiglob,
+					SolutionLib::SolutionVector & residual_global, std::size_t switchOn);
+
+	void GlobalJacobianAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, SolutionLib::SolutionVector & Jacobian_global);
+
+	void NumDiff(std::size_t & col,
+			 	 ogsChem::LocalVector & delta_xi,
+			 	 ogsChem::LocalVector & f,
+			 	ogsChem::LocalVector & f_old,
+			 	 ogsChem::LocalVector & unknown,
+			 	 ogsChem::LocalVector & DrateDxi);
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
 
@@ -500,29 +511,47 @@ private:
       */ 
     std::vector<MyNodalFunctionScalar*> _xi_local_rates;
 
+    /**
+      * global reaction rate vector
+      */
+    std::vector<MyNodalFunctionScalar*> _global_vec_Rate;
+
+    /**
+     * local A matrix
+     */
+   MathLib::LocalMatrix _mat_A45, _mat_A46;
 
     //temp global vectors
-    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Sorp_tilde;
-    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Min_tilde;
-    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Sorp;
-    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Min;
-    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Kin;
-
-    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Sorp_tilde;
-    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Min_tilde;
-    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Sorp;
-    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Min;
-    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Kin;
-
-    std::vector<MyNodalFunctionScalar*> _residual_global_res43;
-    std::vector<MyNodalFunctionScalar*> _residual_global_res44;
-    std::vector<MyNodalFunctionScalar*> _residual_global_res45;
-    std::vector<MyNodalFunctionScalar*> _residual_global_res46;
-    std::vector<MyNodalFunctionScalar*> _global_vec_Rate_45;
-    std::vector<MyNodalFunctionScalar*> _global_vec_Rate_46;
-    std::vector<MyNodalFunctionScalar*> _residual_global;
-    std::vector<MyNodalFunctionScalar*> _global_vec_LHS;
-    std::vector<MyNodalFunctionScalar*> _global_vec_RHS;
+//    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Sorp_tilde;
+//    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Min_tilde;
+//    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Sorp;
+//    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Min;
+//    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Kin;
+//
+//    std::vector<MyNodalFunctionScalar*> _global_u1_tilde;
+//    std::vector<MyNodalFunctionScalar*> _global_u0_tilde;
+//    std::vector<MyNodalFunctionScalar*> _global_u1;
+//    std::vector<MyNodalFunctionScalar*> _global_u0;
+//    std::vector<MyNodalFunctionScalar*> _global_vec_LHS;
+//    std::vector<MyNodalFunctionScalar*> _global_vec_RHS;
+//
+//    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Sorp_tilde;
+//    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Min_tilde;
+//    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Sorp;
+//    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Min;
+//    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Kin;
+//
+//    std::vector<MyNodalFunctionScalar*> _residual_global_res43;
+//    std::vector<MyNodalFunctionScalar*> _residual_global_res44;
+//    std::vector<MyNodalFunctionScalar*> _residual_global_res45;
+//    std::vector<MyNodalFunctionScalar*> _residual_global_res46;
+//    std::vector<MyNodalFunctionScalar*> _global_vec_Rate_45;
+//    std::vector<MyNodalFunctionScalar*> _global_vec_Rate_46;
+//    std::vector<MyNodalFunctionScalar*> _residual_global;
+//    std::vector<MyNodalFunctionScalar*> _global_vec_LHS;
+//    std::vector<MyNodalFunctionScalar*> _global_vec_RHS;
+//    std::vector<MyNodalFunctionScalar*> _global_vec_LHS_sorp;
+//    std::vector<MyNodalFunctionScalar*> _global_vec_RHS_sorp;
     /**
       * degree of freedom equation ID talbe for the nonlinear problem
       */ 
@@ -538,7 +567,7 @@ private:
       * the size of eta_mob, eta_immob, xi_mob and xi_immob vector
       */
 	std::size_t _n_eta,_n_eta_bar, _n_xi_mobile, _n_xi_immobile, _n_xi_local,  _n_xi_global, _n_xi_Mob, _n_xi_Sorp_tilde,_n_xi_Sorp, _n_xi_Sorp_bar, _n_xi_Sorp_bar_li, _n_xi_Sorp_bar_ld
-			,_n_xi_Min, _n_xi_Min_tilde, _n_xi_Min_bar, _n_xi_Kin, _n_xi_Kin_bar, _I_mob, _I_sorp, _I_min, _I_NMin_bar;
+			,_n_xi_Min, _n_xi_Min_tilde, _n_xi_Min_bar, _n_xi_Kin, _n_xi_Kin_bar, _I_mob, _I_sorp, _I_min, _I_NMin_bar, _vec_Rate_rows;
 
     /**
       * number of components
