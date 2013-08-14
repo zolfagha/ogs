@@ -25,6 +25,7 @@ namespace NumLib
 class ICoupledSystem : public IIOSystem, public INamedIO
 {
 public:
+    ICoupledSystem() : _id(0) {};
     /// 
     virtual ~ICoupledSystem() {};
 
@@ -36,6 +37,11 @@ public:
 
     /// return a convergence check for this system
     virtual IConvergenceCheck* getConvergenceChecker() = 0;
+
+    size_t getID() const {return _id;};
+    void setID(size_t id) {_id=id;};
+private:
+    size_t _id;
 };
 
 }

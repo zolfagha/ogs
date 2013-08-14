@@ -23,7 +23,7 @@
 
 template <class T_DISCRETE_SYSTEM>
 class FunctionHeadToElementVelocity
-    : public ProcessLib::AbstractTimeIndependentProcess
+    : public ProcessLib::Process
 {
 public:
     enum In { Head=0 };
@@ -35,23 +35,27 @@ public:
     typedef typename NumLib::TXWrapped3DVectorFunction<MyIntegrationPointFunctionVector> My3DIntegrationPointFunctionVector;
 
     FunctionHeadToElementVelocity() 
-    : ProcessLib::AbstractTimeIndependentProcess("HEAD_TO_ELEMENT_VELOCITY", 1, 1),
-      _dis(NULL), _vel(NULL), _feObjects(NULL), _vel_3d(NULL)
+    : ProcessLib::Process("HEAD_TO_ELEMENT_VELOCITY", 1, 1),
+      _dis(NULL), _vel(NULL), _feObjects(NULL), _vel_3d(NULL), _tim(NULL)
     {
         // set default parameter name
-        ProcessLib::AbstractTimeIndependentProcess::setInputParameterName(Head, "Head");
-        ProcessLib::AbstractTimeIndependentProcess::setOutputParameterName(Velocity, "Velocity");
+        ProcessLib::Process::setInputParameterName(Head, "Head");
+        ProcessLib::Process::setOutputParameterName(Velocity, "Velocity");
     };
 
     virtual ~FunctionHeadToElementVelocity()
     {
-        BaseLib::releaseObject(_feObjects, _vel);
+        BaseLib::releaseObject(_feObjects, _vel, _vel_3d);
     };
 
 
     virtual bool initialize(const BaseLib::Options &op);
 
     virtual void finalize() {};
+
+    double suggestNext(const NumLib::TimeStep &time_current) { return _tim->getNext(time_current.getTime()); }
+
+    bool isAwake(const NumLib::TimeStep &time) { return time.getTime()==suggestNext(time.getPreviousTime());  }
 
     int solveTimeStep(const NumLib::TimeStep &/*time*/);
 
@@ -60,12 +64,14 @@ public:
     ///
     virtual NumLib::IConvergenceCheck* getConvergenceChecker() { return &_checker; };
 
+
 private:
-    DiscreteLib::IDiscreteSystem* _dis;
+    MyDiscreteSystem* _dis;
     MyIntegrationPointFunctionVector* _vel;
     FemLib::LagrangeFeObjectContainer* _feObjects;
     NumLib::DiscreteDataConvergenceCheck _checker;
     My3DIntegrationPointFunctionVector* _vel_3d;
+    NumLib::ITimeStepFunction* _tim;
 
     DISALLOW_COPY_AND_ASSIGN(FunctionHeadToElementVelocity);
 };

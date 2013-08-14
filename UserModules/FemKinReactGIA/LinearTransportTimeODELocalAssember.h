@@ -111,10 +111,12 @@ protected:
             // calculating dispersion tensor according to Benchmark book p219, Eq. 10.15
             // D_{ij} = \alpha_T |v| \delta_{ij} + (\alpha_L - \alpha_T) \frac{v_i v_j}{|v|} + D^{d}_{ii} 
             dispersion_diffusion.setIdentity(n_dim, n_dim); 
-            dispersion_diffusion *= disp_t * v.norm(); 
-            for ( m=0; m < n_dim ; m++ )
-                    for ( n=0; n < n_dim; n++ )
-                        dispersion_diffusion(m,n) += (disp_l - disp_t) * ( v2(m) * v2(n) ) / v.norm();
+            if (v.norm() > .0) {
+                dispersion_diffusion *= disp_t * v.norm();
+                for ( m=0; m < n_dim ; m++ )
+                        for ( n=0; n < n_dim; n++ )
+                            dispersion_diffusion(m,n) += (disp_l - disp_t) * ( v2(m) * v2(n) ) / v.norm();
+            }
             dispersion_diffusion += d_poro.topLeftCorner(n_dim, n_dim);
             // --------debugging--------------
             // std::cout << "dispersion_diffusion Matrix" << std::endl;

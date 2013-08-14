@@ -265,26 +265,41 @@ int THMCSimulator::execute()
     // list up monolithic processes
     INFO("->Initializing all processes...");
     std::vector<ProcessLib::Process*> &list_mono_system = cpl_builder.getListOfMonolithicSystem();
+    BaseLib::Options* opPcsParaList = opOgs6->getSubGroup("processParameters");
     for (size_t i=0; i<list_mono_system.size(); i++) {
         std::string &pcs_name = list_mono_system_name[i];
         ProcessLib::Process* pcs = list_mono_system[i];
+        pcs->setProcessName(pcs_name);
         INFO("PCS %d: name=%s, type=%s (IN=%d, OUT=%d)", i, pcs_name.c_str(), pcs->getProcessType().c_str(), pcs->getNumberOfInputParameters(), pcs->getNumberOfOutputParameters());
         for (size_t j=0; j<pcs->getNumberOfInputParameters(); j++)
             INFO("* IN  %d: %s", j, pcs->getInputParameterName(j).c_str());
         for (size_t j=0; j<pcs->getNumberOfOutputParameters(); j++)
             INFO("* OUT %d: %s", j, pcs->getOutputParameterName(j).c_str());
         ogs6fem->list_pcs.insert(pcs_name, pcs);
-        const BaseLib::Options* opPCSList = opOgs6->getSubGroup("processList");
-        const BaseLib::Options* opPCS = NULL;
+        BaseLib::Options* opPCSList = opOgs6->getSubGroup("processList");
+        BaseLib::Options* opPCS = NULL;
         if (opPCSList!=NULL) {
-            std::vector<const BaseLib::Options*> vec_opPCS = opPCSList->getSubGroupList("process");
+            std::vector<BaseLib::Options*> vec_opPCS = opPCSList->getSubGroupList("process");
             for (size_t i=0; i<vec_opPCS.size(); i++) {
-                const BaseLib::Options* opVal = vec_opPCS[i];
+                BaseLib::Options* opVal = vec_opPCS[i];
                 if (opVal->getOption("name").compare(pcs_name)==0)
                     opPCS = opVal;
             }
         }
-        if (opPCS==NULL) INFO("* Process option not found.");
+        if (opPCS==NULL) {
+            INFO("* Process option not found.");
+            opPCS = opPCSList->addSubGroup("process");
+            opPCS->addOption("name", pcs_name);
+            opPCS->addOption("type", pcs->getProcessType());
+        }
+        if (opPcsParaList) {
+            BaseLib::Options* opPcsPara = opPcsParaList->getSubGroup(pcs_name);
+            if (opPcsPara && opPcsPara->hasOption("TimeGroupID")) {
+                size_t time_id = opPcsPara->getOptionAsNum<size_t>("TimeGroupID");
+                opPCS->setOptionAsNum<size_t>("TimeGroupID", time_id);
+            }
+        }
+
         bool isPcsReady = pcs->initialize(opPCS!=NULL ? *opPCS : *opOgs6);
         if (!isPcsReady) {
             ERR("***Error while setting up processes");

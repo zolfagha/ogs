@@ -32,10 +32,12 @@ public:
     double getBeginning() const {return _t0;};
     double getEnd() const {return _tn;};
     void setEnd(double t) {_tn = t;};
-    void accept()
+    virtual void accept(double t_current)
     {
-        _t_previous = _t_next;
-        _steps++;
+        if (t_current == _t_next && _t_previous < _t_next) {
+            _t_previous = _t_next;
+            _steps++;
+        }
     }
     double getPrevious() const {return _t_previous;};
     double getNext(double t_current)
@@ -44,6 +46,8 @@ public:
         return _t_next;
     }
     size_t getStep() const {return _steps;};
+
+    virtual void updateLog(BaseLib::Options &/*log*/) {};
 
 protected:
     virtual double suggestNext(double t_current) = 0;
