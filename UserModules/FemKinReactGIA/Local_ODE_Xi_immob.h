@@ -57,7 +57,7 @@ public:
     /**
       * evaluate the change of xi_immob over time
       */ 
-	MathLib::LocalVector operator() (double time, MathLib::LocalVector vec_xi_immob )
+	MathLib::LocalVector operator() (double /*time*/, MathLib::LocalVector vec_xi_immob )
 	{
 	    _vec_xi_immob = vec_xi_immob; 
 		this->_reductionKin->Calc_Xi_immob_Rate( _vec_eta_mob, _vec_eta_immob, _vec_xi_mob, _vec_xi_immob, _vec_dxi_immob_dt); 

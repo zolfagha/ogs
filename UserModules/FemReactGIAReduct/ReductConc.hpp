@@ -25,7 +25,7 @@
 #include "MathLib/ODE/RungeKutta4.h"
 
 template <class T1, class T2>
-bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
+bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &/*option*/)
 {
 //	size_t i;  // index
 //    Ogs6FemData* femData = Ogs6FemData::getInstance();

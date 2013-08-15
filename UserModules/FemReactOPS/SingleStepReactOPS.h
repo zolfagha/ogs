@@ -229,8 +229,8 @@ SingleStepReactOPS<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBL
                          std::vector<UserLinearProblem*>  linear_problem,
 						 std::vector<UserLinearSolution*> linear_solutions)
     : AbstractTimeSteppingAlgorithm(*problem->getTimeSteppingFunction()),
-      _problem(problem), _discrete_system(dis), _function_data(function_data), 
-      _linear_problem(linear_problem), _lin_solutions(linear_solutions)
+      _problem(problem), _discrete_system(dis),
+      _linear_problem(linear_problem), _lin_solutions(linear_solutions), _function_data(function_data)
 {
     INFO("->Setting up a solution algorithm for Reactive Transport OPS problem.");
 
@@ -282,7 +282,7 @@ SingleStepReactOPS<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBL
 		list_var[i] = problem->getVariable(i);
 
 	// getting the boundary conditions of concentrations for all components, 
-    const size_t msh_id = _discrete_system->getMesh()->getID();
+    //const size_t msh_id = _discrete_system->getMesh()->getID();
     std::vector<size_t> list_bc1_eqs_id;
     std::vector<double> list_bc1_val;
     for ( i_var=0; i_var < n_var; i_var++ ) {

@@ -190,7 +190,7 @@ void FunctionOPSConc<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 }
 
 template <class T1, class T2>
-void FunctionOPSConc<T1, T2>::calc_nodal_eq_react_sys(double dt)
+void FunctionOPSConc<T1, T2>::calc_nodal_eq_react_sys(double /*dt*/)
 {
     size_t i, node_idx, err_node_count; 
     size_t result = 1; 

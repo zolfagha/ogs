@@ -245,9 +245,9 @@ SingleStepKinReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
                              UserNonLinearProblem*            non_linear_problem,
 						     UserNonLinearSolution*           non_linear_solution)
     : AbstractTimeSteppingAlgorithm(*problem->getTimeSteppingFunction()),
-      _problem(problem), _discrete_system(dis), _function_data(function_data), 
+      _problem(problem), _discrete_system(dis),
       _linear_problem(linear_problem), _lin_solutions(linear_solutions), 
-      _non_linear_problem(non_linear_problem), _nlin_solution(non_linear_solution)
+      _non_linear_problem(non_linear_problem), _nlin_solution(non_linear_solution), _function_data(function_data)
 {
     INFO("->Setting up a solution algorithm SingleStepKinReduction");
 
@@ -299,7 +299,7 @@ SingleStepKinReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
 		list_var[i] = problem->getVariable(i);
 
 	// getting the boundary conditions of concentrations for all components, 
-    const size_t msh_id = _discrete_system->getMesh()->getID();
+    //const size_t msh_id = _discrete_system->getMesh()->getID();
     std::vector<size_t> list_bc1_eqs_id;
     std::vector<double> list_bc1_val;
     for ( i_var=0; i_var < n_var; i_var++ ) {
