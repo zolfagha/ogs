@@ -133,9 +133,11 @@ void chemReductionKin::update_reductionScheme(void)
 	this->_n_xi        = _n_xi_mob  + _n_xi_immob;
 
 	// now calculated A1 and A2
-	_matA1 = ( _mat_s_1.transpose() * _mat_s_1 ).fullPivHouseholderQr().solve(_mat_s_1.transpose()) * _matS_1 ; 
-	_matA2 = ( _mat_s_2.transpose() * _mat_s_2 ).fullPivHouseholderQr().solve(_mat_s_2.transpose()) * _matS_2 ; 
-
+	// _matA1 = ( _mat_s_1.transpose() * _mat_s_1 ).fullPivHouseholderQr().solve(_mat_s_1.transpose()) * _matS_1 ; 
+	// _matA2 = ( _mat_s_2.transpose() * _mat_s_2 ).fullPivHouseholderQr().solve(_mat_s_2.transpose()) * _matS_2 ; 
+    _matA1 = ( _mat_s_1.transpose() * _mat_s_1 ).fullPivHouseholderQr().solve(_mat_s_1.transpose() * _matS_1);
+    _matA2 = ( _mat_s_2.transpose() * _mat_s_2 ).fullPivHouseholderQr().solve(_mat_s_2.transpose() * _matS_2);
+    
 #ifdef _DEBUG
 	std::cout << "A_1: "    << std::endl; 
 	std::cout << _matA1 << std::endl;
@@ -249,7 +251,7 @@ void chemReductionKin::EtaXi2Conc(ogsChem::LocalVector &local_eta_mob,
     for (size_t i=0; i < local_conc.size(); i++)
     {
         if ( local_conc(i) < 0.0 )
-            local_conc(i) = 1.0e-99;     
+            local_conc(i) = 1.0e-20;     
     }
     // end of testing
 

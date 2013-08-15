@@ -74,6 +74,7 @@ public:
         double disp_l = 0.0; 
         double disp_t = 0.0; 
         NumLib::ITXFunction::DataType v;
+        size_t m,n; 
 
         for (size_t j=0; j<q->getNumberOfSamplingPoints(); j++) {
             q->getSamplingPoint(j, gp_x);
@@ -90,8 +91,10 @@ public:
             NumLib::ITXFunction::DataType v2 = v.topRows(n_dim).transpose();
             
             NumLib::ITXFunction::DataType dispersion_diffusion = NumLib::ITXFunction::DataType::Identity(n_dim, n_dim); 
-            dispersion_diffusion *= disp_l * v.norm(); 
-            dispersion_diffusion += (disp_l - disp_t) * ( v2.transpose() * v2 ) / v.norm(); 
+            dispersion_diffusion *= disp_t * v.norm(); 
+            for ( m=0; m < n_dim ; m++ )
+                    for ( n=0; n < n_dim; n++ )
+                        dispersion_diffusion(m,n) += (disp_l - disp_t) * ( v2(m) * v2(n) ) / v.norm();
             dispersion_diffusion += d_poro.topLeftCorner(n_dim, n_dim);
             
             fe->integrateWxN(j, poro, matM);

@@ -52,7 +52,7 @@ void chemEqReactSys::calc_tot_mass(LocalVector & vec_conc_basis,
                                    LocalVector & vec_conc_second, 
                                    LocalVector & vec_tot_mass)
 {
-    vec_tot_mass = vec_conc_basis + _matStoi.transpose() * vec_conc_second; 
+    vec_tot_mass = vec_conc_basis - _matStoi.transpose() * vec_conc_second; 
 }
 
 void chemEqReactSys::calc_residual(LocalVector & vec_unknowns, 
@@ -60,7 +60,7 @@ void chemEqReactSys::calc_residual(LocalVector & vec_unknowns,
                                    LocalVector & vec_residual)
 {
     size_t i; 
-    double res_tmp;
+    double res_tmp, phi;
     ogsChem::LocalVector c_basis, c_sec_min, c_second; 
     ogsChem::LocalVector ln_c_basis, ln_c_sec_mob, ln_c_sec_sorp; 
     ogsChem::LocalVector vec_conc_basis; 
@@ -90,9 +90,9 @@ void chemEqReactSys::calc_residual(LocalVector & vec_unknowns,
     Stoi_min  = _matStoi.bottomRows( _J_min );
     
     // calculate the secondary mobile component concentrations
-    ln_c_sec_mob  = -1.0 * _vec_lnK.head( _J_mob ) + Stoi_mob * ln_c_basis; 
+    ln_c_sec_mob  = _vec_lnK.head( _J_mob ) - Stoi_mob * ln_c_basis; 
     // calculate the secondary sorption component concentrations
-    ln_c_sec_sorp = -1.0 * _vec_lnK.segment( _J_mob, _J_sorp ) + Stoi_sorp * ln_c_basis; 
+    ln_c_sec_sorp = _vec_lnK.segment( _J_mob, _J_sorp ) - Stoi_sorp * ln_c_basis; 
     lnK_min = _vec_lnK.tail(_J_min); 
     
     // fill in the secondary concentrations
@@ -109,15 +109,9 @@ void chemEqReactSys::calc_residual(LocalVector & vec_unknowns,
     // AKA, the "complementary problem".
     for ( i=0; i < _J_min; i++ )
     {
-        if ( _AI(i) == 1 )
-        {
-            // attention, this is spectial for mineral reactions
-            res_tmp  = -1.0 * lnK_min(i) + Stoi_min.row(i) * ln_c_basis;
-        }
-        else
-        {
-            res_tmp  = 0.0; 
-        }
+        // attention, this is spectial for mineral reactions
+        phi  = -1.0 * lnK_min(i) + Stoi_min.row(i) * ln_c_basis;
+        res_tmp  = std::min( phi, c_sec_min(i) ); 
         vec_residual(_I_basis+i) = res_tmp; 
     }  // end of for
 
@@ -127,7 +121,7 @@ void chemEqReactSys::calc_Jacobi(LocalVector & vec_unknowns,
                                  LocalVector & vec_tot_mass_constrain,
                                  LocalVector & vec_res_base)
 {
-    const double epsilon = 1.0e-6; 
+    const double epsilon = 1.0e-8; 
     size_t i; 
     LocalVector vec_unknown_tmp; 
     LocalVector vec_res_tmp; 
@@ -157,8 +151,8 @@ void chemEqReactSys::calc_Jacobi(LocalVector & vec_unknowns,
     }  // end of for loop
 #ifdef _DEBUG
 	// debugging--------------------------
-	std::cout << "Jacobi Matrix: \n"; 
-	std::cout << _mat_Jacobi << std::endl;
+	// std::cout << "Jacobi Matrix: \n"; 
+	// std::cout << _mat_Jacobi << std::endl;
 	// end of debugging-------------------
 #endif
 }
@@ -292,7 +286,7 @@ void chemEqReactSys::solve_EqSys_Newton(LocalVector & vec_conc, size_t & result,
     LocalVector conc_second; 
     // number of iterations
     size_t j, iter, n_unkowns;
-    double d_norm, d1_norm; 
+    double d_norm, d1_norm, d_norm0; 
 
     n_unkowns      = _I_basis + _I_sec_min; 
     x              = LocalVector::Zero( n_unkowns ); 
@@ -326,11 +320,11 @@ void chemEqReactSys::solve_EqSys_Newton(LocalVector & vec_conc, size_t & result,
     iter = 0; 
     dx = LocalVector::Ones(this->_I); 
     // now updating the saturation index and minerals
-    this->update_AI( x ); 
     this->update_minerals( x, total_mass );
     // evaluate the residual
     this->calc_residual(x, total_mass, _vec_res); 
-    d_norm = _vec_res.norm(); 
+    d_norm0 = _vec_res.norm(); 
+    d_norm  = d_norm0; 
     while (true)
     {
         #ifdef _DEBUG
@@ -338,7 +332,7 @@ void chemEqReactSys::solve_EqSys_Newton(LocalVector & vec_conc, size_t & result,
             // std::cout << "Iteration #" << iter << "||res|| = " << _vec_res.norm() << "||delta_x|| = " << dx.norm() << std::endl; 
         #endif
         // convergence criteria
-        if ( d_norm < iter_tol )
+        if ( d_norm < iter_tol  )
         {
             #ifdef _DEBUG
                 // std::cout << "Newton iteration successfully converged!\n"; 
@@ -351,11 +345,11 @@ void chemEqReactSys::solve_EqSys_Newton(LocalVector & vec_conc, size_t & result,
         else if ( dx.norm() < rel_tol )
         {
             #ifdef _DEBUG
-            std::cout << "Warning, Newton iteration stagnent on Node #" << node_idx << "! Exit the iteration!\n" ; 
+            // std::cout << "Warning, Newton iteration stagnent on Node #" << node_idx << "! Exit the iteration!\n" ; 
             #endif
             result = 0;
             // update concentrations
-            // this->update_concentations( x, vec_conc );
+            this->update_concentations( x, vec_conc );
             break;  // break the loop
         }
         else if ( iter > max_iter )
@@ -374,10 +368,11 @@ void chemEqReactSys::solve_EqSys_Newton(LocalVector & vec_conc, size_t & result,
         // increment of unkowns
         this->increment_unknown( x, dx, x_new ); 
 
-        // this->update_AI( x_new ); 
-        // this->update_minerals( x_new, total_mass );
+        // update the mineral
+        this->update_minerals( x_new, total_mass );
         // evaluate residual with x_new
         this->calc_residual(x_new, total_mass, _vec_res); 
+
 
         // line search begins
         j = 0; 
@@ -395,14 +390,15 @@ void chemEqReactSys::solve_EqSys_Newton(LocalVector & vec_conc, size_t & result,
             // increment of unkowns
             this->increment_unknown( x, dx, x_new ); 
             // now updating the saturation index and minerals
-            this->update_AI( x_new ); 
             this->update_minerals( x_new, total_mass );
             // evaluate residual with x_new
             this->calc_residual(x_new, total_mass, _vec_res); 
             
             j++;
-        }  // end of while
+        }  // end of while        
         d_norm = d1_norm; 
+
+        // d_norm = _vec_res.norm(); 
         x = x_new; 
 
         // increase the iteration count
@@ -503,7 +499,7 @@ void chemEqReactSys::increment_unknown(LocalVector & x_old,
     double damp_factor; 
 
     n_unknowns = x_old.rows();
-    // increment with a damping factor for everyone
+    // increment with a damping factor for the minerals
     for (i=0; i<n_unknowns; i++)
     {
         damp_factor = 1.0 / std::max(1.0, -1.33*delta_x(i) / x_old(i) );
@@ -512,11 +508,11 @@ void chemEqReactSys::increment_unknown(LocalVector & x_old,
 
 }  // end of func increment_unknown
 
-
-void chemEqReactSys::update_AI(LocalVector & vec_unknowns)
+void chemEqReactSys::update_minerals(LocalVector & vec_unknowns, 
+                                     LocalVector & mass_constrain)
 {
-    size_t i; 
-    double phi;
+    size_t i, idx; 
+    double cbarmin, phi; 
     ogsChem::LocalMatrix Stoi_min; 
     ogsChem::LocalVector logK_min;
     ogsChem::LocalVector c_sec_min; 
@@ -534,8 +530,10 @@ void chemEqReactSys::update_AI(LocalVector & vec_unknowns)
     // and the minerals
     c_sec_min  = vec_unknowns.tail( _I_sec_min ); 
 
-    for ( i=0; i < _I_sec_min ; i++ )
+    for ( i=0; i < _I_sec_min; i++ )
     {
+        idx = _I_basis + i; 
+        
         // calculate the phi
         phi  = -logK_min(i) + Stoi_min.row(i) * ln_c_basis;
 
@@ -548,8 +546,9 @@ void chemEqReactSys::update_AI(LocalVector & vec_unknowns)
         {
             // mineral is not present
             _AI(i) = 0; 
+            // set mineral concentration to zero
+            cbarmin = 0.0; 
         }
-    }
 
 }
 
@@ -589,18 +588,17 @@ void chemEqReactSys::update_minerals(LocalVector & vec_unknowns,
         {
             _AI(i) = 0;
             cbarmin = 0.0; 
-            vec_unknowns(idx) = cbarmin;
         }
         else
         {
             if ( _AI(i) == 0 )
             {
                 cbarmin = cal_cbarmin_by_total_mass(i, c_basis, mass_constrain);
-                vec_unknowns(idx) = cbarmin;
             }
             _AI(i) = 1; 
         }  // end of else
 
+        vec_unknowns(idx) = cbarmin;
     }  // end of for 
 
 }  // end of function update_minerals
@@ -627,9 +625,9 @@ void chemEqReactSys::update_concentations(LocalVector & vec_unknowns, LocalVecto
     Stoi_mob  = _matStoi.topRows(    _J_mob );
     Stoi_sorp = _matStoi.middleRows( _J_mob, _J_sorp ); 
     // calculate the secondary mobile component concentrations
-    ln_c_sec_mob  = -1.0 * _vec_lnK.head( _J_mob ) + Stoi_mob * ln_c_basis; 
+    ln_c_sec_mob  = _vec_lnK.head( _J_mob ) - Stoi_mob * ln_c_basis; 
     // calculate the secondary sorption component concentrations
-    ln_c_sec_sorp = -1.0 * _vec_lnK.segment( _J_mob, _J_sorp ) + Stoi_sorp * ln_c_basis; 
+    ln_c_sec_sorp = _vec_lnK.segment( _J_mob, _J_sorp ) - Stoi_sorp * ln_c_basis; 
 
     // fill in the secondary concentrations
     for (i=0; i < (size_t)ln_c_sec_mob.rows(); i++)
@@ -656,7 +654,7 @@ double chemEqReactSys::cal_cbarmin_by_total_mass(size_t        idx_min,
     res_tmp       = tot_mass - c_basis; 
 
     // conc_second = matStoi_trans.fullPivHouseholderQr().solve( res_tmp ); 
-    conc_second = matStoi_trans.householderQr().solve( res_tmp ); 
+    conc_second = (-1.0 * matStoi_trans).householderQr().solve( res_tmp ); 
     cbarmin = conc_second( _I_sec_mob + _I_sec_sorp + idx_min);
 return cbarmin;
 }  // end of function cal_cbarmin_by_total_mass
