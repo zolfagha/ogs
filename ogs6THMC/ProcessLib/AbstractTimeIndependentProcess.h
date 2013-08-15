@@ -37,7 +37,9 @@ public:
 
     bool isAwake(const NumLib::TimeStep &/*time*/) { return true;  }
 
-    virtual void accept(const NumLib::TimeStep &/*time*/) {};
+    virtual bool accept(const NumLib::TimeStep &/*time*/) { return true; }
+
+    virtual void finalizeTimeStep(const NumLib::TimeStep &/*time*/) {};
 
 };
 
