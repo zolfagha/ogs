@@ -121,10 +121,21 @@ public:
       */ 
     int solveTimeStep(const NumLib::TimeStep &t_n1);
     
+    virtual bool accept(const NumLib::TimeStep &t)
+    {
+        // this solution itself
+        if (!AbstractTimeSteppingAlgorithm::accept(t)) return false;
+        // call all linear solutions
+        for (size_t i=0; i < _lin_solutions.size(); i++ )
+            if (!_lin_solutions[i]->accept(t)) return false;
+        // the non-linear solution
+        return _nlin_solution->accept(t);
+    }
+
     /**
 	  * called when this solution is accepted
 	  */
-    virtual void accept(const NumLib::TimeStep &t)
+    virtual void finalizeTimeStep(const NumLib::TimeStep &t)
     {
         // this solution itself
         AbstractTimeSteppingAlgorithm::accept(t);

@@ -58,7 +58,7 @@ bool FunctionHeadToElementVelocity<T>::initialize(const BaseLib::Options &option
 }
 
 template <class T>
-void FunctionHeadToElementVelocity<T>::accept(const NumLib::TimeStep &time)
+void FunctionHeadToElementVelocity<T>::finalizeTimeStep(const NumLib::TimeStep &time)
 {
     //std::cout << "Velocity=" << std::endl;
     //_vel->printout();

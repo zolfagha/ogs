@@ -46,7 +46,7 @@ bool FunctionPressureToElementVelocity<T>::initialize(const BaseLib::Options &op
 }
 
 template <class T>
-void FunctionPressureToElementVelocity<T>::accept(const NumLib::TimeStep &/*time*/)
+void FunctionPressureToElementVelocity<T>::finalizeTimeStep(const NumLib::TimeStep &/*time*/)
 {
     //std::cout << "Velocity=" << std::endl;
     //_vel->printout();

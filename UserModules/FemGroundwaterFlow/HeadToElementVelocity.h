@@ -59,7 +59,12 @@ public:
 
     int solveTimeStep(const NumLib::TimeStep &/*time*/);
 
-    virtual void accept(const NumLib::TimeStep &/*time*/);
+    virtual bool accept(const NumLib::TimeStep &time)
+    {
+        return _tim->accept(time.getTime());
+    }
+
+    virtual void finalizeTimeStep(const NumLib::TimeStep &/*time*/);
 
     ///
     virtual NumLib::IConvergenceCheck* getConvergenceChecker() { return &_checker; };
