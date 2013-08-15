@@ -113,9 +113,9 @@ public:
     DiscreteLib::DofEquationIdTable* getDofEquationIdTable() {return &_dofManager;};
 
     ///
-    virtual void accept(const NumLib::TimeStep &t)
+    virtual void finalizeTimeStep(const NumLib::TimeStep &t)
     {
-        AbstractTimeSteppingAlgorithm::accept(t);
+        AbstractTimeSteppingAlgorithm::finalizeTimeStep(t);
         *_x_n0 = *_x_n1; //copy current value to previous value
     };
 
