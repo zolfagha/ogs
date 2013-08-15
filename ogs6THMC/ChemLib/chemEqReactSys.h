@@ -208,12 +208,7 @@ private:
     void increment_unknown(LocalVector & x_old, 
                            LocalVector & delta_x, 
                            LocalVector & x_new);
-
-    /** 
-      * update the saturation index of minerals
-      */
-    void update_AI(LocalVector & vec_unknowns);
-    
+   
     /**
       * update the concentration of minerals
       */

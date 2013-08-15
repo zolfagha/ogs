@@ -63,7 +63,7 @@ public:
 protected:
     virtual void assembleODE(const NumLib::TimeStep & time, const MeshLib::IElement &e, const LocalVectorType & u1, const LocalVectorType & u0, LocalMatrixType & localM, LocalMatrixType & localK, LocalVectorType & localF)
     {
-		size_t i, j, k, node_idx, n_xi_mob, n_nodes, n_sp, n_rows_localK, n_cols_localK;
+		size_t i, j, k, m, n, node_idx, n_xi_mob, n_nodes, n_sp, n_rows_localK, n_cols_localK;
         FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
         const size_t n_dim = e.getDimension();
         size_t mat_id = e.getGroupID();
@@ -122,8 +122,10 @@ protected:
 			NumLib::ITXFunction::DataType v2 = v.topRows(n_dim).transpose();
 
             NumLib::ITXFunction::DataType dispersion_diffusion = NumLib::ITXFunction::DataType::Identity(n_dim, n_dim); 
-            dispersion_diffusion *= disp_l * v.norm(); 
-            dispersion_diffusion += (disp_l - disp_t) * ( v2.transpose() * v2 ) / v.norm(); 
+            dispersion_diffusion *= disp_t * v.norm(); 
+            for ( m=0; m < n_dim ; m++ )
+                    for ( n=0; n < n_dim; n++ )
+                        dispersion_diffusion(m,n) += (disp_l - disp_t) * ( v2(m) * v2(n) ) / v.norm();
             dispersion_diffusion += d_poro.topLeftCorner(n_dim, n_dim);
 
     		// mass matrix
@@ -133,6 +135,7 @@ protected:
 			// advection
 			fe->integrateWxDN(j, v2, localAdvection_tmp);
 
+            
             LocalMatrixType &Np = *fe->getBasisFunction(); // HS
          	for (k=0; k<n_xi_mob; k++)
             {
@@ -141,6 +144,8 @@ protected:
                 // right hand side xi_mob rates
                 localF.segment(n_nodes*k,n_nodes).noalias() += Np.transpose() * rate_xi_mob_gp * fe->getDetJ() * q->getWeight(j);
             }
+            
+
 	    }  // end of for j
         localK_tmp = localDispersion_tmp + localAdvection_tmp; 
 
@@ -150,6 +155,8 @@ protected:
             localM.block(n_nodes*k,n_nodes*k,n_nodes,n_nodes) = localM_tmp.block(0, 0, n_nodes, n_nodes);
             // localK
             localK.block(n_nodes*k,n_nodes*k,n_nodes,n_nodes) = localK_tmp.block(0, 0, n_nodes, n_nodes);
+            // localF
+            // localF.segment(n_nodes*k,n_nodes).noalias() += node_xi_mob_rate_values.col(k);
         }  // end of for k
 
     }
