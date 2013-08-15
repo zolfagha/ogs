@@ -988,7 +988,7 @@ void FunctionReductConc<T1, T2>::GlobalResidualAssembler(const NumLib::TimeStep 
 	// rate vector
 	MathLib::LocalVector vec_Rate, vec_Rate_45, vec_Rate_46; //, global_vec_Rate_45, global_vec_Rate_46;
 
-	MathLib::LocalMatrix _mat_A1sorp, _mat_A2sorpli, _mat_A2sorpld, _mat_A1min, _mat_Ald, mat_A45, mat_A46;
+	MathLib::LocalMatrix _mat_A1sorp, _mat_A2sorpli, _mat_A2sorpld, _mat_A1min, _mat_Ald;
 
 	// initialize the local vector
 	//current xi global
@@ -1036,8 +1036,8 @@ void FunctionReductConc<T1, T2>::GlobalResidualAssembler(const NumLib::TimeStep 
     _mat_Ald 		   = _ReductionGIA->get_matrix_Ald();
     _mat_A2sorpld  	   = _ReductionGIA->get_matrix_A2sorpld();
 
-    _mat_A45 = _mat_A1sorp - _mat_A2sorpli;
-    _mat_A46 = _mat_A1min - _mat_Ald * _mat_A2sorpld;
+    _mat_Asorp = _mat_A1sorp - _mat_A2sorpli;
+    _mat_Amin = _mat_A1min - _mat_Ald * _mat_A2sorpld;
 
 
 	// loop over all the nodes
@@ -1381,7 +1381,7 @@ void FunctionReductConc<T1, T2>::assembly(const NumLib::TimeStep & delta_t, cons
 							local_u0(idx) 		= loc_pre_xi_Sorp[node_indx];
 							local_u1_tilde(idx) = loc_cur_xi_Sorp_tilde[node_indx];
 							local_u0_tilde(idx) = loc_pre_xi_Sorp_tilde[node_indx];
-							vec_Rate_temp = _mat_A45 * loc_vec_Rate;
+							vec_Rate_temp = _mat_Asorp * loc_vec_Rate;
 
 			}
 			else
@@ -1390,7 +1390,7 @@ void FunctionReductConc<T1, T2>::assembly(const NumLib::TimeStep & delta_t, cons
 							local_u0(idx) 		= loc_pre_xi_Min[node_indx];
 							local_u1_tilde(idx) = loc_cur_xi_Min_tilde[node_indx];
 							local_u0_tilde(idx) = loc_pre_xi_Min_tilde[node_indx];
-							vec_Rate_temp = _mat_A46 * loc_vec_Rate;
+							vec_Rate_temp = _mat_Amin * loc_vec_Rate;
 			}
 
 		// LHS = dt*(1/dt M + theta K)
@@ -1432,7 +1432,7 @@ void FunctionReductConc<T1, T2>::assembly(const NumLib::TimeStep & delta_t, cons
 
 
 template <class T1, class T2>
-void FunctionReductConc<T1, T2>::GlobalJacobianAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, SolutionLib::SolutionVector & Jacobian_global)
+void FunctionReductConc<T1, T2>::GlobalJacobianAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, SolutionLib::SolutionVector & Jacobian_global)  // TODO Jacobian_global will be changed to matrix
 {
 
 	using namespace std::placeholders;
@@ -1443,6 +1443,9 @@ void FunctionReductConc<T1, T2>::GlobalJacobianAssembler(const NumLib::TimeStep 
     nnodes = dis->getMesh()->getNumberOfNodes();
     const double theta_water_content(0.32);
     const double delta_xi = 1E-14;
+
+    MathLib::LocalMatrix mat_A1kin   = _ReductionGIA->get_matrix_A1kin();
+    ogsChem::LocalMatrix mat_Ald   = _ReductionGIA->get_matrix_Ald();
 
     // current xi global
 	MathLib::LocalVector loc_cur_xi_global, loc_cur_xi_Sorp_tilde, loc_cur_xi_Min_tilde,
@@ -1456,7 +1459,10 @@ void FunctionReductConc<T1, T2>::GlobalJacobianAssembler(const NumLib::TimeStep 
 	// eta vectors
 	MathLib::LocalVector loc_cur_eta, loc_cur_eta_bar;
 
-	MathLib::LocalMatrix mat_p1Fder,mat_p1Trans, mat_p1F, mat_p2F, mat_Global_Jacobian;
+	// local concentration vector
+	MathLib::LocalVector vec_conc;
+
+	MathLib::LocalMatrix mat_p1Fder,mat_p1Ftrans, mat_p1F, mat_p2F, mat_Global_Jacobian;
 
 	// initialize the local vector
 	//current xi global
@@ -1475,14 +1481,18 @@ void FunctionReductConc<T1, T2>::GlobalJacobianAssembler(const NumLib::TimeStep 
 	// current eta mobie and immobile
 	loc_cur_eta        		= LocalVector::Zero( _n_eta );
 	loc_cur_eta_bar     	= LocalVector::Zero( _n_eta_bar );
+	vec_conc                = LocalVector::Zero(_n_Comp);
 
+	MathLib::LocalMatrix mat_vprime  = LocalMatrix::Zero(_n_xi_local,_n_xi_global);
+	MathLib::LocalMatrix Jacobian_local = LocalMatrix::Zero(_n_xi_global, _n_xi_global);
 	MathLib::LocalVector vec_rate_old = LocalVector::Zero(_vec_Rate_rows);
 	MathLib::LocalVector vec_Rate = LocalVector::Zero(_vec_Rate_rows);
 
     mat_p1Fder 	= LocalMatrix::Zero(_n_xi_global, _n_xi_global);
-    mat_p1Trans = LocalMatrix::Zero(_n_xi_global, _n_xi_global);
+    mat_p1Ftrans = LocalMatrix::Zero(_n_xi_global, _n_xi_global);
     mat_p1F		= LocalMatrix::Zero(_n_xi_global, _n_xi_global);
     mat_p2F 	= LocalMatrix::Zero(_n_xi_global, _n_xi_global);
+    double dt = delta_t.getTimeStepSize();
 
     //TODO fix the global jacobian matrix
 
@@ -1511,6 +1521,9 @@ void FunctionReductConc<T1, T2>::GlobalJacobianAssembler(const NumLib::TimeStep 
 			for (i=0; i < _vec_Rate_rows; i++)
 				vec_rate_old[i] = this->_global_vec_Rate[i]->getValue(node_idx);
 
+			for (i=0; i < _n_Comp; i++)
+				vec_conc[i] = this->_concentrations[i]->getValue(node_idx);
+
 		    // current xi global
 			loc_cur_xi_Sorp_tilde   = loc_cur_xi_global.head(_n_xi_Sorp_tilde);
 			loc_cur_xi_Min_tilde  	= loc_cur_xi_global.segment(_n_xi_Sorp_tilde, _n_xi_Min_tilde);
@@ -1528,6 +1541,8 @@ void FunctionReductConc<T1, T2>::GlobalJacobianAssembler(const NumLib::TimeStep 
 		    loc_cur_xi_Sorp_bar_ld 	= loc_cur_xi_Sorp_bar.bottomRows(_n_xi_Sorp_bar_ld);
 
 
+		    ///// calculate partial1F
+
 			ogsChem::LocalVector der_sorpT_R;
 			der_sorpT_R  = LocalVector::Zero(_n_xi_Sorp_tilde);
 			NumDiff(_n_xi_Sorp_tilde, delta_xi, std::bind(this->_ReductionGIA->Calc_Kin_Rate ,loc_cur_xi_Mob, loc_cur_xi_Sorp, _3, loc_cur_xi_Sorp_bar, loc_cur_xi_Min, loc_cur_xi_Min_tilde,
@@ -1544,10 +1559,79 @@ void FunctionReductConc<T1, T2>::GlobalJacobianAssembler(const NumLib::TimeStep 
 			NumDiff(_n_xi_Kin, delta_xi, std::bind(this->_ReductionGIA->Calc_Kin_Rate ,loc_cur_xi_Mob, loc_cur_xi_Sorp, loc_cur_xi_Sorp_tilde, loc_cur_xi_Sorp_bar, loc_cur_xi_Min, loc_cur_xi_Min_tilde,
 					 loc_cur_xi_Min_bar, _8, loc_cur_xi_Kin_bar, loc_cur_eta, loc_cur_eta_bar, vec_Rate), vec_rate_old, loc_cur_xi_Kin, der_kin_R);
 
-			//p1Fder
-		}
 
-	}
+
+
+			mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde, 0, _n_xi_Sorp, _n_xi_Sorp_tilde)						  =  _mat_Asorp * der_sorpT_R;
+			mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, 0, _n_xi_Min, _n_xi_Sorp_tilde) 			  =  _mat_Amin * der_sorpT_R;
+			mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, 0, _n_xi_Kin, _n_xi_Sorp_tilde) =  mat_A1kin * der_sorpT_R;
+
+			mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Sorp_tilde, _n_xi_Sorp, _n_xi_Min_tilde) 						=  _mat_Asorp * der_minT_R;
+			mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Sorp_tilde, _n_xi_Min, _n_xi_Min_tilde) 			=  _mat_Amin * der_minT_R;
+			mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Sorp_tilde, _n_xi_Kin, _n_xi_Min_tilde) =  mat_A1kin * der_minT_R;
+
+			mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Sorp, _n_xi_Kin) 						 =  _mat_Asorp * der_kin_R;
+			mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Min, _n_xi_Kin) 			 =  _mat_Amin * der_kin_R;
+			mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Kin, _n_xi_Kin) =  mat_A1kin * der_kin_R;
+
+		    ///// Add the identity matrix to the  the mass and conductance matrix
+			mat_p1Ftrans.block(0, 0, _n_xi_Sorp_tilde, _n_xi_Sorp_tilde) 													  = LocalMatrix::Identity(_n_xi_Sorp_tilde, _n_xi_Sorp_tilde);
+			mat_p1Ftrans.block(_n_xi_Sorp_tilde, _n_xi_Sorp_tilde, _n_xi_Min_tilde, _n_xi_Min_tilde) 						  = LocalMatrix::Identity(_n_xi_Min_tilde, _n_xi_Min_tilde);
+			mat_p1Ftrans.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Sorp_tilde, _n_xi_Sorp)							  = -1.0 * LocalMatrix::Identity(_n_xi_Sorp_tilde, _n_xi_Sorp);
+			mat_p1Ftrans.block(_n_xi_Sorp_tilde, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Min_tilde, _n_xi_Min) = -1.0 * LocalMatrix::Identity(_n_xi_Min_tilde, _n_xi_Min);
+
+			//// calculate partial1f. i.e. partial drivative with respect to global variable
+			mat_p1F = mat_p1Ftrans - dt * theta_water_content * mat_p1Fder;
+
+			///// calculate partial2F
+
+			ogsChem::LocalVector der_mob_R;
+			der_mob_R  = LocalVector::Zero(_n_xi_Mob);
+			NumDiff(_n_xi_Mob, delta_xi, std::bind(this->_ReductionGIA->Calc_Kin_Rate ,_1, loc_cur_xi_Sorp, loc_cur_xi_Sorp_tilde, loc_cur_xi_Sorp_bar, loc_cur_xi_Min, loc_cur_xi_Min_tilde,
+					 loc_cur_xi_Min_bar, loc_cur_xi_Kin, loc_cur_xi_Kin_bar, loc_cur_eta, loc_cur_eta_bar, vec_Rate), vec_rate_old, loc_cur_xi_Mob, der_mob_R);
+
+			ogsChem::LocalVector der_sorpB_R;
+			der_sorpB_R  = LocalVector::Zero(_n_xi_Sorp_bar);
+			NumDiff(_n_xi_Sorp, delta_xi, std::bind(this->_ReductionGIA->Calc_Kin_Rate ,loc_cur_xi_Mob, loc_cur_xi_Sorp, loc_cur_xi_Sorp_tilde, _4, loc_cur_xi_Min, loc_cur_xi_Min_tilde,
+					 loc_cur_xi_Min_bar, loc_cur_xi_Kin, loc_cur_xi_Kin_bar, loc_cur_eta, loc_cur_eta_bar, vec_Rate), vec_rate_old, loc_cur_xi_Sorp_bar, der_sorpB_R);
+
+			//ogsChem::LocalVector der_sorpB_li_R 	= der_sorpB_R.topRows(_n_xi_Sorp_bar_li);
+			//ogsChem::LocalVector der_sorpB_ld_R 	= der_sorpB_R.bottomRows(_n_xi_Sorp_bar_ld);
+
+			ogsChem::LocalVector der_minB_R;
+			der_minB_R  = LocalVector::Zero(_n_xi_Min_bar);
+			NumDiff(_n_xi_Sorp, delta_xi, std::bind(this->_ReductionGIA->Calc_Kin_Rate ,loc_cur_xi_Mob, loc_cur_xi_Sorp, loc_cur_xi_Sorp_tilde, loc_cur_xi_Sorp_bar, loc_cur_xi_Min, loc_cur_xi_Min_tilde,
+					 _7, loc_cur_xi_Kin, loc_cur_xi_Kin_bar, loc_cur_eta, loc_cur_eta_bar, vec_Rate), vec_rate_old, loc_cur_xi_Min_bar, der_minB_R);
+
+			mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde, 0, _n_xi_Sorp, _n_xi_Mob)							 = - dt * theta_water_content * _mat_Asorp * der_mob_R;
+			mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, 0, _n_xi_Min, _n_xi_Mob) 			 = - dt * theta_water_content * _mat_Amin * der_mob_R;
+			mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, 0, _n_xi_Kin, _n_xi_Mob)  = - dt * theta_water_content * mat_A1kin * der_mob_R;
+
+			//TODO IMPORTANT: li and ld is merged together. it should be checked later for its correctness.
+			mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Mob, _n_xi_Sorp, _n_xi_Sorp_bar) 						 = - dt * theta_water_content * _mat_Asorp * der_sorpB_R;
+			mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Mob, _n_xi_Min, _n_xi_Sorp_bar) 			 = - dt * theta_water_content * _mat_Amin * der_sorpB_R;
+			mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Mob, _n_xi_Kin, _n_xi_Sorp_bar) = - dt * theta_water_content * mat_A1kin * der_sorpB_R;
+
+			mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Sorp, _n_xi_Min_bar) 						 = - dt * theta_water_content * _mat_Asorp * der_minB_R;
+			mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Min, _n_xi_Min_bar) 		     = - dt * theta_water_content * _mat_Amin * der_minB_R;
+			mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Kin, _n_xi_Min_bar) = - dt * theta_water_content * mat_A1kin * der_minB_R;
+
+			// add the relavent identity matrices
+			mat_p2F.block(0, _n_xi_Mob, _n_xi_Sorp_bar_li, _n_xi_Sorp_bar_li)							 		 = LocalMatrix::Identity(_n_xi_Sorp_bar_li, _n_xi_Sorp_bar_li);
+			mat_p2F.block(_n_xi_Sorp_bar_li, _n_xi_Mob + _n_xi_Sorp_bar_li, _n_xi_Min_bar, _n_xi_Sorp_bar_ld)	 = mat_Ald;
+			mat_p2F.block(_n_xi_Sorp_bar_li, _n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Min_bar, _n_xi_Min_bar)	 		 = LocalMatrix::Identity(_n_xi_Min_bar, _n_xi_Min_bar);
+
+			////// calculate vprime
+			Vprime(vec_conc, mat_vprime);
+
+			// construct local Jacobian matrix
+			Jacobian_local = mat_p1F + mat_p2F * mat_vprime;
+
+			// construct global Jacobian matrix
+			Jacobian_global.block(node_idx * _n_xi_global, node_idx * _n_xi_global, _n_xi_global, _n_xi_global) += Jacobian_local;
+
+		}  // end of if statement
+	}  // end of node based for loop
 
 
 
@@ -1575,3 +1659,12 @@ for(std::size_t i = 0; i < col; i++)
 }
 
 }
+
+template <class T1, class T2>
+void FunctionReductConc<T1, T2>::Vprime( MathLib::LocalVector & vec_conc,
+										 MathLib::LocalMatrix & mat_vprime)
+{
+
+
+}
+

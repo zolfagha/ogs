@@ -286,6 +286,9 @@ public:
 			 	ogsChem::LocalVector & f_old,
 			 	 ogsChem::LocalVector & unknown,
 			 	 ogsChem::LocalVector & DrateDxi);
+	void Vprime (MathLib::LocalVector & vec_conc,
+				  MathLib::LocalMatrix & mat_vprime);
+
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
 
@@ -519,7 +522,7 @@ private:
     /**
      * local A matrix
      */
-   MathLib::LocalMatrix _mat_A45, _mat_A46;
+   MathLib::LocalMatrix _mat_Asorp, _mat_Amin;
 
     //temp global vectors
 //    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Sorp_tilde;

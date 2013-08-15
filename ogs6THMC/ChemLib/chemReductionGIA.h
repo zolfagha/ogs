@@ -260,6 +260,11 @@ public:
 	LocalMatrix get_matrix_A2kin(void) {return _mat_A2kin; };
 
 	/**
+      * get the _mat_A1kin matrix
+      */
+	LocalMatrix get_matrix_A1kin(void) {return _mat_A1kin; };
+
+	/**
       * get the _mat_S1min matrix
       */
 	LocalMatrix get_matrix_S1min(void) {return _mat_S1min; };
