@@ -20,13 +20,10 @@
 #include "NumLib/TransientAssembler/TransientElementWiseMatrixUpdater.h"
 #include "FemLib/Function/FemFunction.h"
 #include "SolutionLib/DataType.h"
-#include "FemDirichletBC.h"
-#include "FemNeumannBC.h"
+#include "SolutionLib/Fem/FemDirichletBC.h"
+#include "SolutionLib/Fem/FemNeumannBC.h"
+#include "SolutionLib/Fem/FemVariable.h"
 
-#include "FemVariable.h"
-
-namespace SolutionLib
-{
 
 /**
  * \brief Template class for transient linear FEM functions
@@ -36,41 +33,42 @@ namespace SolutionLib
 template <
     class T_DIS_SYS,
     class T_LINEAR_SOLVER,
-    class T_LOCAL_JACOBIAN_ASSEMBLER
+    class T_USER_FUNCTION_DATA
+//    class T_LOCAL_JACOBIAN_ASSEMBLER
     >
-class TemplateTransientDxFEMFunction
+class TemplateTransientDxFEMFunction_GIA_Reduct
 {
 public:
-    typedef FemVariable MyVariable;
+    typedef SolutionLib::FemVariable MyVariable;
     typedef T_LINEAR_SOLVER LinearSolverType;
-    typedef T_LOCAL_JACOBIAN_ASSEMBLER UserLocalJacobianAssembler;
-    typedef typename NumLib::TransientElementWiseMatrixUpdater<UserLocalJacobianAssembler> MyUpdater;
-    typedef typename T_DIS_SYS::template MyLinearEquationAssembler<MyUpdater,LinearSolverType>::type MyGlobalAssembler;
+//    typedef T_LOCAL_JACOBIAN_ASSEMBLER UserLocalJacobianAssembler;
+//    typedef typename NumLib::TransientElementWiseMatrixUpdater<UserLocalJacobianAssembler> MyUpdater;
+//    typedef typename T_DIS_SYS::template MyLinearEquationAssembler<MyUpdater,LinearSolverType>::type MyGlobalAssembler;
 
     /// constructor
     /// @param problem        Fem problem
     /// @param linear_eqs    Discrete linear equation
-    TemplateTransientDxFEMFunction(MeshLib::IMesh* msh, std::vector<MyVariable*> &list_var, UserLocalJacobianAssembler* asssembler, DiscreteLib::IDiscreteLinearEquation* linear_eqs)
-        : _msh(msh), _local_assembler(asssembler),  _linear_eqs(linear_eqs),
-          _t_n1(0), _u_n0(0), _list_var(list_var)
+    TemplateTransientDxFEMFunction_GIA_Reduct(MeshLib::IMesh* msh, std::vector<MyVariable*> &list_var, DiscreteLib::IDiscreteLinearEquation* linear_eqs, T_USER_FUNCTION_DATA* userData)
+        : _msh(msh),  _linear_eqs(linear_eqs),
+          _t_n1(0), _u_n0(0), _list_var(list_var), _userData(userData)
     {
     };
 
     ///
-    virtual ~TemplateTransientDxFEMFunction() {};
+    virtual ~TemplateTransientDxFEMFunction_GIA_Reduct() {};
 
     ///
-    NumLib::TemplateFunction<SolutionVector,SolutionVector>* clone() const
+    NumLib::TemplateFunction<SolutionLib::SolutionVector,SolutionLib::SolutionVector>* clone() const
     {
-        return new TemplateTransientDxFEMFunction<
+        return new TemplateTransientDxFEMFunction_GIA_Reduct<
                     T_DIS_SYS,
                     T_LINEAR_SOLVER,
-                    T_LOCAL_JACOBIAN_ASSEMBLER
-                    >(_list_var, _local_assembler, _linear_eqs);
+                    T_USER_FUNCTION_DATA
+                    >(_list_var, _linear_eqs, _userData);
     }
 
     /// reset property
-    void reset(const NumLib::TimeStep* t, const SolutionVector* u_n0)
+    void reset(const NumLib::TimeStep* t, const SolutionLib::SolutionVector* u_n0)
     {
         this->_t_n1 = t;
         this->_u_n0 = u_n0;
@@ -80,24 +78,24 @@ public:
     /// @param u_n1    current solution
     /// @param r     residual
     /// @param du    increment
-    void eval(const SolutionVector &u_n1, const SolutionVector &r, SolutionVector &du);
+    void eval(const SolutionLib::SolutionVector &u_n1, const SolutionLib::SolutionVector &r, SolutionLib::SolutionVector &du);
 
 private:
     MeshLib::IMesh* _msh;
-    UserLocalJacobianAssembler *_local_assembler;
     DiscreteLib::IDiscreteLinearEquation* _linear_eqs;
     const NumLib::TimeStep* _t_n1;
-    const SolutionVector* _u_n0;
+    const SolutionLib::SolutionVector* _u_n0;
     std::vector<MyVariable*> _list_var;
+    T_USER_FUNCTION_DATA* _userData;
 };
 
 
 template <class T1, class T2, class T3>
-void TemplateTransientDxFEMFunction<T1,T2,T3>::eval(const SolutionVector &u_n1, const SolutionVector &r, SolutionVector &du)
+void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::eval(const SolutionLib::SolutionVector &u_n1, const SolutionLib::SolutionVector &r, SolutionLib::SolutionVector &du)
 {
     // input, output
     const NumLib::TimeStep &t_n1 = *this->_t_n1;
-    const SolutionVector* u_n = this->_u_n0;
+    const SolutionLib::SolutionVector* u_n = this->_u_n0;
 
     _linear_eqs->initialize();
 
@@ -107,7 +105,7 @@ void TemplateTransientDxFEMFunction<T1,T2,T3>::eval(const SolutionVector &u_n1, 
         std::vector<size_t> var_bc_id;
         std::vector<double> var_bc_val;
         for (size_t j=0; j<var->getNumberOfDirichletBC(); j++) {
-            FemDirichletBC* bc1 = var->getDirichletBC(j);
+            SolutionLib::FemDirichletBC* bc1 = var->getDirichletBC(j);
             bc1->setup(var->getCurrentOrder());
             std::vector<double> bc_value_for_dx(bc1->getListOfBCNodes().size(), .0);
             for (size_t k=0; k<bc_value_for_dx.size(); k++) {
@@ -124,9 +122,9 @@ void TemplateTransientDxFEMFunction<T1,T2,T3>::eval(const SolutionVector &u_n1, 
 
     // assembly
     //NumLib::ElementWiseTransientDxEQSAssembler<UserLocalJacobianAssembler> assembler(&t_n1, u_n, &u_n1, _local_assembler);
-    MyUpdater updater(&t_n1, _msh, u_n, &u_n1, _local_assembler);
-    MyGlobalAssembler assembler(&updater);
-    _linear_eqs->construct(assembler);
+//    MyUpdater updater(&t_n1, _msh, u_n, &u_n1, _local_assembler);
+//    MyGlobalAssembler assembler(&updater);
+//    _linear_eqs->construct(assembler);
 
     // set residual
     _linear_eqs->addRHS(r, -1.0);
@@ -135,4 +133,3 @@ void TemplateTransientDxFEMFunction<T1,T2,T3>::eval(const SolutionVector &u_n1, 
     _linear_eqs->solve();
     _linear_eqs->getX(du);
 }
-} //end

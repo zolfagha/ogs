@@ -57,10 +57,10 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 	// first get the number of components
 	_n_Comp = femData->map_ChemComp.size();
     // also get the size of secondary variables
-    _n_eta   		= this->_ReductionGIA->get_n_eta  ();
-	_n_eta_bar 		= this->_ReductionGIA->get_n_eta_bar();
-	_n_xi_global    = this->_ReductionGIA->get_n_xi_global ();
-	_n_xi_local 	= this->_ReductionGIA->get_n_xi_local ();
+    size_t _n_eta   		= this->_ReductionGIA->get_n_eta  ();
+    size_t _n_eta_bar 		= this->_ReductionGIA->get_n_eta_bar();
+    size_t _n_xi_global    = this->_ReductionGIA->get_n_xi_global ();
+    size_t _n_xi_local 	= this->_ReductionGIA->get_n_xi_local ();
 
 	// set concentrations of all components as output
 	for ( i=0; i < _n_Comp; i++ )
@@ -147,7 +147,7 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 	// define nonlinear problem
 	_non_linear_problem = new MyNonLinearReactiveTransportProblemType(dis);
 	_non_linear_eqs     = _non_linear_problem->createEquation();
-	_non_linear_eqs->initialize( non_linear_assembler, non_linear_r_assembler, non_linear_j_assembler );
+	//_non_linear_eqs->initialize( non_linear_j_assembler );
 	_non_linear_problem->setTimeSteppingFunction(*tim);
 	// for nonlinear coupled transport problem, variables are xi_mobile species
 	for ( i=0; i < _n_xi_global ; i++ )
@@ -225,7 +225,7 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 	// NRIterationStepInitializer
 	myNRIterator = new MyNRIterationStepInitializer(non_linear_r_assembler, non_linear_j_assembler);
 	myNSolverFactory = new MyDiscreteNonlinearSolverFactory( myNRIterator );
-	this->_non_linear_solution = new MyNonLinearSolutionType( dis, this->_non_linear_problem, myNSolverFactory );
+	this->_non_linear_solution = new MyNonLinearSolutionType( dis, this->_non_linear_problem, this, myNSolverFactory );
     this->_non_linear_solution->getDofEquationIdTable()->setNumberingType(DiscreteLib::DofNumberingType::BY_POINT);  // global order
     this->_non_linear_solution->getDofEquationIdTable()->setLocalNumberingType(DiscreteLib::DofNumberingType::BY_VARIABLE);  // local order
 	const BaseLib::Options* optNum = option.getSubGroup("Numerics");
@@ -310,9 +310,9 @@ void FunctionReductConc<T1, T2>::initializeTimeStep(const NumLib::TimeStep &/*ti
 	//	_linear_problems[i]->getEquation()->getJacobianAssembler()->setVelocity(vel);
 	}
 	// set velocity for nonlinear problem as well
-	_non_linear_problem->getEquation()->getLinearAssembler()->setVelocity(vel);
-    _non_linear_problem->getEquation()->getResidualAssembler()->setVelocity(vel);
-	_non_linear_problem->getEquation()->getJacobianAssembler()->setVelocity(vel);
+	//_non_linear_problem->getEquation()->getLinearAssembler()->setVelocity(vel);
+//    _non_linear_problem->getEquation()->getResidualAssembler()->setVelocity(vel);
+//	_non_linear_problem->getEquation()->getJacobianAssembler()->setVelocity(vel);
  //   // set xi_mob_rates for non-linear problem
 	//_non_linear_problem->getEquation()->getLinearAssembler()  ->set_xi_mob_rates( &_xi_mob_rates ); 
 	//_non_linear_problem->getEquation()->getResidualAssembler()->set_xi_mob_rates( &_xi_mob_rates ); 
@@ -346,6 +346,7 @@ void FunctionReductConc<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 
 #ifdef _DEBUG
     // -----------debugging, output eta and xi----------------------
+	size_t _n_eta = this->_ReductionGIA->get_n_eta();
     for (i=0; i < _n_eta; i++) {
         std::stringstream str_tmp;
 		str_tmp << "eta_" << i ;
@@ -384,6 +385,8 @@ template <class T1, class T2>
 void FunctionReductConc<T1, T2>::convert_conc_to_eta_xi(void)
 {
 	size_t node_idx, i;
+    size_t _n_eta = this->_ReductionGIA->get_n_eta();
+    size_t _n_eta_bar = this->_ReductionGIA->get_n_eta_bar();
 
 	// only when the reduction scheme is fully initialized
 	if ( this->_ReductionGIA->IsInitialized() )
@@ -442,6 +445,8 @@ template <class T1, class T2>
 void FunctionReductConc<T1, T2>::convert_eta_xi_to_conc(void)
 {
 	size_t node_idx, i;
+    size_t _n_eta = this->_ReductionGIA->get_n_eta();
+    size_t _n_eta_bar = this->_ReductionGIA->get_n_eta_bar();
 
 	// only when the reduction scheme is fully initialized
 	if ( this->_ReductionGIA->IsInitialized() )
@@ -552,6 +557,8 @@ template <class T1, class T2>
 void FunctionReductConc<T1, T2>::update_node_kin_reaction_rates(void)
 {
 	size_t node_idx, i;
+    size_t _n_eta = this->_ReductionGIA->get_n_eta();
+    size_t _n_eta_bar = this->_ReductionGIA->get_n_eta_bar();
 
 	// only when the reduction scheme is fully initialized
 	if ( this->_ReductionGIA->IsInitialized() )
@@ -639,6 +646,8 @@ void FunctionReductConc<T1, T2>::update_node_kin_reaction_drates_dxi(void)
     double drates_dxi_tmp = 0.0;
 
     size_t node_idx, i, j;
+    size_t _n_eta = this->_ReductionGIA->get_n_eta();
+    size_t _n_eta_bar = this->_ReductionGIA->get_n_eta_bar();
 
 	LocalVector loc_eta;
 	LocalVector loc_eta_bar;
@@ -735,14 +744,16 @@ template <class T1, class T2>
 void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const double iter_tol, const double rel_tol, const double max_iter)
 {
 	size_t i, node_idx;
+    size_t _n_eta = this->_ReductionGIA->get_n_eta();
+    size_t _n_eta_bar = this->_ReductionGIA->get_n_eta_bar();
 
     //pointer to the local problem
     LocalProblem* pSolve;
     pSolve = new LocalProblem( _ReductionGIA);
 
 	//get the transformation matrices
-	_mat_c_mob_2_xi_mob     = _ReductionGIA->get_matrix_C2Xi();
-	_mat_c_immob_2_xi_immob = _ReductionGIA->get_matrix_Cbar2XiBar();
+	MathLib::LocalMatrix _mat_c_mob_2_xi_mob     = _ReductionGIA->get_matrix_C2Xi();
+	MathLib::LocalMatrix _mat_c_immob_2_xi_immob = _ReductionGIA->get_matrix_Cbar2XiBar();
 	_n_xi_Sorp_tilde        = _ReductionGIA->get_n_xi_Sorp_tilde();
 	_n_xi_Min_tilde         = _ReductionGIA->get_n_xi_Min_tilde();
 	_n_xi_Sorp				= _ReductionGIA->get_n_xi_Sorp();
@@ -958,7 +969,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
     delete pSolve;
 }
 
-
+#if 0
 template <class T1, class T2>
 void FunctionReductConc<T1, T2>::GlobalResidualAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, SolutionLib::SolutionVector & residual_global)
 {
@@ -1430,11 +1441,9 @@ void FunctionReductConc<T1, T2>::assembly(const NumLib::TimeStep & delta_t, cons
 
 
 
-
 template <class T1, class T2>
 void FunctionReductConc<T1, T2>::GlobalJacobianAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, SolutionLib::SolutionVector & Jacobian_global)  // TODO Jacobian_global will be changed to matrix
 {
-
 	using namespace std::placeholders;
 	size_t i, node_idx, indx_tmp, nnodes;
     _n_xi_Sorp_bar_li  = _ReductionGIA->get_n_xi_Sorp_bar_li();
@@ -1637,9 +1646,9 @@ void FunctionReductConc<T1, T2>::GlobalJacobianAssembler(const NumLib::TimeStep 
 
 
 
-
 }
 
+#endif
 
 
 template <class T1, class T2>
@@ -1650,6 +1659,7 @@ void FunctionReductConc<T1, T2>::NumDiff(std::size_t & col,
 			              			 	 ogsChem::LocalVector & unknown,
 			              			 	 ogsChem::LocalVector & DrateDxi)
 {
+#if 0
 	ogsChem::LocalVector xi = LocalVector::Zero(col);
 for(std::size_t i = 0; i < col; i++)
 {
@@ -1657,7 +1667,7 @@ for(std::size_t i = 0; i < col; i++)
     xi(i)     = xi(i) + delta_xi * xi(i).norm();
     DrateDxi(i) = ( f(xi) - f_old) / (delta_xi * xi(i).norm());  //is it elementwise?
 }
-
+#endif
 }
 
 template <class T1, class T2>
