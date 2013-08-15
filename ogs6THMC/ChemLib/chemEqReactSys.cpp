@@ -549,7 +549,7 @@ void chemEqReactSys::update_minerals(LocalVector & vec_unknowns,
             // set mineral concentration to zero
             cbarmin = 0.0; 
         }
-
+    }
 }
 
 void chemEqReactSys::update_minerals(LocalVector & vec_unknowns, 
