@@ -100,5 +100,9 @@ double TimeStepFunctionNewtonAdaptive::suggestNext(double /*t_current*/)
 		return t;
 };
 
+bool TimeStepFunctionNewtonAdaptive::accept(double /*t_current*/)
+{
+    return this->_iter_times < 1000; //TODO
+}
 
 }
