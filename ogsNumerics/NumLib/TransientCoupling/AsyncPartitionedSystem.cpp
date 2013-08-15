@@ -110,7 +110,16 @@ bool AsyncPartitionedSystem::isAwake(const TimeStep &time)
     return false;
 };
 
-void AsyncPartitionedSystem::accept(const TimeStep &time)
+bool AsyncPartitionedSystem::accept(const TimeStep &time)
+{
+    for (size_t i=0; i<_list_subproblems.size(); i++) {
+        ITransientCoupledSystem *solution = _list_subproblems[i];
+        if (!solution->accept(time)) return false;
+    }
+    return true;
+}
+
+void AsyncPartitionedSystem::finalizeTimeStep(const TimeStep &time)
 {
     for (size_t i=0; i<_list_subproblems.size(); i++) {
         ITransientCoupledSystem *solution = _list_subproblems[i];
