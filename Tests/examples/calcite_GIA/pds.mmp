@@ -9,7 +9,7 @@ GeoSys-MMP  Material Medium Properties ------------------------------------
  $TORTUOSITY
   1   1.000000e+000
  $PERMEABILITY_TENSOR
-  ISOTROPIC    1.13386e-3
+  ISOTROPIC    1.13386e-5
  $MASS_DISPERSION
   1  0.0067  0.0 
  $DENSITY

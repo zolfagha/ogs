@@ -83,11 +83,23 @@ public:
 	/**
 	 * calculate the reaction rates
 	 */
-	void Calc_Kin_Rate(ogsChem::LocalVector &local_eta,
-		               ogsChem::LocalVector &local_eta_bar,
-					   ogsChem::LocalVector &local_xi_global,
-					   ogsChem::LocalVector &local_xi_local,
-					   ogsChem::LocalVector &local_rate_vec);
+//	void Calc_Kin_Rate(ogsChem::LocalVector &local_eta,
+//		               ogsChem::LocalVector &local_eta_bar,
+//					   ogsChem::LocalVector &local_xi_global,
+//					   ogsChem::LocalVector &local_xi_local,
+//					   ogsChem::LocalVector &local_rate_vec);
+	void Calc_Kin_Rate(ogsChem::LocalVector &local_xi_Mob,
+										 ogsChem::LocalVector &local_xi_Sorp,
+				                         ogsChem::LocalVector &local_xi_Sorp_tilde,
+										 ogsChem::LocalVector &local_xi_Sorp_bar,
+										 ogsChem::LocalVector &local_xi_Min,
+										 ogsChem::LocalVector &local_xi_Min_tilde,
+										 ogsChem::LocalVector &local_xi_Min_bar,
+										 ogsChem::LocalVector &local_xi_Kin,
+									     ogsChem::LocalVector &local_xi_Kin_bar,
+										 ogsChem::LocalVector &local_eta,
+										 ogsChem::LocalVector &local_eta_bar,
+										 ogsChem::LocalVector &local_rate_vec);
 
 	/**
       * get the number of components
@@ -223,9 +235,34 @@ public:
 	LocalMatrix get_matrix_Ald(void) {return _mat_Ald; };
 
 	/**
+      * get the _mat_A1sorp matrix
+      */
+	LocalMatrix get_matrix_A1sorp(void) {return _mat_A1sorp; };
+
+	/**
+      * get the _mat_A2sorpli matrix
+      */
+	LocalMatrix get_matrix_A2sorpli(void) {return _mat_A2sorpli; };
+
+	/**
+      * get the _mat_A2sorpld matrix
+      */
+	LocalMatrix get_matrix_A2sorpld(void) {return _mat_A2sorpld; };
+
+	/**
+      * get the _mat_A1min matrix
+      */
+	LocalMatrix get_matrix_A1min(void) {return _mat_A1min; };
+
+	/**
       * get the _mat_A2kin matrix
       */
 	LocalMatrix get_matrix_A2kin(void) {return _mat_A2kin; };
+
+	/**
+      * get the _mat_A1kin matrix
+      */
+	LocalMatrix get_matrix_A1kin(void) {return _mat_A1kin; };
 
 	/**
       * get the _mat_S1min matrix
@@ -283,11 +320,11 @@ private:
 	LocalMatrix _mat_S1, _mat_S1mob,_mat_S2mob, _mat_Ssorp,_mat_Ssorp_ast,_mat_Ssorp_li,_mat_Ssorp_ld, _mat_S1sorp_li, _mat_S1sorp_ld, _mat_S1sorp, _mat_S1min, _mat_S2min, _mat_S2, _mat_S2sorp, _mat_S1kin, _mat_S2kin,
 	            _mat_Skin,_mat_Skin_li, _mat_S2sorp_li,_mat_S2sorp_ld,_mat_S1_preserve, _mat_S2_preserve, _matrix_Ssorp;
 
-	/**
-      * LocalVector sub-vectors of xi and eta,
-      */
-	LocalVector local_xi_Mob, local_xi_Sorp,local_xi_Sorp_li,local_xi_Sorp_ld,local_xi_Sorp_tilde,local_xi_Sorp_bar,local_xi_Min,local_xi_Min_tilde,local_xi_Min_bar,local_xi_Kin,local_xi_Kin_bar,
-	            local_xi,local_xi_bar;
+//	/**
+//      * LocalVector sub-vectors of xi and eta,    ?
+//      */
+//	LocalVector local_xi_Mob, local_xi_Sorp,local_xi_Sorp_li,local_xi_Sorp_ld,local_xi_Sorp_tilde,local_xi_Sorp_bar,local_xi_Min,local_xi_Min_tilde,local_xi_Min_bar,local_xi_Kin,local_xi_Kin_bar,
+//	            local_xi,local_xi_bar;
 
 	LocalVector local_conc,local_eta,local_eta_bar;
 

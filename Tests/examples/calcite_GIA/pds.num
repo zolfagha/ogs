@@ -12,7 +12,7 @@ GeoSys-NUM: Numerical Parameter ----------------------------------------
   REACT_GIA
  $LINEAR_SOLVER 
 ; method error_tolerance max_iterations theta precond storage
-  2      6 1.e-014       1000           0.5   1       2
+  2      6 1.e-08       1000           0.5   1       2
  $ELE_GAUSS_POINTS
   3
 #STOP

@@ -91,7 +91,8 @@ protected:
         double disp_l = 0.0; 
         double disp_t = 0.0; 
         
-        for (size_t j=0; j < _q->getNumberOfSamplingPoints(); j++) {
+        for (size_t j=0; j < _q->getNumberOfSamplingPoints(); j++)
+        {
             _q->getSamplingPoint(j, gp_x);
             _fe->computeBasisFunctions(gp_x);
             _fe->getRealCoordinates(real_x);
