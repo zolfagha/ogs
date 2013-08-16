@@ -508,6 +508,7 @@ void chemEqReactSys::increment_unknown(LocalVector & x_old,
 
 }  // end of func increment_unknown
 
+#if 0
 void chemEqReactSys::update_minerals(LocalVector & vec_unknowns, 
                                      LocalVector & mass_constrain)
 {
@@ -549,8 +550,9 @@ void chemEqReactSys::update_minerals(LocalVector & vec_unknowns,
             // set mineral concentration to zero
             cbarmin = 0.0; 
         }
-
+    }
 }
+#endif
 
 void chemEqReactSys::update_minerals(LocalVector & vec_unknowns, 
                                      LocalVector & mass_constrain)
