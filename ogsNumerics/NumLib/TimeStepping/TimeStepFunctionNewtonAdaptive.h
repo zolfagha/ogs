@@ -53,7 +53,7 @@ protected:
     {
         if (t > getPrevious())
             _dt_pre = t - getPrevious();
-        AbstractTimeStepFunction::accept(t);
+        AbstractTimeStepFunction::finalize(t);
     }
 
     /**
