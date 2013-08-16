@@ -269,11 +269,30 @@ public:
       */
 	LocalMatrix get_matrix_S1min(void) {return _mat_S1min; };
 
-
 	/**
       * get the _mat_S1mob matrix
       */
 	LocalMatrix get_matrix_S1mob(void) {return _mat_S1mob; };
+
+	/**
+      * get the _mat_S1sorp matrix
+      */
+	LocalMatrix get_matrix_S1sorp(void) {return _mat_S1sorp; };
+
+	/**
+      * get the _mat_S1sorpli matrix
+      */
+	LocalMatrix get_matrix_S1sorpli(void) {return _mat_S1sorp_li; };
+
+	/**
+      * get the _mat_S1kin_ast matrix
+      */
+	LocalMatrix get_matrix_S1kin_ast(void) {return _mat_S1kin_ast; };
+
+	/**
+      * get the _mat_S2sorp matrix
+      */
+	LocalMatrix get_matrix_S2sorp(void) {return _mat_S2sorp; };
 
 
 	/**
