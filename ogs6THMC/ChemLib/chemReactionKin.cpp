@@ -22,6 +22,7 @@ chemReactionKin::chemReactionKin()
 	_rate = 0.0;
 	_rate_constant = 0.0; 
 	_rate_constant_order = 1.0; 
+	_idx_bacteria = 0;
     _decay_rate = 0.0; 
 }
 
@@ -29,7 +30,7 @@ chemReactionKin::~chemReactionKin(void)
 {
 }
 
-void chemReactionKin::readReactionStr(std::string & reaction_str)
+void chemReactionKin::readReactionStr(std::string & /*reaction_str*/)
 {
 	// TODO
 	std::string tmp_str;

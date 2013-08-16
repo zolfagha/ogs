@@ -68,7 +68,7 @@ public:
 
     int solveTimeStep(const NumLib::TimeStep &/*time*/);
 
-    void accept(const NumLib::TimeStep &/*time*/);
+    void finalizeTimeStep(const NumLib::TimeStep &/*time*/);
 
 protected:
     virtual void updateOutputParameter(const NumLib::TimeStep &/*time*/) {};

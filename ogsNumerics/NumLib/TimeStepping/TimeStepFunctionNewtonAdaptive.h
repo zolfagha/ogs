@@ -43,11 +43,13 @@ protected:
       */
     virtual void updateLog(BaseLib::Options &log);
 
+    virtual bool accept(double t);
+
     /**
       * If the time if moving forward, then update the size of 
       * last time step. It will be used to evaluate the next time step. 
       */
-    virtual void accept(double t)
+    virtual void finalize(double t)
     {
         if (t > getPrevious())
             _dt_pre = t - getPrevious();

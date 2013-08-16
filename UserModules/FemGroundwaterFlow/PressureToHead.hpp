@@ -53,7 +53,7 @@ bool FunctionPressureToHead<T>::initialize(const BaseLib::Options &option)
 }
 
 template <class T>
-void FunctionPressureToHead<T>::accept(const NumLib::TimeStep &/*time*/)
+void FunctionPressureToHead<T>::finalizeTimeStep(const NumLib::TimeStep &/*time*/)
 {
     //std::cout << "Velocity=" << std::endl;
     //_vel->printout();

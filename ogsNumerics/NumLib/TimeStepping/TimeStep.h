@@ -59,7 +59,7 @@ public:
 
     void setTime(double t) {_time_current = t;};
     void setTimeStepSize(double dt) {_dt = dt;};
-    void accept(double t) 
+    void finalize(double t) 
     {
         _time_current = t;
         _dt = .0;

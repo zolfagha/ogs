@@ -65,7 +65,7 @@ bool FunctionElementStressStrain<T>::initialize(const BaseLib::Options &option)
 }
 
 template <class T>
-void FunctionElementStressStrain<T>::accept(const NumLib::TimeStep &/*time*/)
+void FunctionElementStressStrain<T>::finalizeTimeStep(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
     const size_t n_strain_components = getNumberOfStrainComponents();

@@ -70,7 +70,7 @@ double TimeStepFunctionNewtonAdaptive::suggestNext(double /*t_current*/)
 	{
 		double tmp_dt = 0.0;
 		double tmp_multiplier; 
-        double t_pre  = getPrevious();
+        //double t_pre  = getPrevious();
         size_t i; 
         // get the first multiplier by default        
         if ( _multiplier_vector.size() > 0 )
@@ -100,5 +100,9 @@ double TimeStepFunctionNewtonAdaptive::suggestNext(double /*t_current*/)
 		return t;
 };
 
+bool TimeStepFunctionNewtonAdaptive::accept(double /*t_current*/)
+{
+    return this->_iter_times < 1000; //TODO
+}
 
 }

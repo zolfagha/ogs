@@ -30,7 +30,7 @@ public:
 				const double         atoll, 
 				const double         rtoll, 
 				bool                 dens)
-    : x(xx), y(yy), dydx(dydxx), atol(atoll), rtol(rtoll), dense(dens), n(y.size()), neqn(n), yout(n), yerr(n) {};
+    : x(xx), xold(.0), y(yy), dydx(dydxx), atol(atoll), rtol(rtoll), dense(dens), hdid(.0), hnext(.0), EPS(.0), n(y.size()), neqn(n), yout(n), yerr(n) {};
 
 	double                &x; 
 	double                xold; 
@@ -57,7 +57,7 @@ public:
                         double rtoll, 
                         bool dens)
 	: StepperBase(yy, dydxx, xx, atoll, rtoll, dens), KMAXX(8), IMAXX(KMAXX+1), 
-	  nseq(IMAXX), cost(IMAXX), table(KMAXX, n), dydxnew(n), coeff(IMAXX, IMAXX), errfac(2*IMAXX+2),
+	  nseq(IMAXX), cost(IMAXX), table(KMAXX, n), dydxnew(n), mu(0), coeff(IMAXX, IMAXX), errfac(2*IMAXX+2),
 	  ysave(IMAXX,n), fsave(IMAXX*(2*IMAXX+1),n), ipoint(IMAXX+1), dens((2*IMAXX+5)*n)
 	{
 		size_t i,j,k,l; 
@@ -324,7 +324,7 @@ public:
 		
 			if (reject) // Arrive here from any break in for loop.
 				prev_reject=true;
-		} // Go back if step was rejected.\
+		} // Go back if step was rejected.
 	
 		// derivs_class->eval(x+h,y,dydxnew); // Used for start of next step and in dense out-put.
         dydxnew = (*derivs_class)(x+h,y);
@@ -563,8 +563,8 @@ public:
 			y[2*n+i]=aspl;
 			y[3*n+i]=bspl;
 		
-			if  (imit  <  0) 
-				continue;
+//			if  (imit  <  0)
+//				continue;
 			ph0=(y0+y1)*0.5+0.125*(aspl+bspl);
 			ph1=ydiff+(aspl-bspl)*0.25;
 			ph2=-(yp0-yp1);

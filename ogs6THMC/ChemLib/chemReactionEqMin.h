@@ -37,7 +37,7 @@ public:
       * the returned value is the residual of the reaction. 
       * if equilibrium is reached, then redisual is zero. 
       */
-    double eval(ogsChem::LocalVector & vec_log_Conc)
+    double eval(ogsChem::LocalVector & /*vec_log_Conc*/)
     {
         // TODO
         return 0.0;
