@@ -7,7 +7,7 @@
  *
  * \file FemDxEQS.h
  *
- * Created on 2012-08-03 by Norihiro Watanabe
+ * Created on 2013-08-016 by Reza Zolfaghari & Norihiro Watanabe
  */
 
 #pragma once
