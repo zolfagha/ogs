@@ -67,7 +67,7 @@ void FunctionHeadToElementVelocity<T>::finalizeTimeStep(const NumLib::TimeStep &
     OutputVariableInfo var(this->getOutputParameterName(Velocity), _dis->getMesh()->getID(), OutputVariableInfo::Element, OutputVariableInfo::Real, 3, _vel);
     femData->outController.setOutput(var.name, var);
 
-    _tim->accept(time.getTime());
+    _tim->finalize(time.getTime());
 };
 
 template <class T>

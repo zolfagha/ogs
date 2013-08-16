@@ -123,7 +123,7 @@ void AsyncPartitionedSystem::finalizeTimeStep(const TimeStep &time)
 {
     for (size_t i=0; i<_list_subproblems.size(); i++) {
         ITransientCoupledSystem *solution = _list_subproblems[i];
-        solution->accept(time);
+        solution->finalizeTimeStep(time);
     }
 }
 

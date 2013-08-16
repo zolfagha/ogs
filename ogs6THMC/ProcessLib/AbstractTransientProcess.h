@@ -71,7 +71,7 @@ public:
     {
         postTimeStep(time);
         output(time);
-        getSolution()->accept(time);
+        getSolution()->finalizeTimeStep(time);
     };
 
 protected:
