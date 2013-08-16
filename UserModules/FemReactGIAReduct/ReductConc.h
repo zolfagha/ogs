@@ -64,11 +64,11 @@ public:
     typedef LinearTransportTimeODELocalAssemblerML<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyLinearResidualAssemblerType;
     typedef LinearTransportJacobianLocalAssembler MyLinearJacobianAssemblerType;                                        
 	// for the nonlinear part, use different settings
-	typedef NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler, MyNodalFunctionScalar>      MyNonLinearAssemblerType;
-	typedef NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler, MyNodalFunctionScalar> MyNonLinearResidualAssemblerType;
+//	typedef NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler, MyNodalFunctionScalar>      MyNonLinearAssemblerType;
+//	typedef NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler, MyNodalFunctionScalar> MyNonLinearResidualAssemblerType;
 
 	//to be changed
-	typedef NonLinearGIAJacobianLocalAssembler<MyNodalFunctionScalar, MyFunctionData>                                    MyNonLinearJacobianAssemblerType;
+//	typedef NonLinearGIAJacobianLocalAssembler<MyNodalFunctionScalar, MyFunctionData>                                    MyNonLinearJacobianAssemblerType;
 	typedef NestedGIALocalProbNRIterationStepInitializer<MyNodalFunctionScalar, MyFunctionData>                          MyNRIterationStepInitializer;
 	typedef NumLib::DiscreteNRSolverWithStepInitFactory<MyNRIterationStepInitializer>                                    MyDiscreteNonlinearSolverFactory;
 	
@@ -106,10 +106,10 @@ public:
 	typedef TemplateFemEquation_GIAReduct<
 		    MyDiscreteSystem,
             MyFunctionData,
-			MyLinearSolver,
-			MyNonLinearAssemblerType,
-			MyNonLinearResidualAssemblerType,
-			MyNonLinearJacobianAssemblerType
+			MyLinearSolver
+//			MyNonLinearAssemblerType,
+//			MyNonLinearResidualAssemblerType,
+//			MyNonLinearJacobianAssemblerType
 	        > MyNonLinearEquationType;
 	/**
       * FEM IVBV problem definition

@@ -119,9 +119,9 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
     MyLinearJacobianAssemblerType* linear_j_eqs = new MyLinearJacobianAssemblerType(_feObjects);
 
     //To Do: for xi global
-	MyNonLinearAssemblerType* non_linear_assembler = new MyNonLinearAssemblerType(_feObjects, this->_ReductionGIA );
-	MyNonLinearResidualAssemblerType* non_linear_r_assembler = new MyNonLinearResidualAssemblerType(_feObjects, this->_ReductionGIA );
-	MyNonLinearJacobianAssemblerType* non_linear_j_assembler = new MyNonLinearJacobianAssemblerType(_feObjects, this->_ReductionGIA, this);
+//	MyNonLinearAssemblerType* non_linear_assembler = new MyNonLinearAssemblerType(_feObjects, this->_ReductionGIA );
+//	MyNonLinearResidualAssemblerType* non_linear_r_assembler = new MyNonLinearResidualAssemblerType(_feObjects, this->_ReductionGIA );
+//	MyNonLinearJacobianAssemblerType* non_linear_j_assembler = new MyNonLinearJacobianAssemblerType(_feObjects, this->_ReductionGIA, this);
 
 	//_local_ode_xi_immob = new Local_ODE_Xi_immob( this->_ReductionGIA );
 
@@ -223,7 +223,7 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 	//TODO : xi global
 	// set up non-linear solution
 	// NRIterationStepInitializer
-	myNRIterator = new MyNRIterationStepInitializer(non_linear_r_assembler, non_linear_j_assembler);
+//	myNRIterator = new MyNRIterationStepInitializer(non_linear_r_assembler, non_linear_j_assembler);
 	myNSolverFactory = new MyDiscreteNonlinearSolverFactory( myNRIterator );
 	this->_non_linear_solution = new MyNonLinearSolutionType( dis, this->_non_linear_problem, this, myNSolverFactory );
     this->_non_linear_solution->getDofEquationIdTable()->setNumberingType(DiscreteLib::DofNumberingType::BY_POINT);  // global order
