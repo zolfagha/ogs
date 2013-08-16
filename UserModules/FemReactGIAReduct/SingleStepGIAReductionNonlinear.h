@@ -60,6 +60,7 @@ class SingleStepGIAReductionNonlinear
 public:
     typedef T_USER_FEM_PROBLEM UserFemProblem;
     typedef typename UserFemProblem::MyDiscreteSystem MyDiscreteSystem;
+    typedef typename MyDiscreteSystem::template MyLinearEquation<T_LINEAR_SOLVER,DiscreteLib::SparsityBuilderFromNodeConnectivity>::type MyDiscreteLinaerEQS;
     typedef typename UserFemProblem::MyVariable MyVariable;
     typedef typename UserFemProblem::EquationType::LinearEQSType UserLinearFunction; //dummy
     typedef typename UserFemProblem::EquationType::ResidualEQSType UserResidualFunction;
@@ -125,7 +126,7 @@ private:
     T_USER_FUNCTION_DATA* _user_data;
     LinearSolverType* _linear_solver;
     MyDiscreteSystem *_discrete_system;
-    DiscreteLib::IDiscreteLinearEquation* _linear_eqs;
+    MyDiscreteLinaerEQS* _linear_eqs;
     std::vector<MyNodalFunctionScalar*> _vec_u_n1;
     //UserLinearFunction* _f_linear;
     UserResidualFunction* _f_r;

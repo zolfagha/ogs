@@ -41,6 +41,7 @@ class TemplateTransientDxFEMFunction_GIA_Reduct
 {
 public:
     typedef T_DIS_SYS MyDiscreteSystem;
+    typedef typename T_DIS_SYS::template MyLinearEquation<T_LINEAR_SOLVER,DiscreteLib::SparsityBuilderFromNodeConnectivity>::type MyLinaerEQS;
     typedef SolutionLib::FemVariable MyVariable;
     typedef T_LINEAR_SOLVER LinearSolverType;
     typedef typename FemLib::FemNodalFunctionScalar<MyDiscreteSystem>::type MyNodalFunctionScalar;
@@ -51,9 +52,9 @@ public:
     /// constructor
     /// @param problem        Fem problem
     /// @param linear_eqs    Discrete linear equation
-    TemplateTransientDxFEMFunction_GIA_Reduct(MeshLib::IMesh* msh, std::vector<MyVariable*> &list_var, DiscreteLib::IDiscreteLinearEquation* linear_eqs, T_USER_FUNCTION_DATA* userData)
+    TemplateTransientDxFEMFunction_GIA_Reduct(MeshLib::IMesh* msh, std::vector<MyVariable*> &list_var, MyLinaerEQS* linear_eqs, DiscreteLib::DofEquationIdTable* dofManager, T_USER_FUNCTION_DATA* userData)
         : _msh(msh),  _linear_eqs(linear_eqs),
-          _t_n1(0), _u_n0(0), _list_var(list_var), _userData(userData)
+          _t_n1(0), _u_n0(0), _list_var(list_var), _dofManager(dofManager), _userData(userData)
     {
     };
 
@@ -67,7 +68,7 @@ public:
                     T_DIS_SYS,
                     T_LINEAR_SOLVER,
                     T_USER_FUNCTION_DATA
-                    >(_list_var, _linear_eqs, _userData);
+                    >(_list_var, _linear_eqs, _dofManager, _userData);
     }
 
     /// reset property
@@ -84,12 +85,18 @@ public:
     void eval(const SolutionLib::SolutionVector &u_n1, const SolutionLib::SolutionVector &r, SolutionLib::SolutionVector &du);
 
 private:
-    void GlobalJacobianAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, SolutionLib::SolutionVector & Jacobian_global);
-    void Vprime( MathLib::LocalVector & vec_conc,
-            MathLib::LocalMatrix & mat_vprime);
+    void GlobalJacobianAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, LinearSolverType & eqsJacobian_global);
+    void Vprime( MathLib::LocalVector & vec_conc, MathLib::LocalMatrix & mat_vprime);
+    void NumDiff(std::size_t & col,
+                                             ogsChem::LocalVector & delta_xi,
+                                             ogsChem::LocalVector & f,
+                                             ogsChem::LocalVector & f_old,
+                                             ogsChem::LocalVector & unknown,
+                                             ogsChem::LocalVector & DrateDxi);
 private:
     MeshLib::IMesh* _msh;
-    DiscreteLib::IDiscreteLinearEquation* _linear_eqs;
+    DiscreteLib::DofEquationIdTable* _dofManager;
+    MyLinaerEQS* _linear_eqs;
     const NumLib::TimeStep* _t_n1;
     const SolutionLib::SolutionVector* _u_n0;
     std::vector<MyVariable*> _list_var;
@@ -98,7 +105,7 @@ private:
     //TODO pass via constructor
     ogsChem::chemReductionGIA* _ReductionGIA;
     std::map<size_t, ReductionGIANodeInfo*>* _bc_info;
-    std::vector<MyNodalFunctionScalar*> _xi_global, _xi_local, _eta, _eta_bar, _global_vec_Rate;
+    std::vector<MyNodalFunctionScalar*> _concentrations, _xi_global, _xi_local, _eta, _eta_bar, _global_vec_Rate;
     NumLib::ITXFunction* _vel;
     //TODO set the followings from _ReductionGIA
     size_t _n_xi_global, _n_xi_Sorp_tilde, _n_xi_Min_tilde, _n_xi_Sorp, _n_xi_Min, _n_xi_Kin, _n_xi_local, _n_xi_Sorp_bar, _n_xi_Min_bar, _n_eta, _n_eta_bar, _n_xi_Mob, _n_xi_Kin_bar, _vec_Rate_rows;
@@ -141,6 +148,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::eval(const SolutionLib
 //    MyUpdater updater(&t_n1, _msh, u_n, &u_n1, _local_assembler);
 //    MyGlobalAssembler assembler(&updater);
 //    _linear_eqs->construct(assembler);
+    LinearSolverType* eqsJacobian_global = _linear_eqs->getLinearSolver();
+    GlobalJacobianAssembler(t_n1.getTimeStepSize(), u_n1, *eqsJacobian_global);
 
     // set residual
     _linear_eqs->addRHS(r, -1.0);
@@ -151,8 +160,23 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::eval(const SolutionLib
 }
 
 template <class T1, class T2, class T3>
-void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, SolutionLib::SolutionVector & Jacobian_global)  // TODO Jacobian_global will be changed to matrix
+void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, LinearSolverType & eqsJacobian_global)
 {
+    //---------------------------------------------------------------------------
+    // Note for Reza:
+    // eqsJacobian_global is actually MathLib/LinAlg/LisLinearEquation object in your case
+    // In this function, you have to update a coefficient matrix in the linear equation object.
+    // For example, you can add a value to the jacobian matrix as
+    //
+    // eqsJacobian_global.addA(0,0, 1.0);
+    //
+    // You can get a dimension of the matrix as
+    //
+    // size_t eqs_dim = eqsJacobian_global.getDimension();
+    //
+    //---------------------------------------------------------------------------
+
+
     using namespace std::placeholders;
     size_t i, node_idx, indx_tmp, nnodes;
     _n_xi_Sorp_bar_li  = _ReductionGIA->get_n_xi_Sorp_bar_li();
@@ -360,3 +384,21 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 
 }
 
+template <class T1, class T2, class T3>
+void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::NumDiff(std::size_t & col,
+                                         ogsChem::LocalVector & delta_xi,
+                                         ogsChem::LocalVector & f,
+                                         ogsChem::LocalVector & f_old,
+                                         ogsChem::LocalVector & unknown,
+                                         ogsChem::LocalVector & DrateDxi)
+{
+#if 0
+    ogsChem::LocalVector xi = LocalVector::Zero(col);
+for(std::size_t i = 0; i < col; i++)
+{
+    xi        = unknown;
+    xi(i)     = xi(i) + delta_xi * xi(i).norm();
+    DrateDxi(i) = ( f(xi) - f_old) / (delta_xi * xi(i).norm());  //is it elementwise?
+}
+#endif
+}
