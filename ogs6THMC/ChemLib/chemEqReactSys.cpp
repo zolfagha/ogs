@@ -248,7 +248,7 @@ void chemEqReactSys::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemCom
     _I = _I_mob + _I_sec_sorp + _I_sec_min;
 }
 
-void chemEqReactSys::countReactions(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp, std::vector<ogsChem::chemReactionEq*> & list_eq_reactions)
+void chemEqReactSys::countReactions(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & /*map_chemComp*/, std::vector<ogsChem::chemReactionEq*> & list_eq_reactions)
 {
 	_J_mob = 0; 
 	_J_sorp= 0; 
@@ -407,7 +407,7 @@ void chemEqReactSys::solve_EqSys_Newton(LocalVector & vec_conc, size_t & result,
 }
 
 
-void chemEqReactSys::Min_solv(size_t      & idx_node, 
+void chemEqReactSys::Min_solv(size_t      & /*idx_node*/,
                               LocalMatrix & J,  
                               LocalVector & res,  
                               LocalVector & delta_x)

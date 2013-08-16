@@ -52,7 +52,7 @@ protected:
 	/**
       * virtual class, read from a reaction string 
       */
-	virtual void readReactionStr(std::string & reaction_str) {}; 
+	virtual void readReactionStr(std::string & /*reaction_str*/) {};
     
 	/**
       * vector of components in this reaction

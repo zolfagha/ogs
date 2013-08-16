@@ -194,13 +194,18 @@ public:
         return getSolution()->isAwake(time);
     }
 
+    virtual bool accept(const NumLib::TimeStep &time)
+    {
+        return getSolution()->accept(time);
+    }
+
     /**
 	  * called when this time step is accepted
 	  */
-    virtual void accept(const NumLib::TimeStep &time)
+    virtual void finalizeTimeStep(const NumLib::TimeStep &time)
     {
          output(time);
-		 getSolution()->accept(time);
+		 getSolution()->finalizeTimeStep(time);
     };
 
 	/**

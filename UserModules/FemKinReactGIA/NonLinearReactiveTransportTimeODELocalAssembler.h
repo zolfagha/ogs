@@ -61,7 +61,7 @@ public:
 	}
 
 protected:
-    virtual void assembleODE(const NumLib::TimeStep & time, const MeshLib::IElement &e, const LocalVectorType & u1, const LocalVectorType & u0, LocalMatrixType & localM, LocalMatrixType & localK, LocalVectorType & localF)
+    virtual void assembleODE(const NumLib::TimeStep & /*time*/, const MeshLib::IElement &e, const LocalVectorType & /*u1*/, const LocalVectorType & /*u0*/, LocalMatrixType & localM, LocalMatrixType & localK, LocalVectorType & localF)
     {
 		size_t i, j, k, m, n, node_idx, n_xi_mob, n_nodes, n_sp, n_rows_localK, n_cols_localK;
         FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);

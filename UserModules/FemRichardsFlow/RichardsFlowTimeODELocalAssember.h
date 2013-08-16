@@ -19,7 +19,7 @@ protected:
     virtual void assembleODE(const NumLib::TimeStep &/*time*/, const MeshLib::IElement &e, const LocalVectorType &u1,   const LocalVectorType &/*u0*/, LocalMatrixType &localM, LocalMatrixType &localK, LocalVectorType &localF)
     {
 		FemLib::IFiniteElement* fe = _feObjects.getFeObject(e);
-        const size_t n_dim = e.getDimension();
+        //const size_t n_dim = e.getDimension();
         size_t mat_id = e.getGroupID();
         // get pointer to corresponding porous media class
         MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[mat_id];
@@ -105,7 +105,7 @@ protected:
         // testing mass lumping----------------------------
         // std::cout << "Local Mass Matrix before lumping: " << std::endl; 
         // std::cout << localM << std::endl; 
-        for (size_t idx_ml=0; idx_ml < localM.cols(); idx_ml++ )
+        for (int idx_ml=0; idx_ml < localM.cols(); idx_ml++ )
         {
             double mass_lump_val;
             mass_lump_val = localM.col(idx_ml).sum();

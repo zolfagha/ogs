@@ -67,7 +67,7 @@ bool FunctionNodalStressStrain<T>::initialize(const BaseLib::Options &option)
 }
 
 template <class T>
-void FunctionNodalStressStrain<T>::accept(const NumLib::TimeStep &/*time*/)
+void FunctionNodalStressStrain<T>::finalizeTimeStep(const NumLib::TimeStep &/*time*/)
 {
     //update data for output
     const size_t n_strain_components = getNumberOfStrainComponents();

@@ -36,7 +36,7 @@ class NonLinearReactiveTransportJacobianLocalAssembler: public NumLib::IElementW
 {
 public:
 	NonLinearReactiveTransportJacobianLocalAssembler(FemLib::LagrangeFeObjectContainer* feObjects, ogsChem::chemReductionKin* ReductionScheme, T_FUNCTION_DATA* concentrations)
-        : _feObjects(*feObjects), _vel(NULL), _reductionKin(ReductionScheme), _concentrations(concentrations), _xi_mob_rates(NULL), _xi_immob_rates(NULL)
+        : _feObjects(*feObjects), _vel(NULL), _reductionKin(ReductionScheme), _concentrations(concentrations), _xi_mob_rates(NULL), _xi_mob_rates_old(NULL), _xi_immob_rates(NULL), _drates_dxi(NULL)
     {
     };
 
@@ -76,7 +76,7 @@ public:
 	    return _concentrations; 
 	}
 
-	void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &, const MathLib::LocalVector & u1, const MathLib::LocalVector & u0, MathLib::LocalMatrix & localJ)
+	void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &, const MathLib::LocalVector & /*u1*/, const MathLib::LocalVector & /*u0*/, MathLib::LocalMatrix & localJ)
     {
 		size_t i, j, k, m, n, node_idx; 
   		const size_t n_nodes = e.getNumberOfNodes(); 

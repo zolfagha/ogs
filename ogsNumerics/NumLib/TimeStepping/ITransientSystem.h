@@ -44,8 +44,10 @@ public:
     virtual bool isAwake(const TimeStep &time) = 0;
     /// solve this system with the given time step
     virtual int solveTimeStep(const TimeStep &time) = 0;
-    /// accept the given time step
-    virtual void accept(const TimeStep &time) = 0;
+    /// return if the given time step is accepted or not
+    virtual bool accept(const TimeStep &time) = 0;
+    /// finalize the given time step
+    virtual void finalizeTimeStep(const TimeStep &time) = 0;
 
     /// return current time
     const TimeStep& getCurrentTime() const {return *_current_time;};
