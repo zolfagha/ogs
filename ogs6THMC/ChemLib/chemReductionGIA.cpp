@@ -344,7 +344,8 @@ void chemReductionGIA::update_reductionScheme(void)
 	//known
 	this->_n_xi_Mob          = _Jmob;
 	this->_n_xi_Sorp_bar     = _Jsorp;
-	this->_n_xi_Sorp         = _Jsorp_li;
+	//this->_n_xi_Sorp         = _Jsorp_li;
+	this->_n_xi_Sorp         = _Jsorp;
 	this->_n_xi_Min		     = _Jmin;
 	this->_n_xi_Min_tilde    = _Jmin;
 	this->_n_xi_Min_bar      = _Jmin;

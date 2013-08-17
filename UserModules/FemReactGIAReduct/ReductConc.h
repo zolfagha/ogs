@@ -32,6 +32,8 @@
 #include "NonLinearGIAJacabianLocalAssembler.h"
 #include "LocalProblem.h"
 #include  "ogs6THMC/ChemLib/chemReductionGIA.h"
+#include "TemplateFemEquation_GIAReduct.h"
+#include "SingleStepGIAReductionNonlinear.h"
 
 
 template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER >
@@ -62,11 +64,11 @@ public:
     typedef LinearTransportTimeODELocalAssemblerML<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyLinearResidualAssemblerType;
     typedef LinearTransportJacobianLocalAssembler MyLinearJacobianAssemblerType;                                        
 	// for the nonlinear part, use different settings
-	typedef NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler, MyNodalFunctionScalar>      MyNonLinearAssemblerType;
-	typedef NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler, MyNodalFunctionScalar> MyNonLinearResidualAssemblerType;
+//	typedef NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler, MyNodalFunctionScalar>      MyNonLinearAssemblerType;
+//	typedef NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler, MyNodalFunctionScalar> MyNonLinearResidualAssemblerType;
 
 	//to be changed
-	typedef NonLinearGIAJacobianLocalAssembler<MyNodalFunctionScalar, MyFunctionData>                                    MyNonLinearJacobianAssemblerType;
+//	typedef NonLinearGIAJacobianLocalAssembler<MyNodalFunctionScalar, MyFunctionData>                                    MyNonLinearJacobianAssemblerType;
 	typedef NestedGIALocalProbNRIterationStepInitializer<MyNodalFunctionScalar, MyFunctionData>                          MyNRIterationStepInitializer;
 	typedef NumLib::DiscreteNRSolverWithStepInitFactory<MyNRIterationStepInitializer>                                    MyDiscreteNonlinearSolverFactory;
 	
@@ -101,12 +103,13 @@ public:
       * nonlinear coupled part solving xi
       * Equation definition
       */
-	typedef SolutionLib::TemplateFemEquation<
+	typedef TemplateFemEquation_GIAReduct<
 		    MyDiscreteSystem,
-			MyLinearSolver,
-			MyNonLinearAssemblerType,
-			MyNonLinearResidualAssemblerType,
-			MyNonLinearJacobianAssemblerType
+            MyFunctionData,
+			MyLinearSolver
+//			MyNonLinearAssemblerType,
+//			MyNonLinearResidualAssemblerType,
+//			MyNonLinearJacobianAssemblerType
 	        > MyNonLinearEquationType;
 	/**
       * FEM IVBV problem definition
@@ -119,8 +122,9 @@ public:
     /**
 	  * Solution algorithm definition
 	  */
-	typedef SolutionLib::SingleStepFEM<
+	typedef SingleStepGIAReductionNonlinear<
 			MyNonLinearReactiveTransportProblemType,
+			MyFunctionData,
 			MyLinearSolver, 
 			MyDiscreteNonlinearSolverFactory
 			> MyNonLinearSolutionType;
@@ -385,56 +389,6 @@ private:
       */
     NumLib::ITXFunction* _vel;
 
-    /**
-      * pointer to finite element class
-      */
-    FemLib::IFiniteElement* _fe;
-
-    /**
-      * pointer to porous media class
-      */
-    MaterialLib::PorousMedia* _pm;
-
-    /**
-      * pointer to integrater
-      */
-    FemLib::IFemNumericalIntegration * _q;
-
-    /**
-      * to store porosity value
-      */
-    MathLib::LocalMatrix poro;
-
-    /**
-      * to store porosity value
-      */
-    MathLib::LocalMatrix d_poro;
-
-    /**
-      * velocity values
-      */
-    MathLib::LocalMatrix v;
-
-    /**
-      * velocity values
-      */
-    MathLib::LocalMatrix v2;
-
-    /**
-      * dispersion diffusion values
-      */
-    MathLib::LocalMatrix dispersion_diffusion;
-
-    /**
-      * local dispersion matrix
-      */
-    MathLib::LocalMatrix localDispersion;
-
-     /**
-      * local advection matrix
-      */
-    MathLib::LocalMatrix localAdvection;
-
 	/**
       * convergence checker
       */
@@ -519,11 +473,6 @@ private:
       */
     std::vector<MyNodalFunctionScalar*> _global_vec_Rate;
 
-    /**
-     * local A matrix
-     */
-   MathLib::LocalMatrix _mat_Asorp, _mat_Amin;
-
     //temp global vectors
 //    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Sorp_tilde;
 //    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Min_tilde;
@@ -560,21 +509,16 @@ private:
       */ 
     DiscreteLib::DofEquationIdTable * _nl_sol_dofManager;
 
-    ogsChem::LocalMatrix _mat_c_mob_2_xi_mob, _mat_c_immob_2_xi_immob;
     /**
       * the id of the msh applied in this process
       */ 
     std::size_t _msh_id;
 
-    /**
-      * the size of eta_mob, eta_immob, xi_mob and xi_immob vector
-      */
-	std::size_t _n_eta,_n_eta_bar, _n_xi_mobile, _n_xi_immobile, _n_xi_local,  _n_xi_global, _n_xi_Mob, _n_xi_Sorp_tilde,_n_xi_Sorp, _n_xi_Sorp_bar, _n_xi_Sorp_bar_li, _n_xi_Sorp_bar_ld
-			,_n_xi_Min, _n_xi_Min_tilde, _n_xi_Min_bar, _n_xi_Kin, _n_xi_Kin_bar, _I_mob, _I_sorp, _I_min, _I_NMin_bar, _vec_Rate_rows;
+	std::size_t _n_xi_local,  _n_xi_global; //TODO uninitialized
 
-    /**
-      * number of components
-      */
+	//TODO no need to make them member variables
+	std::size_t _n_xi_Mob, _n_xi_Sorp_tilde,_n_xi_Sorp, _n_xi_Sorp_bar, _n_xi_Sorp_bar_li, _n_xi_Sorp_bar_ld
+			,_n_xi_Min, _n_xi_Min_tilde, _n_xi_Min_bar, _n_xi_Kin, _n_xi_Kin_bar, _I_mob, _I_sorp, _I_min, _I_NMin_bar;
     std::size_t _n_Comp;
 }; 
 
