@@ -210,6 +210,11 @@ public:
 	size_t get_n_xi_Kin_bar(void) {return _n_xi_Kin_bar; };
 
 	/**
+      * get the length of xi_ki total
+      */
+	size_t get_n_xi_Kin_total(void) {return _J_tot_kin; };
+
+	/**
       * get the _mat_c_mob_2_xi_mob
       */
 	LocalMatrix get_matrix_C2Xi(void) {return _mat_c_mob_2_xi_mob; };
@@ -312,6 +317,23 @@ public:
       * get the log k of equilibrium mineral reactions
       */
 	LocalMatrix get_logk_min(void) {return _logk_min; };
+
+	/**
+      * get _mat_S1_ast matrix
+      */
+	LocalMatrix get_mat_S1_ast(void) {return _mat_S1_ast; };
+	/**
+      * get _mat_S2_ast matrix
+      */
+	LocalMatrix get_mat_S2_ast(void) {return _mat_S2_ast; };
+	/**
+      * get _mat_S1_orth
+      */
+	LocalMatrix get_mat_S1_orth(void) {return _mat_S1_orth; };
+	/**
+      * get _mat_S2_orth
+      */
+	LocalMatrix get_mat_S2_orth(void) {return _mat_S2_orth; };
 private:
 	/**
       * private flag indicating initialization
