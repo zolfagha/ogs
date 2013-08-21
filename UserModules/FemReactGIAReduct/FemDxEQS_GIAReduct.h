@@ -58,11 +58,11 @@ public:
     		                                  DiscreteLib::DofEquationIdTable* dofManager,
     		                                  T_USER_FUNCTION_DATA* userData)
         : _msh(msh),  _linear_eqs(linear_eqs),
-          _t_n1(0), _u_n0(0), _list_var(list_var), _dofManager(dofManager), _userData(userData),
+          _t_n1(0), _u_n0(0), _list_var(list_var), _dofManager(dofManager), _userData(userData), _ReductionGIA(userData->getReductionGIA()),
      	 _n_Comp(_ReductionGIA->get_n_Comp()), _I_mob(_ReductionGIA->get_n_Comp_mob()), _I_min(_ReductionGIA->get_n_Comp_min()), _n_xi_Kin_bar(_ReductionGIA->get_n_xi_Kin_bar())
-     	, _n_xi_Mob(_ReductionGIA->get_n_xi_Mob()), _n_eta(_ReductionGIA->get_n_eta()), _n_eta_bar(_ReductionGIA->get_n_eta_bar()), _n_xi_Sorp_tilde(_ReductionGIA->get_n_xi_Sorp_tilde()), _n_xi_Min_tilde(_ReductionGIA->get_n_xi_Min_tilde())
-         , _n_xi_Sorp(_ReductionGIA->get_n_xi_Sorp()), _n_xi_Min(_ReductionGIA->get_n_xi_Min()), _n_xi_Sorp_bar_li(_ReductionGIA->get_n_xi_Sorp_bar_li()), _n_xi_Sorp_bar_ld(_ReductionGIA->get_n_xi_Sorp_bar_ld()), _n_xi_Kin(_ReductionGIA->get_n_xi_Kin())
-        , _n_xi_Min_bar(_ReductionGIA->get_n_xi_Min_bar()), _I_NMin_bar(_ReductionGIA->get_n_Comp_NMin_bar())
+     	, _n_xi_Mob(_ReductionGIA->get_n_xi_Mob()), _n_eta(_ReductionGIA->get_n_eta()), _n_eta_bar(_ReductionGIA->get_n_eta_bar()), _n_xi_Sorp_tilde(_ReductionGIA->get_n_xi_Sorp_tilde()),
+     	_n_xi_Min_tilde(_ReductionGIA->get_n_xi_Min_tilde()), _n_xi_Sorp(_ReductionGIA->get_n_xi_Sorp()), _n_xi_Min(_ReductionGIA->get_n_xi_Min()), _n_xi_Sorp_bar_li(_ReductionGIA->get_n_xi_Sorp_bar_li()),
+     	_n_xi_Sorp_bar_ld(_ReductionGIA->get_n_xi_Sorp_bar_ld()), _n_xi_Kin(_ReductionGIA->get_n_xi_Kin()), _n_xi_Min_bar(_ReductionGIA->get_n_xi_Min_bar()), _I_NMin_bar(_ReductionGIA->get_n_Comp_NMin_bar())
     {
     };
 
@@ -113,7 +113,7 @@ private:
     ogsChem::chemReductionGIA* _ReductionGIA;
     std::map<size_t, ReductionGIANodeInfo*>* _bc_info;
     std::vector<MyNodalFunctionScalar*> _concentrations, _xi_global, _xi_local, _eta, _eta_bar, _global_vec_Rate;
-    std::vector<ogsChem::chemReactionKin*> & _list_kin_reactions;
+    std::vector<ogsChem::chemReactionKin*>  _list_kin_reactions;
     NumLib::ITXFunction* _vel;
     //TODO set the followings from _ReductionGIA
     size_t _n_xi_global, _n_xi_Sorp_tilde, _n_xi_Min_tilde, _n_xi_Sorp, _n_xi_Min, _n_xi_Kin, _n_xi_local, _n_xi_Sorp_bar, _n_xi_Min_bar, _n_eta, _n_eta_bar, _n_xi_Mob, _n_xi_Kin_bar, _vec_Rate_rows;
@@ -328,7 +328,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             	temp_xi = xi(i);
             	xi(i)     = xi(i) + (delta_xi * temp_xi);
             	cal_nodal_rate(xi, loc_cur_eta_bar, loc_cur_eta, n_xi_Kin_total, mat_S1_ast, mat_S2_ast, mat_S1_orth ,mat_S2_orth, vec_rate_new);
-            	DrateDxi[i] = ( vec_rate_new - vec_rate_old) / (delta_xi * temp_xi);
+            	//DrateDxi(i) = ( vec_rate_new - vec_rate_old) / (delta_xi * temp_xi);
             }
 
             ogsChem::LocalVector der_sorpT_R =  MathLib::LocalVector::Zero(_n_xi_Sorp_tilde);

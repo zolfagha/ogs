@@ -12,7 +12,7 @@
 
 #include "LocalProblem.h"
 #include "logog.hpp"
-#define _DEBUG
+//#define _DEBUG
 
 LocalProblem::LocalProblem(ogsChem::chemReductionGIA* ReductionGIA)
 	: _n_Comp(ReductionGIA->get_n_Comp()), _ReductionGIA(ReductionGIA), _I_mob(_ReductionGIA->get_n_Comp_mob()), _I_sorp(_ReductionGIA->get_n_Comp_sorb()), _I_min(_ReductionGIA->get_n_Comp_min()), _n_xi_Kin_bar(_ReductionGIA->get_n_xi_Kin_bar())

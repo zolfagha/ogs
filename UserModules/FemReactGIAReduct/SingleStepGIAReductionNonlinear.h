@@ -62,7 +62,7 @@ public:
     typedef typename UserFemProblem::MyDiscreteSystem MyDiscreteSystem;
     typedef typename MyDiscreteSystem::template MyLinearEquation<T_LINEAR_SOLVER,DiscreteLib::SparsityBuilderFromNodeConnectivity>::type MyDiscreteLinaerEQS;
     typedef typename UserFemProblem::MyVariable MyVariable;
-    typedef typename UserFemProblem::EquationType::LinearEQSType UserLinearFunction; //dummy
+    typedef typename UserFemProblem::EquationType::LinearEquationType UserLinearFunction; //dummy
     typedef typename UserFemProblem::EquationType::ResidualEQSType UserResidualFunction;
     typedef typename UserFemProblem::EquationType::DxEQSType UserDxFunction;
     typedef T_NL_SOLVER_FACTORY MyNonlinearSolverFactory;
@@ -258,8 +258,7 @@ int SingleStepGIAReductionNonlinear<T_USER_FEM_PROBLEM,T_USER_FUNCTION_DATA,T_LI
     }
 
     // setup functions
-//    _f_linear->reset(&t_n1, _x_n0);
-    _f_r->reset(&t_n1, _x_n0, _x_st);
+    _f_r->reset(t_n1, _x_n0, _x_st);
     _f_dx->reset(&t_n1, _x_n0);
 
     // initial guess

@@ -54,12 +54,23 @@ public:
     		                                        DiscreteLib::DofEquationIdTable* dofManager,
     		                                        T_USER_FUNCTION_DATA* function_data)
         : _dis_sys(sys), _dofManager(dofManager),
-          _t_n1(0), _u_n0(0), _st(0), _list_var(list_var), _function_data(function_data)
+          _time_step(0), _u_n0(0), _st(0), _list_var(list_var), _function_data(function_data), _ReductionGIA(function_data->getReductionGIA()),
+          _n_xi_Kin_bar(_ReductionGIA->get_n_xi_Kin_bar()), _n_xi_Mob(_ReductionGIA->get_n_xi_Mob()), _n_eta(_ReductionGIA->get_n_eta()), _n_eta_bar(_ReductionGIA->get_n_eta_bar()),
+          _n_xi_Sorp_tilde(_ReductionGIA->get_n_xi_Sorp_tilde()), _n_xi_Min_tilde(_ReductionGIA->get_n_xi_Min_tilde()), _n_xi_Sorp(_ReductionGIA->get_n_xi_Sorp()), _n_xi_Min(_ReductionGIA->get_n_xi_Min()),
+          _n_xi_Kin(_ReductionGIA->get_n_xi_Kin()),_n_xi_Min_bar(_ReductionGIA->get_n_xi_Min_bar()), _n_xi_local(_ReductionGIA->get_n_xi_local()), _n_xi_global(_ReductionGIA->get_n_xi_global()),
+          _n_xi_Sorp_bar(_ReductionGIA->get_n_xi_Sorp_bar()), _J_tot_kin(_ReductionGIA->get_n_xi_Kin_total()), _n_xi_Sorp_bar_li(_ReductionGIA->get_n_xi_Sorp_bar_li()), _n_xi_Sorp_bar_ld(_ReductionGIA->get_n_xi_Sorp_bar_ld()),
+          _xi_global(function_data->get_xi_global()), _xi_local(function_data->get_xi_local()), _eta(function_data->get_eta()), _eta_bar(function_data->get_eta_bar()),
+          _global_vec_Rate(function_data->get_global_vec_Rate())
     {
     };
 
     ///
     virtual ~TemplateTransientResidualFEMFunction_GIA_Reduct() {};
+
+    void setVelocity(const NumLib::ITXFunction *vel)
+    {
+        _vel = const_cast<NumLib::ITXFunction*>(vel);
+    }
 
     ///
     NumLib::TemplateFunction<SolutionLib::SolutionVector,SolutionLib::SolutionVector>* clone() const
@@ -69,11 +80,11 @@ public:
     }
 
     /// reset property
-    void reset(const NumLib::TimeStep* t, const SolutionLib::SolutionVector* u_n0, SolutionLib::SolutionVector* st)
+    void reset(const NumLib::TimeStep& t, const SolutionLib::SolutionVector* u_n0, SolutionLib::SolutionVector* st)
     {
-        this->_t_n1 = t;
-        this->_u_n0 = u_n0;
-        this->_st = st;
+        _time_step = &t;
+        _u_n0 = u_n0;
+        _st = st;
     };
 
     /// evaluate residual
@@ -83,7 +94,7 @@ public:
 
 	const NumLib::TimeStep* getTimeStepObj(void)
 	{
-		return _t_n1; 	
+		return _time_step;
 	}
 
 private:
@@ -95,19 +106,21 @@ private:
     MyDiscreteSystem *_dis_sys;
 //    UserLocalResidualAssembler *_local_assembler;
     DiscreteLib::DofEquationIdTable* _dofManager;
-    const NumLib::TimeStep* _t_n1;
-    const SolutionLib::SolutionVector* _u_n0;
-    SolutionLib::SolutionVector* _st;
+    const NumLib::TimeStep* _time_step;
+    const SolutionLib::SolutionVector* _st;
+    const SolutionLib::SolutionVector *_u_n0;
     std::vector<MyVariable*> _list_var;
     T_USER_FUNCTION_DATA* _function_data;
 
     //TODO pass via constructor
     ogsChem::chemReductionGIA* _ReductionGIA;
-    std::map<size_t, ReductionGIANodeInfo*>* _bc_info;
-    std::vector<MyNodalFunctionScalar*> _xi_global, _xi_local, _eta, _eta_bar, _global_vec_Rate;
+    // std::map<size_t, ReductionGIANodeInfo*>* _bc_info;
+    std::vector<MyNodalFunctionScalar*> &_xi_global, &_xi_local, &_eta, &_eta_bar, &_global_vec_Rate;
     NumLib::ITXFunction* _vel;
-    //TODO set the followings from _ReductionGIA
-    size_t _n_xi_global, _n_xi_Sorp_tilde, _n_xi_Min_tilde, _n_xi_Sorp, _n_xi_Min, _n_xi_Kin, _n_xi_local, _n_xi_Sorp_bar, _n_xi_Min_bar, _n_eta, _n_eta_bar, _n_xi_Mob, _n_xi_Kin_bar, _vec_Rate_rows;
+    FemLib::IFemNumericalIntegration* _q;
+    FemLib::IFiniteElement* _fe;
+    std::size_t _n_xi_global, _n_xi_Sorp_tilde, _n_xi_Min_tilde, _n_xi_Sorp, _n_xi_Min, _n_xi_Kin, _n_xi_local, _n_xi_Sorp_bar, _n_xi_Min_bar, _n_eta, _n_eta_bar, _n_xi_Mob, _n_xi_Kin_bar, _J_tot_kin
+    			,_n_xi_Sorp_bar_li, _n_xi_Sorp_bar_ld;
 };
 
 
@@ -115,7 +128,6 @@ template <class T_DIS_SYS, class T_USER_FUNCTION_DATA>
 void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_DATA>::eval(const SolutionLib::SolutionVector &u_n1, SolutionLib::SolutionVector &r)
 {
     // input, output
-    const NumLib::TimeStep &t_n1 = *this->_t_n1;
     const SolutionLib::SolutionVector *u_n = this->_u_n0;
     size_t msh_id = _dis_sys->getMesh()->getID();
     size_t node_idx, i;
@@ -130,7 +142,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
     //FunctionReductConc *test = template<msh, ggf> FunctionReductConc();
 
 	// calculate the global residual
-    GlobalResidualAssembler(t_n1, u_n1, r);
+    GlobalResidualAssembler(*this->_time_step, u_n1, r);
 
 
 //    // element based operation for assemblyCh
@@ -164,8 +176,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
 template <class T_DIS_SYS, class T_USER_FUNCTION_DATA>
 void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_DATA>::GlobalResidualAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, SolutionLib::SolutionVector & residual_global)
 {
-    const size_t _n_xi_Sorp_bar_li  = _ReductionGIA->get_n_xi_Sorp_bar_li();
-    const size_t _n_xi_Sorp_bar_ld  = _ReductionGIA->get_n_xi_Sorp_bar_ld();
     const size_t nnodes = _dis_sys->getMesh()->getNumberOfNodes();
 
     // current xi global
@@ -244,9 +254,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
     // loop over all the nodes
     for (size_t node_idx = 0; node_idx < nnodes; node_idx++ )
     {
-        // skip the boundary nodes
-        if ( _bc_info->find( node_idx ) == _bc_info->end() )
-        {
 
             // on each node, get the right start value
             // get the right set of xis
@@ -321,7 +328,11 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             for(std::size_t i = 0; i < _n_xi_Sorp_tilde; i++)
             residual_global[_n_xi_global * node_idx + i] = res43[i];
 
-            res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar + loc_cur_xi_Sorp_bar_ld;
+            if(_n_xi_Sorp_bar_ld != 0)
+            	res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar + loc_cur_xi_Sorp_bar_ld;
+            else
+            	res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar;
+
             for(std::size_t i = 0; i < _n_xi_Min_tilde; i++)
             residual_global[_n_xi_global * node_idx + i] = res44[i];
 
@@ -352,14 +363,13 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
 
 
 
-            _vec_Rate_rows  = vec_Rate.rows();
-            for (size_t i=0; i < vec_Rate.rows(); i++)
+            //_J_tot_kin  = vec_Rate.rows();
+            for (size_t i=0; i < _J_tot_kin; i++)
                 _global_vec_Rate[i]->setValue(node_idx, vec_Rate[i]);
 
 //          for (i=0; i < vec_Rate_46.cols(); i++)
 //              _global_vec_Rate_46[i]->setValue(node_idx, vec_Rate_46[i]);
 
-        }
 
     }
 
@@ -447,7 +457,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
     for (size_t i=0; i<n_ele; i++)
     {
         MeshLib::IElement *e = msh->getElement(i);
-        FemLib::IFiniteElement* _fe;
 
         std::vector<size_t> ele_node_ids;
         //MathLib::Vector<size_t> ele_node_ids;
@@ -462,11 +471,13 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
         MathLib::LocalMatrix localDispersion = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
         MathLib::LocalMatrix localAdvection = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
         MathLib::LocalVector F = MathLib::LocalVector::Zero(ele_node_ids.size());
-        MathLib::LocalMatrix poro, d_poro, dispersion_diffusion;
-        MathLib::LocalMatrix v, v2;
+        MathLib::LocalMatrix dispersion_diffusion;
+        MathLib::LocalMatrix d_poro = MathLib::LocalMatrix::Zero(3,3);
+        MathLib::LocalMatrix poro(1,1);
+        NumLib::ITXFunction::DataType v;
 
         //assembleODE(time, e, local_u_n1, local_u_n, M, K, F);
-        //_fe = _feObjects->getFeObject(e);
+        _fe = _function_data->get_feObjects()->getFeObject(*e);
 
         const size_t n_dim = e->getDimension();
         size_t mat_id = e->getGroupID();
@@ -476,9 +487,8 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
         localAdvection.setZero (localK.rows(), localK.cols());
 
         double cmp_mol_diffusion = .0;
-        // _cmp->molecular_diffusion->eval(0, cmp_mol_diffusion);
 
-        FemLib::IFemNumericalIntegration* _q = _fe->getIntegrationMethod();
+        _q = _fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
         poro.setZero();
         d_poro.setZero();
@@ -499,8 +509,8 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             d_poro(0,0) = cmp_mol_diffusion * poro(0,0);
             d_poro(1,1) = cmp_mol_diffusion * poro(0,0);
             d_poro(2,2) = cmp_mol_diffusion * poro(0,0);
-            _vel->eval(gp_pos, v);
-            v2 = v.topRows(n_dim).transpose();
+            _function_data->_vel->eval(gp_pos, v);
+            NumLib::ITXFunction::DataType v2 = v.topRows(n_dim).transpose();
 
             // calculating dispersion tensor according to Benchmark book p219, Eq. 10.15
             // D_{ij} = \alpha_T |v| \delta_{ij} + (\alpha_L - \alpha_T) \frac{v_i v_j}{|v|} + D^{d}_{ii}
@@ -576,7 +586,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
                 loc_pre_xi_Sorp         = loc_pre_xi_global.segment( _n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Sorp);
                 loc_pre_xi_Min          = loc_pre_xi_global.segment( _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Min);
 
-                for (i=0; i < _vec_Rate_rows; i++)
+                for (i=0; i < _J_tot_kin; i++)
                     loc_vec_Rate[i] = this->_global_vec_Rate[i]->getValue(ele_node_ids[idx]);
 
                 MathLib::LocalVector vec_Rate_temp;
