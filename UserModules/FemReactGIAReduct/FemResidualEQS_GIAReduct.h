@@ -509,7 +509,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             d_poro(0,0) = cmp_mol_diffusion * poro(0,0);
             d_poro(1,1) = cmp_mol_diffusion * poro(0,0);
             d_poro(2,2) = cmp_mol_diffusion * poro(0,0);
-            _function_data->_vel->eval(gp_pos, v);
+            _vel->eval(gp_pos, v);
             NumLib::ITXFunction::DataType v2 = v.topRows(n_dim).transpose();
 
             // calculating dispersion tensor according to Benchmark book p219, Eq. 10.15
