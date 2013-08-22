@@ -425,11 +425,12 @@ int SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINE
 	//_nlin_solution->solveTimeStep( t_n1 );
 	std::vector<MyVariable*> list_var;
 	TemplateTransientResidualFEMFunction_GIA_Reduct<MyDiscreteSystem, UserFunctionData> f_res(_discrete_system, list_var, &_dofManager,_function_data);
-	SolutionLib::SolutionVector* u0 = _discrete_system->template createVector<double>(_dofManager.getTotalNumberOfActiveDoFs());
+	// SolutionLib::SolutionVector* u0 = _discrete_system->template createVector<double>(_dofManager.getTotalNumberOfActiveDoFs());
 	SolutionLib::SolutionVector* r = _discrete_system->template createVector<double>(_dofManager.getTotalNumberOfActiveDoFs());
-	f_res.eval(*u0, *r);
+	f_res.reset( t_n1, _x_n0, _x_st);
+	f_res.eval(*_x_n1, *r);
 
-	delete u0;
+	// delete u0;
 	delete r;
 
 //	// getting result

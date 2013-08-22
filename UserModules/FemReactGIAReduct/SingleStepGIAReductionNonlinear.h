@@ -62,7 +62,7 @@ public:
     typedef typename UserFemProblem::MyDiscreteSystem MyDiscreteSystem;
     typedef typename MyDiscreteSystem::template MyLinearEquation<T_LINEAR_SOLVER,DiscreteLib::SparsityBuilderFromNodeConnectivity>::type MyDiscreteLinaerEQS;
     typedef typename UserFemProblem::MyVariable MyVariable;
-    typedef typename UserFemProblem::EquationType::LinearEQSType UserLinearFunction; //dummy
+    typedef typename UserFemProblem::EquationType::LinearEquationType UserLinearFunction; //dummy
     typedef typename UserFemProblem::EquationType::ResidualEQSType UserResidualFunction;
     typedef typename UserFemProblem::EquationType::DxEQSType UserDxFunction;
     typedef T_NL_SOLVER_FACTORY MyNonlinearSolverFactory;
@@ -198,10 +198,11 @@ SingleStepGIAReductionNonlinear<T_USER_FEM_PROBLEM,T_USER_FUNCTION_DATA,T_LINEAR
 
     // setup functions
     std::vector<MyVariable*> list_var(n_var);
-    for (size_t i=0; i<n_var; i++) list_var[i] = problem->getVariable(i);
+    for (size_t i=0; i<n_var; i++)
+    	list_var[i] = problem->getVariable(i);
 //    _f_linear = new UserLinearFunction(dis, list_var, problem->getEquation()->getLinearAssembler(), _linear_eqs);
     _f_r = new UserResidualFunction(dis, list_var, &_dofManager, _user_data);
-    _f_dx = new UserDxFunction(dis->getMesh(), list_var, _linear_eqs, _user_data);
+    _f_dx = new UserDxFunction(dis->getMesh(), list_var, _linear_eqs, &_dofManager, _user_data);
 
     // setup nonlinear solver
     _f_nonlinear = new NonlinearSolverType(dis, nullptr, _f_r, _f_dx, nl_solver_factory);
@@ -257,8 +258,7 @@ int SingleStepGIAReductionNonlinear<T_USER_FEM_PROBLEM,T_USER_FUNCTION_DATA,T_LI
     }
 
     // setup functions
-//    _f_linear->reset(&t_n1, _x_n0);
-    _f_r->reset(&t_n1, _x_n0, _x_st);
+    _f_r->reset(t_n1, _x_n0, _x_st);
     _f_dx->reset(&t_n1, _x_n0);
 
     // initial guess

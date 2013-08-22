@@ -65,7 +65,7 @@ public:
     typedef LinearTransportJacobianLocalAssembler MyLinearJacobianAssemblerType;                                        
 	// for the nonlinear part, use different settings
 //	typedef NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler, MyNodalFunctionScalar>      MyNonLinearAssemblerType;
-//	typedef NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler, MyNodalFunctionScalar> MyNonLinearResidualAssemblerType;
+	typedef TemplateTransientResidualFEMFunction_GIA_Reduct<T_DISCRETE_SYSTEM, FunctionReductConc> MyNonLinearResidualAssemblerType;
 
 	//to be changed
 //	typedef NonLinearGIAJacobianLocalAssembler<MyNodalFunctionScalar, MyFunctionData>                                    MyNonLinearJacobianAssemblerType;
@@ -106,9 +106,8 @@ public:
 	typedef TemplateFemEquation_GIAReduct<
 		    MyDiscreteSystem,
             MyFunctionData,
-			MyLinearSolver
-//			MyNonLinearAssemblerType,
-//			MyNonLinearResidualAssemblerType,
+			MyLinearSolver,
+			MyNonLinearResidualAssemblerType
 //			MyNonLinearJacobianAssemblerType
 	        > MyNonLinearEquationType;
 	/**
@@ -293,6 +292,16 @@ public:
 	void Vprime (MathLib::LocalVector & vec_conc,
 				  MathLib::LocalMatrix & mat_vprime);
 
+	ogsChem::chemReductionGIA* getReductionGIA(){return _ReductionGIA;}
+
+	std::vector<MyNodalFunctionScalar*> & get_xi_global() {return _xi_global;}
+	std::vector<MyNodalFunctionScalar*> & get_xi_local() {return _xi_local;}
+	std::vector<MyNodalFunctionScalar*> & get_eta() {return _eta;}
+	std::vector<MyNodalFunctionScalar*> & get_eta_bar() {return _eta_bar;}
+	std::vector<MyNodalFunctionScalar*> & get_global_vec_Rate() {return _global_vec_Rate; }
+	FemLib::LagrangeFeObjectContainer* get_feObjects(){return _feObjects;}
+	NumLib::ITimeStepFunction* get_time_step() {return _tim;}
+
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
 
@@ -326,8 +335,12 @@ private:
 	virtual void convert_eta_xi_to_conc(void); 
 
 	DiscreteLib::DofEquationIdTable* _dofManager;
+
 	MyDiscreteSystem *_dis_sys;
-    /**
+
+	NumLib::ITimeStepFunction* _tim;
+
+	/**
       * linear problems
       */
 	std::vector<MyLinearTransportProblemType*> _linear_problems;
@@ -514,11 +527,11 @@ private:
       */ 
     std::size_t _msh_id;
 
-	std::size_t _n_xi_local,  _n_xi_global; //TODO uninitialized
+	std::size_t _n_xi_local,  _n_xi_global, _n_eta, _n_eta_bar; //TODO uninitialized
 
 	//TODO no need to make them member variables
 	std::size_t _n_xi_Mob, _n_xi_Sorp_tilde,_n_xi_Sorp, _n_xi_Sorp_bar, _n_xi_Sorp_bar_li, _n_xi_Sorp_bar_ld
-			,_n_xi_Min, _n_xi_Min_tilde, _n_xi_Min_bar, _n_xi_Kin, _n_xi_Kin_bar, _I_mob, _I_sorp, _I_min, _I_NMin_bar;
+			,_n_xi_Min, _n_xi_Min_tilde, _n_xi_Min_bar, _n_xi_Kin, _n_xi_Kin_bar, _I_mob, _I_sorp, _I_min, _I_NMin_bar, _J_tot_kin;
     std::size_t _n_Comp;
 }; 
 

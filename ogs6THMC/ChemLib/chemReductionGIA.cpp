@@ -344,8 +344,8 @@ void chemReductionGIA::update_reductionScheme(void)
 	//known
 	this->_n_xi_Mob          = _Jmob;
 	this->_n_xi_Sorp_bar     = _Jsorp;
-	//this->_n_xi_Sorp         = _Jsorp_li;
-	this->_n_xi_Sorp         = _Jsorp;
+	this->_n_xi_Sorp         = _Jsorp_li;
+	//this->_n_xi_Sorp         = _Jsorp;
 	this->_n_xi_Min		     = _Jmin;
 	this->_n_xi_Min_tilde    = _Jmin;
 	this->_n_xi_Min_bar      = _Jmin;
@@ -454,10 +454,25 @@ void chemReductionGIA::Conc2EtaXi(ogsChem::LocalVector &local_conc,
 								  ogsChem::LocalVector &local_xi_local)
 {
 	// declare local temp variable
-	ogsChem::LocalVector local_c_mob, local_c_immob;
-	ogsChem::LocalVector local_xi, local_xi_bar;
-	ogsChem::LocalVector local_xi_Sorp_bar_li, local_xi_Sorp_bar_ld;
-	ogsChem::LocalVector local_xi_Mob, local_xi_Sorp,local_xi_Sorp_li,local_xi_Sorp_ld,local_xi_Sorp_tilde,local_xi_Sorp_bar,local_xi_Min,local_xi_Min_tilde,local_xi_Min_bar,local_xi_Kin,local_xi_Kin_bar;
+	ogsChem::LocalVector local_c_mob    = ogsChem::LocalVector::Zero(this->_I_mob);
+	ogsChem::LocalVector local_c_immob  = ogsChem::LocalVector::Zero(this->_I_NMin_bar + this->_I_min);
+	ogsChem::LocalVector local_xi       = ogsChem::LocalVector::Zero(this->_n_xi_Mob + this->_n_xi_Sorp + this->_n_xi_Min + this->_n_xi_Kin);
+	ogsChem::LocalVector local_xi_bar   = ogsChem::LocalVector::Zero(this->_n_xi_Sorp_bar + this->_n_xi_Min_bar + this->_n_xi_Kin_bar);
+	ogsChem::LocalVector local_xi_Sorp_bar_li    = ogsChem::LocalVector::Zero(this->_Jsorp_li);
+	ogsChem::LocalVector local_xi_Sorp_bar_ld    = ogsChem::LocalVector::Zero(this->_Jsorp_ld);
+	ogsChem::LocalVector local_xi_Mob  			 = ogsChem::LocalVector::Zero(this->_n_xi_Mob);
+	ogsChem::LocalVector local_xi_Sorp   		 = ogsChem::LocalVector::Zero(this->_n_xi_Sorp);
+//	ogsChem::LocalVector local_xi_Sorp_li   	 = ogsChem::LocalVector::Zero();
+//	ogsChem::LocalVector local_xi_Sorp_ld   	 = ogsChem::LocalVector::Zero();
+	ogsChem::LocalVector local_xi_Sorp_tilde   	 = ogsChem::LocalVector::Zero(_n_xi_Sorp_tilde);
+	ogsChem::LocalVector local_xi_Sorp_bar   	 = ogsChem::LocalVector::Zero(_n_xi_Sorp_bar);
+	ogsChem::LocalVector local_xi_Min   		 = ogsChem::LocalVector::Zero(this->_n_xi_Min);
+	ogsChem::LocalVector local_xi_Min_tilde   	 = ogsChem::LocalVector::Zero(_n_xi_Min_tilde);
+	ogsChem::LocalVector local_xi_Min_bar   	 = ogsChem::LocalVector::Zero(_n_xi_Min_bar);
+	ogsChem::LocalVector local_xi_Kin   		 = ogsChem::LocalVector::Zero(_n_xi_Kin);
+	ogsChem::LocalVector local_xi_Kin_bar   	 = ogsChem::LocalVector::Zero(_n_xi_Kin_bar);
+	//ogsChem::LocalVector local_xi_global         = ogsChem::LocalVector::Zero(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
+	//ogsChem::LocalVector local_xi_local          = ogsChem::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
 
 	// divide c1 and c2
 	local_c_mob   = local_conc.topRows(    this->_I_mob );

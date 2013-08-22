@@ -26,7 +26,7 @@
 #include "MathLib/ODE/RungeKutta4.h"
 #include "NonLinearGIATimeODELocalAssembler.h"
 //#include "NonLinearGIAJacobianLocalAssembler.h"
-#define _DEBUG
+//#define _DEBUG
 
 template <class T1, class T2>
 bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
@@ -35,7 +35,7 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
     Ogs6FemData* femData = Ogs6FemData::getInstance();
     _msh_id = option.getOptionAsNum<size_t>("MeshID");
     size_t time_id = option.getOptionAsNum<size_t>("TimeGroupID");
-    NumLib::ITimeStepFunction* tim = femData->list_tim[time_id];
+    _tim = femData->list_tim[time_id];
 
     //mesh and FE objects
     MeshLib::IMesh* msh = femData->list_mesh[_msh_id];
@@ -57,10 +57,24 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 	// first get the number of components
 	_n_Comp = femData->map_ChemComp.size();
     // also get the size of secondary variables
-    size_t _n_eta   		= this->_ReductionGIA->get_n_eta  ();
-    size_t _n_eta_bar 		= this->_ReductionGIA->get_n_eta_bar();
-    size_t _n_xi_global    = this->_ReductionGIA->get_n_xi_global ();
-    size_t _n_xi_local 	= this->_ReductionGIA->get_n_xi_local ();
+    _n_eta   		= this->_ReductionGIA->get_n_eta  ();
+    _n_eta_bar 		= this->_ReductionGIA->get_n_eta_bar();
+    _n_xi_global    = this->_ReductionGIA->get_n_xi_global ();
+    _n_xi_local 	= this->_ReductionGIA->get_n_xi_local ();
+	_n_xi_Sorp_tilde        = _ReductionGIA->get_n_xi_Sorp_tilde();
+	_n_xi_Min_tilde         = _ReductionGIA->get_n_xi_Min_tilde();
+	_n_xi_Sorp				= _ReductionGIA->get_n_xi_Sorp();
+	_n_xi_Min				= _ReductionGIA->get_n_xi_Min();
+	_I_mob					= _ReductionGIA->get_n_Comp_mob();
+	_I_NMin_bar             = _ReductionGIA->get_n_Comp_NMin_bar();
+	_I_min					= _ReductionGIA->get_n_Comp_min();
+	_n_xi_Kin_bar           = _ReductionGIA->get_n_xi_Kin_bar();
+	_n_xi_Mob				= _ReductionGIA->get_n_xi_Mob();
+	_n_xi_Sorp_bar			= _ReductionGIA->get_n_xi_Sorp_bar();
+	_n_xi_Min_bar			= _ReductionGIA->get_n_xi_Min_bar();
+    _n_xi_Kin               = _ReductionGIA->get_n_xi_Kin();
+    _n_xi_Kin_bar           = _ReductionGIA->get_n_xi_Kin_bar();
+    _J_tot_kin 				= _ReductionGIA->get_n_xi_Kin_total();
 
 	// set concentrations of all components as output
 	for ( i=0; i < _n_Comp; i++ )
@@ -85,11 +99,11 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 	for ( i=0; i < _n_xi_global ; i++ )
 	{
 		MyNodalFunctionScalar* xi_global_tmp       = new MyNodalFunctionScalar();  // xi_global
-        MyNodalFunctionScalar* xi_rates_tmp = new MyNodalFunctionScalar();  // R_kin rates
-		xi_global_tmp->initialize(       *dis, FemLib::PolynomialOrder::Linear, 0.0  );
-        xi_rates_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
+     //   MyNodalFunctionScalar* xi_rates_tmp = new MyNodalFunctionScalar();  // R_kin rates
+		xi_global_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
+     //   xi_rates_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
 		_xi_global.push_back(xi_global_tmp);
-        _kin_rates.push_back(xi_rates_tmp);
+     //   _kin_rates.push_back(xi_rates_tmp);
 	}
 
 //	// initialize drates_dxi
@@ -103,14 +117,22 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 	for ( i=0; i < _n_xi_local ; i++ )
 	{
 		MyNodalFunctionScalar* xi_local_tmp       = new MyNodalFunctionScalar();  // xi_immob
-        MyNodalFunctionScalar* rates_tmp = new MyNodalFunctionScalar();  // xi_mob_rates
+    //   MyNodalFunctionScalar* rates_tmp = new MyNodalFunctionScalar();  // xi_mob_rates
 		MyNodalFunctionScalar* xi_local_new_tmp   = new MyNodalFunctionScalar();  // xi_mob_rates
 		xi_local_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
-        rates_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
+    //   rates_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
 		xi_local_new_tmp->initialize(*dis, FemLib::PolynomialOrder::Linear, 0.0  );
 		_xi_local.push_back(xi_local_tmp);
-        _kin_rates.push_back(rates_tmp);
+    //    _kin_rates.push_back(rates_tmp);
 		_xi_local_new.push_back(xi_local_new_tmp);
+	}
+
+	//initialize _global_vec_Rate
+	for (i= 0; i < _J_tot_kin; i++)
+	{
+		MyNodalFunctionScalar* global_vec_Rate_tmp = new MyNodalFunctionScalar();  // xi_global
+        global_vec_Rate_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
+     	_global_vec_Rate.push_back(global_vec_Rate_tmp);
 	}
 
 	// linear assemblers
@@ -132,7 +154,7 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 		MyLinearTransportProblemType* linear_problem = new MyLinearTransportProblemType(dis);
 		MyLinearEquationType* linear_eqs = linear_problem->createEquation();
 		linear_eqs->initialize(linear_assembler, linear_r_assembler, linear_j_eqs);
-		linear_problem->setTimeSteppingFunction(*tim);
+		linear_problem->setTimeSteppingFunction(*_tim);
 
 		// set up variables
 		// in this case, the variables includes: eta_0, eta_1, eta_2......,
@@ -148,7 +170,7 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 	_non_linear_problem = new MyNonLinearReactiveTransportProblemType(dis);
 	_non_linear_eqs     = _non_linear_problem->createEquation();
 	//_non_linear_eqs->initialize( non_linear_j_assembler );
-	_non_linear_problem->setTimeSteppingFunction(*tim);
+	_non_linear_problem->setTimeSteppingFunction(*_tim);
 	// for nonlinear coupled transport problem, variables are xi_mobile species
 	for ( i=0; i < _n_xi_global ; i++ )
 	{
@@ -159,7 +181,7 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 
 	// reduction problem
 	_problem = new MyGIAReductionProblemType( dis, _ReductionGIA );
-	_problem->setTimeSteppingFunction(*tim);  // applying the same time stepping function for all linear, non-linear and reduction problems
+	_problem->setTimeSteppingFunction(*_tim);  // applying the same time stepping function for all linear, non-linear and reduction problems
 	// add variables to the KinReduction problem class
 	// for the KinReduction problem, variables are the concentrations of all chemical components
 	// add all concentrations to discretized memory space
@@ -310,8 +332,8 @@ void FunctionReductConc<T1, T2>::initializeTimeStep(const NumLib::TimeStep &/*ti
 	//	_linear_problems[i]->getEquation()->getJacobianAssembler()->setVelocity(vel);
 	}
 	// set velocity for nonlinear problem as well
-	//_non_linear_problem->getEquation()->getLinearAssembler()->setVelocity(vel);
-//    _non_linear_problem->getEquation()->getResidualAssembler()->setVelocity(vel);
+	// _non_linear_problem->getEquation()->getLinearAssembler()->setVelocity(vel);
+    _non_linear_problem->getEquation()->getResidualAssembler()->setVelocity(vel);
 //	_non_linear_problem->getEquation()->getJacobianAssembler()->setVelocity(vel);
  //   // set xi_mob_rates for non-linear problem
 	//_non_linear_problem->getEquation()->getLinearAssembler()  ->set_xi_mob_rates( &_xi_mob_rates ); 
@@ -387,7 +409,8 @@ void FunctionReductConc<T1, T2>::convert_conc_to_eta_xi(void)
 	size_t node_idx, i;
     size_t _n_eta = this->_ReductionGIA->get_n_eta();
     size_t _n_eta_bar = this->_ReductionGIA->get_n_eta_bar();
-
+    size_t _n_xi_global = this->_ReductionGIA->get_n_xi_global();
+    size_t _n_xi_local = this->_ReductionGIA->get_n_xi_local();
 	// only when the reduction scheme is fully initialized
 	if ( this->_ReductionGIA->IsInitialized() )
 	{
@@ -744,29 +767,14 @@ template <class T1, class T2>
 void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const double iter_tol, const double rel_tol, const double max_iter)
 {
 	size_t i, node_idx;
-    size_t _n_eta = this->_ReductionGIA->get_n_eta();
-    size_t _n_eta_bar = this->_ReductionGIA->get_n_eta_bar();
 
-    //pointer to the local problem
+	//pointer to the local problem
     LocalProblem* pSolve;
     pSolve = new LocalProblem( _ReductionGIA);
 
 	//get the transformation matrices
 	MathLib::LocalMatrix _mat_c_mob_2_xi_mob     = _ReductionGIA->get_matrix_C2Xi();
 	MathLib::LocalMatrix _mat_c_immob_2_xi_immob = _ReductionGIA->get_matrix_Cbar2XiBar();
-	_n_xi_Sorp_tilde        = _ReductionGIA->get_n_xi_Sorp_tilde();
-	_n_xi_Min_tilde         = _ReductionGIA->get_n_xi_Min_tilde();
-	_n_xi_Sorp				= _ReductionGIA->get_n_xi_Sorp();
-	_n_xi_Min				= _ReductionGIA->get_n_xi_Min();
-	_I_mob					= _ReductionGIA->get_n_Comp_mob();
-	_I_NMin_bar             = _ReductionGIA->get_n_Comp_NMin_bar();
-	_I_min					= _ReductionGIA->get_n_Comp_min();
-	_n_xi_Kin_bar           = _ReductionGIA->get_n_xi_Kin_bar();
-	_n_xi_Mob				= _ReductionGIA->get_n_xi_Mob();
-	_n_xi_Sorp_bar			= _ReductionGIA->get_n_xi_Sorp_bar();
-	_n_xi_Min_bar			= _ReductionGIA->get_n_xi_Min_bar();
-    _n_xi_Kin               = _ReductionGIA->get_n_xi_Kin(); 
-    _n_xi_Kin_bar           = _ReductionGIA->get_n_xi_Kin_bar();
 
 	// initialize the local vector
 	MathLib::LocalVector loc_eta;
@@ -1651,30 +1659,5 @@ void FunctionReductConc<T1, T2>::GlobalJacobianAssembler(const NumLib::TimeStep 
 #endif
 
 
-template <class T1, class T2>
-void FunctionReductConc<T1, T2>::NumDiff(std::size_t & col,
-			              			 	 ogsChem::LocalVector & delta_xi,
-			              			 	 ogsChem::LocalVector & f,
-			              			 	 ogsChem::LocalVector & f_old,
-			              			 	 ogsChem::LocalVector & unknown,
-			              			 	 ogsChem::LocalVector & DrateDxi)
-{
-#if 0
-	ogsChem::LocalVector xi = LocalVector::Zero(col);
-for(std::size_t i = 0; i < col; i++)
-{
-    xi        = unknown;
-    xi(i)     = xi(i) + delta_xi * xi(i).norm();
-    DrateDxi(i) = ( f(xi) - f_old) / (delta_xi * xi(i).norm());  //is it elementwise?
-}
-#endif
-}
 
-template <class T1, class T2>
-void FunctionReductConc<T1, T2>::Vprime( MathLib::LocalVector & vec_conc,
-										 MathLib::LocalMatrix & mat_vprime)
-{
-
-
-}
 
