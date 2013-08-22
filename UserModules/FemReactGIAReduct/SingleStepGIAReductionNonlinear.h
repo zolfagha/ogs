@@ -109,6 +109,10 @@ public:
 
     DiscreteLib::DofEquationIdTable* getDofEquationIdTable() {return &_dofManager;};
 
+    UserResidualFunction* getResidualFunction() {return _f_r;}
+
+    UserDxFunction* getDxFunction() {return _f_dx;}
+
     ///
     virtual void accept(const NumLib::TimeStep &t)
     {
