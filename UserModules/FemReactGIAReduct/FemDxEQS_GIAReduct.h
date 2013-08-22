@@ -69,6 +69,11 @@ public:
     ///
     virtual ~TemplateTransientDxFEMFunction_GIA_Reduct() {};
 
+    void setVelocity(const NumLib::ITXFunction *vel)
+    {
+        _vel = const_cast<NumLib::ITXFunction*>(vel);
+    }
+
     ///
     NumLib::TemplateFunction<SolutionLib::SolutionVector,SolutionLib::SolutionVector>* clone() const
     {

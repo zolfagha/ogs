@@ -332,8 +332,10 @@ void FunctionReductConc<T1, T2>::initializeTimeStep(const NumLib::TimeStep &/*ti
 	//	_linear_problems[i]->getEquation()->getJacobianAssembler()->setVelocity(vel);
 	}
 	// set velocity for nonlinear problem as well
+	_non_linear_solution->getResidualFunction()->setVelocity(vel);
+    _non_linear_solution->getDxFunction()->setVelocity(vel);
 	// _non_linear_problem->getEquation()->getLinearAssembler()->setVelocity(vel);
-    _non_linear_problem->getEquation()->getResidualAssembler()->setVelocity(vel);
+    //_non_linear_problem->getEquation()->getResidualAssembler()->setVelocity(vel);
 //	_non_linear_problem->getEquation()->getJacobianAssembler()->setVelocity(vel);
  //   // set xi_mob_rates for non-linear problem
 	//_non_linear_problem->getEquation()->getLinearAssembler()  ->set_xi_mob_rates( &_xi_mob_rates ); 
