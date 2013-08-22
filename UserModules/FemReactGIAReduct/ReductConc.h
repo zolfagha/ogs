@@ -63,12 +63,9 @@ public:
     typedef LinearTransportTimeODELocalAssemblerML<NumLib::ElementWiseTimeEulerEQSLocalAssembler> MyLinearAssemblerType;
     typedef LinearTransportTimeODELocalAssemblerML<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyLinearResidualAssemblerType;
     typedef LinearTransportJacobianLocalAssembler MyLinearJacobianAssemblerType;                                        
-	// for the nonlinear part, use different settings
-//	typedef NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler, MyNodalFunctionScalar>      MyNonLinearAssemblerType;
-	typedef TemplateTransientResidualFEMFunction_GIA_Reduct<T_DISCRETE_SYSTEM, FunctionReductConc> MyNonLinearResidualAssemblerType;
 
-	//to be changed
-//	typedef NonLinearGIAJacobianLocalAssembler<MyNodalFunctionScalar, MyFunctionData>                                    MyNonLinearJacobianAssemblerType;
+	// to be changed
+    // typedef NonLinearGIAJacobianLocalAssembler<MyNodalFunctionScalar, MyFunctionData>                                    MyNonLinearJacobianAssemblerType;
 	typedef NestedGIALocalProbNRIterationStepInitializer<MyNodalFunctionScalar, MyFunctionData>                          MyNRIterationStepInitializer;
 	typedef NumLib::DiscreteNRSolverWithStepInitFactory<MyNRIterationStepInitializer>                                    MyDiscreteNonlinearSolverFactory;
 	
@@ -106,9 +103,7 @@ public:
 	typedef TemplateFemEquation_GIAReduct<
 		    MyDiscreteSystem,
             MyFunctionData,
-			MyLinearSolver,
-			MyNonLinearResidualAssemblerType
-//			MyNonLinearJacobianAssemblerType
+			MyLinearSolver
 	        > MyNonLinearEquationType;
 	/**
       * FEM IVBV problem definition
