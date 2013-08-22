@@ -12,7 +12,6 @@
 
 #ifndef SINGLE_STEP_GIA_REDUCTION_H
 #define SINGLE_STEP_GIA_REDUCTION_H
-#define _DEBUG
 
 #include <vector>
 #include <map>
