@@ -40,7 +40,7 @@ class DofEquationIdTable;
 class DiscreteSystem : public IDiscreteSystem
 {
 public:
-    template<typename T_LINEAR_SOLVER, typename T_SPARSITY_BUILDER=DiscreteLib::SparsityBuilderDummy>
+    template<typename T_LINEAR_SOLVER, typename T_SPARSITY_BUILDER>
     struct MyLinearEquation
     {
         typedef DiscreteLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER> type;
@@ -89,7 +89,7 @@ public:
     /// @tparam T_SPARSITY_BUILDER
     /// @param linear_solver         Linear solver
     /// @param dofManager            Equation index table
-    template <class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER=DiscreteLib::SparsityBuilderDummy>
+    template <class T_LINEAR_SOLVER, class T_SPARSITY_BUILDER>
     typename MyLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>::type* createLinearEquation(T_LINEAR_SOLVER* linear_solver, DofEquationIdTable* dofManager)
     {
         return MyLinearEquation<T_LINEAR_SOLVER, T_SPARSITY_BUILDER>::type::createInstance(*this, _msh, linear_solver, dofManager);
