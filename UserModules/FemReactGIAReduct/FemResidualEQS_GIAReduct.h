@@ -99,8 +99,11 @@ public:
 
 private:
 	void GlobalResidualAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, SolutionLib::SolutionVector & residual_global);
-	void assembly(const NumLib::TimeStep & delta_t, const std::size_t _n_xi, const SolutionLib::SolutionVector & u_cur_xiglob,
-	                                            SolutionLib::SolutionVector & residual_global, std::size_t switchOn, MathLib::LocalMatrix &_mat_Asorp, MathLib::LocalMatrix &_mat_Amin);
+	void assembly(const NumLib::TimeStep & delta_t, 
+                  const SolutionLib::SolutionVector & u_cur_xiglob,
+                  SolutionLib::SolutionVector & residual_global, 
+                  MathLib::LocalMatrix &_mat_Asorp, 
+                  MathLib::LocalMatrix &_mat_Amin);
 
 private:
     MyDiscreteSystem *_dis_sys;
@@ -138,19 +141,10 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
     r = .0;
     //node based operations
 
-
     //FunctionReductConc *test = template<msh, ggf> FunctionReductConc();
 
 	// calculate the global residual
     GlobalResidualAssembler(*this->_time_step, u_n1, r);
-
-
-//    // element based operation for assemblyCh
-//    MyUpdater updater(&t_n1, msh, _dofManager, u_n, &u_n1, _local_assembler);
-//    MyGlobalAssembler assembler(&updater);
-//    r.construct(*_dofManager, assembler);
-
-
 
     // add source/sink term (i.e. RHS in linear equation)
     if (_st!=0) {
@@ -177,7 +171,8 @@ template <class T_DIS_SYS, class T_USER_FUNCTION_DATA>
 void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_DATA>::GlobalResidualAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, SolutionLib::SolutionVector & residual_global)
 {
     const size_t nnodes = _dis_sys->getMesh()->getNumberOfNodes();
-
+    const double theta_water_content = 0.32; 
+    size_t j; 
     // current xi global
     MathLib::LocalVector loc_cur_xi_global, loc_cur_xi_Sorp_tilde, loc_cur_xi_Min_tilde,
                          loc_cur_xi_Sorp, loc_cur_xi_Min, loc_cur_xi_Kin;
@@ -191,7 +186,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
     MathLib::LocalVector loc_cur_xi_local, loc_xi_local, loc_cur_xi_Mob, loc_cur_xi_Sorp_bar, loc_cur_xi_Min_bar, loc_cur_xi_Kin_bar, loc_cur_xi_Sorp_bar_li, loc_cur_xi_Sorp_bar_ld;
 
     // residual vectors
-    MathLib::LocalVector res43, res44, res45, res46, local_residual;//, residual_global_res43, residual_global_res44, residual_global_res45, residual_global_res46, global_vec_LHS_sorp, global_vec_RHS_sorp, global_vec_LHS_min, global_vec_RHS_min;
+    MathLib::LocalVector res43, res44, res45, res46, res47, local_residual;//, residual_global_res43, residual_global_res44, residual_global_res45, residual_global_res46, global_vec_LHS_sorp, global_vec_RHS_sorp, global_vec_LHS_min, global_vec_RHS_min;
 
     // eta vectors
     MathLib::LocalVector loc_cur_eta, loc_cur_eta_bar;
@@ -199,7 +194,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
     // rate vector
     MathLib::LocalVector vec_Rate, vec_Rate_45, vec_Rate_46; //, global_vec_Rate_45, global_vec_Rate_46;
 
-    MathLib::LocalMatrix _mat_A1sorp, _mat_A2sorpli, _mat_A2sorpld, _mat_A1min, _mat_Ald;
+    MathLib::LocalMatrix mat_A1sorp, mat_A2sorpli, mat_A2sorpld, mat_A1min, mat_Ald, mat_A1kin;
 
     // initialize the local vector
     //current xi global
@@ -209,13 +204,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
     loc_cur_xi_Sorp                 = MathLib::LocalVector::Zero( _n_xi_Sorp);
     loc_cur_xi_Min                  = MathLib::LocalVector::Zero( _n_xi_Min);
     loc_cur_xi_Kin                  = MathLib::LocalVector::Zero( _n_xi_Kin);
-    //previous xi global
-    loc_pre_xi_global               = MathLib::LocalVector::Zero( _n_xi_global );
-    loc_pre_xi_Sorp_tilde           = MathLib::LocalVector::Zero( _n_xi_Sorp_tilde );
-    loc_pre_xi_Min_tilde            = MathLib::LocalVector::Zero( _n_xi_Min_tilde );
-    loc_pre_xi_Sorp                 = MathLib::LocalVector::Zero( _n_xi_Sorp);
-    loc_pre_xi_Min                  = MathLib::LocalVector::Zero( _n_xi_Min);
-    loc_pre_xi_Kin                  = MathLib::LocalVector::Zero( _n_xi_Kin);
+
     //current xi local
     loc_cur_xi_local                = MathLib::LocalVector::Zero( _n_xi_local );
     loc_cur_xi_Sorp_bar             = MathLib::LocalVector::Zero( _n_xi_Sorp_bar );
@@ -227,28 +216,22 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
     res44                       = MathLib::LocalVector::Zero( _n_xi_Min_tilde);
     res45                       = MathLib::LocalVector::Zero( _n_xi_Sorp);
     res46                       = MathLib::LocalVector::Zero( _n_xi_Min);
-//  residual_global_res43       = MathLib::LocalVector::Zero( _n_xi_Sorp_tilde * nnodes);
-//  residual_global_res44       = MathLib::LocalVector::Zero( _n_xi_Min_tilde * nnodes);
-//  residual_global_res45       = MathLib::LocalVector::Zero( _n_xi_Min * nnodes);
-//  residual_global_res46       = MathLib::LocalVector::Zero( _n_xi_Sorp * nnodes);
-//  global_vec_LHS_sorp         = MathLib::LocalVector::Zero( _n_xi_Sorp * nnodes);
-//  global_vec_RHS_sorp         = MathLib::LocalVector::Zero( _n_xi_Sorp * nnodes);
-//  global_vec_LHS_min          = MathLib::LocalVector::Zero( _n_xi_Min * nnodes);
-//  global_vec_RHS_min          = MathLib::LocalVector::Zero( _n_xi_Min * nnodes);
+
     // current eta mobie and immobile
     loc_cur_eta             = MathLib::LocalVector::Zero( _n_eta );
     loc_cur_eta_bar         = MathLib::LocalVector::Zero( _n_eta_bar );
 
 
     //initialize it before?
-    _mat_A1sorp        = _ReductionGIA->get_matrix_A1sorp();
-    _mat_A2sorpli      = _ReductionGIA->get_matrix_A2sorpli();
-    _mat_A1min         = _ReductionGIA->get_matrix_A1min();
-    _mat_Ald           = _ReductionGIA->get_matrix_Ald();
-    _mat_A2sorpld      = _ReductionGIA->get_matrix_A2sorpld();
+    mat_A1sorp        = _ReductionGIA->get_matrix_A1sorp();
+    mat_A2sorpli      = _ReductionGIA->get_matrix_A2sorpli();
+    mat_A1min         = _ReductionGIA->get_matrix_A1min();
+    mat_Ald           = _ReductionGIA->get_matrix_Ald();
+    mat_A2sorpld      = _ReductionGIA->get_matrix_A2sorpld();
+    mat_A1kin         = _ReductionGIA->get_matrix_A1kin(); 
 
-    MathLib::LocalMatrix _mat_Asorp = _mat_A1sorp - _mat_A2sorpli;
-    MathLib::LocalMatrix _mat_Amin = _mat_A1min - _mat_Ald * _mat_A2sorpld;
+    MathLib::LocalMatrix mat_Asorp = mat_A1sorp - mat_A2sorpli;
+    MathLib::LocalMatrix mat_Amin  = mat_A1min  - mat_Ald * mat_A2sorpld;
 
 
     // loop over all the nodes
@@ -260,8 +243,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
 
             for (size_t i=0; i < _n_xi_global; i++)
                 loc_cur_xi_global[i] = u_cur_xiglob[node_idx * _n_xi_global + i];
-            for (size_t i=0; i < _n_xi_global; i++)
-                loc_pre_xi_global[i] = _xi_global[i]->getValue(node_idx);
             for (size_t i=0; i < _n_xi_local; i++)
                 loc_cur_xi_local[i] = _xi_local[i]->getValue(node_idx);
             for (size_t i=0; i < _n_eta; i++)
@@ -278,38 +259,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             loc_cur_xi_Min          = loc_cur_xi_global.segment( _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Min);
             loc_cur_xi_Kin          = loc_cur_xi_global.tail(_n_xi_Kin);
 
-
-//          for (i=0; i < _n_xi_Sorp_tilde; i++)
-//              _global_cur_xi_Sorp_tilde[i]->setValue(node_idx, loc_cur_xi_Sorp_tilde[i]);
-//          for (i=0; i < _n_xi_Min_tilde; i++)
-//              _global_cur_xi_Min_tilde[i]->setValue(node_idx, loc_cur_xi_Min_tilde[i]);
-//          for (i=0; i < _n_xi_Sorp; i++)
-//              _global_cur_xi_Sorp[i]->setValue(node_idx, loc_cur_xi_Sorp[i]);
-//          for (i=0; i < _n_xi_Min; i++)
-//              _global_cur_xi_Min[i]->setValue(node_idx, loc_cur_xi_Min[i]);
-//          for (i=0; i < _n_xi_Kin; i++)
-//              _global_cur_xi_Kin[i]->setValue(node_idx, loc_cur_xi_Kin[i]);
-
-
-            // previous xi global
-            loc_pre_xi_Sorp_tilde   = loc_pre_xi_global.head(_n_xi_Sorp_tilde);
-            loc_pre_xi_Min_tilde    = loc_pre_xi_global.segment(_n_xi_Sorp_tilde, _n_xi_Min_tilde);
-            loc_pre_xi_Sorp         = loc_pre_xi_global.segment( _n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Sorp);
-            loc_pre_xi_Min          = loc_pre_xi_global.segment( _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Min);
-            loc_pre_xi_Kin          = loc_pre_xi_global.tail(_n_xi_Kin);
-
-//          for (i=0; i < _n_xi_Sorp_tilde; i++)
-//              _global_pre_xi_Sorp_tilde[i]->setValue(node_idx, loc_pre_xi_Sorp_tilde[i]);
-//          for (i=0; i < _n_xi_Min_tilde; i++)
-//              _global_pre_xi_Min_tilde[i]->setValue(node_idx, loc_pre_xi_Min_tilde[i]);
-//          for (i=0; i < _n_xi_Sorp; i++)
-//              _global_pre_xi_Sorp[i]->setValue(node_idx, loc_pre_xi_Sorp[i]);
-//          for (i=0; i < _n_xi_Min; i++)
-//              _global_pre_xi_Min[i]->setValue(node_idx, loc_pre_xi_Min[i]);
-//          for (i=0; i < _n_xi_Kin; i++)
-//              _global_pre_xi_Kin[i]->setValue(node_idx, loc_pre_xi_Kin[i]);
-
-
             // current xi local
             loc_cur_xi_Mob          = loc_cur_xi_local.head(_n_xi_Mob);
             loc_cur_xi_Sorp_bar     = loc_cur_xi_local.segment(_n_xi_Mob, _n_xi_Sorp_bar);
@@ -318,10 +267,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
 
             loc_cur_xi_Sorp_bar_li  = loc_cur_xi_Sorp_bar.topRows(_n_xi_Sorp_bar_li);
             loc_cur_xi_Sorp_bar_ld  = loc_cur_xi_Sorp_bar.bottomRows(_n_xi_Sorp_bar_ld);
-
-
-
-
 
             // calculate node based AE (Eq. 3.43 and 3.44)
             res43 = loc_cur_xi_Sorp_tilde - loc_cur_xi_Sorp + loc_cur_xi_Sorp_bar_li;
@@ -336,30 +281,20 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             for(std::size_t i = 0; i < _n_xi_Min_tilde; i++)
             residual_global[_n_xi_global * node_idx + i] = res44[i];
 
-//          // collect the xi_local_new  ??
-//          for (i=0; i < _n_xi_Sorp_tilde; i++)
-//              residual_global_res43[i]->setValue(node_idx, res43[i]);
-//          // residual_global_res43.push_back( res43 );
-//
-//          for (i=0; i < _n_xi_Min_tilde; i++)
-//              residual_global_res44[i]->setValue(node_idx, res44[i]);
-//          // residual_global_res44.push_back( res44 );
-
-
             // Note: since rate is already used in local problem, is it the same? probably not.
             // calculate the nodal kinetic reaction rates
             _ReductionGIA->Calc_Kin_Rate(loc_cur_xi_Mob,
-                                            loc_pre_xi_Sorp,
-                                            loc_cur_xi_Sorp_tilde,
-                                            loc_cur_xi_Sorp_bar,
-                                            loc_cur_xi_Min,
-                                            loc_cur_xi_Min_tilde,
-                                            loc_cur_xi_Min_bar,
-                                            loc_cur_xi_Kin,
-                                            loc_cur_xi_Kin_bar,
-                                            loc_cur_eta,
-                                            loc_cur_eta_bar,
-                                            vec_Rate);
+                                         loc_cur_xi_Sorp,
+                                         loc_cur_xi_Sorp_tilde,
+                                         loc_cur_xi_Sorp_bar,
+                                         loc_cur_xi_Min,
+                                         loc_cur_xi_Min_tilde,
+                                         loc_cur_xi_Min_bar,
+                                         loc_cur_xi_Kin,
+                                         loc_cur_xi_Kin_bar,
+                                         loc_cur_eta,
+                                         loc_cur_eta_bar,
+                                         vec_Rate);
 
 
 
@@ -367,100 +302,100 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             for (size_t i=0; i < _J_tot_kin; i++)
                 _global_vec_Rate[i]->setValue(node_idx, vec_Rate[i]);
 
-//          for (i=0; i < vec_Rate_46.cols(); i++)
-//              _global_vec_Rate_46[i]->setValue(node_idx, vec_Rate_46[i]);
+            res45 = theta_water_content * mat_Asorp * vec_Rate; 
+            res46 = theta_water_content * mat_Amin  * vec_Rate; 
+            res47 = theta_water_content * mat_A1kin * vec_Rate; 
 
+            for (j=0; j<_n_xi_Sorp_tilde; j++ )
+                residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + j] -= res45(j) ;
+            for (j=0; j<_n_xi_Min_tilde; j++ )
+                residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp_tilde + j] -= res46(j) ;
+            for (j=0; j<_n_xi_Kin; j++ )
+                residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp_tilde + _n_xi_Min_tilde + j] -= res47(j) ;
+     
+    } // end of loop over all nodes. 
 
-    }
+    // loop over all elements and assemble Eq. 45-47
+    this->assembly(delta_t, u_cur_xiglob, residual_global, mat_Asorp, mat_Amin);
 
-    // solve for Eq. 45
-    std::size_t switchOn = 1;  // 1 for xi sorp tilde
-    this->assembly(delta_t, _n_xi_Sorp, u_cur_xiglob, residual_global, switchOn, _mat_Asorp, _mat_Amin);
-
-    switchOn = 0;  // 1 for xi sorp tilde
-    this->assembly(delta_t, _n_xi_Min, u_cur_xiglob, residual_global, switchOn, _mat_Asorp, _mat_Amin);
-
-//    for(std::vector<int>::iterator iter; iter _residual_global_res45.begin(); iter != _residual_global_res45.end(); ++iter)
-//    _residual_global_res45[iter] = _global_vec_LHS_sorp[iter] - _global_vec_RHS_sorp[iter] - _global_vec_Rate_45[iter];
-//
-//    // solve for Eq. 46
-//    this->assembly(delta_t, _n_xi_Min, global_cur_xi_Min_tilde, global_pre_xi_Min_tilde, global_cur_xi_Min, global_pre_xi_Min, _global_vec_LHS_min, _global_vec_RHS_min);
-//
-//    residual_global_res46 = _global_vec_LHS_min - _global_vec_RHS_min - _global_vec_Rate_46;
-//
-//
-//
-//    // construct global residual vector
-//  // loop over all the nodes
-//    for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin();
-//       node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd();
-//       node_idx++ )
-//  {
-//
-//  for (i=0; i < _n_xi_Sorp_tilde; i++)
-//      res43[i] = this->_residual_global_res43[i]->getValue(node_idx);
-//  for (i=0; i < _n_xi_Min_tilde; i++)
-//      res44[i] = this->_residual_global_res44[i]->getValue(node_idx);
-//
-//  for (i=0; i < _n_xi_Sorp; i++)
-//      res45[i] = this->_residual_global_res45[i]->getValue(node_idx);
-//  for (i=0; i < _n_xi_Min; i++)
-//      res46[i] = this->_residual_global_res46[i]->getValue(node_idx);
-//
-//  local_residual.head(_n_xi_Sorp_tilde)                                   = res43;
-//  local_residual.segment(_n_xi_Sorp_tilde,_n_xi_Min_tilde)                = res44;
-//  local_residual.segment(_n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Sorp)  = res45;
-//  local_residual.tail(_n_xi_Min)                                          = res46;
-//
-//  for (i=0; i < _n_xi_global; i++)
-//      _residual_global[i]->setValue(node_idx, local_residual[i]);
-//
-//
-//  }
 }
 
 
 // element based assembly
 template <class T_DIS_SYS, class T_USER_FUNCTION_DATA>
-void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_DATA>::assembly(const NumLib::TimeStep & delta_t, const std::size_t _n_xi, const SolutionLib::SolutionVector & u_cur_xiglob,
-                                            SolutionLib::SolutionVector & residual_global, std::size_t switchOn, MathLib::LocalMatrix &_mat_Asorp, MathLib::LocalMatrix &_mat_Amin)
-        {
+void TemplateTransientResidualFEMFunction_GIA_Reduct
+     <T_DIS_SYS, T_USER_FUNCTION_DATA>
+     ::assembly(const NumLib::TimeStep & delta_t, 
+                const SolutionLib::SolutionVector & u_cur_xiglob,
+                SolutionLib::SolutionVector & residual_global,  
+                MathLib::LocalMatrix &_mat_Asorp, 
+                MathLib::LocalMatrix &_mat_Amin)
+{
     //MyLinearSolver* linear_solver = this->_non_linear_solution->getLinearEquationSolver();
     MeshLib::IMesh* msh = _dis_sys->getMesh();
     const size_t n_ele = msh->getNumberOfElements();
+    const size_t n_max_connect_nodes = 20; 
+    size_t nnodes; 
     double _theta(1.0);
+    size_t _n_xi_trans = this->_n_xi_Sorp + this->_n_xi_Min + this->_n_xi_Kin; 
+    size_t i,j,k; 
 
-    MathLib::LocalVector loc_cur_xi_global, loc_cur_xi_Sorp_tilde, loc_cur_xi_Min_tilde, loc_cur_xi_Sorp, loc_cur_xi_Min, loc_cur_xi_Kin;
+    MathLib::LocalVector loc_cur_xi_global, 
+                         loc_cur_xi_Sorp_tilde, 
+                         loc_cur_xi_Min_tilde, 
+                         loc_cur_xi_Sorp, 
+                         loc_cur_xi_Min, 
+                         loc_cur_xi_Kin;
 
     // previous xi global
-    MathLib::LocalVector loc_pre_xi_global, loc_pre_xi_Sorp_tilde, loc_pre_xi_Min_tilde, loc_pre_xi_Sorp, loc_pre_xi_Min, loc_pre_xi_Kin;
+    MathLib::LocalVector loc_pre_xi_global, 
+                         loc_pre_xi_Sorp_tilde, 
+                         loc_pre_xi_Min_tilde, 
+                         loc_pre_xi_Sorp, 
+                         loc_pre_xi_Min, 
+                         loc_pre_xi_Kin;
 
     MathLib::LocalVector loc_vec_Rate, vec_Rate_temp;
 
+    MathLib::LocalMatrix localLHS_xi_sorp, 
+                         localRHS_xi_sorp, 
+                         localLHS_xi_min, 
+                         localRHS_xi_min,
+                         localLHS_xi_kin, 
+                         localRHS_xi_kin, 
+                         local_res_sorp, 
+                         local_res_min,
+                         local_res_kin; 
+
+    loc_vec_Rate  = MathLib::LocalVector::Zero( _J_tot_kin );
+    vec_Rate_temp = MathLib::LocalVector::Zero( _J_tot_kin );
+
     // initialize the local vector
     //current xi global
-    loc_cur_xi_global               = MathLib::LocalVector::Zero( _n_xi_global );
-    loc_cur_xi_Sorp_tilde           = MathLib::LocalVector::Zero( _n_xi_Sorp_tilde );
-    loc_cur_xi_Min_tilde            = MathLib::LocalVector::Zero( _n_xi_Min_tilde );
-    loc_cur_xi_Sorp                 = MathLib::LocalVector::Zero( _n_xi_Sorp);
-    loc_cur_xi_Min                  = MathLib::LocalVector::Zero( _n_xi_Min);
-    loc_cur_xi_Kin                  = MathLib::LocalVector::Zero( _n_xi_Kin);
+    loc_cur_xi_global               = MathLib::LocalVector::Zero( _n_xi_global * n_max_connect_nodes );
+    loc_cur_xi_Sorp_tilde           = MathLib::LocalVector::Zero( _n_xi_Sorp_tilde * n_max_connect_nodes  );
+    loc_cur_xi_Min_tilde            = MathLib::LocalVector::Zero( _n_xi_Min_tilde * n_max_connect_nodes  );
+    loc_cur_xi_Sorp                 = MathLib::LocalVector::Zero( _n_xi_Sorp * n_max_connect_nodes );
+    loc_cur_xi_Min                  = MathLib::LocalVector::Zero( _n_xi_Min * n_max_connect_nodes );
+    loc_cur_xi_Kin                  = MathLib::LocalVector::Zero( _n_xi_Kin * n_max_connect_nodes );
     //previous xi global
-    loc_pre_xi_global               = MathLib::LocalVector::Zero( _n_xi_global );
-    loc_pre_xi_Sorp_tilde           = MathLib::LocalVector::Zero( _n_xi_Sorp_tilde );
-    loc_pre_xi_Min_tilde            = MathLib::LocalVector::Zero( _n_xi_Min_tilde );
-    loc_pre_xi_Sorp                 = MathLib::LocalVector::Zero( _n_xi_Sorp);
-    loc_pre_xi_Min                  = MathLib::LocalVector::Zero( _n_xi_Min);
-    loc_pre_xi_Kin                  = MathLib::LocalVector::Zero( _n_xi_Kin);
+    loc_pre_xi_global               = MathLib::LocalVector::Zero( _n_xi_global * n_max_connect_nodes  );
+    loc_pre_xi_Sorp_tilde           = MathLib::LocalVector::Zero( _n_xi_Sorp_tilde * n_max_connect_nodes  );
+    loc_pre_xi_Min_tilde            = MathLib::LocalVector::Zero( _n_xi_Min_tilde * n_max_connect_nodes  );
+    loc_pre_xi_Sorp                 = MathLib::LocalVector::Zero( _n_xi_Sorp * n_max_connect_nodes );
+    loc_pre_xi_Min                  = MathLib::LocalVector::Zero( _n_xi_Min * n_max_connect_nodes );
+    loc_pre_xi_Kin                  = MathLib::LocalVector::Zero( _n_xi_Kin * n_max_connect_nodes );
 
 
-    for (size_t i=0; i<n_ele; i++)
+    for ( i=0; i<n_ele; i++)
     {
         MeshLib::IElement *e = msh->getElement(i);
 
         std::vector<size_t> ele_node_ids;
         //MathLib::Vector<size_t> ele_node_ids;
         e->getNodeIDList(e->getMaximumOrder(), ele_node_ids);
+        // number of connecting nodes
+        nnodes = ele_node_ids.size(); 
 
         //TODO get the water content and multiply it in LHS and RHS
 
@@ -495,7 +430,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
         double disp_l = 0.0;
         double disp_t = 0.0;
 
-        for (size_t j=0; j < _q->getNumberOfSamplingPoints(); j++)
+        for (j=0; j < _q->getNumberOfSamplingPoints(); j++)
         {
             _q->getSamplingPoint(j, gp_x);
             _fe->computeBasisFunctions(gp_x);
@@ -542,83 +477,74 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
         //std::cout << "M="; M.write(std::cout); std::cout << std::endl;
         //std::cout << "K="; K.write(std::cout); std::cout << std::endl;
 
-        //MathLib::LocalVector localLHS = MathLib::LocalVector::Zero(ele_node_ids.size());
-        //MathLib::LocalVector localRHS = MathLib::LocalVector::Zero(ele_node_ids.size());
-        MathLib::LocalVector local_u1 = MathLib::LocalVector::Zero(ele_node_ids.size());
-        MathLib::LocalVector local_u0 = MathLib::LocalVector::Zero(ele_node_ids.size());
-        MathLib::LocalVector local_u1_tilde = MathLib::LocalVector::Zero(ele_node_ids.size());
-        MathLib::LocalVector local_u0_tilde = MathLib::LocalVector::Zero(ele_node_ids.size());
+
+
 
         //MathLib::LocalVector node_indx = MathLib::LocalVector::Zero(_n_xi);
-        std::size_t xi_count, node_indx(0);
-        double localLHS, localRHS;
+        std::size_t idx_xi, node_indx, val_idx;
 
-        for (xi_count = 0; xi_count < _n_xi; xi_count++)
+        for (idx_xi = 0; idx_xi < _n_xi_global ; idx_xi++)
         {
-
-    //      for(size_t idx = 0; idx != ele_node_ids.size(); idx++)
-    //      {
-    //
-    //          node_indx           = ele_node_ids[idx] * _n_xi + xi_count;
-    //          local_u1(idx)       = _global_u1_tilde[node_indx];
-    //          local_u0(idx)       = _global_u0[node_indx];
-    //          local_u1_tilde(idx) = _global_u1_tilde[node_indx];
-    //          local_u0_tilde(idx) = _global_u0_tilde[node_indx];
-    //      }
-
-
-            for(size_t idx = 0; idx != ele_node_ids.size(); idx++)
+            for( node_indx = 0; node_indx != nnodes; node_indx++)
             {
-                node_indx = ele_node_ids[idx] * _n_xi + xi_count;
+                // calculating the global index 
+                val_idx = ele_node_ids[node_indx] * _n_xi_global + idx_xi;
+                // now we get the nodal values connected to this element
+                loc_cur_xi_global[idx_xi*nnodes+node_indx] = u_cur_xiglob[val_idx];
+                loc_pre_xi_global[idx_xi*nnodes+node_indx] = this->_xi_global[idx_xi]->getValue(ele_node_ids[node_indx]);
+            }  // end of idx_xi
+        }  // end of node_idx
 
-                for (i=0; i < _n_xi_global; i++)
-                    loc_cur_xi_global[i] = u_cur_xiglob[ele_node_ids[idx] * _n_xi_global + xi_count];
-                for (i=0; i < _n_xi_global; i++)
-                    loc_pre_xi_global[i] = this->_xi_global[i]->getValue(ele_node_ids[idx]);
+        loc_cur_xi_Sorp_tilde   = loc_cur_xi_global.head(_n_xi_Sorp_tilde*nnodes);
+        loc_cur_xi_Min_tilde    = loc_cur_xi_global.segment(_n_xi_Sorp_tilde*nnodes, _n_xi_Min_tilde*nnodes);
+        loc_cur_xi_Sorp         = loc_cur_xi_global.segment(_n_xi_Sorp_tilde*nnodes  + _n_xi_Min_tilde*nnodes, _n_xi_Sorp*nnodes);
+        loc_cur_xi_Min          = loc_cur_xi_global.segment( _n_xi_Sorp_tilde*nnodes + _n_xi_Min_tilde*nnodes + _n_xi_Sorp*nnodes, _n_xi_Min*nnodes);
 
-                loc_cur_xi_Sorp_tilde   = loc_cur_xi_global.head(_n_xi_Sorp_tilde);
-                loc_cur_xi_Min_tilde    = loc_cur_xi_global.segment(_n_xi_Sorp_tilde, _n_xi_Min_tilde);
-                loc_cur_xi_Sorp         = loc_cur_xi_global.segment( _n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Sorp);
-                loc_cur_xi_Min          = loc_cur_xi_global.segment( _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Min);
+        loc_pre_xi_Sorp_tilde   = loc_pre_xi_global.head(_n_xi_Sorp_tilde*nnodes);
+        loc_pre_xi_Min_tilde    = loc_pre_xi_global.segment(_n_xi_Sorp_tilde*nnodes, _n_xi_Min_tilde*nnodes);
+        loc_pre_xi_Sorp         = loc_pre_xi_global.segment(_n_xi_Sorp_tilde*nnodes  + _n_xi_Min_tilde*nnodes, _n_xi_Sorp*nnodes);
+        loc_pre_xi_Min          = loc_pre_xi_global.segment( _n_xi_Sorp_tilde*nnodes + _n_xi_Min_tilde*nnodes + _n_xi_Sorp*nnodes, _n_xi_Min*nnodes);
 
-                loc_pre_xi_Sorp_tilde   = loc_pre_xi_global.head(_n_xi_Sorp_tilde);
-                loc_pre_xi_Min_tilde    = loc_pre_xi_global.segment(_n_xi_Sorp_tilde, _n_xi_Min_tilde);
-                loc_pre_xi_Sorp         = loc_pre_xi_global.segment( _n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Sorp);
-                loc_pre_xi_Min          = loc_pre_xi_global.segment( _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Min);
+        // LHS = (1/dt M + theta theta K) u1
+        // RHS = (1/dt M - (1-theta) K) u0 + F
+        for ( j=0; j < _n_xi_Sorp_tilde; j++ )
+        {
+            localLHS_xi_sorp  = 1.0 / dt * localM * loc_cur_xi_Sorp_tilde.segment(j*nnodes, nnodes) 
+                                + _theta * localK * loc_cur_xi_Sorp.segment(j*nnodes, nnodes);
 
-                for (i=0; i < _J_tot_kin; i++)
-                    loc_vec_Rate[i] = this->_global_vec_Rate[i]->getValue(ele_node_ids[idx]);
-
-                MathLib::LocalVector vec_Rate_temp;
-                if(switchOn)  //if switchOn calculate for xi sorp tilde and for xi min tilde otherwise
-                {
-                                local_u1(idx)       = loc_cur_xi_Sorp[node_indx];
-                                local_u0(idx)       = loc_pre_xi_Sorp[node_indx];
-                                local_u1_tilde(idx) = loc_cur_xi_Sorp_tilde[node_indx];
-                                local_u0_tilde(idx) = loc_pre_xi_Sorp_tilde[node_indx];
-                                vec_Rate_temp = _mat_Asorp * loc_vec_Rate;
-
-                }
-                else
-                {
-                                local_u1(idx)       = loc_cur_xi_Min[node_indx];
-                                local_u0(idx)       = loc_pre_xi_Min[node_indx];
-                                local_u1_tilde(idx) = loc_cur_xi_Min_tilde[node_indx];
-                                local_u0_tilde(idx) = loc_pre_xi_Min_tilde[node_indx];
-                                vec_Rate_temp = _mat_Amin * loc_vec_Rate;
-                }
-
-            // LHS = dt*(1/dt M + theta K)
-            //localLHS = (localM * global_u1_tilde(node_indx)) + (delta_t * _theta * localK * global_u1(node_indx));
-             localLHS = (localM.row(idx).dot(local_u1_tilde)) + (dt * _theta * (localK.row(idx).dot(local_u1)));
-            //_global_vec_LHS(node_indx) = _global_vec_LHS(node_indx) + localLHS;
-             // RHS = (1/dt M - (1-theta) K) u0 + F
-             localRHS = (localM.row(idx).dot(local_u0_tilde)) - (dt * (1.-_theta) * localK.row(idx).dot(local_u0)); //local_u_n;
-             //_global_vec_RHS(node_indx) = _global_vec_RHS(node_indx) + localRHS;
-
-            residual_global[_n_xi_global * ele_node_ids[idx] + xi_count] = localLHS - localRHS - vec_Rate_temp[xi_count];
-
+            localRHS_xi_sorp  = 1.0 / dt * localM * loc_pre_xi_Sorp_tilde.segment(j*nnodes, nnodes) 
+                                 + (1.0 - _theta) * localK * loc_pre_xi_Sorp.segment(j*nnodes, nnodes);
+            local_res_sorp    = localLHS_xi_sorp - localRHS_xi_sorp;
+            for (k=0; k<nnodes; k++)
+            {
+                residual_global[_n_xi_global * ele_node_ids[k] + _n_xi_Sorp_tilde + _n_xi_Min_tilde + j] += local_res_sorp(k) ;
             }
-        }
-    }
+        }  // end of for j
+        for ( j=0; j <_n_xi_Min_tilde; j++ )
+        {
+            localLHS_xi_min  = 1.0 / dt * localM * loc_cur_xi_Min_tilde.segment(j*nnodes, nnodes) 
+                               + _theta * localK * loc_cur_xi_Min.segment(j*nnodes, nnodes);
+            localRHS_xi_min  = 1.0 / dt * localM * loc_pre_xi_Min_tilde.segment(j*nnodes, nnodes) 
+                                + (1.0 - _theta) * localK * loc_pre_xi_Min.segment(j*nnodes, nnodes);
+            local_res_min    = localLHS_xi_min - localRHS_xi_min; 
+            for (k=0; k<nnodes; k++)
+            {
+                residual_global[_n_xi_global * ele_node_ids[k] + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + j] += local_res_min(k) ;
+            }
+        }  // end of for j
+        for ( j=0; j <_n_xi_Kin; j++ )
+        {
+            localLHS_xi_kin  = 1.0 / dt * localM * loc_cur_xi_Kin.segment(j*nnodes, nnodes) 
+                               + _theta * localK * loc_cur_xi_Kin.segment(j*nnodes, nnodes);
+            localRHS_xi_kin  = 1.0 / dt * localM * loc_pre_xi_Kin.segment(j*nnodes, nnodes) 
+                                + (1.0 - _theta) * localK * loc_pre_xi_Kin.segment(j*nnodes, nnodes);
+            local_res_kin    = localLHS_xi_kin - localRHS_xi_kin; 
+            for (k=0; k<nnodes; k++)
+            {
+                residual_global[_n_xi_global * ele_node_ids[k] + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + j] += local_res_kin(k) ;
+            }
+        }  // end of for j
+       
+
+    }  // end of loop over all elements
 }
