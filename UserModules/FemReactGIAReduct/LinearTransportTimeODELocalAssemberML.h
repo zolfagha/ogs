@@ -127,7 +127,7 @@ protected:
         localK = localDispersion + localAdvection;
 
         // mass lumping----------------------------
-        for (size_t idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
+        for (int idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
         {
             double mass_lump_val;
             mass_lump_val = localM.row(idx_ml).sum();
