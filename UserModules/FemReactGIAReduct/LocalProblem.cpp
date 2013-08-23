@@ -12,7 +12,7 @@
 
 #include "LocalProblem.h"
 #include "logog.hpp"
-//#define _DEBUG
+
 
 LocalProblem::LocalProblem(ogsChem::chemReductionGIA* ReductionGIA)
 	: _n_Comp(ReductionGIA->get_n_Comp()), _ReductionGIA(ReductionGIA), _I_mob(_ReductionGIA->get_n_Comp_mob()), _I_sorp(_ReductionGIA->get_n_Comp_sorb()), _I_min(_ReductionGIA->get_n_Comp_min()), _n_xi_Kin_bar(_ReductionGIA->get_n_xi_Kin_bar())
@@ -84,11 +84,11 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & x
 
 #ifdef _DEBUG
 	// debugging--------------------------
-	std::cout << "x Vector: \n";
-	std::cout << x << std::endl;
+	//std::cout << "x Vector: \n";
+	//std::cout << x << std::endl;
 
-	std::cout << "vec_AI Vector: \n";
-	std::cout << vec_AI << std::endl;
+	//std::cout << "vec_AI Vector: \n";
+	//std::cout << vec_AI << std::endl;
 	// end of debugging-------------------
 #endif
 
@@ -101,8 +101,8 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & x
 
 #ifdef _DEBUG
 	// debugging--------------------------
-	std::cout << "Residual Vector: \n";
-	std::cout << vec_residual << std::endl;
+	//std::cout << "Residual Vector: \n";
+	//std::cout << vec_residual << std::endl;
 	// end of debugging-------------------
 #endif
 
@@ -145,9 +145,8 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & x
 
 #ifdef _DEBUG
 	// debugging--------------------------
-	std::cout << "_mat_Jacobian: \n";
-	std::cout << _mat_Jacobian << std::endl;
-
+	//std::cout << "_mat_Jacobian: \n";
+	//std::cout << _mat_Jacobian << std::endl;
 	// end of debugging-------------------
 #endif
 
@@ -156,9 +155,8 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & x
 
 #ifdef _DEBUG
 	// debugging--------------------------
-	std::cout << "dx Vector: \n";
-	std::cout << dx << std::endl;
-
+	//std::cout << "dx Vector: \n";
+	//std::cout << dx << std::endl;
 	// end of debugging-------------------
 #endif
 
@@ -168,9 +166,8 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & x
 
 #ifdef _DEBUG
 	// debugging--------------------------
-	std::cout << "x_new Vector: \n";
-	std::cout << x_new << std::endl;
-
+	// std::cout << "x_new Vector: \n";
+	// std::cout << x_new << std::endl;
 	// end of debugging-------------------
 #endif
 
@@ -179,9 +176,8 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & x
 
 #ifdef _DEBUG
 	// debugging--------------------------
-	std::cout << "x_new: \n";
-	std::cout << x_new << std::endl;
-
+	//std::cout << "x_new: \n";
+	//std::cout << x_new << std::endl;
 	// end of debugging-------------------
 #endif
 
@@ -190,12 +186,11 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & x
 
 #ifdef _DEBUG
 	// debugging--------------------------
-	std::cout << "x_new Vector: \n";
-	std::cout << x_new << std::endl;
+	//std::cout << "x_new Vector: \n";
+	//std::cout << x_new << std::endl;
 
-	std::cout << "vec_residual: \n";
-	std::cout << vec_residual << std::endl;
-
+	//std::cout << "vec_residual: \n";
+	//std::cout << vec_residual << std::endl;
 	// end of debugging-------------------
 #endif
 
@@ -220,7 +215,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & x
 
 		#ifdef _DEBUG
             // display the residual
-            std::cout << "Line Search Iteration #" << iter << "||res|| = " << d1_norm << "||delta_x|| = " << dx.norm() << std::endl;
+            // std::cout << "Line Search Iteration #" << iter << "||res|| = " << d1_norm << "||delta_x|| = " << dx.norm() << std::endl;
 		#endif
 
             j++;
@@ -348,8 +343,8 @@ void LocalProblem::calc_Jacobian(ogsChem::LocalVector & vec_x,
 
 #ifdef _DEBUG
 	// debugging--------------------------
-	std::cout << "Jacobi Matrix: \n";
-	std::cout << _mat_Jacobian << std::endl;
+	// std::cout << "Jacobi Matrix: \n";
+	// std::cout << _mat_Jacobian << std::endl;
 	// end of debugging-------------------
 #endif
 }
@@ -655,17 +650,17 @@ void LocalProblem::residual_Eta(ogsChem::LocalVector & conc_Mob,
 
 #ifdef _DEBUG
 	// debugging--------------------------
-	std::cout << "_vec_eta: \n";
-	std::cout << _vec_eta << std::endl;
+	//std::cout << "_vec_eta: \n";
+	//std::cout << _vec_eta << std::endl;
 
-	std::cout << "conc_Mob: \n";
-	std::cout << conc_Mob << std::endl;
+	//std::cout << "conc_Mob: \n";
+	//std::cout << conc_Mob << std::endl;
 
-	std::cout << "_mat_c_mob_2_eta_mob: \n";
-	std::cout << _mat_c_mob_2_eta_mob << std::endl;
+	//std::cout << "_mat_c_mob_2_eta_mob: \n";
+	//std::cout << _mat_c_mob_2_eta_mob << std::endl;
 
-	std::cout << "vec_residual: \n";
-	std::cout << vec_residual << std::endl;
+	//std::cout << "vec_residual: \n";
+	//std::cout << vec_residual << std::endl;
 	// end of debugging-------------------
 #endif
 

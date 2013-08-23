@@ -941,14 +941,13 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 
 #ifdef _DEBUG
 	// debugging--------------------------
-	std::cout << "loc_xi_local_new Vector: \n";
-	std::cout << loc_xi_local_new << std::endl;
+	//std::cout << "loc_xi_local_new Vector: \n";
+	//std::cout << loc_xi_local_new << std::endl;
 
-	std::cout << "======================================== \n";
+	//std::cout << "======================================== \n";
 
-	std::cout << "vec_conc_updated Vector: \n";
-	std::cout << vec_conc_updated << std::endl;
-
+	//std::cout << "vec_conc_updated Vector: \n";
+	//std::cout << vec_conc_updated << std::endl;
 	// end of debugging-------------------
 #endif
 
@@ -979,7 +978,8 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
     delete pSolve;
 }
 
-#if 0
+/*
+
 template <class T1, class T2>
 void FunctionReductConc<T1, T2>::GlobalResidualAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, SolutionLib::SolutionVector & residual_global)
 {
@@ -1658,7 +1658,7 @@ void FunctionReductConc<T1, T2>::GlobalJacobianAssembler(const NumLib::TimeStep 
 
 }
 
-#endif
+*/
 
 
 
