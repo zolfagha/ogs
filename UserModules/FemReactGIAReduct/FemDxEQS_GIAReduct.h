@@ -184,7 +184,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::eval(const SolutionLib
 
     LinearSolverType* eqsJacobian_global = _linear_eqs->getLinearSolver();
     // Assembling global jacobian
-    GlobalJacobianAssembler(t_n1.getTimeStepSize(), u_n1, *eqsJacobian_global);
+    GlobalJacobianAssembler(t_n1, u_n1, *eqsJacobian_global);
 
     // set residual
     _linear_eqs->addRHS(r, -1.0);
@@ -573,164 +573,168 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 }
 
 template <class T1, class T2, class T3>
-void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::AddMassLaplasTerms(const NumLib::TimeStep & delta_t, LinearSolverType & eqsJacobian_global)
-		        {
+void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
+     ::AddMassLaplasTerms(const NumLib::TimeStep & delta_t, 
+                          LinearSolverType & eqsJacobian_global)
+{
+    const size_t n_ele = _msh->getNumberOfElements();
+    std::size_t n_dim, mat_id; 
+    std::size_t i, j, xi_count, idx_ml, idx;
+    double _theta(1.0);
+    double dt = delta_t.getTimeStepSize();
+    double cmp_mol_diffusion;
+    MeshLib::IElement *e; 
+    MaterialLib::PorousMedia* _pm;
+    std::vector<size_t> ele_node_ids;
+    std::vector<size_t> node_indx_vec;
+	std::vector<size_t>  col_indx_vec;
 
+    MathLib::LocalMatrix localM, localK, localK_temp, localDispersion, localAdvection; 
+    MathLib::LocalVector F; 
+    MathLib::LocalMatrix dispersion_diffusion, d_poro, poro; 
+    NumLib::ITXFunction::DataType v;
 
-		    const size_t n_ele = _msh->getNumberOfElements();
-		    double _theta(1.0);
-		    double dt = delta_t.getTimeStepSize();
+    for ( i=0; i<n_ele; i++)
+    {
+        e = _msh->getElement(i);
+		e->getNodeIDList(e->getMaximumOrder(), ele_node_ids);
 
-		    for (size_t i=0; i<n_ele; i++)
-		    {
-		        MeshLib::IElement *e = _msh->getElement(i);
-		        std::vector<size_t> ele_node_ids;
-		        //MathLib::Vector<size_t> ele_node_ids;
-		        e->getNodeIDList(e->getMaximumOrder(), ele_node_ids);
+	    localM          = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
+	    localK          = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
+	    localK_temp     = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());  //debugging
+	    localDispersion = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
+	    localAdvection  = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
+	    F               = MathLib::LocalVector::Zero(ele_node_ids.size());
+	    d_poro          = MathLib::LocalMatrix::Zero(3,3);
+        poro            = MathLib::LocalMatrix::Zero(1,1);
 
-		        MathLib::LocalMatrix localM = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
-		        MathLib::LocalMatrix localK = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
-		        MathLib::LocalMatrix localK_temp = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());  //debugging
-		        MathLib::LocalMatrix localDispersion = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
-		        MathLib::LocalMatrix localAdvection = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
-		        MathLib::LocalVector F = MathLib::LocalVector::Zero(ele_node_ids.size());
-		        MathLib::LocalMatrix dispersion_diffusion;
-		        MathLib::LocalMatrix d_poro = MathLib::LocalMatrix::Zero(3,3);
-		        MathLib::LocalMatrix poro(1,1);
-		        NumLib::ITXFunction::DataType v;
+	    //assembleODE(time, e, local_u_n1, local_u_n, M, K, F);
+	    _fe = _userData->get_feObjects()->getFeObject(*e);
 
-		        //assembleODE(time, e, local_u_n1, local_u_n, M, K, F);
-		        _fe = _userData->get_feObjects()->getFeObject(*e);
+	    n_dim = e->getDimension();
+	    mat_id = e->getGroupID();
+	    _pm = Ogs6FemData::getInstance()->list_pm[mat_id];
 
-		        const size_t n_dim = e->getDimension();
-		        size_t mat_id = e->getGroupID();
-		        MaterialLib::PorousMedia* _pm = Ogs6FemData::getInstance()->list_pm[mat_id];
+	    localDispersion.setZero(localK.rows(), localK.cols());
+	    localAdvection.setZero (localK.rows(), localK.cols());
 
-		        localDispersion.setZero(localK.rows(), localK.cols());
-		        localAdvection.setZero (localK.rows(), localK.cols());
+	    cmp_mol_diffusion = .0;
+	    // _cmp->molecular_diffusion->eval(0, cmp_mol_diffusion);
 
-		        double cmp_mol_diffusion = .0;
-		        // _cmp->molecular_diffusion->eval(0, cmp_mol_diffusion);
+	    _q = _fe->getIntegrationMethod();
+	    double gp_x[3], real_x[3];
+	    poro.setZero();
+	    d_poro.setZero();
+	    double disp_l = 0.0;
+	    double disp_t = 0.0;
 
-		        _q = _fe->getIntegrationMethod();
-		        double gp_x[3], real_x[3];
-		        poro.setZero();
-		        d_poro.setZero();
-		        double disp_l = 0.0;
-		        double disp_t = 0.0;
+		for ( j=0; j < _q->getNumberOfSamplingPoints(); j++)
+		{
+		    _q->getSamplingPoint(j, gp_x);
+		    _fe->computeBasisFunctions(gp_x);
+		    _fe->getRealCoordinates(real_x);
+		    NumLib::TXPosition gp_pos(NumLib::TXPosition::IntegrationPoint, e->getID(), j, real_x);
 
-		        for (size_t j=0; j < _q->getNumberOfSamplingPoints(); j++)
-		        {
-		            _q->getSamplingPoint(j, gp_x);
-		            _fe->computeBasisFunctions(gp_x);
-		            _fe->getRealCoordinates(real_x);
-		            NumLib::TXPosition gp_pos(NumLib::TXPosition::IntegrationPoint, e->getID(), j, real_x);
+		    _pm->porosity->eval(gp_pos, poro);
+		    _pm->dispersivity_long->eval(gp_pos, disp_l);
+		    _pm->dispersivity_trans->eval(gp_pos, disp_t);
 
-		            _pm->porosity->eval(gp_pos, poro);
-		            _pm->dispersivity_long->eval(gp_pos, disp_l);
-		            _pm->dispersivity_trans->eval(gp_pos, disp_t);
+		    d_poro(0,0) = cmp_mol_diffusion * poro(0,0);
+		    d_poro(1,1) = cmp_mol_diffusion * poro(0,0);
+		    d_poro(2,2) = cmp_mol_diffusion * poro(0,0);
+		    _vel->eval(gp_pos, v);
+		    NumLib::ITXFunction::DataType v2 = v.topRows(n_dim).transpose();
 
-		            d_poro(0,0) = cmp_mol_diffusion * poro(0,0);
-		            d_poro(1,1) = cmp_mol_diffusion * poro(0,0);
-		            d_poro(2,2) = cmp_mol_diffusion * poro(0,0);
-		            _vel->eval(gp_pos, v);
-		            NumLib::ITXFunction::DataType v2 = v.topRows(n_dim).transpose();
+		    // calculating dispersion tensor according to Benchmark book p219, Eq. 10.15
+		    // D_{ij} = \alpha_T |v| \delta_{ij} + (\alpha_L - \alpha_T) \frac{v_i v_j}{|v|} + D^{d}_{ii}
+		    dispersion_diffusion.setIdentity(n_dim, n_dim);
+		    dispersion_diffusion *= disp_l * v.norm();
+		    dispersion_diffusion += (disp_l - disp_t) * ( v2.transpose() * v2 ) / v.norm();
+		    dispersion_diffusion += d_poro.topLeftCorner(n_dim, n_dim);
+		    // --------debugging--------------
+		    // std::cout << "dispersion_diffusion Matrix" << std::endl;
+		    // std::cout << dispersion_diffusion << std::endl;
+		    // --------end of debugging-------
 
-		            // calculating dispersion tensor according to Benchmark book p219, Eq. 10.15
-		            // D_{ij} = \alpha_T |v| \delta_{ij} + (\alpha_L - \alpha_T) \frac{v_i v_j}{|v|} + D^{d}_{ii}
-		            dispersion_diffusion.setIdentity(n_dim, n_dim);
-		            dispersion_diffusion *= disp_l * v.norm();
-		            dispersion_diffusion += (disp_l - disp_t) * ( v2.transpose() * v2 ) / v.norm();
-		            dispersion_diffusion += d_poro.topLeftCorner(n_dim, n_dim);
-		            // --------debugging--------------
-		            // std::cout << "dispersion_diffusion Matrix" << std::endl;
-		            // std::cout << dispersion_diffusion << std::endl;
-		            // --------end of debugging-------
+		    _fe->integrateWxN(j, poro, localM);
+		    _fe->integrateDWxDN(j, dispersion_diffusion, localDispersion);
+		    _fe->integrateWxDN(j, v2, localAdvection);
+		}  // end of for loop over j
 
-		            _fe->integrateWxN(j, poro, localM);
-		            _fe->integrateDWxDN(j, dispersion_diffusion, localDispersion);
-		            _fe->integrateWxDN(j, v2, localAdvection);
-		        }
+		localK = localDispersion + localAdvection;
 
-		        localK = localDispersion + localAdvection;
-
-		        // mass lumping----------------------------
-		        for (size_t idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
-		        {
-		            double mass_lump_val;
-		            mass_lump_val = localM.row(idx_ml).sum();
-		            localM.row(idx_ml).setZero();
-		            localM(idx_ml, idx_ml) =  mass_lump_val;
-		        }
-
-		        //	// debugging--------------------------
-		        std::cout << "======================================== \n";
-		        std::cout << "dispersion_diffusion: \n";
-		        std::cout << dispersion_diffusion << std::endl;
-		        std::cout << "localDispersion: \n";
-		        std::cout << localDispersion << std::endl;
-		        std::cout << "localAdvection: \n";
-		        std::cout << localAdvection << std::endl;
-		        std::cout << "localM: \n";
-		        std::cout << localM << std::endl;
-		        std::cout << "======================================== \n";
-		        //	// end of debugging-------------------
-
-		        std::size_t xi_count;
-		        std::vector<size_t> node_indx_vec;
-		        std::vector<size_t>  col_indx_vec;
-		        node_indx_vec.resize(ele_node_ids.size());
-		        col_indx_vec.resize(ele_node_ids.size());
-
-		        for (xi_count = 0; xi_count < _n_xi_Sorp; xi_count++)
-		        {
-
-		        	for(size_t idx = 0; idx < ele_node_ids.size(); idx++)
-		        	{
-		        		node_indx_vec[idx] = ele_node_ids[idx] * _n_xi_global + _n_xi_Sorp_tilde + _n_xi_Min_tilde + xi_count;
-		        		col_indx_vec[idx]   = ele_node_ids[idx] * _n_xi_global + xi_count;
-		        	}
-
-	        		// add conductance matrix
-	        		eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, dt * localK);
-	        		// add storage term
-	        		eqsJacobian_global.addAsub(node_indx_vec, col_indx_vec, localM);
-		        }
-
-
-		        for (xi_count = 0; xi_count < _n_xi_Min; xi_count++)
-		        {
-
-		        	for(size_t idx = 0; idx < ele_node_ids.size(); idx++)
-		        	{
-		        		node_indx_vec[idx] = ele_node_ids[idx] * _n_xi_global + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + xi_count;
-		        		col_indx_vec[idx]  = ele_node_ids[idx] * _n_xi_global + _n_xi_Sorp_tilde + xi_count;
-		        	}
-	        		// add conductance matrix
-		        	localK_temp = localK * dt;
-	        		eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, localK_temp);
-	        		// add storage term
-	        		eqsJacobian_global.addAsub(node_indx_vec, col_indx_vec, localM);
-		        }
-
-		        for (xi_count = 0; xi_count < _n_xi_Kin; xi_count++)
-		        {
-
-		        	for(size_t idx = 0; idx < ele_node_ids.size(); idx++)
-		        	{
-		        		node_indx_vec[idx]  = ele_node_ids[idx] * _n_xi_global + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + xi_count;
-		        	}
-
-	        		// add mass & conductance matrix
-	        		eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, localM + (dt * localK));
-
-		        }
-
-		        node_indx_vec.clear();
-		        col_indx_vec.clear();
-
-		    }
+		// mass lumping----------------------------
+		for ( idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
+		{
+		    double mass_lump_val;
+		    mass_lump_val = localM.row(idx_ml).sum();
+		    localM.row(idx_ml).setZero();
+		    localM(idx_ml, idx_ml) =  mass_lump_val;
 		}
+
+		////	// debugging--------------------------
+		//std::cout << "======================================== \n";
+		//std::cout << "dispersion_diffusion: \n";
+		//std::cout << dispersion_diffusion << std::endl;
+		//std::cout << "localDispersion: \n";
+		//std::cout << localDispersion << std::endl;
+		//std::cout << "localAdvection: \n";
+		//std::cout << localAdvection << std::endl;
+		//std::cout << "localM: \n";
+		//std::cout << localM << std::endl;
+		//std::cout << "======================================== \n";
+		////	// end of debugging-------------------
+
+        // add conductance matrix
+		localK_temp = localK * dt;
+
+		node_indx_vec.resize(ele_node_ids.size());
+		col_indx_vec.resize(ele_node_ids.size());
+                
+		for (xi_count = 0; xi_count < _n_xi_Sorp; xi_count++)
+		{
+
+		    for( idx = 0; idx < ele_node_ids.size(); idx++)
+		    {
+		        node_indx_vec[idx] = ele_node_ids[idx] * _n_xi_global + _n_xi_Sorp_tilde + _n_xi_Min_tilde + xi_count;
+		        col_indx_vec[idx]   = ele_node_ids[idx] * _n_xi_global + xi_count;
+		    }
+	        // add conductance matrix
+	        eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, localK_temp );
+	        // add storage term
+	        eqsJacobian_global.addAsub(node_indx_vec, col_indx_vec, localM);
+		}
+
+
+		for (xi_count = 0; xi_count < _n_xi_Min; xi_count++)
+		{
+
+		    for( idx = 0; idx < ele_node_ids.size(); idx++)
+		    {
+		        node_indx_vec[idx] = ele_node_ids[idx] * _n_xi_global + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + xi_count;
+		        col_indx_vec[idx]  = ele_node_ids[idx] * _n_xi_global + _n_xi_Sorp_tilde + xi_count;
+		    }
+	        eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, localK_temp );
+	        // add storage term
+	        eqsJacobian_global.addAsub(node_indx_vec, col_indx_vec, localM);
+		}
+
+		for (xi_count = 0; xi_count < _n_xi_Kin; xi_count++)
+		{
+
+		    for( idx = 0; idx < ele_node_ids.size(); idx++)
+		    {
+		        node_indx_vec[idx]  = ele_node_ids[idx] * _n_xi_global + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + xi_count;
+		    }
+	        // add mass & conductance matrix
+	        eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, localM + localK_temp );
+
+		}
+		node_indx_vec.clear();
+		col_indx_vec.clear();
+
+	}  // end of for i over all elements
+}  // end of function AddMassLaplasTerms
 
 
 template <class T1, class T2, class T3>

@@ -302,9 +302,9 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             for (size_t i=0; i < _J_tot_kin; i++)
                 _global_vec_Rate[i]->setValue(node_idx, vec_Rate[i]);
 
-            res45 = theta_water_content * mat_Asorp * vec_Rate; 
-            res46 = theta_water_content * mat_Amin  * vec_Rate; 
-            res47 = theta_water_content * mat_A1kin * vec_Rate; 
+            res45 = delta_t.getTimeStepSize() * theta_water_content * mat_Asorp * vec_Rate; 
+            res46 = delta_t.getTimeStepSize() * theta_water_content * mat_Amin  * vec_Rate; 
+            res47 = delta_t.getTimeStepSize() * theta_water_content * mat_A1kin * vec_Rate; 
 
             for (j=0; j<_n_xi_Sorp_tilde; j++ )
                 residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + j] -= res45(j) ;
@@ -509,11 +509,11 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
         // RHS = (1/dt M - (1-theta) K) u0 + F
         for ( j=0; j < _n_xi_Sorp_tilde; j++ )
         {
-            localLHS_xi_sorp  = 1.0 / dt * localM * loc_cur_xi_Sorp_tilde.segment(j*nnodes, nnodes) 
-                                + _theta * localK * loc_cur_xi_Sorp.segment(j*nnodes, nnodes);
+            localLHS_xi_sorp  = localM * loc_cur_xi_Sorp_tilde.segment(j*nnodes, nnodes) 
+                                  + dt * _theta * localK * loc_cur_xi_Sorp.segment(j*nnodes, nnodes);
 
-            localRHS_xi_sorp  = 1.0 / dt * localM * loc_pre_xi_Sorp_tilde.segment(j*nnodes, nnodes) 
-                                 + (1.0 - _theta) * localK * loc_pre_xi_Sorp.segment(j*nnodes, nnodes);
+            localRHS_xi_sorp  = localM * loc_pre_xi_Sorp_tilde.segment(j*nnodes, nnodes) 
+                                  + dt * (1.0 - _theta) * localK * loc_pre_xi_Sorp.segment(j*nnodes, nnodes);
             local_res_sorp    = localLHS_xi_sorp - localRHS_xi_sorp;
             for (k=0; k<nnodes; k++)
             {
@@ -522,10 +522,10 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
         }  // end of for j
         for ( j=0; j <_n_xi_Min_tilde; j++ )
         {
-            localLHS_xi_min  = 1.0 / dt * localM * loc_cur_xi_Min_tilde.segment(j*nnodes, nnodes) 
-                               + _theta * localK * loc_cur_xi_Min.segment(j*nnodes, nnodes);
-            localRHS_xi_min  = 1.0 / dt * localM * loc_pre_xi_Min_tilde.segment(j*nnodes, nnodes) 
-                                + (1.0 - _theta) * localK * loc_pre_xi_Min.segment(j*nnodes, nnodes);
+            localLHS_xi_min  = localM * loc_cur_xi_Min_tilde.segment(j*nnodes, nnodes) 
+                                 + dt * _theta * localK * loc_cur_xi_Min.segment(j*nnodes, nnodes);
+            localRHS_xi_min  = localM * loc_pre_xi_Min_tilde.segment(j*nnodes, nnodes) 
+                                 + dt * (1.0 - _theta) * localK * loc_pre_xi_Min.segment(j*nnodes, nnodes);
             local_res_min    = localLHS_xi_min - localRHS_xi_min; 
             for (k=0; k<nnodes; k++)
             {
@@ -534,10 +534,10 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
         }  // end of for j
         for ( j=0; j <_n_xi_Kin; j++ )
         {
-            localLHS_xi_kin  = 1.0 / dt * localM * loc_cur_xi_Kin.segment(j*nnodes, nnodes) 
-                               + _theta * localK * loc_cur_xi_Kin.segment(j*nnodes, nnodes);
-            localRHS_xi_kin  = 1.0 / dt * localM * loc_pre_xi_Kin.segment(j*nnodes, nnodes) 
-                                + (1.0 - _theta) * localK * loc_pre_xi_Kin.segment(j*nnodes, nnodes);
+            localLHS_xi_kin  = localM * loc_cur_xi_Kin.segment(j*nnodes, nnodes) 
+                                 + dt * _theta * localK * loc_cur_xi_Kin.segment(j*nnodes, nnodes);
+            localRHS_xi_kin  = localM * loc_pre_xi_Kin.segment(j*nnodes, nnodes) 
+                                 + dt * (1.0 - _theta) * localK * loc_pre_xi_Kin.segment(j*nnodes, nnodes);
             local_res_kin    = localLHS_xi_kin - localRHS_xi_kin; 
             for (k=0; k<nnodes; k++)
             {
