@@ -422,25 +422,9 @@ int SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINE
 //	// solving the non-linear problem
 	INFO("--Solving non-linear equations for xi:");
 	_nlin_solution->solveTimeStep( t_n1 );
-	//std::vector<MyVariable*> list_var;
-	//TemplateTransientResidualFEMFunction_GIA_Reduct<MyDiscreteSystem, UserFunctionData> f_res(_discrete_system, list_var, &_dofManager,_function_data);
-	//// SolutionLib::SolutionVector* u0 = _discrete_system->template createVector<double>(_dofManager.getTotalNumberOfActiveDoFs());
-	//SolutionLib::SolutionVector* r = _discrete_system->template createVector<double>(_dofManager.getTotalNumberOfActiveDoFs());
-	//f_res.reset( t_n1, _x_n0, _x_st);
-	//f_res.eval(*_x_n1, *r);
-
-	// delete u0;
-	// delete r;
-
-//	// getting result
-//    // xi_global
-//	for ( i=0; i < _nlin_solution->getProblem()->getNumberOfVariables(); i++)
-//	    _function_data->set_xi_global_node_values( i, _nlin_solution->getCurrentSolution(i) );
-//    // xi_local
-//    _function_data->update_xi_local_node_values();
 
 
-    return 0;
+	return 0;
 }
 
 

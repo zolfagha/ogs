@@ -326,7 +326,7 @@ tag: processList
 				tag: error_type
 				tag: max_iteration_step
 				tag: solver_type
-					value: PICARD
+					value: NEWTON
 			tag: TimeTheta
 		tag: STList
 		tag: TimeGroupID

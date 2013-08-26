@@ -65,7 +65,6 @@ public:
     typedef LinearTransportJacobianLocalAssembler MyLinearJacobianAssemblerType;                                        
 
 	// to be changed
-    // typedef NonLinearGIAJacobianLocalAssembler<MyNodalFunctionScalar, MyFunctionData>                                    MyNonLinearJacobianAssemblerType;
 	typedef NestedGIALocalProbNRIterationStepInitializer<MyNodalFunctionScalar, MyFunctionData>                          MyNRIterationStepInitializer;
 	typedef NumLib::DiscreteNRSolverWithStepInitFactory<MyNRIterationStepInitializer>                                    MyDiscreteNonlinearSolverFactory;
 	
@@ -294,6 +293,7 @@ public:
 	std::vector<MyNodalFunctionScalar*> & get_eta() {return _eta;}
 	std::vector<MyNodalFunctionScalar*> & get_eta_bar() {return _eta_bar;}
 	std::vector<MyNodalFunctionScalar*> & get_global_vec_Rate() {return _global_vec_Rate; }
+	std::vector<MyNodalFunctionScalar*> & get_concentrations() {return _concentrations; }
 	FemLib::LagrangeFeObjectContainer* get_feObjects(){return _feObjects;}
 	NumLib::ITimeStepFunction* get_time_step() {return _tim;}
 

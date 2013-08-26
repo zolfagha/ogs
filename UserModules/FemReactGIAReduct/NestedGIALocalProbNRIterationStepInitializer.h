@@ -26,10 +26,11 @@ template <class T_NODAL_FUNCTION_SCALAR, class T_FUNCTION_DATA>
 class NestedGIALocalProbNRIterationStepInitializer
 {
 public:
-    NestedGIALocalProbNRIterationStepInitializer(
-		    NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler, T_NODAL_FUNCTION_SCALAR>* assemblerR,
-            NonLinearGIAJacobianLocalAssembler<T_NODAL_FUNCTION_SCALAR, T_FUNCTION_DATA> *assemblerJ)
-            : _assemblerR(assemblerR), _assemblerJ(assemblerJ) {};
+    NestedGIALocalProbNRIterationStepInitializer(NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler,
+    											 T_NODAL_FUNCTION_SCALAR>* assemblerR,
+    											 NonLinearGIAJacobianLocalAssembler<T_NODAL_FUNCTION_SCALAR,
+    											 T_FUNCTION_DATA> *assemblerJ)
+      : _assemblerR(assemblerR), _assemblerJ(assemblerJ) {};
 
 	template<class T_X, class F_RESIDUALS, class F_DX>
     void pre_process(const T_X &/*dx*/, const T_X &/*x_new*/, F_RESIDUALS & f_residuals, F_DX &/*f_dx*/)
@@ -52,6 +53,9 @@ public:
         // so that the in the next Newton iteration, concentrations are calculated
         // based on the new x_new values
         // _assemblerJ->get_function_data()->update_xi_mob_nodal_values( x_new ); 
+
+    	// TODO
+    	// call the local problem
     };
 
 private:
