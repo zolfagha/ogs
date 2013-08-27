@@ -18,19 +18,17 @@
 #ifndef NESTED_GIA_Local_Prob_NR_ITERATION_STEP_INITIALIZER_H
 #define NESTED_GIA_Local_Prob_NR_ITERATION_STEP_INITIALIZER_H
 
-#include "NonLinearGIATimeODELocalAssembler.h"  // TO BE CHANGED
-#include "NonLinearGIAJacabianLocalAssembler.h" // TO BE CHANGED
+//#include "NonLinearGIATimeODELocalAssembler.h"  // TO BE CHANGED
+//#include "NonLinearGIAJacabianLocalAssembler.h" // TO BE CHANGED
+#include "ReductConc.h" // TO BE CHANGED
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
 
-template <class T_NODAL_FUNCTION_SCALAR, class T_FUNCTION_DATA>
+template <class FunctionReductConc>
 class NestedGIALocalProbNRIterationStepInitializer
 {
 public:
-    NestedGIALocalProbNRIterationStepInitializer(NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler,
-    											 T_NODAL_FUNCTION_SCALAR>* assemblerR,
-    											 NonLinearGIAJacobianLocalAssembler<T_NODAL_FUNCTION_SCALAR,
-    											 T_FUNCTION_DATA> *assemblerJ)
-      : _assemblerR(assemblerR), _assemblerJ(assemblerJ) {};
+    NestedGIALocalProbNRIterationStepInitializer(FunctionReductConc & ReductConc)
+      : _ReductConc(ReductConc) {};
 
 	template<class T_X, class F_RESIDUALS, class F_DX>
     void pre_process(const T_X &/*dx*/, const T_X &/*x_new*/, F_RESIDUALS & f_residuals, F_DX &/*f_dx*/)
@@ -53,21 +51,18 @@ public:
         // so that the in the next Newton iteration, concentrations are calculated
         // based on the new x_new values
         // _assemblerJ->get_function_data()->update_xi_mob_nodal_values( x_new ); 
+    	_ReductConc.update_xi_global_nodal_values( x_new );
 
-    	// TODO
     	// call the local problem
+    	_ReductConc.calc_nodal_local_problem(_ReductConc.getTimeStep()->getTimeStepSize(), 1.0E-8, 1.0E-12, 50);
     };
 
 private:
     /**
-      * pointer to assemblerR
-      */ 
-    NonLinearGIATimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler, T_NODAL_FUNCTION_SCALAR>* _assemblerR;
-
-    /**
       * pointer to assemblerJ
       */ 
-    NonLinearGIAJacobianLocalAssembler<T_NODAL_FUNCTION_SCALAR, T_FUNCTION_DATA>* _assemblerJ;
+    //NonLinearGIAJacobianLocalAssembler<T_NODAL_FUNCTION_SCALAR, T_FUNCTION_DATA>* _assemblerJ;
+    FunctionReductConc & _ReductConc;
 };
 
 #endif  // end of ifndef

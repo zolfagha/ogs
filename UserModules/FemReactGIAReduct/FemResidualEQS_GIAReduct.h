@@ -450,18 +450,44 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
             // calculating dispersion tensor according to Benchmark book p219, Eq. 10.15
             // D_{ij} = \alpha_T |v| \delta_{ij} + (\alpha_L - \alpha_T) \frac{v_i v_j}{|v|} + D^{d}_{ii}
             dispersion_diffusion.setIdentity(n_dim, n_dim);
+//            // --------debugging--------------
+//             std::cout << "dispersion_diffusion Matrix" << std::endl;
+//             std::cout << dispersion_diffusion << std::endl;
+//            // --------end of debugging-------
+
             dispersion_diffusion *= disp_l * v.norm();
+//            // --------debugging--------------
+//             std::cout << "dispersion_diffusion Matrix" << std::endl;
+//             std::cout << dispersion_diffusion << std::endl;
+//            // --------end of debugging-------
+
             dispersion_diffusion += (disp_l - disp_t) * ( v2.transpose() * v2 ) / v.norm();
+           // dispersion_diffusion += disp_l * () - disp_t * ( v2.transpose() * v2 ) / v.norm();
+////            // --------debugging--------------
+//             std::cout << "v2" << std::endl;
+//             std::cout << v2 << std::endl;
+//             std::cout << "disp_t" << std::endl;
+//             std::cout << disp_t << std::endl;
+//             std::cout << "d_poro Matrix" << std::endl;
+//             std::cout << d_poro << std::endl;
+//            // --------end of debugging-------
             dispersion_diffusion += d_poro.topLeftCorner(n_dim, n_dim);
-            // --------debugging--------------
-            // std::cout << "dispersion_diffusion Matrix" << std::endl;
-            // std::cout << dispersion_diffusion << std::endl;
-            // --------end of debugging-------
+//            // --------debugging--------------
+//             std::cout << "dispersion_diffusion Matrix" << std::endl;
+//             std::cout << dispersion_diffusion << std::endl;
+//            // --------end of debugging-------
 
             _fe->integrateWxN(j, poro, localM);
             _fe->integrateDWxDN(j, dispersion_diffusion, localDispersion);
             _fe->integrateWxDN(j, v2, localAdvection);
         }
+
+//        // --------debugging--------------
+//         std::cout << "localDispersion Matrix" << std::endl;
+//         std::cout << localDispersion << std::endl;
+//         std::cout << "localAdvection Matrix" << std::endl;
+//         std::cout << localAdvection << std::endl;
+//        // --------end of debugging-------
 
         localK = localDispersion + localAdvection;
 
@@ -474,11 +500,12 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
             localM(idx_ml, idx_ml) = mass_lump_val;
         }
 
-        //std::cout << "M="; M.write(std::cout); std::cout << std::endl;
-        //std::cout << "K="; K.write(std::cout); std::cout << std::endl;
-
-
-
+//        // --------debugging--------------
+//         std::cout << "localK Matrix" << std::endl;
+//         std::cout << localK << std::endl;
+//         std::cout << "localM Matrix" << std::endl;
+//         std::cout << localM << std::endl;
+//        // --------end of debugging-------
 
         //MathLib::LocalVector node_indx = MathLib::LocalVector::Zero(_n_xi);
         std::size_t idx_xi, node_indx, val_idx;
@@ -527,6 +554,10 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
             localRHS_xi_min  = localM * loc_pre_xi_Min_tilde.segment(j*nnodes, nnodes) 
                                  + dt * (1.0 - _theta) * localK * loc_pre_xi_Min.segment(j*nnodes, nnodes);
             local_res_min    = localLHS_xi_min - localRHS_xi_min; 
+//            // --------debugging--------------
+//            std::cout << "local_res_min vector" << std::endl;
+//            std::cout << local_res_min << std::endl;
+//            // --------end of debugging-------
             for (k=0; k<nnodes; k++)
             {
                 residual_global[_n_xi_global * ele_node_ids[k] + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + j] += local_res_min(k) ;

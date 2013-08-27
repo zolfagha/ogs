@@ -65,7 +65,7 @@ public:
     typedef LinearTransportJacobianLocalAssembler MyLinearJacobianAssemblerType;                                        
 
 	// to be changed
-	typedef NestedGIALocalProbNRIterationStepInitializer<MyNodalFunctionScalar, MyFunctionData>                          MyNRIterationStepInitializer;
+	typedef NestedGIALocalProbNRIterationStepInitializer<MyFunctionData>                          MyNRIterationStepInitializer;
 	typedef NumLib::DiscreteNRSolverWithStepInitFactory<MyNRIterationStepInitializer>                                    MyDiscreteNonlinearSolverFactory;
 	
 	/**
@@ -216,7 +216,7 @@ public:
 	  */
     virtual double suggestNext(const NumLib::TimeStep &time_current) 
     {
-        return getSolution()->suggestNext(time_current); 
+        return getSolution()->suggestNext(time_current); // is crashing here. why dt is zero?
     }
 
     /**
@@ -246,6 +246,11 @@ public:
     
     template <class T_X>
     void update_xi_global_nodal_values  ( const T_X & x_new );
+
+//	T_FUNCTION_DATA* get_function_data(void)
+//	{
+//	    return _concentrations;
+//	}
 	
     void update_xi_local_node_values ( void );
 
@@ -295,7 +300,7 @@ public:
 	std::vector<MyNodalFunctionScalar*> & get_global_vec_Rate() {return _global_vec_Rate; }
 	std::vector<MyNodalFunctionScalar*> & get_concentrations() {return _concentrations; }
 	FemLib::LagrangeFeObjectContainer* get_feObjects(){return _feObjects;}
-	NumLib::ITimeStepFunction* get_time_step() {return _tim;}
+	NumLib::TimeStep const* getTimeStep() {return _current_time_step;}
 
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
@@ -334,6 +339,8 @@ private:
 	MyDiscreteSystem *_dis_sys;
 
 	NumLib::ITimeStepFunction* _tim;
+
+	NumLib::TimeStep const* _current_time_step;
 
 	/**
       * linear problems

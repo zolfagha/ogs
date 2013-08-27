@@ -7,7 +7,7 @@ OGS_ADD_PROCESS_SYS(PRESSURE_TO_HEAD, FunctionPressureToHead, DiscreteLib::Discr
 OGS_ADD_PROCESS_SYS_SOLVER(MASS_TRANSPORT, FunctionConcentration, DiscreteLib::DiscreteSystem, MathLib::LisLinearEquation);
 OGS_ADD_PROCESS_SYS_SOLVER(HEAT_TRANSPORT, FunctionTemperature, DiscreteLib::DiscreteSystem, MathLib::LisLinearEquation);
 OGS_ADD_PROCESS_SYS_SOLVER(KIN_REACT_GIA, FunctionConcentrations, DiscreteLib::DiscreteSystem, MathLib::LisLinearEquation);
-OGS_ADD_PROCESS_SYS_SOLVER(REACT_GIA, FunctionReductConc, DiscreteLib::DiscreteSystem, MathLib::LisLinearEquation);
+OGS_ADD_PROCESS_SYS_SOLVER(REACT_GIA, FunctionReductConc, DiscreteLib::DiscreteSystem, MathLib::DenseLinearEquation);   // RZ: using direct solver for global problem.
 //OGS_ADD_PROCESS_SYS_SOLVER(DEFORMATION, FunctionDisplacement, DiscreteLib::DiscreteSystem, MathLib::LisLinearEquation);
 //OGS_ADD_PROCESS_SYS(ELEMENT_STRESS_STRAIN, FunctionElementStressStrain, DiscreteLib::DiscreteSystem);
 //OGS_ADD_PROCESS_SYS(NODAL_STRESS_STRAIN, FunctionNodalStressStrain, DiscreteLib::DiscreteSystem);

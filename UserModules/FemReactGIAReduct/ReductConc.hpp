@@ -245,7 +245,7 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 	//TODO : xi global
 	// set up non-linear solution
 	// NRIterationStepInitializer
-//	myNRIterator = new MyNRIterationStepInitializer(non_linear_r_assembler, non_linear_j_assembler);
+	myNRIterator 	 = new MyNRIterationStepInitializer(*this);
 	myNSolverFactory = new MyDiscreteNonlinearSolverFactory( myNRIterator );
 	this->_non_linear_solution = new MyNonLinearSolutionType( dis, this->_non_linear_problem, this, myNSolverFactory );
     this->_non_linear_solution->getDofEquationIdTable()->setNumberingType(DiscreteLib::DofNumberingType::BY_POINT);  // global order
@@ -320,8 +320,11 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 }
 
 template <class T1, class T2>
-void FunctionReductConc<T1, T2>::initializeTimeStep(const NumLib::TimeStep &/*time*/)
+void FunctionReductConc<T1, T2>::initializeTimeStep(const NumLib::TimeStep & time)
 {
+	// Update current time step
+	this->_current_time_step = &time;
+
 	size_t i;
     const NumLib::ITXFunction *vel = this->getInput<NumLib::ITXFunction>(Velocity);
 
