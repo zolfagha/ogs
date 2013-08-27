@@ -73,7 +73,7 @@ public:
 
 	T_FUNCTION_DATA* get_function_data(void)
 	{
-	    return _concentrations; 
+	    return _concentrations;
 	}
 
 	void assembly(const NumLib::TimeStep &time, const MeshLib::IElement &e, const DiscreteLib::DofEquationIdTable &, const MathLib::LocalVector & u1, const MathLib::LocalVector & u0, MathLib::LocalMatrix & localJ)

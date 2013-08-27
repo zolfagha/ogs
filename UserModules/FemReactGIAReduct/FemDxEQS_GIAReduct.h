@@ -413,6 +413,11 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             // construct local Jacobian matrix
             Jacobian_local = mat_p1F + mat_p2F * mat_vprime;
 
+//            // --------debugging--------------
+//            std::cout << "Jacobian_local" << std::endl;
+//            std::cout << Jacobian_local << std::endl;
+//            // --------end of debugging-------
+
             // construct global Jacobian matrix
 	        for(size_t idx = 0; idx < _n_xi_global; idx++)
 	        	node_indx_vec[idx] = node_idx * _n_xi_global + idx;
