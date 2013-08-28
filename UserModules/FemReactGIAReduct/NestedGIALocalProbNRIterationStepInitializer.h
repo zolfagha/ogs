@@ -23,11 +23,11 @@
 #include "ReductConc.h" // TO BE CHANGED
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
 
-template <class FunctionReductConc>
+template <class T_USER_DATA>
 class NestedGIALocalProbNRIterationStepInitializer
 {
 public:
-    NestedGIALocalProbNRIterationStepInitializer(FunctionReductConc & ReductConc)
+    NestedGIALocalProbNRIterationStepInitializer(T_USER_DATA & ReductConc)
       : _ReductConc(ReductConc) {};
 
 	template<class T_X, class F_RESIDUALS, class F_DX>
@@ -62,7 +62,7 @@ private:
       * pointer to assemblerJ
       */ 
     //NonLinearGIAJacobianLocalAssembler<T_NODAL_FUNCTION_SCALAR, T_FUNCTION_DATA>* _assemblerJ;
-    FunctionReductConc & _ReductConc;
+    T_USER_DATA & _ReductConc;
 };
 
 #endif  // end of ifndef
