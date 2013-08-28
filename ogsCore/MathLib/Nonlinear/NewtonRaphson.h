@@ -65,6 +65,7 @@ public:
                 f_dx.eval(x_new, r, dx);
 				// x increment
                 x_new += dx;
+                printout(itr_cnt, x_new, r, dx);
 				// post processing
                 if (pre_post) 
 					pre_post->post_process(dx, x_new, f_residuals, f_dx);
@@ -144,7 +145,7 @@ private:
         std::cout << "r=(";
         for (size_t i=0; i<dx.size(); i++) std::cout << r[i] << " ";
         std::cout << std::endl;
-#if 0
+#if 1
         std::cout << "-> " << i <<": x=(";
         for (size_t i=0; i<x_new.size(); i++) std::cout << x_new[i] << " ";
         std::cout << "), r=(";
