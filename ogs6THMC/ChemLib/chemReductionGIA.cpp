@@ -123,10 +123,10 @@ void chemReductionGIA::buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 	}  // end of for j
 
 #ifdef _DEBUG
-	// debugging--------------------------
-	std::cout << "Stoichiometric Matrix S: " << std::endl;
-	std::cout << _matStoi << std::endl;
-	// end of debugging-------------------
+//	// debugging--------------------------
+//	std::cout << "Stoichiometric Matrix S: " << std::endl;
+//	std::cout << _matStoi << std::endl;
+//	// end of debugging-------------------
 #endif
 }
 
@@ -256,14 +256,14 @@ void chemReductionGIA::update_reductionScheme(void)
 	_mat_S2kin_ast = _mat_S2kin_ast.topRows(_I_NMin_bar);
 
 #ifdef _DEBUG
-    std::cout << "_mat_S1: "    << std::endl;
-	std::cout << _mat_S1 << std::endl;
-	std::cout << "_mat_S2: "    << std::endl;
-	std::cout << _mat_S2 << std::endl;
-	std::cout << "_mat_S1_ast: "    << std::endl;
-	std::cout << _mat_S1_ast << std::endl;
-	std::cout << "_mat_S2_ast: "    << std::endl;
-	std::cout << _mat_S2_ast << std::endl;
+//    std::cout << "_mat_S1: "    << std::endl;
+//	std::cout << _mat_S1 << std::endl;
+//	std::cout << "_mat_S2: "    << std::endl;
+//	std::cout << _mat_S2 << std::endl;
+//	std::cout << "_mat_S1_ast: "    << std::endl;
+//	std::cout << _mat_S1_ast << std::endl;
+//	std::cout << "_mat_S2_ast: "    << std::endl;
+//	std::cout << _mat_S2_ast << std::endl;
 #endif
 
 	// Calculate the s1T = S_i^T matrix consisting of a max set of linearly
@@ -303,10 +303,10 @@ void chemReductionGIA::update_reductionScheme(void)
 	_mat_S2_orth = orthcomp( _mat_S2_ast );
 
 #ifdef _DEBUG
-	std::cout << "_mat_S1_orth: "    << std::endl;
-	std::cout << _mat_S1_orth << std::endl;
-	std::cout << "_mat_S2_orth: "    << std::endl;
-	std::cout << _mat_S2_orth << std::endl;
+//	std::cout << "_mat_S1_orth: "    << std::endl;
+//	std::cout << _mat_S1_orth << std::endl;
+//	std::cout << "_mat_S2_orth: "    << std::endl;
+//	std::cout << _mat_S2_orth << std::endl;
 #endif
 
 	_mat_c_mob_2_eta_mob     = ( _mat_S1_orth.transpose() * _mat_S1_orth ).fullPivHouseholderQr().solve(_mat_S1_orth.transpose());
@@ -315,14 +315,14 @@ void chemReductionGIA::update_reductionScheme(void)
 	_mat_c_immob_2_xi_immob  = ( _mat_S2_ast.transpose()  * _mat_S2_ast  ).fullPivHouseholderQr().solve(_mat_S2_ast.transpose());
 
 #ifdef _DEBUG
-	std::cout << "_mat_c_mob_2_eta_mob: "    << std::endl;
-	std::cout << _mat_c_mob_2_eta_mob << std::endl;
-	std::cout << "_mat_c_immob_2_eta_immob: "    << std::endl;
-	std::cout << _mat_c_immob_2_eta_immob << std::endl;
-	std::cout << "_mat_c_mob_2_xi_mob: "    << std::endl;
-	std::cout << _mat_c_mob_2_xi_mob << std::endl;
-	std::cout << "_mat_c_immob_2_xi_immob: "    << std::endl;
-	std::cout << _mat_c_immob_2_xi_immob << std::endl;
+//	std::cout << "_mat_c_mob_2_eta_mob: "    << std::endl;
+//	std::cout << _mat_c_mob_2_eta_mob << std::endl;
+//	std::cout << "_mat_c_immob_2_eta_immob: "    << std::endl;
+//	std::cout << _mat_c_immob_2_eta_immob << std::endl;
+//	std::cout << "_mat_c_mob_2_xi_mob: "    << std::endl;
+//	std::cout << _mat_c_mob_2_xi_mob << std::endl;
+//	std::cout << "_mat_c_immob_2_xi_immob: "    << std::endl;
+//	std::cout << _mat_c_immob_2_xi_immob << std::endl;
 #endif
 /*
  * known indeces : Jmob, Jsorp, Jmin, Jkin, IbarNmin
@@ -367,10 +367,10 @@ void chemReductionGIA::update_reductionScheme(void)
 	_mat_A2 = ( _mat_S2_ast.transpose() * _mat_S2_ast ).fullPivHouseholderQr().solve(_mat_S2_ast.transpose()) * _mat_S2 ;
 
 #ifdef _DEBUG
-	std::cout << "A_1: "    << std::endl;
-	std::cout << _mat_A1 << std::endl;
-	std::cout << "A_2: "    << std::endl;
-	std::cout << _mat_A2 << std::endl;
+//	std::cout << "A_1: "    << std::endl;
+//	std::cout << _mat_A1 << std::endl;
+//	std::cout << "A_2: "    << std::endl;
+//	std::cout << _mat_A2 << std::endl;
 #endif
 
 	//extract the A subspaces
@@ -487,8 +487,8 @@ void chemReductionGIA::Conc2EtaXi(ogsChem::LocalVector &local_conc,
     local_xi_bar  = _mat_c_immob_2_xi_immob  * local_c_immob;
 
 #ifdef _DEBUG
-  	std::cout << "local_conc: "    << std::endl;
-  	std::cout << local_conc << std::endl;
+//  	std::cout << "local_conc: "    << std::endl;
+//  	std::cout << local_conc << std::endl;
 //	std::cout << "local_eta: "    << std::endl;
 //	std::cout << local_eta << std::endl;
 //	std::cout << "local_eta_bar: "    << std::endl;

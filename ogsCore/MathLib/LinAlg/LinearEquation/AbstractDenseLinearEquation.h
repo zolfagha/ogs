@@ -125,7 +125,9 @@ public:
 
     virtual void printout(std::ostream &os=std::cout) const
     {
-        os << "not implemented yet." << std::endl;
+        //os << "not implemented yet." << std::endl;
+    	os << *_A << std::endl;
+    	//return * _A;
     }
 
 private:
