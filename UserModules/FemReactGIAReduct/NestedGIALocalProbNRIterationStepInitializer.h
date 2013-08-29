@@ -20,7 +20,7 @@
 
 //#include "NonLinearGIATimeODELocalAssembler.h"  // TO BE CHANGED
 //#include "NonLinearGIAJacabianLocalAssembler.h" // TO BE CHANGED
-#include "ReductConc.h" // TO BE CHANGED
+#include "ReductConc.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
 
 template <class T_USER_DATA>

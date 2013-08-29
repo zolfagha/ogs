@@ -13,6 +13,8 @@
 #pragma once
 
 #include <vector>
+#include <fstream>
+
 
 #include "MathLib/DataType.h"
 #include "DiscreteLib/Core/IDiscreteSystem.h"
@@ -146,6 +148,10 @@ private:
     FemLib::IFemNumericalIntegration* _q;
     FemLib::IFiniteElement* _fe;
     NumLib::ITXFunction* _vel;
+    /**
+      * pointer to the local problem class.
+      */
+    LocalProblem* _solv_minimization;
     //TODO set the followings from _ReductionGIA
     size_t _n_xi_global, _n_xi_Sorp_tilde, _n_xi_Min_tilde, _n_xi_Sorp, _n_xi_Min, _n_xi_Kin, _n_xi_local, _n_xi_Min_bar, _n_eta, _n_eta_bar, _n_xi_Mob, _n_xi_Kin_bar, _J_tot_kin, _n_xi_Sorp_bar;
     size_t _n_xi_Sorp_bar_li, _n_xi_Sorp_bar_ld, _n_Comp, _I_NMin_bar, _I_mob, _I_min;
@@ -217,6 +223,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     nnodes = _msh->getNumberOfNodes();
     const double theta_water_content(0.32);
     const double delta_xi = 1E-14;
+
+    _solv_minimization = new LocalProblem( _ReductionGIA);
 
     // current xi global
     MathLib::LocalVector loc_cur_xi_global, loc_cur_xi_Sorp_tilde, loc_cur_xi_Min_tilde,
@@ -399,16 +407,16 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             ////// calculate vprime
             Vprime(vec_conc, logk_min, mat_S1min, mat_S1mob, mat_S1sorp, mat_S1sorpli, mat_S1kin_ast, mat_S2sorp, mat_vprime);
 
-//        	// debugging--------------------------
-//        	std::cout << "======================================== \n";
-//        	std::cout << "mat_vprime: \n";
-//        	std::cout << mat_vprime << std::endl;
-//        	std::cout << "mat_p2F: \n";
-//        	std::cout << mat_p2F << std::endl;
-//        	std::cout << "mat_p1F: \n";
-//        	std::cout << mat_p1F << std::endl;
-//        	std::cout << "======================================== \n";
-//        	// end of debugging-------------------
+        	// debugging--------------------------
+        	std::cout << "======================================== \n";
+        	std::cout << "mat_vprime: \n";
+        	std::cout << mat_vprime << std::endl;
+        	std::cout << "mat_p2F: \n";
+        	std::cout << mat_p2F << std::endl;
+        	std::cout << "mat_p1F: \n";
+        	std::cout << mat_p1F << std::endl;
+        	std::cout << "======================================== \n";
+        	// end of debugging-------------------
 
             // construct local Jacobian matrix
             Jacobian_local = mat_p1F + mat_p2F * mat_vprime;
@@ -431,6 +439,13 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     // element based operation: add time and laplas terms
     AddMassLaplasTerms(delta_t, eqsJacobian_global);
 
+    // --------debugging--------------
+    //std::cout << "Global Jacobian" << std::endl;
+    std::ofstream globalJ ("globalJ.txt");
+    eqsJacobian_global.printout(globalJ);
+    // --------end of debugging-------
+
+    delete _solv_minimization;
 }
 
 
@@ -527,48 +542,67 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 //	//	// end of debugging-------------------
 
 	std::size_t sol_size 		= _n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols();
-	//int n = 10000;
-	//Eigen::SparseMatrix<double> J(_n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin, _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
 
-	typedef Eigen::Triplet<double> T;
-	std::vector<T> tripletList;
-	//tripletList.reserve(2*(_n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin));
-	tripletList.reserve(_n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
-	for(std::size_t i = 0; i < _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin; i++)
-	{
-		for(std::size_t j = 0; j < _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin; j++)
+//	typedef Eigen::Triplet<double> T;
+//	std::vector<T> tripletList;
+//	//tripletList.reserve(2*(_n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin));
+//	tripletList.reserve(_n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
+//	for(std::size_t i = 0; i < _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin; i++)
+//	{
+//		for(std::size_t j = 0; j < _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin; j++)
+//		{
+//			 double temp = J_temp(i,j);
+//			 tripletList.push_back(T(i, j, temp));
+//		}
+//	}
+//
+//	Eigen::SparseMatrix<double> J(_n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin, _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
+//	J.setFromTriplets(tripletList.begin(), tripletList.end());
+//
+//	Eigen::VectorXd b(_n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
+//	Eigen::VectorXd dx(_n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
+//	Eigen::MatrixXd x(_n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin, _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
+//	// solve the linear system
+//	for(i = 0; i < _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin; i++)
+//	{
+//		b = mat_B.transpose() * mat_A_tilde * mat_C.col(i);
+//		// fill A and b
+//		Eigen::BiCGSTAB<Eigen::SparseMatrix<double> > solver;
+//		solver.compute(J);
+//		x.col(i) = solver.solve(b);
+//
+//
+////		//	// debugging--------------------------
+////			std::cout << "======================================== \n";
+////			std::cout << "b: \n";
+////			std::cout << b << std::endl;
+////			std::cout << "J: \n";
+////			std::cout << J << std::endl;
+////			std::cout << "x: \n";
+////			std::cout << x << std::endl;
+////			std::cout << "======================================== \n";
+////		//	// end of debugging-------------------
+//	}
+
+
+// using minimization solver of the local problem.
+
+		MathLib::LocalVector b 	= MathLib::LocalVector::Zero(_n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
+		MathLib::LocalVector dx = MathLib::LocalVector::Zero(_n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
+		MathLib::LocalMatrix x  = MathLib::LocalMatrix::Zero(_n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin, _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
+		std::size_t indx_dummy = 0;
+		// solve the linear system
+		for(i = 0; i < _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin; i++)
 		{
-			 double temp = J_temp(i,j);
-			 tripletList.push_back(T(i, j, temp));
+			b = mat_B.transpose() * mat_A_tilde * mat_C.col(i);
+
+		  // _solv_minimization->Solv_Minimization(indx_dummy, J_temp, b, dx);
+		  // x.col(i) = dx;
+
+	      // using the standard direct solver
+		  x.col(i) = J_temp.fullPivHouseholderQr().solve( b );
 		}
-	}
 
-	Eigen::SparseMatrix<double> J(_n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin, _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
-	J.setFromTriplets(tripletList.begin(), tripletList.end());
-
-	Eigen::VectorXd b(_n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
-	Eigen::MatrixXd x(_n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin, _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
-	// solve the linear system
-	for(i = 0; i < _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin; i++)
-	{
-		b = mat_B.transpose() * mat_A_tilde * mat_C.col(i);
-		// fill A and b
-		Eigen::BiCGSTAB<Eigen::SparseMatrix<double> > solver;
-		solver.compute(J);
-		x.col(i) = solver.solve(b);
-
-
-//		//	// debugging--------------------------
-//			std::cout << "======================================== \n";
-//			std::cout << "b: \n";
-//			std::cout << b << std::endl;
-//			std::cout << "J: \n";
-//			std::cout << J << std::endl;
-//			std::cout << "x: \n";
-//			std::cout << x << std::endl;
-//			std::cout << "======================================== \n";
-//		//	// end of debugging-------------------
-	}
 
 	mat_vprime.block(0, 0, sol_size, _n_xi_Sorp_tilde) = x.block(0, 0, sol_size, _n_xi_Sorp_tilde);
 	mat_vprime.block(0, _n_xi_Sorp_tilde, sol_size, _n_xi_Min_tilde ) = x.block(0, _n_xi_Sorp_tilde, sol_size, _n_xi_Min_tilde);
@@ -677,18 +711,19 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 		    localM(idx_ml, idx_ml) =  mass_lump_val;
 		}
 
-		////	// debugging--------------------------
-		//std::cout << "======================================== \n";
-		//std::cout << "dispersion_diffusion: \n";
-		//std::cout << dispersion_diffusion << std::endl;
-		//std::cout << "localDispersion: \n";
-		//std::cout << localDispersion << std::endl;
-		//std::cout << "localAdvection: \n";
-		//std::cout << localAdvection << std::endl;
-		//std::cout << "localM: \n";
-		//std::cout << localM << std::endl;
-		//std::cout << "======================================== \n";
-		////	// end of debugging-------------------
+		//	// debugging--------------------------
+//		std::cout << "======================================== \n";
+//		std::cout << "dispersion_diffusion: \n";
+//		std::cout << dispersion_diffusion << std::endl;
+//		std::cout << "localDispersion: \n";
+//		std::cout << localDispersion << std::endl;
+//		std::cout << "localAdvection: \n";
+//		std::cout << "localK: \n";
+//		std::cout << localK << std::endl;
+//		std::cout << "localM: \n";
+//		std::cout << localM << std::endl;
+//		std::cout << "======================================== \n";
+		//	// end of debugging-------------------
 
         // add conductance matrix
 		localK_temp = localK * dt;
