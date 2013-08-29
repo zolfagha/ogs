@@ -408,14 +408,14 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             Vprime(vec_conc, logk_min, mat_S1min, mat_S1mob, mat_S1sorp, mat_S1sorpli, mat_S1kin_ast, mat_S2sorp, mat_vprime);
 
         	// debugging--------------------------
-        	std::cout << "======================================== \n";
-        	std::cout << "mat_vprime: \n";
-        	std::cout << mat_vprime << std::endl;
-        	std::cout << "mat_p2F: \n";
-        	std::cout << mat_p2F << std::endl;
-        	std::cout << "mat_p1F: \n";
-        	std::cout << mat_p1F << std::endl;
-        	std::cout << "======================================== \n";
+//        	std::cout << "======================================== \n";
+//        	std::cout << "mat_vprime: \n";
+//        	std::cout << mat_vprime << std::endl;
+//        	std::cout << "mat_p2F: \n";
+//        	std::cout << mat_p2F << std::endl;
+//        	std::cout << "mat_p1F: \n";
+//        	std::cout << mat_p1F << std::endl;
+//        	std::cout << "======================================== \n";
         	// end of debugging-------------------
 
             // construct local Jacobian matrix
@@ -587,9 +587,9 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 
 // using minimization solver of the local problem.
 
-		MathLib::LocalVector b 	= MathLib::LocalVector::Zero(_n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
-		MathLib::LocalVector dx = MathLib::LocalVector::Zero(_n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
-		MathLib::LocalMatrix x  = MathLib::LocalMatrix::Zero(_n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin, _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
+		MathLib::LocalVector b 	= MathLib::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
+		//MathLib::LocalVector dx = MathLib::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
+		MathLib::LocalMatrix x  = MathLib::LocalMatrix::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols(), _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
 		std::size_t indx_dummy = 0;
 		// solve the linear system
 		for(i = 0; i < _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin; i++)
@@ -598,6 +598,24 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 
 		  // _solv_minimization->Solv_Minimization(indx_dummy, J_temp, b, dx);
 		  // x.col(i) = dx;
+
+			//	// debugging--------------------------
+//			std::cout << "======================================== \n";
+//			std::cout << "b: \n";
+//			std::cout << b << std::endl;
+//			std::cout << "J: \n";
+//			std::cout << J_temp << std::endl;
+//			std::cout << "x: \n";
+//			std::cout << x << std::endl;
+//
+//			std::cout << "mat_B: \n";
+//			std::cout << mat_B << std::endl;
+//			std::cout << "mat_A_tilde: \n";
+//			std::cout << mat_A_tilde << std::endl;
+//			std::cout << "mat_C: \n";
+//			std::cout << mat_C << std::endl;
+//			std::cout << "======================================== \n";
+			//	// end of debugging-------------------
 
 	      // using the standard direct solver
 		  x.col(i) = J_temp.fullPivHouseholderQr().solve( b );
