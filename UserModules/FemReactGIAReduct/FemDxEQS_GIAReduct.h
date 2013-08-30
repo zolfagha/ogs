@@ -432,6 +432,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
 
             eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, Jacobian_local);
 
+            mat_vprime.setZero(); 
+
 
     }  // end of node based for loop
             node_indx_vec.clear();
@@ -518,7 +520,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 	MathLib::LocalMatrix  mat_B  = MathLib::LocalMatrix::Zero(_I_mob + _I_NMin_bar, _n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
 	mat_B.block(0, 0, _I_mob, _n_xi_Mob)							  =  mat_S1mob;
 	mat_B.block(0, _n_xi_Mob, _I_mob, _n_xi_Sorp)					  =  mat_S1sorp;
-	mat_B.block(0, _n_xi_Mob + _n_xi_Sorp, _I_mob, mat_S1minI.cols()) =  mat_S1minI;
+	mat_B.block(0, _n_xi_Mob + _n_xi_Sorp, mat_S1minI.rows(), mat_S1minI.cols()) =  mat_S1minI;
 	mat_B.block(_I_mob, _n_xi_Mob, _I_NMin_bar, _n_xi_Sorp) 		  =  mat_S2sorp;
 
 	MathLib::LocalMatrix  mat_C  = MathLib::LocalMatrix::Zero(_I_mob + _I_NMin_bar, _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
