@@ -407,16 +407,16 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             ////// calculate vprime
             Vprime(vec_conc, logk_min, mat_S1min, mat_S1mob, mat_S1sorp, mat_S1sorpli, mat_S1kin_ast, mat_S2sorp, mat_vprime);
 
-        	// debugging--------------------------
-        	std::cout << "======================================== \n";
-        	std::cout << "mat_vprime: \n";
-        	std::cout << mat_vprime << std::endl;
-        	std::cout << "mat_p2F: \n";
-        	std::cout << mat_p2F << std::endl;
-        	std::cout << "mat_p1F: \n";
-        	std::cout << mat_p1F << std::endl;
-        	std::cout << "======================================== \n";
-        	// end of debugging-------------------
+        	//// debugging--------------------------
+        	//std::cout << "======================================== \n";
+        	//std::cout << "mat_vprime: \n";
+        	//std::cout << mat_vprime << std::endl;
+        	//std::cout << "mat_p2F: \n";
+        	//std::cout << mat_p2F << std::endl;
+        	//std::cout << "mat_p1F: \n";
+        	//std::cout << mat_p1F << std::endl;
+        	//std::cout << "======================================== \n";
+        	//// end of debugging-------------------
 
             // construct local Jacobian matrix
             Jacobian_local = mat_p1F + mat_p2F * mat_vprime;
@@ -440,9 +440,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     AddMassLaplasTerms(delta_t, eqsJacobian_global);
 
     // --------debugging--------------
-    //std::cout << "Global Jacobian" << std::endl;
-    std::ofstream globalJ ("globalJ.txt");
-    eqsJacobian_global.printout(globalJ);
+    // std::ofstream globalJ ("globalJ.txt");
+    // eqsJacobian_global.printout(globalJ);
     // --------end of debugging-------
 
     delete _solv_minimization;
@@ -499,6 +498,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 //	std::cout << conc_Min_bar << std::endl;
 //	std::cout << "======================================== \n";
 ////	// end of debugging-------------------
+    mat_S1minI.resize(0,0); 
+    mat_S1minA.resize(0,0); 
 	for (i = 0; i < _n_xi_Min; i++)
 	{
 		//MathLib::LocalVector temp_vec = _mat_S1min.col(i);
