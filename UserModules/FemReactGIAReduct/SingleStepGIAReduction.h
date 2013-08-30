@@ -326,6 +326,7 @@ SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
 					bc_node->set_comp_conc( i_var, node_value );
 					_bc_info.insert( my_bc, std::pair<size_t, ReductionGIANodeInfo*>(node_id, bc_node) );
 				}  // end of if else
+                _function_data->set_BC_conc_node_values(node_id, i_var, node_value ); 
 	        }  // end of for j
         }  // end of for i
     }  // end of for i_var
