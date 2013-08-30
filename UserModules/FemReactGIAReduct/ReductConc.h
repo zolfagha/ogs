@@ -301,6 +301,9 @@ public:
 	std::vector<MyNodalFunctionScalar*> & get_concentrations() {return _concentrations; }
 	FemLib::LagrangeFeObjectContainer* get_feObjects(){return _feObjects;}
 	NumLib::TimeStep const* getTimeStep() {return _current_time_step;}
+    virtual void set_BC_conc_node_values(std::size_t node_idx, std::size_t i_var, double node_value);
+    virtual void set_BC_xilocal_node_values(std::size_t node_idx, std::vector<double> vec_xi_local_bc);
+
 
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
