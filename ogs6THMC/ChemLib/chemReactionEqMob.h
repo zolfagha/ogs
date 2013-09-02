@@ -28,14 +28,14 @@ public:
     {
         _eqReactType = ogsChem::MOB_EQ_REACT;
     };
-	~chemReactionEqMob(void);
+	virtual ~chemReactionEqMob(void){};
 
     /**
       * the realization of eval function
       * the returned value is the residual of the reaction. 
       * if equilibrium is reached, then redisual is zero. 
       */
-    double eval(ogsChem::LocalVector & vec_log_Conc)
+    double eval(ogsChem::LocalVector & /*vec_log_Conc*/)
     {
         // TODO
         return 0.0; 

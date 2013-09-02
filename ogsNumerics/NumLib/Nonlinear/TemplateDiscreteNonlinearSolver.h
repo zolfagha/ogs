@@ -38,12 +38,12 @@ public:
     typedef DiscreteLib::IDiscreteVector<double> VectorType;
 
     TemplateDiscreteNonlinearSolver(MyDiscreteSystem* dis_sys, F_LINEAR* f_l, F_R* f_r, F_DX* f_dx)
-    : _dis_sys(dis_sys), _f_l(f_l), _f_r(f_r), _f_dx(f_dx), _solver(NULL), _nl_factory(new T_NL_FACTORY)
+    : _dis_sys(dis_sys), _f_l(f_l), _f_r(f_r), _f_dx(f_dx), _solver(NULL), _nl_factory(new T_NL_FACTORY), _log(nullptr)
     {
     }
 
     TemplateDiscreteNonlinearSolver(MyDiscreteSystem* dis_sys, F_LINEAR* f_l, F_R* f_r, F_DX* f_dx, T_NL_FACTORY* nl_factory)
-    : _dis_sys(dis_sys), _f_l(f_l), _f_r(f_r), _f_dx(f_dx), _solver(NULL), _nl_factory(nl_factory)
+    : _dis_sys(dis_sys), _f_l(f_l), _f_r(f_r), _f_dx(f_dx), _solver(NULL), _nl_factory(nl_factory), _log(nullptr)
     {
     }
 
@@ -70,11 +70,18 @@ public:
 
     NonlinerSolverOption &getOption() const { return _option; }
 
+    void setLog(BaseLib::Options &log) { _log = &log; }
+
+    const BaseLib::Options* getLog() const {return _log;};
+
     void solve(const VectorType &x_0, VectorType &x_new)
     {
         if (_solver==0)
             _solver = _nl_factory->create(_option, _dis_sys, _f_l, _f_r, _f_dx);
         _solver->solve(x_0, x_new);
+
+        if (_log!=nullptr)
+            _solver->recordLog(*_log);
     }
 
 private:
@@ -88,6 +95,7 @@ private:
     F_DX* _f_dx;
     INonlinearSolver* _solver;
     T_NL_FACTORY* _nl_factory;
+    BaseLib::Options* _log;
 };
 
 } //end

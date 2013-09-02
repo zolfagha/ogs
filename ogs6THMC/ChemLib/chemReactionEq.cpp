@@ -28,7 +28,7 @@ chemReactionEq::~chemReactionEq(void)
 {
 }
 
-void chemReactionEq::readReactionStr(std::string & reaction_str)
+void chemReactionEq::readReactionStr(std::string & /*reaction_str*/)
 {
 	// TODO
 	std::string tmp_str;

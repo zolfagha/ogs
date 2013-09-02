@@ -121,18 +121,29 @@ public:
       */ 
     int solveTimeStep(const NumLib::TimeStep &t_n1);
     
+    virtual bool accept(const NumLib::TimeStep &t)
+    {
+        // this solution itself
+        if (!AbstractTimeSteppingAlgorithm::accept(t)) return false;
+        // call all linear solutions
+        for (size_t i=0; i < _lin_solutions.size(); i++ )
+            if (!_lin_solutions[i]->accept(t)) return false;
+        // the non-linear solution
+        return _nlin_solution->accept(t);
+    }
+
     /**
 	  * called when this solution is accepted
 	  */
-    virtual void accept(const NumLib::TimeStep &t)
+    virtual void finalizeTimeStep(const NumLib::TimeStep &t)
     {
         // this solution itself
-        AbstractTimeSteppingAlgorithm::accept(t);
+        AbstractTimeSteppingAlgorithm::finalizeTimeStep(t);
         // call all linear solutions
         for (size_t i=0; i < _lin_solutions.size(); i++ )
-            _lin_solutions[i]->accept(t); 
+            _lin_solutions[i]->finalizeTimeStep(t); 
         // the non-linear solution
-        _nlin_solution->accept(t); 
+        _nlin_solution->finalizeTimeStep(t); 
     }
 
     /** 
@@ -234,9 +245,9 @@ SingleStepKinReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
                              UserNonLinearProblem*            non_linear_problem,
 						     UserNonLinearSolution*           non_linear_solution)
     : AbstractTimeSteppingAlgorithm(*problem->getTimeSteppingFunction()),
-      _problem(problem), _discrete_system(dis), _function_data(function_data), 
+      _problem(problem), _discrete_system(dis),
       _linear_problem(linear_problem), _lin_solutions(linear_solutions), 
-      _non_linear_problem(non_linear_problem), _nlin_solution(non_linear_solution)
+      _non_linear_problem(non_linear_problem), _nlin_solution(non_linear_solution), _function_data(function_data)
 {
     INFO("->Setting up a solution algorithm SingleStepKinReduction");
 
@@ -288,7 +299,7 @@ SingleStepKinReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
 		list_var[i] = problem->getVariable(i);
 
 	// getting the boundary conditions of concentrations for all components, 
-    const size_t msh_id = _discrete_system->getMesh()->getID();
+    //const size_t msh_id = _discrete_system->getMesh()->getID();
     std::vector<size_t> list_bc1_eqs_id;
     std::vector<double> list_bc1_val;
     for ( i_var=0; i_var < n_var; i_var++ ) {

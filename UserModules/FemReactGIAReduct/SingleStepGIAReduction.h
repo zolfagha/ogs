@@ -123,10 +123,22 @@ public:
       */ 
     int solveTimeStep(const NumLib::TimeStep &t_n1);
     
+    virtual bool accept(const NumLib::TimeStep &/*t*/)
+    {
+        return true;
+        //// this solution itself
+        //AbstractTimeSteppingAlgorithm::accept(t);
+        //// call all linear solutions
+        //for (size_t i=0; i < _lin_solutions.size(); i++ )
+        //    _lin_solutions[i]->accept(t);
+        //// the non-linear solution
+        //_nlin_solution->accept(t);
+    }
+
     /**
 	  * called when this solution is accepted
 	  */
-    virtual void accept(const NumLib::TimeStep &t)
+    virtual void finalizeTimeStep(const NumLib::TimeStep &/*t*/)
     {
         //// this solution itself
         //AbstractTimeSteppingAlgorithm::accept(t);
@@ -136,6 +148,7 @@ public:
         //// the non-linear solution
         //_nlin_solution->accept(t); 
     }
+
 
     /** 
       * get the corresponding solution pointer
@@ -238,7 +251,8 @@ SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
                              UserNonLinearProblem*            non_linear_problem,
 						     UserNonLinearSolution*           non_linear_solution)
     : AbstractTimeSteppingAlgorithm(*problem->getTimeSteppingFunction()),
-      _problem(problem), _discrete_system(dis), _function_data(function_data), 
+      _problem(problem), _discrete_system(dis), _function_data(function_data),
+      _x_n0(NULL), _x_n1_0(NULL), _x_n1(NULL), _x_st(NULL), _feObjects(NULL),
       _linear_problem(linear_problem), _lin_solutions(linear_solutions), 
       _non_linear_problem(non_linear_problem), _nlin_solution(non_linear_solution)
 {
@@ -417,7 +431,7 @@ template <
 	class T_USER_NON_LINEAR_SOLUTION 
     >
 int SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBLEM, T_USER_LINEAR_SOLUTION, T_USER_NON_LINEAR_PROBLEM, T_USER_NON_LINEAR_SOLUTION>
-    ::solveTimeStep(const NumLib::TimeStep &t_n1)
+    ::solveTimeStep(const NumLib::TimeStep &/*t_n1*/)
 {
 	size_t i;
 

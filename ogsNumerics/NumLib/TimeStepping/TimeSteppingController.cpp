@@ -39,10 +39,10 @@ size_t TimeSteppingController::solve(double time_end)
         INFO("\n#############################################################");
         INFO("Time step %d: t=%f s, dt=%f s ", t_n1.getTimeStepCount(), time_next, t_n1.getTimeStepSize());
         INFO("#############################################################");
-        bool isAccepted = (_root_subsystems->solveTimeStep(t_n1)==0);
-        if (isAccepted) {
-            _root_subsystems->accept(time_next);
-            time_current.accept(time_next);
+        _root_subsystems->solveTimeStep(t_n1);
+        if (_root_subsystems->accept(t_n1)) {
+            _root_subsystems->finalizeTimeStep(time_next);
+            time_current.finalize(time_next);
             doSomethingAfterTimeStepAccepted(time_current);
         }
     }

@@ -72,6 +72,20 @@ std::vector<const OptionGroup*> OptionGroup::getSubGroupList(const std::string &
     return list_group;
 }
 
+std::vector<OptionGroup*> OptionGroup::getSubGroupList(const std::string &key)
+{
+    const_pair_of_iterator subgroup_range = _dictionary.equal_range(key);
+    DictionaryType::const_iterator itr;
+    std::vector<OptionGroup*> list_group;
+
+    for (itr = subgroup_range.first; itr!=subgroup_range.second; ++itr) {
+        if (!itr->second->isValue())
+            list_group.push_back(static_cast<OptionGroup*>(itr->second));
+    }
+
+    return list_group;
+}
+
 /// check if there is a value with the given key
 bool OptionGroup::hasOption(const std::string &key) const
 {

@@ -17,6 +17,7 @@
 #include "FemLib/Tools/LagrangeFeObjectContainer.h"
 #include "NumLib/Function/TXFunction.h"
 #include "NumLib/TimeStepping/TimeStepFunction.h"
+#include "NumLib/TimeStepping/TimeStepFunctionNewtonAdaptive.h"
 #include "MaterialLib/Fluid.h"
 #include "MaterialLib/Fracture.h"
 #include "SolutionLib/Fem/FemDirichletBC.h"
@@ -43,7 +44,19 @@ void convertTimeStepping(const std::vector<CTimeDiscretization*> &td_vector, std
     for (size_t i=0; i<td_vector.size(); i++)
     {
         const CTimeDiscretization* td = td_vector[i];
-        if (td->time_independence || !done_shared) {
+        if (td->time_control_name == "NEWTON_ADAPTIVE" )
+        {
+            NumLib::ITimeStepFunction* tf = new NumLib::TimeStepFunctionNewtonAdaptive(td->time_start, 
+                                                                                       td->time_end, 
+                                                                                       td->min_time_step, 
+                                                                                       td->max_time_step, 
+                                                                                       td->time_adapt_tim_vector, 
+                                                                                       td->time_adapt_coe_vector);
+            tf_vector.push_back(tf);
+            if (!td->time_independence)
+                done_shared = true;
+        }
+        else if (td->time_independence || !done_shared) {
             NumLib::ITimeStepFunction* tf = new NumLib::TimeStepFunctionVector(td->time_start, td->time_end, td->time_step_vector);
             tf_vector.push_back(tf);
             if (!td->time_independence)
@@ -353,6 +366,8 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         optPcs->addOptionAsNum("MeshID", rfpcs->mesh_id);
 
         //Time
+        if (rfpcs->timegroup_id<0)
+            rfpcs->timegroup_id = i;
         optPcs->addOptionAsNum("TimeGroupID", rfpcs->timegroup_id);
 
         // IC

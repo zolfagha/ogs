@@ -31,6 +31,8 @@ namespace MathLib
 class NewtonRaphsonMethod
 {
 public:
+    NewtonRaphsonMethod() : _log_itr_count(0), _log_error(.0) {};
+
     /// general solver
     /// @tparam F_RESIDUALS
     /// @tparam F_DX
@@ -84,6 +86,10 @@ public:
                 }
             }
         }
+
+        // store log
+        this->_log_itr_count = itr_cnt;
+        this->_log_error = convergence->getError();
 
         INFO("------------------------------------------------------------------");
         INFO("*** Newton-Raphson nonlinear solver computation result");
@@ -143,6 +149,12 @@ public:
         return solve(f_residuals, f_jac, x0, x_new, &check, max_itr_count);
     }
 
+    /// get the number of iterations computed
+    size_t getNIterations() const {return _log_itr_count;};
+
+    /// get the final error
+    double getError() const {return _log_error;};
+
 private:
     template<class T_VALUE>
     inline void printout(size_t i, T_VALUE &x_new, T_VALUE &r, T_VALUE &dx)
@@ -161,6 +173,10 @@ private:
         std::cout << ")" << std::endl;
 #endif
     }
+
+private:
+    size_t _log_itr_count;
+    double _log_error;
 };
 
 #if 1

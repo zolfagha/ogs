@@ -26,7 +26,7 @@ public:
       * constructor and destructor
       */
 	chemReactionEq();
-	~chemReactionEq(void);
+	virtual ~chemReactionEq(void);
 
 	/**
       * return the constant of equilibrium constant
@@ -62,7 +62,7 @@ public:
       * the returned value is the residual of the reaction. 
       * if equilibrium is reached, then redisual is zero. 
       */
-    virtual double eval(ogsChem::LocalVector & vec_log_Conc)
+    virtual double eval(ogsChem::LocalVector & /*vec_log_Conc*/)
     {return 0.0;};
 
 protected:

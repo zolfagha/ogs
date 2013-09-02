@@ -507,6 +507,60 @@ std::ios::pos_type CTimeDiscretization::Read(std::ifstream* tim_file)
                     } // end of while loop adaptive
                 // end of if "SELF_ADAPTIVE"
                 }
+                else if(time_control_name == "NEWTON_ADAPTIVE")
+                {
+                    while((!new_keyword) || (!new_subkeyword) ||
+                          (!tim_file->eof()))
+                    {
+                        position = tim_file->tellg();
+                        line_string = readNonBlankLineFromInputStream(*tim_file);
+                        if(line_string.find("#") != std::string::npos)
+                            return position;
+                        if(line_string.find("$") != std::string::npos)
+                        {
+                            new_subkeyword = true;
+                            break;
+                        }
+                        if(line_string.find("MAX_TIME_STEP") !=
+                           std::string::npos)
+                        {
+                            *tim_file >> line_string;
+                            max_time_step = strtod(
+                                    line_string.data(),NULL);
+                            line.clear();
+                            // kg44 should not break break;
+                        }
+                        if(line_string.find("MIN_TIME_STEP") !=
+                           std::string::npos)
+                        {
+                            *tim_file >> line_string;
+                            min_time_step = strtod(
+                                    line_string.data(),NULL);
+                            line.clear();
+                            // kg44 should not break break;
+                        }
+                        if(line_string.find("ITER_TIMES_AND_MULTIPLYER") != 
+                            std::string::npos)
+                        {
+                            int n_seg = 0; 
+
+                            *tim_file >> line_string; 
+                            n_seg = atoi(line_string.data());
+                            for ( int i=0; i < n_seg ; i++ )
+                            {
+                                *tim_file >> line_string;
+                                iter_times = atoi(line_string.data());
+                                *tim_file >> line_string;
+                                multiply_coef = strtod(
+                                    line_string.data(),NULL);
+                                time_adapt_tim_vector.push_back(iter_times);
+                                time_adapt_coe_vector.push_back(multiply_coef);
+                                line_string.clear();
+                            }  // end of for i
+                        }
+                    } // end of while loop adaptive
+                // end of if "SELF_ADAPTIVE"
+                }
                 else{
                     //ScreenMessage("ERROR: Unrecognized time control type.\n");
                     exit(1);

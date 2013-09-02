@@ -193,7 +193,7 @@ int FunctionXFEM_EXAMPLE_CRACK1::solveTimeStep(const NumLib::TimeStep &/*time*/)
     return 0;
 }
 
-void FunctionXFEM_EXAMPLE_CRACK1::accept(const NumLib::TimeStep &/*time*/)
+void FunctionXFEM_EXAMPLE_CRACK1::finalizeTimeStep(const NumLib::TimeStep &/*time*/)
 {
 //    //update data for output
     Ogs6FemData* femData = Ogs6FemData::getInstance();

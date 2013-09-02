@@ -57,6 +57,13 @@ struct PorousMedia : public IMedium
                 max_saturation, 
 				exp_saturation
                 );
+        BaseLib::zeroObject(
+                capp_sat_curve,
+                dispersivity_long,
+                dispersivity_trans
+                );
+        capp_sat_model = 0;
+        minimum_relative_permeability = .0;
     }
 
     virtual ~PorousMedia()
@@ -82,7 +89,7 @@ struct PorousMedia : public IMedium
 	virtual double getKrelbySw(const double Sw/*wetting saturation*/, size_t idx_phase)
     {
         double kr = 0.0; 
-        bool phase_shift = false; 
+        //bool phase_shift = false;
         size_t model; 
         model = this->perm_saturation_model[idx_phase];
 		minimum_relative_permeability =  1.0e-9; // Could be set as default at a beter place

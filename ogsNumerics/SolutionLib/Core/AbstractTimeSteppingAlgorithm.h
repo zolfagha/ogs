@@ -55,11 +55,16 @@ public:
     }
 
     ///
-    virtual void accept(const NumLib::TimeStep &)
+    virtual bool accept(const NumLib::TimeStep &t)
     {
-        _tim->accept();
+        return _tim->accept(t.getTime());
     };
 
+    ///
+    virtual void finalizeTimeStep(const NumLib::TimeStep &t)
+    {
+        _tim->finalize(t.getTime());
+    };
 
 private:
     NumLib::ITimeStepFunction* _tim;

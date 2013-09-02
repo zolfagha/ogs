@@ -110,9 +110,9 @@ public:
     DiscreteLib::DofEquationIdTable* getDofEquationIdTable() {return &_dofManager;};
 
     ///
-    virtual void accept(const NumLib::TimeStep &t)
+    virtual void finalizeTimeStep(const NumLib::TimeStep &t)
     {
-        AbstractTimeSteppingAlgorithm::accept(t);
+        AbstractTimeSteppingAlgorithm::finalizeTimeStep(t);
         *_x_n0 = *_x_n1; //copy current value to previous value
     };
 
@@ -135,6 +135,7 @@ private:
     SolutionVector *_x_n1_0;
     SolutionVector *_x_n1;
     SolutionVector *_x_st;
+    BaseLib::Options _opLog;
 };
 
 template <
@@ -203,6 +204,10 @@ SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY>::SingleSte
 
     // setup nonlinear solver
     _f_nonlinear = new NonlinearSolverType(dis, _f_linear, _f_r, _f_dx, nl_solver_factory);
+    _f_nonlinear->setLog(_opLog);
+
+    // set inital log
+    this->getTimeStepFunction()->updateLog(_opLog);
 };
 
 template <
@@ -272,6 +277,9 @@ int SingleStepFEM<T_USER_FEM_PROBLEM,T_LINEAR_SOLVER,T_NL_SOLVER_FACTORY>::solve
         //SolutionVector* vec_var = _problem->getVariable(i)->getIC()->getNodalValues();
         DiscreteLib::setLocalVector(_dofManager, i, msh_id, *_x_n1, *_vec_u_n1[i]->getDiscreteData());
     }
+
+    // update log
+    this->getTimeStepFunction()->updateLog(_opLog);
 
     return 0;
 }

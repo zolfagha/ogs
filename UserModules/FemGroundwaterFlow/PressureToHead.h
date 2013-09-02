@@ -51,7 +51,7 @@ public:
 
     int solveTimeStep(const NumLib::TimeStep &/*time*/);
 
-    virtual void accept(const NumLib::TimeStep &/*time*/);
+    virtual void finalizeTimeStep(const NumLib::TimeStep &/*time*/);
 
     ///
     virtual NumLib::IConvergenceCheck* getConvergenceChecker() { return &_checker; };

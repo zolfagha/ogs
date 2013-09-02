@@ -135,6 +135,7 @@ public:
 
     void addProblem(T_PROBLEM &subproblem, bool is_partitioned=false)
     {
+        subproblem.setID(_list_subproblems.size());
         _list_subproblems.push_back(&subproblem);
         if (is_partitioned)
             _list_part_problems.push_back(&subproblem);
