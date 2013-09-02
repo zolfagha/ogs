@@ -132,6 +132,9 @@ private:
     					ogsChem::LocalMatrix & mat_S1_orth,
     					ogsChem::LocalMatrix & mat_S2_orth,
     					ogsChem::LocalVector &vec_rate_new);
+//    void impose_BC_on_J(LinearSolverType & eqsJacobian_global,
+//    					std::vector<size_t> & list_bc_nodes,
+//    					std::size_t & nnodes);
 private:
     MeshLib::IMesh* _msh;
     DiscreteLib::DofEquationIdTable* _dofManager;
@@ -148,6 +151,8 @@ private:
     FemLib::IFemNumericalIntegration* _q;
     FemLib::IFiniteElement* _fe;
     NumLib::ITXFunction* _vel;
+    //SolutionLib::FemDirichletBC *bc1;
+
     /**
       * pointer to the local problem class.
       */
@@ -198,6 +203,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::eval(const SolutionLib
     // solve
     _linear_eqs->solve();
     _linear_eqs->getX(du);
+
 }
 
 template <class T1, class T2, class T3>
@@ -243,7 +249,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     loc_cur_xi_Min_bar              = MathLib::LocalVector::Zero( _n_xi_Min_bar );
     loc_cur_xi_Sorp_bar_li          = MathLib::LocalVector::Zero(_n_xi_Sorp_bar_li );
     loc_cur_xi_Sorp_bar_ld          = MathLib::LocalVector::Zero(_n_xi_Sorp_bar_ld );
-    // current eta mobie and immobile
+    // current eta mobile and immobile
     loc_cur_eta             = MathLib::LocalVector::Zero( _n_eta );
     loc_cur_eta_bar         = MathLib::LocalVector::Zero( _n_eta_bar );
     vec_conc                = MathLib::LocalVector::Zero(_n_Comp);
@@ -288,6 +294,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     std::size_t n_xi_total = _n_xi_local + _n_xi_global;
     std::vector<size_t> node_indx_vec;
     node_indx_vec.resize(_n_xi_global);
+    //std::vector<size_t> &list_bc_nodes = bc1->getListOfBCNodes();
+
     // loop over all the nodes
     for (size_t node_idx=0; node_idx < nnodes; node_idx++ )
     {
@@ -429,16 +437,16 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             ////// calculate vprime
             Vprime(vec_conc, logk_min, mat_S1min, mat_S1mob, mat_S1sorp, mat_S1sorpli, mat_S1kin_ast, mat_S2sorp, mat_vprime);
 
-        	// debugging--------------------------
-//        	std::cout << "======================================== \n";
-//        	std::cout << "mat_vprime: \n";
-//        	std::cout << mat_vprime << std::endl;
-//        	std::cout << "mat_p2F: \n";
-//        	std::cout << mat_p2F << std::endl;
-//        	std::cout << "mat_p1F: \n";
-//        	std::cout << mat_p1F << std::endl;
-//        	std::cout << "======================================== \n";
-        	// end of debugging-------------------
+        	//// debugging--------------------------
+        	//std::cout << "======================================== \n";
+        	//std::cout << "mat_vprime: \n";
+        	//std::cout << mat_vprime << std::endl;
+        	//std::cout << "mat_p2F: \n";
+        	//std::cout << mat_p2F << std::endl;
+        	//std::cout << "mat_p1F: \n";
+        	//std::cout << mat_p1F << std::endl;
+        	//std::cout << "======================================== \n";
+        	//// end of debugging-------------------
 
             // construct local Jacobian matrix
             Jacobian_local = mat_p1F + mat_p2F * mat_vprime;
@@ -471,10 +479,13 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     // element based operation: add time and laplas terms
     AddMassLaplasTerms(delta_t, eqsJacobian_global);
 
+    // impose BC on Jacobian matrix
+    // impose_BC_on_J(eqsJacobian_global, list_bc_nodes, nnodes);
+
     // --------debugging--------------
     // check nodal and elemental values
-    //std::ofstream globalJ ("globalJ.txt");
-    //eqsJacobian_global.printout(globalJ);
+     std::ofstream globalJ ("globalJ.txt");
+     eqsJacobian_global.printout(globalJ);
     // --------end of debugging-------
 
     delete _solv_minimization;
@@ -533,6 +544,9 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 //	std::cout << conc_Min_bar << std::endl;
 //	std::cout << "======================================== \n";
 ////	// end of debugging-------------------
+    mat_S1minI.resize(0,0); 
+    mat_S1minA.resize(0,0); 
+
 	for (i = 0; i < _n_xi_Min; i++)
 	{
 		//MathLib::LocalVector temp_vec = _mat_S1min.col(i);
@@ -551,7 +565,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 	MathLib::LocalMatrix  mat_B  = MathLib::LocalMatrix::Zero(_I_mob + _I_NMin_bar, _n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
 	mat_B.block(0, 0, _I_mob, _n_xi_Mob)							  =  mat_S1mob;
 	mat_B.block(0, _n_xi_Mob, _I_mob, _n_xi_Sorp)					  =  mat_S1sorp;
-	mat_B.block(0, _n_xi_Mob + _n_xi_Sorp, _I_mob, mat_S1minI.cols()) =  mat_S1minI;
+	mat_B.block(0, _n_xi_Mob + _n_xi_Sorp, mat_S1minI.rows(), mat_S1minI.cols()) =  mat_S1minI;
 	mat_B.block(_I_mob, _n_xi_Mob, _I_NMin_bar, _n_xi_Sorp) 		  =  mat_S2sorp;
 
 	MathLib::LocalMatrix  mat_C  = MathLib::LocalMatrix::Zero(_I_mob + _I_NMin_bar, _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
@@ -894,3 +908,34 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::cal_nodal_rate(ogsChem
 	}
 
 }
+
+//template <class T1, class T2, class T3>
+//void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::impose_BC_on_J(LinearSolverType & eqsJacobian_global,
+//																		  std::vector<size_t> & list_bc_nodes,
+//																		  std::size_t & nnodes)
+//{
+//	std::size_t i, j, J_size, node_id, index, idx;
+//	std::vector<size_t>  col_indx_vec, row_indx_vec;
+//	//loop over all BC nodes
+//	for( i=0 ; i <list_bc_nodes.size(); i++)
+//	{
+//		node_id = list_bc_nodes[i];
+//		//loop over all xi global
+//		for( j = 0; j < _n_xi_global; j++)
+//		{
+//			index = node_id * _n_xi_global + j;
+//
+//		    for( idx = 0; idx < nnodes; idx++)
+//		    {
+//		        row_indx_vec[idx] =  index;
+//		        col_indx_vec[idx]   = idx;
+//		    }
+//		    MathLib::LocalVector temp_row_zeros = MathLib::LocalVector::Zero(nnodes * _n_xi_global);
+//
+//			// corresponding jacobian row is zero and one
+//			eqsJacobian_global.addAsub(row_indx_vec, col_indx_vec, temp_row_zeros);
+//			eqsJacobian_global.addsub(index,index, 1.0);
+//
+//		}
+//	}
+//}
