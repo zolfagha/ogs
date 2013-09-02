@@ -66,6 +66,12 @@ public:
 				// x increment
                 x_new += dx;
                 // printout(itr_cnt, x_new, r, dx);
+                //debugging
+                 for (size_t i=0; i<dx.size(); i++) std::cout << dx[i] << " ";
+                 std::cout << ")" << std::endl;
+                 for (size_t i=0; i<r.size(); i++) std::cout << r[i] << " ";
+                 std::cout << ")" << std::endl;
+                 //end of debugging
 				// post processing
                 if (pre_post) 
 					pre_post->post_process(dx, x_new, f_residuals, f_dx);
@@ -145,7 +151,7 @@ private:
         std::cout << "r=(";
         for (size_t i=0; i<dx.size(); i++) std::cout << r[i] << " ";
         std::cout << std::endl;
-#if 1
+#if 0
         std::cout << "-> " << i <<": x=(";
         for (size_t i=0; i<x_new.size(); i++) std::cout << x_new[i] << " ";
         std::cout << "), r=(";
@@ -157,7 +163,7 @@ private:
     }
 };
 
-#if 0
+#if 1
 // template specialization
 template<>
 inline void NewtonRaphsonMethod::printout(size_t i, double &x_new, double &r, double &dx)
