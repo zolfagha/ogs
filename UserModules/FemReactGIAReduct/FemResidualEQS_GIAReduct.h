@@ -59,7 +59,7 @@ public:
           _n_xi_Sorp_tilde(_ReductionGIA->get_n_xi_Sorp_tilde()), _n_xi_Min_tilde(_ReductionGIA->get_n_xi_Min_tilde()), _n_xi_Sorp(_ReductionGIA->get_n_xi_Sorp()), _n_xi_Min(_ReductionGIA->get_n_xi_Min()),
           _n_xi_Kin(_ReductionGIA->get_n_xi_Kin()),_n_xi_Min_bar(_ReductionGIA->get_n_xi_Min_bar()), _n_xi_local(_ReductionGIA->get_n_xi_local()), _n_xi_global(_ReductionGIA->get_n_xi_global()),
           _n_xi_Sorp_bar(_ReductionGIA->get_n_xi_Sorp_bar()), _J_tot_kin(_ReductionGIA->get_n_xi_Kin_total()), _n_xi_Sorp_bar_li(_ReductionGIA->get_n_xi_Sorp_bar_li()), _n_xi_Sorp_bar_ld(_ReductionGIA->get_n_xi_Sorp_bar_ld()),
-          _xi_global(function_data->get_xi_global()), _xi_local(function_data->get_xi_local()), _eta(function_data->get_eta()), _eta_bar(function_data->get_eta_bar()),
+          _xi_global_pre(function_data->get_xi_global_pre()), _xi_local(function_data->get_xi_local()), _eta(function_data->get_eta()), _eta_bar(function_data->get_eta_bar()),
           _global_vec_Rate(function_data->get_global_vec_Rate())
     {
     };
@@ -118,7 +118,7 @@ private:
     //TODO pass via constructor
     ogsChem::chemReductionGIA* _ReductionGIA;
     // std::map<size_t, ReductionGIANodeInfo*>* _bc_info;
-    std::vector<MyNodalFunctionScalar*> &_xi_global, &_xi_local, &_eta, &_eta_bar, &_global_vec_Rate;
+    std::vector<MyNodalFunctionScalar*> &_xi_global_pre, &_xi_local, &_eta, &_eta_bar, &_global_vec_Rate;
     NumLib::ITXFunction* _vel;
     FemLib::IFemNumericalIntegration* _q;
     FemLib::IFiniteElement* _fe;
@@ -523,7 +523,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
                 val_idx = ele_node_ids[node_indx] * _n_xi_global + idx_xi;
                 // now we get the nodal values connected to this element
                 loc_cur_xi_global[idx_xi*nnodes+node_indx] = u_cur_xiglob[val_idx];
-                loc_pre_xi_global[idx_xi*nnodes+node_indx] = this->_xi_global[idx_xi]->getValue(ele_node_ids[node_indx]);
+                loc_pre_xi_global[idx_xi*nnodes+node_indx] = this->_xi_global_pre[idx_xi]->getValue(ele_node_ids[node_indx]);
             }  // end of idx_xi
         }  // end of node_idx
 
