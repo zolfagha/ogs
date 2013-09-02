@@ -115,10 +115,12 @@ public:
     UserDxFunction* getDxFunction() {return _f_dx;}
 
     ///
-    virtual void accept(const NumLib::TimeStep &t)
+    virtual bool accept(const NumLib::TimeStep &t)
     {
-        AbstractTimeSteppingAlgorithm::accept(t);
+        if (!AbstractTimeSteppingAlgorithm::accept(t)) return false;
         *_x_n0 = *_x_n1; //copy current value to previous value
+        _user_data->copy_cur_xi_global_to_pre();
+
     };
 
 private:

@@ -317,6 +317,8 @@ public:
 
     MyGIAReductionSolution* getSolution(void) { return _solution; }
 
+    void copy_cur_xi_global_to_pre(void); 
+
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
 

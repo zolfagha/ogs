@@ -29,7 +29,7 @@
 //#define _DEBUG
 
 template <class T1, class T2>
-bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &/*option*/)
+bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options & option)
 {
 	size_t i;  // index
     Ogs6FemData* femData = Ogs6FemData::getInstance();
@@ -1007,4 +1007,21 @@ void FunctionReductConc<T1, T2>::set_BC_xilocal_node_values(std::size_t node_idx
 //    size_t i;
 //	for (i=0; i < _n_xi_local; i++)
 //		_xi_local[i]->setValue( node_idx, vec_xi_local_bc[i]);
+}
+
+template <class T1, class T2>
+void FunctionReductConc<T1, T2>::copy_cur_xi_global_to_pre(void)
+{
+    size_t n_var, node_idx;
+    n_var = this->_xi_global_cur.size();
+
+    for (size_t i=0; i<n_var; i++) {
+        // loop over all the nodes
+        for (node_idx = _xi_global_cur[i]->getDiscreteData()->getRangeBegin();
+             node_idx < _xi_global_cur[i]->getDiscreteData()->getRangeEnd();
+             node_idx++ )
+        {
+            _xi_global_pre[i]->setValue( node_idx, _xi_global_cur[i]->getValue( node_idx ) ); 
+        }
+    }
 }
