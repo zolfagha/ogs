@@ -98,12 +98,12 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 	// initialize xi_global
 	for ( i=0; i < _n_xi_global ; i++ )
 	{
-		MyNodalFunctionScalar* xi_global_tmp       = new MyNodalFunctionScalar();  // xi_global
-     //   MyNodalFunctionScalar* xi_rates_tmp = new MyNodalFunctionScalar();  // R_kin rates
-		xi_global_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
-     //   xi_rates_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
-		_xi_global.push_back(xi_global_tmp);
-     //   _kin_rates.push_back(xi_rates_tmp);
+		MyNodalFunctionScalar* xi_global_tmp1 = new MyNodalFunctionScalar();  
+        MyNodalFunctionScalar* xi_global_tmp2 = new MyNodalFunctionScalar();  
+		xi_global_tmp1->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
+        xi_global_tmp2->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
+		_xi_global_pre.push_back(xi_global_tmp1);
+        _xi_global_cur.push_back(xi_global_tmp2);
 	}
 
 //	// initialize drates_dxi
@@ -226,7 +226,7 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options &option)
 	for ( i=0; i < _n_xi_global; i++ )
 	{
 		SolutionLib::FemIC* xi_global_ic = new SolutionLib::FemIC(msh);
-		xi_global_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _xi_global[i]->getDiscreteData() ) );
+		xi_global_ic->addDistribution( femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>( _xi_global_pre[i]->getDiscreteData() ) );
 		_non_linear_problem->getVariable(i)->setIC( xi_global_ic );
 	}
 
@@ -453,7 +453,7 @@ void FunctionReductConc<T1, T2>::convert_conc_to_eta_xi(void)
 				this->_eta_bar[i]->setValue(node_idx, loc_eta_bar[i]);
 			// fill in xi_mob
 			for (i=0; i < _n_xi_global; i++)
-				this->_xi_global[i]->setValue(node_idx, loc_xi_global[i]);
+				this->_xi_global_pre[i]->setValue(node_idx, loc_xi_global[i]);
 
 			for (i=0; i < _n_xi_local; i++)
             {
@@ -504,7 +504,7 @@ void FunctionReductConc<T1, T2>::convert_eta_xi_to_conc(void)
 			// fill in xi
 			// this->_xi->setNodalValues( &loc_xi, node_idx*n_xi, n_xi );
 			for (i=0; i < _n_xi_global; i++)
-				loc_xi_global[i] = this->_xi_global[i]->getValue(node_idx);
+				loc_xi_global[i] = this->_xi_global_cur[i]->getValue(node_idx); // take the current time step one
 		    for (i=0; i < _n_xi_local; i++)
 				// using the xi_immob_new values
                 loc_xi_local[i] = this->_xi_local_new[i]->getValue(node_idx);
@@ -554,15 +554,15 @@ void FunctionReductConc<T1, T2>::set_xi_global_node_values( size_t xi_global_idx
 
 template <class T1, class T2>
 template <class T_X>
-void FunctionReductConc<T1, T2>::update_xi_global_nodal_values( const T_X & x_new )
+void FunctionReductConc<T1, T2>::update_xi_global_cur_nodal_values( const T_X & x_new )
 {
     size_t n_var;
-    n_var = this->_xi_global.size();
+    n_var = this->_xi_global_cur.size();
 
     // T_X xi_mob_new_sol;
     // distribute solution vector to local vector for each variable
     for (size_t i=0; i<n_var; i++) {
-        DiscreteLib::setLocalVector( *_nl_sol_dofManager, i, _msh_id, x_new, *this->_xi_global[i]->getDiscreteData() );
+        DiscreteLib::setLocalVector( *_nl_sol_dofManager, i, _msh_id, x_new, *this->_xi_global_cur[i]->getDiscreteData() );
     }
 
 }
@@ -837,7 +837,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			for (i=0; i < _n_eta_bar; i++)
 				loc_etabar[i] = this->_eta_bar[i]->getValue(node_idx);
 			for (i=0; i < _n_xi_global; i++)
-				loc_xi_global[i] = this->_xi_global[i]->getValue(node_idx);
+				loc_xi_global[i] = this->_xi_global_cur[i]->getValue(node_idx); // using the current time step value
 			for (i=0; i < _n_xi_local; i++)
 				loc_xi_local[i] = this->_xi_local[i]->getValue(node_idx);
 

@@ -167,7 +167,8 @@ public:
     	BaseLib::releaseObjectsInStdVector(_concentrations);
     	BaseLib::releaseObjectsInStdVector(_eta);
     	BaseLib::releaseObjectsInStdVector(_eta_bar);
-    	BaseLib::releaseObjectsInStdVector(_xi_global);
+    	BaseLib::releaseObjectsInStdVector(_xi_global_cur);
+        BaseLib::releaseObjectsInStdVector(_xi_global_pre);
     	BaseLib::releaseObjectsInStdVector(_xi_local);
     	//        BaseLib::releaseObjectsInStdVector(_rates);
     	BaseLib::releaseObjectsInStdVector(_kin_rates);
@@ -245,7 +246,7 @@ public:
 	//void set_xi_local_node_values   ( std::size_t xi_local_idx,    MyNodalFunctionScalar* new_xi_local_node_values    );
     
     template <class T_X>
-    void update_xi_global_nodal_values  ( const T_X & x_new );
+    void update_xi_global_cur_nodal_values  ( const T_X & x_new );
 
 //	T_FUNCTION_DATA* get_function_data(void)
 //	{
@@ -293,7 +294,8 @@ public:
 
 	ogsChem::chemReductionGIA* getReductionGIA(){return _ReductionGIA;}
 
-	std::vector<MyNodalFunctionScalar*> & get_xi_global() {return _xi_global;}
+	std::vector<MyNodalFunctionScalar*> & get_xi_global_cur() {return _xi_global_cur;}
+    std::vector<MyNodalFunctionScalar*> & get_xi_global_pre() {return _xi_global_pre;}
 	std::vector<MyNodalFunctionScalar*> & get_xi_local() {return _xi_local;}
 	std::vector<MyNodalFunctionScalar*> & get_eta() {return _eta;}
 	std::vector<MyNodalFunctionScalar*> & get_eta_bar() {return _eta_bar;}
@@ -443,9 +445,14 @@ private:
 	std::vector<MyNodalFunctionScalar*> _eta_bar;
     
     /**
-      * nodal xi_global values
+      * nodal xi_global values at the current time step
       */ 
-    std::vector<MyNodalFunctionScalar*> _xi_global;
+    std::vector<MyNodalFunctionScalar*> _xi_global_cur;
+
+    /**
+      * nodal xi_global values at the previous time step
+      */ 
+    std::vector<MyNodalFunctionScalar*> _xi_global_pre;
 
     /**
       * nodal xi_local values
