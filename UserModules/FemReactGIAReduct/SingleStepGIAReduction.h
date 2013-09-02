@@ -137,15 +137,15 @@ public:
     /**
 	  * called when this solution is accepted
 	  */
-    virtual void finalizeTimeStep(const NumLib::TimeStep &/*t*/)
+    virtual void finalizeTimeStep(const NumLib::TimeStep & t)
     {
-        //// this solution itself
-        //AbstractTimeSteppingAlgorithm::accept(t);
-        //// call all linear solutions
-        //for (size_t i=0; i < _lin_solutions.size(); i++ )
-        //    _lin_solutions[i]->accept(t); 
-        //// the non-linear solution
-        //_nlin_solution->accept(t); 
+        // this solution itself
+        AbstractTimeSteppingAlgorithm::finalizeTimeStep(t);
+        // call all linear solutions
+        for (size_t i=0; i < _lin_solutions.size(); i++ )
+            _lin_solutions[i]->finalizeTimeStep(t); 
+        // the non-linear solution
+        _nlin_solution->finalizeTimeStep(t); 
     }
 
 
