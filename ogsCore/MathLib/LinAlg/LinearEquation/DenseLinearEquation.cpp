@@ -27,6 +27,8 @@ void DenseLinearEquation::setOption(const BaseLib::Options&)
 
 void DenseLinearEquation::solve()
 {
+    this->applyKnownX();
+
     MathLib::GaussAlgorithm solver(*this->getA());
     AbstractDenseLinearEquation::VectorType *b = this->getRHSAsStdVec();
     AbstractDenseLinearEquation::VectorType *x = this->getXAsStdVec();
