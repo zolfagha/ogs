@@ -115,12 +115,16 @@ public:
     VectorType* getXAsStdVec() {return &_x;};
 
 
-    virtual void setKnownX(size_t row_id, double x);
+    virtual void setKnownX(size_t row_id, double x)
+    {
+        _vec_knownX_id.push_back(row_id);
+        _vec_knownX_x.push_back(x);
+    }
 
     virtual void setKnownX(const std::vector<size_t> &vec_id, const std::vector<double> &vec_x)
     {
-        for (size_t i=0; i<vec_id.size(); ++i)
-            setKnownX(vec_id[i], vec_x[i]);
+        _vec_knownX_id.assign(vec_id.begin(), vec_id.end());
+        _vec_knownX_x.assign(vec_x.begin(), vec_x.end());
     }
 
     virtual void printout(std::ostream &os=std::cout) const
@@ -130,10 +134,15 @@ public:
     	//return * _A;
     }
 
+protected:
+    void applyKnownX();
+
 private:
     MatrixType *_A;
     VectorType _b;
     VectorType _x;
+    std::vector<size_t> _vec_knownX_id;
+    std::vector<double> _vec_knownX_x;
 
 };
 
