@@ -90,8 +90,8 @@ public:
 
         assemler.assembly(*(MeshLib::IMesh*)getMesh(), *AbstractMeshBasedDiscreteLinearEquation::getDofMapManger(), *_eqs);
 
-        //apply 1st bc
-        _eqs->setKnownX(_list_prescribed_dof_id, _list_prescribed_values);
+//        //apply 1st bc
+//        _eqs->setKnownX(_list_prescribed_dof_id, _list_prescribed_values);
     }
 
     /// set prescribed dof
@@ -135,6 +135,8 @@ public:
     /// solve
     virtual void solve()
     {
+        //apply 1st bc
+        _eqs->setKnownX(_list_prescribed_dof_id, _list_prescribed_values);
         _eqs->solve();
     }
 

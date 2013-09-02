@@ -1007,5 +1007,4 @@ void FunctionReductConc<T1, T2>::set_BC_xilocal_node_values(std::size_t node_idx
 //    size_t i;
 //	for (i=0; i < _n_xi_local; i++)
 //		_xi_local[i]->setValue( node_idx, vec_xi_local_bc[i]);
-
 }

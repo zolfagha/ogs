@@ -335,9 +335,6 @@ SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
         }  // end of for i
     }  // end of for i_var
 
-    // set bc values for xi local.
-     //std::vector<size_t> &list_bc_nodes = bc1->getListOfBCNodes();
-    //_function_data->set_BC_xilocal_node_values(std::size_t node_idx, std::vector<double> vec_xi_local_bc);
 
     // loop over all the boundary nodes, and
 	// transform these concentrations to eta and xi values

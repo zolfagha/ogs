@@ -72,7 +72,10 @@ public:
     };
 
     ///
-    virtual ~TemplateTransientDxFEMFunction_GIA_Reduct() {};
+    virtual ~TemplateTransientDxFEMFunction_GIA_Reduct() 
+    {
+        delete _solv_minimization;
+    };
 
     void setVelocity(const NumLib::ITXFunction *vel)
     {
@@ -145,7 +148,6 @@ private:
     T_USER_FUNCTION_DATA* _userData;
     //MyDiscreteSystem* _dis;
     ogsChem::chemReductionGIA* _ReductionGIA;
-    std::map<size_t, ReductionGIANodeInfo*>* _bc_info;
     std::vector<MyNodalFunctionScalar*>  &_xi_local, &_eta, &_eta_bar, &_global_vec_Rate, &_concentrations;
     std::vector<ogsChem::chemReactionKin*>  _list_kin_reactions;
     FemLib::IFemNumericalIntegration* _q;
@@ -189,6 +191,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::eval(const SolutionLib
             }
             var_bc_id.insert(var_bc_id.end(), bc1->getListOfBCNodes().begin(), bc1->getListOfBCNodes().end());
             var_bc_val.insert(var_bc_val.end(), bc_value_for_dx.begin(), bc_value_for_dx.end());
+
         }
         _linear_eqs->setPrescribedDoF(i, var_bc_id, var_bc_val);
     }
@@ -299,7 +302,6 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     // loop over all the nodes
     for (size_t node_idx=0; node_idx < nnodes; node_idx++ )
     {
-
             // on each node, get the right start value
             // get the right set of xis
 
@@ -471,9 +473,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     node_indx_vec.clear();
 
     // --------debugging--------------
-    // check the nodal values.
-    //std::ofstream nodalglobalJ ("Nodal_globalJ.txt");
-    //eqsJacobian_global.printout(nodalglobalJ);
+    std::ofstream globalJ_node ("globalJ_node.txt");
+    eqsJacobian_global.printout(globalJ_node);
     // --------end of debugging-------
 
     // element based operation: add time and laplas terms
@@ -483,12 +484,11 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     // impose_BC_on_J(eqsJacobian_global, list_bc_nodes, nnodes);
 
     // --------debugging--------------
-    // check nodal and elemental values
-     std::ofstream globalJ ("globalJ.txt");
-     eqsJacobian_global.printout(globalJ);
+    std::ofstream globalJ ("globalJ.txt");
+    eqsJacobian_global.printout(globalJ);
     // --------end of debugging-------
 
-    delete _solv_minimization;
+
 }
 
 
