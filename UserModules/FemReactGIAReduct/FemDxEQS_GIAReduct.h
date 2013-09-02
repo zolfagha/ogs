@@ -453,18 +453,9 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             // construct local Jacobian matrix
             Jacobian_local = mat_p1F + mat_p2F * mat_vprime;
 
-//            // --------debugging--------------
-//            std::cout << "Jacobian_local" << std::endl;
-//            std::cout << Jacobian_local << std::endl;
-//            // --------end of debugging-------
-
             // construct global Jacobian matrix
 	        for(size_t idx = 0; idx < _n_xi_global; idx++){
 	        	node_indx_vec[idx] = node_idx * _n_xi_global + idx;
-            // --------debugging--------------
-//             std::cout << "node_indx_vec" << std::endl;
-//             std::cout << node_indx_vec[idx] << std::endl;
-            // --------end of debugging-------
 	        }
 
             eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, Jacobian_local);
@@ -472,21 +463,18 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     }  // end of node based for loop
     node_indx_vec.clear();
 
-    // --------debugging--------------
-    std::ofstream globalJ_node ("globalJ_node.txt");
-    eqsJacobian_global.printout(globalJ_node);
-    // --------end of debugging-------
+    //// --------debugging--------------
+    //std::ofstream globalJ_node ("globalJ_node.txt");
+    //eqsJacobian_global.printout(globalJ_node);
+    //// --------end of debugging-------
 
     // element based operation: add time and laplas terms
     AddMassLaplasTerms(delta_t, eqsJacobian_global);
 
-    // impose BC on Jacobian matrix
-    // impose_BC_on_J(eqsJacobian_global, list_bc_nodes, nnodes);
-
-    // --------debugging--------------
-    std::ofstream globalJ ("globalJ.txt");
-    eqsJacobian_global.printout(globalJ);
-    // --------end of debugging-------
+    //// --------debugging--------------
+    //std::ofstream globalJ ("globalJ.txt");
+    //eqsJacobian_global.printout(globalJ);
+    //// --------end of debugging-------
 
 
 }
