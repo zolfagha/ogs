@@ -67,10 +67,10 @@ public:
                 x_new += dx;
                 // printout(itr_cnt, x_new, r, dx);
                 //debugging
-                 for (size_t i=0; i<dx.size(); i++) std::cout << dx[i] << " ";
-                 std::cout << ")" << std::endl;
-                 for (size_t i=0; i<r.size(); i++) std::cout << r[i] << " ";
-                 std::cout << ")" << std::endl;
+//                 for (size_t i=0; i<dx.size(); i++) std::cout << dx[i] << " ";
+//                 std::cout << ")" << std::endl;
+//                 for (size_t i=0; i<r.size(); i++) std::cout << r[i] << " ";
+//                 std::cout << ")" << std::endl;
                  //end of debugging
 				// post processing
                 if (pre_post) 

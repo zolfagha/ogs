@@ -269,8 +269,10 @@ int SingleStepGIAReductionNonlinear<T_USER_FEM_PROBLEM,T_USER_FUNCTION_DATA,T_LI
     // initial guess
     *_x_n1_0 = *_x_n0;
     for (size_t i=0; i<list_bc1_eqs_id.size(); i++) {
+    	list_bc1_val[i] = 0.0;
         (*_x_n1_0)[list_bc1_eqs_id[i]] = list_bc1_val[i];
     }
+    //_linear_solver->setKnownX(list_bc1_eqs_id, list_bc1_val);
 
     // solve
     _f_nonlinear->solve(*_x_n1_0, *_x_n1);

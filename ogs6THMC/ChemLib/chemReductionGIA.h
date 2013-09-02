@@ -391,7 +391,9 @@ private:
 	LocalMatrix _mat_c_mob_2_eta_mob,
 		        _mat_c_immob_2_eta_immob,   
 	            _mat_c_mob_2_xi_mob, 
-	            m,
+	            m,  //debuging
+	            temp_mat_c_mob_2_xi_mob,//debuging
+	            temp_mat_c_mob_2_eta_mob,//debuging
 				_mat_c_immob_2_xi_immob;
 
 	/**

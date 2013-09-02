@@ -171,7 +171,7 @@ template <class T_DIS_SYS, class T_USER_FUNCTION_DATA>
 void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_DATA>::GlobalResidualAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, SolutionLib::SolutionVector & residual_global)
 {
     const size_t nnodes = _dis_sys->getMesh()->getNumberOfNodes();
-    const double theta_water_content = 0.32; 
+    const double theta_water_content = 0.32;
     size_t j; 
     // current xi global
     MathLib::LocalVector loc_cur_xi_global, loc_cur_xi_Sorp_tilde, loc_cur_xi_Min_tilde,
@@ -281,7 +281,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             for(std::size_t i = 0; i < _n_xi_Min_tilde; i++)
             residual_global[_n_xi_global * node_idx + i] = res44[i];
 
-            // Note: since rate is already used in local problem, is it the same? probably not.
+            if(_J_tot_kin != 0){
             // calculate the nodal kinetic reaction rates
             _ReductionGIA->Calc_Kin_Rate(loc_cur_xi_Mob,
                                          loc_cur_xi_Sorp,
@@ -313,6 +313,8 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             for (j=0; j<_n_xi_Kin; j++ )
                 residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp_tilde + _n_xi_Min_tilde + j] -= res47(j) ;
      
+            } //end of if clause
+
     } // end of loop over all nodes. 
 
     // loop over all elements and assemble Eq. 45-47
@@ -337,6 +339,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
     const size_t n_max_connect_nodes = 20; 
     size_t nnodes; 
     double _theta(1.0);
+    double theta_water_content (0.32);
     size_t _n_xi_trans = this->_n_xi_Sorp + this->_n_xi_Min + this->_n_xi_Kin; 
     size_t i,j,k; 
 

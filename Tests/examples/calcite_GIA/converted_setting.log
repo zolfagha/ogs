@@ -131,7 +131,7 @@ tag: processList
 				tag: error_tolerance
 				tag: max_iteration_step
 				tag: precon_type
-					value: JACOBI
+					value: ILU
 				tag: solver_type
 					value: BICGSTAB
 			tag: NonlinearSolver

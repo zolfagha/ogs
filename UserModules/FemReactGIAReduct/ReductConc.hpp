@@ -844,7 +844,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			for (i=0; i < _n_Comp; i++)
 				loc_conc[i] = this->_concentrations[i]->getValue(node_idx);
 
-			loc_conc_BC = loc_conc;
+//			loc_conc_BC = loc_conc;
 //			// take natural log of mobile and non mineral concentrations
 //			loc_conc_non_Min = loc_conc.head(_I_mob + _I_NMin_bar);
 //			loc_conc_Min 	 = loc_conc.tail(_I_min);
@@ -959,16 +959,16 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			for (i=0; i < _n_Comp; i++)
 				_concentrations[i]->setValue(node_idx, vec_conc_updated[i]);
 		} // end of if
-        else
-        {
-            // if it is boundary nodes, then xi_local_new is equal to xi_local.
-            for (i=0; i < _n_xi_local; i++)
-				//_xi_local_new[i]->setValue(node_idx, _xi_local[i]->getValue( node_idx ) );
-            	_xi_local[i]->setValue(node_idx, loc_xi_local[i] );
-
-            // if it is boundary nodes, then conc_glob_new is equal to conc_glob.
-            for (i=0; i < _n_Comp; i++)
-            	_concentrations[i]->setValue(node_idx, loc_conc_BC[i] );
+//        else
+//        {
+//            // if it is boundary nodes, then xi_local_new is equal to xi_local.
+//            for (i=0; i < _n_xi_local; i++)
+//				//_xi_local_new[i]->setValue(node_idx, _xi_local[i]->getValue( node_idx ) );
+//            	_xi_local[i]->setValue(node_idx, loc_xi_local[i] );
+//
+//            // if it is boundary nodes, then conc_glob_new is equal to conc_glob.
+//            for (i=0; i < _n_Comp; i++)
+//            	_concentrations[i]->setValue(node_idx, loc_conc_BC[i] );
 
 //#ifdef _DEBUG
 	// debugging--------------------------
@@ -980,7 +980,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 
 	// end of debugging-------------------
 //#endif
-        }
+      //  }
 
 	}  // end of for node_idx
 

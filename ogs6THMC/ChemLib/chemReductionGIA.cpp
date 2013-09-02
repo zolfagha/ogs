@@ -256,24 +256,25 @@ void chemReductionGIA::update_reductionScheme(void)
 	_mat_S2kin_ast = _mat_S2kin_ast.topRows(_I_NMin_bar);
 
 #ifdef _DEBUG
-//    std::cout << "_mat_S1: "    << std::endl;
-//	std::cout << _mat_S1 << std::endl;
-//	std::cout << "_mat_S2: "    << std::endl;
-//	std::cout << _mat_S2 << std::endl;
-//	std::cout << "_mat_S1_ast: "    << std::endl;
-//	std::cout << _mat_S1_ast << std::endl;
-//	std::cout << "_mat_S2_ast: "    << std::endl;
-//	std::cout << _mat_S2_ast << std::endl;
+    std::cout << "_mat_S1: "    << std::endl;
+	std::cout << _mat_S1 << std::endl;
+	std::cout << "_mat_S2: "    << std::endl;
+	std::cout << _mat_S2 << std::endl;
+	std::cout << "_mat_S1_ast: "    << std::endl;
+	std::cout << _mat_S1_ast << std::endl;
+	std::cout << "_mat_S2_ast: "    << std::endl;
+	std::cout << _mat_S2_ast << std::endl;
 #endif
 
 	// Calculate the s1T = S_i^T matrix consisting of a max set of linearly
 	// independent columns that are orthogonal to each column of S_i^*.
 	// s1T = orthcomp(s1);
-	//_mat_S1_orth = orthcomp( _mat_S1_ast );  debuging
+//	_mat_S1_orth = orthcomp( _mat_S1_ast );
 
-	LocalMatrix::Zero(6,3);
+//	//debuging
+//	LocalMatrix::Zero(6,3);
 	LocalMatrix m(6,3);
-
+//	MathLib::LocalMatrix m = MathLib::LocalMatrix::Zero(6,3);
 	m(0,0) = 0.0;
 	m(1,0) = 0.0;
 	m(2,0) = 0.0;
@@ -303,16 +304,76 @@ void chemReductionGIA::update_reductionScheme(void)
 	_mat_S2_orth = orthcomp( _mat_S2_ast );
 
 #ifdef _DEBUG
-//	std::cout << "_mat_S1_orth: "    << std::endl;
-//	std::cout << _mat_S1_orth << std::endl;
-//	std::cout << "_mat_S2_orth: "    << std::endl;
-//	std::cout << _mat_S2_orth << std::endl;
+	std::cout << "_mat_S1_orth: "    << std::endl;
+	std::cout << _mat_S1_orth << std::endl;
+	std::cout << "_mat_S2_orth: "    << std::endl;
+	std::cout << _mat_S2_orth << std::endl;
 #endif
 
-	_mat_c_mob_2_eta_mob     = ( _mat_S1_orth.transpose() * _mat_S1_orth ).fullPivHouseholderQr().solve(_mat_S1_orth.transpose());
+	//_mat_c_mob_2_eta_mob     = ( _mat_S1_orth.transpose() * _mat_S1_orth ).fullPivHouseholderQr().solve(_mat_S1_orth.transpose());
     _mat_c_immob_2_eta_immob = ( _mat_S2_orth.transpose() * _mat_S2_orth ).fullPivHouseholderQr().solve(_mat_S2_orth.transpose());
-	_mat_c_mob_2_xi_mob      = ( _mat_S1_ast.transpose()  * _mat_S1_ast  ).fullPivHouseholderQr().solve(_mat_S1_ast.transpose());
+	//_mat_c_mob_2_xi_mob      = ( _mat_S1_ast.transpose()  * _mat_S1_ast  ).fullPivHouseholderQr().solve(_mat_S1_ast.transpose());
 	_mat_c_immob_2_xi_immob  = ( _mat_S2_ast.transpose()  * _mat_S2_ast  ).fullPivHouseholderQr().solve(_mat_S2_ast.transpose());
+
+
+	//debugging
+	LocalMatrix temp_mat_c_mob_2_eta_mob(3,6);
+	//MathLib::LocalMatrix temp_mat_c_mob_2_eta_mob = MathLib::LocalMatrix::Zero(3,6);
+	temp_mat_c_mob_2_eta_mob(0,0) = 0.0;
+	temp_mat_c_mob_2_eta_mob(1,0) = - 0.142857142857143;
+	temp_mat_c_mob_2_eta_mob(2,0) = 0.428571428571429;
+
+	temp_mat_c_mob_2_eta_mob(0,1) = 0.0;
+	temp_mat_c_mob_2_eta_mob(1,1) = -0.285714285714286;
+	temp_mat_c_mob_2_eta_mob(2,1) = -0.142857142857143;
+
+	temp_mat_c_mob_2_eta_mob(0,2) = 0.0;
+	temp_mat_c_mob_2_eta_mob(1,2) = -0.285714285714286;
+	temp_mat_c_mob_2_eta_mob(2,2) = -0.142857142857143;
+
+	temp_mat_c_mob_2_eta_mob(0,3) = 1.0;
+	temp_mat_c_mob_2_eta_mob(1,3) = 0.0;
+	temp_mat_c_mob_2_eta_mob(2,3) = 0.0;
+
+	temp_mat_c_mob_2_eta_mob(0,4) = 0.0;
+	temp_mat_c_mob_2_eta_mob(1,4) = 0.285714285714286;
+	temp_mat_c_mob_2_eta_mob(2,4) = 0.142857142857143;
+
+	temp_mat_c_mob_2_eta_mob(0,5) = 0.0;
+	temp_mat_c_mob_2_eta_mob(1,5) = 0.142857142857143;
+	temp_mat_c_mob_2_eta_mob(2,5) = 0.571428571428571;
+	_mat_c_mob_2_eta_mob  = temp_mat_c_mob_2_eta_mob;
+
+	LocalMatrix temp_mat_c_mob_2_xi_mob(3,6);
+	//MathLib::LocalMatrix temp_mat_c_mob_2_xi_mob = MathLib::LocalMatrix::Zero(3,6);
+
+		temp_mat_c_mob_2_xi_mob(0,0) = -0.428571428571429;
+		temp_mat_c_mob_2_xi_mob(1,0) = -4.299875284949258e-17;
+		temp_mat_c_mob_2_xi_mob(2,0) = 0.142857142857143;
+
+		temp_mat_c_mob_2_xi_mob(0,1) = 0.142857142857143;
+		temp_mat_c_mob_2_xi_mob(1,1) = -1.000000000000000;
+		temp_mat_c_mob_2_xi_mob(2,1) = 0.285714285714286;
+
+		temp_mat_c_mob_2_xi_mob(0,2) = 0.142857142857143;
+		temp_mat_c_mob_2_xi_mob(1,2) = 1.0;
+		temp_mat_c_mob_2_xi_mob(2,2) = -0.714285714285714;
+
+		temp_mat_c_mob_2_xi_mob(0,3) = 0.0;
+		temp_mat_c_mob_2_xi_mob(1,3) = 0.0;
+		temp_mat_c_mob_2_xi_mob(2,3) = 0.0;
+
+		temp_mat_c_mob_2_xi_mob(0,4) = -0.142857142857143;
+		temp_mat_c_mob_2_xi_mob(1,4) = -1.719950113979703e-16;
+		temp_mat_c_mob_2_xi_mob(2,4) = -0.285714285714286;
+
+		temp_mat_c_mob_2_xi_mob(0,5) = 0.428571428571429;
+		temp_mat_c_mob_2_xi_mob(1,5) = 4.299875284949258e-17;
+		temp_mat_c_mob_2_xi_mob(2,5) = -0.142857142857143;
+		_mat_c_mob_2_xi_mob  = temp_mat_c_mob_2_xi_mob;
+
+
+	//end of debugging
 
 #ifdef _DEBUG
 //	std::cout << "_mat_c_mob_2_eta_mob: "    << std::endl;
