@@ -217,6 +217,8 @@ private:
       * boundary condition values
       */ 
 	std::map<size_t, ReductionGIANodeInfo*> _bc_info;
+
+
 };
 
 template <
@@ -290,7 +292,7 @@ SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
 		list_var[i] = problem->getVariable(i);
 
 	// getting the boundary conditions of concentrations for all components,
-    const size_t msh_id = _discrete_system->getMesh()->getID();
+    //const size_t msh_id = _discrete_system->getMesh()->getID();
     std::vector<size_t> list_bc1_eqs_id;
     std::vector<double> list_bc1_val;
     for ( i_var=0; i_var < n_var; i_var++ ) {
@@ -306,6 +308,7 @@ SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
 		    {
 				size_t node_id = list_bc_nodes[j];
 				double node_value = list_bc_values[j];
+
                 std::map<size_t, ReductionGIANodeInfo*>::iterator my_bc;
 				my_bc = _bc_info.find( node_id );
                 // now check whether this node has already been in the BC info
@@ -326,7 +329,8 @@ SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
 					bc_node->set_comp_conc( i_var, node_value );
 					_bc_info.insert( my_bc, std::pair<size_t, ReductionGIANodeInfo*>(node_id, bc_node) );
 				}  // end of if else
-                _function_data->set_BC_conc_node_values(node_id, i_var, node_value ); 
+                // set BC concentration values
+                _function_data->set_BC_conc_node_values(node_id, i_var, node_value);
 	        }  // end of for j
         }  // end of for i
     }  // end of for i_var
@@ -366,27 +370,42 @@ SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
 
         for ( i=0; i < _non_linear_problem->getNumberOfVariables(); i++ )
         {
-			double xi_value = bc_node_it->second->get_xi_global_value(i);
-            vec_node_xi_values[i].push_back(xi_value);
+			double xi_global_value = bc_node_it->second->get_xi_global_value(i);
+            vec_node_xi_values[i].push_back(xi_global_value);
         }
     }
 
     // imposing BC for eta
     for ( i=0; i < _linear_problem.size(); i++ )
     {
-//#ifdef _DEBUG
+ #ifdef _DEBUG
 //	std::cout << "vec_node_eta_values: "    << std::endl;
 //	std::cout << vec_node_eta_values[i][0] << std::endl;
 //	std::cout << vec_node_eta_values[i][1] << std::endl;
 //	std::cout << vec_node_eta_values[i][2] << std::endl;
-//
-//#endif
+////
+  #endif
      	_linear_problem[i]->getVariable(0)->addDirichletBC( new SolutionLib::FemDirichletBC( vec_bc_node_idx,  vec_node_eta_values[i] ) );
     }
 
-    // imposing BC for xi
-	for ( i=0; i < _non_linear_problem->getNumberOfVariables(); i++ )
-		_non_linear_problem->getVariable(i)->addDirichletBC( new SolutionLib::FemDirichletBC( vec_bc_node_idx,  vec_node_xi_values[i] ) );
+    // imposing BC for xi global
+    for ( i=0; i < _non_linear_problem->getNumberOfVariables(); i++ ){
+    	_non_linear_problem->getVariable(i)->addDirichletBC( new SolutionLib::FemDirichletBC( vec_bc_node_idx,  vec_node_xi_values[i] ) );
+
+  #ifdef _DEBUG
+//    	std::cout << "vec_node_xi_values: "    << std::endl;
+//    	std::cout << vec_node_xi_values[i][0] << std::endl;
+//    	std::cout << vec_node_xi_values[i][1] << std::endl;
+//    	std::cout << vec_node_xi_values[i][2] << std::endl;
+//    	std::cout << vec_node_xi_values[i][3] << std::endl;
+//    	//
+  #endif
+
+	}
+
+    _function_data->convert_conc_to_eta_xi();
+
+
 };
 
 template <

@@ -303,7 +303,12 @@ public:
 	NumLib::TimeStep const* getTimeStep() {return _current_time_step;}
     virtual void set_BC_conc_node_values(std::size_t node_idx, std::size_t i_var, double node_value);
     virtual void set_BC_xilocal_node_values(std::size_t node_idx, std::vector<double> vec_xi_local_bc);
+    /**
+      * convert nodal concentration values to eta and xi
+      */
+	virtual void convert_conc_to_eta_xi(void);
 
+    MyGIAReductionSolution* getSolution(void) { return _solution; }
 
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
@@ -313,29 +318,25 @@ protected:
       */ 
     virtual void updateOutputParameter(const NumLib::TimeStep &time);
 
-    /**
-      * get the pointer of solution class for current problem
-      */ 
-    virtual MyGIAReductionSolution* getSolution() {return _solution;};
+
 
     /**
       * output the result of current solution
       */ 
     virtual void output(const NumLib::TimeStep &time);
 
+
 private:
     DISALLOW_COPY_AND_ASSIGN(FunctionReductConc);
 
 private:
-    /**
-      * convert nodal concentration values to eta and xi
-      */ 
-	virtual void convert_conc_to_eta_xi(void); 
 
     /**
       * convert nodal eta and xi values to concentrations
       */ 
 	virtual void convert_eta_xi_to_conc(void); 
+
+
 
 	DiscreteLib::DofEquationIdTable* _dofManager;
 
