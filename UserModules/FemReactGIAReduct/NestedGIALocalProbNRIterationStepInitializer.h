@@ -40,7 +40,7 @@ public:
         // the data in the FunctionConcentrations needs to be updated, 
         // so that the in the next Newton iteration, concentrations are calculated
         // based on the new x_new values
-    	_user_data.update_xi_global_nodal_values( x_new );
+    	_user_data.update_xi_global_cur_nodal_values( x_new );
 
     	// call the local problem
     	_user_data.calc_nodal_local_problem(_user_data.getTimeStep()->getTimeStepSize(), 1.0E-8, 1.0E-12, 50);
