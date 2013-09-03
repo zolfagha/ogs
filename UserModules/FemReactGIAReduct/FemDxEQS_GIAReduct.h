@@ -60,7 +60,7 @@ public:
      	_n_xi_Min_tilde(_ReductionGIA->get_n_xi_Min_tilde()), _n_xi_Sorp(_ReductionGIA->get_n_xi_Sorp()), _n_xi_Min(_ReductionGIA->get_n_xi_Min()), _n_xi_Sorp_bar_li(_ReductionGIA->get_n_xi_Sorp_bar_li()),
      	_n_xi_Sorp_bar_ld(_ReductionGIA->get_n_xi_Sorp_bar_ld()), _n_xi_Kin(_ReductionGIA->get_n_xi_Kin()), _n_xi_Min_bar(_ReductionGIA->get_n_xi_Min_bar()), _I_NMin_bar(_ReductionGIA->get_n_Comp_NMin_bar()),
      	_n_xi_local(_ReductionGIA->get_n_xi_local()), _n_xi_global(_ReductionGIA->get_n_xi_global()),  _J_tot_kin(_ReductionGIA->get_n_xi_Kin_total()), _n_xi_Sorp_bar(_ReductionGIA->get_n_xi_Sorp_bar()),
-     	_xi_local(userData->get_xi_local()), _eta(userData->get_eta()), _eta_bar(userData->get_eta_bar()),
+     	_xi_local_new(userData->get_xi_local_new()), _eta(userData->get_eta()), _eta_bar(userData->get_eta_bar()),
      	_global_vec_Rate(userData->get_global_vec_Rate()), _concentrations(userData->get_concentrations())
     {
     };
@@ -139,7 +139,7 @@ private:
     T_USER_FUNCTION_DATA* _userData;
     //MyDiscreteSystem* _dis;
     ogsChem::chemReductionGIA* _ReductionGIA;
-    std::vector<MyNodalFunctionScalar*>  &_xi_local, &_eta, &_eta_bar, &_global_vec_Rate, &_concentrations;
+    std::vector<MyNodalFunctionScalar*>  &_xi_local_new, &_eta, &_eta_bar, &_global_vec_Rate, &_concentrations;
     std::vector<ogsChem::chemReactionKin*>  _list_kin_reactions;
     FemLib::IFemNumericalIntegration* _q;
     FemLib::IFiniteElement* _fe;
@@ -299,7 +299,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             for (i=0; i < _n_xi_global; i++)
                 loc_cur_xi_global[i] = u_cur_xiglob[node_idx * _n_xi_global + i];
             for (i=0; i < _n_xi_local; i++)
-                loc_cur_xi_local[i] = _xi_local[i]->getValue(node_idx);
+                loc_cur_xi_local[i] = _xi_local_new[i]->getValue(node_idx);
             for (i=0; i < _n_eta; i++)
                 loc_cur_eta[i] = _eta[i]->getValue(node_idx);
             // fill in eta_immob

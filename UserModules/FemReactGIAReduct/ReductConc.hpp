@@ -110,13 +110,10 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options & option)
 	for ( i=0; i < _n_xi_local ; i++ )
 	{
 		MyNodalFunctionScalar* xi_local_tmp       = new MyNodalFunctionScalar();  // xi_immob
-    //   MyNodalFunctionScalar* rates_tmp = new MyNodalFunctionScalar();  // xi_mob_rates
 		MyNodalFunctionScalar* xi_local_new_tmp   = new MyNodalFunctionScalar();  // xi_mob_rates
 		xi_local_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
-    //   rates_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
 		xi_local_new_tmp->initialize(*dis, FemLib::PolynomialOrder::Linear, 0.0  );
 		_xi_local.push_back(xi_local_tmp);
-    //    _kin_rates.push_back(rates_tmp);
 		_xi_local_new.push_back(xi_local_new_tmp);
 	}
 
@@ -254,38 +251,25 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options & option)
     for (i=0; i < _n_eta; i++) {
         std::stringstream str_tmp;
 		str_tmp << "eta_" << i ;
-        OutputVariableInfo var1(str_tmp.str(), _msh_id,  OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta[i]);
+        OutputVariableInfo var1(str_tmp.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta[i]);
         femData->outController.setOutput(var1.name, var1);
     }
-//    for (i=0; i < _n_eta_immob; i++) {
-//        std::stringstream str_tmp;
-//		str_tmp << "eta_immob_" << i ;
-//        OutputVariableInfo var1(str_tmp.str(), _msh_id,  OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_immob[i]);
-//        femData->outController.setOutput(var1.name, var1);
-//    }
-//    for (i=0; i < _n_xi_mob; i++) {
-//        std::stringstream str_tmp1, str_tmp2;
-//		str_tmp1 << "xi_mob_" << i ;
-//        OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob[i]);
-//        femData->outController.setOutput(var1.name, var1);
-//        str_tmp2 << "xi_mob_rate_" << i;
-//        OutputVariableInfo var2(str_tmp2.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob_rates[i]);
-//        femData->outController.setOutput(var2.name, var2);
-//    }
+    for (i=0; i < _n_eta_bar; i++) {
+        std::stringstream str_tmp;
+		str_tmp << "eta_bar_" << i ;
+        OutputVariableInfo var1(str_tmp.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_bar[i]);
+        femData->outController.setOutput(var1.name, var1);
+    }
+    for (i=0; i < _n_xi_global; i++) {
+        std::stringstream str_tmp1, str_tmp2;
+		str_tmp1 << "xi_global_" << i ;
+        OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_global_cur[i]);
+        femData->outController.setOutput(var1.name, var1);
+    }
     for (i=0; i < _n_xi_local; i++) {
         std::stringstream str_tmp1, str_tmp2;
 		str_tmp1 << "xi_local_" << i ;
-        OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_local[i]);
-        femData->outController.setOutput(var1.name, var1);
-//        str_tmp2 << "xi_immob_rate_" << i;
-//        OutputVariableInfo var2(str_tmp2.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob_rates[i]);
-//        femData->outController.setOutput(var2.name, var2);
-    }
-
-    for (i=0; i < _n_Comp; i++) {
-        std::stringstream str_tmp1, str_tmp2;
-		str_tmp1 << "conc_" << i ;
-        OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
+        OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_local_new[i]);
         femData->outController.setOutput(var1.name, var1);
     }
 //    // -----------------end of debugging-----------------------------
@@ -338,38 +322,31 @@ void FunctionReductConc<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 
 #ifdef _DEBUG
     // -----------debugging, output eta and xi----------------------
-	size_t _n_eta = this->_ReductionGIA->get_n_eta();
     for (i=0; i < _n_eta; i++) {
         std::stringstream str_tmp;
 		str_tmp << "eta_" << i ;
         OutputVariableInfo var1(str_tmp.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta[i]);
         femData->outController.setOutput(var1.name, var1);
     }
-//    for (i=0; i < _n_eta_immob; i++) {
-//        std::stringstream str_tmp;
-//		str_tmp << "eta_immob_" << i ;
-//        OutputVariableInfo var1(str_tmp.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_immob[i]);
-//        femData->outController.setOutput(var1.name, var1);
-//    }
-//    for (i=0; i < _n_xi_mob; i++) {
-//        std::stringstream str_tmp1, str_tmp2;
-//		str_tmp1 << "xi_mob_" << i ;
-//        OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob[i]);
-//        femData->outController.setOutput(var1.name, var1);
-//        str_tmp2 << "xi_mob_rate_" << i; 
-//        OutputVariableInfo var2(str_tmp2.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_mob_rates[i]);
-//        femData->outController.setOutput(var2.name, var2);
-//    }
-//    for (i=0; i < _n_xi_immob; i++) {
-//        std::stringstream str_tmp1, str_tmp2;
-//		str_tmp1 << "xi_immob_" << i ;
-//        OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob[i]);
-//        femData->outController.setOutput(var1.name, var1);
-//        str_tmp2 << "xi_immob_rate_" << i; 
-//        OutputVariableInfo var2(str_tmp2.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_immob_rates[i]);
-//        femData->outController.setOutput(var2.name, var2);
-//    }
-//    // -----------end of debugging----------------------------------
+    for (i=0; i < _n_eta_bar; i++) {
+        std::stringstream str_tmp;
+		str_tmp << "eta_bar_" << i ;
+        OutputVariableInfo var1(str_tmp.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _eta_bar[i]);
+        femData->outController.setOutput(var1.name, var1);
+    }
+    for (i=0; i < _n_xi_global; i++) {
+        std::stringstream str_tmp1, str_tmp2;
+		str_tmp1 << "xi_global_" << i ;
+        OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_global_cur[i]);
+        femData->outController.setOutput(var1.name, var1);
+    }
+    for (i=0; i < _n_xi_local; i++) {
+        std::stringstream str_tmp1, str_tmp2;
+		str_tmp1 << "xi_local_" << i ;
+        OutputVariableInfo var1(str_tmp1.str(), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _xi_local_new[i]);
+        femData->outController.setOutput(var1.name, var1);
+    }
+    // -----------end of debugging----------------------------------
 #endif
 }
 
@@ -426,7 +403,7 @@ void FunctionReductConc<T1, T2>::convert_conc_to_eta_xi(void)
 			for (i=0; i < _n_xi_local; i++)
             {
 				this->_xi_local[i]->setValue(node_idx, loc_xi_local[i]);
-                // also over-write xi_immob_new
+                // also over-write xi_local_new
                 this->_xi_local_new[i]->setValue(node_idx, loc_xi_local[i]);
             }
 		}  // end of for node_idx
@@ -901,8 +878,8 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 
 			// collect the xi_local_new
 			for (i=0; i < _n_xi_local; i++)
-				//_xi_local_new[i]->setValue(node_idx, loc_xi_local_new[i]);
-				_xi_local[i]->setValue(node_idx, loc_xi_local_new[i]);
+				_xi_local_new[i]->setValue(node_idx, loc_xi_local_new[i]);
+				//_xi_local[i]->setValue(node_idx, loc_xi_local_new[i]);
 
 			// collect new concentration values
 			for (i=0; i < _n_Comp; i++)
@@ -912,7 +889,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
         {
             // if it is boundary nodes, then xi_local_new is equal to xi_local.
             for (i=0; i < _n_xi_local; i++)
-            	_xi_local[i]->setValue(node_idx, loc_xi_local[i] );
+            	_xi_local_new[i]->setValue(node_idx, loc_xi_local[i] );
 
             // if it is boundary nodes, then conc_glob_new is equal to conc_glob.
             for (i=0; i < _n_Comp; i++)

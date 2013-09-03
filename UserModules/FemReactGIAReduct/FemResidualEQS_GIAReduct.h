@@ -55,7 +55,7 @@ public:
           _n_xi_Sorp_tilde(_ReductionGIA->get_n_xi_Sorp_tilde()), _n_xi_Min_tilde(_ReductionGIA->get_n_xi_Min_tilde()), _n_xi_Sorp(_ReductionGIA->get_n_xi_Sorp()), _n_xi_Min(_ReductionGIA->get_n_xi_Min()),
           _n_xi_Kin(_ReductionGIA->get_n_xi_Kin()),_n_xi_Min_bar(_ReductionGIA->get_n_xi_Min_bar()), _n_xi_local(_ReductionGIA->get_n_xi_local()), _n_xi_global(_ReductionGIA->get_n_xi_global()),
           _n_xi_Sorp_bar(_ReductionGIA->get_n_xi_Sorp_bar()), _J_tot_kin(_ReductionGIA->get_n_xi_Kin_total()), _n_xi_Sorp_bar_li(_ReductionGIA->get_n_xi_Sorp_bar_li()), _n_xi_Sorp_bar_ld(_ReductionGIA->get_n_xi_Sorp_bar_ld()),
-          _xi_global_pre(function_data->get_xi_global_pre()), _xi_local(function_data->get_xi_local()), _eta(function_data->get_eta()), _eta_bar(function_data->get_eta_bar()),
+          _xi_global_pre(function_data->get_xi_global_pre()), _xi_local_new(function_data->get_xi_local_new()), _eta(function_data->get_eta()), _eta_bar(function_data->get_eta_bar()),
           _global_vec_Rate(function_data->get_global_vec_Rate())
     {
     };
@@ -94,9 +94,14 @@ public:
 	}
 
 private:
-	void GlobalResidualAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, SolutionLib::SolutionVector & residual_global);
+	void GlobalResidualAssembler(const NumLib::TimeStep & delta_t, 
+                                 const SolutionLib::SolutionVector & u_cur_xiglob, 
+                                 const SolutionLib::SolutionVector & u_pre_xiglob, 
+                                 SolutionLib::SolutionVector & residual_global);
+
 	void assembly(const NumLib::TimeStep & delta_t, 
                   const SolutionLib::SolutionVector & u_cur_xiglob,
+                  const SolutionLib::SolutionVector & u_pre_xiglob,
                   SolutionLib::SolutionVector & residual_global, 
                   MathLib::LocalMatrix &_mat_Asorp, 
                   MathLib::LocalMatrix &_mat_Amin);
@@ -114,7 +119,7 @@ private:
     //TODO pass via constructor
     ogsChem::chemReductionGIA* _ReductionGIA;
     // std::map<size_t, ReductionGIANodeInfo*>* _bc_info;
-    std::vector<MyNodalFunctionScalar*> &_xi_global_pre, &_xi_local, &_eta, &_eta_bar, &_global_vec_Rate;
+    std::vector<MyNodalFunctionScalar*> &_xi_global_pre, &_xi_local_new, &_eta, &_eta_bar, &_global_vec_Rate;
     NumLib::ITXFunction* _vel;
     FemLib::IFemNumericalIntegration* _q;
     FemLib::IFiniteElement* _fe;
@@ -135,7 +140,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
     r = .0;
     //node based operations
 	// calculate the global residual
-    GlobalResidualAssembler(*this->_time_step, u_n1, r);
+    GlobalResidualAssembler(*this->_time_step, u_n1, *_u_n0, r);
 
     // add source/sink term (i.e. RHS in linear equation)
     if (_st!=0) {
@@ -159,7 +164,11 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
 }
 
 template <class T_DIS_SYS, class T_USER_FUNCTION_DATA>
-void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_DATA>::GlobalResidualAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, SolutionLib::SolutionVector & residual_global)
+void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_DATA>
+     ::GlobalResidualAssembler(const NumLib::TimeStep & delta_t,
+                               const SolutionLib::SolutionVector & u_cur_xiglob, 
+                               const SolutionLib::SolutionVector & u_pre_xiglob, 
+                               SolutionLib::SolutionVector & residual_global)
 {
     const size_t nnodes = _dis_sys->getMesh()->getNumberOfNodes();
     const double theta_water_content = 0.32; 
@@ -233,7 +242,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             for (size_t i=0; i < _n_xi_global; i++)
                 loc_cur_xi_global[i] = u_cur_xiglob[node_idx * _n_xi_global + i];
             for (size_t i=0; i < _n_xi_local; i++)
-                loc_cur_xi_local[i] = _xi_local[i]->getValue(node_idx);
+                loc_cur_xi_local[i] = _xi_local_new[i]->getValue(node_idx);
             for (size_t i=0; i < _n_eta; i++)
                 loc_cur_eta[i] = _eta[i]->getValue(node_idx);
             // fill in eta_immob
@@ -305,7 +314,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
     } // end of loop over all nodes. 
 
     // loop over all elements and assemble Eq. 45-47
-    this->assembly(delta_t, u_cur_xiglob, residual_global, mat_Asorp, mat_Amin);
+    this->assembly(delta_t, u_cur_xiglob, u_pre_xiglob, residual_global, mat_Asorp, mat_Amin);
 
 }
 
@@ -316,6 +325,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
      <T_DIS_SYS, T_USER_FUNCTION_DATA>
      ::assembly(const NumLib::TimeStep & delta_t, 
                 const SolutionLib::SolutionVector & u_cur_xiglob,
+                const SolutionLib::SolutionVector & u_pre_xiglob,
                 SolutionLib::SolutionVector & residual_global,  
                 MathLib::LocalMatrix &_mat_Asorp, 
                 MathLib::LocalMatrix &_mat_Amin)
@@ -487,7 +497,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
                 val_idx = ele_node_ids[node_indx] * _n_xi_global + idx_xi;
                 // now we get the nodal values connected to this element
                 loc_cur_xi_global[idx_xi*nnodes+node_indx] = u_cur_xiglob[val_idx];
-                loc_pre_xi_global[idx_xi*nnodes+node_indx] = this->_xi_global_pre[idx_xi]->getValue(ele_node_ids[node_indx]);
+                loc_pre_xi_global[idx_xi*nnodes+node_indx] = u_pre_xiglob[val_idx];
             }  // end of idx_xi
         }  // end of node_idx
 
