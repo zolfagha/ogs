@@ -416,7 +416,7 @@ SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
 
 	}
 
-    _function_data->convert_conc_to_eta_xi();
+    // _function_data->convert_conc_to_eta_xi();
 
 
 };
