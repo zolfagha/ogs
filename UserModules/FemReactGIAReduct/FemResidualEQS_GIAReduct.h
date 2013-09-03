@@ -41,10 +41,6 @@ public:
     typedef T_DIS_SYS MyDiscreteSystem;
     typedef SolutionLib::FemVariable MyVariable;
     typedef typename FemLib::FemNodalFunctionScalar<MyDiscreteSystem>::type MyNodalFunctionScalar;
-//    typedef T_LOCAL_RESIDUAL_ASSEMBLER UserLocalResidualAssembler;
-//    typedef typename NumLib::TransientElementWiseVectorUpdater<UserLocalResidualAssembler> MyUpdater;
-//    typedef typename T_DIS_SYS::template MyVectorAssembler<double, MyUpdater>::type MyGlobalAssembler;
-
 
     /// constructor
     /// @param problem        Fem problem
@@ -140,9 +136,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
     MeshLib::IMesh* msh = _dis_sys->getMesh();
     r = .0;
     //node based operations
-
-    //FunctionReductConc *test = template<msh, ggf> FunctionReductConc();
-
 	// calculate the global residual
     GlobalResidualAssembler(*this->_time_step, u_n1, r);
 
@@ -450,49 +443,24 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
             // calculating dispersion tensor according to Benchmark book p219, Eq. 10.15
             // D_{ij} = \alpha_T |v| \delta_{ij} + (\alpha_L - \alpha_T) \frac{v_i v_j}{|v|} + D^{d}_{ii}
             dispersion_diffusion.setIdentity(n_dim, n_dim);
-//            // --------debugging--------------
-//             std::cout << "dispersion_diffusion Matrix" << std::endl;
-//             std::cout << dispersion_diffusion << std::endl;
-//            // --------end of debugging-------
 
             dispersion_diffusion *= disp_l * v.norm();
-//            // --------debugging--------------
-//             std::cout << "dispersion_diffusion Matrix" << std::endl;
-//             std::cout << dispersion_diffusion << std::endl;
-//            // --------end of debugging-------
 
             dispersion_diffusion += (disp_l - disp_t) * ( v2.transpose() * v2 ) / v.norm();
-           // dispersion_diffusion += disp_l * () - disp_t * ( v2.transpose() * v2 ) / v.norm();
-////            // --------debugging--------------
-//             std::cout << "v2" << std::endl;
-//             std::cout << v2 << std::endl;
-//             std::cout << "v" << std::endl;
-//             std::cout << v << std::endl;
-//             std::cout << "disp_t" << std::endl;
-//             std::cout << disp_t << std::endl;
-//             std::cout << "d_poro Matrix" << std::endl;
-//             std::cout << d_poro << std::endl;
-//            std::cout << "dispersion_diffusion Matrix" << std::endl;
-//            std::cout << dispersion_diffusion << std::endl;
-//            // --------end of debugging-------
 
             dispersion_diffusion += d_poro.topLeftCorner(n_dim, n_dim);
-//            // --------debugging--------------
-//             std::cout << "dispersion_diffusion Matrix" << std::endl;
-//             std::cout << dispersion_diffusion << std::endl;
-//            // --------end of debugging-------
 
             _fe->integrateWxN(j, poro, localM);
             _fe->integrateDWxDN(j, dispersion_diffusion, localDispersion);
             _fe->integrateWxDN(j, v2, localAdvection);
         }
 
-        // --------debugging--------------
-//         std::cout << "localDispersion Matrix" << std::endl;
-//         std::cout << localDispersion << std::endl;
-//         std::cout << "localAdvection Matrix" << std::endl;
-//         std::cout << localAdvection << std::endl;
-        // --------end of debugging-------
+        //// --------debugging--------------
+        //std::cout << "localDispersion Matrix" << std::endl;
+        //std::cout << localDispersion << std::endl;
+        //std::cout << "localAdvection Matrix" << std::endl;
+        //std::cout << localAdvection << std::endl;
+        //// --------end of debugging-------
 
         localK = localDispersion + localAdvection;
 
@@ -506,10 +474,10 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
         }
 
         // --------debugging--------------
-//         std::cout << "localK Matrix" << std::endl;
-//         std::cout << localK << std::endl;
-//         std::cout << "localM Matrix" << std::endl;
-//         std::cout << localM << std::endl;
+        //std::cout << "localK Matrix" << std::endl;
+        //std::cout << localK << std::endl;
+        //std::cout << "localM Matrix" << std::endl;
+        //std::cout << localM << std::endl;
         // --------end of debugging-------
 
         //MathLib::LocalVector node_indx = MathLib::LocalVector::Zero(_n_xi);
@@ -528,10 +496,10 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
         }  // end of node_idx
 
         // --------debugging--------------
-//         std::cout << "loc_cur_xi_global" << std::endl;
-//         std::cout << loc_cur_xi_global << std::endl;
-//         std::cout << "loc_pre_xi_global" << std::endl;
-//         std::cout << loc_pre_xi_global << std::endl;
+        //std::cout << "loc_cur_xi_global" << std::endl;
+        //std::cout << loc_cur_xi_global << std::endl;
+        //std::cout << "loc_pre_xi_global" << std::endl;
+        //std::cout << loc_pre_xi_global << std::endl;
         // --------end of debugging-------
 
         loc_cur_xi_Sorp_tilde   = loc_cur_xi_global.head(_n_xi_Sorp_tilde*nnodes);
@@ -544,16 +512,16 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
         loc_pre_xi_Sorp         = loc_pre_xi_global.segment(_n_xi_Sorp_tilde*nnodes  + _n_xi_Min_tilde*nnodes, _n_xi_Sorp*nnodes);
         loc_pre_xi_Min          = loc_pre_xi_global.segment( _n_xi_Sorp_tilde*nnodes + _n_xi_Min_tilde*nnodes + _n_xi_Sorp*nnodes, _n_xi_Min*nnodes);
 
-//        // --------debugging--------------
-//         std::cout << "loc_cur_xi_Min_tilde" << std::endl;
-//         std::cout << loc_cur_xi_Min_tilde << std::endl;
-//         std::cout << "loc_cur_xi_Min" << std::endl;
-//         std::cout << loc_cur_xi_Min << std::endl;
-//         std::cout << "loc_pre_xi_Min" << std::endl;
-//         std::cout << loc_pre_xi_Min << std::endl;
-//         std::cout << "loc_pre_xi_Min" << std::endl;
-//         std::cout << loc_pre_xi_Min << std::endl;
-//        // --------end of debugging-------
+        //    --------debugging--------------
+        //std::cout << "loc_cur_xi_Min_tilde" << std::endl;
+        //std::cout << loc_cur_xi_Min_tilde << std::endl;
+        //std::cout << "loc_cur_xi_Min" << std::endl;
+        //std::cout << loc_cur_xi_Min << std::endl;
+        //std::cout << "loc_pre_xi_Min" << std::endl;
+        //std::cout << loc_pre_xi_Min << std::endl;
+        //std::cout << "loc_pre_xi_Min" << std::endl;
+        //std::cout << loc_pre_xi_Min << std::endl;
+        //    --------end of debugging-------
 
         // LHS = (1/dt M + theta theta K) u1
         // RHS = (1/dt M - (1-theta) K) u0 + F
@@ -575,38 +543,37 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
             localLHS_xi_min  = localM * loc_cur_xi_Min_tilde.segment(j*nnodes, nnodes) 
                                  + dt * _theta * localK * loc_cur_xi_Min.segment(j*nnodes, nnodes);
 
-                    // --------debugging--------------
-//            MathLib::LocalVector tempp_tilde = loc_cur_xi_Min_tilde.segment(j*nnodes, nnodes);
-//            MathLib::LocalVector tempp = loc_cur_xi_Min_tilde.segment(j*nnodes, nnodes);
-//                     std::cout << "loc_cur_xi_Min_tilde" << std::endl;
-//                     std::cout << tempp_tilde << std::endl;
-//
-//                     std::cout << "loc_cur_xi_Min" << std::endl;
-//                     std::cout << tempp << std::endl;
-//                     std::cout << "loc_cur_xi_Min_tilde" << std::endl;
-//                     std::cout << tempp << std::endl;
-
-                    // --------end of debugging-------
+            // --------debugging--------------
+            //MathLib::LocalVector tempp_tilde = loc_cur_xi_Min_tilde.segment(j*nnodes, nnodes);
+            //MathLib::LocalVector tempp = loc_cur_xi_Min_tilde.segment(j*nnodes, nnodes);
+            //std::cout << "loc_cur_xi_Min_tilde" << std::endl;
+            //std::cout << tempp_tilde << std::endl;
+            //
+            //std::cout << "loc_cur_xi_Min" << std::endl;
+            //std::cout << tempp << std::endl;
+            //std::cout << "loc_cur_xi_Min_tilde" << std::endl;
+            //std::cout << tempp << std::endl;
+            // --------end of debugging-------
 
             localRHS_xi_min  = localM * loc_pre_xi_Min_tilde.segment(j*nnodes, nnodes) 
                                  + dt * (1.0 - _theta) * localK * loc_pre_xi_Min.segment(j*nnodes, nnodes);
             local_res_min    = localLHS_xi_min - localRHS_xi_min; 
-//            // --------debugging--------------
-//            std::cout << "localLHS_xi_min vector" << std::endl;
-//            std::cout << localLHS_xi_min << std::endl;
-//            std::cout << "localRHS_xi_min vector" << std::endl;
-//            std::cout << localRHS_xi_min << std::endl;
-//            std::cout << "local_res_min vector" << std::endl;
-//            std::cout << local_res_min << std::endl;
-//            // --------end of debugging-------
+            // --------debugging--------------
+            //std::cout << "localLHS_xi_min vector" << std::endl;
+            //std::cout << localLHS_xi_min << std::endl;
+            //std::cout << "localRHS_xi_min vector" << std::endl;
+            //std::cout << localRHS_xi_min << std::endl;
+            //std::cout << "local_res_min vector" << std::endl;
+            //std::cout << local_res_min << std::endl;
+            // --------end of debugging-------
             for (k=0; k<nnodes; k++)
             {
                 residual_global[_n_xi_global * ele_node_ids[k] + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + j] += local_res_min(k) ;
-//                 // --------debugging--------------
-//                double tmp = _n_xi_global * ele_node_ids[k] + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + j;
-//                 std::cout << "global nodal indx:" << std::endl;
-//                 std::cout << tmp << std::endl;
-//                // --------end of debugging-------
+                // --------debugging--------------
+                //double tmp = _n_xi_global * ele_node_ids[k] + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + j;
+                //std::cout << "global nodal indx:" << std::endl;
+                //std::cout << tmp << std::endl;
+                // --------end of debugging-------
             }
         }  // end of for j
         for ( j=0; j <_n_xi_Kin; j++ )
@@ -621,7 +588,5 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
                 residual_global[_n_xi_global * ele_node_ids[k] + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + j] += local_res_kin(k) ;
             }
         }  // end of for j
-       
-
     }  // end of loop over all elements
 }

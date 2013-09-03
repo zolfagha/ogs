@@ -66,7 +66,7 @@ public:
 
 	// to be changed
 	typedef NestedGIALocalProbNRIterationStepInitializer<MyFunctionData>                          MyNRIterationStepInitializer;
-	typedef NumLib::DiscreteNRSolverWithStepInitFactory<MyNRIterationStepInitializer>                                    MyDiscreteNonlinearSolverFactory;
+	typedef NumLib::DiscreteNRSolverWithStepInitFactory<MyNRIterationStepInitializer>             MyDiscreteNonlinearSolverFactory;
 	
 	/**
       * linear Equation definition
@@ -155,7 +155,6 @@ public:
     	BaseLib::releaseObject(_solution);
 
     	BaseLib::releaseObject(_ReductionGIA);
-    	//BaseLib::releaseObject(_local_ode_xi_immob);
 
     	BaseLib::releaseObject(_non_linear_eqs);
     	BaseLib::releaseObject(_non_linear_problem);
@@ -248,15 +247,10 @@ public:
 	void set_eta_node_values     	( std::size_t eta_idx,   MyNodalFunctionScalar* new_eta_node_values   );
 	void set_eta_bar_node_values    ( std::size_t eta_bar_idx, MyNodalFunctionScalar* new_eta_bar_node_values );
 	void set_xi_global_node_values  ( std::size_t xi_global_idx,    MyNodalFunctionScalar* new_xi_global_node_values    );
-	//void set_xi_local_node_values   ( std::size_t xi_local_idx,    MyNodalFunctionScalar* new_xi_local_node_values    );
     
     template <class T_X>
     void update_xi_global_cur_nodal_values  ( const T_X & x_new );
 
-//	T_FUNCTION_DATA* get_function_data(void)
-//	{
-//	    return _concentrations;
-//	}
 	
     void update_xi_local_node_values ( void );
 
@@ -279,9 +273,6 @@ public:
       * calculate node based residual of global problem
       */
 	void GlobalResidualAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, SolutionLib::SolutionVector & residual_global);
-
-	//void assembly(const NumLib::TimeStep & delta_t, const std::size_t _n_xi, MathLib::LocalVector &global_u1_tilde, MathLib::LocalVector &global_u0_tilde, MathLib::LocalVector &global_u1,
-	//		MathLib::LocalVector &global_u0, std::vector<MyNodalFunctionScalar*> _global_vec_LHS, std::vector<MyNodalFunctionScalar*> _global_vec_RHS);
 
 	void assembly(	const NumLib::TimeStep & delta_t, const std::size_t _n_xi, const SolutionLib::SolutionVector & u_cur_xiglob,
 					SolutionLib::SolutionVector & residual_global, std::size_t switchOn);
@@ -309,7 +300,6 @@ public:
 	FemLib::LagrangeFeObjectContainer* get_feObjects(){return _feObjects;}
 	NumLib::TimeStep const* getTimeStep() {return _current_time_step;}
     virtual void set_BC_conc_node_values(std::size_t node_idx, std::size_t i_var, double node_value);
-    virtual void set_BC_xilocal_node_values(std::size_t node_idx, std::vector<double> vec_xi_local_bc);
     /**
       * convert nodal concentration values to eta and xi
       */
@@ -327,8 +317,6 @@ protected:
       */ 
     virtual void updateOutputParameter(const NumLib::TimeStep &time);
 
-
-
     /**
       * output the result of current solution
       */ 
@@ -344,8 +332,6 @@ private:
       * convert nodal eta and xi values to concentrations
       */ 
 	virtual void convert_eta_xi_to_conc(void); 
-
-
 
 	DiscreteLib::DofEquationIdTable* _dofManager;
 
@@ -391,11 +377,6 @@ private:
 	MyNonLinearSolutionType*                  _non_linear_solution;
 
 	/**
-      * the nested local ODE problem
-      */ 
-	//Local_ODE_Xi_immob*                       _local_ode_xi_immob; 
-	
-	/**
       * reduction problem
       */ 
 	MyGIAReductionProblemType* _problem;
@@ -432,14 +413,6 @@ private:
       * including all components in the MCP data structure
       */
 	std::vector<MyNodalFunctionScalar*> _concentrations;
-
-
-    /**
-      * residual vector for the first two global equation 3.43 and  3.44
-      */
-	//std::vector<MyNodalFunctionScalar*> _residual_global_res43;
-	//std::vector<MyNodalFunctionScalar*> _residual_global_res44;
-
 
     /**
       * nodal eta_mobile values
@@ -506,37 +479,7 @@ private:
       */
     std::vector<MyNodalFunctionScalar*> _global_vec_Rate;
 
-    //temp global vectors
-//    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Sorp_tilde;
-//    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Min_tilde;
-//    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Sorp;
-//    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Min;
-//    std::vector<MyNodalFunctionScalar*> _global_cur_xi_Kin;
-//
-//    std::vector<MyNodalFunctionScalar*> _global_u1_tilde;
-//    std::vector<MyNodalFunctionScalar*> _global_u0_tilde;
-//    std::vector<MyNodalFunctionScalar*> _global_u1;
-//    std::vector<MyNodalFunctionScalar*> _global_u0;
-//    std::vector<MyNodalFunctionScalar*> _global_vec_LHS;
-//    std::vector<MyNodalFunctionScalar*> _global_vec_RHS;
-//
-//    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Sorp_tilde;
-//    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Min_tilde;
-//    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Sorp;
-//    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Min;
-//    std::vector<MyNodalFunctionScalar*> _global_pre_xi_Kin;
-//
-//    std::vector<MyNodalFunctionScalar*> _residual_global_res43;
-//    std::vector<MyNodalFunctionScalar*> _residual_global_res44;
-//    std::vector<MyNodalFunctionScalar*> _residual_global_res45;
-//    std::vector<MyNodalFunctionScalar*> _residual_global_res46;
-//    std::vector<MyNodalFunctionScalar*> _global_vec_Rate_45;
-//    std::vector<MyNodalFunctionScalar*> _global_vec_Rate_46;
-//    std::vector<MyNodalFunctionScalar*> _residual_global;
-//    std::vector<MyNodalFunctionScalar*> _global_vec_LHS;
-//    std::vector<MyNodalFunctionScalar*> _global_vec_RHS;
-//    std::vector<MyNodalFunctionScalar*> _global_vec_LHS_sorp;
-//    std::vector<MyNodalFunctionScalar*> _global_vec_RHS_sorp;
+
     /**
       * degree of freedom equation ID talbe for the nonlinear problem
       */ 

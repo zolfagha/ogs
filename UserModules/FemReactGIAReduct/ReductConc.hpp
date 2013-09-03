@@ -106,13 +106,6 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options & option)
         _xi_global_cur.push_back(xi_global_tmp2);
 	}
 
-//	// initialize drates_dxi
-//	for ( i=0; i < _n_xi_global; i++ )
-//	{
-//		MyNodalFunctionScalar* drate_dxi_tmp = new MyNodalFunctionScalar();  // drate_dxi instances
-//		drate_dxi_tmp->initialize(       *dis, FemLib::PolynomialOrder::Linear, 0.0  );
-//		_drates_dxi.push_back(drate_dxi_tmp);
-//	}
 	// initialize xi_local
 	for ( i=0; i < _n_xi_local ; i++ )
 	{
@@ -139,13 +132,6 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options & option)
     MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_feObjects);
     MyLinearResidualAssemblerType* linear_r_assembler = new MyLinearResidualAssemblerType(_feObjects);
     MyLinearJacobianAssemblerType* linear_j_eqs = new MyLinearJacobianAssemblerType(_feObjects);
-
-    //To Do: for xi global
-//	MyNonLinearAssemblerType* non_linear_assembler = new MyNonLinearAssemblerType(_feObjects, this->_ReductionGIA );
-//	MyNonLinearResidualAssemblerType* non_linear_r_assembler = new MyNonLinearResidualAssemblerType(_feObjects, this->_ReductionGIA );
-//	MyNonLinearJacobianAssemblerType* non_linear_j_assembler = new MyNonLinearJacobianAssemblerType(_feObjects, this->_ReductionGIA, this);
-
-	//_local_ode_xi_immob = new Local_ODE_Xi_immob( this->_ReductionGIA );
 
 	// for the linear transport problem, variables are eta_mobile
 	for ( i=0; i < _n_eta ; i++ )
@@ -262,11 +248,6 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options & option)
 
     this->setOutput(Concentrations, _solution->getCurrentSolution(0));
 
-//    // set initial output parameter
-//	for (i=0; i<_concentrations.size(); i++) {
-//		OutputVariableInfo var1(this->getOutputParameterName(i), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
-//        femData->outController.setOutput(var1.name, var1);
- //   }
 
 #ifdef _DEBUG
     // -----------debugging, output eta and xi----------------------
@@ -328,23 +309,10 @@ void FunctionReductConc<T1, T2>::initializeTimeStep(const NumLib::TimeStep & tim
 	// set velocity for linear problem
 	for ( i=0; i < _linear_problems.size(); i++ ) {
 		_linear_problems[i]->getEquation()->getLinearAssembler()->setVelocity(vel);
-	//	_linear_problems[i]->getEquation()->getResidualAssembler()->setVelocity(vel);
-	//	_linear_problems[i]->getEquation()->getJacobianAssembler()->setVelocity(vel);
 	}
 	// set velocity for nonlinear problem as well
 	_non_linear_solution->getResidualFunction()->setVelocity(vel);
     _non_linear_solution->getDxFunction()->setVelocity(vel);
-	// _non_linear_problem->getEquation()->getLinearAssembler()->setVelocity(vel);
-    //_non_linear_problem->getEquation()->getResidualAssembler()->setVelocity(vel);
-//	_non_linear_problem->getEquation()->getJacobianAssembler()->setVelocity(vel);
- //   // set xi_mob_rates for non-linear problem
-	//_non_linear_problem->getEquation()->getLinearAssembler()  ->set_xi_mob_rates( &_xi_mob_rates ); 
-	//_non_linear_problem->getEquation()->getResidualAssembler()->set_xi_mob_rates( &_xi_mob_rates ); 
-	//_non_linear_problem->getEquation()->getJacobianAssembler()->set_xi_mob_rates( &_xi_mob_rates ); 
- //   // set xi_immob_rates for non-linear problem
-	//_non_linear_problem->getEquation()->getLinearAssembler()  ->set_xi_immob_rates( &_xi_immob_rates ); 
-	//_non_linear_problem->getEquation()->getResidualAssembler()->set_xi_immob_rates( &_xi_immob_rates ); 
-	//_non_linear_problem->getEquation()->getJacobianAssembler()->set_xi_immob_rates( &_xi_immob_rates ); 
 }
 
 template <class T1, class T2>
@@ -845,10 +813,6 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 				loc_conc[i] = this->_concentrations[i]->getValue(node_idx);
 
 			loc_conc_BC = loc_conc;
-//			// take natural log of mobile and non mineral concentrations
-//			loc_conc_non_Min = loc_conc.head(_I_mob + _I_NMin_bar);
-//			loc_conc_Min 	 = loc_conc.tail(_I_min);
-
 
 			// xi global constrains
 			loc_XiSorpTilde  = loc_xi_global.head(_n_xi_Sorp_tilde);
@@ -876,9 +840,6 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			vec_conc_updated	= ogsChem::LocalVector::Zero(_n_Comp);
 			conc_Min_bar	    = ogsChem::LocalVector::Zero(_I_min);
 
-		    //conc_Min_bar        = vec_unknowns.segment(_I_mob + _I_NMin_bar, _I_min );
-		    //Xi_Kin_bar   	    = vec_unknowns.segment(_I_mob + _I_NMin_bar + _I_min, _n_xi_Kin_bar );
-
 			conc_nonMin = loc_conc.head(_I_mob + _I_NMin_bar );
 			ln_conc_nonMin = loc_conc.head(_I_mob + _I_NMin_bar );
 		    // convert the ln mobile conc to mobile conc
@@ -889,15 +850,15 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			vec_unknowns.head (_n_Comp)		  = loc_conc;
 			vec_unknowns.tail (_n_xi_Kin_bar) = loc_XiBarKin;
 
-#ifdef _DEBUG
-	// debugging--------------------------
-//			std::cout << "======================================== \n";
-//	std::cout << "vec_unknowns Vector BEFORE solving local problem: \n";
-//	std::cout << node_idx << std::endl;
-//	std::cout << vec_unknowns << std::endl;
-//	std::cout << "======================================== \n";
-	// end of debugging-------------------
-#endif
+            #ifdef _DEBUG
+            // // debugging--------------------------
+            // std::cout << "======================================== \n";
+            // std::cout << "vec_unknowns Vector BEFORE solving local problem: \n";
+            // std::cout << node_idx << std::endl;
+            // std::cout << vec_unknowns << std::endl;
+            // std::cout << "======================================== \n";
+            // // end of debugging-------------------
+            #endif
 
 			// skip the boundary nodes
 			if ( ! this->_solution->isBCNode(node_idx) )
@@ -938,18 +899,6 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 		    conc_Min_bar								   =  vec_conc.tail(_I_min);
 		    vec_conc_updated.tail(_I_min) 			       =  conc_Min_bar;
 
-//#ifdef _DEBUG
-	// debugging--------------------------
-//	std::cout << "node_idx: \n";
-//	std::cout << node_idx << std::endl;
-//	std::cout << "======================================== \n";
-//	std::cout << "loc_xi_local_new Vector: \n";
-//	std::cout << vec_conc_updated << std::endl;
-
-	// end of debugging-------------------
-//#endif
-
-
 			// collect the xi_local_new
 			for (i=0; i < _n_xi_local; i++)
 				//_xi_local_new[i]->setValue(node_idx, loc_xi_local_new[i]);
@@ -963,25 +912,13 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
         {
             // if it is boundary nodes, then xi_local_new is equal to xi_local.
             for (i=0; i < _n_xi_local; i++)
-				//_xi_local_new[i]->setValue(node_idx, _xi_local[i]->getValue( node_idx ) );
             	_xi_local[i]->setValue(node_idx, loc_xi_local[i] );
 
             // if it is boundary nodes, then conc_glob_new is equal to conc_glob.
             for (i=0; i < _n_Comp; i++)
             	_concentrations[i]->setValue(node_idx, loc_conc_BC[i] );
 
-//#ifdef _DEBUG
-	// debugging--------------------------
-//	std::cout << "node_idx: \n";
-//	std::cout << node_idx << std::endl;
-//	std::cout << "======================================== \n";
-//	std::cout << "loc_conc_BC Vector: \n";
-//	std::cout << loc_conc_BC << std::endl;
-
-	// end of debugging-------------------
-//#endif
-        }
-
+        }  // end of else if
 	}  // end of for node_idx
 
     delete pSolve;
@@ -990,23 +927,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 template <class T1, class T2>
 void FunctionReductConc<T1, T2>::set_BC_conc_node_values(std::size_t node_idx, std::size_t i_var, double node_value)
 {
-//    size_t i, j;
-//    MathLib::LocalVector bc_values_vec = MathLib::LocalVector::Zero(_n_Comp);
-//    for ( j=0; j < list_bc_nodes.size(); j++ ){
-//		node_idx = list_bc_nodes[j];
-//	for (i=0; i < _n_Comp; i++)
-//		bc_values_vec[i] = list_bc_values[j * _n_Comp + i];
-//	for (i=0; i < _n_Comp; i++)
         _concentrations[i_var]->setValue( node_idx, node_value);
-//    }
-}
-
-template <class T1, class T2>
-void FunctionReductConc<T1, T2>::set_BC_xilocal_node_values(std::size_t node_idx, std::vector<double> vec_xi_local_bc)
-{
-//    size_t i;
-//	for (i=0; i < _n_xi_local; i++)
-//		_xi_local[i]->setValue( node_idx, vec_xi_local_bc[i]);
 }
 
 template <class T1, class T2>
