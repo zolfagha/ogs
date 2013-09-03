@@ -68,7 +68,7 @@ public:
     ///
     virtual ~TemplateTransientDxFEMFunction_GIA_Reduct() 
     {
-        delete _solv_minimization;
+        // delete _solv_minimization;
     };
 
     void setVelocity(const NumLib::ITXFunction *vel)
@@ -209,7 +209,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     const double theta_water_content(0.32);
     const double delta_xi = 1E-14;
 
-    _solv_minimization = new LocalProblem( _ReductionGIA);
+    // _solv_minimization = new LocalProblem( _ReductionGIA);
 
     // current xi global
     MathLib::LocalVector loc_cur_xi_global, loc_cur_xi_Sorp_tilde, loc_cur_xi_Min_tilde,
@@ -287,8 +287,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
 
     std::size_t n_xi_total = _n_xi_local + _n_xi_global;
     std::vector<size_t> node_indx_vec;
-    node_indx_vec.resize(_n_xi_global);
-    //std::vector<size_t> &list_bc_nodes = bc1->getListOfBCNodes();
+    for (i=0; i< _n_xi_global; i++)
+        node_indx_vec.push_back(0); 
 
     // loop over all the nodes
     for (size_t node_idx=0; node_idx < nnodes; node_idx++ )
