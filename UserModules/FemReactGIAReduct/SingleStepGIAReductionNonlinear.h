@@ -123,7 +123,7 @@ public:
 
     };
 
-    virtual void finalizeTimeStep(const NumLib::TimeStep &t)
+    virtual void finalizeTimeStep(const NumLib::TimeStep & t)
     {
         AbstractTimeSteppingAlgorithm::finalizeTimeStep( t );
     };
@@ -197,7 +197,7 @@ SingleStepGIAReductionNonlinear<T_USER_FEM_PROBLEM,T_USER_FUNCTION_DATA,T_LINEAR
 
     // copy values of each variable to one solution vector
     for (size_t i=0; i<n_var; i++) {
-        SolutionLib::SolutionVector* vec_var = _vec_u_n1[i]->getDiscreteData();
+        SolutionLib::SolutionVector* vec_var = this->_user_data->get_xi_global_pre()[i]->getDiscreteData();
         DiscreteLib::setGlobalVector(_dofManager, i, msh->getID(), *vec_var, *_x_n0);
     }
 
