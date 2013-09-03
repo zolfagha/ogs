@@ -784,7 +784,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			for (i=0; i < _n_xi_global; i++)
 				loc_xi_global[i] = this->_xi_global_cur[i]->getValue(node_idx); // using the current time step value
 			for (i=0; i < _n_xi_local; i++)
-				loc_xi_local[i] = this->_xi_local[i]->getValue(node_idx);
+				loc_xi_local[i] = this->_xi_local_new[i]->getValue(node_idx);
 
 			for (i=0; i < _n_Comp; i++)
 				loc_conc[i] = this->_concentrations[i]->getValue(node_idx);
