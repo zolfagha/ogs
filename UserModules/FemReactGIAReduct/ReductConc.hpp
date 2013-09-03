@@ -25,8 +25,6 @@
 #include "NestedGIALocalProbNRIterationStepInitializer.h"
 #include "MathLib/ODE/RungeKutta4.h"
 #include "NonLinearGIATimeODELocalAssembler.h"
-//#include "NonLinearGIAJacobianLocalAssembler.h"
-//#define _DEBUG
 
 template <class T1, class T2>
 bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options & option)

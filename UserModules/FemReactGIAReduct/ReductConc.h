@@ -235,7 +235,7 @@ public:
     /**
 	  * called when this time step is accepted
 	  */
-    virtual void finalizeTimeStep(const NumLib::TimeStep &time)
+    virtual void finalizeTimeStep(const NumLib::TimeStep & time)
     {
          output(time);
 		 getSolution()->finalizeTimeStep(time);
