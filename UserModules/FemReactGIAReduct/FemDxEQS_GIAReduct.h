@@ -583,24 +583,23 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 	    // using the standard direct solver
 	    x.col(i) = J_temp.fullPivHouseholderQr().solve( b );
 
-
-        // debugging--------------------------
-        std::cout << "======================================== \n";
-        std::cout << "b: \n";
-        std::cout << b << std::endl;
-        std::cout << "J: \n";
-        std::cout << J_temp << std::endl;
-        std::cout << "x: \n";
-        std::cout << x << std::endl;
-
-        std::cout << "mat_B: \n";
-        std::cout << mat_B << std::endl;
-        std::cout << "mat_A_tilde: \n";
-        std::cout << mat_A_tilde << std::endl;
-        std::cout << "mat_C: \n";
-        std::cout << mat_C << std::endl;
-        std::cout << "======================================== \n";
-        // end of debugging-------------------
+        //// debugging--------------------------
+        //std::cout << "======================================== \n";
+        //std::cout << "b: \n";
+        //std::cout << b << std::endl;
+        //std::cout << "J: \n";
+        //std::cout << J_temp << std::endl;
+        //std::cout << "x: \n";
+        //std::cout << x << std::endl;
+        //
+        //std::cout << "mat_B: \n";
+        //std::cout << mat_B << std::endl;
+        //std::cout << "mat_A_tilde: \n";
+        //std::cout << mat_A_tilde << std::endl;
+        //std::cout << "mat_C: \n";
+        //std::cout << mat_C << std::endl;
+        //std::cout << "======================================== \n";
+        //// end of debugging-------------------
     }
 
 	MathLib::LocalMatrix cols_xi_sorp_tilde   = x.block(0, 0, sol_size, _n_xi_Sorp_tilde);
