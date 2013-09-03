@@ -129,8 +129,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
     // input, output
     const SolutionLib::SolutionVector *u_n = this->_u_n0;
     size_t msh_id = _dis_sys->getMesh()->getID();
-    size_t node_idx, i;
-
 
     // assembly
     MeshLib::IMesh* msh = _dis_sys->getMesh();
@@ -214,7 +212,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
     loc_cur_eta             = MathLib::LocalVector::Zero( _n_eta );
     loc_cur_eta_bar         = MathLib::LocalVector::Zero( _n_eta_bar );
 
-
     //initialize it before?
     mat_A1sorp        = _ReductionGIA->get_matrix_A1sorp();
     mat_A2sorpli      = _ReductionGIA->get_matrix_A2sorpli();
@@ -225,7 +222,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
 
     MathLib::LocalMatrix mat_Asorp = mat_A1sorp - mat_A2sorpli;
     MathLib::LocalMatrix mat_Amin  = mat_A1min  - mat_Ald * mat_A2sorpld;
-
 
     // loop over all the nodes
     for (size_t node_idx = 0; node_idx < nnodes; node_idx++ )
@@ -465,7 +461,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
         localK = localDispersion + localAdvection;
 
         // mass lumping----------------------------
-        for (size_t idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
+        for (int idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
         {
             double mass_lump_val;
             mass_lump_val = localM.row(idx_ml).sum();

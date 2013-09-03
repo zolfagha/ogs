@@ -314,7 +314,7 @@ void LocalProblem::calc_Jacobian(ogsChem::LocalVector & vec_x,
 							     ogsChem::LocalVector & vec_residual)
 {
 	const double delta_xi = 1.0e-8;
-    std::size_t i;
+    int i;
     ogsChem::LocalVector vec_x_incremented, vec_residual_incremented;
     vec_residual_incremented = vec_residual;
 

@@ -11,7 +11,7 @@
  */
 #include "chemReductionGIA.h"
 #include "logog.hpp"
-#define _DEBUG
+
 namespace ogsChem
 {
 chemReductionGIA::chemReductionGIA(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & list_chemComp,
@@ -36,8 +36,6 @@ chemReductionGIA::chemReductionGIA(BaseLib::OrderedMap<std::string, ogsChem::Che
 		isInitialized = true;
 	}
 }
-
-
 
 void chemReductionGIA::buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp,
 								 std::vector<ogsChem::chemReactionEq*>                & list_eq_reactions,
@@ -72,11 +70,11 @@ void chemReductionGIA::buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 	for ( j=0; j < list_eq_reactions.size() ; j++ )
 	{	// for each reaction
         // check which type of equilibrium reaction it is
-        if (      list_eq_reactions[j]->get_type() == ogsChem::EqReactType::MOB_EQ_REACT  )
+        if (      list_eq_reactions[j]->get_type() == EqReactType::MOB_EQ_REACT  )
             this->_Jmob++; 
-        else if ( list_eq_reactions[j]->get_type() == ogsChem::EqReactType::SORP_EQ_REACT )
+        else if ( list_eq_reactions[j]->get_type() == EqReactType::SORP_EQ_REACT )
             this->_Jsorp++; 
-        else if ( list_eq_reactions[j]->get_type() == ogsChem::EqReactType::MIN_EQ_REACT  )
+        else if ( list_eq_reactions[j]->get_type() == EqReactType::MIN_EQ_REACT  )
             this->_Jmin++; 
 
 		// find each participating components
@@ -566,7 +564,7 @@ void chemReductionGIA::EtaXi2Conc(ogsChem::LocalVector &local_eta,
 	local_conc.bottomRows( this->_I_NMin_bar + this->_I_min ) = local_c_immob;
 
     // testing if the non-negative stablilization will help?
-    for (size_t i=0; i < local_conc.rows(); i++)    {
+    for (int i=0; i < local_conc.rows(); i++)    {
         if ( local_conc(i) < 0.0 )
             local_conc(i) = 1.0e-99;
     }

@@ -109,8 +109,8 @@ CFluidProperties::CFluidProperties()
     latent_heat = .0;
     compressibility_model_pressure = 0;
     compressibility_model_temperature = 0;
-    compressibility_pressure = .0;
-    compressibility_temperature = .0;
+    compressibility_pressure = 0;
+    compressibility_temperature = 0;
     JTC = 0;
     density_model = 0;
     viscosity_model = 0;

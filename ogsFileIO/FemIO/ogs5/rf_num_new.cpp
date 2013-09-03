@@ -125,7 +125,7 @@ CNumerics::CNumerics(string name)
     lag_max_steps = 0;
     lag_min_weight = .0;
     lag_quality = .0;
-    lag_time_weighting = .0;
+    lag_time_weighting = 0;
     lag_use_matrix = 0;
     lag_vel_method = 0;
     nls_plasticity_local_tolerance = .0;

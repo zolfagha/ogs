@@ -204,7 +204,7 @@ template <class T1, class T2, class T3>
 void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, LinearSolverType & eqsJacobian_global)
 {
 
-    size_t i, node_idx, indx_tmp, nnodes;
+    size_t i, nnodes;
     nnodes = _msh->getNumberOfNodes();
     const double theta_water_content(0.32);
     const double delta_xi = 1E-14;
@@ -632,7 +632,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 {
     const size_t n_ele = _msh->getNumberOfElements();
     std::size_t n_dim, mat_id; 
-    std::size_t i, j, xi_count, idx_ml, idx;
+    std::size_t i, j, xi_count, idx;
+    int idx_ml; 
     double _theta(1.0);
     double dt = delta_t.getTimeStepSize();
     double cmp_mol_diffusion;
