@@ -37,7 +37,7 @@ public:
 
     void create(size_t length, RowMajorSparsity* /*sp*/=0);
 
-    bool isCreated() const { return true; };
+    bool isCreated() const { return _A.rows()>0; };
 
     void resize(size_t length);
 
@@ -103,9 +103,14 @@ public:
     void solve();
 
 private:
+    void applyKnownX();
+
+private:
     MatrixType _A;
     VectorType _b;
     VectorType _x;
+    std::vector<size_t> _vec_knownX_id;
+    std::vector<double> _vec_knownX_x;
 
 };
 
