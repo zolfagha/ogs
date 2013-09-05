@@ -53,15 +53,15 @@ void convertTimeStepping(const std::vector<CTimeDiscretization*> &td_vector, std
                                                                                        td->time_adapt_tim_vector, 
                                                                                        td->time_adapt_coe_vector);
             tf_vector.push_back(tf);
-            if (!td->time_independence)
-                done_shared = true;
+            // if (!td->time_independence)
+            //     done_shared = true;
         }
         // else if (td->time_independence || !done_shared) {
         else {
             NumLib::ITimeStepFunction* tf = new NumLib::TimeStepFunctionVector(td->time_start, td->time_end, td->time_step_vector);
             tf_vector.push_back(tf);
-            if (!td->time_independence)
-                done_shared = true;
+            // if (!td->time_independence)
+            //     done_shared = true;
         }
     }
 }

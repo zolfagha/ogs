@@ -136,10 +136,10 @@ public:
     virtual void finalizeTimeStep(const NumLib::TimeStep &t)
     {
         // this solution itself
-        AbstractTimeSteppingAlgorithm::accept(t);
+        AbstractTimeSteppingAlgorithm::finalizeTimeStep(t);
         // call all linear solutions
         for (size_t i=0; i < _lin_solutions.size(); i++ )
-            _lin_solutions[i]->accept(t);
+            _lin_solutions[i]->finalizeTimeStep(t);
     }
 
     /** 
