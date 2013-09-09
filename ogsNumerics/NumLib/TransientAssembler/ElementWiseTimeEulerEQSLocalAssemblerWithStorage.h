@@ -30,7 +30,7 @@ namespace NumLib
 class ElementWiseTimeEulerEQSLocalAssemblerWithStorage : public IElementWiseTransientLinearEQSLocalAssembler
 {
 public:
-    ElementWiseTimeEulerEQSLocalAssemblerWithStorage() : _theta(1.0)
+    ElementWiseTimeEulerEQSLocalAssemblerWithStorage() : _theta(1.0), _stored_t(0.0)
     {
     };
 
@@ -55,7 +55,27 @@ protected:
     virtual void assembleODE(const TimeStep &time, const MeshLib::IElement &e, const MathLib::LocalVector &local_u_n1, const MathLib::LocalVector &local_u_n, MathLib::LocalMatrix &M, MathLib::LocalMatrix &K, MathLib::LocalVector &F)  = 0;
 
 private:
-    double _theta;
+    double _theta; 
+
+    /**
+      * current time value
+      */
+    double _stored_t; 
+
+    /**
+      * Local mass matrix
+      */
+    MathLib::LocalMatrix _M; 
+
+    /**
+      * Local conductance matrix
+      */
+    MathLib::LocalMatrix _K; 
+
+    /**
+      * Local force vector
+      */
+    MathLib::LocalVector _F; 
 };
 
 
