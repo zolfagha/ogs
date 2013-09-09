@@ -10,7 +10,7 @@
  * Created on 2013-09-09 by Haibing Shao
  */
 
-#include "ElementWiseTimeEulerEQSLocalAssemblerWithStorage.cpp"
+#include "ElementWiseTimeEulerEQSLocalAssemblerWithStorage.h"
 
 namespace NumLib
 {
@@ -40,7 +40,7 @@ void ElementWiseTimeEulerEQSLocalAssemblerWithStorage::assembly(const TimeStep &
         
         //std::cout << "M="; M.write(std::cout); std::cout << std::endl;
         //std::cout << "K="; K.write(std::cout); std::cout << std::endl;
-        _stored_t = t; 
+        _stored_t = t; // TODO: this will not be for each element. 
     }
 
     MathLib::LocalMatrix *localA = eqs.getA();

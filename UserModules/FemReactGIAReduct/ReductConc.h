@@ -14,7 +14,7 @@
 #define REDUCT_CONC_H
 
 #include "BaseLib/CodingTools.h"
-#include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssembler.h"
+#include "NumLib/TransientAssembler/ElementWiseTimeEulerEQSLocalAssemblerWithStorage.h"
 #include "NumLib/TransientAssembler/ElementWiseTimeEulerResidualLocalAssembler.h"
 #include "NumLib/Function/DiscreteDataConvergenceCheck.h"
 #include "SolutionLib/Fem/FemIVBVProblem.h"
@@ -60,7 +60,7 @@ public:
 
     // local assembler
 	// for the linear systems, use the same settings as Mass_Transport
-    typedef LinearTransportTimeODELocalAssemblerML<NumLib::ElementWiseTimeEulerEQSLocalAssembler> MyLinearAssemblerType;
+    typedef LinearTransportTimeODELocalAssemblerML<NumLib::ElementWiseTimeEulerEQSLocalAssemblerWithStorage> MyLinearAssemblerType;
     typedef LinearTransportTimeODELocalAssemblerML<NumLib::ElementWiseTimeEulerResidualLocalAssembler> MyLinearResidualAssemblerType;
     typedef LinearTransportJacobianLocalAssembler MyLinearJacobianAssemblerType;                                        
 
