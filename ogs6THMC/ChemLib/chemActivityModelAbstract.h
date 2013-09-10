@@ -28,16 +28,18 @@ public:
     virtual ~chemActivityModelAbstract() {};
 
     /**
-     * set current time
-     * @param molarity
-	 * @param activity
+     * calculate the activity based on molarity
+     * @param log_molarity
+	 * @param log_activity
      */
-    virtual void calc_activity(MathLib::LocalVector molarity, MathLib::LocalVector activity) = 0;
+    virtual void calc_activity(MathLib::LocalVector & log_molarity, 
+                               MathLib::LocalVector & log_activity, 
+                               const double Tc = 25.0) = 0;
 
 protected:
-    ogsChem::ACTIVITY_MODEL  _activity_model; 
+    const ogsChem::ACTIVITY_MODEL  _activity_model; 
 };
 
-}
+} // end of namespace
 
 #endif

@@ -90,10 +90,9 @@ namespace ogsChem
     // the activity model included
     enum ACTIVITY_MODEL {
         ACT_MOD_AQ_DBH,  // Debyle-Huekel model for aqueous phase
-        ACT_MOD_AQ_DAV,  // Davis model for aqueous phase
-        ACT_MOD_UNT      // activity coefficients are all ones
-    }
-
+        ACT_MOD_AQ_DVS,  // Davis model for aqueous phase
+        ACT_MOD_UNITY    // activity coefficients are all ones
+    };
 
 	// type definitions
 	typedef MathLib::LocalMatrix LocalMatrix;

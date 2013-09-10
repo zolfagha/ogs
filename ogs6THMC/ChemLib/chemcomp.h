@@ -100,6 +100,9 @@ public:
 	Comp_Mobility getMobility(void)
 	{return _Mobility; }
 
+    Comp_Type getCompType(void)
+    {return _mCompType; }
+
 private:
     /**
       * The name of the chemical component.
