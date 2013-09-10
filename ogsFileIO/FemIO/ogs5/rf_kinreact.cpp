@@ -1225,7 +1225,7 @@ bool CKinReact::Read(std::ifstream* rfd_file)
 				number_monod++;
 				in.str(line_str1);
 				in >> m_monod->species >> m_monod->concentration
-				>> m_monod->order;
+                   >> m_monod->order >> m_monod->monod_term_rate;
 				if ((m_monod->order != -99.0) && (m_monod->concentration
 				                                  != -1.0e9)) //check for read in
 					monod.push_back(m_monod);

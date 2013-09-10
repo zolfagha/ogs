@@ -38,6 +38,11 @@ public:
       */
 	double calcReactionRateMonod(ogsChem::LocalVector & vec_Comp_Conc); 
 
+    /**
+      * calculate the reaction rate with sum of monod kinetic rates
+      */
+	double calcReactionRateMonodSum(ogsChem::LocalVector & vec_Comp_Conc); 
+
 	/**
       * return the rate of current reaction. 
       */
@@ -104,6 +109,11 @@ private:
       * a vector of inhibition rate components
       */
 	std::vector<size_t> _vec_Inhibition_Comps_Idx; 
+
+    /**
+      * a vector of monod components' order
+      */
+	std::vector<double> _vec_Monod_Rate_Constants; 
 
     /**
       * a vector of inhibition components' concentrations

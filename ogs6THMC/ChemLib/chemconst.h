@@ -70,6 +70,7 @@ namespace ogsChem
 	enum KinReactType {
 		Monod,             /* - monod reaction */ 
 		// DoubleMonodDecay,  /* - double monod reaction with decay term */ 
+        MonodSum,          /* - sum of monod rate terms */
 		NoType             /* - uninitialized type */ 
 	}; 
 

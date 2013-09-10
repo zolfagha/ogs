@@ -56,6 +56,7 @@ public:
 	int speciesnumber;                    // number of species;
 	double concentration;                 // Monod concentration
 	double order;                         // Order of monod term
+    double monod_term_rate;               // rate of the monod term
 	int isotopecouplenumber;              // CB isotope fractionation : specis number of isotope partner
 	// CB for Threshhold terms
 	bool threshhold;

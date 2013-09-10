@@ -40,6 +40,8 @@ void chemReactionKin::calcReactionRate(ogsChem::LocalVector & vec_Comp_Conc)
 {
 	if ( this->_kinReactType == ogsChem::Monod )
 		this->_rate = calcReactionRateMonod(vec_Comp_Conc); 
+    else if ( this->_kinReactType == ogsChem::MonodSum )
+        this->_rate = calcReactionRateMonodSum(vec_Comp_Conc);
     else
         this->_rate = 0.0; 	
     // debugging, set rate to zero
@@ -86,6 +88,27 @@ double chemReactionKin::calcReactionRateMonod(ogsChem::LocalVector & vec_Comp_Co
     // decay term
     rate -= _decay_rate * c_bio; 
 	// retrun rate
+	return rate; 
+}
+
+
+double chemReactionKin::calcReactionRateMonodSum(ogsChem::LocalVector & vec_Comp_Conc)
+{
+	size_t i, comp_idx; 
+	double rate = 0.0; 
+	double conc(0.0), k(0.0);
+
+	// loop over all the monod term
+	for (i=0; i<this->_vec_Monod_Comps_Idx.size(); i++ )
+	{
+		comp_idx = _vec_Monod_Comps_Idx[i]; 
+		conc = vec_Comp_Conc( comp_idx ); 
+        k    = _vec_Monod_Rate_Constants[i]; 
+		// rate += k*[ c / ( c + k_c) ]^order
+		rate += k * pow( conc / (conc + this->_vec_Monod_Comps_Conc[i]), this->_vec_Monod_Comps_order[i] ); 
+	}  // end of for i
+	
+    // retrun rate
 	return rate; 
 }
 
@@ -155,6 +178,70 @@ void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::
 			this->_vec_Monod_Comps_Idx.push_back(   monod_comp_idx   );
 			this->_vec_Monod_Comps_Conc.push_back(  monod_comp_conc  ); 
 			this->_vec_Monod_Comps_order.push_back( monod_term_order ); 
+		}  // end of for i
+
+        // loop over all inhibition terms, 
+        for ( i=0; i < KRC_reaction->inhibit.size(); i++ )
+		{
+            size_t inhibit_comp_idx; 
+			double inhibit_comp_conc(0.0), inhibit_term_order(1.0); 
+			// read the corresponding components
+			std::string comp_str = KRC_reaction->inhibit[i]->species; 
+			// find this component
+            // get its index value in all component list
+            inhibit_comp_idx = list_chemComp.find( comp_str )->second->getIndex();
+
+            if ( inhibit_comp_idx >= list_chemComp.size() )
+            {
+                ERR("When reading Inhibition terms, component name not found! ");
+                exit(1);
+            }
+
+            // read the monod component concentration
+            inhibit_comp_conc = KRC_reaction->inhibit[i]->concentration; 
+			// read the monod term order
+			inhibit_term_order = KRC_reaction->inhibit[i]->order; 
+
+			this->_vec_Inhibition_Comps_Idx.push_back(   inhibit_comp_idx   );
+			this->_vec_Inhibition_Comps_Conc.push_back(  inhibit_comp_conc  ); 
+			this->_vec_Inhibition_Comps_order.push_back( inhibit_term_order ); 
+			
+        }  // end of for i
+
+	}  // end of if KRC_reaction
+    // read the rate parameters
+	else if ( KRC_reaction->getType() == "monodsum" )
+	{
+        this->_kinReactType = ogsChem::MonodSum; 
+
+		// loop over the monod term, 
+		for ( i=0; i < KRC_reaction->monod.size(); i++ )
+		{
+			size_t monod_comp_idx; 
+			double monod_comp_conc(0.0), monod_term_order(1.0), monod_term_rate(0.0); 
+			// read the corresponding components
+			std::string comp_str = KRC_reaction->monod[i]->species; 
+			// find this component
+            // get its index value in all component list
+            monod_comp_idx = list_chemComp.find( comp_str )->second->getIndex();
+			
+            if ( monod_comp_idx >= list_chemComp.size() )
+            {
+                ERR("When reading Monod terms, component name not found! ");
+                exit(1);
+            }
+
+			// read the monod component concentration
+			monod_comp_conc  = KRC_reaction->monod[i]->concentration; 
+			// read the monod term order
+			monod_term_order = KRC_reaction->monod[i]->order; 
+            // read the monod term rate
+            monod_term_rate  = KRC_reaction->monod[i]->monod_term_rate; 
+
+			this->_vec_Monod_Comps_Idx.push_back(   monod_comp_idx   );
+			this->_vec_Monod_Comps_Conc.push_back(  monod_comp_conc  ); 
+			this->_vec_Monod_Comps_order.push_back( monod_term_order ); 
+            this->_vec_Monod_Rate_Constants.push_back(monod_term_rate); 
 		}  // end of for i
 
         // loop over all inhibition terms, 
