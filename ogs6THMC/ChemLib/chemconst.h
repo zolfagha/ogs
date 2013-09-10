@@ -87,6 +87,13 @@ namespace ogsChem
         GRE_XML       // XML database format of this program
     };
 
+    // the activity model included
+    enum ACTIVITY_MODEL {
+        ACT_MOD_AQ_DBH,  // Debyle-Huekel model for aqueous phase
+        ACT_MOD_AQ_DAV,  // Davis model for aqueous phase
+        ACT_MOD_UNT      // activity coefficients are all ones
+    }
+
 
 	// type definitions
 	typedef MathLib::LocalMatrix LocalMatrix;
