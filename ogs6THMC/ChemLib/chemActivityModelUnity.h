@@ -21,11 +21,11 @@ namespace ogsChem
 /**
  * \brief Common interface of Activity Model
  */
-class chemActivityModelAqDBH : chemActivityModelAbstract
+class chemActivityModelAqUnity : chemActivityModelAbstract
 {
 public:
     // destructor
-    chemActivityModelAqDBH() 
+    chemActivityModelAqUnity() 
         : _activity_model( ogsChem::ACT_MOD_UNITY )
     {
     };
