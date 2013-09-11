@@ -396,13 +396,17 @@ void FunctionReductConc<T1, T2>::convert_conc_to_eta_xi(void)
 				this->_eta_bar[i]->setValue(node_idx, loc_eta_bar[i]);
 			// fill in xi_mob
 			for (i=0; i < _n_xi_global; i++)
+			{
+				//this->_xi_global_pre[i]->setValue(node_idx, loc_xi_global[i]);
+				this->_xi_global_cur[i]->setValue(node_idx, loc_xi_global[i]);
 				this->_xi_global_pre[i]->setValue(node_idx, loc_xi_global[i]);
+			}
 
 			for (i=0; i < _n_xi_local; i++)
             {
-				this->_xi_local[i]->setValue(node_idx, loc_xi_local[i]);
-                // also over-write xi_local_new
+				// also over-write xi_local_new
                 this->_xi_local_new[i]->setValue(node_idx, loc_xi_local[i]);
+                this->_xi_local_old[i]->setValue(node_idx, loc_xi_local[i]);
             }
 		}  // end of for node_idx
 
@@ -719,10 +723,9 @@ void FunctionReductConc<T1, T2>::copy_cur_xi_global_to_pre(void)
 template <class T1, class T2>
 void FunctionReductConc<T1, T2>::copy_cur_xi_local_to_pre(void)
 {
-    size_t n_var, node_idx;
-    n_var = this->_xi_local_new.size();
+    size_t node_idx;
 
-    for (size_t i=0; i<n_var; i++) {
+    for (size_t i=0; i<_n_xi_local; i++) {
         // loop over all the nodes
         for (node_idx = _xi_local_new[i]->getDiscreteData()->getRangeBegin();
              node_idx < _xi_local_new[i]->getDiscreteData()->getRangeEnd();
