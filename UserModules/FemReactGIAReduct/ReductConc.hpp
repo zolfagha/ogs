@@ -715,3 +715,20 @@ void FunctionReductConc<T1, T2>::copy_cur_xi_global_to_pre(void)
         }
     }
 }
+
+template <class T1, class T2>
+void FunctionReductConc<T1, T2>::copy_cur_xi_local_to_pre(void)
+{
+    size_t n_var, node_idx;
+    n_var = this->_xi_local_new.size();
+
+    for (size_t i=0; i<n_var; i++) {
+        // loop over all the nodes
+        for (node_idx = _xi_local_new[i]->getDiscreteData()->getRangeBegin();
+             node_idx < _xi_local_new[i]->getDiscreteData()->getRangeEnd();
+             node_idx++ )
+        {
+        	_xi_local_old[i]->setValue( node_idx, _xi_local_new[i]->getValue( node_idx ) );
+        }
+    }
+}
