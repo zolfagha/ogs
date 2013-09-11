@@ -493,10 +493,12 @@ void LocalProblem::update_minerals_conc_AI(ogsChem::LocalVector & vec_unknowns,
 {
     size_t i, idx; 
     double  phi(0.0);
-    ogsChem::LocalVector ln_conc_Mob, ln_conc_NonMin_bar, conc_Min_bar;
-    ogsChem::LocalMatrix mat_S1min_transposed;
+    ogsChem::LocalVector ln_conc_Mob = ogsChem::LocalVector::Zero(_I_mob);
+    ogsChem::LocalVector ln_conc_NonMin_bar = ogsChem::LocalVector::Zero(_I_NMin_bar);
+    ogsChem::LocalVector conc_Min_bar = ogsChem::LocalVector::Zero(_I_min);
+    //ogsChem::LocalMatrix mat_S1min_transposed;
     //logConc_Mob = ogsChem::LocalVector::Zero(_I_mob);
-    mat_S1min_transposed = ogsChem::LocalMatrix::Zero(_mat_S1min.cols(),_mat_S1min.rows());
+    ogsChem::LocalMatrix  mat_S1min_transposed = ogsChem::LocalMatrix::Zero(_mat_S1min.cols(),_mat_S1min.rows());
     mat_S1min_transposed = _mat_S1min.transpose();
 
 
