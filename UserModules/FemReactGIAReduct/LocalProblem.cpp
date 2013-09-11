@@ -711,11 +711,9 @@ void LocalProblem::residual_xi_Min_tilde(ogsChem::LocalVector & conc_Mob,
 void LocalProblem::residual_xi_Kin(ogsChem::LocalVector & conc_Mob,
 								   ogsChem::LocalVector & vec_residual)
 {
-//	ogsChem::LocalVector   conc_tmp;
-//	conc_tmp 		= ogsChem::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
-//
-//	conc_tmp        = _mat_c_mob_2_xi_mob * conc_Mob;
-//	vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde , _n_xi_Kin)   = - _vec_Xikin + conc_tmp.segment(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min, _n_xi_Kin);
+	ogsChem::LocalVector conc_tmp  = ogsChem::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
+	conc_tmp        = _mat_c_mob_2_xi_mob * conc_Mob;
+	vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde , _n_xi_Kin)   = - _vec_Xikin + conc_tmp.segment(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min, _n_xi_Kin);
 }
 
 // Eq. 3.61
