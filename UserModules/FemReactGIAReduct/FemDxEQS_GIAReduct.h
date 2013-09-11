@@ -622,6 +622,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
     // std::cout << cols_xi_kin << std::endl;
     // std::cout << "mat_vprime: \n";
     // std::cout << mat_vprime << std::endl;
+	mat_B.setZero();
 }
 
 template <class T1, class T2, class T3>
