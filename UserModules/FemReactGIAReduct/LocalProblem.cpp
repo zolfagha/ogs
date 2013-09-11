@@ -67,13 +67,13 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & x
 	_vec_etabar 		= vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin,_n_eta_bar);
 	_vec_XiBarKin_old   = vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_eta_bar, _n_xi_Kin_bar);
 
-    //concentration vector components, ie, mobile, sorbed, mineral concentrations
-    ln_conc_Mob     	= x.head(_I_mob );
-    //NonMin refers to non mineral (sorbed + kinetic) concentrations.
-    ln_conc_NonMin_bar  = x.segment(_I_mob, _I_NMin_bar );
-    conc_Min_bar     	= x.segment(_I_mob + _I_NMin_bar, _I_min );
-    // xi kin bar is both unknown and mass constrain!
-    Xi_Kin_bar       	= x.tail(_n_xi_Kin_bar);
+//    //concentration vector components, ie, mobile, sorbed, mineral concentrations
+//    ln_conc_Mob     	= x.head(_I_mob );
+//    //NonMin refers to non mineral (sorbed + kinetic) concentrations.
+//    ln_conc_NonMin_bar  = x.segment(_I_mob, _I_NMin_bar );
+//    conc_Min_bar     	= x.segment(_I_mob + _I_NMin_bar, _I_min );
+//    // xi kin bar is both unknown and mass constrain!
+//    Xi_Kin_bar       	= x.tail(_n_xi_Kin_bar);
 
 
     // start solving the system
