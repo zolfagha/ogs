@@ -409,6 +409,18 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
         MathLib::LocalMatrix poro(1,1);
         NumLib::ITXFunction::DataType v;
 
+        //Local RHS, LHS and residual
+        localLHS_xi_sorp  = MathLib::LocalVector::Zero(ele_node_ids.size());
+        localRHS_xi_sorp  = MathLib::LocalVector::Zero(ele_node_ids.size());
+        localLHS_xi_min   = MathLib::LocalVector::Zero(ele_node_ids.size());
+        localRHS_xi_min   = MathLib::LocalVector::Zero(ele_node_ids.size());
+        localLHS_xi_kin   = MathLib::LocalVector::Zero(ele_node_ids.size());
+        localRHS_xi_kin   = MathLib::LocalVector::Zero(ele_node_ids.size());
+        local_res_sorp    = MathLib::LocalVector::Zero(ele_node_ids.size());
+        local_res_min     = MathLib::LocalVector::Zero(ele_node_ids.size());
+        local_res_kin     = MathLib::LocalVector::Zero(ele_node_ids.size());
+
+
         //assembleODE(time, e, local_u_n1, local_u_n, M, K, F);
         _fe = _function_data->get_feObjects()->getFeObject(*e);
 
