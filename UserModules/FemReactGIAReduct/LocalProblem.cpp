@@ -671,10 +671,9 @@ void LocalProblem::residual_xi_Sorp_tilde(ogsChem::LocalVector & conc_Mob,
 										  ogsChem::LocalVector & conc_Min_bar,
 										  ogsChem::LocalVector & vec_residual)
 {
-	ogsChem::LocalVector                 vec_XiSorp;
-	ogsChem::LocalVector                 vec_XiSorpBarLI;
-	ogsChem::LocalVector                 conc_bar;
-	conc_bar = ogsChem::LocalVector::Zero(_I_NMin_bar + _I_min);
+	ogsChem::LocalVector vec_XiSorp      = ogsChem::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
+	ogsChem::LocalVector vec_XiSorpBarLI = ogsChem::LocalVector::Zero(_n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
+	ogsChem::LocalVector conc_bar        = ogsChem::LocalVector::Zero(_I_NMin_bar + _I_min);;
 
 	conc_bar.head(_I_NMin_bar) 	  = conc_NonMin_bar;
 	conc_bar.tail(_n_xi_Min) 	  = conc_Min_bar;
@@ -690,14 +689,11 @@ void LocalProblem::residual_xi_Min_tilde(ogsChem::LocalVector & conc_Mob,
 										 ogsChem::LocalVector & conc_Min_bar,
 										 ogsChem::LocalVector & vec_residual)
 {
-	ogsChem::LocalVector                 vec_XiMin;
-	ogsChem::LocalVector                 vec_XiMinBar;
-	ogsChem::LocalVector                 conc_bar, A, B;
-	conc_bar 		= ogsChem::LocalVector::Zero(_I_NMin_bar + _I_min);
-	vec_XiMin 		= ogsChem::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
-	vec_XiMinBar 	= ogsChem::LocalVector::Zero(_n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
-	A 				= ogsChem::LocalVector::Zero(_n_xi_Min);
-	B 				= ogsChem::LocalVector::Zero(_n_xi_Sorp_bar_ld);
+	ogsChem::LocalVector  vec_XiMin     = ogsChem::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
+	ogsChem::LocalVector  vec_XiMinBar  = ogsChem::LocalVector::Zero(_n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
+	ogsChem::LocalVector conc_bar 		= ogsChem::LocalVector::Zero(_I_NMin_bar + _I_min);
+	ogsChem::LocalVector A 				= ogsChem::LocalVector::Zero(_n_xi_Min);
+	ogsChem::LocalVector B 				= ogsChem::LocalVector::Zero(_n_xi_Sorp_bar_ld);
 
 	conc_bar.head(_n_xi_Sorp_bar)    = conc_NonMin_bar;
 	conc_bar.tail(_n_xi_Min)         = conc_Min_bar;
