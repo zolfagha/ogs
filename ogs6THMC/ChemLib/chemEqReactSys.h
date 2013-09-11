@@ -16,10 +16,12 @@
 #include "chemcomp.h"
 #include "chemReactionEq.h"
 #include "BaseLib/OrderedMap.h"
+#include "chemActivityModelUnity.h"
 
 namespace ogsChem
 {
 
+template <class T_ACTIVITY_MODEL = ogsChem::chemActivityModelUnity>
 class chemEqReactSys
 {
 public:
@@ -27,7 +29,8 @@ public:
       * constructor of the class
       */
 	chemEqReactSys(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & list_chemComp, 
-                   std::vector<ogsChem::chemReactionEq*>                & list_eq_reactions);
+                   std::vector<ogsChem::chemReactionEq*>                & list_eq_reactions, 
+                   T_ACTIVITY_MODEL                                    *a = new T_ACTIVITY_MODEL() );
 	
 	/**
       * destructor of the class
@@ -224,6 +227,12 @@ private:
       * update all concentrations based on p
       */
     void update_concentations(LocalVector & vec_unknowns, LocalVector & vec_concentrations);
+
+
+    /**
+      * pointer to the activity model
+      */
+    T_ACTIVITY_MODEL *_activity_model; 
 };
 
 }

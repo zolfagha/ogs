@@ -15,10 +15,12 @@
 
 namespace ogsChem
 {
-
-chemEqReactSys::chemEqReactSys(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp, 
-                               std::vector<ogsChem::chemReactionEq*> & list_eq_reactions)
-    : _list_eq_reactions(list_eq_reactions), _I(0), _J(0)
+template <class T_ACTIVITY_MODEL>
+chemEqReactSys<T_ACTIVITY_MODEL>
+    ::chemEqReactSys(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp, 
+                     std::vector<ogsChem::chemReactionEq*> & list_eq_reactions, 
+                     T_ACTIVITY_MODEL                     *a = new T_ACTIVITY_MODEL())
+    : _list_eq_reactions(list_eq_reactions), _I(0), _J(0), _activity_model(a)
 {
 	// by default, the class is not yet initialized
 	isInitialized = false; 
@@ -45,17 +47,20 @@ chemEqReactSys::chemEqReactSys(BaseLib::OrderedMap<std::string, ogsChem::ChemCom
 	}
 }
 
-chemEqReactSys::~chemEqReactSys()
+template <class T_ACTIVITY_MODEL>
+chemEqReactSys<T_ACTIVITY_MODEL>::~chemEqReactSys()
 {}
 
-void chemEqReactSys::calc_tot_mass(LocalVector & vec_conc_basis, 
+template <class T_ACTIVITY_MODEL>
+void chemEqReactSys<T_ACTIVITY_MODEL>::calc_tot_mass(LocalVector & vec_conc_basis, 
                                    LocalVector & vec_conc_second, 
                                    LocalVector & vec_tot_mass)
 {
     vec_tot_mass = vec_conc_basis - _matStoi.transpose() * vec_conc_second; 
 }
 
-void chemEqReactSys::calc_residual(LocalVector & vec_unknowns, 
+template <class T_ACTIVITY_MODEL>
+void chemEqReactSys<T_ACTIVITY_MODEL>::calc_residual(LocalVector & vec_unknowns, 
                                    LocalVector & vec_tot_mass_constrain,
                                    LocalVector & vec_residual)
 {
@@ -89,6 +94,8 @@ void chemEqReactSys::calc_residual(LocalVector & vec_unknowns,
     Stoi_sorp = _matStoi.middleRows( _J_mob, _J_sorp ); 
     Stoi_min  = _matStoi.bottomRows( _J_min );
     
+    // TODO, do the activity correction
+
     // calculate the secondary mobile component concentrations
     ln_c_sec_mob  = _vec_lnK.head( _J_mob ) - Stoi_mob * ln_c_basis; 
     // calculate the secondary sorption component concentrations
@@ -117,7 +124,8 @@ void chemEqReactSys::calc_residual(LocalVector & vec_unknowns,
 
 }  // end of function calc_residual
 
-void chemEqReactSys::calc_Jacobi(LocalVector & vec_unknowns,
+template <class T_ACTIVITY_MODEL>
+void chemEqReactSys<T_ACTIVITY_MODEL>::calc_Jacobi(LocalVector & vec_unknowns,
                                  LocalVector & vec_tot_mass_constrain,
                                  LocalVector & vec_res_base)
 {
@@ -157,7 +165,8 @@ void chemEqReactSys::calc_Jacobi(LocalVector & vec_unknowns,
 #endif
 }
 
-void chemEqReactSys::buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp, 
+template <class T_ACTIVITY_MODEL>
+void chemEqReactSys<T_ACTIVITY_MODEL>::buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp, 
 	                             std::vector<ogsChem::chemReactionEq*> & list_eq_reactions)
 {
 	size_t i,j, tmp_idx; 
@@ -210,7 +219,8 @@ void chemEqReactSys::buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemCom
 #endif
 }
 
-void chemEqReactSys::read_logK(std::vector<ogsChem::chemReactionEq*>                & list_eq_reactions)
+template <class T_ACTIVITY_MODEL>
+void chemEqReactSys<T_ACTIVITY_MODEL>::read_logK(std::vector<ogsChem::chemReactionEq*>                & list_eq_reactions)
 {
     size_t i; 
     _vec_lnK = ogsChem::LocalVector::Zero(_J); 
@@ -218,7 +228,8 @@ void chemEqReactSys::read_logK(std::vector<ogsChem::chemReactionEq*>            
         _vec_lnK(i) = list_eq_reactions[i]->get_ln_K(); 
 }
 
-void chemEqReactSys::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp)
+template <class T_ACTIVITY_MODEL>
+void chemEqReactSys<T_ACTIVITY_MODEL>::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp)
 {
 	_I_mob = 0; 
     _I_sec_mob = 0; 
@@ -248,7 +259,8 @@ void chemEqReactSys::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemCom
     _I = _I_mob + _I_sec_sorp + _I_sec_min;
 }
 
-void chemEqReactSys::countReactions(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & /*map_chemComp*/, std::vector<ogsChem::chemReactionEq*> & list_eq_reactions)
+template <class T_ACTIVITY_MODEL>
+void chemEqReactSys<T_ACTIVITY_MODEL>::countReactions(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & /*map_chemComp*/, std::vector<ogsChem::chemReactionEq*> & list_eq_reactions)
 {
 	_J_mob = 0; 
 	_J_sorp= 0; 
@@ -277,7 +289,8 @@ void chemEqReactSys::countReactions(BaseLib::OrderedMap<std::string, ogsChem::Ch
     _J = _J_mob + _J_sorp + _J_min;
 }
 
-void chemEqReactSys::solve_EqSys_Newton(LocalVector & vec_conc, size_t & result, size_t & node_idx , double iter_tol, double rel_tol, double max_iter)
+template <class T_ACTIVITY_MODEL>
+void chemEqReactSys<T_ACTIVITY_MODEL>::solve_EqSys_Newton(LocalVector & vec_conc, size_t & result, size_t & node_idx , double iter_tol, double rel_tol, double max_iter)
 {
     LocalVector x, x_new;
     LocalVector dx; 
@@ -406,8 +419,8 @@ void chemEqReactSys::solve_EqSys_Newton(LocalVector & vec_conc, size_t & result,
     }
 }
 
-
-void chemEqReactSys::Min_solv(size_t      & /*idx_node*/,
+template <class T_ACTIVITY_MODEL>
+void chemEqReactSys<T_ACTIVITY_MODEL>::Min_solv(size_t      & /*idx_node*/,
                               LocalMatrix & J,  
                               LocalVector & res,  
                               LocalVector & delta_x)
@@ -491,7 +504,8 @@ void chemEqReactSys::Min_solv(size_t      & /*idx_node*/,
 
 }
 
-void chemEqReactSys::increment_unknown(LocalVector & x_old, 
+template <class T_ACTIVITY_MODEL>
+void chemEqReactSys<T_ACTIVITY_MODEL>::increment_unknown(LocalVector & x_old, 
                                        LocalVector & delta_x, 
                                        LocalVector & x_new)
 {
@@ -554,7 +568,8 @@ void chemEqReactSys::update_minerals(LocalVector & vec_unknowns,
 }
 #endif
 
-void chemEqReactSys::update_minerals(LocalVector & vec_unknowns, 
+template <class T_ACTIVITY_MODEL>
+void chemEqReactSys<T_ACTIVITY_MODEL>::update_minerals(LocalVector & vec_unknowns, 
                                      LocalVector & mass_constrain)
 {
     size_t i, idx; 
@@ -605,7 +620,8 @@ void chemEqReactSys::update_minerals(LocalVector & vec_unknowns,
 
 }  // end of function update_minerals
 
-void chemEqReactSys::update_concentations(LocalVector & vec_unknowns, LocalVector & vec_concentrations)
+template <class T_ACTIVITY_MODEL>
+void chemEqReactSys<T_ACTIVITY_MODEL>::update_concentations(LocalVector & vec_unknowns, LocalVector & vec_concentrations)
 {
     size_t i; 
     ogsChem::LocalVector c_basis, c_second, c_sec_min; 
@@ -642,7 +658,8 @@ void chemEqReactSys::update_concentations(LocalVector & vec_unknowns, LocalVecto
     vec_concentrations.tail( _I_second ) = c_second; 
 }
 
-double chemEqReactSys::cal_cbarmin_by_total_mass(size_t        idx_min, 
+template <class T_ACTIVITY_MODEL>
+double chemEqReactSys<T_ACTIVITY_MODEL>::cal_cbarmin_by_total_mass(size_t        idx_min, 
                                                  LocalVector & c_basis, 
                                                  LocalVector & tot_mass)
 {

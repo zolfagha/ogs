@@ -24,6 +24,9 @@ namespace ogsChem
 class chemActivityModelAbstract
 {
 public:
+    chemActivityModelAbstract(ogsChem::ACTIVITY_MODEL am) 
+        : _activity_model(am)
+    {}; 
     // destructor
     virtual ~chemActivityModelAbstract() {};
 
