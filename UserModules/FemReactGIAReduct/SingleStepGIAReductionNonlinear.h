@@ -119,6 +119,7 @@ public:
         AbstractTimeSteppingAlgorithm::finalizeTimeStep( t );
         *_x_n0 = *_x_n1; //copy current value to previous value
         _user_data->copy_cur_xi_global_to_pre();
+        _user_data->copy_cur_xi_local_to_pre();
     }
 
 private:
