@@ -569,15 +569,12 @@ double LocalProblem::cal_cbarmin_by_constrain(size_t        idx_min,
 {
 
     double cbarmin (0.0);
-    ogsChem::LocalVector temp, conc_bar, Conc_Mob, conc_NonMin_bar;
-    ogsChem::LocalMatrix xi_sorp_bar_Ald;
-    ogsChem::LocalVector xi_mobile;
-    temp 				= ogsChem::LocalVector::Zero(_n_xi_Kin_bar + _n_xi_Sorp_bar + _n_xi_Min_bar);
-    conc_bar 			= ogsChem::LocalVector::Zero(_n_xi_Kin_bar + _n_xi_Sorp_bar + _n_xi_Min_bar);
-    Conc_Mob 			= ogsChem::LocalVector::Zero(_I_mob);
-    conc_NonMin_bar 	= ogsChem::LocalVector::Zero(_I_NMin_bar);
-    xi_mobile           = ogsChem::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
-    xi_sorp_bar_Ald     = ogsChem::LocalVector::Zero(_n_xi_Sorp_bar_ld);
+    ogsChem::LocalVector temp 				= ogsChem::LocalVector::Zero(_n_xi_Kin_bar + _n_xi_Sorp_bar + _n_xi_Min_bar);
+    ogsChem::LocalVector conc_bar 			= ogsChem::LocalVector::Zero(_n_xi_Kin_bar + _n_xi_Sorp_bar + _n_xi_Min_bar);
+    ogsChem::LocalVector Conc_Mob 			= ogsChem::LocalVector::Zero(_I_mob);
+    ogsChem::LocalVector conc_NonMin_bar 	= ogsChem::LocalVector::Zero(_I_NMin_bar);
+    ogsChem::LocalVector xi_mobile           = ogsChem::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
+    ogsChem::LocalMatrix xi_sorp_bar_Ald     = ogsChem::LocalVector::Zero(_n_xi_Sorp_bar_ld);
 
     // convert the ln mobile conc to mobile conc
     this->cal_exp_conc_vec(_I_mob, ln_conc_Mob, Conc_Mob);
