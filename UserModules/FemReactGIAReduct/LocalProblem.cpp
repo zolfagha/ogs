@@ -793,21 +793,20 @@ void LocalProblem::residual_xi_KinBar_Kin(ogsChem::LocalVector & conc_Mob,
 										  ogsChem::LocalVector & Xi_Kin_bar,
 										  ogsChem::LocalVector & vec_residual)
 {
-//	ogsChem::LocalVector   conc, vec_rateKin;
-//	conc 		 = ogsChem::LocalVector::Zero(_n_Comp);
-//	vec_rateKin  = ogsChem::LocalVector::Zero(_n_xi_Kin);
-//
-//	//TODO get theta_waterContent
-//	double theta_waterContent (0.3);
-//
-//	conc.head	(_I_mob)  					 = conc_Mob;
-//	conc.segment(_I_mob, _I_NMin_bar) 		 = conc_NonMin_bar;
-//	conc.tail	(_n_xi_Min_bar) 			 = conc_Min_bar;
-//
-//	this->reaction_rates(conc, vec_rateKin);
-//
-//	vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde +  _n_xi_Kin + _n_xi_Sorp + _n_xi_Min + _n_eta_bar + _n_xi_Kin_bar, _n_xi_Kin_bar)
-//			      = ((theta_waterContent * Xi_Kin_bar - (theta_waterContent * _vec_XiBarKin_old)) / deltaT) - (theta_waterContent * _mat_A2kin * vec_rateKin);
+	ogsChem::LocalVector  conc 		 = ogsChem::LocalVector::Zero(_n_Comp);
+	ogsChem::LocalVector  vec_rateKin  = ogsChem::LocalVector::Zero(_J_tot_kin);
+
+	//TODO get theta_waterContent
+	double theta_waterContent (0.3);  //monod2d example
+
+	conc.head	(_I_mob)  					 = conc_Mob;
+	conc.segment(_I_mob, _I_NMin_bar) 		 = conc_NonMin_bar;
+	conc.tail	(_n_xi_Min_bar) 			 = conc_Min_bar;
+
+	this->reaction_rates(conc, vec_rateKin);
+
+	vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde +  _n_xi_Kin + _n_xi_Sorp + _n_xi_Min + _n_eta_bar + _n_xi_Kin_bar, _n_xi_Kin_bar)
+			      = ((theta_waterContent * Xi_Kin_bar - theta_waterContent * _vec_XiBarKin_old) / deltaT) - (theta_waterContent * _mat_A2kin * vec_rateKin);
 }
 
 //problem specific reaction rates
