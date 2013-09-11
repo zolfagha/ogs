@@ -30,7 +30,6 @@ LocalProblem::LocalProblem(ogsChem::chemReductionGIA* ReductionGIA)
 LocalProblem::~LocalProblem()
 {}
 
-
 void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & x,
 														ogsChem::LocalVector & vec_tot_mass_constrain,
 														std::size_t & node_idx ,

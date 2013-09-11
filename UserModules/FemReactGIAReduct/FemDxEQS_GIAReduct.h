@@ -526,7 +526,6 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 
 	for (i = 0; i < _n_xi_Min; i++)
 	{
-		//TODO fix it later
 		if(conc_Min_bar(i) >= vec_phi(i)) {
 			mat_S1minI.resize( mat_S1min.rows(), mat_S1minI.cols() + 1);
 			mat_S1minI.rightCols(1) = mat_S1min.col(i);
