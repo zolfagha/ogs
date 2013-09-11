@@ -739,9 +739,8 @@ void LocalProblem::residual_conc_Min(ogsChem::LocalVector & ln_conc_Mob,
 	     	 	 	 	 	 	 	 ogsChem::LocalVector & vec_residual)
 {
 	size_t        i, idx;
-	double        phi;
-	ogsChem::LocalMatrix   mat_S1minT;
-	mat_S1minT 	= ogsChem::LocalMatrix::Zero(_mat_S1min.cols(), _mat_S1min.rows());
+	double        phi(0.0);
+	ogsChem::LocalMatrix   mat_S1minT  = ogsChem::LocalMatrix::Zero(_mat_S1min.cols(), _mat_S1min.rows());
 
 	idx  = _n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_xi_Sorp;
 
