@@ -279,7 +279,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             for(std::size_t i = 0; i < _n_xi_Min_tilde; i++)
             residual_global[_n_xi_global * node_idx + i] = res44[i];
 
-            // Note: since rate is already used in local problem, is it the same? probably not.
             // calculate the nodal kinetic reaction rates
             _ReductionGIA->Calc_Kin_Rate(loc_cur_xi_Mob,
                                          loc_cur_xi_Sorp,
@@ -356,7 +355,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
 
     MathLib::LocalVector loc_vec_Rate, vec_Rate_temp;
 
-    MathLib::LocalMatrix localLHS_xi_sorp, 
+    MathLib::LocalVector localLHS_xi_sorp,
                          localRHS_xi_sorp, 
                          localLHS_xi_min, 
                          localRHS_xi_min,
