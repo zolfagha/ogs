@@ -30,11 +30,31 @@ namespace NumLib
 class ElementWiseTimeEulerEQSLocalAssemblerWithStorage : public IElementWiseTransientLinearEQSLocalAssembler
 {
 public:
-    ElementWiseTimeEulerEQSLocalAssemblerWithStorage() : _theta(1.0), _stored_t(0.0)
+    ElementWiseTimeEulerEQSLocalAssemblerWithStorage() 
+        : _theta(1.0), _stored_t(0.0), 
+          _max_num_elements(1) /* initialize to one on purpose! */, 
+          _need_update(true)
     {
     };
 
-    virtual ~ElementWiseTimeEulerEQSLocalAssemblerWithStorage() {};
+    virtual ~ElementWiseTimeEulerEQSLocalAssemblerWithStorage()
+    {
+        // TODO: need to think where to put this! 
+        /*
+        for ( size_t i=0; i< _vec_M.size(); i++ )
+            delete _vec_M[i]; 
+        _vec_M.clear(); 
+        
+        for ( size_t i=0; i< _vec_K.size(); i++ )
+            delete _vec_K[i]; 
+        _vec_K.clear(); 
+        
+        for ( size_t i=0; i< _vec_F.size(); i++ )
+            delete _vec_F[i]; 
+        _vec_F.clear(); 
+        */
+
+    };
 
     ///
     void setTheta(double v)
@@ -65,17 +85,26 @@ private:
     /**
       * Local mass matrix
       */
-    MathLib::LocalMatrix _M; 
+    MathLib::LocalMatrix *_M; 
 
     /**
       * Local conductance matrix
       */
-    MathLib::LocalMatrix _K; 
+    MathLib::LocalMatrix *_K; 
 
     /**
       * Local force vector
       */
-    MathLib::LocalVector _F; 
+    MathLib::LocalVector *_F; 
+
+    std::vector<MathLib::LocalMatrix*> _vec_M; 
+    std::vector<MathLib::LocalMatrix*> _vec_K; 
+    std::vector<MathLib::LocalVector*> _vec_F; 
+
+    std::size_t _max_num_elements; 
+
+    bool _need_update;
+
 };
 
 
