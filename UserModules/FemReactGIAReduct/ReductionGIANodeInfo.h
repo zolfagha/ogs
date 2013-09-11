@@ -46,22 +46,22 @@ public:
     /**
       * return the value in eta mobile vector
       */ 
-	double get_eta_value( size_t eta_idx ) { return _eta(eta_idx); }
+	double get_eta_value( size_t eta_idx ) { return loc_eta(eta_idx); }
 
     /**
       * return the value in eta immobile vector
       */ 
-    double get_eta_bar_value( size_t eta_bar_idx ) { return _eta_bar(eta_bar_idx); }
+  //  double get_eta_bar_value( size_t eta_bar_idx ) { return loc_eta_bar(eta_bar_idx); }  //never called
 
     /**
       * return the value in xi global vector
       */ 
-	double get_xi_global_value( size_t xi_global_idx ) { return _xi_global(xi_global_idx); }
+	double get_xi_global_value( size_t xi_global_idx ) { return loc_xi_global(xi_global_idx); }
 
     /**
       * return the value in xi local vector
       */ 
-	double get_xi_local_value( size_t xi_local_idx ) { return _xi_local(xi_local_idx); }
+//	double get_xi_local_value( size_t xi_local_idx ) { return loc_xi_local(xi_local_idx); }  //never called
 
     /**
       * transform from concentrations to eta and xi values
@@ -107,22 +107,22 @@ private:
     /**
       * eta vector
       */ 
-	MathLib::LocalVector _eta;
+	MathLib::LocalVector loc_eta;
 
     /**
       * eta_bar vector
       */ 
-	MathLib::LocalVector _eta_bar;
+	MathLib::LocalVector loc_eta_bar;
 
     /**
       * xi_global vector
       */ 
-	MathLib::LocalVector _xi_global;
+	MathLib::LocalVector loc_xi_global;
 
     /**
       * xi_local vector
       */ 
-	MathLib::LocalVector _xi_local;
+	MathLib::LocalVector loc_xi_local;
 
     /**
       * pointer to the ReductionGIA class

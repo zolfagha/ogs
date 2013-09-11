@@ -104,6 +104,11 @@ public:
 	/**
       * get the number of components
       */
+	std::vector<ogsChem::chemReactionKin*> & get_list_kin_reactions(void) {return _list_kin_reactions; };
+
+	/**
+      * get the number of components
+      */
 	size_t get_n_Comp(void) {return _I_tot; };
 
 	/**

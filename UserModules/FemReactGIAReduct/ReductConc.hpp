@@ -111,7 +111,7 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options & option)
 		MyNodalFunctionScalar* xi_local_new_tmp   = new MyNodalFunctionScalar();  // xi_mob_rates
 		xi_local_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
 		xi_local_new_tmp->initialize(*dis, FemLib::PolynomialOrder::Linear, 0.0  );
-		_xi_local.push_back(xi_local_tmp);
+		_xi_local_old.push_back(xi_local_tmp);
 		_xi_local_new.push_back(xi_local_new_tmp);
 	}
 
@@ -396,13 +396,17 @@ void FunctionReductConc<T1, T2>::convert_conc_to_eta_xi(void)
 				this->_eta_bar[i]->setValue(node_idx, loc_eta_bar[i]);
 			// fill in xi_mob
 			for (i=0; i < _n_xi_global; i++)
+			{
+				//this->_xi_global_pre[i]->setValue(node_idx, loc_xi_global[i]);
+				this->_xi_global_cur[i]->setValue(node_idx, loc_xi_global[i]);
 				this->_xi_global_pre[i]->setValue(node_idx, loc_xi_global[i]);
+			}
 
 			for (i=0; i < _n_xi_local; i++)
             {
-				this->_xi_local[i]->setValue(node_idx, loc_xi_local[i]);
-                // also over-write xi_local_new
+				// also over-write xi_local_new
                 this->_xi_local_new[i]->setValue(node_idx, loc_xi_local[i]);
+                this->_xi_local_old[i]->setValue(node_idx, loc_xi_local[i]);
             }
 		}  // end of for node_idx
 
@@ -486,16 +490,6 @@ void FunctionReductConc<T1, T2>::set_eta_bar_node_values( size_t eta_bar_idx, My
 }
 
 template <class T1, class T2>
-void FunctionReductConc<T1, T2>::set_xi_global_node_values( size_t xi_global_idx, MyNodalFunctionScalar* new_xi_global_node_values )
-{
-    size_t node_idx;
-    for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin();
-	     node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd();
-		 node_idx++ )
-        this->_xi_global[xi_global_idx]->setValue( node_idx, new_xi_global_node_values->getValue( node_idx ) );
-}
-
-template <class T1, class T2>
 template <class T_X>
 void FunctionReductConc<T1, T2>::update_xi_global_cur_nodal_values( const T_X & x_new )
 {
@@ -508,203 +502,6 @@ void FunctionReductConc<T1, T2>::update_xi_global_cur_nodal_values( const T_X & 
         DiscreteLib::setLocalVector( *_nl_sol_dofManager, i, _msh_id, x_new, *this->_xi_global_cur[i]->getDiscreteData() );
     }
 
-}
-
-template <class T1, class T2>
-void FunctionReductConc<T1, T2>::update_xi_local_node_values( void )
-{
-    size_t i, node_idx;
-    for ( i=0; i < _xi_local.size() ; i++ )
-    for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin();
-	     node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd();
-		 node_idx++ )
-    	this->_xi_local[i]->setValue( node_idx, _xi_local_new[i]->getValue( node_idx ) );
-}
-
-template <class T1, class T2>
-void FunctionReductConc<T1, T2>::update_node_kin_reaction_rates(void)
-{
-	size_t node_idx, i;
-    size_t _n_eta = this->_ReductionGIA->get_n_eta();
-    size_t _n_eta_bar = this->_ReductionGIA->get_n_eta_bar();
-
-	// only when the reduction scheme is fully initialized
-	if ( this->_ReductionGIA->IsInitialized() )
-	{
-		// local vectors
-		LocalVector loc_eta;
-		LocalVector loc_eta_bar;
-		LocalVector loc_xi_global;
-		LocalVector loc_xi_local;
-		LocalVector loc_conc;
-        LocalVector loc_xi_global_rates;
-        LocalVector loc_xi_local_rates;
-
-		// allocate the memory for local vectors
-		loc_eta        		= LocalVector::Zero( _n_eta );
-		loc_eta_bar     	= LocalVector::Zero( _n_eta_bar );
-		loc_xi_global       = LocalVector::Zero( _n_xi_global );
-		loc_xi_local       	= LocalVector::Zero( _n_xi_local );
-		loc_conc           	= LocalVector::Zero( _n_Comp );
-        loc_xi_global_rates = LocalVector::Zero( _n_xi_global );
-        loc_xi_local_rates 	= LocalVector::Zero( _n_xi_local );
-
-		// for each nodes,
-		for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin();
-			 node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd()  ;
-			 node_idx++ )
-		{
-            if ( ! this->_solution->isBCNode(node_idx) )
-            {
-                // put the local eta and xi into the global vector
-                // fill in eta_mob
-                for (i=0; i < _n_eta; i++)
-                    loc_eta[i] = this->_eta[i]->getValue(node_idx);
-                // fill in eta_immob
-                for (i=0; i < _n_eta_bar; i++)
-                    loc_eta_bar[i] = this->_eta_bar[i]->getValue(node_idx);
-                // fill in xi
-                // this->_xi->setNodalValues( &loc_xi, node_idx*n_xi, n_xi );
-                for (i=0; i < _n_xi_global; i++)
-                    loc_xi_global[i] = this->_xi_global[i]->getValue(node_idx);
-                for (i=0; i < _n_xi_local; i++)
-                    // loc_xi_immob[i] = this->_xi_immob[i]->getValue(node_idx);
-                    loc_xi_local[i] = this->_xi_local_new[i]->getValue(node_idx); // using new rates instead! // HS 26.11.2012
-
-                // calculate rates;
-                this->_ReductionGIA->Calc_Kin_Rate( loc_eta,
-                                                   loc_eta_bar,
-                                                   loc_xi_global,
-                                                   loc_xi_local,
-                                                   loc_xi_global_rates,
-                                                   loc_xi_local_rates );
-
-                // write the rates into the global nodal vector
-                for (i=0; i < _n_xi_global; i++)
-                    this->_xi_global_rates[i]->setValue( node_idx, loc_xi_global_rates[i] );
-
-                for (i=0; i < _n_xi_local; i++)
-                    this->_xi_local_rates[i]->setValue( node_idx, loc_xi_local_rates[i] );
-            }  // end of if boundary node
-            else
-            {
-                // if is boundary node, then set rates to zero.
-                for (i=0; i < _n_xi_global; i++)
-                    this->_xi_global_rates[i]->setValue( node_idx, 0.0 );
-
-                for (i=0; i < _n_xi_local; i++)
-                    this->_xi_local_rates[i]->setValue( node_idx, 0.0 );
-            }
-
-		}  // end of for node_idx
-
- //       _non_linear_problem->getEquation()->getResidualAssembler()->set_xi_global_rates(   & _xi_global_rates );
- //       _non_linear_problem->getEquation()->getResidualAssembler()->set_xi_local_rates( & _xi_local_rates );
-
-        _non_linear_problem->getEquation()->getJacobianAssembler()->set_xi_mob_rates(   & _xi_global_rates );
-        _non_linear_problem->getEquation()->getJacobianAssembler()->set_xi_immob_rates( & _xi_local_rates );
-	}  // end of if _ReductionGIA
-}
-
-
-template <class T1, class T2>
-void FunctionReductConc<T1, T2>::update_node_kin_reaction_drates_dxi(void)
-{
-	const double epsilon  = 1.0e-14;
-    double drates_dxi_tmp = 0.0;
-
-    size_t node_idx, i, j;
-    size_t _n_eta = this->_ReductionGIA->get_n_eta();
-    size_t _n_eta_bar = this->_ReductionGIA->get_n_eta_bar();
-
-	LocalVector loc_eta;
-	LocalVector loc_eta_bar;
-	LocalVector loc_xi_global;
-	LocalVector loc_xi_global_tmp;  // used for xi increment
-	LocalVector loc_xi_local;
-	LocalVector loc_xi_global_rates_base;
-    LocalVector loc_xi_global_rates_new;
-    LocalVector loc_xi_local_rates;
-
-	// initialize the local vector
-	loc_eta     		      = LocalVector::Zero( _n_eta );
-	loc_eta_bar         	  = LocalVector::Zero( _n_eta_bar );
-	loc_xi_global             = LocalVector::Zero( _n_xi_global );
-	loc_xi_local          	  = LocalVector::Zero( _n_xi_local );
-    loc_xi_global_rates_base  = LocalVector::Zero( _n_xi_global );
-    loc_xi_global_rates_new   = LocalVector::Zero( _n_xi_global );
-    loc_xi_local_rates    	  = LocalVector::Zero( _n_xi_local );
-
-	// loop over all nodes
-	for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin();
-	     node_idx < _concentrations[0]->getDiscreteData()->getRangeEnd()  ;
-		 node_idx++)
-	{
-        // if not boundary nodes, calculates its drate/dxi.
-        if ( ! this->_solution->isBCNode(node_idx) )
-        {
-            // read the local values
-            for (i=0; i < _n_eta; i++)
-                loc_eta[i] = this->_eta[i]->getValue(node_idx);
-            // fill in eta_immob
-            for (i=0; i < _n_eta_bar; i++)
-                loc_eta_bar[i] = this->_eta_bar[i]->getValue(node_idx);
-            for (i=0; i < _n_xi_global; i++)
-                loc_xi_global[i] = this->_xi_global[i]->getValue(node_idx);
-            for (i=0; i < _n_xi_local; i++)
-                loc_xi_local[i] = this->_xi_local_new[i]->getValue(node_idx);  // HS, use the new immob values after ODE calculation
-
-//            // calculate rates;
-//            this->_ReductionGIA->Calc_Xi_Rate( loc_eta,
-//                                               loc_eta_bar,
-//                                               loc_xi_global,
-//                                               loc_xi_local,
-//                                               loc_xi_global_rates_base,
-//                                               loc_xi_local_rates );
-
-            // loop over each xi_mob,
-            for (j=0; j < _n_xi_global; j++)
-            {
-                // get a clean copy of the origiinal xi_mob
-                loc_xi_global_tmp = loc_xi_global;
-                // give an increment to the xi value
-                if ( abs( loc_xi_global(j) ) >= 1.0e-16 )  // loc_xi_mob(j) != 0.0
-                    loc_xi_global_tmp(j) += epsilon * abs( loc_xi_global(j) );
-                else
-                    loc_xi_global_tmp(j) += epsilon;
-
-                // calculate the new rate
-                //            // calculate rates;
-                //            this->_ReductionGIA->Calc_Xi_Rate( loc_eta,
-                //                                               loc_eta_bar,
-                //                                               loc_xi_global,
-                //                                               loc_xi_local,
-                //                                               loc_xi_global_tmp,
-                //                                               loc_xi_local_rates );
-                // loop over all xi_mob
-                for (i=0; i < _n_xi_global; i++)
-                {
-                    // calculate derivative
-                    if ( abs( loc_xi_global(j) ) >= 1.0e-16 )  // loc_xi_mob(j) != 0.0
-                        drates_dxi_tmp = ( loc_xi_global_rates_new(i) - loc_xi_global_tmp(i) ) / epsilon /  abs( loc_xi_global(j) );
-                    else
-                        drates_dxi_tmp = ( loc_xi_global_rates_new(i) - loc_xi_global_tmp(i) ) /  epsilon ;
-
-                     _xi_global_drates_dxi[i*_n_xi_global+j]->setValue( node_idx, drates_dxi_tmp );
-                }  // end of for i
-            }  // end of for j
-        }  // end of if boundary node
-        else
-        {
-            // if boundary node, then set drates/dxi to zeros
-            for (i=0; i < _n_xi_global; i++)
-                for (j=0; j < _n_xi_global; j++)
-                    _xi_global_drates_dxi[i*_n_xi_global+j]->setValue( node_idx, 0.0 );
-        }  // end of else
-	}  // end of for node_idx
-
-    // setting the rates
-    _non_linear_problem->getEquation()->getJacobianAssembler()->set_xi_global_drate_dxi( &_xi_global_drates_dxi );
 }
 
 
@@ -781,8 +578,9 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 				loc_etabar[i] = this->_eta_bar[i]->getValue(node_idx);
 			for (i=0; i < _n_xi_global; i++)
 				loc_xi_global[i] = this->_xi_global_cur[i]->getValue(node_idx); // using the current time step value
-			for (i=0; i < _n_xi_local; i++)
-				loc_xi_local[i] = this->_xi_local_new[i]->getValue(node_idx);
+			for (i=0; i < _n_xi_local; i++){
+				loc_xi_local[i] 	   = this->_xi_local_new[i]->getValue(node_idx);
+				loc_xi_local_old_dt[i] = this->_xi_local_old[i]->getValue(node_idx);}
 
 			for (i=0; i < _n_Comp; i++)
 				loc_conc[i] = this->_concentrations[i]->getValue(node_idx);
@@ -918,6 +716,22 @@ void FunctionReductConc<T1, T2>::copy_cur_xi_global_to_pre(void)
              node_idx++ )
         {
             _xi_global_pre[i]->setValue( node_idx, _xi_global_cur[i]->getValue( node_idx ) ); 
+        }
+    }
+}
+
+template <class T1, class T2>
+void FunctionReductConc<T1, T2>::copy_cur_xi_local_to_pre(void)
+{
+    size_t node_idx;
+
+    for (size_t i=0; i<_n_xi_local; i++) {
+        // loop over all the nodes
+        for (node_idx = _xi_local_new[i]->getDiscreteData()->getRangeBegin();
+             node_idx < _xi_local_new[i]->getDiscreteData()->getRangeEnd();
+             node_idx++ )
+        {
+        	_xi_local_old[i]->setValue( node_idx, _xi_local_new[i]->getValue( node_idx ) );
         }
     }
 }
