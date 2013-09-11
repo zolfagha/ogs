@@ -279,7 +279,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             for(std::size_t i = 0; i < _n_xi_Min_tilde; i++)
             residual_global[_n_xi_global * node_idx + i] = res44[i];
 
-            // Note: since rate is already used in local problem, is it the same? probably not.
             // calculate the nodal kinetic reaction rates
             _ReductionGIA->Calc_Kin_Rate(loc_cur_xi_Mob,
                                          loc_cur_xi_Sorp,
@@ -356,7 +355,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
 
     MathLib::LocalVector loc_vec_Rate, vec_Rate_temp;
 
-    MathLib::LocalMatrix localLHS_xi_sorp, 
+    MathLib::LocalVector localLHS_xi_sorp,
                          localRHS_xi_sorp, 
                          localLHS_xi_min, 
                          localRHS_xi_min,
@@ -409,6 +408,18 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
         MathLib::LocalMatrix d_poro = MathLib::LocalMatrix::Zero(3,3);
         MathLib::LocalMatrix poro(1,1);
         NumLib::ITXFunction::DataType v;
+
+        //Local RHS, LHS and residual
+        localLHS_xi_sorp  = MathLib::LocalVector::Zero(ele_node_ids.size());
+        localRHS_xi_sorp  = MathLib::LocalVector::Zero(ele_node_ids.size());
+        localLHS_xi_min   = MathLib::LocalVector::Zero(ele_node_ids.size());
+        localRHS_xi_min   = MathLib::LocalVector::Zero(ele_node_ids.size());
+        localLHS_xi_kin   = MathLib::LocalVector::Zero(ele_node_ids.size());
+        localRHS_xi_kin   = MathLib::LocalVector::Zero(ele_node_ids.size());
+        local_res_sorp    = MathLib::LocalVector::Zero(ele_node_ids.size());
+        local_res_min     = MathLib::LocalVector::Zero(ele_node_ids.size());
+        local_res_kin     = MathLib::LocalVector::Zero(ele_node_ids.size());
+
 
         //assembleODE(time, e, local_u_n1, local_u_n, M, K, F);
         _fe = _function_data->get_feObjects()->getFeObject(*e);

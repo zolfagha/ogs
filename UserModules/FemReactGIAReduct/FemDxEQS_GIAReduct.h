@@ -215,10 +215,10 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     MathLib::LocalVector loc_cur_xi_global, loc_cur_xi_Sorp_tilde, loc_cur_xi_Min_tilde,
                          loc_cur_xi_Sorp, loc_cur_xi_Min, loc_cur_xi_Kin;
     // previous xi global
-    MathLib::LocalVector loc_pre_xi_global, loc_pre_xi_Sorp_tilde, loc_pre_xi_Min_tilde, loc_pre_xi_Sorp, loc_pre_xi_Min, loc_pre_xi_Kin;
+    //MathLib::LocalVector loc_pre_xi_global, loc_pre_xi_Sorp_tilde, loc_pre_xi_Min_tilde, loc_pre_xi_Sorp, loc_pre_xi_Min, loc_pre_xi_Kin;
 
     // current xi local
-    MathLib::LocalVector loc_cur_xi_local, loc_xi_local, loc_cur_xi_Mob, loc_cur_xi_Sorp_bar, loc_cur_xi_Min_bar, loc_cur_xi_Kin_bar, loc_cur_xi_Sorp_bar_li, loc_cur_xi_Sorp_bar_ld;
+    MathLib::LocalVector loc_cur_xi_local, loc_cur_xi_Sorp_bar, loc_cur_xi_Min_bar, loc_cur_xi_Sorp_bar_li, loc_cur_xi_Sorp_bar_ld;
 
     // eta vectors
     MathLib::LocalVector loc_cur_eta, loc_cur_eta_bar;
@@ -526,7 +526,6 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 
 	for (i = 0; i < _n_xi_Min; i++)
 	{
-		//TODO fix it later
 		if(conc_Min_bar(i) >= vec_phi(i)) {
 			mat_S1minI.resize( mat_S1min.rows(), mat_S1minI.cols() + 1);
 			mat_S1minI.rightCols(1) = mat_S1min.col(i);
@@ -622,6 +621,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
     // std::cout << cols_xi_kin << std::endl;
     // std::cout << "mat_vprime: \n";
     // std::cout << mat_vprime << std::endl;
+	mat_B.setZero();
 }
 
 template <class T1, class T2, class T3>
