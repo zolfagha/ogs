@@ -813,45 +813,13 @@ void LocalProblem::residual_xi_KinBar_Kin(ogsChem::LocalVector & conc_Mob,
 void LocalProblem::reaction_rates(ogsChem::LocalVector & conc,
 								  ogsChem::LocalVector & vec_rateKin)
 {
-//double sub_A, sub_B, sub_C, biomass, umax, k_subA, k_subB, kdec;
-//ogsChem::LocalVector R;
-//ogsChem::LocalVector::Zero();
-//sub_A  = conc.segment(0,0);
-//sub_B  = conc.segment(1,0);
-//sub_C  = conc.segment(2,0);
-//biomass      = conc.segment(3,0);
-//
-//// max reaction rate
-//umax = umax;
-//
-//// monod coefficients
-//k_subA = k_subA;
-//k_subB = k_subB;
-//
-//// decay rates
-//kdec = kdec;
-//
-//R.head(0,0) = umax * sub_A / (k_subA + sub_A) * sub_B /(k_subB + sub_B) * biomass;
-//R.tail (1,0) =  R(0,1) - kdec * biomass;
+	std::size_t i;
+	// then calculate the rates and fill them in the rate vector
+	for ( i=0; i < this->_J_tot_kin; i++ )
+	{
+		// get to the particular kin equation and calculate its rate
+		this->_list_kin_reactions[i]->calcReactionRate( conc );
+		vec_rateKin(i) = this->_list_kin_reactions[i]->getRate();
+	}
 }
 
-//template <typename T>
-//ogsChem::LocalMatrix LocalProblem::Num_Diff(size_t & Row,
-//							std::size_t & Col,
-//							ogsChem::LocalVector & _vec_unknown,
-//							double & delta_xi,
-//							std::function<ogsChem::LocalVector(T))> f)
-//{
-//    size_t i;
-//    res = ogsChem::LocalMatrix::Zero(Row, Col);
-//	for (i = 0; i< Col; i++)
-//	{
-//		x  = _vec_unknown;
-//		x(i) = x(i) +  delta_xi;
-//		res.Col(i) = ( f(x) - f( _vec_unknown)) / delta_xi;
-//	}
-//
-//	return res;
-////	return f(_vec_unknown);
-//
-//}
