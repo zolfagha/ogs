@@ -46,7 +46,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & x
     // number of iterations
     size_t j, iter, n_unknowns;
     const double alpha (0.5);
-    double d_norm, d1_norm;
+    double d_norm(0.0), d1_norm(0.0);
 
     n_unknowns     = _n_Comp + _n_xi_Kin_bar;
     //x_new          = ogsChem::LocalVector::Ones( n_unknowns );
