@@ -142,6 +142,7 @@ private:
     SolutionLib::SolutionVector *_x_n1_0;
     SolutionLib::SolutionVector *_x_n1;
     SolutionLib::SolutionVector *_x_st;
+    BaseLib::Options _opLog;  // mainly to pass iteration times
 };
 
 template <
@@ -212,6 +213,11 @@ SingleStepGIAReductionNonlinear<T_USER_FEM_PROBLEM,T_USER_FUNCTION_DATA,T_LINEAR
 
     // setup nonlinear solver
     _f_nonlinear = new NonlinearSolverType(dis, nullptr, _f_r, _f_dx, nl_solver_factory);
+    // set the log option 
+    _f_nonlinear->setLog(_opLog);
+
+    // set inital log
+    this->getTimeStepFunction()->updateLog(_opLog);
 };
 
 template <
@@ -281,6 +287,9 @@ int SingleStepGIAReductionNonlinear<T_USER_FEM_PROBLEM,T_USER_FUNCTION_DATA,T_LI
         //SolutionLib::SolutionVector* vec_var = _problem->getVariable(i)->getIC()->getNodalValues();
         DiscreteLib::setLocalVector(_dofManager, i, msh_id, *_x_n1, *_vec_u_n1[i]->getDiscreteData());
     }
+
+    // update log
+    this->getTimeStepFunction()->updateLog(_opLog);
 
     return 0;
 }
