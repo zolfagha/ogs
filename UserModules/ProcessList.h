@@ -24,6 +24,7 @@
 #include "FemRichardsFlow/FunctionRichards.h"
 #include "FemMassTransport/Concentration.h"
 #include "FemHeatTransport/Temperature.h"
+#include "FemReactOPS/OPSConc.h"
 #include "FemKinReactGIA/Concentrations.h"
 #include "FemReactGIAReduct/ReductConc.h"
 #include "FemDeformationTotalForm/Displacement.h"
