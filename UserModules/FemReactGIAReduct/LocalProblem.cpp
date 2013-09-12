@@ -21,7 +21,7 @@ LocalProblem::LocalProblem(ogsChem::chemReductionGIA* ReductionGIA)
 	, _mat_c_mob_2_xi_mob(_ReductionGIA->get_matrix_C2Xi()), _mat_c_immob_2_xi_immob(_ReductionGIA->get_matrix_Cbar2XiBar()), _n_xi_Sorp_bar(_ReductionGIA->get_n_xi_Sorp_bar()), _mat_S1min (_ReductionGIA->get_matrix_S1min())
     , _mat_Ald(_ReductionGIA->get_matrix_Ald()),_mat_Ssorp(_ReductionGIA->get_matrix_Ssorp()), _mat_A2kin(_ReductionGIA->get_matrix_A2kin()), _mat_S1mob(_ReductionGIA->get_matrix_S1mob()),_mat_c_mob_2_eta_mob(_ReductionGIA->get_matrix_C2Eta())
     , _logk_mob(_ReductionGIA->get_logk_mob()), _logk_sorp(_ReductionGIA->get_logk_sorp()), _logk_min(_ReductionGIA->get_logk_min()), _n_xi_Min_bar(_ReductionGIA->get_n_xi_Min_bar()), _I_NMin_bar(_ReductionGIA->get_n_Comp_NMin_bar())
-    , _mat_c_immob_2_eta_immob(_ReductionGIA->get_matrix_C2EtaBar())
+    , _mat_c_immob_2_eta_immob(_ReductionGIA->get_matrix_C2EtaBar()), _list_kin_reactions(_ReductionGIA->get_list_kin_reactions()), _J_tot_kin(_ReductionGIA->get_n_xi_Kin_total())
 
 {
 
@@ -29,7 +29,6 @@ LocalProblem::LocalProblem(ogsChem::chemReductionGIA* ReductionGIA)
 
 LocalProblem::~LocalProblem()
 {}
-
 
 void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & x,
 														ogsChem::LocalVector & vec_tot_mass_constrain,
@@ -41,12 +40,12 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & x
 {
     ogsChem::LocalVector x_new, vec_residual, vec_AI;
     ogsChem::LocalVector dx;
-    ogsChem::LocalVector ln_conc_Mob, ln_conc_NonMin_bar, conc_Min_bar, Xi_Kin_bar;
+   // ogsChem::LocalVector ln_conc_Mob, ln_conc_NonMin_bar, conc_Min_bar, Xi_Kin_bar;
 //TODO initialize water content and deltaT
     // number of iterations
     size_t j, iter, n_unknowns;
     const double alpha (0.5);
-    double d_norm, d1_norm;
+    double d_norm(0.0), d1_norm(0.0);
 
     n_unknowns     = _n_Comp + _n_xi_Kin_bar;
     //x_new          = ogsChem::LocalVector::Ones( n_unknowns );
@@ -67,13 +66,13 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & x
 	_vec_etabar 		= vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin,_n_eta_bar);
 	_vec_XiBarKin_old   = vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_eta_bar, _n_xi_Kin_bar);
 
-    //concentration vector components, ie, mobile, sorbed, mineral concentrations
-    ln_conc_Mob     	= x.head(_I_mob );
-    //NonMin refers to non mineral (sorbed + kinetic) concentrations.
-    ln_conc_NonMin_bar  = x.segment(_I_mob, _I_NMin_bar );
-    conc_Min_bar     	= x.segment(_I_mob + _I_NMin_bar, _I_min );
-    // xi kin bar is both unknown and mass constrain!
-    Xi_Kin_bar       	= x.tail(_n_xi_Kin_bar);
+//    //concentration vector components, ie, mobile, sorbed, mineral concentrations
+//    ln_conc_Mob     	= x.head(_I_mob );
+//    //NonMin refers to non mineral (sorbed + kinetic) concentrations.
+//    ln_conc_NonMin_bar  = x.segment(_I_mob, _I_NMin_bar );
+//    conc_Min_bar     	= x.segment(_I_mob + _I_NMin_bar, _I_min );
+//    // xi kin bar is both unknown and mass constrain!
+//    Xi_Kin_bar       	= x.tail(_n_xi_Kin_bar);
 
 
     // start solving the system
@@ -248,64 +247,32 @@ void LocalProblem::calc_residual(ogsChem::LocalVector & vec_unknowns,
 
     // Eq. 3.55
     this->residual_conc_Mob			(ln_conc_Mob, vec_residual);
-
-#ifdef _DEBUG
-	// debugging--------------------------
-//	std::cout << "residual_conc_Mob: \n";
-//	std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
-
     // Eq. 3.56
     this->residual_Eta				(conc_Mob, vec_residual);
-
-#ifdef _DEBUG
-	// debugging--------------------------
-//	std::cout << "residual_Eta: \n";
-//	std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
-
-    // Eq. 3.57 - 58
-    this->residual_xi_Sorp_tilde	(conc_Mob, conc_NonMin_bar, conc_Min_bar, vec_residual);
     // Eq. 3.59
     this->residual_xi_Min_tilde		(conc_Mob, conc_NonMin_bar, conc_Min_bar, vec_residual);
-
-#ifdef _DEBUG
-	// debugging--------------------------
-//	std::cout << "residual_xi_Min_tilde: \n";
-    //	std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
-
-    // Eq. 3.60
-    this->residual_xi_Kin			(conc_Mob, vec_residual);
-    // Eq. 3.61
-    this->residual_conc_Sorp		(ln_conc_Mob, ln_conc_NonMin_bar, vec_residual);
     // Eq. 3.62
     this->residual_conc_Min			(ln_conc_Mob, conc_Min_bar, vec_residual);
 
-#ifdef _DEBUG
-	// debugging--------------------------
-    //	std::cout << "residual_conc_Min: \n";
-    //std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
-
+    if(_n_xi_Sorp != 0)
+    {
+    // Eq. 3.57 - 58
+    this->residual_xi_Sorp_tilde	(conc_Mob, conc_NonMin_bar, conc_Min_bar, vec_residual);
+    // Eq. 3.61
+    this->residual_conc_Sorp		(ln_conc_Mob, ln_conc_NonMin_bar, vec_residual);
+    }
     // Eq. 3.63
     this->residual_Eta_bar			(conc_NonMin_bar, conc_Min_bar, vec_residual);
 
-#ifdef _DEBUG
-	// debugging--------------------------
-    //std::cout << "residual_Eta_bar: \n";
-    //std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
-
-    // Eq. 3.64
-    this->residual_xi_KinBar_Eq		(conc_NonMin_bar, conc_Min_bar, Xi_Kin_bar, vec_residual);
-    // Eq. 3.65
-    this->residual_xi_KinBar_Kin	(conc_Mob, conc_NonMin_bar, conc_Min_bar, Xi_Kin_bar, vec_residual);
+    if(_n_xi_Kin != 0)  // boost from 260s to 180s!
+    {
+    	// Eq. 3.60
+    	this->residual_xi_Kin			(conc_Mob, vec_residual);
+    	// Eq. 3.64
+    	this->residual_xi_KinBar_Eq		(conc_NonMin_bar, conc_Min_bar, Xi_Kin_bar, vec_residual);
+    	// Eq. 3.65
+    	this->residual_xi_KinBar_Kin	(conc_Mob, conc_NonMin_bar, conc_Min_bar, Xi_Kin_bar, vec_residual);
+    }
 
 }  // end of function calc_residual
 
@@ -493,10 +460,12 @@ void LocalProblem::update_minerals_conc_AI(ogsChem::LocalVector & vec_unknowns,
 {
     size_t i, idx; 
     double  phi(0.0);
-    ogsChem::LocalVector ln_conc_Mob, ln_conc_NonMin_bar, conc_Min_bar;
-    ogsChem::LocalMatrix mat_S1min_transposed;
+    ogsChem::LocalVector ln_conc_Mob = ogsChem::LocalVector::Zero(_I_mob);
+    ogsChem::LocalVector ln_conc_NonMin_bar = ogsChem::LocalVector::Zero(_I_NMin_bar);
+    ogsChem::LocalVector conc_Min_bar = ogsChem::LocalVector::Zero(_I_min);
+    //ogsChem::LocalMatrix mat_S1min_transposed;
     //logConc_Mob = ogsChem::LocalVector::Zero(_I_mob);
-    mat_S1min_transposed = ogsChem::LocalMatrix::Zero(_mat_S1min.cols(),_mat_S1min.rows());
+    ogsChem::LocalMatrix  mat_S1min_transposed = ogsChem::LocalMatrix::Zero(_mat_S1min.cols(),_mat_S1min.rows());
     mat_S1min_transposed = _mat_S1min.transpose();
 
 
@@ -567,15 +536,12 @@ double LocalProblem::cal_cbarmin_by_constrain(size_t        idx_min,
 {
 
     double cbarmin (0.0);
-    ogsChem::LocalVector temp, conc_bar, Conc_Mob, conc_NonMin_bar;
-    ogsChem::LocalMatrix xi_sorp_bar_Ald;
-    ogsChem::LocalVector xi_mobile;
-    temp 				= ogsChem::LocalVector::Zero(_n_xi_Kin_bar + _n_xi_Sorp_bar + _n_xi_Min_bar);
-    conc_bar 			= ogsChem::LocalVector::Zero(_n_xi_Kin_bar + _n_xi_Sorp_bar + _n_xi_Min_bar);
-    Conc_Mob 			= ogsChem::LocalVector::Zero(_I_mob);
-    conc_NonMin_bar 	= ogsChem::LocalVector::Zero(_I_NMin_bar);
-    xi_mobile           = ogsChem::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
-    xi_sorp_bar_Ald     = ogsChem::LocalVector::Zero(_n_xi_Sorp_bar_ld);
+    ogsChem::LocalVector temp 				= ogsChem::LocalVector::Zero(_n_xi_Kin_bar + _n_xi_Sorp_bar + _n_xi_Min_bar);
+    ogsChem::LocalVector conc_bar 			= ogsChem::LocalVector::Zero(_n_xi_Kin_bar + _n_xi_Sorp_bar + _n_xi_Min_bar);
+    ogsChem::LocalVector Conc_Mob 			= ogsChem::LocalVector::Zero(_I_mob);
+    ogsChem::LocalVector conc_NonMin_bar 	= ogsChem::LocalVector::Zero(_I_NMin_bar);
+    ogsChem::LocalVector xi_mobile           = ogsChem::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
+    ogsChem::LocalMatrix xi_sorp_bar_Ald     = ogsChem::LocalVector::Zero(_n_xi_Sorp_bar_ld);
 
     // convert the ln mobile conc to mobile conc
     this->cal_exp_conc_vec(_I_mob, ln_conc_Mob, Conc_Mob);
@@ -672,10 +638,9 @@ void LocalProblem::residual_xi_Sorp_tilde(ogsChem::LocalVector & conc_Mob,
 										  ogsChem::LocalVector & conc_Min_bar,
 										  ogsChem::LocalVector & vec_residual)
 {
-	ogsChem::LocalVector                 vec_XiSorp;
-	ogsChem::LocalVector                 vec_XiSorpBarLI;
-	ogsChem::LocalVector                 conc_bar;
-	conc_bar = ogsChem::LocalVector::Zero(_I_NMin_bar + _I_min);
+	ogsChem::LocalVector vec_XiSorp      = ogsChem::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
+	ogsChem::LocalVector vec_XiSorpBarLI = ogsChem::LocalVector::Zero(_n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
+	ogsChem::LocalVector conc_bar        = ogsChem::LocalVector::Zero(_I_NMin_bar + _I_min);;
 
 	conc_bar.head(_I_NMin_bar) 	  = conc_NonMin_bar;
 	conc_bar.tail(_n_xi_Min) 	  = conc_Min_bar;
@@ -691,14 +656,11 @@ void LocalProblem::residual_xi_Min_tilde(ogsChem::LocalVector & conc_Mob,
 										 ogsChem::LocalVector & conc_Min_bar,
 										 ogsChem::LocalVector & vec_residual)
 {
-	ogsChem::LocalVector                 vec_XiMin;
-	ogsChem::LocalVector                 vec_XiMinBar;
-	ogsChem::LocalVector                 conc_bar, A, B;
-	conc_bar 		= ogsChem::LocalVector::Zero(_I_NMin_bar + _I_min);
-	vec_XiMin 		= ogsChem::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
-	vec_XiMinBar 	= ogsChem::LocalVector::Zero(_n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
-	A 				= ogsChem::LocalVector::Zero(_n_xi_Min);
-	B 				= ogsChem::LocalVector::Zero(_n_xi_Sorp_bar_ld);
+	ogsChem::LocalVector  vec_XiMin     = ogsChem::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
+	ogsChem::LocalVector  vec_XiMinBar  = ogsChem::LocalVector::Zero(_n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
+	ogsChem::LocalVector conc_bar 		= ogsChem::LocalVector::Zero(_I_NMin_bar + _I_min);
+	ogsChem::LocalVector A 				= ogsChem::LocalVector::Zero(_n_xi_Min);
+	ogsChem::LocalVector B 				= ogsChem::LocalVector::Zero(_n_xi_Sorp_bar_ld);
 
 	conc_bar.head(_n_xi_Sorp_bar)    = conc_NonMin_bar;
 	conc_bar.tail(_n_xi_Min)         = conc_Min_bar;
@@ -716,11 +678,9 @@ void LocalProblem::residual_xi_Min_tilde(ogsChem::LocalVector & conc_Mob,
 void LocalProblem::residual_xi_Kin(ogsChem::LocalVector & conc_Mob,
 								   ogsChem::LocalVector & vec_residual)
 {
-//	ogsChem::LocalVector   conc_tmp;
-//	conc_tmp 		= ogsChem::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
-//
-//	conc_tmp        = _mat_c_mob_2_xi_mob * conc_Mob;
-//	vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde , _n_xi_Kin)   = - _vec_Xikin + conc_tmp.segment(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min, _n_xi_Kin);
+	ogsChem::LocalVector conc_tmp  = ogsChem::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
+	conc_tmp        = _mat_c_mob_2_xi_mob * conc_Mob;
+	vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde , _n_xi_Kin)   = - _vec_Xikin + conc_tmp.segment(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min, _n_xi_Kin);
 }
 
 // Eq. 3.61
@@ -746,9 +706,8 @@ void LocalProblem::residual_conc_Min(ogsChem::LocalVector & ln_conc_Mob,
 	     	 	 	 	 	 	 	 ogsChem::LocalVector & vec_residual)
 {
 	size_t        i, idx;
-	double        phi;
-	ogsChem::LocalMatrix   mat_S1minT;
-	mat_S1minT 	= ogsChem::LocalMatrix::Zero(_mat_S1min.cols(), _mat_S1min.rows());
+	double        phi(0.0);
+	ogsChem::LocalMatrix   mat_S1minT  = ogsChem::LocalMatrix::Zero(_mat_S1min.cols(), _mat_S1min.rows());
 
 	idx  = _n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_xi_Sorp;
 
@@ -767,8 +726,7 @@ void LocalProblem::residual_Eta_bar(ogsChem::LocalVector & conc_NonMin_bar,
 									ogsChem::LocalVector & conc_Min_bar,
 									ogsChem::LocalVector & vec_residual)
 {
-	ogsChem::LocalVector      conc_bar;
-	conc_bar  = ogsChem::LocalVector::Zero(_I_NMin_bar + _I_min);
+	ogsChem::LocalVector      conc_bar  = ogsChem::LocalVector::Zero(_I_NMin_bar + _I_min);
 
 	conc_bar.head(_I_NMin_bar)    = conc_NonMin_bar;
 	conc_bar.tail(_I_min)         = conc_Min_bar;
@@ -784,17 +742,15 @@ void LocalProblem::residual_xi_KinBar_Eq(ogsChem::LocalVector & conc_NonMin_bar,
 										 ogsChem::LocalVector & vec_residual)
 {
 
-//	ogsChem::LocalVector   conc_tmp;
-//	ogsChem::LocalVector   conc_bar;
-//	conc_bar  = ogsChem::LocalVector::Zero(_I_NMin_bar + _n_xi_Min);
-//	conc_tmp  = ogsChem::LocalVector::Zero(_n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
-//
-//	conc_bar.head(_I_NMin_bar)    = conc_NonMin_bar;
-//	conc_bar.tail(_n_xi_Min)         = conc_Min_bar;
-//
-//	conc_tmp     = _mat_c_immob_2_xi_immob * conc_bar;
-//	//XiBarKin is the total mass constrain
-//	vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde +  _n_xi_Kin + _n_xi_Sorp + _n_xi_Min + _n_eta_bar, _n_xi_Kin_bar)  = - Xi_Kin_bar + conc_tmp.segment(_n_xi_Sorp_bar + _n_xi_Min_bar, _n_xi_Kin_bar);
+	ogsChem::LocalVector   conc_tmp  = ogsChem::LocalVector::Zero(_n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
+	ogsChem::LocalVector   conc_bar  = ogsChem::LocalVector::Zero(_I_NMin_bar + _n_xi_Min);
+
+	conc_bar.head(_I_NMin_bar)    = conc_NonMin_bar;
+	conc_bar.tail(_n_xi_Min)      = conc_Min_bar;
+
+	conc_tmp     = _mat_c_immob_2_xi_immob * conc_bar;
+	//XiBarKin is the total mass constrain
+	vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde +  _n_xi_Kin + _n_xi_Sorp + _n_xi_Min + _n_eta_bar, _n_xi_Kin_bar)  = - Xi_Kin_bar + conc_tmp.segment(_n_xi_Sorp_bar + _n_xi_Min_bar, _n_xi_Kin_bar);
 }
 
 // Eq. 3.65
@@ -804,66 +760,33 @@ void LocalProblem::residual_xi_KinBar_Kin(ogsChem::LocalVector & conc_Mob,
 										  ogsChem::LocalVector & Xi_Kin_bar,
 										  ogsChem::LocalVector & vec_residual)
 {
-//	ogsChem::LocalVector   conc, vec_rateKin;
-//	conc 		 = ogsChem::LocalVector::Zero(_n_Comp);
-//	vec_rateKin  = ogsChem::LocalVector::Zero(_n_xi_Kin);
-//
-//	//TODO get theta_waterContent
-//	double theta_waterContent (0.3);
-//
-//	conc.head	(_I_mob)  					 = conc_Mob;
-//	conc.segment(_I_mob, _I_NMin_bar) 		 = conc_NonMin_bar;
-//	conc.tail	(_n_xi_Min_bar) 			 = conc_Min_bar;
-//
-//	this->reaction_rates(conc, vec_rateKin);
-//
-//	vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde +  _n_xi_Kin + _n_xi_Sorp + _n_xi_Min + _n_eta_bar + _n_xi_Kin_bar, _n_xi_Kin_bar)
-//			      = ((theta_waterContent * Xi_Kin_bar - (theta_waterContent * _vec_XiBarKin_old)) / deltaT) - (theta_waterContent * _mat_A2kin * vec_rateKin);
+	ogsChem::LocalVector  conc 		 = ogsChem::LocalVector::Zero(_n_Comp);
+	ogsChem::LocalVector  vec_rateKin  = ogsChem::LocalVector::Zero(_J_tot_kin);
+
+	//TODO get theta_waterContent
+	double theta_waterContent (0.3);  //monod2d example
+
+	conc.head	(_I_mob)  					 = conc_Mob;
+	conc.segment(_I_mob, _I_NMin_bar) 		 = conc_NonMin_bar;
+	conc.tail	(_n_xi_Min_bar) 			 = conc_Min_bar;
+
+	this->reaction_rates(conc, vec_rateKin);
+
+	vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde +  _n_xi_Kin + _n_xi_Sorp + _n_xi_Min + _n_eta_bar + _n_xi_Kin_bar, _n_xi_Kin_bar)
+			      = ((theta_waterContent * Xi_Kin_bar - theta_waterContent * _vec_XiBarKin_old) / deltaT) - (theta_waterContent * _mat_A2kin * vec_rateKin);
 }
 
 //problem specific reaction rates
 void LocalProblem::reaction_rates(ogsChem::LocalVector & conc,
 								  ogsChem::LocalVector & vec_rateKin)
 {
-//double sub_A, sub_B, sub_C, biomass, umax, k_subA, k_subB, kdec;
-//ogsChem::LocalVector R;
-//ogsChem::LocalVector::Zero();
-//sub_A  = conc.segment(0,0);
-//sub_B  = conc.segment(1,0);
-//sub_C  = conc.segment(2,0);
-//biomass      = conc.segment(3,0);
-//
-//// max reaction rate
-//umax = umax;
-//
-//// monod coefficients
-//k_subA = k_subA;
-//k_subB = k_subB;
-//
-//// decay rates
-//kdec = kdec;
-//
-//R.head(0,0) = umax * sub_A / (k_subA + sub_A) * sub_B /(k_subB + sub_B) * biomass;
-//R.tail (1,0) =  R(0,1) - kdec * biomass;
+	std::size_t i;
+	// then calculate the rates and fill them in the rate vector
+	for ( i=0; i < this->_J_tot_kin; i++ )
+	{
+		// get to the particular kin equation and calculate its rate
+		this->_list_kin_reactions[i]->calcReactionRate( conc );
+		vec_rateKin(i) = this->_list_kin_reactions[i]->getRate();
+	}
 }
 
-//template <typename T>
-//ogsChem::LocalMatrix LocalProblem::Num_Diff(size_t & Row,
-//							std::size_t & Col,
-//							ogsChem::LocalVector & _vec_unknown,
-//							double & delta_xi,
-//							std::function<ogsChem::LocalVector(T))> f)
-//{
-//    size_t i;
-//    res = ogsChem::LocalMatrix::Zero(Row, Col);
-//	for (i = 0; i< Col; i++)
-//	{
-//		x  = _vec_unknown;
-//		x(i) = x(i) +  delta_xi;
-//		res.Col(i) = ( f(x) - f( _vec_unknown)) / delta_xi;
-//	}
-//
-//	return res;
-////	return f(_vec_unknown);
-//
-//}

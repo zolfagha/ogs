@@ -23,10 +23,10 @@ ReductionGIANodeInfo::ReductionGIANodeInfo(size_t node_id,
 	  _n_eta_bar(n_eta_bar), _n_xi_global(n_xi_global), _n_xi_local(n_xi_local), _ReductionGIA(ReductionGIA)
 {
 	_Comp_Conc = MathLib::LocalVector::Zero( _n_comp );
-	_eta  	   = MathLib::LocalVector::Zero( _n_eta );
-	_eta_bar   = MathLib::LocalVector::Zero( _n_eta_bar );
-	_xi_global = MathLib::LocalVector::Zero( _n_xi_global );
-	_xi_local  = MathLib::LocalVector::Zero( _n_xi_local );
+	loc_eta  	   = MathLib::LocalVector::Zero( _n_eta );   //changing local variable names to avoid the confusion with global variables.
+	loc_eta_bar   = MathLib::LocalVector::Zero( _n_eta_bar );
+	loc_xi_global = MathLib::LocalVector::Zero( _n_xi_global );
+	loc_xi_local  = MathLib::LocalVector::Zero( _n_xi_local );
 }
 
 ReductionGIANodeInfo::~ReductionGIANodeInfo()
@@ -41,6 +41,6 @@ void ReductionGIANodeInfo::set_comp_conc( size_t comp_idx, double val )
 
 void ReductionGIANodeInfo::transform(void)
 {
-	_ReductionGIA->Conc2EtaXi( _Comp_Conc, _eta, _eta_bar, _xi_global, _xi_local );
+	_ReductionGIA->Conc2EtaXi( _Comp_Conc, loc_eta, loc_eta_bar, loc_xi_global, loc_xi_local );
 }
 

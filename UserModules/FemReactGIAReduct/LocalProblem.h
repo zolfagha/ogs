@@ -119,6 +119,11 @@ private:
       */
 	ogsChem::chemReductionGIA* _ReductionGIA;
 
+	/**
+	  * a list of all kinetic reactions
+	  */
+	std::vector<ogsChem::chemReactionKin*> & _list_kin_reactions;
+
     ogsChem::LocalMatrix _mat_Ald,_mat_c_mob_2_xi_mob,_mat_c_immob_2_xi_immob, _mat_c_mob_2_eta_mob, _mat_c_immob_2_eta_immob;
 
     /**
@@ -157,7 +162,7 @@ private:
 	/**
 	 * number of species
 	 */
-    size_t _n_xi_Mob,_n_xi_Min, _n_xi_Min_bar, _n_xi_Sorp_bar, _n_xi_Sorp_bar_li, _n_xi_Sorp_bar_ld;
+    size_t _n_xi_Mob,_n_xi_Min, _n_xi_Min_bar, _n_xi_Sorp_bar, _n_xi_Sorp_bar_li, _n_xi_Sorp_bar_ld, _J_tot_kin;
 
     /**
       * number of total unknowns

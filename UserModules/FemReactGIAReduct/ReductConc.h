@@ -168,7 +168,8 @@ public:
     	BaseLib::releaseObjectsInStdVector(_eta_bar);
     	BaseLib::releaseObjectsInStdVector(_xi_global_cur);
         BaseLib::releaseObjectsInStdVector(_xi_global_pre);
-    	BaseLib::releaseObjectsInStdVector(_xi_local);
+    	BaseLib::releaseObjectsInStdVector(_xi_local_new);
+    	BaseLib::releaseObjectsInStdVector(_xi_local_old);
     	//        BaseLib::releaseObjectsInStdVector(_rates);
     	BaseLib::releaseObjectsInStdVector(_kin_rates);
     	//BaseLib::releaseObjectsInStdVector(_xi_global_drates_dxi);
@@ -309,6 +310,8 @@ public:
 
     void copy_cur_xi_global_to_pre(void); 
 
+    void copy_cur_xi_local_to_pre(void);
+
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
 
@@ -437,7 +440,7 @@ private:
     /**
       * nodal xi_local values
       */ 
-    std::vector<MyNodalFunctionScalar*> _xi_local;
+    std::vector<MyNodalFunctionScalar*> _xi_local_old;
 
     /**
       * nodal concentration values
