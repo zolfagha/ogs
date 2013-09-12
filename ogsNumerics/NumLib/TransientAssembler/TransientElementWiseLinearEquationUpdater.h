@@ -47,7 +47,8 @@ public:
             const GlobalVector* u0, const GlobalVector* u1,
             LocalAssemblerType* a   )
     : _msh(msh),
-      _transient_e_assembler(new LocalAssemblerType(*a)), _timestep(time),
+      /* _transient_e_assembler(new LocalAssemblerType(*a)), _timestep(time), */ // HS: just try
+      _transient_e_assembler( a ), _timestep(time),
       _vec_u0(u0), _vec_u1(u1)
     {
     }
@@ -81,7 +82,7 @@ public:
      */
     virtual ~TransientElementWiseLinearEquationUpdater()
     {
-        BaseLib::releaseObject(_transient_e_assembler);
+        // BaseLib::releaseObject(_transient_e_assembler); // HS no longer create a new one, therefore disable this. 
     }
 
     /**
