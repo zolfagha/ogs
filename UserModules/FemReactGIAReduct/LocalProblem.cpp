@@ -247,64 +247,32 @@ void LocalProblem::calc_residual(ogsChem::LocalVector & vec_unknowns,
 
     // Eq. 3.55
     this->residual_conc_Mob			(ln_conc_Mob, vec_residual);
-
-#ifdef _DEBUG
-	// debugging--------------------------
-//	std::cout << "residual_conc_Mob: \n";
-//	std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
-
     // Eq. 3.56
     this->residual_Eta				(conc_Mob, vec_residual);
-
-#ifdef _DEBUG
-	// debugging--------------------------
-//	std::cout << "residual_Eta: \n";
-//	std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
-
-    // Eq. 3.57 - 58
-    this->residual_xi_Sorp_tilde	(conc_Mob, conc_NonMin_bar, conc_Min_bar, vec_residual);
     // Eq. 3.59
     this->residual_xi_Min_tilde		(conc_Mob, conc_NonMin_bar, conc_Min_bar, vec_residual);
-
-#ifdef _DEBUG
-	// debugging--------------------------
-//	std::cout << "residual_xi_Min_tilde: \n";
-    //	std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
-
-    // Eq. 3.60
-    this->residual_xi_Kin			(conc_Mob, vec_residual);
-    // Eq. 3.61
-    this->residual_conc_Sorp		(ln_conc_Mob, ln_conc_NonMin_bar, vec_residual);
     // Eq. 3.62
     this->residual_conc_Min			(ln_conc_Mob, conc_Min_bar, vec_residual);
 
-#ifdef _DEBUG
-	// debugging--------------------------
-    //	std::cout << "residual_conc_Min: \n";
-    //std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
-
+    if(_n_xi_Sorp != 0)
+    {
+    // Eq. 3.57 - 58
+    this->residual_xi_Sorp_tilde	(conc_Mob, conc_NonMin_bar, conc_Min_bar, vec_residual);
+    // Eq. 3.61
+    this->residual_conc_Sorp		(ln_conc_Mob, ln_conc_NonMin_bar, vec_residual);
+    }
     // Eq. 3.63
     this->residual_Eta_bar			(conc_NonMin_bar, conc_Min_bar, vec_residual);
 
-#ifdef _DEBUG
-	// debugging--------------------------
-    //std::cout << "residual_Eta_bar: \n";
-    //std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
-
-    // Eq. 3.64
-    this->residual_xi_KinBar_Eq		(conc_NonMin_bar, conc_Min_bar, Xi_Kin_bar, vec_residual);
-    // Eq. 3.65
-    this->residual_xi_KinBar_Kin	(conc_Mob, conc_NonMin_bar, conc_Min_bar, Xi_Kin_bar, vec_residual);
+    if(_n_xi_Kin != 0)  // boost from 260s to 180s!
+    {
+    	// Eq. 3.60
+    	this->residual_xi_Kin			(conc_Mob, vec_residual);
+    	// Eq. 3.64
+    	this->residual_xi_KinBar_Eq		(conc_NonMin_bar, conc_Min_bar, Xi_Kin_bar, vec_residual);
+    	// Eq. 3.65
+    	this->residual_xi_KinBar_Kin	(conc_Mob, conc_NonMin_bar, conc_Min_bar, Xi_Kin_bar, vec_residual);
+    }
 
 }  // end of function calc_residual
 
