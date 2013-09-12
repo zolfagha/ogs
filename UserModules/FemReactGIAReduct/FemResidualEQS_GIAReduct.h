@@ -279,6 +279,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             for(std::size_t i = 0; i < _n_xi_Min_tilde; i++)
             residual_global[_n_xi_global * node_idx + i] = res44[i];
 
+            if(_n_xi_Kin != 0){
             // calculate the nodal kinetic reaction rates
             _ReductionGIA->Calc_Kin_Rate(loc_cur_xi_Mob,
                                          loc_cur_xi_Sorp,
@@ -309,6 +310,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
                 residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp_tilde + j] -= res46(j) ;
             for (j=0; j<_n_xi_Kin; j++ )
                 residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp_tilde + _n_xi_Min_tilde + j] -= res47(j) ;
+            }
      
     } // end of loop over all nodes. 
 
