@@ -228,9 +228,9 @@ void chemReductionGIA::update_reductionScheme(void)
     _mat_S1.block(0,_J_tot_eq,_I_mob,_J_tot_kin) = _mat_S1kin;
 
     _mat_S2.block(0,0,_I_bar,_Jmob) = _mat_S2mob;
-    _mat_S2.block(0,_Jmob,_I_bar,_Jsorp) = _mat_S2sorp;
-	_mat_S2.block(0,_Jmob+_Jsorp,_I_bar,_Jmin) = _mat_S2min;
-    _mat_S2.block(0,_J_tot_eq,_I_bar,_J_tot_kin) = _mat_S2kin;
+    _mat_S2.block(0,_Jmob,_I_sorp,_Jsorp) = _mat_S2sorp;
+	_mat_S2.block(0,_Jmob+_Jsorp,_I_min,_Jmin) = _mat_S2min;
+    _mat_S2.block(0,_J_tot_eq,_I_kin,_J_tot_kin) = _mat_S2kin;
 
     _mat_S1kin_ast = _mat_S1kin;
     _mat_S2kin_ast = _mat_S2kin;
@@ -239,15 +239,18 @@ void chemReductionGIA::update_reductionScheme(void)
     if( _J_tot_kin > 0 )
     {
     	//clean the memory
-    	_mat_S1kin_ast.resize(0,0);
-    	_mat_S2kin_ast.resize(0,0);
-
+    	_mat_S1kin_ast.setZero();
+    	_mat_S2kin_ast.setZero();
+    	_mat_Skin.block(0,0,_I_mob,_J_tot_kin) = _mat_S1kin;
+    	_mat_Skin.block(0,0,_I_kin,_J_tot_kin) = _mat_S2kin;
     	// reveal the rank of S1kin
-    	Eigen::FullPivLU<LocalMatrix> lu_decomp_Skin(_mat_Skin);
-    	_mat_Skin_li = lu_decomp_Skin.image(_mat_Skin);
-        _mat_S1kin_ast = _mat_Skin_li.topRows(_I_mob);
-        _mat_S2kin_ast = _mat_Skin_li.bottomRows(_I_bar);
-        _Jkin_ast      = _mat_Skin_li.cols();
+    	Eigen::FullPivLU<LocalMatrix> lu_decomp_S1kin(_mat_S1kin);
+    	_mat_S1kin_ast = lu_decomp_S1kin.image(_mat_S1kin);
+
+    	Eigen::FullPivLU<LocalMatrix> lu_decomp_S2kin(_mat_S2kin);
+    	_mat_S2kin_ast = lu_decomp_S2kin.image(_mat_S2kin);
+
+    	_Jkin_ast      = _mat_S1kin_ast.cols();  //J1kin_ast = J2kin_ast
     }
 
 	// creat the memory for Stoi matrix
