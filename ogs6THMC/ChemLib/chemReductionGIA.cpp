@@ -466,8 +466,6 @@ void chemReductionGIA::Conc2EtaXi(ogsChem::LocalVector &local_conc,
 	ogsChem::LocalVector local_xi_Min_bar   	 = ogsChem::LocalVector::Zero(_n_xi_Min_bar);
 	ogsChem::LocalVector local_xi_Kin   		 = ogsChem::LocalVector::Zero(_n_xi_Kin);
 	ogsChem::LocalVector local_xi_Kin_bar   	 = ogsChem::LocalVector::Zero(_n_xi_Kin_bar);
-	//ogsChem::LocalVector local_xi_global         = ogsChem::LocalVector::Zero(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
-	//ogsChem::LocalVector local_xi_local          = ogsChem::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
 
 	// divide c1 and c2
 	local_c_mob   = local_conc.topRows(    this->_I_mob );
@@ -535,15 +533,6 @@ void chemReductionGIA::EtaXi2Conc(ogsChem::LocalVector &local_eta,
 	local_c_mob   = ogsChem::LocalVector::Zero(_I_mob);
 	local_xi_bar  = ogsChem::LocalVector::Zero(_n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
 	local_c_immob = ogsChem::LocalVector::Zero(_I_NMin_bar + _I_min);
-
-	//local_xi_Mob  = local_xi_local.segment( 0,this->_n_xi_Mob);
-	//local_xi_Sorp = local_xi_global.segment(this->_n_xi_Sorp_tilde + this->_n_xi_Min,this->_n_xi_Sorp);
-	//local_xi_Min  = local_xi_global.segment(this->_n_xi_Sorp_tilde + this->_n_xi_Min + this->_n_xi_Sorp,this->_n_xi_Min);
-	//local_xi_Kin  = local_xi_global.segment(this->_n_xi_Sorp_tilde + this->_n_xi_Min + this->_n_xi_Sorp+ this->_n_xi_Min,this->_n_xi_Kin);
-
-	//local_xi_Sorp_bar = local_xi_local.segment(this->_n_xi_Mob,this->_n_xi_Sorp_bar);
-	//local_xi_Min_bar  = local_xi_local.segment(this->_n_xi_Mob+this->_n_xi_Sorp_bar,this->_n_xi_Min_bar);
-	//local_xi_Kin_bar  = local_xi_local.segment(this->_n_xi_Mob+this->_n_xi_Sorp_bar+this->_n_xi_Min_bar,this->_n_xi_Kin_bar);
 
 	local_xi.head	(this->_n_xi_Mob) 					  				   = local_xi_local.segment( 0,this->_n_xi_Mob);;
 	local_xi.segment(this->_n_xi_Mob, this->_n_xi_Sorp) 		           = local_xi_global.segment(this->_n_xi_Sorp + this->_n_xi_Min,this->_n_xi_Sorp);;
