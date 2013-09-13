@@ -610,46 +610,7 @@ void chemReductionGIA::Calc_Kin_Rate(ogsChem::LocalVector &local_xi_Mob,
 		vec_rates(i) = this->_list_kin_reactions[i]->getRate();
 	}
 
-	//Note: since A sub spaces are different for different equations, it should be multiplied later
-	// multiply the rate vector with the A matrix to get rate for xi_mob and xi_immob
-	//xi_mob_rate   = _matA1 * vec_rates;
-	//xi_immob_rate = _matA2 * vec_rates;
 }
-
-//void chemReductionGIA::Calc_Kin_Rate(ogsChem::LocalVector &local_eta,
-//	                                ogsChem::LocalVector &local_eta_bar,
-//									ogsChem::LocalVector &local_xi_global,
-//									ogsChem::LocalVector &local_xi_local,
-//									ogsChem::LocalVector &local_rate_vec)
-//{
-//	size_t i;
-//
-//	// the size of vec_rates is equal to the number of kinetic equations
-//	ogsChem::LocalVector vec_rates = ogsChem::LocalVector::Zero(_J_tot_kin);
-//	// the local temp concentration vector
-//	ogsChem::LocalVector vec_conc = ogsChem::LocalVector::Zero(_I_tot);
-//
-//	// first convert these eta and xi to concentrations
-//	EtaXi2Conc( local_eta,
-//		        local_eta_bar,
-//				local_xi_global,
-//				local_xi_local,
-//				vec_conc );
-//
-//	// then calculate the rates and fill them in the rate vector
-//	for ( i=0; i < this->_J_tot_kin; i++ )
-//	{
-//		// get to the particular kin equation and calculate its rate
-//		this->_list_kin_reactions[i]->calcReactionRate( vec_conc );
-//		vec_rates(i) = this->_list_kin_reactions[i]->getRate();
-//	}
-//
-//	//Note: since A sub spaces are different for different equations, it should be multiplied later
-//	// multiply the rate vector with the A matrix to get rate for xi_mob and xi_immob
-//	//xi_mob_rate   = _matA1 * vec_rates;
-//	//xi_immob_rate = _matA2 * vec_rates;
-//}
-
 
 }  // end of namespace
 
