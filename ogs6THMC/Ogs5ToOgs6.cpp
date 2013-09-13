@@ -541,7 +541,8 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 			if ( ogs6fem.list_compound[i]->is_mobile )
 				mChemComp->set_mobility( ogsChem::MOBILE  ); 
 			else 
-				mChemComp->set_mobility( ogsChem::MINERAL );
+				//mChemComp->set_mobility( ogsChem::MINERAL );
+				mChemComp->set_mobility( ogsChem::KINETIC ); //RZ temp solution for monode 2d
 
 			ogs6fem.map_ChemComp.insert(ogs6fem.list_compound[i]->name, mChemComp); 
 			mChemComp = NULL; 
