@@ -165,17 +165,17 @@ void chemReductionGIA::update_reductionScheme(void)
     _mat_S1kin    =_mat_S1.block(0,_J_tot_eq,_I_mob,_J_tot_kin);
 
     _mat_S2mob    =_mat_S2.block(0,0,_I_bar,_Jmob);
-    _mat_S2sorp   =_mat_S2.block(0,_Jmob,_I_bar,_Jsorp);
-	_mat_S2min    =_mat_S2.block(0,_Jmob +_Jsorp,_I_bar,_Jmin);
-    _mat_S2kin    =_mat_S2.block(0,_J_tot_eq,_I_bar,_J_tot_kin);
+    _mat_S2sorp   =_mat_S2.block(0,_Jmob,_I_sorp,_Jsorp);
+	_mat_S2min    =_mat_S2.block(0,_Jmob +_Jsorp,_I_min,_Jmin);
+    _mat_S2kin    =_mat_S2.block(0,_J_tot_eq,_I_kin,_J_tot_kin);
 
     _Jsorp_li = _Jsorp;
     _mat_S1sorp_li = _mat_S1sorp;
-    _matrix_Ssorp  = _matStoi.block(0,_Jmob,_I_mob +_I_NMin_bar,_Jsorp);
+    _matrix_Ssorp  = _matStoi.block(0,_Jmob,_I_mob +_I_sorp,_Jsorp);
 
-    if(_Jsorp)
+    if(_Jsorp)  // calculate S1 and S2 seperately.
     {
-    	_mat_Ssorp   =_matStoi.block(0,_Jmob,_I_tot,_Jsorp);
+    	_mat_Ssorp   =_matStoi.block(0,_Jmob,_I_mob +_I_sorp,_Jsorp);
     	_mat_Ssorp_li = _mat_Ssorp;   //if _Jsorp = 0
 
     	// reveal the rank of S1sorp = S1sorpli and S1sorpld
