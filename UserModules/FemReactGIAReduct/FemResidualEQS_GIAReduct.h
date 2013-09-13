@@ -171,7 +171,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
                                SolutionLib::SolutionVector & residual_global)
 {
     const size_t nnodes = _dis_sys->getMesh()->getNumberOfNodes();
-    const double theta_water_content = 0.32; 
+    const double theta_water_content = 0.5;
     size_t j; 
     // current xi global
     MathLib::LocalVector loc_cur_xi_global, loc_cur_xi_Sorp_tilde, loc_cur_xi_Min_tilde,
@@ -216,6 +216,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
     res44                       = MathLib::LocalVector::Zero( _n_xi_Min_tilde);
     res45                       = MathLib::LocalVector::Zero( _n_xi_Sorp);
     res46                       = MathLib::LocalVector::Zero( _n_xi_Min);
+    vec_Rate					= MathLib::LocalVector::Zero( _J_tot_kin);
 
     // current eta mobie and immobile
     loc_cur_eta             = MathLib::LocalVector::Zero( _n_eta );
@@ -293,8 +294,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
                                          loc_cur_eta,
                                          loc_cur_eta_bar,
                                          vec_Rate);
-
-
 
             //_J_tot_kin  = vec_Rate.rows();
             for (size_t i=0; i < _J_tot_kin; i++)
@@ -515,10 +514,10 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
         }  // end of node_idx
 
         // --------debugging--------------
-        //std::cout << "loc_cur_xi_global" << std::endl;
-        //std::cout << loc_cur_xi_global << std::endl;
-        //std::cout << "loc_pre_xi_global" << std::endl;
-        //std::cout << loc_pre_xi_global << std::endl;
+//        std::cout << "loc_cur_xi_global" << std::endl;
+//        std::cout << loc_cur_xi_global << std::endl;
+//        std::cout << "loc_pre_xi_global" << std::endl;
+//        std::cout << loc_pre_xi_global << std::endl;
         // --------end of debugging-------
 
         loc_cur_xi_Sorp_tilde   = loc_cur_xi_global.head(_n_xi_Sorp_tilde*nnodes);
@@ -532,14 +531,10 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
         loc_pre_xi_Min          = loc_pre_xi_global.segment( _n_xi_Sorp_tilde*nnodes + _n_xi_Min_tilde*nnodes + _n_xi_Sorp*nnodes, _n_xi_Min*nnodes);
 
         //    --------debugging--------------
-        //std::cout << "loc_cur_xi_Min_tilde" << std::endl;
-        //std::cout << loc_cur_xi_Min_tilde << std::endl;
-        //std::cout << "loc_cur_xi_Min" << std::endl;
-        //std::cout << loc_cur_xi_Min << std::endl;
-        //std::cout << "loc_pre_xi_Min" << std::endl;
-        //std::cout << loc_pre_xi_Min << std::endl;
-        //std::cout << "loc_pre_xi_Min" << std::endl;
-        //std::cout << loc_pre_xi_Min << std::endl;
+//        std::cout << "loc_cur_xi_Kin" << std::endl;
+//        std::cout << loc_cur_xi_Kin << std::endl;
+//        std::cout << "loc_pre_xi_Kin" << std::endl;
+//        std::cout << loc_pre_xi_Kin << std::endl;
         //    --------end of debugging-------
 
         // LHS = (1/dt M + theta theta K) u1
