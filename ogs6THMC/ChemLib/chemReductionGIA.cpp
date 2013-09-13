@@ -287,34 +287,6 @@ void chemReductionGIA::update_reductionScheme(void)
 	// s1T = orthcomp(s1);
 	_mat_S1_orth = orthcomp( _mat_S1_ast );
 
-	LocalMatrix::Zero(6,3);
-	LocalMatrix m(6,3);
-
-	m(0,0) = 0.0;
-	m(1,0) = 0.0;
-	m(2,0) = 0.0;
-	m(3,0) = 1.0;
-	m(4,0) = 0.0;
-	m(5,0) = 0.0;
-
-
-	m(0,1) = -1.0;
-	m(1,1) = -1.0;
-	m(2,1) = -1.0;
-	m(3,1) = 0.0;
-	m(4,1) = 1.0;
-	m(5,1) = 0.0;
-
-
-	m(0,2) = 1.0;
-	m(1,2) = 0.0;
-	m(2,2) = 0.0;
-	m(3,2) = 0.0;
-	m(4,2) = 0.0;
-	m(5,2) = 1.0;
-
-	_mat_S1_orth = m;
-
     // s2T = orthcomp(s2);
 	_mat_S2_orth = orthcomp( _mat_S2_ast );
 
@@ -444,11 +416,15 @@ void chemReductionGIA::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 		case ogsChem::MINERAL: //immobile mineral
 			_I_min++;
 			break;
+		case ogsChem::KINETIC: //immobile kinetic (biomass)
+			_I_kin++;
+			break;
 		default:
 			//_I_min++;  //temp disabled.
 			break;
 		}
 	}
+	_I_NMin_bar = _I_sorp + _I_kin;
     _I_bar = _I_NMin_bar + _I_min;
 }
 
