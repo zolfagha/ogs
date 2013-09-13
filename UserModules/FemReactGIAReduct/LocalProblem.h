@@ -48,9 +48,9 @@ public:
       * the concentration vector of all components and
       * the total concentration constrain of the basis species
       */
-    void calc_residual(ogsChem::LocalVector & vec_unknowns,
-	//		 ogsChem::LocalVector & vec_AI,
-			 ogsChem::LocalVector & vec_residual);
+    void calc_residual(double dt,
+    				ogsChem::LocalVector & vec_unknowns,
+    				ogsChem::LocalVector & vec_residual);
     
     /**
       * calculate the Jacobi of the reaction system analytically using 
@@ -58,7 +58,8 @@ public:
       * the total concentration constrain of the basis species, 
       * and an already calculated residual vector
       */
-    void calc_Jacobian(ogsChem::LocalVector & vec_unknowns,
+    void calc_Jacobian( double dt,
+    					ogsChem::LocalVector & vec_unknowns,
     //				 ogsChem::LocalVector & vec_AI,
     				 ogsChem::LocalVector & vec_residual);
 
@@ -152,7 +153,7 @@ private:
       */
 	std::size_t const  _n_Comp;
 
-    double  deltaT, theta_waterContent;
+    //double  deltaT, theta_waterContent;
 
     /**
       * number of mobile, sorption and mineral components
@@ -254,7 +255,8 @@ private:
     								 ogsChem::LocalVector & Xi_Kin_bar,
     								 ogsChem::LocalVector & vec_residual);
     // Eq. 3.65
-    void residual_xi_KinBar_Kin	(ogsChem::LocalVector & conc_Mob,
+    void residual_xi_KinBar_Kin	(   double deltaT,
+    								ogsChem::LocalVector & conc_Mob,
     								ogsChem::LocalVector & conc_NonMin_bar,
     								 ogsChem::LocalVector & conc_Min_bar,
     								 ogsChem::LocalVector & Xi_Kin_bar,
