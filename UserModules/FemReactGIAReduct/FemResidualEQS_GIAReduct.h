@@ -524,11 +524,13 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
         loc_cur_xi_Min_tilde    = loc_cur_xi_global.segment(_n_xi_Sorp_tilde*nnodes, _n_xi_Min_tilde*nnodes);
         loc_cur_xi_Sorp         = loc_cur_xi_global.segment(_n_xi_Sorp_tilde*nnodes  + _n_xi_Min_tilde*nnodes, _n_xi_Sorp*nnodes);
         loc_cur_xi_Min          = loc_cur_xi_global.segment( _n_xi_Sorp_tilde*nnodes + _n_xi_Min_tilde*nnodes + _n_xi_Sorp*nnodes, _n_xi_Min*nnodes);
+        loc_cur_xi_Kin          = loc_cur_xi_global.segment( _n_xi_Sorp_tilde*nnodes + _n_xi_Min_tilde*nnodes + _n_xi_Sorp*nnodes + _n_xi_Min*nnodes, _n_xi_Kin*nnodes);
 
         loc_pre_xi_Sorp_tilde   = loc_pre_xi_global.head(_n_xi_Sorp_tilde*nnodes);
         loc_pre_xi_Min_tilde    = loc_pre_xi_global.segment(_n_xi_Sorp_tilde*nnodes, _n_xi_Min_tilde*nnodes);
         loc_pre_xi_Sorp         = loc_pre_xi_global.segment(_n_xi_Sorp_tilde*nnodes  + _n_xi_Min_tilde*nnodes, _n_xi_Sorp*nnodes);
         loc_pre_xi_Min          = loc_pre_xi_global.segment( _n_xi_Sorp_tilde*nnodes + _n_xi_Min_tilde*nnodes + _n_xi_Sorp*nnodes, _n_xi_Min*nnodes);
+        loc_pre_xi_Kin          = loc_pre_xi_global.segment( _n_xi_Sorp_tilde*nnodes + _n_xi_Min_tilde*nnodes + _n_xi_Sorp*nnodes + _n_xi_Min*nnodes, _n_xi_Kin*nnodes);
 
         //    --------debugging--------------
 //        std::cout << "loc_cur_xi_Kin" << std::endl;
