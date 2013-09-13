@@ -600,41 +600,41 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
         }  // end of for
 
 ///TODO fix the if clause later.
-		double KIN_REACT_GIA_tmp(0), REACT_GIA_tmp(0);
-		for (size_t i=0; i<ogs5fem.pcs_vector.size(); i++)
-		    {
-			optPcsData = option.getSubGroup("processList");
-			BaseLib::OptionGroup* optPcs = optPcsData->getSubGroup("process");
-			std::string pcs_name = optPcs->getOption("name");
-			std::string KIN_REACT_GIA, REACT_GIA;
-
-			if(pcs_name.compare(KIN_REACT_GIA) == 0){
-				KIN_REACT_GIA_tmp = 1;
-			break;
-			}
-			else if(pcs_name.compare(REACT_GIA) == 0){
-				REACT_GIA_tmp = 1;
-			break;
-			}
+//		double KIN_REACT_GIA_tmp(0), REACT_GIA_tmp(0);
+//		for (size_t i=0; i<ogs5fem.pcs_vector.size(); i++)
+//		    {
+//			optPcsData = option.getSubGroup("processList");
+//			BaseLib::OptionGroup* optPcs = optPcsData->getSubGroup("process");
+//			std::string pcs_name = optPcs->getOption("name");
+//			std::string KIN_REACT_GIA, REACT_GIA;
+//
+//			if(pcs_name.compare(KIN_REACT_GIA) == 0){
+//				KIN_REACT_GIA_tmp = 1;
+//			break;
+//			}
+//			else if(pcs_name.compare(REACT_GIA) == 0){
+//				REACT_GIA_tmp = 1;
+//			break;
+//			}
 		// if only kinetic but no equilibrium reactions
 		//if (pcs_type == FiniteElement::KIN_REACT_GIA)
-		if (KIN_REACT_GIA_tmp)
-        {   // initialize the kin-reduction scheme
-            ogsChem::chemReductionKin* mReductionKinScheme;
-            mReductionKinScheme = new ogsChem::chemReductionKin( ogs6fem.map_ChemComp, ogs6fem.list_kin_reactions );
-            ogs6fem.m_KinReductScheme = mReductionKinScheme;
-            mReductionKinScheme = NULL;
-        }
+//		if (KIN_REACT_GIA_tmp)
+//        {   // initialize the kin-reduction scheme
+//            ogsChem::chemReductionKin* mReductionKinScheme;
+//            mReductionKinScheme = new ogsChem::chemReductionKin( ogs6fem.map_ChemComp, ogs6fem.list_kin_reactions );
+//            ogs6fem.m_KinReductScheme = mReductionKinScheme;
+//            mReductionKinScheme = NULL;
+//        }
 		//  for both kinetic and equilibrium reactions
         //else if ( pcs_type == FiniteElement::REACT_GIA)
-		else if (REACT_GIA_tmp)
-        {  // initialize the full reduction scheme
+//		else if (REACT_GIA_tmp)
+//        {  // initialize the full reduction scheme
            // TODO
             ogsChem::chemReductionGIA* mReductionGIAScheme;
             mReductionGIAScheme = new ogsChem::chemReductionGIA( ogs6fem.map_ChemComp, ogs6fem.list_eq_reactions, ogs6fem.list_kin_reactions );
             ogs6fem.m_GIA_ReductScheme = mReductionGIAScheme;
             mReductionGIAScheme = NULL;
-        }  // end of if else
+//        }  // end of if else
 
 		//        // if only kinetic but no equilibrium reactions
 		//		if ( ogs6fem.list_eq_reactions.size() == 0 && ogs6fem.list_kin_reactions.size() > 0 )

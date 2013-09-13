@@ -10,7 +10,7 @@ GeoSys-TIM: Timestepping ------------------------------------------------
   0.0
 #TIME_STEPPING
  $PCS_TYPE
-  KIN_REACT_GIA
+    REACT_GIA
  $TIME_STEPS
    100000  8640.0
  $TIME_END
@@ -33,7 +33,7 @@ GeoSys-TIM: Timestepping ------------------------------------------------
   0.0
 #TIME_STEPPING
  $PCS_TYPE
-  KIN_REACT_GIA
+    REACT_GIA
  $TIME_STEPS
    100000  216.0
  $TIME_END

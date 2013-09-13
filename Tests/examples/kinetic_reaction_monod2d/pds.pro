@@ -13,7 +13,7 @@
                 <in>HEAD</in>
                 <out>VELOCITY</out>
             </M>
-            <M name="KIN_REACT_GIA" type="KIN_REACT_GIA">
+            <M name="REACT_GIA" type="REACT_GIA">
                 <in>VELOCITY</in>
                 <out>Tracer</out>
             </M>
