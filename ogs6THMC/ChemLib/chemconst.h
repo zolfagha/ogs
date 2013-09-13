@@ -48,7 +48,8 @@ namespace ogsChem
 	enum Comp_Mobility {
 		MOBILE,           /* mobile components*/
 		SORPTION,         /* sorption components*/
-		MINERAL           /* mineral components*/
+		MINERAL,           /* mineral components*/
+		KINETIC 		 /*immobile kinetic (biomass) RZ*/
 	}; 
 
     // type of chemical reaction
