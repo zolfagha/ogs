@@ -196,7 +196,7 @@ void chemReductionGIA::update_reductionScheme(void)
     		}
     	}
 
-    	_mat_S1sorp_li.resize(0,0);   //clean the allocated memory
+    	_mat_S1sorp_li.setZero();   //clean the allocated memory
     	_mat_S1sorp_li = _mat_Ssorp_li.topRows(_I_mob);
     	_mat_S2sorp_li = _mat_Ssorp_li.bottomRows(_I_bar);
     	_Jsorp_li   = _mat_Ssorp_li.cols();
