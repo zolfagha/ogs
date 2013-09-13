@@ -188,7 +188,7 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options & option)
 		{
 			// FemIC vector is empty
 			// initialize the vector with zeros
-			tmp_conc->initialize(*dis, _problem->getVariable(i)->getCurrentOrder(), 0.0);
+			tmp_conc->initialize(*dis, _problem->getVariable(i)->getCurrentOrder(), 1E-50);  //RZ: avoid zero. 
 		}
 		_concentrations.push_back( tmp_conc );
 	}
