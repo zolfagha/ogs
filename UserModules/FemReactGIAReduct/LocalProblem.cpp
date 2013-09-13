@@ -248,7 +248,7 @@ void LocalProblem::calc_residual(double dt,
     // convert the ln mobile conc to mobile conc
      this->cal_exp_conc_vec(_I_mob, ln_conc_Mob, conc_Mob);
      // convert the ln immobile conc to immobile conc
-     this->cal_exp_conc_vec(_I_NMin_bar, ln_conc_NonMin_bar, conc_Min_bar);
+     this->cal_exp_conc_vec(_I_NMin_bar, ln_conc_NonMin_bar, conc_NonMin_bar);
 
     // Eq. 3.55
     this->residual_conc_Mob			(ln_conc_Mob, vec_residual);
@@ -771,11 +771,14 @@ void LocalProblem::residual_xi_KinBar_Kin(double deltaT,
 										  ogsChem::LocalVector & Xi_Kin_bar,
 										  ogsChem::LocalVector & vec_residual)
 {
-	ogsChem::LocalVector  conc 		 = ogsChem::LocalVector::Zero(_n_Comp);
+	ogsChem::LocalVector  conc 		   = ogsChem::LocalVector::Zero(_n_Comp);
 	ogsChem::LocalVector  vec_rateKin  = ogsChem::LocalVector::Zero(_J_tot_kin);
+	ogsChem::LocalVector  temp_vec1    = ogsChem::LocalVector::Zero(_n_xi_Kin_bar);
+	ogsChem::LocalVector  temp_vec2    = ogsChem::LocalVector::Zero(_n_xi_Kin_bar);
+	ogsChem::LocalVector  temp_vec3    = ogsChem::LocalVector::Zero(_n_xi_Kin_bar);
 
-	//TODO get theta_waterContent
-	double theta_waterContent (0.3);  //monod2d example
+	//TODO get theta_water_content
+	double theta_water_content (0.5);  //monod2d example
 
 	conc.head	(_I_mob)  					 = conc_Mob;
 	conc.segment(_I_mob, _I_NMin_bar) 		 = conc_NonMin_bar;
