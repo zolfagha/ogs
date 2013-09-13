@@ -131,6 +131,21 @@ void chemReductionGIA::buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 void chemReductionGIA::update_reductionScheme(void)
 {
 	size_t i,j;
+	_Jsorp_li = 0;
+	_Jsorp_ld = 0;
+	_mat_S1 = LocalMatrix::Zero(_I_mob, _Jmob + _Jsorp + _Jmin + _J_tot_kin);
+	_mat_S2 = LocalMatrix::Zero(_I_bar, _Jmob + _Jsorp + _Jmin + _J_tot_kin);
+	_mat_S1_preserve = LocalMatrix::Zero(_I_mob, _Jmob + _Jsorp + _Jmin + _J_tot_kin);
+	_mat_S2_preserve = LocalMatrix::Zero(_I_bar, _Jmob + _Jsorp + _Jmin + _J_tot_kin);
+	_mat_S1mob 		 = LocalMatrix::Zero(_I_mob,_Jmob);
+	_mat_S1sorp 	 = LocalMatrix::Zero(_I_mob,_Jsorp);
+	_mat_S1min 	 = LocalMatrix::Zero(_I_mob,_Jmin);
+	_mat_S1kin 	 = LocalMatrix::Zero(_I_mob,_J_tot_kin);
+	_mat_S2mob 		 = LocalMatrix::Zero(_I_bar,_Jmob);
+	_mat_S2sorp 	 = LocalMatrix::Zero(_I_sorp,_Jsorp);
+	_mat_S2min 	 = LocalMatrix::Zero(_I_min,_Jmin);
+	_mat_S2kin 	 = LocalMatrix::Zero(_I_kin,_J_tot_kin);
+	_mat_Skin    = LocalMatrix::Zero(_I_mob + _I_kin, _J_tot_kin);
 
 	// divide mobile and immobile parts
 	// S1 =S(1:I,:);
