@@ -263,13 +263,13 @@ void chemReductionGIA::update_reductionScheme(void)
     _mat_S1_ast.block(0,_Jmob + _Jsorp_li,_I_mob,_Jmin) 			= _mat_S1min;
     _mat_S1_ast.block(0,_Jmob + _Jsorp_li + _Jmin,_I_mob,_Jkin_ast) = _mat_S1kin_ast;
 
-    _mat_S2_ast.block(0,0,_I_bar,_Jsorp) 						  = _mat_S2sorp;
-    _mat_S2_ast.block(0,_Jsorp, _I_bar ,_Jmin) 		   	  = _mat_S2min;
-    _mat_S2_ast.block(0,_Jsorp + _Jmin,_I_bar,_Jkin_ast) = _mat_S2kin_ast;
+    _mat_S2_ast.block(0,0,_I_sorp,_Jsorp) 						  = _mat_S2sorp;
+    _mat_S2_ast.block(0,_Jsorp, _I_min ,_Jmin) 		   	  = _mat_S2min;
+    _mat_S2_ast.block(0,_Jsorp + _Jmin,_I_kin,_Jkin_ast) = _mat_S2kin_ast;
 
     //the location of these matrices should not be changed. Cut the zero parts
-	_mat_S2sorp = _mat_S2sorp.topRows(_I_NMin_bar);
-	_mat_S2kin_ast = _mat_S2kin_ast.topRows(_I_NMin_bar);
+	_mat_S2sorp = _mat_S2sorp.topRows(_I_sorp);
+	_mat_S2kin_ast = _mat_S2kin_ast.topRows(_I_kin);
 
 #ifdef _DEBUG
 //    std::cout << "_mat_S1: "    << std::endl;
@@ -285,7 +285,7 @@ void chemReductionGIA::update_reductionScheme(void)
 	// Calculate the s1T = S_i^T matrix consisting of a max set of linearly
 	// independent columns that are orthogonal to each column of S_i^*.
 	// s1T = orthcomp(s1);
-	//_mat_S1_orth = orthcomp( _mat_S1_ast );  debuging
+	_mat_S1_orth = orthcomp( _mat_S1_ast );
 
 	LocalMatrix::Zero(6,3);
 	LocalMatrix m(6,3);
@@ -424,25 +424,28 @@ LocalMatrix chemReductionGIA::orthcomp( LocalMatrix & inMat )
 void chemReductionGIA::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp)
 {
 	_I_mob = 0;
+	_I_sorp = 0;
 	_I_NMin_bar= 0;
 	_I_min = 0;
-
+	_I_kin  = 0;
+	_I_bar = 0;
+	//TODO fix comp count for sorption, kinetic and mineral reactions.
 	BaseLib::OrderedMap<std::string, ogsChem::ChemComp*>::iterator it;
 	for( it = map_chemComp.begin(); it != map_chemComp.end(); it++ )
 	{
 		switch ( it->second->getMobility() )
 		{
-		case ogsChem::MOBILE:
+		case ogsChem::MOBILE:  //mobile
 			_I_mob++;
 			break;
-		case ogsChem::SORPTION:   //TODO add the immobile kinetic components to the nonmineral immobile
-			_I_NMin_bar++;
+		case ogsChem::SORPTION: //immobile sorbed
+			_I_sorp++;
 			break;
-		case ogsChem::MINERAL:
+		case ogsChem::MINERAL: //immobile mineral
 			_I_min++;
 			break;
 		default:
-			_I_min++;
+			//_I_min++;  //temp disabled.
 			break;
 		}
 	}
