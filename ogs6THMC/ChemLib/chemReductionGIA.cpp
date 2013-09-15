@@ -131,6 +131,21 @@ void chemReductionGIA::buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 void chemReductionGIA::update_reductionScheme(void)
 {
 	size_t i,j;
+	_Jsorp_li = 0;
+	_Jsorp_ld = 0;
+	_mat_S1 = LocalMatrix::Zero(_I_mob, _Jmob + _Jsorp + _Jmin + _J_tot_kin);
+	_mat_S2 = LocalMatrix::Zero(_I_bar, _Jmob + _Jsorp + _Jmin + _J_tot_kin);
+	_mat_S1_preserve = LocalMatrix::Zero(_I_mob, _Jmob + _Jsorp + _Jmin + _J_tot_kin);
+	_mat_S2_preserve = LocalMatrix::Zero(_I_bar, _Jmob + _Jsorp + _Jmin + _J_tot_kin);
+	_mat_S1mob 		 = LocalMatrix::Zero(_I_mob,_Jmob);
+	_mat_S1sorp 	 = LocalMatrix::Zero(_I_mob,_Jsorp);
+	_mat_S1min 	 = LocalMatrix::Zero(_I_mob,_Jmin);
+	_mat_S1kin 	 = LocalMatrix::Zero(_I_mob,_J_tot_kin);
+	_mat_S2mob 		 = LocalMatrix::Zero(_I_bar,_Jmob);
+	_mat_S2sorp 	 = LocalMatrix::Zero(_I_sorp,_Jsorp);
+	_mat_S2min 	 = LocalMatrix::Zero(_I_min,_Jmin);
+	_mat_S2kin 	 = LocalMatrix::Zero(_I_kin,_J_tot_kin);
+	_mat_Skin    = LocalMatrix::Zero(_I_mob + _I_kin, _J_tot_kin);
 
 	// divide mobile and immobile parts
 	// S1 =S(1:I,:);
@@ -150,17 +165,17 @@ void chemReductionGIA::update_reductionScheme(void)
     _mat_S1kin    =_mat_S1.block(0,_J_tot_eq,_I_mob,_J_tot_kin);
 
     _mat_S2mob    =_mat_S2.block(0,0,_I_bar,_Jmob);
-    _mat_S2sorp   =_mat_S2.block(0,_Jmob,_I_bar,_Jsorp);
-	_mat_S2min    =_mat_S2.block(0,_Jmob +_Jsorp,_I_bar,_Jmin);
-    _mat_S2kin    =_mat_S2.block(0,_J_tot_eq,_I_bar,_J_tot_kin);
+    _mat_S2sorp   =_mat_S2.block(0,_Jmob,_I_sorp,_Jsorp);
+	_mat_S2min    =_mat_S2.block(0,_Jmob +_Jsorp,_I_min,_Jmin);
+    _mat_S2kin    =_mat_S2.block(0,_J_tot_eq,_I_kin,_J_tot_kin);
 
     _Jsorp_li = _Jsorp;
     _mat_S1sorp_li = _mat_S1sorp;
-    _matrix_Ssorp  = _matStoi.block(0,_Jmob,_I_mob +_I_NMin_bar,_Jsorp);
+    _matrix_Ssorp  = _matStoi.block(0,_Jmob,_I_mob +_I_sorp,_Jsorp);
 
-    if(_Jsorp)
+    if(_Jsorp)  // calculate S1 and S2 seperately.
     {
-    	_mat_Ssorp   =_matStoi.block(0,_Jmob,_I_tot,_Jsorp);
+    	_mat_Ssorp   =_matStoi.block(0,_Jmob,_I_mob +_I_sorp,_Jsorp);
     	_mat_Ssorp_li = _mat_Ssorp;   //if _Jsorp = 0
 
     	// reveal the rank of S1sorp = S1sorpli and S1sorpld
@@ -181,7 +196,7 @@ void chemReductionGIA::update_reductionScheme(void)
     		}
     	}
 
-    	_mat_S1sorp_li.resize(0,0);   //clean the allocated memory
+    	_mat_S1sorp_li.setZero();   //clean the allocated memory
     	_mat_S1sorp_li = _mat_Ssorp_li.topRows(_I_mob);
     	_mat_S2sorp_li = _mat_Ssorp_li.bottomRows(_I_bar);
     	_Jsorp_li   = _mat_Ssorp_li.cols();
@@ -213,9 +228,9 @@ void chemReductionGIA::update_reductionScheme(void)
     _mat_S1.block(0,_J_tot_eq,_I_mob,_J_tot_kin) = _mat_S1kin;
 
     _mat_S2.block(0,0,_I_bar,_Jmob) = _mat_S2mob;
-    _mat_S2.block(0,_Jmob,_I_bar,_Jsorp) = _mat_S2sorp;
-	_mat_S2.block(0,_Jmob+_Jsorp,_I_bar,_Jmin) = _mat_S2min;
-    _mat_S2.block(0,_J_tot_eq,_I_bar,_J_tot_kin) = _mat_S2kin;
+    _mat_S2.block(0,_Jmob,_I_sorp,_Jsorp) = _mat_S2sorp;
+	_mat_S2.block(0,_Jmob+_Jsorp,_I_min,_Jmin) = _mat_S2min;
+    _mat_S2.block(0,_J_tot_eq,_I_kin,_J_tot_kin) = _mat_S2kin;
 
     _mat_S1kin_ast = _mat_S1kin;
     _mat_S2kin_ast = _mat_S2kin;
@@ -224,15 +239,18 @@ void chemReductionGIA::update_reductionScheme(void)
     if( _J_tot_kin > 0 )
     {
     	//clean the memory
-    	_mat_S1kin_ast.resize(0,0);
-    	_mat_S2kin_ast.resize(0,0);
-
+    	_mat_S1kin_ast.setZero();
+    	_mat_S2kin_ast.setZero();
+    	_mat_Skin.block(0,0,_I_mob,_J_tot_kin) = _mat_S1kin;
+    	_mat_Skin.block(0,0,_I_kin,_J_tot_kin) = _mat_S2kin;
     	// reveal the rank of S1kin
-    	Eigen::FullPivLU<LocalMatrix> lu_decomp_Skin(_mat_Skin);
-    	_mat_Skin_li = lu_decomp_Skin.image(_mat_Skin);
-        _mat_S1kin_ast = _mat_Skin_li.topRows(_I_mob);
-        _mat_S2kin_ast = _mat_Skin_li.bottomRows(_I_bar);
-        _Jkin_ast      = _mat_Skin_li.cols();
+    	Eigen::FullPivLU<LocalMatrix> lu_decomp_S1kin(_mat_S1kin);
+    	_mat_S1kin_ast = lu_decomp_S1kin.image(_mat_S1kin);
+
+    	Eigen::FullPivLU<LocalMatrix> lu_decomp_S2kin(_mat_S2kin);
+    	_mat_S2kin_ast = lu_decomp_S2kin.image(_mat_S2kin);
+
+    	_Jkin_ast      = _mat_S1kin_ast.cols();  //J1kin_ast = J2kin_ast
     }
 
 	// creat the memory for Stoi matrix
@@ -245,13 +263,13 @@ void chemReductionGIA::update_reductionScheme(void)
     _mat_S1_ast.block(0,_Jmob + _Jsorp_li,_I_mob,_Jmin) 			= _mat_S1min;
     _mat_S1_ast.block(0,_Jmob + _Jsorp_li + _Jmin,_I_mob,_Jkin_ast) = _mat_S1kin_ast;
 
-    _mat_S2_ast.block(0,0,_I_bar,_Jsorp) 						  = _mat_S2sorp;
-    _mat_S2_ast.block(0,_Jsorp, _I_bar ,_Jmin) 		   	  = _mat_S2min;
-    _mat_S2_ast.block(0,_Jsorp + _Jmin,_I_bar,_Jkin_ast) = _mat_S2kin_ast;
+    _mat_S2_ast.block(0,0,_I_sorp,_Jsorp) 						  = _mat_S2sorp;
+    _mat_S2_ast.block(0,_Jsorp, _I_min ,_Jmin) 		   	  = _mat_S2min;
+    _mat_S2_ast.block(0,_Jsorp + _Jmin,_I_kin,_Jkin_ast) = _mat_S2kin_ast;
 
     //the location of these matrices should not be changed. Cut the zero parts
-	_mat_S2sorp = _mat_S2sorp.topRows(_I_NMin_bar);
-	_mat_S2kin_ast = _mat_S2kin_ast.topRows(_I_NMin_bar);
+	_mat_S2sorp = _mat_S2sorp.topRows(_I_sorp);
+	_mat_S2kin_ast = _mat_S2kin_ast.topRows(_I_kin);
 
 #ifdef _DEBUG
 //    std::cout << "_mat_S1: "    << std::endl;
@@ -267,35 +285,7 @@ void chemReductionGIA::update_reductionScheme(void)
 	// Calculate the s1T = S_i^T matrix consisting of a max set of linearly
 	// independent columns that are orthogonal to each column of S_i^*.
 	// s1T = orthcomp(s1);
-	//_mat_S1_orth = orthcomp( _mat_S1_ast );  debuging
-
-	LocalMatrix::Zero(6,3);
-	LocalMatrix m(6,3);
-
-	m(0,0) = 0.0;
-	m(1,0) = 0.0;
-	m(2,0) = 0.0;
-	m(3,0) = 1.0;
-	m(4,0) = 0.0;
-	m(5,0) = 0.0;
-
-
-	m(0,1) = -1.0;
-	m(1,1) = -1.0;
-	m(2,1) = -1.0;
-	m(3,1) = 0.0;
-	m(4,1) = 1.0;
-	m(5,1) = 0.0;
-
-
-	m(0,2) = 1.0;
-	m(1,2) = 0.0;
-	m(2,2) = 0.0;
-	m(3,2) = 0.0;
-	m(4,2) = 0.0;
-	m(5,2) = 1.0;
-
-	_mat_S1_orth = m;
+	_mat_S1_orth = orthcomp( _mat_S1_ast );
 
     // s2T = orthcomp(s2);
 	_mat_S2_orth = orthcomp( _mat_S2_ast );
@@ -406,28 +396,35 @@ LocalMatrix chemReductionGIA::orthcomp( LocalMatrix & inMat )
 void chemReductionGIA::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp)
 {
 	_I_mob = 0;
+	_I_sorp = 0;
 	_I_NMin_bar= 0;
 	_I_min = 0;
-
+	_I_kin  = 0;
+	_I_bar = 0;
+	//TODO fix comp count for sorption, kinetic and mineral reactions.
 	BaseLib::OrderedMap<std::string, ogsChem::ChemComp*>::iterator it;
 	for( it = map_chemComp.begin(); it != map_chemComp.end(); it++ )
 	{
 		switch ( it->second->getMobility() )
 		{
-		case ogsChem::MOBILE:
+		case ogsChem::MOBILE:  //mobile
 			_I_mob++;
 			break;
-		case ogsChem::SORPTION:   //TODO add the immobile kinetic components to the nonmineral immobile
-			_I_NMin_bar++;
+		case ogsChem::SORPTION: //immobile sorbed
+			_I_sorp++;
 			break;
-		case ogsChem::MINERAL:
+		case ogsChem::MINERAL: //immobile mineral
 			_I_min++;
+			break;
+		case ogsChem::KINETIC: //immobile kinetic (biomass)
+			_I_kin++;
 			break;
 		default:
-			_I_min++;
+			//_I_min++;  //temp disabled.
 			break;
 		}
 	}
+	_I_NMin_bar = _I_sorp + _I_kin;
     _I_bar = _I_NMin_bar + _I_min;
 }
 
@@ -469,8 +466,6 @@ void chemReductionGIA::Conc2EtaXi(ogsChem::LocalVector &local_conc,
 	ogsChem::LocalVector local_xi_Min_bar   	 = ogsChem::LocalVector::Zero(_n_xi_Min_bar);
 	ogsChem::LocalVector local_xi_Kin   		 = ogsChem::LocalVector::Zero(_n_xi_Kin);
 	ogsChem::LocalVector local_xi_Kin_bar   	 = ogsChem::LocalVector::Zero(_n_xi_Kin_bar);
-	//ogsChem::LocalVector local_xi_global         = ogsChem::LocalVector::Zero(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
-	//ogsChem::LocalVector local_xi_local          = ogsChem::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
 
 	// divide c1 and c2
 	local_c_mob   = local_conc.topRows(    this->_I_mob );
@@ -538,15 +533,6 @@ void chemReductionGIA::EtaXi2Conc(ogsChem::LocalVector &local_eta,
 	local_c_mob   = ogsChem::LocalVector::Zero(_I_mob);
 	local_xi_bar  = ogsChem::LocalVector::Zero(_n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
 	local_c_immob = ogsChem::LocalVector::Zero(_I_NMin_bar + _I_min);
-
-	//local_xi_Mob  = local_xi_local.segment( 0,this->_n_xi_Mob);
-	//local_xi_Sorp = local_xi_global.segment(this->_n_xi_Sorp_tilde + this->_n_xi_Min,this->_n_xi_Sorp);
-	//local_xi_Min  = local_xi_global.segment(this->_n_xi_Sorp_tilde + this->_n_xi_Min + this->_n_xi_Sorp,this->_n_xi_Min);
-	//local_xi_Kin  = local_xi_global.segment(this->_n_xi_Sorp_tilde + this->_n_xi_Min + this->_n_xi_Sorp+ this->_n_xi_Min,this->_n_xi_Kin);
-
-	//local_xi_Sorp_bar = local_xi_local.segment(this->_n_xi_Mob,this->_n_xi_Sorp_bar);
-	//local_xi_Min_bar  = local_xi_local.segment(this->_n_xi_Mob+this->_n_xi_Sorp_bar,this->_n_xi_Min_bar);
-	//local_xi_Kin_bar  = local_xi_local.segment(this->_n_xi_Mob+this->_n_xi_Sorp_bar+this->_n_xi_Min_bar,this->_n_xi_Kin_bar);
 
 	local_xi.head	(this->_n_xi_Mob) 					  				   = local_xi_local.segment( 0,this->_n_xi_Mob);;
 	local_xi.segment(this->_n_xi_Mob, this->_n_xi_Sorp) 		           = local_xi_global.segment(this->_n_xi_Sorp + this->_n_xi_Min,this->_n_xi_Sorp);;
@@ -624,46 +610,7 @@ void chemReductionGIA::Calc_Kin_Rate(ogsChem::LocalVector &local_xi_Mob,
 		vec_rates(i) = this->_list_kin_reactions[i]->getRate();
 	}
 
-	//Note: since A sub spaces are different for different equations, it should be multiplied later
-	// multiply the rate vector with the A matrix to get rate for xi_mob and xi_immob
-	//xi_mob_rate   = _matA1 * vec_rates;
-	//xi_immob_rate = _matA2 * vec_rates;
 }
-
-//void chemReductionGIA::Calc_Kin_Rate(ogsChem::LocalVector &local_eta,
-//	                                ogsChem::LocalVector &local_eta_bar,
-//									ogsChem::LocalVector &local_xi_global,
-//									ogsChem::LocalVector &local_xi_local,
-//									ogsChem::LocalVector &local_rate_vec)
-//{
-//	size_t i;
-//
-//	// the size of vec_rates is equal to the number of kinetic equations
-//	ogsChem::LocalVector vec_rates = ogsChem::LocalVector::Zero(_J_tot_kin);
-//	// the local temp concentration vector
-//	ogsChem::LocalVector vec_conc = ogsChem::LocalVector::Zero(_I_tot);
-//
-//	// first convert these eta and xi to concentrations
-//	EtaXi2Conc( local_eta,
-//		        local_eta_bar,
-//				local_xi_global,
-//				local_xi_local,
-//				vec_conc );
-//
-//	// then calculate the rates and fill them in the rate vector
-//	for ( i=0; i < this->_J_tot_kin; i++ )
-//	{
-//		// get to the particular kin equation and calculate its rate
-//		this->_list_kin_reactions[i]->calcReactionRate( vec_conc );
-//		vec_rates(i) = this->_list_kin_reactions[i]->getRate();
-//	}
-//
-//	//Note: since A sub spaces are different for different equations, it should be multiplied later
-//	// multiply the rate vector with the A matrix to get rate for xi_mob and xi_immob
-//	//xi_mob_rate   = _matA1 * vec_rates;
-//	//xi_immob_rate = _matA2 * vec_rates;
-//}
-
 
 }  // end of namespace
 

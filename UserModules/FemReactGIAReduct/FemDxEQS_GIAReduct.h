@@ -206,7 +206,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
 
     size_t i, nnodes;
     nnodes = _msh->getNumberOfNodes();
-    const double theta_water_content(0.32);
+    const double theta_water_content(0.5);
     const double delta_xi = 1E-14;
 
     // _solv_minimization = new LocalProblem( _ReductionGIA);

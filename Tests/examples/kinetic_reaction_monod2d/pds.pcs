@@ -6,7 +6,7 @@ GeoSys-PCS: Processes ------------------------------------------------
    NEW  
 #PROCESS
  $PCS_TYPE
-  KIN_REACT_GIA
+    REACT_GIA
  $NUM_TYPE
    NEW  
 #STOP

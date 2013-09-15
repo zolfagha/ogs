@@ -11,17 +11,17 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  KIN_REACT_GIA
+    REACT_GIA
  $PRIMARY_VARIABLE 
   Comp_A
  $GEO_TYPE
   DOMAIN
  $DIS_TYPE
-  CONSTANT 0.0
+  CONSTANT 1E-16
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  KIN_REACT_GIA
+    REACT_GIA
  $PRIMARY_VARIABLE 
   Comp_B
  $GEO_TYPE
@@ -31,17 +31,17 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  KIN_REACT_GIA
+    REACT_GIA
  $PRIMARY_VARIABLE 
   Comp_C
  $GEO_TYPE
   DOMAIN
  $DIS_TYPE
-  CONSTANT 0.0
+  CONSTANT 1E-16
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  KIN_REACT_GIA
+    REACT_GIA
  $PRIMARY_VARIABLE 
   Biomass
  $GEO_TYPE
@@ -51,21 +51,21 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
 
 #INITIAL_CONDITION
  $PCS_TYPE
-  KIN_REACT_GIA
+    REACT_GIA
  $PRIMARY_VARIABLE 
   ConsTracer
  $GEO_TYPE
   DOMAIN
  $DIS_TYPE
-  CONSTANT 0.0
+  CONSTANT 1E-16
 #STOP
 
 #INITIAL_CONDITION
  $PCS_TYPE
-  KIN_REACT_GIA
+    REACT_GIA
  $PRIMARY_VARIABLE 
   Cons_Tracer
  $GEO_TYPE
   DOMAIN
  $DIS_TYPE
-  CONSTANT 0.0
+  CONSTANT 1E-16

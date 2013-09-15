@@ -431,7 +431,7 @@ private:
 	/**
       * number of mobile and immobile components and species
       */
-	size_t _I_bar, _I_NMin_bar, _I_tot,_I_mob, _I_sorp,_I_min, _I_immob, _I_immob_min, _I_immob_nonMin;
+	size_t _I_bar, _I_NMin_bar, _I_tot,_I_mob, _I_sorp,_I_min, _I_kin, _I_immob, _I_immob_min, _I_immob_nonMin;
 
     /**
      * will be moved to the main function
