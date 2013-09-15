@@ -13,6 +13,7 @@
 #include "SurfaceGrid.h"
 #include "Surface.h"
 #include "Triangle.h"
+#include <algorithm>
 
 namespace GeoLib
 {
