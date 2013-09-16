@@ -290,7 +290,8 @@ void LocalProblem::calc_Jacobian(double dt,
 //							     ogsChem::LocalVector & vec_AI,
 							     ogsChem::LocalVector & vec_residual)
 {
-	const double delta_xi = 1.0e-8;
+	//const double delta_xi = 1.0e-8;  //calcite example
+	const double delta_xi = 1.0e-10;    //monod2d
     int i;
     ogsChem::LocalVector vec_x_incremented, vec_residual_incremented;
     vec_residual_incremented = vec_residual;
@@ -672,7 +673,7 @@ void LocalProblem::residual_xi_Min_tilde(ogsChem::LocalVector & conc_Mob,
 	ogsChem::LocalVector A 				= ogsChem::LocalVector::Zero(_n_xi_Min);
 	ogsChem::LocalVector B 				= ogsChem::LocalVector::Zero(_n_xi_Sorp_bar_ld);
 
-	conc_bar.head(_n_xi_Sorp_bar)    = conc_NonMin_bar;
+	conc_bar.head(_I_NMin_bar)    = conc_NonMin_bar;
 	conc_bar.tail(_n_xi_Min)         = conc_Min_bar;
 
 	vec_XiMin        = _mat_c_mob_2_xi_mob * conc_Mob;
