@@ -598,6 +598,9 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             }  // end of if else
         }  // end of for
 
+        // using the process name to control which class to initialize
+        // TODO
+
         // if only kinetic but no equilibrium reactions
 		if ( ogs6fem.list_eq_reactions.size() == 0 && ogs6fem.list_kin_reactions.size() > 0 )
         {   // initialize the kin-reduction scheme 

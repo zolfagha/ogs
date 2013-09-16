@@ -196,7 +196,7 @@ void FunctionOPSConc<T1, T2>::calc_nodal_eq_react_sys(double /*dt*/)
     size_t result = 1; 
 	
 	// initialize the local vector
-	ogsChem::LocalVector loc_conc; 
+	LocalVector loc_conc; 
 	loc_conc = LocalVector::Zero( _n_Comp ); 
 
 	// signal, solving local equilibrium reaction system
