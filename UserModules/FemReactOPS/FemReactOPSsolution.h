@@ -45,7 +45,7 @@ public:
     /**
       * constructor
       */
-    explicit FemReactOPSsolution(MyDiscreteSystem* dis, ogsChem::chemEqReactSys* mychemEqReactSys  )
+    explicit FemReactOPSsolution(MyDiscreteSystem* dis, ogsChem::chemEqReactSys<>* mychemEqReactSys  )
      : _discrete_system(dis), _EqReactSys(mychemEqReactSys)
     {
     }
@@ -87,7 +87,7 @@ public:
 	/**
       * get the pointer to the equilibrium reaction system
       */
-    ogsChem::chemEqReactSys* getEqReactSys() const { return _EqReactSys; }
+    ogsChem::chemEqReactSys<>* getEqReactSys() const { return _EqReactSys; }
 
 private:
     DISALLOW_COPY_AND_ASSIGN(FemReactOPSsolution);
@@ -106,7 +106,7 @@ private:
     /**
       * pointer to equilibrium reaction system
       */ 
-	ogsChem::chemEqReactSys* _EqReactSys; // TO BE CHANGED. 
+	ogsChem::chemEqReactSys<>* _EqReactSys; // TO BE CHANGED. 
 
 };
 
