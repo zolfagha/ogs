@@ -598,11 +598,23 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             }  // end of if else
         }  // end of for
 
+        // initialize the activity model of the chemical system. 
+        /*if ()
+        {
+        
+        }*/
+        
         // using the process name to control which class to initialize
-        // TODO
-
+        //TODO
+        if ( ogs6fem.list_eq_reactions.size() > 0 && ogs6fem.list_kin_reactions.size() == 0 )
+        {
+            ogsChem::chemEqReactSys<ogsChem::chemActivityModelUnity>* mEqReactSys; 
+            mEqReactSys = new ogsChem::chemEqReactSys<>( ogs6fem.map_ChemComp, ogs6fem.list_eq_reactions ); 
+            ogs6fem.m_EqReactSys = mEqReactSys; 
+            mEqReactSys = NULL; 
+        }
         // if only kinetic but no equilibrium reactions
-		if ( ogs6fem.list_eq_reactions.size() == 0 && ogs6fem.list_kin_reactions.size() > 0 )
+		else if ( ogs6fem.list_eq_reactions.size() == 0 && ogs6fem.list_kin_reactions.size() > 0 )
         {   // initialize the kin-reduction scheme 
             ogsChem::chemReductionKin* mReductionKinScheme;
             mReductionKinScheme = new ogsChem::chemReductionKin( ogs6fem.map_ChemComp, ogs6fem.list_kin_reactions );
