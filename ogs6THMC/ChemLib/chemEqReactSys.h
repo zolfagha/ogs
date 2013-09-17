@@ -101,11 +101,12 @@ public:
         double res_tmp, phi;
         ogsChem::LocalVector c_basis, c_sec_min, c_second; 
         ogsChem::LocalVector ln_c_basis, ln_c_sec_mob, ln_c_sec_sorp; 
-        ogsChem::LocalVector vec_conc_basis; 
+        ogsChem::LocalVector vec_conc_basis, vec_conc; 
         ogsChem::LocalVector vec_cur_mass_balance;
         ogsChem::LocalVector lnK_min;
         ogsChem::LocalMatrix Stoi_mob, Stoi_sorp, Stoi_min; 
 
+        vec_conc             = ogsChem::LocalVector::Zero( _I ); 
         vec_cur_mass_balance = ogsChem::LocalVector::Zero( _I_basis  ); 
         ln_c_basis           = ogsChem::LocalVector::Zero( _I_basis );
         vec_conc_basis       = ogsChem::LocalVector::Zero( _I_basis  ); 
