@@ -12,6 +12,8 @@ GeoSys Reactions
   100.0
  $NO_REACTIONS
    POLYLINE PLY_BC_LEFT
+ $ACTIVITY_MODEL
+    2 ; constant activity coefficient = 0, DH = 1, Davies = 2
 
 #REACTION ; 
  $NAME
