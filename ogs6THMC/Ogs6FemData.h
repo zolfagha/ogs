@@ -71,7 +71,7 @@ public:
     std::vector<ogsChem::chemReactionEq*> list_eq_reactions; 
 	ogsChem::chemReductionKin* m_KinReductScheme;
 	ogsChem::chemReductionGIA* m_GIA_ReductScheme;
-    ogsChem::chemEqReactSys<>* m_EqReactSys;
+    ogsChem::chemEqReactSys*   m_EqReactSys;
     //process
     BaseLib::OrderedMap<std::string, ProcessLib::Process*> list_pcs;
     //

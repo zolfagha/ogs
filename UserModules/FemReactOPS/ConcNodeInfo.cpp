@@ -14,7 +14,7 @@
  
 ConcNodeInfo::ConcNodeInfo(size_t node_id, 
                            size_t n_comp,
-                           ogsChem::chemEqReactSys<>* EqReactSys)
+                           ogsChem::chemEqReactSys* EqReactSys)
     : _node_id(node_id), _n_comp(n_comp), _EqReactSys(EqReactSys)
 {
 	_Comp_Conc = MathLib::LocalVector::Zero( _n_comp ); 

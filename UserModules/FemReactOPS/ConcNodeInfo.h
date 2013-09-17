@@ -23,7 +23,7 @@ public:
       */ 
 	ConcNodeInfo(size_t node_id, 
                  size_t n_comp, 
-                 ogsChem::chemEqReactSys<>* EqReactSys); 
+                 ogsChem::chemEqReactSys* EqReactSys); 
     /**
       * destructor
       */ 
@@ -63,7 +63,7 @@ private:
     /**
       * pointer to the ReductionKin class
       */ 
-	ogsChem::chemEqReactSys<>* _EqReactSys;
+	ogsChem::chemEqReactSys* _EqReactSys;
 }; 
 
 #endif  // end of ifndef

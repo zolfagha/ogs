@@ -276,7 +276,7 @@ private:
 	/**
       * the local equilibrium reactions system
       */ 
-	ogsChem::chemEqReactSys<>*                   _local_eq_react_sys; 
+	ogsChem::chemEqReactSys*                   _local_eq_react_sys; 
 	
 	/**
       * reactive transport operator splitting problem

@@ -21,7 +21,6 @@
 namespace ogsChem
 {
 
-template <class T_ACTIVITY_MODEL = ogsChem::chemActivityModelUnity>
 class chemEqReactSys
 {
 public:
@@ -30,7 +29,7 @@ public:
       */
 	chemEqReactSys(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp, 
                    std::vector<ogsChem::chemReactionEq*>                & list_eq_reactions, 
-                   T_ACTIVITY_MODEL                                    *a = new T_ACTIVITY_MODEL() )
+                   ogsChem::chemActivityModelAbstract                  *a )
                    : _list_eq_reactions(list_eq_reactions), _I(0), _J(0), _activity_model(a)
     {
 	    // by default, the class is not yet initialized
@@ -788,7 +787,7 @@ private:
     /**
       * pointer to the activity model
       */
-    T_ACTIVITY_MODEL *_activity_model; 
+    ogsChem::chemActivityModelAbstract *_activity_model; 
 };
 
 }
