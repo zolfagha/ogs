@@ -28,23 +28,22 @@ public:
     chemActivityModelAqDVS(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp) 
         : chemActivityModelAbstract( ogsChem::ACT_MOD_AQ_DVS )
     {
-        int counter(0); 
-
-        // loop over all chemical components, 
-        // if it is a aqueous phase component, fill in Zi
+        _n = map_chemComp.size();
+        _vec_Zi    = LocalVector::Zero( _n ); 
+        _vec_valid = LocalVector::Zero( _n ); 
+        
         BaseLib::OrderedMap<std::string, ogsChem::ChemComp*>::iterator it; 
         for( it = map_chemComp.begin(); it != map_chemComp.end(); it++ )
         {
             if (  it->second->getCompType() == ogsChem::BASIS_COMP
                || it->second->getCompType() == ogsChem::AQ_PHASE_COMP )
             {
-                _vec_Zi(counter) = it->second->get_charge(); 
-                counter++; 
-            }  // end of if
+               _vec_valid( it->second->getIndex() ) = 1.0; 
+               _vec_Zi(    it->second->getIndex() ) = it->second->getCharge();  
+            }
         }  // end of for it 
-
-        _n = counter;
-
+        
+        calc_A(); 
     };
 
     /**
@@ -52,9 +51,10 @@ public:
      * @param log_molarity
 	 * @param log_activity
      */
-    void calc_activity(MathLib::LocalVector & log_molarity, 
-                       MathLib::LocalVector & log_activity, 
-                       const double Tc = 25.0)
+    void calc_activity_logC(MathLib::LocalVector & log_molarity, 
+                            MathLib::LocalVector & log_activity_coeff,
+                            MathLib::LocalVector & log_activity, 
+                            const double Tc = 25.0)
     {
         // log of activity coefficient
         double log_f(1.0); 
@@ -64,19 +64,45 @@ public:
             calc_A( Tc ); 
 
         // update ionic strength
-        calc_I( log_molarity ); 
+        calc_I_logC( log_molarity ); 
 
         // loop over all entries
         for (int i=0; i < _n; i++ )
         {
-            zi = _vec_Zi(i); 
+            zi = _vec_valid(i) * _vec_Zi(i); // if not in this phase, then will have no influence.  
             log_f  = -1.0 * _A * zi * zi;
             log_f *= _sqrt_I / ( 1.0 + _sqrt_I ) - 0.3 * _I; 
             log_f *= _sqrt_I; 
-
+            log_activity_coeff(i) = log_f; 
             log_activity[i] = log_f + log_molarity[i]; 
         }
-    
+    }
+
+    void calc_activity_C(MathLib::LocalVector & molarity, 
+                         MathLib::LocalVector & activity_coeff, 
+                         MathLib::LocalVector & activity, 
+                         const double Tc = 25.0)
+    {
+        // log of activity coefficient
+        double log_f(1.0); 
+        double zi(0.0); 
+        // update A
+        if ( Tc != 25.0 )
+            calc_A( Tc ); 
+
+        // update ionic strength
+        calc_I_C( molarity ); 
+
+        // loop over all entries
+        for (int i=0; i < _n; i++ )
+        {
+            zi = _vec_valid(i) * _vec_Zi(i); // if not in this phase, then will have no influence.  
+            log_f  = -1.0 * _A * zi * zi;
+            log_f *= _sqrt_I / ( 1.0 + _sqrt_I ) - 0.3 * _I; 
+            log_f *= _sqrt_I; 
+            activity_coeff(i) = std::exp( log_f ); 
+            activity(i) = exp( log_f + std::log( molarity(i) )); 
+        }
     }
 private:
     /**
@@ -99,7 +125,7 @@ private:
     /**
       * calculate the ionic strength I
       **/
-    void calc_I(MathLib::LocalVector & log_molarity)
+    void calc_I_logC(MathLib::LocalVector & log_molarity)
     {
         double mi(0.0);
         double zi(0.0); 
@@ -108,11 +134,28 @@ private:
         for ( int i=0; i < _n; i++ )
         {
             mi = exp( log_molarity(i) ); 
-            zi = _vec_Zi(i); 
+            zi = _vec_valid(i) * _vec_Zi(i); // if not in this phase, then will have no influence.  
             _I += mi * zi * zi; 
         }
         _I *= 0.5;     
         _sqrt_I = std::sqrt(_I); 
+    }
+
+    void calc_I_C(MathLib::LocalVector & molarity)
+    {
+        double mi(0.0); 
+        double zi(0.0); 
+        _I = 0.0; 
+        // I = 0.5 * sigma( mi * zi^2 )
+        for ( int i=0; i < _n; i++ )
+        {
+            mi = molarity(i); 
+            zi = _vec_valid(i) * _vec_Zi(i); // if not in this phase, then will have no influence.  
+            _I += mi * zi * zi; 
+        }
+        _I *= 0.5;     
+        _sqrt_I = std::sqrt(_I); 
+    
     }
 
     /**
@@ -127,6 +170,11 @@ private:
     int _n; 
 
     MathLib::LocalVector _vec_Zi; 
+    /**
+      * if it is zero, not in aqueous phase;
+      * if it is 1.0, then in aqueous phase. 
+      */
+    MathLib::LocalVector _vec_valid; 
 };
 
 } // end of namespace

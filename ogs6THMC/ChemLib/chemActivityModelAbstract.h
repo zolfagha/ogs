@@ -35,9 +35,15 @@ public:
      * @param log_molarity
 	 * @param log_activity
      */
-    virtual void calc_activity(MathLib::LocalVector & log_molarity, 
-                               MathLib::LocalVector & log_activity, 
-                               const double Tc = 25.0) = 0;
+    virtual void calc_activity_logC(MathLib::LocalVector & log_molarity, 
+                                    MathLib::LocalVector & log_activity_coeff, 
+                                    MathLib::LocalVector & log_activity, 
+                                    const double Tc = 25.0) = 0;
+
+    virtual void calc_activity_C(MathLib::LocalVector & molarity, 
+                                 MathLib::LocalVector & activity_coeff, 
+                                 MathLib::LocalVector & activity, 
+                                 const double Tc = 25.0) = 0;
 
 protected:
     const ogsChem::ACTIVITY_MODEL  _activity_model; 

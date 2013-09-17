@@ -34,13 +34,23 @@ public:
      * @param log_molarity
 	 * @param log_activity
      */
-    void calc_activity(MathLib::LocalVector & log_molarity, 
-                       MathLib::LocalVector & log_activity, 
-                       const double Tc = 25.0)
+    void calc_activity_logC(MathLib::LocalVector & log_molarity, 
+                            MathLib::LocalVector & log_activity_coeff, 
+                            MathLib::LocalVector & log_activity, 
+                            const double Tc = 25.0)
     {
+        log_activity_coeff.setZero(); 
         log_activity = log_molarity; 
     }
 
+    void calc_activity_C(MathLib::LocalVector & molarity, 
+                         MathLib::LocalVector & activity_coeff, 
+                         MathLib::LocalVector & activity, 
+                         const double Tc = 25.0)
+    {
+        activity_coeff.setOnes(); 
+        activity = molarity; 
+    }
 };
 
 } // end of namespace
