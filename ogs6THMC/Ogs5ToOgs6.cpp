@@ -192,8 +192,14 @@ void convertFractureProperty(const CMediumProperties &mmp, MaterialLib::Fracture
 }
 void convertCompoundProperty(const CompProperties &mcp, MaterialLib::Compound &new_cp)
 {
+    // copy the component name
     new_cp.name = mcp.compname;
+    // mobility of component
     new_cp.is_mobile = (mcp.mobil == 1);
+    // charge of the component
+    new_cp.charge = mcp.charge;
+    // checking the type of the component
+    new_cp.comp_type = mcp.comp_type; 
 
     if (mcp.diffusion_model==1) {
         new_cp.molecular_diffusion = new NumLib::TXFunctionConstant(mcp.diffusion_model_values[0]);
@@ -545,6 +551,19 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 				mChemComp->set_mobility( ogsChem::MOBILE  ); 
 			else 
 				mChemComp->set_mobility( ogsChem::MINERAL );
+            // set component type
+            if ( ogs6fem.list_compound[i]->comp_type.find("BASIS_COMP") == 0 )
+                mChemComp->set_compTyps(ogsChem::BASIS_COMP);
+            else if ( ogs6fem.list_compound[i]->comp_type.find("AQ_PHASE_COMP") == 0 )
+                mChemComp->set_compTyps(ogsChem::AQ_PHASE_COMP);
+            else if ( ogs6fem.list_compound[i]->comp_type.find("GAS_PHASE_COMP") == 0 )
+                mChemComp->set_compTyps(ogsChem::GAS_PHASE_COMP);
+            else if ( ogs6fem.list_compound[i]->comp_type.find("MIN_PHASE_COMP") == 0 )
+                mChemComp->set_compTyps(ogsChem::MIN_PHASE_COMP);
+            else if ( ogs6fem.list_compound[i]->comp_type.find("SS_PHASE_COMP") == 0 )
+                mChemComp->set_compTyps(ogsChem::SS_PHASE_COMP);
+            // set charge
+            mChemComp->set_charge(ogs6fem.list_compound[i]->charge); 
 
 			ogs6fem.map_ChemComp.insert(ogs6fem.list_compound[i]->name, mChemComp); 
 			mChemComp = NULL; 
