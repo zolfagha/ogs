@@ -42,6 +42,7 @@ namespace ogsChem
          AQ_PHASE_COMP,   /* aquous solution                */
          GAS_PHASE_COMP,  /* ideal gas mixture              */
          MIN_PHASE_COMP,  /* singal component mineral phase */
+         SORPTION_COMP,   /* sorption component             */ 
          SS_PHASE_COMP    /* solid solution component       */
     };
 

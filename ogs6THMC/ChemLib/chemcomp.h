@@ -78,6 +78,9 @@ public:
 	void set_mobility(Comp_Mobility new_mobility)
 	{_Mobility = new_mobility; }
 
+    void set_charge(double charge)
+    {_charge = charge; }
+
     std::string get_composition(void)
     {return _composition;}
 
@@ -102,6 +105,9 @@ public:
 
     Comp_Type getCompType(void)
     {return _mCompType; }
+
+    double getCharge(void)
+    {return _charge; }
 
 private:
     /**

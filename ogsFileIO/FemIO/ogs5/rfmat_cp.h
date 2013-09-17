@@ -89,6 +89,8 @@ public:
     double molar_density;
     double molar_weight;
     double max_solubility;
+    double charge; 
+    std::string comp_type; 
 
     int OutputMassOfComponentInModel;
 
