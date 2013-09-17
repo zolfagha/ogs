@@ -21,7 +21,7 @@ namespace ogsChem
 /**
  * \brief Common interface of Activity Model
  */
-class chemActivityModelUnity : chemActivityModelAbstract
+class chemActivityModelUnity : public chemActivityModelAbstract
 {
 public:
     // destructor

@@ -21,21 +21,14 @@ namespace ogsChem
 /**
  * \brief Common interface of Activity Model
  */
-class chemActivityModelAqDBH : chemActivityModelAbstract
+class chemActivityModelAqDBH : public chemActivityModelAbstract
 {
 public:
     // destructor
-    chemActivityModelAqDBH(MathLib::LocalVector & log_molarity
-                           BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp) 
-        : _activity_model( ogsChem::ACT_MOD_AQ_DBH )
+    chemActivityModelAqDBH(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp) 
+        : chemActivityModelAbstract( ogsChem::ACT_MOD_AQ_DBH )
     {
         int counter(0); 
-
-        calc_A(); 
-
-        _n = log_molarity.size(); 
-
-        _vec_Zi = MathLib::LocalVector::Zero(_n); 
 
         // loop over all chemical components, 
         // if it is a aqueous phase component, fill in Zi
@@ -50,6 +43,7 @@ public:
             }  // end of if
         }  // end of for it 
 
+        _n = counter;
     };
 
     /**
@@ -63,10 +57,9 @@ public:
     {
         // log of activity coefficient
         double log_f(1.0); 
-        _n = log_molarity.size(); 
         double zi(0.0); 
         // update A
-        if ( Tc !- 25.0 )
+        if ( Tc != 25.0 )
             calc_A( Tc ); 
 
         // update ionic strength
@@ -92,13 +85,13 @@ private:
         double epsilon, d, B; 
         double Tk = Tc + 273.15; 
         // first epsilon
-        epsilon = 2727.586 + 0.6224107 * Tk - 466.9151 * std::log(Tk) - 52000.87 ./ Tk ; 
+        epsilon = 2727.586 + 0.6224107 * Tk - 466.9151 * std::log(Tk) - 52000.87 / Tk ; 
         // then d
-        d = 1.0 - (Tc - 3.9863)*(Tc - 3.9863)*(Tc + 288.9414)./(508929.2 * (Tc + 68.12963)) + 0.011445 * exp(-374.3./Tc); 
+        d = 1.0 - (Tc - 3.9863)*(Tc - 3.9863)*(Tc + 288.9414)/(508929.2 * (Tc + 68.12963)) + 0.011445 * exp(-374.3/Tc); 
         // then B
-        B = 50.2916 * std::sqrt(d) ./ std::sqrt(epsilon * Tk);
+        B = 50.2916 * std::sqrt(d) / std::sqrt(epsilon * Tk);
         // finally A
-        _A = 1.82483e6 * std::sqrt(d) ./ pow( epsilon * Tk, 3.0/2.0);
+        _A = 1.82483e6 * std::sqrt(d) / pow( epsilon * Tk, 3.0/2.0);
     };
 
     /**
