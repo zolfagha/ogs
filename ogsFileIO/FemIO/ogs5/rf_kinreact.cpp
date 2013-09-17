@@ -2451,6 +2451,12 @@ bool CKinReactData::Read(std::ifstream* rfd_file)
 		if (line_string.find("$DEBUG_OUTPUT") != string::npos)
 			debugoutflag = true;
 		//....................................................................
+        // subkeyword found
+        if(line_string.find("$ACTIVITY_MODEL")!=string::npos) { 
+	        in.str(readNonBlankLineFromInputStream(*rfd_file));
+            in >> activity_model;
+	        in.clear();
+	    }
 	}
 	usedt = max(initialTimestep, minTimestep);
 	return true;

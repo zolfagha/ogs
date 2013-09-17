@@ -261,6 +261,7 @@ public:
 	                                      // node indices of local neighborhood around individual nodes
 	std::vector<std::vector<int> > ReactNeighborhood;
 	int ReactDeactMode;
+    int activity_model;  // HS added. 0-unity, 1-DH, 2-Davies
 
 	bool debugoutflag;
 	std::string debugoutfilename;
