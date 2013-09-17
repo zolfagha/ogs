@@ -34,6 +34,7 @@
 #include  "ogs6THMC/ChemLib/chemReductionGIA.h"
 #include "TemplateFemEquation_GIAReduct.h"
 #include "SingleStepGIAReductionNonlinear.h"
+#include "Local_ODE_Xi_immob_GIA.h"
 
 
 template <class T_DISCRETE_SYSTEM, class T_LINEAR_SOLVER >
@@ -487,6 +488,11 @@ private:
       * degree of freedom equation ID talbe for the nonlinear problem
       */ 
     DiscreteLib::DofEquationIdTable * _nl_sol_dofManager;
+
+    /**
+      * the nested ode local problem
+      */
+    Local_ODE_Xi_immob_GIA*                       _local_ode_xi_immob_GIA;
 
     /**
       * the id of the msh applied in this process

@@ -24,6 +24,7 @@
 #include "Ogs6FemData.h"
 #include "NestedGIALocalProbNRIterationStepInitializer.h"
 #include "MathLib/ODE/RungeKutta4.h"
+#include "StepperBulischStoer.h"
 #include "NonLinearGIATimeODELocalAssembler.h"
 
 template <class T1, class T2>
@@ -509,10 +510,18 @@ template <class T1, class T2>
 void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const double iter_tol, const double rel_tol, const double max_iter)
 {
 	size_t i, node_idx;
+	double t0 = 0.0;
+	double theta_water_content (0.5);  //monod2d example
 
 	//pointer to the local problem
     LocalProblem* pSolve;
     pSolve = new LocalProblem( _ReductionGIA);
+
+	//pointer to the local problem
+   // LocalProblem* _local_ode_xi_immob_GIA;
+    _local_ode_xi_immob_GIA = new Local_ODE_Xi_immob_GIA( _ReductionGIA);
+
+    MathLib::LocalMatrix mat_A2kin = _ReductionGIA->get_matrix_A2kin();
 
 	//get the transformation matrices
 	MathLib::LocalMatrix _mat_c_mob_2_xi_mob     = _ReductionGIA->get_matrix_C2Xi();
@@ -556,11 +565,22 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 	vec_XiMinBar		= LocalVector::Zero(_n_xi_Min_bar);
 	loc_xi_local_new	= LocalVector::Zero(_n_xi_local);
 	vec_unknowns_new	= LocalVector::Zero(_n_Comp + _n_xi_Kin_bar);
+	ogsChem::LocalVector  vec_xi_kin_rate  = ogsChem::LocalVector::Zero(_J_tot_kin);
+	ogsChem::LocalVector  vec_xi_kin_rate_new  = ogsChem::LocalVector::Zero(_n_xi_Kin_bar);
 
 
 	// signal, solving local ODEs of xi_immob
 	INFO("--Solving local problem for xi_local and concentrations:");
 
+
+    //  initialize the ODE using the StepperBulischStoer class
+    MathLib::StepperBulischStoer<Local_ODE_Xi_immob_GIA>* sbs
+        = new MathLib::StepperBulischStoer<Local_ODE_Xi_immob_GIA>(loc_XiBarKin,
+                                                               vec_xi_kin_rate,
+                                                               t0,
+                                                               1.0e-6,
+                                                               1.0e-6,
+                                                               true);
 
 
 	// loop over all the nodes
@@ -644,7 +664,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 
 			// re assembling xi local
 			vec_conc   	      =  vec_unknowns.head (_n_Comp);
-		    vec_XiBarKin      =  vec_unknowns.tail (_n_xi_Kin_bar);
+		    //vec_XiBarKin      =  vec_unknowns.tail (_n_xi_Kin_bar); //RZ: calculate xikin using ode solver
 
 		    // convert the ln mobile conc to mobile conc
 		    ln_conc_Mob 	  =  vec_conc.head(_I_mob);
@@ -660,13 +680,29 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 
 		    loc_xi_immobile   = _mat_c_immob_2_xi_immob * vec_conc.tail(_I_NMin_bar + _n_xi_Min);
 		    vec_XiSorpBar     = loc_xi_immobile.head(_n_xi_Sorp_bar);
-
 		    vec_XiMinBar	  = vec_conc.tail(_n_xi_Min_bar);
 
 		    loc_xi_local_new.head   (_n_xi_Mob) 								 = vec_xi_mob;
 		    loc_xi_local_new.segment(_n_xi_Mob, _n_xi_Sorp_bar)				     = vec_XiSorpBar;
 		    loc_xi_local_new.segment(_n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Min_bar)  = vec_XiMinBar;
-		    loc_xi_local_new.tail   (_n_xi_Kin_bar)							     = vec_XiBarKin;
+		    //loc_xi_local_new.tail   (_n_xi_Kin_bar)							     = vec_XiBarKin;  //RZ: switch to ode solver
+		    loc_xi_local_new.tail   (_n_xi_Kin_bar)							     = loc_XiBarKin;  // old values
+
+
+
+		    //using ode solver for vec_XiBarKin
+			// get the right reference values to ODE RHS function
+			this->_local_ode_xi_immob_GIA->update_eta_xi( loc_eta, loc_etabar, loc_xi_global, loc_xi_local_new, loc_XiBarKin);
+			vec_xi_kin_rate = (*_local_ode_xi_immob_GIA)(dt, loc_XiBarKin);
+			vec_xi_kin_rate_new = (theta_water_content * mat_A2kin) * vec_xi_kin_rate;
+            sbs->set_y(loc_XiBarKin);
+            sbs->set_dydx(vec_xi_kin_rate);
+
+			// solve the local ODE problem for xi kin bar
+            sbs->step(dt, _local_ode_xi_immob_GIA);
+            vec_XiBarKin = sbs->get_y();
+
+            loc_xi_local_new.tail(_n_xi_Kin_bar)           = vec_XiBarKin;
 
 		    vec_conc_updated.head(_I_mob)				   =  conc_Mob;
 		    vec_conc_updated.segment(_I_mob, _I_NMin_bar)  =  conc_NonMin_bar;
@@ -682,8 +718,6 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			// collect the xi_local_new
 			for (i=0; i < _n_xi_local; i++)
 				_xi_local_new[i]->setValue(node_idx, loc_xi_local_new[i]);
-				//_xi_local[i]->setValue(node_idx, loc_xi_local_new[i]);
-
 			// collect new concentration values
 			for (i=0; i < _n_Comp; i++)
 				_concentrations[i]->setValue(node_idx, vec_conc_updated[i]);
@@ -702,6 +736,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 	}  // end of for node_idx
 
     delete pSolve;
+    delete sbs;
 }
 
 template <class T1, class T2>
