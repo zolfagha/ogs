@@ -587,6 +587,16 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 
 			loc_conc_BC = loc_conc;
 
+
+			// // debugging--------------------------
+//			std::cout << "======================================== \n";
+//			std::cout << "Concentration Vector BEFORE solving local problem: \n";
+//			std::cout << node_idx << std::endl;
+//			std::cout << loc_conc << std::endl;
+//			std::cout << "======================================== \n";
+			// // end of debugging-------------------
+
+
 			// xi global constrains
 			loc_XiSorpTilde  = loc_xi_global.head(_n_xi_Sorp_tilde);
 			loc_XiMinTilde   = loc_xi_global.segment(_n_xi_Sorp_tilde, _n_xi_Min_tilde);
@@ -623,15 +633,6 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			vec_unknowns.head (_n_Comp)		  = loc_conc;
 			vec_unknowns.tail (_n_xi_Kin_bar) = loc_XiBarKin;
 
-            #ifdef _DEBUG
-            // // debugging--------------------------
-            // std::cout << "======================================== \n";
-            // std::cout << "vec_unknowns Vector BEFORE solving local problem: \n";
-            // std::cout << node_idx << std::endl;
-            // std::cout << vec_unknowns << std::endl;
-            // std::cout << "======================================== \n";
-            // // end of debugging-------------------
-            #endif
 
 			// skip the boundary nodes
 			if ( ! this->_solution->isBCNode(node_idx) )
@@ -671,6 +672,12 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 		    vec_conc_updated.segment(_I_mob, _I_NMin_bar)  =  conc_NonMin_bar;
 		    conc_Min_bar								   =  vec_conc.tail(_I_min);
 		    vec_conc_updated.tail(_I_min) 			       =  conc_Min_bar;
+
+//            std::cout << "======================================== \n";
+//            std::cout << "Concentration Vector AFTER solving local problem: \n";
+//            std::cout << node_idx << std::endl;
+//            std::cout << vec_conc_updated << std::endl;
+//            std::cout << "======================================== \n";
 
 			// collect the xi_local_new
 			for (i=0; i < _n_xi_local; i++)
