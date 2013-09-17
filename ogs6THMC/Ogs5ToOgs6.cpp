@@ -29,6 +29,9 @@
 #include "ChemLib/chemReactionEqMob.h"
 #include "ChemLib/chemReactionEqSorp.h"
 #include "ChemLib/chemReactionEqMin.h"
+#include "ChemLib/chemActivityModelAqDBH.h"
+#include "ChemLib/chemActivityModelAqDVS.h"
+#include "ChemLib/chemActivityModelUnity.h"
 
 using namespace ogs5;
 
@@ -598,20 +601,46 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             }  // end of if else
         }  // end of for
 
-        // initialize the activity model of the chemical system. 
-        /*if ()
-        {
-        
-        }*/
-        
+
         // using the process name to control which class to initialize
         //TODO
         if ( ogs6fem.list_eq_reactions.size() > 0 && ogs6fem.list_kin_reactions.size() == 0 )
         {
-            ogsChem::chemEqReactSys<ogsChem::chemActivityModelUnity>* mEqReactSys; 
-            mEqReactSys = new ogsChem::chemEqReactSys<>( ogs6fem.map_ChemComp, ogs6fem.list_eq_reactions ); 
-            ogs6fem.m_EqReactSys = mEqReactSys; 
+            // initialize the activity model of the chemical system. 
+            ogs5::CKinReactData* ogs5KinReactData = ogs5fem.KinReactData_vector[0]; 
+            ogsChem::chemEqReactSys* mEqReactSys; 
+            if ( ogs5KinReactData->activity_model == 1 ) // Debyl-Huekel
+            {
+                ogsChem::chemActivityModelAqDBH* mActivityModelAqDBH 
+                    = new ogsChem::chemActivityModelAqDBH(ogs6fem.map_ChemComp); 
+                mEqReactSys = new ogsChem::chemEqReactSys(ogs6fem.map_ChemComp, 
+                                                          ogs6fem.list_eq_reactions, 
+                                                          mActivityModelAqDBH); 
+                ogs6fem.m_EqReactSys = mEqReactSys; 
+                
+            }
+            else if ( ogs5KinReactData->activity_model == 2 ) // Davies
+            {
+                ogsChem::chemActivityModelAqDVS* mActivityModelAqDVS 
+                    = new ogsChem::chemActivityModelAqDVS(ogs6fem.map_ChemComp); 
+                mEqReactSys = new ogsChem::chemEqReactSys(ogs6fem.map_ChemComp, 
+                                                          ogs6fem.list_eq_reactions, 
+                                                          mActivityModelAqDVS); 
+                ogs6fem.m_EqReactSys = mEqReactSys; 
+                
+            }
+            else // by default, use the unity model
+            {
+                ogsChem::chemActivityModelUnity* mActivityModelUnity 
+                    = new ogsChem::chemActivityModelUnity();
+                mEqReactSys = new ogsChem::chemEqReactSys(ogs6fem.map_ChemComp, 
+                                                          ogs6fem.list_eq_reactions, 
+                                                          mActivityModelUnity); 
+                ogs6fem.m_EqReactSys = mEqReactSys; 
+                
+            }
             mEqReactSys = NULL; 
+            
         }
         // if only kinetic but no equilibrium reactions
 		else if ( ogs6fem.list_eq_reactions.size() == 0 && ogs6fem.list_kin_reactions.size() > 0 )
