@@ -50,6 +50,7 @@ enum ProcessType
     LIQUID_FLOW,                          //!< LIQUID_FLOW
     MASS_TRANSPORT,                       //!< MASS_TRANSPORT
 	KIN_REACT_GIA,                        //!< reactive transport with kinetic reactions only.
+    REACT_TRANS_OPS,                      //!< reactive transport with operator splitting scheme.
 	REACT_GIA,							  //!< reactive transport with kinetic and Equilibrium reactions.
     MULTI_PHASE_FLOW,                     //!< MULTI_PHASE_FLOW
     NO_PCS,                               //!< NO_PCS
