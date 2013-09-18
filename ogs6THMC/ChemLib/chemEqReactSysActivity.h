@@ -702,17 +702,25 @@ private:
         ogsChem::LocalVector logK_min;
         ogsChem::LocalVector c_sec_min; 
         ogsChem::LocalVector c_basis; 
+        ogsChem::LocalVector ln_activity_basis;
         ogsChem::LocalVector ln_c_basis; 
+        ogsChem::LocalVector ln_activity;
+        ogsChem::LocalVector ln_activity_coeff;
 
         Stoi_min = this->_matStoi.bottomRows(_I_sec_min);
         logK_min = this->_vec_lnK.tail(_I_sec_min); 
 
         c_basis = ogsChem::LocalVector::Zero( _I_basis ); 
+        ln_activity = ogsChem::LocalVector::Zero( _I    ); 
+        ln_activity_coeff = ogsChem::LocalVector::Zero( _I ); 
+        ln_activity_basis = ogsChem::LocalVector::Zero( _I_basis ); 
+
+        this->_activity_model->calc_activity_logC( vec_unknowns, ln_activity_coeff, ln_activity ); 
 
         // take the first section which is basis concentration
-        ln_c_basis = vec_unknowns.head( _I_basis );
+        ln_activity_basis = ln_activity.head( _I_basis );
         for ( i=0; i < _I_basis; i++)
-            c_basis(i) = std::exp( ln_c_basis(i) ); 
+            c_basis(i) = std::exp( ln_activity(i) - ln_activity_coeff(i) ); 
         
         // and the minerals
         c_sec_min  = vec_unknowns.tail( _I_sec_min ); 
@@ -725,7 +733,7 @@ private:
                 cbarmin = cal_cbarmin_by_total_mass(i, c_basis, mass_constrain);
             }  // end of if AI(i)
 
-            phi  = -logK_min(i) + Stoi_min.row(i) * ln_c_basis;
+            phi  = -logK_min(i) + Stoi_min.row(i) * ln_activity_basis;
         
             if ( phi > cbarmin )
             {
