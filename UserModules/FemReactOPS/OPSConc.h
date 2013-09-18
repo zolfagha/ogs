@@ -22,7 +22,7 @@
 #include "SolutionLib/Fem/SingleStepFEM.h"
 #include "ProcessLib/AbstractTransientProcess.h"
 #include "MathLib/DataType.h"
-#include "ChemLib/chemEqReactSys.h"
+#include "ChemLib/chemEqReactSysActivity.h"
 #include "NumLib/Nonlinear/DiscreteNRSolverWithStepInitFactory.h"
 #include "UserModules/FemKinReactGIA/LinearTransportTimeODELocalAssember.h"
 #include "UserModules/FemKinReactGIA/LinearTransportJacobianLocalAssembler.h"
@@ -276,7 +276,7 @@ private:
 	/**
       * the local equilibrium reactions system
       */ 
-	ogsChem::chemEqReactSys*                   _local_eq_react_sys; 
+	ogsChem::chemEqReactSysActivity*                   _local_eq_react_sys; 
 	
 	/**
       * reactive transport operator splitting problem

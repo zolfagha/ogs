@@ -44,7 +44,7 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
     if ( !(this->_local_eq_react_sys->IsInitialized()) ) 
 	{
 		// error msg
-	    ERR("While initialize the OPS Reactive Transport Process, the chemEqReactSys class has not been correctly initialized! ");
+	    ERR("While initialize the OPS Reactive Transport Process, the chemEqReactSysActivity class has not been correctly initialized! ");
 		// then stop the program
 		exit(1);
 	}
