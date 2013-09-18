@@ -98,14 +98,14 @@ public:
         double res_tmp, phi;
         ogsChem::LocalVector c_basis, c_sec_min, c_second; 
         ogsChem::LocalVector ln_activity_basis, ln_activity_sec_mob, ln_activity_sec_sorp; 
-        ogsChem::LocalVector vec_conc_basis, vec_ln_a; 
+        ogsChem::LocalVector vec_ln_a; 
         ogsChem::LocalVector vec_cur_mass_balance;
         ogsChem::LocalVector lnK_min;
         ogsChem::LocalMatrix Stoi_mob, Stoi_sorp, Stoi_min; 
 
         vec_cur_mass_balance = ogsChem::LocalVector::Zero( _I_basis  ); 
         ln_activity_basis    = ogsChem::LocalVector::Zero( _I_basis );
-        vec_conc_basis       = ogsChem::LocalVector::Zero( _I_basis  ); 
+        c_basis              = ogsChem::LocalVector::Zero( _I_basis  ); 
         c_second             = ogsChem::LocalVector::Zero( _I_second );
         _ln_activity         = ogsChem::LocalVector::Zero( _I        ); 
 
@@ -124,16 +124,17 @@ public:
         // now split the unknown vector
         ln_activity_basis = _ln_activity.head(_I_basis);
         // calculate the secondary mobile component concentrations
-        ln_activity_sec_mob  = _vec_lnK.head( _J_mob ) - Stoi_mob * ln_activity_basis; 
+        ln_activity_sec_mob  = _ln_activity.segment( _I_basis, _I_sec_mob ); 
         // calculate the secondary sorption component concentrations
-        ln_activity_sec_sorp = _vec_lnK.segment( _J_mob, _J_sorp ) - Stoi_sorp * ln_activity_basis; 
+        ln_activity_sec_sorp = _ln_activity.segment( _I_basis + _I_sec_mob, _I_sec_sorp ); 
         lnK_min = _vec_lnK.tail(_J_min); 
     
+        // fill in the basis concentrations
+        for (i=0; i < _I_basis ; i++ )
+            c_basis(i) = std::exp( ln_activity_basis(i) - _ln_activity_coeff(i) ); 
         // fill in the secondary concentrations
-        for (i=0; i < (size_t)ln_activity_sec_mob.rows(); i++)
-            c_second( i ) = std::exp( ln_activity_sec_mob(i) - _ln_activity_coeff( _I_basis + i ) );
-        for (i=0; i < (size_t)ln_activity_sec_sorp.rows(); i++)
-            c_second( _I_sec_mob + i ) = std::exp( ln_activity_sec_sorp(i) - _ln_activity_coeff( _I_basis + _I_sec_mob + i ) ); 
+        for (i=0; i < ( _I_sec_mob + _I_sec_sorp ); i++)
+            c_second( i ) = std::exp( _ln_activity(_I_basis + i) - _ln_activity_coeff( _I_basis + i ) );
         c_second.tail( _I_sec_min )  = _ln_activity.tail( _I_sec_min );
         
         // start calculating the residuals. 
@@ -141,8 +142,9 @@ public:
         this->calc_tot_mass( c_basis, c_second, vec_cur_mass_balance ); 
         vec_residual.head( _I_basis ) = vec_tot_mass_constrain - vec_cur_mass_balance; 
 
-        // part 2), the secondary components, 
-        // do nothing, they are all zeroes. 
+        // part 2), the secondary equilibrium reactions, 
+        vec_residual.segment( _I_basis, _I_sec_mob ) = ln_activity_sec_mob - _vec_lnK.head( _J_mob ) + Stoi_mob * ln_activity_basis; 
+        vec_residual.segment( _I_basis + _I_sec_mob, _I_sec_sorp ) = ln_activity_sec_sorp - _vec_lnK.segment( _J_mob, _J_sorp ) + Stoi_sorp * ln_activity_basis;
 
         // part 3), n_react_min mineral reactions, 
         // AKA, the "complementary problem".
@@ -151,7 +153,7 @@ public:
             // attention, this is spectial for mineral reactions
             phi  = -1.0 * lnK_min(i) + Stoi_min.row(i) * ln_activity_basis;
             res_tmp  = std::min( phi, c_sec_min(i) ); 
-            vec_residual(_I_basis + _I_second + i) = res_tmp; 
+            vec_residual(_I_basis + _I_sec_mob + _I_sec_sorp + i) = res_tmp; 
         }  // end of for
         
 
@@ -175,7 +177,7 @@ public:
         // with n_cols and n_rows equal to the number of concentrations
         size_t n_unknowns(vec_unknowns.rows());
         vec_res_tmp = LocalVector::Zero( n_unknowns ); 
-        this->_mat_Jacobi = ogsChem::LocalMatrix::Zero(n_unknowns, n_unknowns); 
+        _mat_Jacobi.setZero(); 
 
         // using the numerical increment method to construct Jacobi matrix 
         for (i=0; i<n_unknowns; i++)
@@ -705,6 +707,8 @@ private:
         Stoi_min = this->_matStoi.bottomRows(_I_sec_min);
         logK_min = this->_vec_lnK.tail(_I_sec_min); 
 
+        c_basis = ogsChem::LocalVector::Zero( _I_basis ); 
+
         // take the first section which is basis concentration
         ln_c_basis = vec_unknowns.head( _I_basis );
         for ( i=0; i < _I_basis; i++)
@@ -715,7 +719,7 @@ private:
 
         for ( i=0; i < _I_sec_min; i++ )
         {
-            idx = _I_basis + i; 
+            idx = _I_basis + _I_sec_mob + _I_sec_sorp + i; 
             if ( _AI(i) == 1 )
             {
                 cbarmin = cal_cbarmin_by_total_mass(i, c_basis, mass_constrain);
