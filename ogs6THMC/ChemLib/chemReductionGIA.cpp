@@ -558,42 +558,48 @@ void chemReductionGIA::EtaXi2Conc(ogsChem::LocalVector &local_eta,
 
 }
 
-void chemReductionGIA::Calc_Kin_Rate(ogsChem::LocalVector &local_xi_Mob,
-									 ogsChem::LocalVector &local_xi_Sorp,
-			                         ogsChem::LocalVector &local_xi_Sorp_tilde,
-									 ogsChem::LocalVector &local_xi_Sorp_bar,
-									 ogsChem::LocalVector &local_xi_Min,
-									 ogsChem::LocalVector &local_xi_Min_tilde,
-									 ogsChem::LocalVector &local_xi_Min_bar,
-									 ogsChem::LocalVector &local_xi_Kin,
-								     ogsChem::LocalVector &local_xi_Kin_bar,
+//void chemReductionGIA::Calc_Kin_Rate(ogsChem::LocalVector &local_xi_Mob,
+//									 ogsChem::LocalVector &local_xi_Sorp,
+//			                         ogsChem::LocalVector &local_xi_Sorp_tilde,
+//									 ogsChem::LocalVector &local_xi_Sorp_bar,
+//									 ogsChem::LocalVector &local_xi_Min,
+//									 ogsChem::LocalVector &local_xi_Min_tilde,
+//									 ogsChem::LocalVector &local_xi_Min_bar,
+//									 ogsChem::LocalVector &local_xi_Kin,
+//								     ogsChem::LocalVector &local_xi_Kin_bar,
+//									 ogsChem::LocalVector &local_eta,
+//									 ogsChem::LocalVector &local_eta_bar,
+//									 ogsChem::LocalVector &local_rate_vec)
+
+void chemReductionGIA::Calc_Kin_Rate(ogsChem::LocalVector &local_xi_local,
+									 ogsChem::LocalVector &local_xi_global,
 									 ogsChem::LocalVector &local_eta,
 									 ogsChem::LocalVector &local_eta_bar,
-									 ogsChem::LocalVector &local_rate_vec)
+									 ogsChem::LocalVector &vec_rates)
 {
 	size_t i;
 
 	// the size of vec_rates is equal to the number of kinetic equations
-	ogsChem::LocalVector vec_rates = ogsChem::LocalVector::Zero(_J_tot_kin);
+	//ogsChem::LocalVector vec_rates = ogsChem::LocalVector::Zero(_J_tot_kin);
 	// the local temp concentration vector
 	ogsChem::LocalVector vec_conc = ogsChem::LocalVector::Zero(_I_tot);
 
-	// xi global
-	ogsChem::LocalVector local_xi_global = ogsChem::LocalVector::Zero(_n_xi_global);
-	// xi local
-	ogsChem::LocalVector local_xi_local = ogsChem::LocalVector::Zero(_n_xi_local);
-
-	 local_xi_global.head(_n_xi_Sorp_tilde) 											  = local_xi_Sorp_tilde;
-	 local_xi_global.segment(_n_xi_Sorp_tilde, _n_xi_Min_tilde)							  = local_xi_Min_tilde;
-	 local_xi_global.segment( _n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Sorp)			  = local_xi_Sorp;
-	 local_xi_global.segment( _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Min) = local_xi_Min;
-	 local_xi_global.tail(_n_xi_Kin)													  = local_xi_Kin;
-
-	// current xi local
-	 local_xi_local.head(_n_xi_Mob) 									= local_xi_Mob;
-	 local_xi_local.segment(_n_xi_Mob, _n_xi_Sorp_bar)  				= local_xi_Sorp_bar;
-	 local_xi_local.segment( _n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Min_bar) = local_xi_Min_bar;
- 	 local_xi_local.tail(_n_xi_Kin_bar) 								= local_xi_Kin_bar;
+//	// xi global
+//	ogsChem::LocalVector local_xi_global = ogsChem::LocalVector::Zero(_n_xi_global);
+//	// xi local
+//	ogsChem::LocalVector local_xi_local = ogsChem::LocalVector::Zero(_n_xi_local);
+//
+//	 local_xi_global.head(_n_xi_Sorp_tilde) 											  = local_xi_Sorp_tilde;
+//	 local_xi_global.segment(_n_xi_Sorp_tilde, _n_xi_Min_tilde)							  = local_xi_Min_tilde;
+//	 local_xi_global.segment( _n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Sorp)			  = local_xi_Sorp;
+//	 local_xi_global.segment( _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Min) = local_xi_Min;
+//	 local_xi_global.tail(_n_xi_Kin)													  = local_xi_Kin;
+//
+//	// current xi local
+//	 local_xi_local.head(_n_xi_Mob) 									= local_xi_Mob;
+//	 local_xi_local.segment(_n_xi_Mob, _n_xi_Sorp_bar)  				= local_xi_Sorp_bar;
+//	 local_xi_local.segment( _n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Min_bar) = local_xi_Min_bar;
+// 	 local_xi_local.tail(_n_xi_Kin_bar) 								= local_xi_Kin_bar;
 
 	// first convert these eta and xi to concentrations
 	EtaXi2Conc( local_eta,

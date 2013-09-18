@@ -282,18 +282,18 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
 
             if(_n_xi_Kin != 0){
             // calculate the nodal kinetic reaction rates
-            _ReductionGIA->Calc_Kin_Rate(loc_cur_xi_Mob,
-                                         loc_cur_xi_Sorp,
-                                         loc_cur_xi_Sorp_tilde,
-                                         loc_cur_xi_Sorp_bar,
-                                         loc_cur_xi_Min,
-                                         loc_cur_xi_Min_tilde,
-                                         loc_cur_xi_Min_bar,
-                                         loc_cur_xi_Kin,
-                                         loc_cur_xi_Kin_bar,
-                                         loc_cur_eta,
-                                         loc_cur_eta_bar,
-                                         vec_Rate);
+//            _ReductionGIA->Calc_Kin_Rate(loc_cur_xi_Mob,
+//                                         loc_cur_xi_Sorp,
+//                                         loc_cur_xi_Sorp_tilde,
+//                                         loc_cur_xi_Sorp_bar,
+//                                         loc_cur_xi_Min,
+//                                         loc_cur_xi_Min_tilde,
+//                                         loc_cur_xi_Min_bar,
+//                                         loc_cur_xi_Kin,
+//                                         loc_cur_xi_Kin_bar,
+//                                         loc_cur_eta,
+//                                         loc_cur_eta_bar,
+//                                         vec_Rate);
 
             //_J_tot_kin  = vec_Rate.rows();
             for (size_t i=0; i < _J_tot_kin; i++)
