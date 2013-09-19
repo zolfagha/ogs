@@ -89,18 +89,18 @@ public:
 					   ogsChem::LocalVector &local_eta_bar,
 					   ogsChem::LocalVector &vec_rates);
 
-//	void Calc_Kin_Rate(ogsChem::LocalVector &local_xi_Mob,
-//										 ogsChem::LocalVector &local_xi_Sorp,
-//				                         ogsChem::LocalVector &local_xi_Sorp_tilde,
-//										 ogsChem::LocalVector &local_xi_Sorp_bar,
-//										 ogsChem::LocalVector &local_xi_Min,
-//										 ogsChem::LocalVector &local_xi_Min_tilde,
-//										 ogsChem::LocalVector &local_xi_Min_bar,
-//										 ogsChem::LocalVector &local_xi_Kin,
-//									     ogsChem::LocalVector &local_xi_Kin_bar,
-//										 ogsChem::LocalVector &local_eta,
-//										 ogsChem::LocalVector &local_eta_bar,
-//										 ogsChem::LocalVector &local_rate_vec);
+	void Calc_Kin_Rate_temp(ogsChem::LocalVector &local_xi_Mob,
+										 ogsChem::LocalVector &local_xi_Sorp,
+				                         ogsChem::LocalVector &local_xi_Sorp_tilde,
+										 ogsChem::LocalVector &local_xi_Sorp_bar,
+										 ogsChem::LocalVector &local_xi_Min,
+										 ogsChem::LocalVector &local_xi_Min_tilde,
+										 ogsChem::LocalVector &local_xi_Min_bar,
+										 ogsChem::LocalVector &local_xi_Kin,
+									     ogsChem::LocalVector &local_xi_Kin_bar,
+										 ogsChem::LocalVector &local_eta,
+										 ogsChem::LocalVector &local_eta_bar,
+										 ogsChem::LocalVector &vec_rates);
 
 	/**
       * get the number of components

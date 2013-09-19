@@ -31,6 +31,7 @@ public:
 	    _vec_xi_global    = MathLib::LocalVector::Zero(_n_xi_global);
 	    _vec_xi_local     = MathLib::LocalVector::Zero(_n_xi_local);
 		_vec_dxi_immob_dt = MathLib::LocalVector::Zero( _J_tot_kin );
+		_vec_dxi_immob_dt_new = MathLib::LocalVector::Zero( _n_xi_Kin_bar );
 	}
 	 
     /**
@@ -62,9 +63,13 @@ public:
       */ 
 	MathLib::LocalVector operator() (double /*time*/, MathLib::LocalVector vec_xi_kin_bar )
 	{
+		double theta_water_content (0.5);  //monod2d example
+		MathLib::LocalMatrix mat_A2kin = _reductionGIA->get_matrix_A2kin();
+
 		_vec_xi_local.tail(_n_xi_Kin_bar) = vec_xi_kin_bar;
 		this->_reductionGIA->Calc_Kin_Rate(_vec_xi_local, _vec_xi_global, _vec_eta_mob, _vec_eta_immob, _vec_dxi_immob_dt);
-		return _vec_dxi_immob_dt; 
+		_vec_dxi_immob_dt_new  = (theta_water_content * mat_A2kin) * _vec_dxi_immob_dt;
+		return _vec_dxi_immob_dt_new;
 	}
 
 private: 
@@ -97,7 +102,7 @@ private:
     /**
       * local vector of dxi_immob_dt
       */ 
-	MathLib::LocalVector _vec_dxi_immob_dt; 
+	MathLib::LocalVector _vec_dxi_immob_dt, _vec_dxi_immob_dt_new;
 
 	std::size_t _n_eta, _n_etabar, _n_xi_global, _n_xi_local,_n_xi_Kin_bar, _J_tot_kin;
  
