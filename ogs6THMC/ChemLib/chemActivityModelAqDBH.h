@@ -71,7 +71,8 @@ public:
         {
             zi = _vec_valid(i) * _vec_Zi(i); // if not in this phase, then will have no influence.  
             log_f  = -1.0 * _A * zi * zi; 
-            log_f *= _sqrt_I; 
+            log_f *= _sqrt_I;
+            log_f *= ogsChem::LN10; 
             log_activity_coeff(i) = log_f; 
             log_activity(i) = log_f + log_molarity[i]; 
         }
@@ -99,6 +100,7 @@ public:
             zi = _vec_valid(i) * _vec_Zi(i); // if not in this phase, then will have no influence.  
             log_f  = -1.0 * _A * zi * zi; 
             log_f *= _sqrt_I; 
+            log_f *= ogsChem::LN10; 
             activity_coeff(i) = std::exp( log_f ); 
             activity(i) = std::exp( log_f + std::log( molarity(i))); 
         }
