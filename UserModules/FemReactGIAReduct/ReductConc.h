@@ -156,6 +156,8 @@ public:
     	BaseLib::releaseObject(_solution);
 
     	BaseLib::releaseObject(_ReductionGIA);
+    	BaseLib::releaseObject(_sbs);
+    	BaseLib::releaseObject(_pSolve);
 
     	BaseLib::releaseObject(_non_linear_eqs);
     	BaseLib::releaseObject(_non_linear_problem);
@@ -171,17 +173,15 @@ public:
         BaseLib::releaseObjectsInStdVector(_xi_global_pre);
     	BaseLib::releaseObjectsInStdVector(_xi_local_new);
     	BaseLib::releaseObjectsInStdVector(_xi_local_old);
-    	//        BaseLib::releaseObjectsInStdVector(_rates);
-    	BaseLib::releaseObjectsInStdVector(_kin_rates);
-    	//BaseLib::releaseObjectsInStdVector(_xi_global_drates_dxi);
-    	//BaseLib::releaseObjectsInStdVector(_xi_local);
-    	//BaseLib::releaseObjectsInStdVector(_xi_local_new);
-    	//BaseLib::releaseObjectsInStdVector(_xi_local_rates);
-
+    	//BaseLib::releaseObjectsInStdVector(_current_time_step);
+    	BaseLib::releaseObjectsInStdVector(_global_vec_Rate);
+    	//BaseLib::releaseObjectsInStdVector(_local_ode_xi_immob_GIA);
+    	//BaseLib::releaseObjectsInStdVector(_dis_sys);
     	BaseLib::releaseObject(_nl_sol_dofManager);
     	BaseLib::releaseObject(_feObjects);
 
     };
+
 
     /**
 	  * initialization of the problem class
@@ -412,6 +412,11 @@ private:
       */
 	ogsChem::chemReductionGIA* _ReductionGIA;
 
+	MathLib::StepperBulischStoer<Local_ODE_Xi_immob_GIA>* _sbs;
+
+	//pointer to the local problem
+    LocalProblem* _pSolve;
+
     /**
       * concentrations vector
       * including all components in the MCP data structure
@@ -446,12 +451,12 @@ private:
     /**
       * nodal concentration values
       */
-    std::vector<MyNodalFunctionScalar*>  _conc_glob;
+   // std::vector<MyNodalFunctionScalar*>  _conc_glob;
 
     /**
       * new nodal concentration values
       */
-    std::vector<MyNodalFunctionScalar*>  _conc_glob_new;
+    //std::vector<MyNodalFunctionScalar*>  _conc_glob_new;
 
     /**
       * nodal xi_immobile values
@@ -461,22 +466,22 @@ private:
     /**
       * nodal reaction rates
       */ 
-	std::vector<MyNodalFunctionScalar*> _kin_rates;
+	//std::vector<MyNodalFunctionScalar*> _kin_rates;
 
     /**
       * derivative of nodal xi_mobile rates over xi_mobile
       */ 
-	std::vector<MyNodalFunctionScalar*> _xi_global_drates_dxi;
+	//std::vector<MyNodalFunctionScalar*> _xi_global_drates_dxi;
 
     /**
       * nodal xi_global reaction rates
       */
-    std::vector<MyNodalFunctionScalar*> _xi_global_rates;
+    //std::vector<MyNodalFunctionScalar*> _xi_global_rates;
 
     /**
       * nodal xi_local reaction rates
       */ 
-    std::vector<MyNodalFunctionScalar*> _xi_local_rates;
+    //std::vector<MyNodalFunctionScalar*> _xi_local_rates;
 
     /**
       * global reaction rate vector
@@ -492,7 +497,7 @@ private:
     /**
       * the nested ode local problem
       */
-    Local_ODE_Xi_immob_GIA*                       _local_ode_xi_immob_GIA;
+    Local_ODE_Xi_immob_GIA*        _local_ode_xi_immob_GIA;
 
     /**
       * the id of the msh applied in this process

@@ -15,6 +15,8 @@
 
 #include   <functional>
 #include   "ogs6THMC/ChemLib/chemReductionGIA.h"
+#include "Local_ODE_Xi_immob_GIA.h"
+#include "StepperBulischStoer.h"
 //#include "chemconst.h"
 //#include "chemcomp.h"
 //#include "chemReactionEq.h"
@@ -26,12 +28,17 @@ public:
 	/**
       * constructor of the class
       */
-	LocalProblem(ogsChem::chemReductionGIA* ReductionGIA);
+	LocalProblem(ogsChem::chemReductionGIA* ReductionGIA, MathLib::StepperBulischStoer<Local_ODE_Xi_immob_GIA>* sbs, Local_ODE_Xi_immob_GIA* local_ode_xi_immob_GIA);
 	
 	/**
       * destructor of the class
       */
-	~LocalProblem(void);
+	virtual ~LocalProblem(void)
+    {
+    	BaseLib::releaseObject(_ReductionGIA);
+    	BaseLib::releaseObject(_local_ode_xi_immob_GIA);
+    	BaseLib::releaseObject(_sbs);
+    };
 
     /**
       * whether the reduction scheme has been initialized
@@ -108,6 +115,9 @@ public:
     void cal_exp_conc_vec(size_t    		    idx_size,
     					  ogsChem::LocalVector & ln_conc,
     					  ogsChem::LocalVector & Conc);
+
+    void ODE_solver(double dt,
+    			    ogsChem::LocalVector & vec_unknowns);
 	
 private:
 	/**
@@ -119,6 +129,8 @@ private:
       * pointer to the reduction scheme.
       */
 	ogsChem::chemReductionGIA* _ReductionGIA;
+
+	MathLib::StepperBulischStoer<Local_ODE_Xi_immob_GIA>* _sbs;
 
 	/**
 	  * a list of all kinetic reactions
@@ -152,6 +164,7 @@ private:
       * _I is the number of components and _J is the number of reactions
       */
 	std::size_t const  _n_Comp;
+	std::size_t _n_xi_global, _n_xi_local;
 
     //double  deltaT, theta_waterContent;
 
@@ -185,6 +198,12 @@ private:
       * its size is equal to the _n_unknowns by _n_unknowns
       */
     ogsChem::LocalMatrix _mat_Jacobian;
+
+    /**
+      * the nested ode local problem
+      */
+    Local_ODE_Xi_immob_GIA*                       _local_ode_xi_immob_GIA;
+
 
     void reaction_rates(ogsChem::LocalVector & conc,
     					ogsChem::LocalVector & vec_rateKin);
