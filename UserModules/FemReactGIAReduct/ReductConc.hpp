@@ -544,7 +544,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 	loc_xi_local_old_dt			= LocalVector::Zero( _n_xi_local );
 	loc_conc	       			= LocalVector::Zero( _n_Comp );
 	loc_conc_BC	       			= LocalVector::Zero( _n_Comp );
-	vec_tot_mass_constrain	    = LocalVector::Zero( _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_eta_bar + _n_xi_Kin_bar );
+	vec_tot_mass_constrain	    = LocalVector::Zero( _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_eta_bar + _n_xi_Kin_bar + _n_xi_Kin_bar);
 //	loc_conc	       			= LocalVector::Zero( _n_Comp + _n_xi_Kin_bar);
 	loc_XiSorpTilde				= LocalVector::Zero( _n_xi_Sorp_tilde);
 	loc_XiMinTilde				= LocalVector::Zero( _n_xi_Min_tilde);
@@ -632,7 +632,8 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde,_n_xi_Min_tilde) 														    =  loc_XiMinTilde;
 			vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Kin)											    =  loc_XiKin;
 			vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin,_n_eta_bar) 								    =  loc_etabar;
-			vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_eta_bar, _n_xi_Kin_bar)				    =  loc_XiBarKin_old;
+			vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_eta_bar, _n_xi_Kin_bar)				    =  loc_XiBarKin;
+			vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_eta_bar + _n_xi_Kin_bar, _n_xi_Kin_bar) =  loc_XiBarKin_old;
 
 			ogsChem::LocalVector ln_conc_Mob, ln_conc_NonMin_bar, conc_Mob, conc_NonMin_bar, conc_nonMin, ln_conc_nonMin, vec_conc_updated, conc_Min_bar;
 			conc_Mob 		    = ogsChem::LocalVector::Zero(_I_mob);
@@ -675,19 +676,22 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 		    vec_xi_mob        =  loc_xi_mobile.head(_n_xi_Mob);
 
 		     // convert the log nonmineral conc to nonmineral conc
-		    ln_conc_NonMin_bar  = vec_conc.segment(_I_mob, _I_NMin_bar);
-		    _pSolve->cal_exp_conc_vec(_I_NMin_bar, ln_conc_NonMin_bar, conc_NonMin_bar);
+		    //ln_conc_NonMin_bar  = vec_conc.segment(_I_mob, _I_NMin_bar); //RZ:temp disabled
+		    //_pSolve->cal_exp_conc_vec(_I_NMin_bar, ln_conc_NonMin_bar, conc_NonMin_bar); //RZ:temp disabled
 		    vec_conc.segment(_I_mob, _I_NMin_bar)  = conc_NonMin_bar;
 
 		    loc_xi_immobile   = _mat_c_immob_2_xi_immob * vec_conc.tail(_I_NMin_bar + _n_xi_Min);
 		    vec_XiSorpBar     = loc_xi_immobile.head(_n_xi_Sorp_bar);
-		    vec_XiMinBar	  = vec_conc.tail(_n_xi_Min_bar);
+			vec_XiBarKin  = vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_eta_bar, _n_xi_Kin_bar);
+
+		    //vec_XiMinBar	  = vec_conc.tail(_n_xi_Min_bar);
+		    //_pSolve->ODE_solver(dt, vec_unknowns, vec_XiBarKin);
 
 		    loc_xi_local_new.head   (_n_xi_Mob) 								 = vec_xi_mob;
 		    loc_xi_local_new.segment(_n_xi_Mob, _n_xi_Sorp_bar)				     = vec_XiSorpBar;
 		    loc_xi_local_new.segment(_n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Min_bar)  = vec_XiMinBar;
-		    //loc_xi_local_new.tail   (_n_xi_Kin_bar)							     = vec_XiBarKin;  //RZ: disbale for ode case
-		    loc_xi_local_new.tail   (_n_xi_Kin_bar)							     = conc_NonMin_bar;   //RZ: temp for this case only.
+		    loc_xi_local_new.tail   (_n_xi_Kin_bar)							     = vec_XiBarKin;  //RZ: disbale for ode case
+		    //loc_xi_local_new.tail   (_n_xi_Kin_bar)							     = conc_NonMin_bar;   //RZ: temp for this case only.
 
 //		    //using ode solver for vec_XiBarKin
 //			// get the right reference values to ODE RHS function
@@ -704,7 +708,8 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 //            loc_xi_local_new.tail(_n_xi_Kin_bar)           = vec_XiBarKin;
 
 		    vec_conc_updated.head(_I_mob)				   =  conc_Mob;
-		    vec_conc_updated.segment(_I_mob, _I_NMin_bar)  =  conc_NonMin_bar;
+		    //vec_conc_updated.segment(_I_mob, _I_NMin_bar)  =  conc_NonMin_bar;  //RZ: temp disabled
+		    vec_conc_updated.segment(_I_mob, _I_NMin_bar)  =  vec_XiBarKin;
 		    conc_Min_bar								   =  vec_conc.tail(_I_min);
 		    vec_conc_updated.tail(_I_min) 			       =  conc_Min_bar;
 
@@ -736,6 +741,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 
     //delete _pSolve; done in the header file
    // delete _sbs; done in the header file
+
 }
 
 template <class T1, class T2>

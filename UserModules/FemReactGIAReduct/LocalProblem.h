@@ -57,7 +57,8 @@ public:
       */
     void calc_residual(double dt,
     				ogsChem::LocalVector & vec_unknowns,
-    				ogsChem::LocalVector & vec_residual);
+    				ogsChem::LocalVector & vec_residual,
+    				ogsChem::LocalVector & vec_Xi_Kin_bar);
     
     /**
       * calculate the Jacobi of the reaction system analytically using 
@@ -68,7 +69,8 @@ public:
     void calc_Jacobian( double dt,
     					ogsChem::LocalVector & vec_unknowns,
     //				 ogsChem::LocalVector & vec_AI,
-    				 ogsChem::LocalVector & vec_residual);
+    				 ogsChem::LocalVector & vec_residual,
+    				 ogsChem::LocalVector & vec_Xi_Kin_bar);
 
     /**
       * solve the equilibrium reaction system 
@@ -117,8 +119,9 @@ public:
     					  ogsChem::LocalVector & Conc);
 
     void ODE_solver(double dt,
-    			    ogsChem::LocalVector & vec_unknowns);
-	
+    			    ogsChem::LocalVector & vec_unknowns,
+    			    ogsChem::LocalVector & vec_Xi_Kin_bar);
+
 private:
 	/**
       * private flag indicating initialization
