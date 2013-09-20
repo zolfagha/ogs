@@ -48,14 +48,12 @@ public:
 	void update_eta_xi( MathLib::LocalVector & vec_eta_mob, 
 		                MathLib::LocalVector & vec_eta_immob, 
 						MathLib::LocalVector & vec_xi_global,
-						MathLib::LocalVector & vec_xi_local,
-						MathLib::LocalVector & vec_xi_kin_bar)
+						MathLib::LocalVector & vec_xi_local)
 	{
 		_vec_eta_mob   = vec_eta_mob; 
 		_vec_eta_immob = vec_eta_immob; 
 	    _vec_xi_global = vec_xi_global;
 	    _vec_xi_local  = vec_xi_local;
-	    _vec_xi_local.tail(_n_xi_Kin_bar) = vec_xi_kin_bar;
 	}
 
     /**
