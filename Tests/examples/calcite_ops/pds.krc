@@ -34,6 +34,36 @@ GeoSys Reactions
    1 Ca2+ + 1 CO32- = 1 CaCO3 ; 
  $EQ_CONSTANT
  1675.377           ; K values
+ 
+#REACTION ; 
+ $NAME
+   R3 ;
+ $TYPE
+   MOB_EQ_REACT;
+ $EQUATION
+   1 Ca2+ + 1 H+ + 1 CO32- = 1 CaHCO3+ ; 
+ $EQ_CONSTANT
+ 2.7202e+11           ; K values
+ 
+#REACTION ; 
+ $NAME
+   R4 ;
+ $TYPE
+   MOB_EQ_REACT;
+ $EQUATION
+   1 Mg2+ + 1 CO32- = 1 MgCO3 ; 
+ $EQ_CONSTANT
+ 954.333          ; K values
+ 
+#REACTION ; 
+ $NAME
+   R5 ;
+ $TYPE
+   MOB_EQ_REACT;
+ $EQUATION
+   1 Mg2+ + 1 H+ + 1 CO32- = 1 MgHCO3+ ; 
+ $EQ_CONSTANT
+ 2.4952e+11           ; K values
 
 #REACTION ; 
  $NAME
