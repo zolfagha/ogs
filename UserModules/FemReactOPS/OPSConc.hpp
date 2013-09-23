@@ -58,7 +58,7 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
 		this->setOutputParameterName( i, femData->map_ChemComp[i]->second->get_name() ); 
 
     // adding variables into the linear problem
-	// for the linear transport problem, variables are eta_mobile
+	// for the linear transport problem, variables are c_mob
 	for ( i=0; i < _n_Comp_mob ; i++ )
 	{
     	// set up problem
