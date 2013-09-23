@@ -12,6 +12,7 @@
 #ifndef CHEM_EQ_REACT_SYS_ACTIVITY_H
 #define CHEM_EQ_REACT_SYS_ACTIVITY_H
 
+#include "logog.hpp"
 #include "chemconst.h"
 #include "chemcomp.h"
 #include "chemReactionEq.h"
@@ -631,6 +632,11 @@ private:
 		    for ( i=0; i < list_eq_reactions[j]->get_vecCompNames().size(); i++ ){
 			    tmp_str  = list_eq_reactions[j]->get_vecCompNames()[i]; 
 			    tmp_Comp = map_chemComp.find(tmp_str);
+				if ( tmp_Comp == map_chemComp.end() ) // this component not found!
+				{
+					ERR("The component in reaction definition not found in MCP list! ");
+					exit(1); 
+				}
 			    tmp_idx  = tmp_Comp->second->getIndex(); 
 			    if ( list_eq_reactions[j]->get_vecStoi().size() > 2 )
 			    {
