@@ -319,36 +319,6 @@ SingleStepReactOPS<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBL
     }  // end of for i_var
 
 
-    // loop over all the boundary nodes, and 
-	// transform these concentrations to eta and xi values
-    //std::map<size_t, ConcNodeInfo*>::iterator bc_node_it; 
-    //std::vector<size_t> vec_bc_node_idx; 
-    //std::vector<std::vector<double>> vec_node_c_mob_values;
-
-    //for ( i=0; i < _linear_problem.size(); i++ )
-    //{
-    //    std::vector<double> vec_c_mob; 
-    //    vec_node_c_mob_values.push_back(vec_c_mob); 
-    //}
-    
-    //// Boundary condition
-    //for ( bc_node_it = _bc_info.begin(); bc_node_it != _bc_info.end(); bc_node_it++ )
-    //{
-    //    // bc_node_it->second->transform(); 
-    //    size_t node_idx = bc_node_it->second->get_node_id(); 
-    //    vec_bc_node_idx.push_back(node_idx);
-
-    //    for ( i=0; i < _linear_problem.size(); i++ )
-    //    {
-    //        double c_mob_value = bc_node_it->second->get_comp_conc(i);
-    //        vec_node_c_mob_values[i].push_back(c_mob_value); 
-    //    }
-    //}
-
-    //// imposing BC for eta
-    //for ( i=0; i < _linear_problem.size(); i++ )
-    // 	_linear_problem[i]->getVariable(0)->addDirichletBC( new SolutionLib::FemDirichletBC( vec_bc_node_idx,  vec_node_c_mob_values[i] ) ); 
-
 };
 
 template <
