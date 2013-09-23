@@ -83,6 +83,16 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PCS_TYPE
   REACT_TRANS_OPS
  $PRIMARY_VARIABLE 
+  CaCO3
+ $GEO_TYPE
+  POINT POINT0
+ $DIS_TYPE
+  CONSTANT  1.0e-10
+  
+#BOUNDARY_CONDITION
+ $PCS_TYPE
+  REACT_TRANS_OPS
+ $PRIMARY_VARIABLE 
   Calcite
  $GEO_TYPE
   POINT POINT0

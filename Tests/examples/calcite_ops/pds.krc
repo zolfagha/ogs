@@ -24,6 +24,16 @@ GeoSys Reactions
    1 H+ + 1 CO32- = 1 HCO3- ; 
  $EQ_CONSTANT
  2.132615e+10           ; K values
+ 
+#REACTION ; 
+ $NAME
+   R2 ;
+ $TYPE
+   MOB_EQ_REACT;
+ $EQUATION
+   1 Ca2+ + 1 CO32- = 1 CaCO3 ; 
+ $EQ_CONSTANT
+ 1675.377           ; K values
 
 #REACTION ; 
  $NAME
