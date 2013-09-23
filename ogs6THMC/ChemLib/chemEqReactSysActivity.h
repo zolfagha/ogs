@@ -1,3 +1,14 @@
+/**
+ * Copyright (c) 2012, OpenGeoSys Community (http://www.opengeosys.com)
+ *            Distributed under a Modified BSD License.
+ *              See accompanying file LICENSE.txt or
+ *              http://www.opengeosys.com/LICENSE.txt
+ *
+ *
+ * \file chemEqReactSys.h
+ *
+ * Created on 2013-09-18 by Haibing Shao
+ */
 #ifndef CHEM_EQ_REACT_SYS_ACTIVITY_H
 #define CHEM_EQ_REACT_SYS_ACTIVITY_H
 
@@ -701,7 +712,7 @@ private:
         ogsChem::LocalMatrix Stoi_min; 
         ogsChem::LocalVector logK_min;
         ogsChem::LocalVector c_sec_min; 
-        ogsChem::LocalVector c_basis; 
+        ogsChem::LocalVector c_basis, c_second; 
         ogsChem::LocalVector ln_activity_basis;
         ogsChem::LocalVector ln_c_basis; 
         ogsChem::LocalVector ln_activity;
@@ -711,6 +722,7 @@ private:
         logK_min = this->_vec_lnK.tail(_I_sec_min); 
 
         c_basis = ogsChem::LocalVector::Zero( _I_basis ); 
+		c_second = ogsChem::LocalVector::Zero(_I_second); 
         ln_activity = ogsChem::LocalVector::Zero( _I    ); 
         ln_activity_coeff = ogsChem::LocalVector::Zero( _I ); 
         ln_activity_basis = ogsChem::LocalVector::Zero( _I_basis ); 
@@ -721,7 +733,10 @@ private:
         ln_activity_basis = ln_activity.head( _I_basis );
         for ( i=0; i < _I_basis; i++)
             c_basis(i) = std::exp( ln_activity(i) - ln_activity_coeff(i) ); 
-        
+		for (i = 0; i < (_I_sec_mob + _I_sec_sorp); i++)
+			c_second(i) = std::exp(ln_activity(_I_basis + i) - ln_activity_coeff(_I_basis + i)); 
+        // notice that we intentially leave the minerals to be zero here. 
+
         // and the minerals
         c_sec_min  = vec_unknowns.tail( _I_sec_min ); 
 
@@ -730,7 +745,7 @@ private:
             idx = _I_basis + _I_sec_mob + _I_sec_sorp + i; 
             if ( _AI(i) == 1 )
             {
-                cbarmin = cal_cbarmin_by_total_mass(i, c_basis, mass_constrain);
+                cbarmin = cal_cbarmin_by_total_mass(i, c_basis, c_second, mass_constrain);
             }  // end of if AI(i)
 
             phi  = -logK_min(i) + Stoi_min.row(i) * ln_activity_basis;
@@ -744,7 +759,7 @@ private:
             {
                 if ( _AI(i) == 0 )
                 {
-                    cbarmin = cal_cbarmin_by_total_mass(i, c_basis, mass_constrain);
+                    cbarmin = cal_cbarmin_by_total_mass(i, c_basis, c_second, mass_constrain);
                 }
                 _AI(i) = 1; 
             }  // end of else
@@ -758,20 +773,19 @@ private:
       * calcuate one particular mineral concentration 
       * by the amount of basis concentration and total mass constrain
       */
-    double cal_cbarmin_by_total_mass(size_t idx_min, LocalVector & c_basis, LocalVector & tot_mass)
+    double cal_cbarmin_by_total_mass(size_t idx_min, LocalVector & c_basis, LocalVector & c_second, LocalVector & tot_mass)
     {
         double cbarmin;
-        ogsChem::LocalVector conc_second, res_tmp;
-        ogsChem::LocalMatrix matStoi_trans; 
-        conc_second = ogsChem::LocalVector::Zero( _I_second ); 
+        ogsChem::LocalVector conc_min, res_tmp;
+        ogsChem::LocalMatrix matStoi_min_trans; 
+		conc_min    = ogsChem::LocalVector::Zero(_I_second);
         res_tmp     = ogsChem::LocalVector::Zero( _I_basis );
     
-        matStoi_trans = _matStoi.transpose(); 
-        res_tmp       = tot_mass - c_basis; 
+		matStoi_min_trans = _matStoi.bottomRows( _J_min ).transpose();
+        res_tmp       = tot_mass - c_basis + _matStoi.transpose() * c_second; 
 
-        // conc_second = matStoi_trans.fullPivHouseholderQr().solve( res_tmp ); 
-        conc_second = (-1.0 * matStoi_trans).householderQr().solve( res_tmp ); 
-        cbarmin = conc_second( _I_sec_mob + _I_sec_sorp + idx_min);
+		conc_min = (-1.0 * matStoi_min_trans).householderQr().solve(res_tmp);
+		cbarmin  = conc_min( idx_min );
     return cbarmin;
     };  // end of function cal_cbarmin_by_total_mass
 
