@@ -41,22 +41,19 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & x
 {
     ogsChem::LocalVector x_new, vec_residual, vec_AI;
     ogsChem::LocalVector dx;
-   // ogsChem::LocalVector ln_conc_Mob, ln_conc_NonMin_bar, conc_Min_bar, Xi_Kin_bar;
-//TODO initialize water content and deltaT
+
+    // TODO initialize water content and deltaT
+
     // number of iterations
-    size_t j, iter, n_unknowns;
+    size_t j, iter;
     const double alpha (0.5);
     double d_norm(0.0), d1_norm(0.0);
 
-    //n_unknowns     = _n_Comp + _n_xi_Kin_bar;  //RZ: ode case
-    n_unknowns     = _n_Comp; //RZ: ode case
-    //x_new          = ogsChem::LocalVector::Ones( n_unknowns );
-    x_new          = ogsChem::LocalVector::Zero( n_unknowns );
-    dx             = ogsChem::LocalVector::Ones( n_unknowns );
-    //dx             = ogsChem::LocalVector::Zero( n_unknowns );
-    _mat_Jacobian  = ogsChem::LocalMatrix::Zero(n_unknowns, n_unknowns);
-    //vec_residual   = ogsChem::LocalVector::Ones( n_unknowns );
-    vec_residual   = ogsChem::LocalVector::Zero( n_unknowns );
+	// HS: notice that the number of unknowns equals to _n_Comps
+    x_new          = ogsChem::LocalVector::Zero( _n_Comp );
+	dx             = ogsChem::LocalVector::Ones( _n_Comp );
+	_mat_Jacobian  = ogsChem::LocalMatrix::Zero( _n_Comp, _n_Comp );
+	vec_residual   = ogsChem::LocalVector::Zero( _n_Comp );
     // initialize the _AI vector
     vec_AI		   = ogsChem::LocalVector::Zero( _I_min );
 
