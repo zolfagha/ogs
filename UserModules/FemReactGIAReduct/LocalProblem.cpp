@@ -72,17 +72,6 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 	_vec_XiBarKin       = vec_XiBarKin;
 	_vec_XiBarKin_old   = vec_XiBarKin_old;
 
-#ifdef _DEBUG
-    // // debugging--------------------------
-//     std::cout << "======================================== \n";
-//     std::cout << "vec_tot_mass_constrain: \n";
-//     std::cout << vec_tot_mass_constrain << std::endl;
-//     std::cout << "x: \n";
-//     std::cout << x << std::endl;
-//     std::cout << "======================================== \n";
-    // // end of debugging-------------------
-#endif
-
     // start solving the system
     iter = 0; 
 
@@ -100,9 +89,8 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 	// end of debugging-------------------
 #endif
 
-
 	// update the value of xikinbar in the vector of unknowns(x_new)
-    //this->ODE_solver(dt, x);
+	this->ODE_solver(dt, x, _vec_XiBarKin);
     // evaluate the residual
 	this->calc_residual(dt, x, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin);
 
