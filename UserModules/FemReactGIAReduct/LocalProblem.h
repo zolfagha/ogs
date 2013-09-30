@@ -54,11 +54,18 @@ public:
       * calculate the residual of the reaction system using 
       * the concentration vector of all components and
       * the total concentration constrain of the basis species
+	  *  input: 1) dt the size of current time step. It is used in ODE calculation; 
+	  *         2) vec_unknowns contains all concentration values, mostly in ln scale; 
+	  *         3) vec_xi_Kin_bar_old contains xi_Kin_bar values from the previous time step; 
+	  *
+	  *  output:4) vec_residual is the calculated residual values;
+	  *         5) vec_Xi_Kin_bar is the xi_Kin_bar values after the ODE calculation. 
       */
-    void calc_residual(double dt,
-    				ogsChem::LocalVector & vec_unknowns,
-    				ogsChem::LocalVector & vec_residual,
-    				ogsChem::LocalVector & vec_Xi_Kin_bar);
+    void calc_residual(double dt, 
+                       ogsChem::LocalVector & vec_unknowns,
+					   ogsChem::LocalVector & vec_xi_Kin_bar_old,
+					   ogsChem::LocalVector & vec_residual,
+					   ogsChem::LocalVector & vec_Xi_Kin_bar);
     
     /**
       * calculate the Jacobi of the reaction system analytically using 
