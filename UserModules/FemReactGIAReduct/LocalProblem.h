@@ -87,13 +87,19 @@ public:
       * the maximum number of iterations. 
       * and the status of convergence
       */
-    void solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & vec_unknowns,
-    										  ogsChem::LocalVector & vec_tot_mass_constrain,
-    										  std::size_t & node_idx,
-    										  double  deltaT,
-    										  const double iter_tol,
-    										  const double rel_tol,
-    										  const double max_iter);
+	void solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
+                                              double dt,
+											  const double iter_tol,
+											  const double rel_tol,
+											  const double max_iter,
+											  ogsChem::LocalVector & x,
+											  ogsChem::LocalVector & vec_eta,
+											  ogsChem::LocalVector & vec_etabar,
+											  ogsChem::LocalVector & vec_XiSorpTilde,
+											  ogsChem::LocalVector & vec_XiMinTilde,
+											  ogsChem::LocalVector & vec_Xikin,
+											  ogsChem::LocalVector & vec_XiBarKin,
+											  ogsChem::LocalVector & vec_XiBarKin_old);
 
     /**
       * solve the system J*dx = -b
