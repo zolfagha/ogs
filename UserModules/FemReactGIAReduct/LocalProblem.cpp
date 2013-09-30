@@ -194,13 +194,13 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & x
 //	std::cout << x_new << std::endl;
 	// end of debugging-------------------
 #endif
-
-        // evaluate residual with x_new
-        this->calc_residual(dt, x_new, vec_residual, vec_Xi_Kin_bar);
 		// update the value of xikinbar in the vector of unknowns(x_new)
 	    this->ODE_solver(dt, x_new, vec_Xi_Kin_bar);
         //save the update value of xi kin bar
         vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_eta_bar, _n_xi_Kin_bar) = vec_Xi_Kin_bar;
+        // evaluate residual with x_new
+        this->calc_residual(dt, x_new, vec_residual, vec_Xi_Kin_bar);
+
 
 #ifdef _DEBUG
 	// debugging--------------------------
@@ -229,13 +229,12 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(ogsChem::LocalVector & x
             // now updating the saturation index and minerals
             if(_n_xi_Min != 0)
             this->update_minerals_conc_AI( x_new, vec_AI );
-            // evaluate residual with x_new
-            this->calc_residual(dt, x_new, vec_residual, vec_Xi_Kin_bar_initial);
-
             // update the value of xikinbar in the vector of unknowns(x_new)
             this->ODE_solver(dt, x_new, vec_Xi_Kin_bar);
             //save the update value of xi kin bar
-            vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_eta_bar, _n_xi_Kin_bar) = vec_Xi_Kin_bar;
+			vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_eta_bar, _n_xi_Kin_bar) = vec_Xi_Kin_bar;
+			// evaluate residual with x_new
+			this->calc_residual(dt, x_new, vec_residual, vec_Xi_Kin_bar_initial);
             vec_Xi_Kin_bar_initial = vec_Xi_Kin_bar;
 
 		#ifdef _DEBUG
@@ -322,12 +321,6 @@ void LocalProblem::ODE_solver(double dt,
     _sbs->step(dt, _local_ode_xi_immob_GIA);
     //vec_Xi_Kin_bar_new = _sbs->get_y();
     vec_Xi_Kin_bar = _sbs->get_y();
-
-     //this->cal_ln_conc_vec(_I_NMin_bar, conc_NonMin_bar, ln_conc_NonMin_bar);
-     //vec_unknowns.segment(_I_mob, _I_NMin_bar) = ln_conc_NonMin_bar;
-     //_vec_XiBarKin = vec_Xi_Kin_bar;  //next time step value and update constrain value for next iteration.
-
-//    vec_unknowns.tail(_n_xi_Kin_bar ) = vec_Xi_Kin_bar_new;
 
 
 }  // end of function ode solver
