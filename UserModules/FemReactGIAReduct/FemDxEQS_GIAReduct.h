@@ -120,6 +120,7 @@ private:
     			 ogsChem::LocalVector & DrateDxi);
     void AddMassLaplasTerms(const NumLib::TimeStep & delta_t,
     						LinearSolverType & eqsJacobian_global);
+	/*
     void cal_nodal_rate(ogsChem::LocalVector &xi,
     					ogsChem::LocalVector &local_eta_bar,
     					ogsChem::LocalVector &local_eta,
@@ -129,6 +130,7 @@ private:
     					ogsChem::LocalMatrix & mat_S1_orth,
     					ogsChem::LocalMatrix & mat_S2_orth,
     					ogsChem::LocalVector &vec_rate_new);
+	*/
 private:
     MeshLib::IMesh* _msh;
     DiscreteLib::DofEquationIdTable* _dofManager;
@@ -207,9 +209,19 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     size_t i, nnodes;
     nnodes = _msh->getNumberOfNodes();
     const double theta_water_content(0.5);
-    const double delta_xi = 1E-14;
-
+    const double delta_xi = 1E-12;
+    std::size_t n_xi_total = _n_xi_local + _n_xi_global;
     // _solv_minimization = new LocalProblem( _ReductionGIA);
+
+    MathLib::LocalVector Unknown_vec 	 = MathLib::LocalVector::Zero(n_xi_total);
+    MathLib::LocalMatrix DrateDxi    	 = MathLib::LocalMatrix::Zero(_J_tot_kin, n_xi_total);
+    MathLib::LocalVector vec_rate_new    = MathLib::LocalVector::Zero(_J_tot_kin);
+    ogsChem::LocalMatrix der_sorpT_R =  MathLib::LocalMatrix::Zero(_J_tot_kin, _n_xi_Sorp_tilde);
+    ogsChem::LocalMatrix der_minT_R  =  MathLib::LocalMatrix::Zero(_J_tot_kin, _n_xi_Min_tilde);
+    ogsChem::LocalMatrix der_kin_R   =  MathLib::LocalMatrix::Zero(_J_tot_kin, _n_xi_Kin);
+    ogsChem::LocalMatrix der_mob_R   = MathLib::LocalMatrix::Zero(_J_tot_kin, _n_xi_Mob);
+    ogsChem::LocalMatrix der_sorpB_R = MathLib::LocalMatrix::Zero(_J_tot_kin, _n_xi_Sorp_bar);
+    ogsChem::LocalMatrix der_minB_R  = MathLib::LocalMatrix::Zero(_J_tot_kin, _n_xi_Min_bar);
 
     // current xi global
     MathLib::LocalVector loc_cur_xi_global, loc_cur_xi_Sorp_tilde, loc_cur_xi_Min_tilde,
@@ -218,7 +230,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     //MathLib::LocalVector loc_pre_xi_global, loc_pre_xi_Sorp_tilde, loc_pre_xi_Min_tilde, loc_pre_xi_Sorp, loc_pre_xi_Min, loc_pre_xi_Kin;
 
     // current xi local
-    MathLib::LocalVector loc_cur_xi_local, loc_cur_xi_Sorp_bar, loc_cur_xi_Min_bar, loc_cur_xi_Sorp_bar_li, loc_cur_xi_Sorp_bar_ld;
+	MathLib::LocalVector loc_cur_xi_local, loc_cur_xi_Sorp_bar, loc_cur_xi_Min_bar, loc_cur_xi_Sorp_bar_li, loc_cur_xi_Sorp_bar_ld, tmp_xi_global, tmp_xi_local;
 
     // eta vectors
     MathLib::LocalVector loc_cur_eta, loc_cur_eta_bar;
@@ -227,7 +239,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     MathLib::LocalVector vec_conc;
 
     MathLib::LocalMatrix mat_p1Fder,mat_p1Ftrans, mat_p1F, mat_p2F, mat_Global_Jacobian;
-    std::size_t n_xi_Kin_total = _ReductionGIA->get_n_xi_Kin_total();
+    //std::size_t n_xi_Kin_total = _ReductionGIA->get_n_xi_Kin_total();
 
     // initialize the local vector
     //current xi global
@@ -248,8 +260,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     loc_cur_eta_bar         = MathLib::LocalVector::Zero( _n_eta_bar );
     vec_conc                = MathLib::LocalVector::Zero(_n_Comp);
 
-    //MathLib::LocalMatrix mat_vprime 	 = MathLib::LocalMatrix::Zero(_n_xi_local,_n_xi_global);
-    MathLib::LocalMatrix mat_vprime 	 = MathLib::LocalMatrix::Zero( _n_xi_Mob + _n_xi_Sorp + _n_xi_Min,_n_xi_global);  //RZ:Debug
+    MathLib::LocalMatrix mat_vprime 	 = MathLib::LocalMatrix::Zero(_n_xi_local,_n_xi_global);
     MathLib::LocalMatrix Jacobian_local  = MathLib::LocalMatrix::Zero(_n_xi_global, _n_xi_global);
     MathLib::LocalVector vec_rate_old 	 = MathLib::LocalVector::Zero(_J_tot_kin);
     MathLib::LocalVector vec_Rate 		 = MathLib::LocalVector::Zero(_J_tot_kin);
@@ -259,7 +270,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     mat_p1Fder  = MathLib::LocalMatrix::Zero(_n_xi_global, _n_xi_global);
     mat_p1Ftrans = MathLib::LocalMatrix::Zero(_n_xi_global, _n_xi_global);
     mat_p1F     = MathLib::LocalMatrix::Zero(_n_xi_global, _n_xi_global);
-    mat_p2F     = MathLib::LocalMatrix::Zero(_n_xi_global, _n_xi_Mob + _n_xi_Sorp + _n_xi_Min);
+    //mat_p2F     = MathLib::LocalMatrix::Zero(_n_xi_global, _n_xi_Mob + _n_xi_Sorp + _n_xi_Min);
+    mat_p2F     = MathLib::LocalMatrix::Zero(_n_xi_global, _n_xi_local);
     double dt = delta_t.getTimeStepSize();
 
     logk_min 		   =  _ReductionGIA->get_logk_min();
@@ -286,7 +298,6 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     MathLib::LocalMatrix mat_S1_orth  = _ReductionGIA->get_mat_S1_orth();
     MathLib::LocalMatrix mat_S2_orth  = _ReductionGIA->get_mat_S2_orth();
 
-    std::size_t n_xi_total = _n_xi_local + _n_xi_global;
     std::vector<size_t> node_indx_vec;
     for (i=0; i< _n_xi_global; i++)
         node_indx_vec.push_back(0); 
@@ -296,14 +307,12 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     {
             // on each node, get the right start value
             // get the right set of xis
-
             for (i=0; i < _n_xi_global; i++)
                 loc_cur_xi_global[i] = u_cur_xiglob[node_idx * _n_xi_global + i];
             for (i=0; i < _n_xi_local; i++)
                 loc_cur_xi_local[i] = _xi_local_new[i]->getValue(node_idx);
             for (i=0; i < _n_eta; i++)
                 loc_cur_eta[i] = _eta[i]->getValue(node_idx);
-            // fill in eta_immob
             for (i=0; i < _n_eta_bar; i++)
                 loc_cur_eta_bar[i] = _eta_bar[i]->getValue(node_idx);
 
@@ -313,71 +322,71 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             for (i=0; i < _n_Comp; i++)
                 vec_conc[i] = this->_concentrations[i]->getValue(node_idx);
 
-
-            ///// calculate partial1F
-
-            // calculate the derivative
-            MathLib::LocalVector Unknown_vec 	 = MathLib::LocalVector::Zero(n_xi_total);
-            MathLib::LocalMatrix DrateDxi    	 = MathLib::LocalMatrix::Zero(_J_tot_kin, n_xi_total);
-            MathLib::LocalVector vec_rate_new    = MathLib::LocalVector::Zero(_J_tot_kin);
-            ogsChem::LocalMatrix der_sorpT_R =  MathLib::LocalMatrix::Zero(_J_tot_kin, _n_xi_Sorp_tilde);
-            ogsChem::LocalMatrix der_minT_R  =  MathLib::LocalMatrix::Zero(_J_tot_kin, _n_xi_Min_tilde);
-            ogsChem::LocalMatrix der_kin_R   =  MathLib::LocalMatrix::Zero(_J_tot_kin, _n_xi_Kin);
-            ogsChem::LocalMatrix der_mob_R   = MathLib::LocalMatrix::Zero(_J_tot_kin, _n_xi_Mob);
-            ogsChem::LocalMatrix der_sorpB_R = MathLib::LocalMatrix::Zero(_J_tot_kin, _n_xi_Sorp_bar);
-            ogsChem::LocalMatrix der_minB_R  = MathLib::LocalMatrix::Zero(_J_tot_kin, _n_xi_Min_bar);
-
-            double temp_xi;
+            double DrateDxi_temp (0.0);
             Unknown_vec.head(_n_xi_global) = loc_cur_xi_global;
             Unknown_vec.tail(_n_xi_local) = loc_cur_xi_local;
 
-            if(_n_xi_Kin != 0){
-            	for(std::size_t i = 0; i < n_xi_total ; i++ ){
+            if(_n_xi_Kin != 0)
+            {
+            	for(std::size_t i = 0; i < n_xi_total ; i++ )
+            	{
             		ogsChem::LocalVector xi = ogsChem::LocalVector::Zero(n_xi_total);
             		xi        = Unknown_vec;
-            		temp_xi = xi(i);
-            		xi(i)     = xi(i) + (delta_xi * temp_xi);
-            		cal_nodal_rate(xi, loc_cur_eta_bar, loc_cur_eta, n_xi_Kin_total, mat_S1_ast, mat_S2_ast, mat_S1_orth ,mat_S2_orth, vec_rate_new);
-            		DrateDxi.col(i) = ( vec_rate_new - vec_rate_old) / (delta_xi * temp_xi);
+
+            		if (Unknown_vec.norm() >= 1.0e-16)
+            			xi(i)     += delta_xi * Unknown_vec.norm();
+            		else
+            			xi(i)     += delta_xi;
+
+					tmp_xi_global = xi.head(_n_xi_global); 
+					tmp_xi_local = xi.tail(_n_xi_local);
+            		//calculate new rate term
+					_ReductionGIA->Calc_Kin_Rate(tmp_xi_local, 
+						                         tmp_xi_global,	
+												 loc_cur_eta, 
+												 loc_cur_eta_bar,
+												 vec_rate_new);
+
+            		for(std::size_t j = 0; j < _J_tot_kin ; j++ )
+            		{
+            			if (std::abs(Unknown_vec(i)) >= 1.0e-16)
+            				DrateDxi_temp = ( vec_rate_new (j)- vec_rate_old(j)) / delta_xi / Unknown_vec.norm();
+            			else
+            				DrateDxi_temp = ( vec_rate_new (j)- vec_rate_old(j)) / delta_xi;
+
+            			DrateDxi(j,i)  = DrateDxi_temp;
+            		}
             	}
 
-            	der_sorpT_R 					 =  DrateDxi.block(0, 0, _J_tot_kin, _n_xi_Sorp_tilde);
-            	der_minT_R 				    	 =  DrateDxi.block(0, _n_xi_Sorp_tilde, _J_tot_kin, _n_xi_Min_tilde);
-            	der_kin_R 				    	 =  DrateDxi.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _J_tot_kin, _n_xi_Kin);
-            	// dr/dxi sorp and min  are not used.
-            	der_mob_R 				    	 =  DrateDxi.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin,_J_tot_kin,_n_xi_Mob);
-            	der_sorpB_R 				     =  DrateDxi.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin + _n_xi_Mob, _J_tot_kin, _n_xi_Sorp_bar);
-            	der_minB_R	 				     =  DrateDxi.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin + _n_xi_Mob + _n_xi_Sorp_bar, _J_tot_kin, _n_xi_Min_bar);
+//            	der_sorpT_R 					 =  DrateDxi.block(0, 0, _J_tot_kin, _n_xi_Sorp_tilde);
+//            	der_minT_R 				    	 =  DrateDxi.block(0, _n_xi_Sorp_tilde, _J_tot_kin, _n_xi_Min_tilde);
+            	der_kin_R 				    	 =  DrateDxi.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _J_tot_kin, _n_xi_Kin);  // try der_kin_R in the laplas assembly
+//            	der_kin_R 				    	 =  DrateDxi.block(0, 0 , _n_xi_Kin, _n_xi_Kin);  //RZ: temp
+//            	// dr/dxi sorp and min  are not used.
+//            	der_mob_R 				    	 =  DrateDxi.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin,_J_tot_kin,_n_xi_Mob);
+//            	der_sorpB_R 				     =  DrateDxi.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin + _n_xi_Mob, _J_tot_kin, _n_xi_Sorp_bar);
+//            	der_minB_R	 				     =  DrateDxi.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin + _n_xi_Mob + _n_xi_Sorp_bar, _J_tot_kin, _n_xi_Min_bar);
 
 
 
-            	mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde, 0, _n_xi_Sorp, _n_xi_Sorp_tilde)                         =  mat_Asorp * der_sorpT_R;
-            	mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, 0, _n_xi_Min, _n_xi_Sorp_tilde)             =  mat_Amin * der_sorpT_R;
-            	mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, 0, _n_xi_Kin, _n_xi_Sorp_tilde) =  mat_A1kin * der_sorpT_R;
+//            	mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde, 0, _n_xi_Sorp, _n_xi_Sorp_tilde)                         =  mat_Asorp * der_sorpT_R;
+//            	mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, 0, _n_xi_Min, _n_xi_Sorp_tilde)             =  mat_Amin * der_sorpT_R;
+//            	mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, 0, _n_xi_Kin, _n_xi_Sorp_tilde) =  mat_A1kin * der_sorpT_R;
+//
+//            	mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Sorp_tilde, _n_xi_Sorp, _n_xi_Min_tilde)                         =  mat_Asorp * der_minT_R;
+//            	mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Sorp_tilde, _n_xi_Min, _n_xi_Min_tilde)             =  mat_Amin * der_minT_R;
+//            	mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Sorp_tilde, _n_xi_Kin, _n_xi_Min_tilde) =  mat_A1kin * der_minT_R;
 
-            	mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Sorp_tilde, _n_xi_Sorp, _n_xi_Min_tilde)                         =  mat_Asorp * der_minT_R;
-            	mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Sorp_tilde, _n_xi_Min, _n_xi_Min_tilde)             =  mat_Amin * der_minT_R;
-            	mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Sorp_tilde, _n_xi_Kin, _n_xi_Min_tilde) =  mat_A1kin * der_minT_R;
-
-            	// debugging--------------------------
-            	// std::cout << "======================================== \n";
-            	// std::cout << "der_minT_R: \n";
-            	// std::cout << der_minT_R << std::endl;
-            	// std::cout << "mat_p1Fder: \n";
-            	// std::cout << mat_p1Fder << std::endl;
-            	// std::cout << "======================================== \n";
-            	// end of debugging-------------------
-
-            	mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Sorp, _n_xi_Kin)                         =  mat_Asorp * der_kin_R;
-            	mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Min, _n_xi_Kin)             =  mat_Amin * der_kin_R;
+            	//mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Sorp, _n_xi_Kin)                         =  mat_Asorp * der_kin_R;
+            	//mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Min, _n_xi_Kin)             =  mat_Amin * der_kin_R;
             	mat_p1Fder.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Kin, _n_xi_Kin) =  mat_A1kin * der_kin_R;
 
             }
-            ///// Add the identity matrix to the  the mass and conductance matrix
-            mat_p1Ftrans.block(0, 0, _n_xi_Sorp_tilde, _n_xi_Sorp_tilde)                                                      = MathLib::LocalMatrix::Identity(_n_xi_Sorp_tilde, _n_xi_Sorp_tilde);
-            mat_p1Ftrans.block(_n_xi_Sorp_tilde, _n_xi_Sorp_tilde, _n_xi_Min_tilde, _n_xi_Min_tilde)                          = MathLib::LocalMatrix::Identity(_n_xi_Min_tilde, _n_xi_Min_tilde);
-            mat_p1Ftrans.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Sorp_tilde, _n_xi_Sorp)                           = -1.0 * MathLib::LocalMatrix::Identity(_n_xi_Sorp_tilde, _n_xi_Sorp);
-            mat_p1Ftrans.block(_n_xi_Sorp_tilde, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Min_tilde, _n_xi_Min) = -1.0 * MathLib::LocalMatrix::Identity(_n_xi_Min_tilde, _n_xi_Min);
+            // Add the identity matrix to the  the mass and conductance matrix
+//            mat_p1Ftrans.block(0, 0, _n_xi_Sorp_tilde, _n_xi_Sorp_tilde)                                                      = MathLib::LocalMatrix::Identity(_n_xi_Sorp_tilde, _n_xi_Sorp_tilde);
+//            mat_p1Ftrans.block(_n_xi_Sorp_tilde, _n_xi_Sorp_tilde, _n_xi_Min_tilde, _n_xi_Min_tilde)                          = MathLib::LocalMatrix::Identity(_n_xi_Min_tilde, _n_xi_Min_tilde);
+//            mat_p1Ftrans.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Sorp_tilde, _n_xi_Sorp)                           = -1.0 * MathLib::LocalMatrix::Identity(_n_xi_Sorp_tilde, _n_xi_Sorp);
+//            mat_p1Ftrans.block(_n_xi_Sorp_tilde, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Min_tilde, _n_xi_Min) = -1.0 * MathLib::LocalMatrix::Identity(_n_xi_Min_tilde, _n_xi_Min);
 
             // debugging--------------------------
             // std::cout << "======================================== \n";
@@ -387,7 +396,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             // end of debugging-------------------
 
             //// calculate partial1f. i.e. partial drivative with respect to global variable
-            mat_p1F = mat_p1Ftrans - dt * theta_water_content * mat_p1Fder;
+           // mat_p1F = mat_p1Ftrans - dt * theta_water_content * mat_p1Fder;
+            mat_p1F = - theta_water_content * mat_p1Fder;  // dt is mulitpiled by mass matrix
 
             // debugging--------------------------
             // std::cout << "======================================== \n";
@@ -396,21 +406,21 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             // std::cout << "======================================== \n";
             // end of debugging-------------------
 
-            if(_n_xi_Kin != 0){
+//            if(_n_xi_Kin != 0){
             // calculate partial2F
-            mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde, 0, _n_xi_Sorp, _n_xi_Mob)                          = - dt * theta_water_content * mat_Asorp * der_mob_R;
-            mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, 0, _n_xi_Min, _n_xi_Mob)              = - dt * theta_water_content * mat_Amin * der_mob_R;
-            mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, 0, _n_xi_Kin, _n_xi_Mob)  = - dt * theta_water_content * mat_A1kin * der_mob_R;
-
-            //TODO IMPORTANT: li and ld is merged together. it should be checked later for its correctness.
-            mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Mob, _n_xi_Sorp, _n_xi_Sorp_bar)                         = - dt * theta_water_content * mat_Asorp * der_sorpB_R;
-            mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Mob, _n_xi_Min, _n_xi_Sorp_bar)             = - dt * theta_water_content * mat_Amin * der_sorpB_R;
-            mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Mob, _n_xi_Kin, _n_xi_Sorp_bar) = - dt * theta_water_content * mat_A1kin * der_sorpB_R;
-
-            mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Sorp, _n_xi_Min_bar)                         = - dt * theta_water_content * mat_Asorp * der_minB_R;
-            mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Min, _n_xi_Min_bar)             = - dt * theta_water_content * mat_Amin * der_minB_R;
-            mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Kin, _n_xi_Min_bar) = - dt * theta_water_content * mat_A1kin * der_minB_R;
-            }
+//            mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde, 0, _n_xi_Sorp, _n_xi_Mob)                          = - dt * theta_water_content * mat_Asorp * der_mob_R;
+//            mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, 0, _n_xi_Min, _n_xi_Mob)              = - dt * theta_water_content * mat_Amin * der_mob_R;
+//            mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, 0, _n_xi_Kin, _n_xi_Mob)  = - dt * theta_water_content * mat_A1kin * der_mob_R;
+//
+//            //TODO IMPORTANT: li and ld is merged together. it should be checked later for its correctness.
+//            mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Mob, _n_xi_Sorp, _n_xi_Sorp_bar)                         = - dt * theta_water_content * mat_Asorp * der_sorpB_R;
+//            mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Mob, _n_xi_Min, _n_xi_Sorp_bar)             = - dt * theta_water_content * mat_Amin * der_sorpB_R;
+//            mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Mob, _n_xi_Kin, _n_xi_Sorp_bar) = - dt * theta_water_content * mat_A1kin * der_sorpB_R;
+//
+//            mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Sorp, _n_xi_Min_bar)                         = - dt * theta_water_content * mat_Asorp * der_minB_R;
+//            mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Min, _n_xi_Min_bar)             = - dt * theta_water_content * mat_Amin * der_minB_R;
+//            mat_p2F.block(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Kin, _n_xi_Min_bar) = - dt * theta_water_content * mat_A1kin * der_minB_R;
+//            }
             // debugging--------------------------
 //             std::cout << "======================================== \n";
 //             std::cout << "mat_p2F: \n";
@@ -419,9 +429,9 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             // end of debugging-------------------
 
             // add the relavent identity matrices
-            mat_p2F.block(0, _n_xi_Mob, _n_xi_Sorp_bar_li, _n_xi_Sorp_bar_li)                                    = MathLib::LocalMatrix::Identity(_n_xi_Sorp_bar_li, _n_xi_Sorp_bar_li);
-            mat_p2F.block(_n_xi_Sorp_bar_li, _n_xi_Mob + _n_xi_Sorp_bar_li, _n_xi_Min_bar, _n_xi_Sorp_bar_ld)    = mat_Ald;
-            mat_p2F.block(_n_xi_Sorp_bar_li, _n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Min_bar, _n_xi_Min_bar)           = MathLib::LocalMatrix::Identity(_n_xi_Min_bar, _n_xi_Min_bar);
+//            mat_p2F.block(0, _n_xi_Mob, _n_xi_Sorp_bar_li, _n_xi_Sorp_bar_li)                                    = MathLib::LocalMatrix::Identity(_n_xi_Sorp_bar_li, _n_xi_Sorp_bar_li);
+//            mat_p2F.block(_n_xi_Sorp_bar_li, _n_xi_Mob + _n_xi_Sorp_bar_li, _n_xi_Min_bar, _n_xi_Sorp_bar_ld)    = mat_Ald;
+//            mat_p2F.block(_n_xi_Sorp_bar_li, _n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Min_bar, _n_xi_Min_bar)           = MathLib::LocalMatrix::Identity(_n_xi_Min_bar, _n_xi_Min_bar);
 
             // debugging--------------------------
             // std::cout << "======================================== \n";
@@ -435,21 +445,33 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
 
             // construct local Jacobian matrix
             Jacobian_local = mat_p1F + mat_p2F * mat_vprime;
+            //Jacobian_local = mat_p1F;
+
+            // debugging--------------------------
+            // std::cout << "======================================== \n";
+            // std::cout << "mat_vprime: \n";
+            // std::cout << mat_vprime << std::endl;
+            // std::cout << "Jacobian_local: \n";
+            // std::cout << Jacobian_local << std::endl;
+            // std::cout << "======================================== \n";
+            // end of debugging-------------------
 
             // construct global Jacobian matrix
-	        for(size_t idx = 0; idx < _n_xi_global; idx++){
-	        	node_indx_vec[idx] = node_idx * _n_xi_global + idx;
-	        }
+            for(size_t idx = 0; idx < _n_xi_global; idx++)
+            {
+            	node_indx_vec[idx] = node_idx * _n_xi_global + idx;
+            }
 
             eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, Jacobian_local);
             mat_vprime.setZero();
-    }  // end of node based for loop
-    node_indx_vec.clear();
 
-    //// --------debugging--------------
-    // std::ofstream globalJ_node ("globalJ_node.txt");
-    // eqsJacobian_global.printout(globalJ_node);
-    //// --------end of debugging-------
+            }  // end of node based for loop
+            node_indx_vec.clear();
+
+            //// --------debugging--------------
+            // std::ofstream globalJ_node ("globalJ_node.txt");
+            // eqsJacobian_global.printout(globalJ_node);
+            //// --------end of debugging-------
 
     // element based operation: add time and laplas terms
     AddMassLaplasTerms(delta_t, eqsJacobian_global);
@@ -552,8 +574,10 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 	MathLib::LocalMatrix cols_xi_min_tilde   = x.block(0, _n_xi_Sorp_tilde, sol_size, _n_xi_Min_tilde);
 	mat_vprime.block(0, _n_xi_Sorp_tilde, sol_size, _n_xi_Min_tilde ) = cols_xi_min_tilde;
 
-	MathLib::LocalMatrix cols_xi_kin  = x.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde, sol_size, _n_xi_Kin);
-	mat_vprime.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, sol_size, _n_xi_Kin) = cols_xi_kin;
+	//MathLib::LocalMatrix cols_xi_kin  = x.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde, sol_size, _n_xi_Kin);  //RZ: wrong, matrix x contains xi mob,sorp,minI
+	MathLib::LocalMatrix cols_xi_kin  = MathLib::LocalMatrix::Identity(_n_xi_Kin_bar, _n_xi_Kin_bar);
+	//mat_vprime.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, sol_size, _n_xi_Kin) = cols_xi_kin;
+	mat_vprime.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Kin_bar, _n_xi_Kin_bar) = cols_xi_kin;
 
 	mat_B.setZero();
 }
@@ -576,7 +600,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
     std::vector<size_t> node_indx_vec;
 	std::vector<size_t>  col_indx_vec;
 
-    MathLib::LocalMatrix localM, localK, localK_temp, localDispersion, localAdvection; 
+    MathLib::LocalMatrix localM, localK, localDispersion, localAdvection; 
     MathLib::LocalVector F; 
     MathLib::LocalMatrix dispersion_diffusion, d_poro, poro; 
     NumLib::ITXFunction::DataType v;
@@ -588,7 +612,6 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 
 	    localM          = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
 	    localK          = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
-	    localK_temp     = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());  //debugging
 	    localDispersion = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
 	    localAdvection  = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
 	    F               = MathLib::LocalVector::Zero(ele_node_ids.size());
@@ -635,7 +658,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 		    // calculating dispersion tensor according to Benchmark book p219, Eq. 10.15
 		    // D_{ij} = \alpha_T |v| \delta_{ij} + (\alpha_L - \alpha_T) \frac{v_i v_j}{|v|} + D^{d}_{ii}
 		    dispersion_diffusion.setIdentity(n_dim, n_dim);
-		    dispersion_diffusion *= disp_l * v.norm();
+		    dispersion_diffusion *= disp_t * v.norm();
 		    dispersion_diffusion += (disp_l - disp_t) * ( v2.transpose() * v2 ) / v.norm();
 		    dispersion_diffusion += d_poro.topLeftCorner(n_dim, n_dim);
 
@@ -655,9 +678,6 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 		    localM(idx_ml, idx_ml) =  mass_lump_val;
 		}
 
-        // add conductance matrix
-		localK_temp = localK * dt;
-
 		node_indx_vec.resize(ele_node_ids.size());
 		col_indx_vec.resize(ele_node_ids.size());
                 
@@ -670,9 +690,9 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 		        col_indx_vec[idx]   = ele_node_ids[idx] * _n_xi_global + xi_count;
 		    }
 	        // add conductance matrix
-	        eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, localK_temp );
+	        eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, localK );
 	        // add storage term
-	        eqsJacobian_global.addAsub(node_indx_vec, col_indx_vec, localM);
+	        eqsJacobian_global.addAsub(node_indx_vec, col_indx_vec, 1.0 / dt * localM);
 		}
 
 
@@ -684,9 +704,9 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 		        node_indx_vec[idx] = ele_node_ids[idx] * _n_xi_global + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + xi_count;
 		        col_indx_vec[idx]  = ele_node_ids[idx] * _n_xi_global + _n_xi_Sorp_tilde + xi_count;
 		    }
-	        eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, localK_temp );
+	        eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, localK );
 	        // add storage term
-	        eqsJacobian_global.addAsub(node_indx_vec, col_indx_vec, localM);
+	        eqsJacobian_global.addAsub(node_indx_vec, col_indx_vec, 1.0 / dt * localM);
 		}
 
 		for (xi_count = 0; xi_count < _n_xi_Kin; xi_count++)
@@ -697,7 +717,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 		        node_indx_vec[idx]  = ele_node_ids[idx] * _n_xi_global + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + xi_count;
 		    }
 	        // add mass & conductance matrix
-	        eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, localM + localK_temp );
+	        eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, 1.0 / dt * localM + localK );
 
 		}
 		node_indx_vec.clear();
@@ -706,55 +726,23 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 	}  // end of for i over all elements
 }  // end of function AddMassLaplasTerms
 
-
+/*
 template <class T1, class T2, class T3>
 void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::cal_nodal_rate(ogsChem::LocalVector &xi,
 																  ogsChem::LocalVector &local_eta_bar,
 																  ogsChem::LocalVector &local_eta,
-																  std::size_t & n_xi_Kin_total,
-																  ogsChem::LocalMatrix & mat_S1_ast,
-																  ogsChem::LocalMatrix & mat_S2_ast,
-																  ogsChem::LocalMatrix & mat_S1_orth,
-																  ogsChem::LocalMatrix & mat_S2_orth,
 																  ogsChem::LocalVector &vec_rate_new )
 {
-	// declare local temp variable
-	ogsChem::LocalVector local_xi, local_xi_bar, local_c_mob, local_c_immob;
-	local_xi 	  = ogsChem::LocalVector::Zero(_n_xi_Mob +_n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
-	local_c_mob   = ogsChem::LocalVector::Zero(_I_mob);
-	local_xi_bar  = ogsChem::LocalVector::Zero(_n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
-	local_c_immob = ogsChem::LocalVector::Zero(_I_NMin_bar + _I_min);
+    // declare local temp variable
+	ogsChem::LocalVector local_xi_global = xi.head(_n_xi_global);
+	ogsChem::LocalVector local_xi_local = xi.tail(_n_xi_local);
 
-
-	ogsChem::LocalVector local_xi_global = ogsChem::LocalVector::Zero(_n_xi_global);
-	ogsChem::LocalVector local_xi_local  = ogsChem::LocalVector::Zero(_n_xi_local);
-	ogsChem::LocalVector local_conc      = ogsChem::LocalVector::Zero(_n_Comp);
-    local_xi_global = xi.head(_n_xi_global);
-    local_xi_local  = xi.tail(_n_xi_local);
-
-	local_xi.head	(this->_n_xi_Mob) 					  				   = local_xi_local.segment( 0,this->_n_xi_Mob);;
-	local_xi.segment(this->_n_xi_Mob, this->_n_xi_Sorp) 		           = local_xi_global.segment(this->_n_xi_Sorp + this->_n_xi_Min,this->_n_xi_Sorp);;
-	local_xi.segment(this->_n_xi_Mob + this->_n_xi_Sorp, this->_n_xi_Min ) = local_xi_global.segment(this->_n_xi_Sorp + this->_n_xi_Min + this->_n_xi_Sorp,this->_n_xi_Min);
-	local_xi.tail	(this->_n_xi_Kin) 									   = local_xi_global.segment(this->_n_xi_Sorp + this->_n_xi_Min + this->_n_xi_Sorp+ this->_n_xi_Min,this->_n_xi_Kin);
-
-	local_xi_bar.head	(_n_xi_Sorp_bar) 					 =  local_xi_local.segment(this->_n_xi_Mob,this->_n_xi_Sorp_bar);
-	local_xi_bar.segment(_n_xi_Sorp_bar, _n_xi_Min_bar) 	 =  local_xi_local.segment(this->_n_xi_Mob+this->_n_xi_Sorp_bar,this->_n_xi_Min_bar);
-	local_xi_bar.tail	(_n_xi_Kin_bar) 					 =  local_xi_local.segment(this->_n_xi_Mob+this->_n_xi_Sorp_bar+this->_n_xi_Min_bar,this->_n_xi_Kin_bar);
-
-	local_c_mob   = mat_S1_ast * local_xi   + mat_S1_orth * local_eta;
-	local_c_immob = mat_S2_ast * local_xi_bar + mat_S2_orth * local_eta_bar;
-
-	local_conc.topRows( this->_I_mob ) = local_c_mob;
-	local_conc.bottomRows( this->_I_NMin_bar + this->_I_min ) = local_c_immob;
-
-	// then calculate the rates and fill them in the rate vector
-	for (std::size_t i=0; i < n_xi_Kin_total; i++ )
-	{
-		// get to the particular kin equation and calculate its rate
-		this->_list_kin_reactions[i]->calcReactionRate( local_conc );
-		vec_rate_new(i) = this->_list_kin_reactions[i]->getRate();
-	}
+	_ReductionGIA->Calc_Kin_Rate(local_xi_local,
+		                         local_xi_global,
+								 local_eta,
+								 local_eta_bar,
+								 vec_rate_new);
 
 }
-
+*/
 
