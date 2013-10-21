@@ -101,8 +101,8 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
 #ifdef _DEBUG
 	// debugging--------------------------
-	std::cout << "Residual Vector: \n";
-	std::cout << vec_residual << std::endl;
+	// std::cout << "Residual Vector: \n";
+	// std::cout << vec_residual << std::endl;
 	// end of debugging-------------------
 #endif
 
@@ -145,8 +145,8 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
 #ifdef _DEBUG
 	// debugging--------------------------
-	std::cout << "_mat_Jacobian: \n";
-	std::cout << _mat_Jacobian << std::endl;
+	// std::cout << "_mat_Jacobian: \n";
+	// std::cout << _mat_Jacobian << std::endl;
 	// end of debugging-------------------
 #endif
 
@@ -155,14 +155,13 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
 #ifdef _DEBUG
 	// debugging--------------------------
-//	std::cout << "dx Vector: \n";
-//	std::cout << dx << std::endl;
+	// std::cout << "dx Vector: \n";
+	// std::cout << dx << std::endl;
 	// end of debugging-------------------
 #endif
 
-
-        // increment of unknowns
-        this->increment_unknown( x, dx, x_new ); 
+    // increment of unknowns
+    this->increment_unknown( x, dx, x_new ); 
 
 #ifdef _DEBUG
 	// debugging--------------------------
@@ -189,11 +188,11 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
 #ifdef _DEBUG
 	// debugging--------------------------
-	std::cout << "x_new Vector: \n";
-	std::cout << x_new << std::endl;
+	// std::cout << "x_new Vector: \n";
+	// std::cout << x_new << std::endl;
 
-	std::cout << "vec_residual: \n";
-	std::cout << vec_residual << std::endl;
+	// std::cout << "vec_residual: \n";
+	// std::cout << vec_residual << std::endl;
 	// end of debugging-------------------
 #endif
 
@@ -220,8 +219,8 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 			this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin);
 
 		#ifdef _DEBUG
-        	std::cout << "vec_residual: \n";
-        	std::cout << vec_residual << std::endl;
+        	// std::cout << "vec_residual: \n";
+        	// std::cout << vec_residual << std::endl;
             // display the residual
             // std::cout << "Line Search Iteration #" << iter << "||res|| = " << d1_norm << "||delta_x|| = " << dx.norm() << std::endl;
 		#endif
@@ -362,7 +361,7 @@ void LocalProblem::calc_Jacobian(double dt,
 							     ogsChem::LocalVector & vec_Xi_Kin_bar)
 {
 	//const double delta_xi = 1.0e-8;  //calcite example
-	const double delta_xi = 1.0e-10;    //monod2d
+	const double delta_xi = 1.0e-12;    //monod2d
     int i;
     ogsChem::LocalVector vec_x_incremented, vec_residual_incremented;
     vec_residual_incremented = vec_residual;
