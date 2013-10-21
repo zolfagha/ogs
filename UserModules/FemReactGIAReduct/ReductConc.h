@@ -179,6 +179,10 @@ public:
     	//BaseLib::releaseObjectsInStdVector(_dis_sys);
     	BaseLib::releaseObject(_nl_sol_dofManager);
     	BaseLib::releaseObject(_feObjects);
+    	BaseLib::releaseObject(_problem);
+    	BaseLib::releaseObject(_solution);
+    	BaseLib::releaseObject(_dis_sys);
+    	BaseLib::releaseObject(_dofManager);
 
     };
 
@@ -299,6 +303,7 @@ public:
 	std::vector<MyNodalFunctionScalar*> & get_eta_bar() {return _eta_bar;}
 	std::vector<MyNodalFunctionScalar*> & get_global_vec_Rate() {return _global_vec_Rate; }
 	std::vector<MyNodalFunctionScalar*> & get_concentrations() {return _concentrations; }
+	std::vector<MyNodalFunctionScalar*> & get_drates_dxi() {return _drates_dxi; }
 	FemLib::LagrangeFeObjectContainer* get_feObjects(){return _feObjects;}
 	NumLib::TimeStep const* getTimeStep() {return _current_time_step;}
     virtual void set_BC_conc_node_values(std::size_t node_idx, std::size_t i_var, double node_value);
@@ -487,6 +492,11 @@ private:
       * global reaction rate vector
       */
     std::vector<MyNodalFunctionScalar*> _global_vec_Rate;
+
+    /**
+      * global _drates_dxi vector
+      */
+    std::vector<MyNodalFunctionScalar*> _drates_dxi;
 
 
     /**

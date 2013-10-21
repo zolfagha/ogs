@@ -124,6 +124,14 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options & option)
      	_global_vec_Rate.push_back(global_vec_Rate_tmp);
 	}
 
+	// initialize drates_dxi
+	for ( i=0; i < _J_tot_kin * (_n_xi_local + _n_xi_global) ; i++ )
+	{
+		MyNodalFunctionScalar* drate_dxi_tmp = new MyNodalFunctionScalar();  // drate_dxi instances
+		drate_dxi_tmp->initialize(       *dis, FemLib::PolynomialOrder::Linear, 0.0  );
+		_drates_dxi.push_back(drate_dxi_tmp);
+	}
+
 	// linear assemblers
     MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_feObjects);
     MyLinearResidualAssemblerType* linear_r_assembler = new MyLinearResidualAssemblerType(_feObjects);
@@ -548,8 +556,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 	loc_XiKin					= LocalVector::Zero( _n_xi_Kin);
 	loc_XiBarKin				= LocalVector::Zero( _n_xi_Kin_bar);
 	loc_XiBarKin_old			= LocalVector::Zero( _n_xi_Kin_bar);
-	//vec_unknowns				= LocalVector::Zero(_n_Comp + _n_xi_Kin_bar); //RZ:: temp for this case
-	vec_unknowns				= LocalVector::Zero(_n_Comp ); //RZ:: temp for this case
+	vec_unknowns				= LocalVector::Zero(_n_Comp ); 
 
 	vec_conc     		= LocalVector::Zero(_n_Comp);
 	loc_xi_mobile		= LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
