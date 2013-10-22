@@ -14,7 +14,7 @@ GeoSys-OUT: Output ------------------------------------------------
  $DAT_TYPE
   PVD
  $TIM_TYPE
-  STEPS 10
+  STEPS 1
 
 #OUTPUT // profile
  $NOD_VALUES
@@ -31,6 +31,6 @@ GeoSys-OUT: Output ------------------------------------------------
  $DAT_TYPE
   PVD
  $TIM_TYPE
-  STEPS 10
+  STEPS 1
 #STOP
 
