@@ -55,10 +55,11 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
     const double alpha (0.5);
     double d_norm(0.0), d1_norm(0.0);
 
-	// HS: notice that the number of unknowns equals to _n_Comps
+	// HS: the number of unknowns in the local problem equals
+	// to the number of chemical components
     x_new          = ogsChem::LocalVector::Zero( _n_Comp );
 	dx             = ogsChem::LocalVector::Ones( _n_Comp );
-	_mat_Jacobian  = ogsChem::LocalMatrix::Zero( _n_Comp, _n_Comp );
+	_mat_Jacobian  = ogsChem::LocalMatrix::Zero( _n_Comp, _n_Comp);
 	vec_residual   = ogsChem::LocalVector::Zero( _n_Comp );
     // initialize the _AI vector
     vec_AI		   = ogsChem::LocalVector::Zero( _I_min );
@@ -165,8 +166,8 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
 #ifdef _DEBUG
 	// debugging--------------------------
-//	 std::cout << "x_new Vector: \n";
-//	 std::cout << x_new << std::endl;
+	// std::cout << "x_new Vector: \n";
+	// std::cout << x_new << std::endl;
 	// end of debugging-------------------
 #endif
 
