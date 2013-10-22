@@ -669,8 +669,8 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 														   loc_XiBarKin_old);
 
 			// re assembling xi local
-			vec_conc   	      =  vec_unknowns.head (_n_Comp);
-		    vec_XiBarKin      =  vec_unknowns.tail (_n_xi_Kin_bar);  
+			vec_conc   	 = vec_unknowns.head (_n_Comp);
+			vec_XiBarKin = loc_XiBarKin;  // should take the updated values. 
 
 		    // convert the ln mobile conc to mobile conc
 		    ln_conc_Mob 	  =  vec_conc.head(_I_mob);
@@ -678,8 +678,6 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 
 		    loc_xi_mobile     = _mat_c_mob_2_xi_mob * conc_Mob;
 		    vec_xi_mob        =  loc_xi_mobile.head(_n_xi_Mob);
-
-            vec_conc.segment(_I_mob, _I_NMin_bar)  = conc_NonMin_bar;
 
 		    loc_xi_immobile   = _mat_c_immob_2_xi_immob * vec_conc.tail(_I_NMin_bar + _n_xi_Min);
 		    vec_XiSorpBar     = loc_xi_immobile.head(_n_xi_Sorp_bar);
@@ -689,22 +687,8 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 		    loc_xi_local_new.segment(_n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Min_bar)  = vec_XiMinBar; 
 		    loc_xi_local_new.tail   (_n_xi_Kin_bar)							     = vec_XiBarKin; 
 
-//		    //using ode solver for vec_XiBarKin
-//			// get the right reference values to ODE RHS function
-//			this->_local_ode_xi_immob_GIA->update_eta_xi( loc_eta, loc_etabar, loc_xi_global, loc_xi_local_new, loc_XiBarKin);
-//			vec_xi_kin_rate = (*_local_ode_xi_immob_GIA)(dt, loc_XiBarKin);
-//			//vec_xi_kin_rate_new = (theta_water_content * mat_A2kin) * vec_xi_kin_rate;
-//            sbs->set_y(loc_XiBarKin);
-//            //sbs->set_dydx(vec_xi_kin_rate_new);
-//            sbs->set_dydx(vec_xi_kin_rate);
-//
-//			// solve the local ODE problem for xi kin bar
-//            sbs->step(dt, _local_ode_xi_immob_GIA);
-//            vec_XiBarKin = sbs->get_y();
-//            loc_xi_local_new.tail(_n_xi_Kin_bar)           = vec_XiBarKin;
-
 		    vec_conc_updated.head(_I_mob)				   =  conc_Mob;
-		    //vec_conc_updated.segment(_I_mob, _I_NMin_bar)  =  conc_NonMin_bar;  //RZ: temp disabled
+		    vec_conc_updated.segment(_I_mob, _I_NMin_bar)  =  conc_NonMin_bar; 
 		    vec_conc_updated.segment(_I_mob, _I_NMin_bar)  =  vec_XiBarKin;
 		    conc_Min_bar								   =  vec_conc.tail(_I_min);
 		    vec_conc_updated.tail(_I_min) 			       =  conc_Min_bar;
