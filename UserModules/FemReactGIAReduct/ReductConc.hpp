@@ -604,9 +604,11 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			for (i=0; i < _n_xi_local; i++){
 				loc_xi_local[i] 	   = this->_xi_local_new[i]->getValue(node_idx);
 				loc_xi_local_old_dt[i] = this->_xi_local_old[i]->getValue(node_idx);}
-
-			for (i=0; i < _n_Comp; i++)
-				loc_conc[i] = this->_concentrations[i]->getValue(node_idx);
+			// the following section is not correct--------------------------
+			// for (i=0; i < _n_Comp; i++)
+			//  	loc_conc[i] = this->_concentrations[i]->getValue(node_idx);
+			// --------------------------------------------------------------
+			this->_ReductionGIA->EtaXi2Conc(loc_eta, loc_etabar, loc_xi_global, loc_xi_local, loc_conc); 
 
 			loc_conc_BC = loc_conc;
 
