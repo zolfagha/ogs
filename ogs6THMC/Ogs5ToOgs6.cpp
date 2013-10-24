@@ -29,6 +29,9 @@
 #include "ChemLib/chemReactionEqMob.h"
 #include "ChemLib/chemReactionEqSorp.h"
 #include "ChemLib/chemReactionEqMin.h"
+#include "ChemLib/chemActivityModelAqDBH.h"
+#include "ChemLib/chemActivityModelAqDVS.h"
+#include "ChemLib/chemActivityModelUnity.h"
 
 using namespace ogs5;
 
@@ -189,8 +192,14 @@ void convertFractureProperty(const CMediumProperties &mmp, MaterialLib::Fracture
 }
 void convertCompoundProperty(const CompProperties &mcp, MaterialLib::Compound &new_cp)
 {
+    // copy the component name
     new_cp.name = mcp.compname;
+    // mobility of component
     new_cp.is_mobile = (mcp.mobil == 1);
+    // charge of the component
+    new_cp.charge = mcp.charge;
+    // checking the type of the component
+    new_cp.comp_type = mcp.comp_type; 
 
     if (mcp.diffusion_model==1) {
         new_cp.molecular_diffusion = new NumLib::TXFunctionConstant(mcp.diffusion_model_values[0]);
@@ -543,6 +552,19 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 			else 
 				//mChemComp->set_mobility( ogsChem::MINERAL );
 				mChemComp->set_mobility( ogsChem::KINETIC ); //RZ temp solution for monode 2d
+            // set component type
+            if ( ogs6fem.list_compound[i]->comp_type.find("BASIS_COMP") == 0 )
+                mChemComp->set_compTyps(ogsChem::BASIS_COMP);
+            else if ( ogs6fem.list_compound[i]->comp_type.find("AQ_PHASE_COMP") == 0 )
+                mChemComp->set_compTyps(ogsChem::AQ_PHASE_COMP);
+            else if ( ogs6fem.list_compound[i]->comp_type.find("GAS_PHASE_COMP") == 0 )
+                mChemComp->set_compTyps(ogsChem::GAS_PHASE_COMP);
+            else if ( ogs6fem.list_compound[i]->comp_type.find("MIN_PHASE_COMP") == 0 )
+                mChemComp->set_compTyps(ogsChem::MIN_PHASE_COMP);
+            else if ( ogs6fem.list_compound[i]->comp_type.find("SS_PHASE_COMP") == 0 )
+                mChemComp->set_compTyps(ogsChem::SS_PHASE_COMP);
+            // set charge
+            mChemComp->set_charge(ogs6fem.list_compound[i]->charge); 
 
 			ogs6fem.map_ChemComp.insert(ogs6fem.list_compound[i]->name, mChemComp); 
 			mChemComp = NULL; 
@@ -599,60 +621,63 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             }  // end of if else
         }  // end of for
 
-///TODO fix the if clause later.
-//		double KIN_REACT_GIA_tmp(0), REACT_GIA_tmp(0);
-//		for (size_t i=0; i<ogs5fem.pcs_vector.size(); i++)
-//		    {
-//			optPcsData = option.getSubGroup("processList");
-//			BaseLib::OptionGroup* optPcs = optPcsData->getSubGroup("process");
-//			std::string pcs_name = optPcs->getOption("name");
-//			std::string KIN_REACT_GIA, REACT_GIA;
-//
-//			if(pcs_name.compare(KIN_REACT_GIA) == 0){
-//				KIN_REACT_GIA_tmp = 1;
-//			break;
-//			}
-//			else if(pcs_name.compare(REACT_GIA) == 0){
-//				REACT_GIA_tmp = 1;
-//			break;
-//			}
-		// if only kinetic but no equilibrium reactions
-		//if (pcs_type == FiniteElement::KIN_REACT_GIA)
-//		if (KIN_REACT_GIA_tmp)
-//        {   // initialize the kin-reduction scheme
-//            ogsChem::chemReductionKin* mReductionKinScheme;
-//            mReductionKinScheme = new ogsChem::chemReductionKin( ogs6fem.map_ChemComp, ogs6fem.list_kin_reactions );
-//            ogs6fem.m_KinReductScheme = mReductionKinScheme;
-//            mReductionKinScheme = NULL;
-//        }
-		//  for both kinetic and equilibrium reactions
-        //else if ( pcs_type == FiniteElement::REACT_GIA)
-//		else if (REACT_GIA_tmp)
-//        {  // initialize the full reduction scheme
+
+        // using the process name to control which class to initialize
+        //TODO
+        if ( ogs6fem.list_eq_reactions.size() > 0 && ogs6fem.list_kin_reactions.size() == 0 )
+        {
+            // initialize the activity model of the chemical system. 
+            ogs5::CKinReactData* ogs5KinReactData = ogs5fem.KinReactData_vector[0]; 
+            ogsChem::chemEqReactSysActivity* mEqReactSys; 
+            if ( ogs5KinReactData->activity_model == 1 ) // Debyl-Huekel
+            {
+                ogsChem::chemActivityModelAqDBH* mActivityModelAqDBH 
+                    = new ogsChem::chemActivityModelAqDBH(ogs6fem.map_ChemComp); 
+                mEqReactSys = new ogsChem::chemEqReactSysActivity(ogs6fem.map_ChemComp, 
+                                                          ogs6fem.list_eq_reactions, 
+                                                          mActivityModelAqDBH); 
+                ogs6fem.m_EqReactSys = mEqReactSys; 
+                
+            }
+            else if ( ogs5KinReactData->activity_model == 2 ) // Davies
+            {
+                ogsChem::chemActivityModelAqDVS* mActivityModelAqDVS 
+                    = new ogsChem::chemActivityModelAqDVS(ogs6fem.map_ChemComp); 
+                mEqReactSys = new ogsChem::chemEqReactSysActivity(ogs6fem.map_ChemComp, 
+                                                          ogs6fem.list_eq_reactions, 
+                                                          mActivityModelAqDVS); 
+                ogs6fem.m_EqReactSys = mEqReactSys; 
+                
+            }
+            else // by default, use the unity model
+            {
+                ogsChem::chemActivityModelUnity* mActivityModelUnity 
+                    = new ogsChem::chemActivityModelUnity();
+                mEqReactSys = new ogsChem::chemEqReactSysActivity(ogs6fem.map_ChemComp, 
+                                                          ogs6fem.list_eq_reactions, 
+                                                          mActivityModelUnity); 
+                ogs6fem.m_EqReactSys = mEqReactSys; 
+                
+            }
+            mEqReactSys = NULL; 
+            
+        }
+        // if only kinetic but no equilibrium reactions
+		else if ( ogs6fem.list_eq_reactions.size() == 0 && ogs6fem.list_kin_reactions.size() > 0 )
+        {   // initialize the kin-reduction scheme 
+            ogsChem::chemReductionKin* mReductionKinScheme;
+            mReductionKinScheme = new ogsChem::chemReductionKin( ogs6fem.map_ChemComp, ogs6fem.list_kin_reactions );
+            ogs6fem.m_KinReductScheme = mReductionKinScheme;
+            mReductionKinScheme = NULL;
+        }
+        else if ( ogs6fem.list_eq_reactions.size() > 0 ||  ogs6fem.list_kin_reactions.size() > 0)  //define a flag to indicate GIA method later.
+        {  // initialize the full reduction scheme
            // TODO
             ogsChem::chemReductionGIA* mReductionGIAScheme;
             mReductionGIAScheme = new ogsChem::chemReductionGIA( ogs6fem.map_ChemComp, ogs6fem.list_eq_reactions, ogs6fem.list_kin_reactions );
             ogs6fem.m_GIA_ReductScheme = mReductionGIAScheme;
             mReductionGIAScheme = NULL;
-//        }  // end of if else
-
-		//        // if only kinetic but no equilibrium reactions
-		//		if ( ogs6fem.list_eq_reactions.size() == 0 && ogs6fem.list_kin_reactions.size() > 0 )
-		//        {   // initialize the kin-reduction scheme
-		//            ogsChem::chemReductionKin* mReductionKinScheme;
-		//            mReductionKinScheme = new ogsChem::chemReductionKin( ogs6fem.map_ChemComp, ogs6fem.list_kin_reactions );
-		//            ogs6fem.m_KinReductScheme = mReductionKinScheme;
-		//            mReductionKinScheme = NULL;
-		//        }
-		//        else if ( ogs6fem.list_eq_reactions.size() > 0 ||  ogs6fem.list_kin_reactions.size() > 0)  //define a flag to indicate GIA method later.
-		//        {  // initialize the full reduction scheme
-		//           // TODO
-		//            ogsChem::chemReductionGIA* mReductionGIAScheme;
-		//            mReductionGIAScheme = new ogsChem::chemReductionGIA( ogs6fem.map_ChemComp, ogs6fem.list_eq_reactions, ogs6fem.list_kin_reactions );
-		//            ogs6fem.m_GIA_ReductScheme = mReductionGIAScheme;
-		//            mReductionGIAScheme = NULL;
-		//        }  // end of if else
-
+        }  // end of if else
     }  // end of if ( n_KinReactions > 0 )
 
     // -------------------------------------------------------------------------

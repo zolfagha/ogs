@@ -44,7 +44,7 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
     if ( !(this->_local_eq_react_sys->IsInitialized()) ) 
 	{
 		// error msg
-	    ERR("While initialize the OPS Reactive Transport Process, the chemEqReactSys class has not been correctly initialized! ");
+	    ERR("While initialize the OPS Reactive Transport Process, the chemEqReactSysActivity class has not been correctly initialized! ");
 		// then stop the program
 		exit(1);
 	}
@@ -58,7 +58,7 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
 		this->setOutputParameterName( i, femData->map_ChemComp[i]->second->get_name() ); 
 
     // adding variables into the linear problem
-	// for the linear transport problem, variables are eta_mobile
+	// for the linear transport problem, variables are c_mob
 	for ( i=0; i < _n_Comp_mob ; i++ )
 	{
     	// set up problem
@@ -196,7 +196,7 @@ void FunctionOPSConc<T1, T2>::calc_nodal_eq_react_sys(double /*dt*/)
     size_t result = 1; 
 	
 	// initialize the local vector
-	ogsChem::LocalVector loc_conc; 
+	LocalVector loc_conc; 
 	loc_conc = LocalVector::Zero( _n_Comp ); 
 
 	// signal, solving local equilibrium reaction system

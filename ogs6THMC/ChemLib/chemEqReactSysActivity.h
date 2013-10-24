@@ -7,11 +7,12 @@
  *
  * \file chemEqReactSys.h
  *
- * Created on 2013-03-28 by Haibing Shao
+ * Created on 2013-09-18 by Haibing Shao
  */
-#ifndef CHEM_EQ_REACT_SYS_H
-#define CHEM_EQ_REACT_SYS_H
+#ifndef CHEM_EQ_REACT_SYS_ACTIVITY_H
+#define CHEM_EQ_REACT_SYS_ACTIVITY_H
 
+#include "logog.hpp"
 #include "chemconst.h"
 #include "chemcomp.h"
 #include "chemReactionEq.h"
@@ -21,16 +22,22 @@
 namespace ogsChem
 {
 
-class chemEqReactSys
+/**
+  * The main difference btw. this class and the class chemEqReactSys is, 
+  * we us [logC; c_min_bar] as the unknown vector. 
+  * The size of this vector is equal to the number of components. 
+  * by keeping the log, we will keep concentration values to positive
+  */
+class chemEqReactSysActivity
 {
 public:
-	/**
+    /**
       * constructor of the class
       */
-	chemEqReactSys(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp, 
-                   std::vector<ogsChem::chemReactionEq*>                & list_eq_reactions, 
-                   ogsChem::chemActivityModelAbstract                  *a )
-                   : _list_eq_reactions(list_eq_reactions), _I(0), _J(0), _activity_model(a)
+	chemEqReactSysActivity(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp, 
+                           std::vector<ogsChem::chemReactionEq*>                & list_eq_reactions, 
+                           ogsChem::chemActivityModelAbstract                  *a )
+      : _list_eq_reactions(list_eq_reactions), _I(0), _J(0), _activity_model(a)
     {
 	    // by default, the class is not yet initialized
 	    isInitialized = false; 
@@ -45,8 +52,10 @@ public:
 		    buildStoi(map_chemComp, list_eq_reactions);
             // read the logK values
             read_logK(list_eq_reactions); 
-            // allocate memory for local residual vector
-            _vec_res    = ogsChem::LocalVector::Zero( _I_basis + _I_sec_min ); 
+            // allocate memory for local residual vector, activity coefficients, and ln concentrations.
+            _vec_res           = ogsChem::LocalVector::Zero( _I ); 
+            _ln_activity_coeff = ogsChem::LocalVector::Ones( _I ); // by default set activity coeff to 1
+            _ln_activity       = ogsChem::LocalVector::Zero( _I ); 
             // allocate memory for local Jacobi matrix
             _mat_Jacobi = ogsChem::LocalMatrix::Zero( _I, _I ); 
 		    // allocate memory for vector AI
@@ -56,12 +65,11 @@ public:
             isInitialized = true; 
 	    }
     };
-	
-	/**
+    
+    /**
       * destructor of the class
       */
-    ~chemEqReactSys(void){}; 
-
+    ~chemEqReactSysActivity(void){}; 
     /**
       * whether the reduction scheme has been initialized
       */
@@ -88,6 +96,7 @@ public:
     {
         vec_tot_mass = vec_conc_basis - _matStoi.transpose() * vec_conc_second; 
     }; 
+
     /**
       * calculate the residual of the reaction system using 
       * the concentration vector of all components and
@@ -100,26 +109,18 @@ public:
         size_t i; 
         double res_tmp, phi;
         ogsChem::LocalVector c_basis, c_sec_min, c_second; 
-        ogsChem::LocalVector ln_c_basis, ln_c_sec_mob, ln_c_sec_sorp; 
-        ogsChem::LocalVector vec_conc_basis, vec_conc; 
+        ogsChem::LocalVector ln_activity_basis, ln_activity_sec_mob, ln_activity_sec_sorp; 
+        ogsChem::LocalVector vec_ln_a; 
         ogsChem::LocalVector vec_cur_mass_balance;
         ogsChem::LocalVector lnK_min;
         ogsChem::LocalMatrix Stoi_mob, Stoi_sorp, Stoi_min; 
 
-        vec_conc             = ogsChem::LocalVector::Zero( _I ); 
         vec_cur_mass_balance = ogsChem::LocalVector::Zero( _I_basis  ); 
-        ln_c_basis           = ogsChem::LocalVector::Zero( _I_basis );
-        vec_conc_basis       = ogsChem::LocalVector::Zero( _I_basis  ); 
+        ln_activity_basis    = ogsChem::LocalVector::Zero( _I_basis );
+        c_basis              = ogsChem::LocalVector::Zero( _I_basis  ); 
         c_second             = ogsChem::LocalVector::Zero( _I_second );
+        _ln_activity         = ogsChem::LocalVector::Zero( _I        ); 
 
-        // now updating the saturation index and minerals
-        // this->update_AI( vec_unknowns ); 
-        // this->update_minerals( vec_unknowns, vec_tot_mass_constrain );
-
-        // now split the unknown vector
-        c_basis    = vec_unknowns.head(_I_basis); 
-        for (i=0; i < (size_t)c_basis.rows(); i++)
-            ln_c_basis(i) = std::log(c_basis(i));
         c_sec_min  = vec_unknowns.tail(_I_sec_min); 
 
         // part 0), calculate the concentration of secondary 
@@ -129,36 +130,47 @@ public:
         Stoi_min  = _matStoi.bottomRows( _J_min );
     
         // TODO, do the activity correction
-
+        this->_activity_model->calc_activity_logC( vec_unknowns, 
+                                                   _ln_activity_coeff, 
+                                                   _ln_activity ); 
+        // now split the unknown vector
+        ln_activity_basis = _ln_activity.head(_I_basis);
         // calculate the secondary mobile component concentrations
-        ln_c_sec_mob  = _vec_lnK.head( _J_mob ) - Stoi_mob * ln_c_basis; 
+        ln_activity_sec_mob  = _ln_activity.segment( _I_basis, _I_sec_mob ); 
         // calculate the secondary sorption component concentrations
-        ln_c_sec_sorp = _vec_lnK.segment( _J_mob, _J_sorp ) - Stoi_sorp * ln_c_basis; 
+        ln_activity_sec_sorp = _ln_activity.segment( _I_basis + _I_sec_mob, _I_sec_sorp ); 
         lnK_min = _vec_lnK.tail(_J_min); 
     
+        // fill in the basis concentrations
+        for (i=0; i < _I_basis ; i++ )
+            c_basis(i) = std::exp( ln_activity_basis(i) - _ln_activity_coeff(i) ); 
         // fill in the secondary concentrations
-        for (i=0; i < (size_t)ln_c_sec_mob.rows(); i++)
-            c_second( i ) = std::exp( ln_c_sec_mob(i) );
-        for (i=0; i < (size_t)ln_c_sec_sorp.rows(); i++)
-            c_second( _I_sec_mob + i ) = std::exp( ln_c_sec_sorp(i) ); 
-        c_second.tail( _I_sec_min )  = c_sec_min;
+        for (i=0; i < ( _I_sec_mob + _I_sec_sorp ); i++)
+            c_second( i ) = std::exp( _ln_activity(_I_basis + i) - _ln_activity_coeff( _I_basis + i ) );
+        c_second.tail( _I_sec_min )  = _ln_activity.tail( _I_sec_min );
+        
+        // start calculating the residuals. 
         // part 1), n_basis mass balance equations
         this->calc_tot_mass( c_basis, c_second, vec_cur_mass_balance ); 
         vec_residual.head( _I_basis ) = vec_tot_mass_constrain - vec_cur_mass_balance; 
 
-        // part 2), n_react_min mineral reactions, 
+        // part 2), the secondary equilibrium reactions, 
+        vec_residual.segment( _I_basis, _I_sec_mob ) = ln_activity_sec_mob - _vec_lnK.head( _J_mob ) + Stoi_mob * ln_activity_basis; 
+        vec_residual.segment( _I_basis + _I_sec_mob, _I_sec_sorp ) = ln_activity_sec_sorp - _vec_lnK.segment( _J_mob, _J_sorp ) + Stoi_sorp * ln_activity_basis;
+
+        // part 3), n_react_min mineral reactions, 
         // AKA, the "complementary problem".
         for ( i=0; i < _J_min; i++ )
         {
             // attention, this is spectial for mineral reactions
-            phi  = -1.0 * lnK_min(i) + Stoi_min.row(i) * ln_c_basis;
+            phi  = -1.0 * lnK_min(i) + Stoi_min.row(i) * ln_activity_basis;
             res_tmp  = std::min( phi, c_sec_min(i) ); 
-            vec_residual(_I_basis+i) = res_tmp; 
+            vec_residual(_I_basis + _I_sec_mob + _I_sec_sorp + i) = res_tmp; 
         }  // end of for
+        
 
     };  // end of function calc_residual
 
-    
     /**
       * calculate the Jacobi of the reaction system analytically using 
       * the concentration vector of all components, 
@@ -177,7 +189,7 @@ public:
         // with n_cols and n_rows equal to the number of concentrations
         size_t n_unknowns(vec_unknowns.rows());
         vec_res_tmp = LocalVector::Zero( n_unknowns ); 
-        this->_mat_Jacobi = ogsChem::LocalMatrix::Zero(n_unknowns, n_unknowns); 
+        _mat_Jacobi.setZero(); 
 
         // using the numerical increment method to construct Jacobi matrix 
         for (i=0; i<n_unknowns; i++)
@@ -205,8 +217,7 @@ public:
     #endif
     };
 
-
-    /**
+/**
       * solve the equilibrium reaction system 
       * using the Newton iterations, input values are
       * the vector of concentration values
@@ -224,21 +235,21 @@ public:
         LocalVector x, x_new;
         LocalVector dx; 
         LocalVector total_mass; 
-        LocalVector conc_basis; 
-        LocalVector conc_second; 
+        LocalVector conc_basis  = LocalVector::Zero( _I_basis ); 
+        LocalVector conc_second = LocalVector::Zero( _I_second ); 
         // number of iterations
-        size_t j, iter, n_unkowns;
+        size_t i, j, iter;
         double d_norm, d1_norm, d_norm0; 
 
-        n_unkowns      = _I_basis + _I_sec_min; 
-        x              = LocalVector::Zero( n_unkowns ); 
-        x_new          = LocalVector::Zero( n_unkowns );
-        dx             = LocalVector::Zero( n_unkowns );
+        x              = LocalVector::Zero( _I ); 
+        x_new          = LocalVector::Zero( _I );
+        dx             = LocalVector::Zero( _I );
         total_mass     = LocalVector::Zero( _I_basis ); 
         // calculate the bulk composition 
         // in terms of basis species
-        conc_basis  = vec_conc.head( _I_basis  ); 
+        conc_basis  = vec_conc.head( _I_basis ); 
         conc_second = vec_conc.tail( _I_second ); 
+
         this->calc_tot_mass( conc_basis, conc_second, total_mass ); 
 
         #ifdef _DEBUG
@@ -254,9 +265,10 @@ public:
 
         // unknown vector is composed of 
         // aqueous mobile basis species
-        x.head( _I_basis   ) = conc_basis; 
+        for ( i=0; i < ( _I_basis + _I_sec_mob + _I_sec_sorp ); i++ )
+            x(i) = std::log( vec_conc(i) ); 
         // and the amount of mineral
-        x.tail( _I_sec_min ) = conc_second.tail( _I_sec_min );  
+        x.tail( _I_sec_min ) = vec_conc.tail( _I_sec_min ); 
 
         // start solving the system
         iter = 0; 
@@ -503,6 +515,18 @@ private:
     ogsChem::LocalVector _vec_res;
 
     /**
+      * vector of activity coefficients
+      * its size is equal to the number of components
+      */
+    ogsChem::LocalVector _ln_activity_coeff; 
+
+    /**
+      * vector of ln concentrations.
+      * notice the c_min are sill in linear scale, not loged. 
+      */
+    ogsChem::LocalVector _ln_activity; 
+
+    /**
       * vector of staturation index
       * size of this vector is equal to the amount of minerals
       * if AI = 1, meaning the mineral is saturated and present
@@ -515,11 +539,81 @@ private:
       * its size is equal to the n_components by n_components
       */
     ogsChem::LocalMatrix _mat_Jacobi; 
+    
+    /**
+      * pointer to the activity model
+      */
+    ogsChem::chemActivityModelAbstract *_activity_model; 
 
-	/**
+    /**
+      * count the components 
+      */
+    void countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp)
+    {
+	    _I_mob = 0; 
+        _I_sec_mob = 0; 
+	    _I_sec_sorp= 0; 
+	    _I_sec_min = 0; 
+
+	    BaseLib::OrderedMap<std::string, ogsChem::ChemComp*>::iterator it; 
+	    for( it = map_chemComp.begin(); it != map_chemComp.end(); it++ )
+	    {
+		    switch ( it->second->getCompType() )
+		    {
+		    case ogsChem::AQ_PHASE_COMP: 
+			    _I_mob++; 
+			    break;
+		    case ogsChem::SORPTION_COMP: 
+			    _I_sec_sorp++;
+			    break;
+		    case ogsChem::MIN_PHASE_COMP: 
+			    _I_sec_min++;
+			    break;
+		    default:
+			    _I_sec_min++;
+			    break; 
+		    }
+	    }
+
+        _I = _I_mob + _I_sec_sorp + _I_sec_min;
+    }; 
+
+    /**
+      * count how many mobile, sorption and mineral reactions
+      */
+    void countReactions(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp, std::vector<ogsChem::chemReactionEq*> & list_eq_reactions)
+    {
+	    _J_mob = 0; 
+	    _J_sorp= 0; 
+	    _J_min = 0; 
+
+	    size_t it; 
+	    for( it=0; it < list_eq_reactions.size(); it++ )
+	    {
+            switch ( list_eq_reactions[it]->get_type() )
+		    {
+            case ogsChem::MOB_EQ_REACT: 
+			    _J_mob++; 
+			    break;
+            case ogsChem::SORP_EQ_REACT: 
+			    _J_sorp++;
+			    break;
+            case ogsChem::MIN_EQ_REACT: 
+			    _J_min++;
+			    break;
+		    default:
+			    _J_min++;
+			    break; 
+		    }  // end of switch
+	    }  // end of for
+
+        _J = _J_mob + _J_sorp + _J_min;
+    };
+
+    /**
       * construct stoichiometric matrix out of list of components and reactions
       */
-	void buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp, 
+    void buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp, 
 		           std::vector<ogsChem::chemReactionEq*>                & list_eq_reactions)
     {
 	    size_t i,j, tmp_idx; 
@@ -538,6 +632,11 @@ private:
 		    for ( i=0; i < list_eq_reactions[j]->get_vecCompNames().size(); i++ ){
 			    tmp_str  = list_eq_reactions[j]->get_vecCompNames()[i]; 
 			    tmp_Comp = map_chemComp.find(tmp_str);
+				if ( tmp_Comp == map_chemComp.end() ) // this component not found!
+				{
+					ERR("The component in reaction definition not found in MCP list! ");
+					exit(1); 
+				}
 			    tmp_idx  = tmp_Comp->second->getIndex(); 
 			    if ( list_eq_reactions[j]->get_vecStoi().size() > 2 )
 			    {
@@ -583,71 +682,6 @@ private:
             _vec_lnK(i) = list_eq_reactions[i]->get_ln_K(); 
     };
 
-	/**
-      * count how many mobile, sorption and mineral components
-      */
-	void countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp)
-    {
-	    _I_mob = 0; 
-        _I_sec_mob = 0; 
-	    _I_sec_sorp= 0; 
-	    _I_sec_min = 0; 
-
-	    BaseLib::OrderedMap<std::string, ogsChem::ChemComp*>::iterator it; 
-	    for( it = map_chemComp.begin(); it != map_chemComp.end(); it++ )
-	    {
-		    switch ( it->second->getMobility() )
-		    {
-		    case ogsChem::MOBILE: 
-			    _I_mob++; 
-			    break;
-		    case ogsChem::SORPTION: 
-			    _I_sec_sorp++;
-			    break;
-		    case ogsChem::MINERAL: 
-			    _I_sec_min++;
-			    break;
-		    default:
-			    _I_sec_min++;
-			    break; 
-		    }
-	    }
-
-        _I = _I_mob + _I_sec_sorp + _I_sec_min;
-    }; 
-
-    /**
-      * count how many mobile, sorption and mineral reactions
-      */
-    void countReactions(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp, std::vector<ogsChem::chemReactionEq*> & list_eq_reactions)
-    {
-	    _J_mob = 0; 
-	    _J_sorp= 0; 
-	    _J_min = 0; 
-
-	    size_t it; 
-	    for( it=0; it < list_eq_reactions.size(); it++ )
-	    {
-            switch ( list_eq_reactions[it]->get_type() )
-		    {
-            case ogsChem::MOB_EQ_REACT: 
-			    _J_mob++; 
-			    break;
-            case ogsChem::SORP_EQ_REACT: 
-			    _J_sorp++;
-			    break;
-            case ogsChem::MIN_EQ_REACT: 
-			    _J_min++;
-			    break;
-		    default:
-			    _J_min++;
-			    break; 
-		    }  // end of switch
-	    }  // end of for
-
-        _J = _J_mob + _J_sorp + _J_min;
-    };
-    
     /**
       * increment the unknown with a damping factor
       * to prevent the concentrations falling into negative values
@@ -663,12 +697,17 @@ private:
         // increment with a damping factor for the minerals
         for (i=0; i<n_unknowns; i++)
         {
-            damp_factor = 1.0 / std::max(1.0, -1.33*delta_x(i) / x_old(i) );
-            x_new(i) = x_old(i) + damp_factor * delta_x(i);
+            if ( i < ( _I_basis + _I_sec_mob + _I_sec_sorp ) )
+                x_new(i) = x_old(i) + delta_x(i);
+            else
+            {
+                damp_factor = 1.0 / std::max(1.0, -1.33*delta_x(i) / x_old(i) );
+                x_new(i) = x_old(i) + damp_factor * delta_x(i);
+            }
         }  // end of for
 
     };  // end of func increment_unknown;
-   
+
     /**
       * update the concentration of minerals
       */
@@ -679,29 +718,43 @@ private:
         ogsChem::LocalMatrix Stoi_min; 
         ogsChem::LocalVector logK_min;
         ogsChem::LocalVector c_sec_min; 
-        ogsChem::LocalVector c_basis; 
+        ogsChem::LocalVector c_basis, c_second; 
+        ogsChem::LocalVector ln_activity_basis;
         ogsChem::LocalVector ln_c_basis; 
+        ogsChem::LocalVector ln_activity;
+        ogsChem::LocalVector ln_activity_coeff;
 
         Stoi_min = this->_matStoi.bottomRows(_I_sec_min);
         logK_min = this->_vec_lnK.tail(_I_sec_min); 
 
+        c_basis = ogsChem::LocalVector::Zero( _I_basis ); 
+		c_second = ogsChem::LocalVector::Zero(_I_second); 
+        ln_activity = ogsChem::LocalVector::Zero( _I    ); 
+        ln_activity_coeff = ogsChem::LocalVector::Zero( _I ); 
+        ln_activity_basis = ogsChem::LocalVector::Zero( _I_basis ); 
+
+        this->_activity_model->calc_activity_logC( vec_unknowns, ln_activity_coeff, ln_activity ); 
+
         // take the first section which is basis concentration
-        c_basis    = vec_unknowns.head( _I_basis   );
-        ln_c_basis = LocalVector::Zero( c_basis.rows() );
-        for (i=0; i < (size_t)c_basis.rows(); i++)
-            ln_c_basis(i) = std::log( c_basis(i) );
+        ln_activity_basis = ln_activity.head( _I_basis );
+        for ( i=0; i < _I_basis; i++)
+            c_basis(i) = std::exp( ln_activity(i) - ln_activity_coeff(i) ); 
+		for (i = 0; i < (_I_sec_mob + _I_sec_sorp); i++)
+			c_second(i) = std::exp(ln_activity(_I_basis + i) - ln_activity_coeff(_I_basis + i)); 
+        // notice that we intentially leave the minerals to be zero here. 
+
         // and the minerals
         c_sec_min  = vec_unknowns.tail( _I_sec_min ); 
 
         for ( i=0; i < _I_sec_min; i++ )
         {
-            idx = _I_basis + i; 
+            idx = _I_basis + _I_sec_mob + _I_sec_sorp + i; 
             if ( _AI(i) == 1 )
             {
-                cbarmin = cal_cbarmin_by_total_mass(i, c_basis, mass_constrain);
+                cbarmin = cal_cbarmin_by_total_mass(i, c_basis, c_second, mass_constrain);
             }  // end of if AI(i)
 
-            phi  = -logK_min(i) + Stoi_min.row(i) * ln_c_basis;
+            phi  = -logK_min(i) + Stoi_min.row(i) * ln_activity_basis;
         
             if ( phi > cbarmin )
             {
@@ -712,7 +765,7 @@ private:
             {
                 if ( _AI(i) == 0 )
                 {
-                    cbarmin = cal_cbarmin_by_total_mass(i, c_basis, mass_constrain);
+                    cbarmin = cal_cbarmin_by_total_mass(i, c_basis, c_second, mass_constrain);
                 }
                 _AI(i) = 1; 
             }  // end of else
@@ -722,25 +775,23 @@ private:
 
     };  // end of function update_minerals
 
-    
     /**
       * calcuate one particular mineral concentration 
       * by the amount of basis concentration and total mass constrain
       */
-    double cal_cbarmin_by_total_mass(size_t idx_min, LocalVector & c_basis, LocalVector & tot_mass)
+    double cal_cbarmin_by_total_mass(size_t idx_min, LocalVector & c_basis, LocalVector & c_second, LocalVector & tot_mass)
     {
         double cbarmin;
-        ogsChem::LocalVector conc_second, res_tmp;
-        ogsChem::LocalMatrix matStoi_trans; 
-        conc_second = ogsChem::LocalVector::Zero( _I_second ); 
+        ogsChem::LocalVector conc_min, res_tmp;
+        ogsChem::LocalMatrix matStoi_min_trans; 
+		conc_min    = ogsChem::LocalVector::Zero(_I_second);
         res_tmp     = ogsChem::LocalVector::Zero( _I_basis );
     
-        matStoi_trans = _matStoi.transpose(); 
-        res_tmp       = tot_mass - c_basis; 
+		matStoi_min_trans = _matStoi.bottomRows( _J_min ).transpose();
+        res_tmp       = tot_mass - c_basis + _matStoi.transpose() * c_second; 
 
-        // conc_second = matStoi_trans.fullPivHouseholderQr().solve( res_tmp ); 
-        conc_second = (-1.0 * matStoi_trans).householderQr().solve( res_tmp ); 
-        cbarmin = conc_second( _I_sec_mob + _I_sec_sorp + idx_min);
+		conc_min = (-1.0 * matStoi_min_trans).householderQr().solve(res_tmp);
+		cbarmin  = conc_min( idx_min );
     return cbarmin;
     };  // end of function cal_cbarmin_by_total_mass
 
@@ -750,47 +801,14 @@ private:
     void update_concentations(LocalVector & vec_unknowns, LocalVector & vec_concentrations)
     {
         size_t i; 
-        ogsChem::LocalVector c_basis, c_second, c_sec_min; 
-        ogsChem::LocalVector ln_c_basis, ln_c_sec_mob, ln_c_sec_sorp; 
-        ogsChem::LocalMatrix Stoi_mob, Stoi_sorp; 
 
-        c_basis      = ogsChem::LocalVector::Zero( this->_I_basis    ); 
-        c_second     = ogsChem::LocalVector::Zero( this->_I_second   );
-        c_sec_min    = ogsChem::LocalVector::Zero( this->_I_sec_min  ); 
-        ln_c_basis   = ogsChem::LocalVector::Zero( this->_I_basis    );
-        ln_c_sec_mob = ogsChem::LocalVector::Zero( this->_I_sec_mob  ); 
-        ln_c_sec_sorp= ogsChem::LocalVector::Zero( this->_I_sec_sorp ); 
-
-        c_sec_min  = vec_unknowns.tail(_I_sec_min); 
-        c_basis    = vec_unknowns.head(_I_basis); 
-        for (i=0; i < (size_t)c_basis.rows(); i++)
-            ln_c_basis(i) = std::log(c_basis(i));
-
-        Stoi_mob  = _matStoi.topRows(    _J_mob );
-        Stoi_sorp = _matStoi.middleRows( _J_mob, _J_sorp ); 
-        // calculate the secondary mobile component concentrations
-        ln_c_sec_mob  = _vec_lnK.head( _J_mob ) - Stoi_mob * ln_c_basis; 
-        // calculate the secondary sorption component concentrations
-        ln_c_sec_sorp = _vec_lnK.segment( _J_mob, _J_sorp ) - Stoi_sorp * ln_c_basis; 
-
-        // fill in the secondary concentrations
-        for (i=0; i < (size_t)ln_c_sec_mob.rows(); i++)
-            c_second( i ) = std::exp( ln_c_sec_mob(i) );
-        for (i=0; i < (size_t)ln_c_sec_sorp.rows(); i++)
-            c_second( _I_sec_mob + i ) = std::exp( ln_c_sec_sorp(i) ); 
-        c_second.tail( _I_sec_min )  = c_sec_min;
-
-        vec_concentrations.head( _I_basis  ) = c_basis;
-        vec_concentrations.tail( _I_second ) = c_second; 
+        for ( i=0; i < ( _I_basis + _I_sec_mob + _I_sec_sorp ) ; i++ )
+            vec_concentrations(i) = std::exp( vec_unknowns(i) );
+        vec_concentrations.tail( _I_sec_min ) = vec_unknowns.tail( _I_sec_min ); 
     };
 
-
-    /**
-      * pointer to the activity model
-      */
-    ogsChem::chemActivityModelAbstract *_activity_model; 
 };
 
-}
+}  // end of namespace
 
 #endif

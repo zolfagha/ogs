@@ -13,7 +13,7 @@
 #ifndef CONC_NODE_INFO_H
 #define CONC_NODE_INFO_H
 
-#include "ChemLib/chemEqReactSys.h"
+#include "ChemLib/chemEqReactSysActivity.h"
 
 class ConcNodeInfo
 {
@@ -23,7 +23,7 @@ public:
       */ 
 	ConcNodeInfo(size_t node_id, 
                  size_t n_comp, 
-                 ogsChem::chemEqReactSys* EqReactSys); 
+                 ogsChem::chemEqReactSysActivity* EqReactSys); 
     /**
       * destructor
       */ 
@@ -63,7 +63,7 @@ private:
     /**
       * pointer to the ReductionKin class
       */ 
-	ogsChem::chemEqReactSys* _EqReactSys;
+	ogsChem::chemEqReactSysActivity* _EqReactSys;
 }; 
 
 #endif  // end of ifndef

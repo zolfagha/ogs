@@ -42,6 +42,7 @@ namespace ogsChem
          AQ_PHASE_COMP,   /* aquous solution                */
          GAS_PHASE_COMP,  /* ideal gas mixture              */
          MIN_PHASE_COMP,  /* singal component mineral phase */
+         SORPTION_COMP,   /* sorption component             */ 
          SS_PHASE_COMP    /* solid solution component       */
     };
 
@@ -71,6 +72,7 @@ namespace ogsChem
 	enum KinReactType {
 		Monod,             /* - monod reaction */ 
 		// DoubleMonodDecay,  /* - double monod reaction with decay term */ 
+        MonodSum,          /* - sum of monod rate terms */
 		NoType             /* - uninitialized type */ 
 	}; 
 
@@ -87,6 +89,12 @@ namespace ogsChem
         GRE_XML       // XML database format of this program
     };
 
+    // the activity model included
+    enum ACTIVITY_MODEL {
+        ACT_MOD_AQ_DBH,  // Debyle-Huekel model for aqueous phase
+        ACT_MOD_AQ_DVS,  // Davis model for aqueous phase
+        ACT_MOD_UNITY    // activity coefficients are all ones
+    };
 
 	// type definitions
 	typedef MathLib::LocalMatrix LocalMatrix;

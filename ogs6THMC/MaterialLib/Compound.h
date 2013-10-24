@@ -20,12 +20,28 @@ namespace MaterialLib
 
 struct Compound
 {
+    /**
+      * name of the component
+      */
     std::string name;
+
+    /**
+      * whether this component is moving
+      */
     bool is_mobile;
+
+    /**
+      * charge of the component, in the unit of equivalent
+      */
+    double charge; 
+
+    std::string comp_type; 
+
     NumLib::ITXFunction* molecular_diffusion;
 
     Compound()
-    : is_mobile(true), molecular_diffusion(nullptr)
+    : is_mobile(true), molecular_diffusion(nullptr), 
+      charge(0.0)
     {
     }
     ~Compound()

@@ -20,7 +20,7 @@
 #include "DiscreteLib/Core/IDiscreteSystem.h"
 #include "SolutionLib/Core/TimeSteppingProblem.h"
 #include "SolutionLib/Fem/FemVariable.h"
-#include "ChemLib/chemEqReactSys.h"
+#include "ChemLib/chemEqReactSysActivity.h"
 
 namespace SolutionLib
 {
@@ -45,7 +45,7 @@ public:
     /**
       * constructor
       */
-    explicit FemReactOPSsolution(MyDiscreteSystem* dis, ogsChem::chemEqReactSys* mychemEqReactSys  )
+    explicit FemReactOPSsolution(MyDiscreteSystem* dis, ogsChem::chemEqReactSysActivity* mychemEqReactSys  )
      : _discrete_system(dis), _EqReactSys(mychemEqReactSys)
     {
     }
@@ -87,7 +87,7 @@ public:
 	/**
       * get the pointer to the equilibrium reaction system
       */
-    ogsChem::chemEqReactSys* getEqReactSys() const { return _EqReactSys; }
+    ogsChem::chemEqReactSysActivity* getEqReactSys() const { return _EqReactSys; }
 
 private:
     DISALLOW_COPY_AND_ASSIGN(FemReactOPSsolution);
@@ -106,7 +106,7 @@ private:
     /**
       * pointer to equilibrium reaction system
       */ 
-	ogsChem::chemEqReactSys* _EqReactSys; // TO BE CHANGED. 
+	ogsChem::chemEqReactSysActivity* _EqReactSys; // TO BE CHANGED. 
 
 };
 

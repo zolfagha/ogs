@@ -22,10 +22,11 @@
 #include "SolutionLib/Fem/SingleStepFEM.h"
 #include "ProcessLib/AbstractTransientProcess.h"
 #include "MathLib/DataType.h"
-#include "ChemLib/chemEqReactSys.h"
+#include "ChemLib/chemEqReactSysActivity.h"
 #include "NumLib/Nonlinear/DiscreteNRSolverWithStepInitFactory.h"
 #include "UserModules/FemKinReactGIA/LinearTransportTimeODELocalAssember.h"
 #include "UserModules/FemKinReactGIA/LinearTransportJacobianLocalAssembler.h"
+#include "UserModules/FemKinReactGIA/NestedOdeNRIterationStepInitializer.h"
 #include "FemReactOPSsolution.h"
 #include "SingleStepReactOPS.h"
 
@@ -59,9 +60,9 @@ public:
 	// for the nonlinear part, use different settings
 	typedef NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerEQSLocalAssembler, MyNodalFunctionScalar>      MyNonLinearAssemblerType; 
 	typedef NonLinearReactiveTransportTimeODELocalAssembler<NumLib::ElementWiseTimeEulerResidualLocalAssembler, MyNodalFunctionScalar> MyNonLinearResidualAssemblerType; 
-	typedef NonLinearReactiveTransportJacobianLocalAssembler<MyNodalFunctionScalar, MyFunctionData>                                    MyNonLinearJacobianAssemblerType; 
-	typedef NestedLocalProbNRIterationStepInitializer<MyNodalFunctionScalar, MyFunctionData>                                           MyNRIterationStepInitializer;
-	typedef NumLib::DiscreteNRSolverWithStepInitFactory<MyNRIterationStepInitializer>                                                  MyDiscreteNonlinearSolverFactory; 
+	typedef NonLinearReactiveTransportJacobianLocalAssembler<MyNodalFunctionScalar, MyFunctionData> MyNonLinearJacobianAssemblerType; 
+	typedef NestedOdeNRIterationStepInitializer<MyNodalFunctionScalar, MyFunctionData> MyNRIterationStepInitializer;
+	typedef NumLib::DiscreteNRSolverWithStepInitFactory<MyNRIterationStepInitializer> MyDiscreteNonlinearSolverFactory; 
 	
 	/**
       * linear Equation definition
@@ -275,7 +276,7 @@ private:
 	/**
       * the local equilibrium reactions system
       */ 
-	ogsChem::chemEqReactSys*                   _local_eq_react_sys; 
+	ogsChem::chemEqReactSysActivity*                   _local_eq_react_sys; 
 	
 	/**
       * reactive transport operator splitting problem

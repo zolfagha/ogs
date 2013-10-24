@@ -508,6 +508,20 @@ ios::pos_type CompProperties::Read(ifstream* rfd_file)
         {
             OutputMassOfComponentInModel = 1;
         }
+        //....................................................................
+        // subkeyword found  // HS added 2013.09.17
+        if(line_string.find("$CHARGE") != std::string::npos)
+        {
+            in.str(readNonBlankLineFromInputStream(*rfd_file));
+            in >> charge;
+            in.clear();
+        }
+        if(line_string.find("$COMP_TYPE") != std::string::npos)
+        {
+            in.str(readNonBlankLineFromInputStream(*rfd_file));
+            in >> comp_type;
+            in.clear();
+        }
     }                                     //end while
     return position;
 }
