@@ -623,8 +623,22 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 
 
         // using the process name to control which class to initialize
-        //TODO
-        if ( ogs6fem.list_eq_reactions.size() > 0 && ogs6fem.list_kin_reactions.size() == 0 )
+		bool HAVE_KIN_REACT_GIA(false), HAVE_REACT_GIA(false), HAVE_REACT_TRANS_OPS(false);
+		for (size_t i = 0; i < ogs5fem.pcs_vector.size(); i++)
+		{
+			ogs5::FiniteElement::ProcessType pcs_type = ogs5fem.pcs_vector[i]->getProcessType(); 
+
+			if ( pcs_type == ogs5::FiniteElement::ProcessType::KIN_REACT_GIA )
+				HAVE_KIN_REACT_GIA = true;
+			else if (pcs_type == ogs5::FiniteElement::ProcessType::REACT_GIA)
+				HAVE_REACT_GIA = true;
+			else if (pcs_type == ogs5::FiniteElement::ProcessType::REACT_TRANS_OPS)
+				HAVE_REACT_TRANS_OPS = true; 
+		}
+
+        // first case the operator splitting mode
+        // if ( ogs6fem.list_eq_reactions.size() > 0 && ogs6fem.list_kin_reactions.size() == 0 )
+		if (HAVE_REACT_TRANS_OPS)
         {
             // initialize the activity model of the chemical system. 
             ogs5::CKinReactData* ogs5KinReactData = ogs5fem.KinReactData_vector[0]; 
@@ -660,19 +674,20 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
                 
             }
             mEqReactSys = NULL; 
-            
         }
-        // if only kinetic but no equilibrium reactions
-		else if ( ogs6fem.list_eq_reactions.size() == 0 && ogs6fem.list_kin_reactions.size() > 0 )
+        // then is the the KIN_GIA mode
+		// else if ( ogs6fem.list_eq_reactions.size() == 0 && ogs6fem.list_kin_reactions.size() > 0 )
+		else if ( HAVE_KIN_REACT_GIA )
         {   // initialize the kin-reduction scheme 
             ogsChem::chemReductionKin* mReductionKinScheme;
             mReductionKinScheme = new ogsChem::chemReductionKin( ogs6fem.map_ChemComp, ogs6fem.list_kin_reactions );
             ogs6fem.m_KinReductScheme = mReductionKinScheme;
             mReductionKinScheme = NULL;
         }
-        else if ( ogs6fem.list_eq_reactions.size() > 0 ||  ogs6fem.list_kin_reactions.size() > 0)  //define a flag to indicate GIA method later.
+		// then the REDUCT_GIA mode
+        // else if ( ogs6fem.list_eq_reactions.size() > 0 ||  ogs6fem.list_kin_reactions.size() > 0)  //define a flag to indicate GIA method later.
+		else if ( HAVE_REACT_GIA )
         {  // initialize the full reduction scheme
-           // TODO
             ogsChem::chemReductionGIA* mReductionGIAScheme;
             mReductionGIAScheme = new ogsChem::chemReductionGIA( ogs6fem.map_ChemComp, ogs6fem.list_eq_reactions, ogs6fem.list_kin_reactions );
             ogs6fem.m_GIA_ReductScheme = mReductionGIAScheme;
