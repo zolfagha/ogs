@@ -123,6 +123,25 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options & option)
         global_vec_Rate_tmp->initialize( *dis, FemLib::PolynomialOrder::Linear, 0.0  );
      	_global_vec_Rate.push_back(global_vec_Rate_tmp);
 	}
+	// initialize the rates for xi_sorp, xi_min and xi_kin
+	for (i = 0; i < _n_xi_Sorp; i++)
+	{
+		MyNodalFunctionScalar* xi_sorp_rates = new MyNodalFunctionScalar();
+		xi_sorp_rates->initialize(*dis, FemLib::PolynomialOrder::Linear, 0.0);
+		_xi_sorp_rates.push_back(xi_sorp_rates);
+	}
+	for (i = 0; i < _n_xi_Min; i++)
+	{
+		MyNodalFunctionScalar* xi_min_rates = new MyNodalFunctionScalar();
+		xi_min_rates->initialize(*dis, FemLib::PolynomialOrder::Linear, 0.0);
+		_xi_min_rates.push_back(xi_min_rates);
+	}
+	for (i = 0; i < _n_xi_Kin; i++)
+	{
+		MyNodalFunctionScalar* xi_kin_rates = new MyNodalFunctionScalar();
+		xi_kin_rates->initialize(*dis, FemLib::PolynomialOrder::Linear, 0.0);
+		_xi_kin_rates.push_back(xi_kin_rates);
+	}
 
 	// initialize drates_dxi
 	for ( i=0; i < _J_tot_kin * (_n_xi_local + _n_xi_global) ; i++ )

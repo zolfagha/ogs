@@ -173,7 +173,12 @@ public:
         BaseLib::releaseObjectsInStdVector(_xi_global_pre);
     	BaseLib::releaseObjectsInStdVector(_xi_local_new);
     	BaseLib::releaseObjectsInStdVector(_xi_local_old);
-    	//BaseLib::releaseObjectsInStdVector(_current_time_step);
+
+		BaseLib::releaseObjectsInStdVector(_xi_sorp_rates);
+		BaseLib::releaseObjectsInStdVector(_xi_min_rates);
+		BaseLib::releaseObjectsInStdVector(_xi_kin_rates);
+			
+		//BaseLib::releaseObjectsInStdVector(_current_time_step);
     	BaseLib::releaseObjectsInStdVector(_global_vec_Rate);
     	//BaseLib::releaseObjectsInStdVector(_local_ode_xi_immob_GIA);
     	//BaseLib::releaseObjectsInStdVector(_dis_sys);
@@ -304,6 +309,10 @@ public:
 	std::vector<MyNodalFunctionScalar*> & get_global_vec_Rate() {return _global_vec_Rate; }
 	std::vector<MyNodalFunctionScalar*> & get_concentrations() {return _concentrations; }
 	std::vector<MyNodalFunctionScalar*> & get_drates_dxi() {return _drates_dxi; }
+	std::vector<MyNodalFunctionScalar*> & get_xi_sorp_rates() { return _xi_sorp_rates; }
+	std::vector<MyNodalFunctionScalar*> & get_xi_min_rates() { return _xi_min_rates; }
+	std::vector<MyNodalFunctionScalar*> & get_xi_kin_rates() { return _xi_kin_rates; }
+
 	FemLib::LagrangeFeObjectContainer* get_feObjects(){return _feObjects;}
 	NumLib::TimeStep const* getTimeStep() {return _current_time_step;}
     virtual void set_BC_conc_node_values(std::size_t node_idx, std::size_t i_var, double node_value);
@@ -468,6 +477,21 @@ private:
       */ 
 	std::vector<MyNodalFunctionScalar*> _xi_local_new;
 	
+	/**
+	  * RHS rate values for nonlinear PDE of xi_sorp
+	  */
+	std::vector<MyNodalFunctionScalar*> _xi_sorp_rates;
+
+	/**
+	  * RHS rate values for nonlinear PDE of xi_min
+	  */
+	std::vector<MyNodalFunctionScalar*> _xi_min_rates;
+
+	/**
+	  * RHS rate values for nonlinear PDE of xi_kin
+	  */
+	std::vector<MyNodalFunctionScalar*> _xi_kin_rates;
+
     /**
       * nodal reaction rates
       */ 

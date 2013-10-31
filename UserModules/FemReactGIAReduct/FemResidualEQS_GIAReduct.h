@@ -304,12 +304,23 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             res46 = theta_water_content * mat_Amin  * vec_Rate; 
             res47 = theta_water_content * mat_A1kin * vec_Rate; 
 
+			// HS: the following part is disabled, 
+			// first we store them, and the integration of these values
+			// will be done in the assembly part. 
+			/*
             for (j=0; j<_n_xi_Sorp_tilde; j++ )
                 residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + j] -= res45(j) ;
             for (j=0; j<_n_xi_Min_tilde; j++ )
                 residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp_tilde + j] -= res46(j) ;
             for (j=0; j<_n_xi_Kin; j++ )
                 residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp_tilde + _n_xi_Min_tilde + j] -= res47(j) ;
+		    */
+			for (j = 0; j < _n_xi_Sorp_tilde; j++)
+				this->_function_data->get_xi_sorp_rates()[j]->setValue( node_idx, res45(j));
+			for (j = 0; j < _n_xi_Min_tilde; j++)
+				this->_function_data->get_xi_min_rates()[j]->setValue(node_idx, res46(j)); 
+			for (j = 0; j < _n_xi_Kin; j++)
+				this->_function_data->get_xi_kin_rates()[j]->setValue(node_idx, res47(j));
             }
      
     } // end of loop over all nodes. 
@@ -339,6 +350,10 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
     double _theta(1.0);
     size_t _n_xi_trans = this->_n_xi_Sorp + this->_n_xi_Min + this->_n_xi_Kin; 
     size_t i,j,k; 
+	MathLib::LocalMatrix rate_xi_sorp_gp, rate_xi_min_gp, rate_xi_kin_gp;
+	MathLib::LocalMatrix node_xi_sorp_rate_values;
+	MathLib::LocalMatrix node_xi_min_rate_values;
+	MathLib::LocalMatrix node_xi_kin_rate_values;
 
     MathLib::LocalVector loc_cur_xi_global, 
                          loc_cur_xi_Sorp_tilde, 
@@ -397,12 +412,32 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
         // number of connecting nodes
         nnodes = ele_node_ids.size(); 
 
+		node_xi_sorp_rate_values = MathLib::LocalMatrix::Zero(nnodes, _n_xi_Sorp); 
+		node_xi_min_rate_values  = MathLib::LocalMatrix::Zero(nnodes, _n_xi_Min);
+		node_xi_kin_rate_values  = MathLib::LocalMatrix::Zero(nnodes, _n_xi_Kin);
+
+		for (j = 0; j < nnodes; j++)
+		{
+			size_t node_idx = e->getNodeID(j);
+			for (k = 0; k < _n_xi_Sorp; k++)
+				node_xi_sorp_rate_values(j, k) = this->_function_data->get_xi_sorp_rates()[k]->getValue(node_idx);
+			for (k = 0; k < _n_xi_Min; k++)
+				node_xi_min_rate_values(j, k)  = this->_function_data->get_xi_min_rates()[k]->getValue(node_idx);
+			for (k = 0; k < _n_xi_Kin; k++)
+				node_xi_kin_rate_values(j, k) = this->_function_data->get_xi_kin_rates()[k]->getValue(node_idx);
+		} // end of for i
+
         //TODO get the water content and multiply it in LHS and RHS
 
         double dt = delta_t.getTimeStepSize();
 
         MathLib::LocalMatrix localM = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
         MathLib::LocalMatrix localK = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
+		
+		MathLib::LocalVector localF_xi_sorp  = MathLib::LocalVector::Zero(ele_node_ids.size()); 
+		MathLib::LocalVector localF_xi_min   = MathLib::LocalVector::Zero(ele_node_ids.size());
+		MathLib::LocalVector localF_xi_kin   = MathLib::LocalVector::Zero(ele_node_ids.size());
+
         MathLib::LocalMatrix localDispersion = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
         MathLib::LocalMatrix localAdvection = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
         MathLib::LocalVector F = MathLib::LocalVector::Zero(ele_node_ids.size());
@@ -472,7 +507,27 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
             _fe->integrateWxN(j, poro, localM);
             _fe->integrateDWxDN(j, dispersion_diffusion, localDispersion);
             _fe->integrateWxDN(j, v2, localAdvection);
-        }
+
+			MathLib::LocalMatrix * Np = _fe->getBasisFunction(); 
+			// loop over all xi_sorp
+			for (k = 0; k < _n_xi_Sorp; k++)
+			{
+				rate_xi_sorp_gp = (*Np) * node_xi_sorp_rate_values.col(k);
+				localF_xi_sorp.segment(nnodes*k, nnodes).noalias() += (*Np).transpose() * rate_xi_sorp_gp * _fe->getDetJ() * _q->getWeight(j);
+			}
+			// loop over all xi_min
+			for (k = 0; k < _n_xi_Min; k++)
+			{
+				rate_xi_min_gp = (*Np) * node_xi_min_rate_values.col(k);
+				localF_xi_min.segment(nnodes*k, nnodes).noalias() += (*Np).transpose() * rate_xi_min_gp * _fe->getDetJ() * _q->getWeight(j);
+			}
+			// loop over all xi_kin
+			for (k = 0; k < _n_xi_Kin; k++)
+			{
+				rate_xi_kin_gp = (*Np) * node_xi_kin_rate_values.col(k);
+				localF_xi_kin.segment(nnodes*k, nnodes).noalias() += (*Np).transpose() * rate_xi_kin_gp * _fe->getDetJ() * _q->getWeight(j);
+			}
+        } // end of loop over all sampling points
 
         //// --------debugging--------------
         //std::cout << "localDispersion Matrix" << std::endl;
@@ -542,7 +597,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
 
 			localRHS_xi_sorp = 1.0 / dt * localM * loc_pre_xi_Sorp_tilde.segment(j*nnodes, nnodes)
                                   + (1.0 - _theta) * localK * loc_pre_xi_Sorp.segment(j*nnodes, nnodes);
-            local_res_sorp    = localLHS_xi_sorp - localRHS_xi_sorp;
+			local_res_sorp = localLHS_xi_sorp - localRHS_xi_sorp - localF_xi_sorp;
             for (k=0; k<nnodes; k++)
             {
                 residual_global[_n_xi_global * ele_node_ids[k] + _n_xi_Sorp_tilde + _n_xi_Min_tilde + j] += local_res_sorp(k) ;
@@ -555,7 +610,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
 
 			localRHS_xi_min = 1.0 / dt * localM * loc_pre_xi_Min_tilde.segment(j*nnodes, nnodes)
                                  + (1.0 - _theta) * localK * loc_pre_xi_Min.segment(j*nnodes, nnodes);
-            local_res_min   = localLHS_xi_min - localRHS_xi_min; 
+			local_res_min = localLHS_xi_min - localRHS_xi_min - localF_xi_min;
 
             for (k=0; k<nnodes; k++)
             {
@@ -568,7 +623,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
                                  + _theta * localK * loc_cur_xi_Kin.segment(j*nnodes, nnodes);
 			localRHS_xi_kin = 1.0 / dt * localM * loc_pre_xi_Kin.segment(j*nnodes, nnodes)
                                  + (1.0 - _theta) * localK * loc_pre_xi_Kin.segment(j*nnodes, nnodes);
-            local_res_kin   = localLHS_xi_kin - localRHS_xi_kin; 
+			local_res_kin = localLHS_xi_kin - localRHS_xi_kin - localF_xi_kin;
             for (k=0; k<nnodes; k++)
             {
                 residual_global[_n_xi_global * ele_node_ids[k] + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + j] += local_res_kin(k) ;
