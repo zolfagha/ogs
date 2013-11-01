@@ -83,10 +83,7 @@ public:
 	/**
 	 * calculate the reaction rates
 	 */
-	void Calc_Kin_Rate(ogsChem::LocalVector &local_xi_local,
-					   ogsChem::LocalVector &local_xi_global,
-					   ogsChem::LocalVector &local_eta,
-					   ogsChem::LocalVector &local_eta_bar,
+	void Calc_Kin_Rate(ogsChem::LocalVector &vec_conc_linear,
 					   ogsChem::LocalVector &vec_rates);
 
 	void Calc_Kin_Rate_temp(ogsChem::LocalVector &local_xi_Mob,
