@@ -91,7 +91,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 #endif
 
 	// update the value of xikinbar in the vector of unknowns(x_new)
-	this->ODE_solver(dt, x, _vec_XiBarKin);
+	this->ODE_solver(dt, x, _vec_XiBarKin, _vec_XiBarKin_old);
     // evaluate the residual
 	this->calc_residual(dt, x, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin);
 
@@ -182,7 +182,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 	// end of debugging-------------------
 #endif
 		// update the value of xikinbar in the vector of unknowns(x_new)
-		this->ODE_solver(dt, x_new, _vec_XiBarKin);
+		this->ODE_solver(dt, x_new, _vec_XiBarKin, _vec_XiBarKin_old);
         // evaluate residual with x_new
 		this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin);
 
@@ -215,7 +215,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
             if(_n_xi_Min != 0)
             this->update_minerals_conc_AI( x_new, vec_AI );
             // update the value of xikinbar in the vector of unknowns(x_new)
-			this->ODE_solver(dt, x_new, _vec_XiBarKin);
+			this->ODE_solver(dt, x_new, _vec_XiBarKin, _vec_XiBarKin_old);
 			// evaluate residual with x_new
 			this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin);
 
@@ -238,7 +238,8 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
 void LocalProblem::ODE_solver(double dt,
 							  ogsChem::LocalVector & vec_unknowns,
-							  ogsChem::LocalVector & vec_Xi_Kin_bar)
+							  ogsChem::LocalVector & vec_Xi_Kin_bar, 
+							  ogsChem::LocalVector & vec_Xi_Kin_bar_old)
 {
 	ogsChem::LocalVector conc_Mob 		    = ogsChem::LocalVector::Zero(_I_mob);
 	ogsChem::LocalVector ln_conc_Mob	    = ogsChem::LocalVector::Zero(_I_mob);
@@ -283,10 +284,11 @@ void LocalProblem::ODE_solver(double dt,
 //	vec_xi_kin_rate = (*_local_ode_xi_immob_GIA)(dt, Xi_Kin_bar);
 
 	this->_local_ode_xi_immob_GIA->update_eta_xi(loc_eta, loc_eta_bar, loc_xi_global, loc_xi_local);
-	vec_xi_kin_rate = (*_local_ode_xi_immob_GIA)(dt, vec_Xi_Kin_bar);
+	// TODO. strictly saying, here should supply time value, not dt value. although it does not influence the result in monod2d example. 
+	vec_xi_kin_rate = (*_local_ode_xi_immob_GIA)(dt, local_conc); 
 
     //_sbs->set_y(Xi_Kin_bar);
-	_sbs->set_y(conc_NonMin_bar);
+	_sbs->set_y(vec_Xi_Kin_bar_old);
     _sbs->set_dydx(vec_xi_kin_rate);
 
 	// solve the local ODE problem for xi kin bar

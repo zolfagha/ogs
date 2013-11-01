@@ -133,7 +133,8 @@ public:
 
     void ODE_solver(double dt,
     			    ogsChem::LocalVector & vec_unknowns,
-    			    ogsChem::LocalVector & vec_Xi_Kin_bar);
+    			    ogsChem::LocalVector & vec_Xi_Kin_bar, 
+					ogsChem::LocalVector & vec_Xi_Kin_bar_old);
 
 private:
 	/**
