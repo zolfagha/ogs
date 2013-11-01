@@ -230,7 +230,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     //MathLib::LocalVector loc_pre_xi_global, loc_pre_xi_Sorp_tilde, loc_pre_xi_Min_tilde, loc_pre_xi_Sorp, loc_pre_xi_Min, loc_pre_xi_Kin;
 
     // current xi local
-	MathLib::LocalVector loc_cur_xi_local, loc_cur_xi_Sorp_bar, loc_cur_xi_Min_bar, loc_cur_xi_Sorp_bar_li, loc_cur_xi_Sorp_bar_ld, tmp_xi_global, tmp_xi_local;
+	MathLib::LocalVector loc_cur_xi_local, loc_cur_xi_Sorp_bar, loc_cur_xi_Min_bar, loc_cur_xi_Sorp_bar_li, loc_cur_xi_Sorp_bar_ld, tmp_xi_global, tmp_xi_local, tmp_vec_conc;
 
     // eta vectors
     MathLib::LocalVector loc_cur_eta, loc_cur_eta_bar;
@@ -321,6 +321,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             for (i=0; i < _n_Comp; i++)
                 vec_conc[i] = this->_concentrations[i]->getValue(node_idx);
 
+			tmp_vec_conc = vec_conc; // just initialize memory. 
+
             double DrateDxi_temp (0.0);
             Unknown_vec.head(_n_xi_global) = loc_cur_xi_global;
             Unknown_vec.tail(_n_xi_local) = loc_cur_xi_local;
@@ -339,11 +341,10 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
 
 					tmp_xi_global = xi.head(_n_xi_global); 
 					tmp_xi_local = xi.tail(_n_xi_local);
-            		//calculate new rate term
-					_ReductionGIA->Calc_Kin_Rate(tmp_xi_local, 
-						                         tmp_xi_global,	
-												 loc_cur_eta, 
-												 loc_cur_eta_bar,
+					// convert xi and eta values to vec_conc
+					_ReductionGIA->EtaXi2Conc(loc_cur_eta, loc_cur_eta_bar, tmp_xi_global, tmp_xi_local, tmp_vec_conc); 
+            		// calculate new rate term
+					_ReductionGIA->Calc_Kin_Rate(tmp_vec_conc,
 												 vec_rate_new);
 
             		for(std::size_t j = 0; j < _J_tot_kin ; j++ )
