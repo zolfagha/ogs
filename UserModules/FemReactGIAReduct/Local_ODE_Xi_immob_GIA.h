@@ -59,13 +59,12 @@ public:
     /**
       * evaluate the change of xi_immob over time
       */ 
-	MathLib::LocalVector operator() (double /*time*/, MathLib::LocalVector vec_xi_kin_bar )
+	MathLib::LocalVector operator() (double /*stime*/, MathLib::LocalVector vec_conc_linear )
 	{
 		double theta_water_content (0.5);  //monod2d example
 		MathLib::LocalMatrix mat_A2kin = _reductionGIA->get_matrix_A2kin();
 
-		_vec_xi_local.tail(_n_xi_Kin_bar) = vec_xi_kin_bar;
-		this->_reductionGIA->Calc_Kin_Rate(_vec_xi_local, _vec_xi_global, _vec_eta_mob, _vec_eta_immob, _vec_dxi_immob_dt);
+		this->_reductionGIA->Calc_Kin_Rate(vec_conc_linear, _vec_dxi_immob_dt);
 		_vec_dxi_immob_dt_new  = (theta_water_content * mat_A2kin) * _vec_dxi_immob_dt;
 		return _vec_dxi_immob_dt_new;
 	}
