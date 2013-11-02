@@ -82,11 +82,10 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
 #ifdef _DEBUG
 	// debugging--------------------------
-//	std::cout << "x Vector: \n";
-//	std::cout << x << std::endl;
-//
-//	std::cout << "vec_AI Vector: \n";
-//	std::cout << vec_AI << std::endl;
+    // std::cout << "x Vector: \n";
+    // std::cout << x << std::endl;
+	// std::cout << "vec_AI Vector: \n";
+    // std::cout << vec_AI << std::endl;
 	// end of debugging-------------------
 #endif
 
@@ -279,13 +278,9 @@ void LocalProblem::ODE_solver(double dt,
 
     _ReductionGIA->Conc2EtaXi(local_conc, loc_eta, loc_eta_bar, loc_xi_global, loc_xi_local);
     //using ode solver for vec_XiBarKin
-	// get the right reference values to ODE RHS function
-//	this->_local_ode_xi_immob_GIA->update_eta_xi(loc_eta, loc_eta_bar, loc_xi_global, loc_xi_local, Xi_Kin_bar);
-//	vec_xi_kin_rate = (*_local_ode_xi_immob_GIA)(dt, Xi_Kin_bar);
-
 	this->_local_ode_xi_immob_GIA->update_eta_xi(loc_eta, loc_eta_bar, loc_xi_global, loc_xi_local);
 	// TODO. strictly saying, here should supply time value, not dt value. although it does not influence the result in monod2d example. 
-	vec_xi_kin_rate = (*_local_ode_xi_immob_GIA)(dt, local_conc); 
+	vec_xi_kin_rate = (*_local_ode_xi_immob_GIA)(dt, loc_xi_local); 
 
     //_sbs->set_y(Xi_Kin_bar);
 	_sbs->set_y(vec_Xi_Kin_bar_old);
