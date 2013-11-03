@@ -65,8 +65,9 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options & option)
 	_n_xi_Sorp				= _ReductionGIA->get_n_xi_Sorp();
 	_n_xi_Min				= _ReductionGIA->get_n_xi_Min();
 	_I_mob					= _ReductionGIA->get_n_Comp_mob();
-	_I_NMin_bar             = _ReductionGIA->get_n_Comp_NMin_bar();
+	_I_sorp                 = _ReductionGIA->get_n_Comp_sorb(); 
 	_I_min					= _ReductionGIA->get_n_Comp_min();
+	_I_kin                  = _ReductionGIA->get_n_Comp_kin();
 	_n_xi_Kin_bar           = _ReductionGIA->get_n_xi_Kin_bar();
 	_n_xi_Mob				= _ReductionGIA->get_n_xi_Mob();
 	_n_xi_Sorp_bar			= _ReductionGIA->get_n_xi_Sorp_bar();
@@ -561,6 +562,10 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 	MathLib::LocalVector vec_unknowns;
 	MathLib::LocalVector loc_XiSorpTilde, loc_XiMinTilde, loc_XiKin, loc_XiBarKin, loc_XiBarKin_old;
 	MathLib::LocalVector vec_conc, vec_XiBarKin, loc_xi_mobile, vec_xi_mob, loc_xi_immobile, vec_XiSorpBar, vec_XiMinBar, loc_xi_local_new, vec_unknowns_new;
+	MathLib::LocalVector vec_conc_Mob, vec_conc_Sorp, vec_conc_Min, vec_conc_Kin, vec_conc_updated;
+	// HS: notice that only concentrations of mob and sorp components 
+	// will be converted to ln scale. 
+	MathLib::LocalVector ln_conc_Mob, ln_conc_Sorp; 
 
 	// initialize the local vector
 	loc_eta        				= LocalVector::Zero( _n_eta );
@@ -576,15 +581,27 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 	loc_XiBarKin_old			= LocalVector::Zero( _n_xi_Kin_bar);
 	vec_unknowns				= LocalVector::Zero(_n_Comp ); 
 
-	vec_conc     		= LocalVector::Zero(_n_Comp);
+	vec_conc            		= LocalVector::Zero(_n_Comp);
+	vec_conc_Mob                = LocalVector::Zero(_I_mob);
+	vec_conc_Sorp               = LocalVector::Zero(_I_sorp);
+	vec_conc_Min                = LocalVector::Zero(_I_min);
+	vec_conc_Kin                 = LocalVector::Zero(_I_kin);
+	vec_conc_updated            = LocalVector::Zero(_n_Comp);
+
+	ln_conc_Mob                 = LocalVector::Zero(_I_mob);
+	ln_conc_Sorp                = LocalVector::Zero(_I_sorp);
+
 	loc_xi_mobile		= LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
+	loc_xi_immobile     = LocalVector::Zero(_n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
+
 	vec_xi_mob			= LocalVector::Zero(_n_xi_Mob);
-	loc_xi_immobile		= LocalVector::Zero(_n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
 	vec_XiSorpBar		= LocalVector::Zero(_n_xi_Sorp_bar);
 	vec_XiMinBar		= LocalVector::Zero(_n_xi_Min_bar);
 	vec_XiBarKin        = LocalVector::Zero(_n_xi_Kin_bar);
+	
 	loc_xi_local_new	= LocalVector::Zero(_n_xi_local);
 	vec_unknowns_new	= LocalVector::Zero(_n_Comp + _n_xi_Kin_bar);
+	
 	ogsChem::LocalVector  vec_xi_kin_rate  = ogsChem::LocalVector::Zero(_J_tot_kin);
 
 	// signal, solving local ODEs of xi_immob
@@ -619,47 +636,38 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 				loc_etabar[i] = this->_eta_bar[i]->getValue(node_idx);
 			for (i=0; i < _n_xi_global; i++)
 				loc_xi_global[i] = this->_xi_global_cur[i]->getValue(node_idx); // using the current time step value
-			for (i=0; i < _n_xi_local; i++){
+			for (i=0; i < _n_xi_local; i++)
+			{
 				loc_xi_local[i] 	   = this->_xi_local_new[i]->getValue(node_idx);
-				loc_xi_local_old_dt[i] = this->_xi_local_old[i]->getValue(node_idx);}
-			// the following section is not correct--------------------------
-			// for (i=0; i < _n_Comp; i++)
-			//  	loc_conc[i] = this->_concentrations[i]->getValue(node_idx);
-			// --------------------------------------------------------------
+				loc_xi_local_old_dt[i] = this->_xi_local_old[i]->getValue(node_idx);
+			}
+
+			// get concentration values based on current updated eta and xi values. 
 			this->_ReductionGIA->EtaXi2Conc(loc_eta, loc_etabar, loc_xi_global, loc_xi_local, loc_conc); 
-
-			// xi global constrains
-			loc_XiSorpTilde  = loc_xi_global.head(_n_xi_Sorp_tilde);
-			loc_XiMinTilde   = loc_xi_global.segment(_n_xi_Sorp_tilde, _n_xi_Min_tilde);
-			loc_XiKin        = loc_xi_global.segment(_n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Kin);
-
-			loc_XiBarKin     = loc_xi_local.tail(_n_xi_Kin_bar);
-			loc_XiBarKin_old = loc_xi_local_old_dt.tail(_n_xi_Kin_bar);
-
-			ogsChem::LocalVector ln_conc_Mob, ln_conc_NonMin_bar, conc_Mob, conc_NonMin_bar, conc_nonMin, ln_conc_nonMin, vec_conc_updated, conc_Min_bar;
-			conc_Mob 		    = ogsChem::LocalVector::Zero(_I_mob);
-			ln_conc_Mob 		= ogsChem::LocalVector::Zero(_I_mob);
-			conc_NonMin_bar 	= ogsChem::LocalVector::Zero(_I_NMin_bar);
-			ln_conc_NonMin_bar 	= ogsChem::LocalVector::Zero(_I_NMin_bar);
-			conc_nonMin 		= ogsChem::LocalVector::Zero(_I_mob + _I_NMin_bar);
-			ln_conc_nonMin 		= ogsChem::LocalVector::Zero(_I_mob + _I_NMin_bar);
-			vec_conc_updated	= ogsChem::LocalVector::Zero(_n_Comp);
-			conc_Min_bar	    = ogsChem::LocalVector::Zero(_I_min);
-
-			conc_nonMin    = loc_conc.head(_I_mob + _I_NMin_bar );
-			ln_conc_nonMin = loc_conc.head(_I_mob + _I_NMin_bar );
-		    // convert the ln mobile conc to mobile conc
-			_pSolve->cal_ln_conc_vec((_I_mob + _I_NMin_bar), conc_nonMin, ln_conc_nonMin);
-			loc_conc.head(_I_mob + _I_NMin_bar )  = ln_conc_nonMin;
-
-
-			vec_unknowns.head (_n_Comp)		  = loc_conc;
-			//vec_unknowns.tail (_n_xi_Kin_bar) = loc_XiBarKin;  //RZ: disbale for ode case
-
 
 			// skip the boundary nodes
 			if ( ! this->_solution->isBCNode(node_idx) )
 			{
+
+			// need to record both old and new values of xi_kin
+		    // for ODE solver
+			loc_XiBarKin     = loc_xi_local.tail(_n_xi_Kin_bar);
+			loc_XiBarKin_old = loc_xi_local_old_dt.tail(_n_xi_Kin_bar);
+
+			vec_conc_Mob     = loc_conc.head(_I_mob); 
+			vec_conc_Sorp    = loc_conc.segment(_I_mob, _I_sorp); 
+			vec_conc_Min     = loc_conc.segment(_I_mob + _I_sorp, _I_min);
+			vec_conc_Kin     = loc_conc.tail(_I_kin); 
+			ln_conc_Mob.setZero();
+			ln_conc_Sorp.setZero(); 
+		    // convert the ln mobile conc to mobile conc
+			_pSolve->cal_ln_conc_vec(_I_mob,  vec_conc_Mob,  ln_conc_Mob);
+			_pSolve->cal_ln_conc_vec(_I_sorp, vec_conc_Sorp, ln_conc_Sorp);
+			// now writting into the unknown vector. 
+			vec_unknowns.head(_I_mob) = ln_conc_Mob;  // ln scale
+			vec_unknowns.segment(_I_mob, _I_sorp) = ln_conc_Sorp;  // ln scale
+			vec_unknowns.segment(_I_mob + _I_sorp, _I_min) = vec_conc_Min;  // linear scale
+			vec_unknowns.tail(_I_kin) = vec_conc_Kin;  // linear scale
 
 			// solve the local problem
 			_pSolve->solve_LocalProblem_Newton_LineSearch( node_idx, 
@@ -670,42 +678,42 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 														   vec_unknowns, 
 														   loc_eta, 
 														   loc_etabar, 
-														   loc_XiSorpTilde, 
-														   loc_XiMinTilde, 
-														   loc_XiKin, 
-														   loc_XiBarKin, 
+														   loc_xi_local, 
+														   loc_xi_global, 
 														   loc_XiBarKin_old);
 
-			// re assembling xi local
-			vec_conc   	 = vec_unknowns.head (_n_Comp);
-			vec_XiBarKin = loc_XiBarKin;  // should take the updated values. 
-
 		    // convert the ln mobile conc to mobile conc
-		    ln_conc_Mob 	  =  vec_conc.head(_I_mob);
-		    _pSolve->cal_exp_conc_vec(_I_mob,ln_conc_Mob, conc_Mob);
+			ln_conc_Mob  = vec_unknowns.head(_I_mob);
+			ln_conc_Sorp = vec_unknowns.segment(_I_mob, _I_sorp); 
+			vec_conc_Min = vec_unknowns.segment(_I_mob + _I_sorp, _I_min); 
+			vec_conc_Kin = vec_unknowns.tail(_I_kin); 
+			_pSolve->cal_exp_conc_vec(_I_mob, ln_conc_Mob, vec_conc_Mob);
+			_pSolve->cal_exp_conc_vec(_I_sorp, ln_conc_Sorp, vec_conc_Sorp);
 
-		    loc_xi_mobile     = _mat_c_mob_2_xi_mob * conc_Mob;
+			vec_conc.head(_I_mob) = vec_conc_Mob; 
+			vec_conc.segment(_I_mob, _I_sorp) = vec_conc_Sorp; 
+			vec_conc.segment(_I_mob + _I_sorp, _I_min) = vec_conc_Min; 
+			vec_conc.tail(_I_kin) = vec_conc_Kin; 			
+
+			loc_xi_mobile     = _mat_c_mob_2_xi_mob * vec_conc_Mob;
 		    vec_xi_mob        =  loc_xi_mobile.head(_n_xi_Mob);
 
-		    loc_xi_immobile   = _mat_c_immob_2_xi_immob * vec_conc.tail(_I_NMin_bar + _n_xi_Min);
+		    loc_xi_immobile   = _mat_c_immob_2_xi_immob * vec_conc.tail(_I_sorp + _I_min + _I_kin);
 		    vec_XiSorpBar     = loc_xi_immobile.head(_n_xi_Sorp_bar);
+			vec_XiMinBar      = loc_xi_immobile.segment(_n_xi_Sorp_bar, _n_xi_Min_bar); 
+			// directly take the value from ODE solution. 
+			vec_XiBarKin = loc_XiBarKin;  
 
+			// update the xi_local value. 
 		    loc_xi_local_new.head   (_n_xi_Mob) 								 = vec_xi_mob;
 		    loc_xi_local_new.segment(_n_xi_Mob, _n_xi_Sorp_bar)				     = vec_XiSorpBar;
 		    loc_xi_local_new.segment(_n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Min_bar)  = vec_XiMinBar; 
 		    loc_xi_local_new.tail   (_n_xi_Kin_bar)							     = vec_XiBarKin; 
 
-		    vec_conc_updated.head(_I_mob)				   =  conc_Mob;
-		    vec_conc_updated.segment(_I_mob, _I_NMin_bar)  =  conc_NonMin_bar; 
-		    vec_conc_updated.segment(_I_mob, _I_NMin_bar)  =  vec_XiBarKin;
-		    conc_Min_bar								   =  vec_conc.tail(_I_min);
-		    vec_conc_updated.tail(_I_min) 			       =  conc_Min_bar;
-
-//            std::cout << "======================================== \n";
-//            std::cout << "Concentration Vector AFTER solving local problem: \n";
-//            std::cout << node_idx << std::endl;
-//            std::cout << vec_conc_updated << std::endl;
-//            std::cout << "======================================== \n";
+			vec_conc_updated.head(_I_mob) = vec_conc_Mob;
+			vec_conc_updated.segment(_I_mob, _I_sorp) = vec_conc_Sorp;
+		    vec_conc_updated.segment(_I_mob + _I_sorp, _I_min) = vec_conc_Min;
+			vec_conc_updated.tail(_I_kin) = vec_conc_Kin;
 
 			// collect the xi_local_new
 			for (i=0; i < _n_xi_local; i++)
