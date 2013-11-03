@@ -124,7 +124,10 @@ public:
       */
 	size_t get_n_Comp_min(void) {return _I_min; };
 
-	size_t get_n_Comp_NMin_bar(void) {return _I_NMin_bar; };
+	/**
+	  * get the number of kinetic components
+	  */
+	size_t get_n_Comp_kin(void) {return _I_kin; };
 
 	/**
       * get the length of eta_mob
