@@ -557,7 +557,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 	MathLib::LocalVector loc_xi_global;
 	MathLib::LocalVector loc_xi_local;
 	MathLib::LocalVector loc_xi_local_old_dt;
-	MathLib::LocalVector loc_conc, loc_conc_BC;
+	MathLib::LocalVector loc_conc;
 	MathLib::LocalVector vec_unknowns;
 	MathLib::LocalVector loc_XiSorpTilde, loc_XiMinTilde, loc_XiKin, loc_XiBarKin, loc_XiBarKin_old;
 	MathLib::LocalVector vec_conc, vec_XiBarKin, loc_xi_mobile, vec_xi_mob, loc_xi_immobile, vec_XiSorpBar, vec_XiMinBar, loc_xi_local_new, vec_unknowns_new;
@@ -569,7 +569,6 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 	loc_xi_local       			= LocalVector::Zero( _n_xi_local );
 	loc_xi_local_old_dt			= LocalVector::Zero( _n_xi_local );
 	loc_conc	       			= LocalVector::Zero( _n_Comp );
-	loc_conc_BC	       			= LocalVector::Zero( _n_Comp );
 	loc_XiSorpTilde				= LocalVector::Zero( _n_xi_Sorp_tilde);
 	loc_XiMinTilde				= LocalVector::Zero( _n_xi_Min_tilde);
 	loc_XiKin					= LocalVector::Zero( _n_xi_Kin);
@@ -628,18 +627,6 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			//  	loc_conc[i] = this->_concentrations[i]->getValue(node_idx);
 			// --------------------------------------------------------------
 			this->_ReductionGIA->EtaXi2Conc(loc_eta, loc_etabar, loc_xi_global, loc_xi_local, loc_conc); 
-
-			loc_conc_BC = loc_conc;
-
-
-			// // debugging--------------------------
-//			std::cout << "======================================== \n";
-//			std::cout << "Concentration Vector BEFORE solving local problem: \n";
-//			std::cout << node_idx << std::endl;
-//			std::cout << loc_conc << std::endl;
-//			std::cout << "======================================== \n";
-			// // end of debugging-------------------
-
 
 			// xi global constrains
 			loc_XiSorpTilde  = loc_xi_global.head(_n_xi_Sorp_tilde);
@@ -735,7 +722,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 
             // if it is boundary nodes, then conc_glob_new is equal to conc_glob.
             for (i=0; i < _n_Comp; i++)
-            	_concentrations[i]->setValue(node_idx, loc_conc_BC[i] );
+            	_concentrations[i]->setValue(node_idx, loc_conc[i] );
 
         }  // end of else if
 	}  // end of for node_idx
