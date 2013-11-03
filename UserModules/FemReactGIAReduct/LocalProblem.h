@@ -95,11 +95,9 @@ public:
 											  ogsChem::LocalVector & x,
 											  ogsChem::LocalVector & vec_eta,
 											  ogsChem::LocalVector & vec_etabar,
-											  ogsChem::LocalVector & vec_XiSorpTilde,
-											  ogsChem::LocalVector & vec_XiMinTilde,
-											  ogsChem::LocalVector & vec_Xikin,
-											  ogsChem::LocalVector & vec_XiBarKin,
-											  ogsChem::LocalVector & vec_XiBarKin_old);
+											  ogsChem::LocalVector & vec_xi_local, 
+											  ogsChem::LocalVector & vec_xi_global, 
+											  ogsChem::LocalVector & vec_xi_bar_kin_old);
 
     /**
       * solve the system J*dx = -b
@@ -177,6 +175,8 @@ private:
      */
     ogsChem::LocalVector _vec_eta , _vec_XiSorpTilde, _vec_XiMinTilde, _vec_etabar, _vec_rateKin, _vec_Xikin, _vec_XiBarKin, _vec_XiBarKin_old;
 
+	ogsChem::LocalVector _vec_xi_global, _vec_xi_local; 
+
 	/**
       * _I is the number of components and _J is the number of reactions
       */
@@ -188,7 +188,7 @@ private:
     /**
       * number of mobile, sorption and mineral components
       */
-	size_t _I_mob, _I_sorp, _I_min, _I_NMin_bar;
+	size_t _I_mob, _I_sorp, _I_min, _I_kin;
 
 	/**
 	 * number of species
@@ -242,34 +242,30 @@ private:
       * calcuate one particular mineral concentration 
       * by the amount of basis concentration and total mass constrain
       */
-    double cal_cbarmin_by_constrain(size_t idx_min,
-    								ogsChem::LocalVector & conc_Mob,
-    								ogsChem::LocalVector & conc_NonMin_bar,
-    								ogsChem::LocalVector & conc_Min_ba);
-
-    /**
-      * calculate the residual of mobile species
-      */
-
-
-
+	double cal_cbarmin_by_constrain(size_t        idx_min,
+                                    ogsChem::LocalVector & ln_conc_Mob,
+									ogsChem::LocalVector & ln_conc_Sorp,
+									ogsChem::LocalVector & conc_Min_bar,
+									ogsChem::LocalVector & conc_Kin_bar);
 
     // Eq. 3.55
-    void residual_conc_Mob			(ogsChem::LocalVector & conc_Mob,
+    void residual_conc_Mob			(ogsChem::LocalVector & ln_conc_Mob,
     								 ogsChem::LocalVector & vec_residual);
     // Eq. 3.56
     void residual_Eta				(ogsChem::LocalVector & conc_Mob,
     								 ogsChem::LocalVector & vec_residual);
     // Eq. 3.57 - 58
-    void residual_xi_Sorp_tilde	(ogsChem::LocalVector & conc_Mob,
-    								 ogsChem::LocalVector & conc_NonMin_bar,
-    								 ogsChem::LocalVector & conc_Min_bar,
-    								 ogsChem::LocalVector & vec_residual);
+	void residual_xi_Sorp_tilde(ogsChem::LocalVector & conc_Mob,
+                                ogsChem::LocalVector & conc_Sorp,
+								ogsChem::LocalVector & conc_Min_bar,
+								ogsChem::LocalVector & conc_Kin_bar,
+								ogsChem::LocalVector & vec_residual);
     // Eq. 3.59
-    void residual_xi_Min_tilde		(ogsChem::LocalVector & conc_Mob,
-    							     ogsChem::LocalVector & conc_NonMin_bar,
-    							     ogsChem::LocalVector & conc_Min_bar,
-    							     ogsChem::LocalVector & vec_residual);
+	void residual_xi_Min_tilde(ogsChem::LocalVector & conc_Mob,
+                               ogsChem::LocalVector & conc_Sorp,
+							   ogsChem::LocalVector & conc_Min_bar,
+							   ogsChem::LocalVector & conc_Kin_bar,
+							   ogsChem::LocalVector & vec_residual);
     // Eq. 3.60
     void residual_xi_Kin			(ogsChem::LocalVector & conc_Mob,
 			 	 	 	 	 	 	 ogsChem::LocalVector & vec_residual);
@@ -282,14 +278,19 @@ private:
 								     ogsChem::LocalVector & vec_AI,
 								     ogsChem::LocalVector & vec_residual);
     // Eq. 3.63
-    void residual_Eta_bar			(ogsChem::LocalVector & conc_NonMin_bar,
-		     	 	 	 	 	 	 ogsChem::LocalVector & conc_Min_bar,
-		     	 	 	 	 	 	 ogsChem::LocalVector & vec_residual);
+	void residual_Eta_bar           (ogsChem::LocalVector & conc_Sorp, 
+                                     ogsChem::LocalVector & conc_Min_bar,
+									 ogsChem::LocalVector & conc_Kin_bar,
+									 ogsChem::LocalVector & vec_residual);
     // Eq. 3.64
-    void residual_xi_KinBar_Eq		(ogsChem::LocalVector & conc_NonMin_bar,
-    								 ogsChem::LocalVector & conc_Min_bar,
-    								 ogsChem::LocalVector & Xi_Kin_bar,
-    								 ogsChem::LocalVector & vec_residual);
+	void residual_xi_KinBar_Eq      (ogsChem::LocalVector & conc_Sorp,
+                                     ogsChem::LocalVector & conc_Min_bar,
+									 ogsChem::LocalVector & conc_Kin_bar,
+									 ogsChem::LocalVector & vec_residual);
+
+	// HS: using ODE for kinetic part.
+	// therefore disable that
+	/*
     // Eq. 3.65
     void residual_xi_KinBar_Kin	(   double deltaT,
     								ogsChem::LocalVector & conc_Mob,
@@ -297,7 +298,7 @@ private:
     								 ogsChem::LocalVector & conc_Min_bar,
     								 ogsChem::LocalVector & Xi_Kin_bar,
     								 ogsChem::LocalVector & vec_residual);
-
+	*/
 
 };
 
