@@ -537,7 +537,9 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
         //// --------end of debugging-------
 
         localK = localDispersion + localAdvection;
-
+		
+		// disable mass lumping
+		/*
         // mass lumping----------------------------
         for (int idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
         {
@@ -546,6 +548,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
             localM.row(idx_ml).setZero();
             localM(idx_ml, idx_ml) = mass_lump_val;
         }
+		*/
 
         // --------debugging--------------
         //std::cout << "localK Matrix" << std::endl;

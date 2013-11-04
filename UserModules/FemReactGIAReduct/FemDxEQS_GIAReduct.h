@@ -661,7 +661,9 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 		}  // end of for loop over j
 
 		localK = localDispersion + localAdvection;
-
+		
+		// disable mass lumping
+		/*
 		// mass lumping----------------------------
 		for ( idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
 		{
@@ -670,6 +672,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 		    localM.row(idx_ml).setZero();
 		    localM(idx_ml, idx_ml) =  mass_lump_val;
 		}
+		*/
 
 		node_indx_vec.resize(ele_node_ids.size());
 		col_indx_vec.resize(ele_node_ids.size());

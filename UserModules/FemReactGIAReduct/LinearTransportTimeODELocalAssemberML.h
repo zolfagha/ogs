@@ -111,7 +111,7 @@ protected:
             // calculating dispersion tensor according to Benchmark book p219, Eq. 10.15
             // D_{ij} = \alpha_T |v| \delta_{ij} + (\alpha_L - \alpha_T) \frac{v_i v_j}{|v|} + D^{d}_{ii} 
             dispersion_diffusion.setIdentity(n_dim, n_dim); 
-            dispersion_diffusion *= disp_l * v.norm(); 
+            dispersion_diffusion *= disp_t * v.norm(); 
             dispersion_diffusion += (disp_l - disp_t) * ( v2.transpose() * v2 ) / v.norm(); 
             dispersion_diffusion += d_poro.topLeftCorner(n_dim, n_dim);
             // --------debugging--------------
@@ -126,6 +126,8 @@ protected:
 
         localK = localDispersion + localAdvection;
 
+		// disable mass lumping
+		/*
         // mass lumping----------------------------
         for (int idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
         {
@@ -134,6 +136,7 @@ protected:
             localM.row(idx_ml).setZero();
             localM(idx_ml, idx_ml) = mass_lump_val;
         }
+		*/
     }
 
 private:
