@@ -552,7 +552,7 @@ void chemReductionGIA::EtaXi2Conc(ogsChem::LocalVector &local_eta,
     // testing if the non-negative stablilization will help?
     for (int i=0; i < local_conc.rows(); i++)    {
         if ( local_conc(i) < 0.0 )
-            local_conc(i) = 1.0e-99;
+            local_conc(i) = 1.0e-18;
     }
     // end of testing
 
