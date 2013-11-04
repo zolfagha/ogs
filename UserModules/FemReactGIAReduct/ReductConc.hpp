@@ -702,7 +702,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 		    vec_XiSorpBar     = loc_xi_immobile.head(_n_xi_Sorp_bar);
 			vec_XiMinBar      = loc_xi_immobile.segment(_n_xi_Sorp_bar, _n_xi_Min_bar); 
 			// directly take the value from ODE solution. 
-			vec_XiBarKin = loc_XiBarKin;  
+			vec_XiBarKin      = _pSolve->get_vec_XiBarKin();
 
 			// update the xi_local value. 
 		    loc_xi_local_new.head   (_n_xi_Mob) 								 = vec_xi_mob;

@@ -134,6 +134,8 @@ public:
     			    ogsChem::LocalVector & vec_Xi_Kin_bar, 
 					ogsChem::LocalVector & vec_Xi_Kin_bar_old);
 
+	ogsChem::LocalVector & get_vec_XiBarKin() { return _vec_XiBarKin;  };
+
 private:
 	/**
       * private flag indicating initialization
