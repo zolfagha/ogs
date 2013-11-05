@@ -67,7 +67,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 	_vec_eta            = vec_eta;
 	_vec_etabar         = vec_etabar;
 	_vec_XiSorpTilde    = vec_xi_global.head(_n_xi_Sorp_tilde);
-	_vec_XiMinTilde     = vec_xi_global.head(_n_xi_Min_tilde);
+	_vec_XiMinTilde     = vec_xi_global.segment(_n_xi_Sorp_tilde, _n_xi_Min_tilde);
 	_vec_Xikin          = vec_xi_global.tail(_n_xi_Kin);
 	_vec_XiBarKin       = vec_xi_local.tail(_n_xi_Kin_bar);
 	_vec_XiBarKin_old   = vec_xi_bar_kin_old;
