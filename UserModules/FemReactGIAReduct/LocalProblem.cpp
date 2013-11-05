@@ -144,8 +144,8 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
 #ifdef _DEBUG
 	// debugging--------------------------
-	// std::cout << "_mat_Jacobian: \n";
-	// std::cout << _mat_Jacobian << std::endl;
+	std::cout << "_mat_Jacobian: \n";
+	std::cout << _mat_Jacobian << std::endl;
 	// end of debugging-------------------
 #endif
 
@@ -154,8 +154,8 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
 #ifdef _DEBUG
 	// debugging--------------------------
-	// std::cout << "dx Vector: \n";
-	// std::cout << dx << std::endl;
+	std::cout << "dx Vector: \n";
+	std::cout << dx << std::endl;
 	// end of debugging-------------------
 #endif
 
@@ -359,7 +359,7 @@ void LocalProblem::calc_Jacobian(double dt,
 							     ogsChem::LocalVector & vec_Xi_Kin_bar)
 {
 	//const double delta_xi = 1.0e-8;  //calcite example
-	const double delta_xi = 1.0e-12;    //monod2d
+	const double delta_xi = 1.0e-6;    //monod2d
     int i;
     ogsChem::LocalVector vec_x_incremented, vec_residual_incremented;
     vec_residual_incremented = vec_residual;
@@ -369,19 +369,18 @@ void LocalProblem::calc_Jacobian(double dt,
 		vec_x_incremented  = vec_x;
 
 		// numerical protection
-		if( std::fabs(vec_x_incremented(i)) > 1.0e-16)
+		if (std::fabs(vec_x(i)) > 1.0e-16)
 		{
-			vec_x_incremented(i) += delta_xi * vec_x_incremented.norm();
+			vec_x_incremented(i) += delta_xi * std::fabs(vec_x(i));
 			this->calc_residual(dt, vec_x_incremented, _vec_XiBarKin_old, vec_residual_incremented, vec_Xi_Kin_bar);
-			_mat_Jacobian.col(i) = (vec_residual_incremented - vec_residual) / (delta_xi * std::fabs(vec_x_incremented(i)));
+			_mat_Jacobian.col(i) = (vec_residual_incremented - vec_residual) / (delta_xi * std::fabs(vec_x(i)));
 
 		}
 		else
 		{
-		vec_x_incremented(i) += delta_xi;
-
-		this->calc_residual(dt, vec_x_incremented, _vec_XiBarKin_old, vec_residual_incremented, vec_Xi_Kin_bar);
-		_mat_Jacobian.col(i) = (vec_residual_incremented - vec_residual ) / delta_xi;
+			vec_x_incremented(i) += delta_xi;
+			this->calc_residual(dt, vec_x_incremented, _vec_XiBarKin_old, vec_residual_incremented, vec_Xi_Kin_bar);
+			_mat_Jacobian.col(i) = (vec_residual_incremented - vec_residual ) / delta_xi;
 		}
 	}
 
