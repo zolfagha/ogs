@@ -113,13 +113,20 @@ public:
       * using minimization method
       * delta_x is the returned result. 
       */
+	// HS, 20131106 disable this function and re-write
+	/*
     void Solv_Minimization(size_t      & idx_node,
                   ogsChem::LocalMatrix & J,
                   ogsChem::LocalVector & b,
                   ogsChem::LocalVector & delta_x);
+    */
 
-    //TODO declare the residual functions
-
+	/**
+	  * solve the system J*dx = -b
+	  */
+	void solve_minimization(ogsChem::LocalMatrix & J,
+                            ogsChem::LocalVector & b,
+                            ogsChem::LocalVector & dx); 
 
     void cal_ln_conc_vec(size_t    		        idx_size,
     					 ogsChem::LocalVector & conc_Mob,

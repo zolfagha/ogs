@@ -144,18 +144,18 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
 #ifdef _DEBUG
 	// debugging--------------------------
-	std::cout << "_mat_Jacobian: \n";
-	std::cout << _mat_Jacobian << std::endl;
+	// std::cout << "_mat_Jacobian: \n";
+	// std::cout << _mat_Jacobian << std::endl;
 	// end of debugging-------------------
 #endif
 
         // solving for increment
-        this->Solv_Minimization( node_idx, _mat_Jacobian, vec_residual, dx );
+        this->solve_minimization(_mat_Jacobian, vec_residual, dx );
 
 #ifdef _DEBUG
 	// debugging--------------------------
-	std::cout << "dx Vector: \n";
-	std::cout << dx << std::endl;
+	// std::cout << "dx Vector: \n";
+	// std::cout << dx << std::endl;
 	// end of debugging-------------------
 #endif
 
@@ -346,7 +346,7 @@ void LocalProblem::calc_residual(double dt,
     	this->residual_xi_KinBar_Eq		(conc_Sorp, conc_Min_bar, conc_Kin_bar, vec_residual); //RZ: solve xi kin bar using ode solver after solving local problem.
     	
 		// Eq. 3.65
-		//RZ: solve xi kin bar using ode solver after solving local problem.
+		// RZ: solve xi kin bar using ode solver after solving local problem.
     	//this->residual_xi_KinBar_Kin	(dt,conc_Mob, conc_NonMin_bar, conc_Min_bar, Xi_Kin_bar, vec_residual);  
     }
 
@@ -394,7 +394,8 @@ void LocalProblem::calc_Jacobian(double dt,
 #endif
 }
 
-
+/* HS 20131106: diable the function and rewrite. */
+/*
 void LocalProblem::Solv_Minimization(size_t      & idx_node,
                               ogsChem::LocalMatrix & J,
                               ogsChem::LocalVector & res,
@@ -477,6 +478,72 @@ void LocalProblem::Solv_Minimization(size_t      & idx_node,
         delta_x = P * y; 
     }  // end of else if
 
+}
+*/
+
+/** HS 20131106: rewrite the minimization solve function
+  * This function is doing the job: 
+  * Minimize norm(dx) on
+  * L(d) := { x belong to Real^n , norm(J*dx + b) = min{ norm(J*dx + b, y belong to Real^n }}
+  * 
+  * The numerical algorithm is exactly following page 47 of the dissertation from
+  * Joachim Hoffmann (2010) Reactive Transport and Mineral Dissolution /Precipitation in Porous Media: 
+  * Efficient Solution Algorithms, Benchmark Computations and Existence of Global Solutions. 
+  * University of Erlangen-Nuernberg.
+  * 
+  * It is an excellant solution of singular J problem! 
+  */
+void LocalProblem::solve_minimization(ogsChem::LocalMatrix & J,
+                                      ogsChem::LocalVector & b,
+                                      ogsChem::LocalVector & dx)
+{
+	// step 0: variable definition and initialization
+	int n_r, n_rows_M; 
+	ogsChem::LocalMatrix Q, R, P, B, RB, V, M, tmp;
+	ogsChem::LocalVector z, y, y1, y2; 
+	Eigen::FullPivHouseholderQR<Eigen::MatrixXd> qr_decomp;
+	y = ogsChem::LocalVector::Zero(dx.rows()); 
+
+	// step 1: perform Housholder QR decomposition on J, 
+	// so that Q^T * J * P = { R  B }
+	//                       { 0  0 }
+	qr_decomp.compute(J);
+	Q        = qr_decomp.matrixQ();
+	P        = qr_decomp.colsPermutation();
+	n_r      = qr_decomp.rank(); 
+	n_rows_M = J.cols() - n_r; 
+	RB  = Q.transpose() * J * P; 
+
+	if (n_r == J.cols())
+	{
+		// if n_rank == n_cols, directly solve
+		dx = qr_decomp.solve(-b);
+	}
+	else
+	{
+		// step 2: split R and B
+		R = RB.topLeftCorner(n_r, n_r);
+		B = RB.topRightCorner(n_r, RB.cols() - n_r);
+
+		// step 3: if n_rank < n_cols, calculate V, z and y based on R and B. 
+		// solve R*V = B
+		qr_decomp.compute(R); 
+		V   = qr_decomp.solve(B);
+		// Rz = (Q^T *(-b))
+		// (I + V^TV)*y2 = V^T * z
+		M = ogsChem::LocalMatrix::Identity(n_rows_M, n_rows_M) + V.transpose() * V;
+		tmp = (Q.transpose() * (-1.0 * b)).topRows(n_r);
+		z   = qr_decomp.solve(tmp);
+		y2  = M.fullPivHouseholderQr().solve(V.transpose() * z);
+		// y1 = z - V*y2
+		y1  = z - V * y2;
+		// formulate y
+		y.head(n_r) = y1; 
+		y.tail(J.rows() - n_r) = y2; 
+		// apply permuation
+		dx = P * y; 
+	}
+return; 
 }
 
 void LocalProblem::increment_unknown(ogsChem::LocalVector & x_old,
