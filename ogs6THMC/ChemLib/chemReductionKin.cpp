@@ -189,17 +189,20 @@ void chemReductionKin::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 	BaseLib::OrderedMap<std::string, ogsChem::ChemComp*>::iterator it; 
 	for( it = map_chemComp.begin(); it != map_chemComp.end(); it++ )
 	{
-		switch ( it->second->getMobility() )
+		switch ( it->second->getCompType() )
 		{
-		case ogsChem::MOBILE: 
+		case ogsChem::AQ_PHASE_COMP: 
 			_I_mob++; 
 			break;
-		case ogsChem::SORPTION: 
+		case ogsChem::SORPTION_COMP: 
 			_I_sorp++;
 			break;
-		case ogsChem::MINERAL: 
+		case ogsChem::MIN_PHASE_COMP: 
 			_I_min++;
 			break;
+		// case ogsChem::KIN_COMP:
+		// 	_I_kin++; 
+		// 	break; 
 		default:
 			_I_min++;
 			break; 
