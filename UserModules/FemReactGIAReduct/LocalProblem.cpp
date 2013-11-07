@@ -89,7 +89,8 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 #endif
 
 	// update the value of xikinbar in the vector of unknowns(x_new)
-	this->ODE_solver(dt, x, _vec_XiBarKin, _vec_XiBarKin_old);
+	if (_n_xi_Kin_bar > 0)
+		this->ODE_solver(dt, x, _vec_XiBarKin, _vec_XiBarKin_old);
     // evaluate the residual
 	this->calc_residual(dt, x, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin);
 
@@ -180,7 +181,8 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 	// end of debugging-------------------
 #endif
 		// update the value of xikinbar in the vector of unknowns(x_new)
-		this->ODE_solver(dt, x_new, _vec_XiBarKin, _vec_XiBarKin_old);
+		if (_n_xi_Kin_bar > 0)
+			this->ODE_solver(dt, x_new, _vec_XiBarKin, _vec_XiBarKin_old);
         // evaluate residual with x_new
 		this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin);
 
@@ -211,11 +213,12 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
             this->increment_unknown( x, dx, x_new ); 
             // now updating the saturation index and minerals
             if(_n_xi_Min != 0)
-            this->update_minerals_conc_AI( x_new, vec_AI );
+				this->update_minerals_conc_AI( x_new, vec_AI );
             // update the value of xikinbar in the vector of unknowns(x_new)
 			this->ODE_solver(dt, x_new, _vec_XiBarKin, _vec_XiBarKin_old);
 			// evaluate residual with x_new
-			this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin);
+			if (_n_xi_Kin_bar > 0)
+				this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin);
 
 		#ifdef _DEBUG
         	// std::cout << "vec_residual: \n";
@@ -277,7 +280,8 @@ void LocalProblem::ODE_solver(double dt,
     //using ode solver for vec_XiBarKin
 	this->_local_ode_xi_immob_GIA->update_eta_xi(loc_eta, loc_eta_bar, loc_xi_global, loc_xi_local);
 	// TODO. strictly saying, here should supply time value, not dt value. although it does not influence the result in monod2d example. 
-	vec_xi_kin_rate = (*_local_ode_xi_immob_GIA)(dt, loc_xi_local); 
+	if (vec_xi_kin_rate.rows() > 0)
+		vec_xi_kin_rate = (*_local_ode_xi_immob_GIA)(dt, loc_xi_local); 
 
     //_sbs->set_y(Xi_Kin_bar);
 	_sbs->set_y(vec_Xi_Kin_bar_old);
@@ -794,7 +798,10 @@ void LocalProblem::residual_xi_Min_tilde(ogsChem::LocalVector & conc_Mob,
 	A = vec_XiMin.segment(_n_xi_Mob + _n_xi_Sorp_bar_li, _n_xi_Min);
 	B = vec_XiMinBar.tail(_n_xi_Sorp_bar_ld);
 
-	vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde, _n_xi_Min_tilde) = -_vec_XiMinTilde + A - conc_Min_bar - (_mat_Ald * B);
+	if (B.rows() > 0)
+		vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde, _n_xi_Min_tilde) = -_vec_XiMinTilde + A - conc_Min_bar - (_mat_Ald * B);
+	else
+		vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde, _n_xi_Min_tilde) = -_vec_XiMinTilde + A - conc_Min_bar; 
 }
 
 // Eq. 3.60
