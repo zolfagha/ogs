@@ -43,14 +43,13 @@ namespace ogsChem
          GAS_PHASE_COMP,  /* ideal gas mixture              */
          MIN_PHASE_COMP,  /* singal component mineral phase */
          SORPTION_COMP,   /* sorption component             */ 
-         SS_PHASE_COMP    /* solid solution component       */
+         SS_PHASE_COMP,   /* solid solution component       */
+		 KIN_COMP         /* kinetic component              */
     };
 
 	enum Comp_Mobility {
 		MOBILE,           /* mobile components*/
-		SORPTION,         /* sorption components*/
-		MINERAL,           /* mineral components*/
-		KINETIC 		 /*immobile kinetic (biomass) RZ*/
+		IMMOBILE          /* immobile components*/
 	}; 
 
     // type of chemical reaction
