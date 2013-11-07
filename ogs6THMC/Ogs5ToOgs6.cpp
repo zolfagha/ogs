@@ -549,9 +549,11 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 			// set mobility
 			if ( ogs6fem.list_compound[i]->is_mobile )
 				mChemComp->set_mobility( ogsChem::MOBILE  ); 
-			else 
-				//mChemComp->set_mobility( ogsChem::MINERAL );
-				mChemComp->set_mobility( ogsChem::KINETIC ); //RZ temp solution for monode 2d
+			else
+			{
+				mChemComp->set_mobility(ogsChem::IMMOBILE); 
+			}
+
             // set component type
             if ( ogs6fem.list_compound[i]->comp_type.find("BASIS_COMP") == 0 )
                 mChemComp->set_compTyps(ogsChem::BASIS_COMP);
@@ -563,6 +565,9 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
                 mChemComp->set_compTyps(ogsChem::MIN_PHASE_COMP);
             else if ( ogs6fem.list_compound[i]->comp_type.find("SS_PHASE_COMP") == 0 )
                 mChemComp->set_compTyps(ogsChem::SS_PHASE_COMP);
+			else if ( ogs6fem.list_compound[i]->comp_type.find("KIN_COMP") == 0 )
+				mChemComp->set_compTyps(ogsChem::KIN_COMP);
+
             // set charge
             mChemComp->set_charge(ogs6fem.list_compound[i]->charge); 
 
