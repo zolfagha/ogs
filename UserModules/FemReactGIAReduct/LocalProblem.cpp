@@ -673,7 +673,7 @@ double LocalProblem::cal_cbarmin_by_constrain(size_t        idx_min,
 
 	conc_bar.head(_I_sorp) = conc_Sorp;
 	conc_bar.segment(_I_sorp, _I_min) = conc_Min_bar; 
-	conc_bar.tail(_I_min) = conc_Kin_bar;
+	conc_bar.tail(conc_Kin_bar.rows()) = conc_Kin_bar;
 
     // xi_sorp_bar
     temp 			= _mat_c_immob_2_xi_immob * conc_bar;
