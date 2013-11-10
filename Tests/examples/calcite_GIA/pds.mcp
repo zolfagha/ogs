@@ -5,7 +5,11 @@
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
   1  0.0e-9             	; diffusion model type, diffusion constant
-
+ $CHARGE
+  +1.0
+ $COMP_TYPE
+  AQ_PHASE_COMP
+  
 #COMPONENT_PROPERTIES  ; comp1
  $NAME
   Ca2+ ;
@@ -13,7 +17,11 @@
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
   1  0.0e-9             	; diffusion model type, diffusion constant
-
+ $CHARGE
+  +2.0
+ $COMP_TYPE
+  AQ_PHASE_COMP
+  
 #COMPONENT_PROPERTIES  ; comp2
   $NAME
   Mg2+ ;
@@ -21,7 +29,11 @@
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
   1  0.0e-9             	; diffusion model type, diffusion constant
-
+ $CHARGE
+  +2.0
+ $COMP_TYPE
+  AQ_PHASE_COMP
+  
 #COMPONENT_PROPERTIES  ; comp3
  $NAME  ; 
   Cl- ; 
@@ -29,7 +41,11 @@
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
   1  0.0e-9             	; diffusion model type, diffusion constant
-
+ $CHARGE
+  -1.0
+ $COMP_TYPE
+  AQ_PHASE_COMP
+  
 #COMPONENT_PROPERTIES  ; comp4
  $NAME  ; 
   CO32- ; 
@@ -37,7 +53,11 @@
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
   1  0.0e-9             	; diffusion model type, diffusion constant
-
+ $CHARGE
+  -2.0
+ $COMP_TYPE
+  AQ_PHASE_COMP
+  
 #COMPONENT_PROPERTIES  ; comp5
  $NAME  ; 
   HCO3- ; 
@@ -45,7 +65,11 @@
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
   1  0.0e-9             	; diffusion model type, diffusion constant
-  
+ $CHARGE
+  -1.0
+ $COMP_TYPE
+  AQ_PHASE_COMP
+
 #COMPONENT_PROPERTIES  ; comp6
  $NAME
   Calcite ;
@@ -53,6 +77,11 @@
   0; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
   0             	; diffusion model type, diffusion constant
+ $CHARGE
+  0.0
+ $COMP_TYPE
+  MIN_PHASE_COMP
+  
 #COMPONENT_PROPERTIES  ; comp7
  $NAME
   Dolomite(dis) ;
@@ -60,4 +89,6 @@
   0; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
   0             	; diffusion model type, diffusion constant
+ $COMP_TYPE
+  MIN_PHASE_COMP
 #STOP
