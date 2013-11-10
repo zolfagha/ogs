@@ -427,7 +427,7 @@ private:
 	/**
       * number of mobile, sorption and mineral and kinetic reactions
       */
-	size_t _Jeq_li, _Jmob, _Jsorp, _Jsorp_li, _Jsorp_ld, _Jmin, _Jkin_ast;
+	size_t _Jeq_li, _Jmob, _Jsorp, _Jsorp_li, _Jsorp_ld, _Jmin, _J_1_kin_ast, _J_2_kin_ast;
 
 	/**
       * number of mobile and immobile components and species

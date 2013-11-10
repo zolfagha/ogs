@@ -133,6 +133,8 @@ void chemReductionGIA::update_reductionScheme(void)
 	size_t i,j;
 	_Jsorp_li = 0;
 	_Jsorp_ld = 0;
+	_J_1_kin_ast = 0; 
+	_J_2_kin_ast = 0; 
 	_mat_S1 = LocalMatrix::Zero(_I_mob, _Jmob + _Jsorp + _Jmin + _J_tot_kin);
 	_mat_S2 = LocalMatrix::Zero(_I_bar, _Jmob + _Jsorp + _Jmin + _J_tot_kin);
 	_mat_S1_preserve = LocalMatrix::Zero(_I_mob, _Jmob + _Jsorp + _Jmin + _J_tot_kin);
@@ -234,7 +236,7 @@ void chemReductionGIA::update_reductionScheme(void)
 
     _mat_S1kin_ast = _mat_S1kin;
     _mat_S2kin_ast = _mat_S2kin;
-    _Jkin_ast      = this->_J_tot_kin;
+    _J_1_kin_ast      = this->_J_tot_kin;
 
     if( _J_tot_kin > 0 )
     {
@@ -250,36 +252,39 @@ void chemReductionGIA::update_reductionScheme(void)
     	Eigen::FullPivLU<LocalMatrix> lu_decomp_S2kin(_mat_S2kin);
     	_mat_S2kin_ast = lu_decomp_S2kin.image(_mat_S2kin);
 
-    	_Jkin_ast      = _mat_S1kin_ast.cols();  //J1kin_ast = J2kin_ast
+		_J_1_kin_ast = _mat_S1kin_ast.cols();  //J1kin_ast = J2kin_ast
+		_J_2_kin_ast = _mat_S2kin_ast.cols(); 
     }
 
 	// creat the memory for Stoi matrix
-	_mat_S1_ast = LocalMatrix::Zero(_I_mob, _Jmob + _Jsorp_li + _Jmin +_Jkin_ast);
-	_mat_S2_ast = LocalMatrix::Zero(_I_bar, _Jsorp + _Jmin + _Jkin_ast);
+	_mat_S1_ast = LocalMatrix::Zero(_I_mob, _Jmob + _Jsorp_li + _Jmin + _J_1_kin_ast);
+	_mat_S2_ast = LocalMatrix::Zero(_I_bar, _Jsorp + _Jmin + _J_2_kin_ast);
 
 	// construct S1* and S2* which consists of max linearly independent columns of S1 and 2
     _mat_S1_ast.block(0,0,_I_mob,_Jmob) 							= _mat_S1mob;
     _mat_S1_ast.block(0,_Jmob,_I_mob,_Jsorp_li) 					= _mat_S1sorp_li;
     _mat_S1_ast.block(0,_Jmob + _Jsorp_li,_I_mob,_Jmin) 			= _mat_S1min;
-    _mat_S1_ast.block(0,_Jmob + _Jsorp_li + _Jmin,_I_mob,_Jkin_ast) = _mat_S1kin_ast;
+	_mat_S1_ast.block(0, _Jmob + _Jsorp_li + _Jmin, _I_mob, _J_1_kin_ast) = _mat_S1kin_ast;
 
     _mat_S2_ast.block(0,0,_I_sorp,_Jsorp) 						  = _mat_S2sorp;
-    _mat_S2_ast.block(0,_Jsorp, _I_min ,_Jmin) 		   	  = _mat_S2min;
-    _mat_S2_ast.block(0,_Jsorp + _Jmin,_I_kin,_Jkin_ast) = _mat_S2kin_ast;
+	// HS, this is probably wrong, acoording to Eq. 3.8 of Hoffmann. 
+    // _mat_S2_ast.block(0,_Jsorp, _I_min ,_Jmin) 		   	  = _mat_S2min;
+	_mat_S2_ast.block(_I_sorp, _Jsorp, _Jmin, _Jmin) = ogsChem::LocalMatrix::Identity(_Jmin, _Jmin);
+	_mat_S2_ast.block(0, _Jsorp + _Jmin, _I_kin, _J_2_kin_ast) = _mat_S2kin_ast;
 
     //the location of these matrices should not be changed. Cut the zero parts
 	_mat_S2sorp = _mat_S2sorp.topRows(_I_sorp);
 	_mat_S2kin_ast = _mat_S2kin_ast.topRows(_I_kin);
 
 #ifdef _DEBUG
-//    std::cout << "_mat_S1: "    << std::endl;
-//	std::cout << _mat_S1 << std::endl;
-//	std::cout << "_mat_S2: "    << std::endl;
-//	std::cout << _mat_S2 << std::endl;
-//	std::cout << "_mat_S1_ast: "    << std::endl;
-//	std::cout << _mat_S1_ast << std::endl;
-//	std::cout << "_mat_S2_ast: "    << std::endl;
-//	std::cout << _mat_S2_ast << std::endl;
+    std::cout << "_mat_S1: "    << std::endl;
+	std::cout << _mat_S1 << std::endl;
+	std::cout << "_mat_S2: "    << std::endl;
+	std::cout << _mat_S2 << std::endl;
+	std::cout << "_mat_S1_ast: "    << std::endl;
+	std::cout << _mat_S1_ast << std::endl;
+	std::cout << "_mat_S2_ast: "    << std::endl;
+	std::cout << _mat_S2_ast << std::endl;
 #endif
 
 	// Calculate the s1T = S_i^T matrix consisting of a max set of linearly
@@ -291,10 +296,10 @@ void chemReductionGIA::update_reductionScheme(void)
 	_mat_S2_orth = orthcomp( _mat_S2_ast );
 
 #ifdef _DEBUG
-//	std::cout << "_mat_S1_orth: "    << std::endl;
-//	std::cout << _mat_S1_orth << std::endl;
-//	std::cout << "_mat_S2_orth: "    << std::endl;
-//	std::cout << _mat_S2_orth << std::endl;
+	std::cout << "_mat_S1_orth: "    << std::endl;
+	std::cout << _mat_S1_orth << std::endl;
+	std::cout << "_mat_S2_orth: "    << std::endl;
+	std::cout << _mat_S2_orth << std::endl;
 #endif
 
 	_mat_c_mob_2_eta_mob     = ( _mat_S1_orth.transpose() * _mat_S1_orth ).fullPivHouseholderQr().solve(_mat_S1_orth.transpose());
@@ -303,14 +308,14 @@ void chemReductionGIA::update_reductionScheme(void)
 	_mat_c_immob_2_xi_immob  = ( _mat_S2_ast.transpose()  * _mat_S2_ast  ).fullPivHouseholderQr().solve(_mat_S2_ast.transpose());
 
 #ifdef _DEBUG
-//	std::cout << "_mat_c_mob_2_eta_mob: "    << std::endl;
-//	std::cout << _mat_c_mob_2_eta_mob << std::endl;
-//	std::cout << "_mat_c_immob_2_eta_immob: "    << std::endl;
-//	std::cout << _mat_c_immob_2_eta_immob << std::endl;
-//	std::cout << "_mat_c_mob_2_xi_mob: "    << std::endl;
-//	std::cout << _mat_c_mob_2_xi_mob << std::endl;
-//	std::cout << "_mat_c_immob_2_xi_immob: "    << std::endl;
-//	std::cout << _mat_c_immob_2_xi_immob << std::endl;
+	std::cout << "_mat_c_mob_2_eta_mob: "    << std::endl;
+	std::cout << _mat_c_mob_2_eta_mob << std::endl;
+	std::cout << "_mat_c_immob_2_eta_immob: "    << std::endl;
+	std::cout << _mat_c_immob_2_eta_immob << std::endl;
+	std::cout << "_mat_c_mob_2_xi_mob: "    << std::endl;
+	std::cout << _mat_c_mob_2_xi_mob << std::endl;
+	std::cout << "_mat_c_immob_2_xi_immob: "    << std::endl;
+	std::cout << _mat_c_immob_2_xi_immob << std::endl;
 #endif
 /*
  * known indeces : Jmob, Jsorp, Jmin, Jkin, IbarNmin
@@ -326,8 +331,9 @@ void chemReductionGIA::update_reductionScheme(void)
 	//_li and _ast is max num of linearly independent columns
     _Jsorp_li = _mat_Ssorp_li.cols();
     _Jsorp_ld = _mat_Ssorp_ld.cols();
-    _Jkin_ast = _mat_S1kin_ast.cols();
-    _J_tot_li = _Jmob + _Jsorp_li + _Jmin + _Jkin_ast;
+    _J_1_kin_ast = _mat_S1kin_ast.cols();
+	_J_2_kin_ast = _mat_S2kin_ast.cols();
+    _J_tot_li = _Jmob + _Jsorp_li + _Jmin + _J_1_kin_ast;
 
 	//known
 	this->_n_xi_Mob          = _Jmob;
@@ -342,11 +348,11 @@ void chemReductionGIA::update_reductionScheme(void)
 	this->_n_xi_Sorp_tilde   = _Jsorp_li;
 	this->_n_xi_Sorp_bar_ld  = _Jsorp_ld;
 	this->_n_xi_Sorp_bar_li  = _Jsorp_li;
-	this->_n_xi_Kin          = _Jkin_ast;
-	this->_n_xi_Kin_bar      = _Jkin_ast;
+	this->_n_xi_Kin          = _J_1_kin_ast;
+	this->_n_xi_Kin_bar      = _J_2_kin_ast;
 
-	this->_n_xi_global       = _Jsorp_li + _Jsorp_li + _Jmin + _Jmin + _Jkin_ast;
-	this->_n_xi_local        = _Jmob + _Jsorp + _Jmin + _Jkin_ast;
+	this->_n_xi_global       = _Jsorp_li + _Jsorp_li + _Jmin + _Jmin + _J_1_kin_ast;
+	this->_n_xi_local        = _Jmob + _Jsorp + _Jmin + _J_2_kin_ast;
 	this->_Jeq_li            = _Jmob + _Jsorp_li + _Jmin;
 
 
@@ -364,12 +370,12 @@ void chemReductionGIA::update_reductionScheme(void)
 	//extract the A subspaces
 	_mat_A1sorp       = _mat_A1.block(_Jmob,_J_tot_eq,_Jsorp_li,_J_tot_kin);
 	_mat_A1min        = _mat_A1.block(_Jmob+_Jsorp_li,_J_tot_eq,_Jmin,_J_tot_kin);
-	_mat_A1kin        = _mat_A1.block(_Jmob+_Jsorp_li+_Jmin,_J_tot_eq,_Jkin_ast,_J_tot_kin);
+	_mat_A1kin        = _mat_A1.block(_Jmob+_Jsorp_li+_Jmin,_J_tot_eq,_J_1_kin_ast,_J_tot_kin);
 	_mat_Ald	      = _mat_A1.block(_Jmob+_Jsorp_li,_Jmob+_Jsorp_li,_Jmin,_Jsorp_ld);
 	_mat_A2sorp       = _mat_A2.block(0,_Jmob+_Jsorp+_Jmin,_Jsorp,_J_tot_kin);
 	_mat_A2sorpli     = _mat_A2sorp.block(0,0,_Jsorp_li,_J_tot_kin);
 	_mat_A2sorpld     = _mat_A2sorp.block(_Jsorp_li,0,_Jsorp_ld,_J_tot_kin);
-	_mat_A2kin        = _mat_A2.block(_Jsorp+_Jmin,_Jmob+_Jsorp+_Jmin,_Jkin_ast,_J_tot_kin);
+	_mat_A2kin        = _mat_A2.block(_Jsorp+_Jmin,_Jmob+_Jsorp+_Jmin,_J_2_kin_ast,_J_tot_kin);
 
 }
 
@@ -405,18 +411,18 @@ void chemReductionGIA::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 	BaseLib::OrderedMap<std::string, ogsChem::ChemComp*>::iterator it;
 	for( it = map_chemComp.begin(); it != map_chemComp.end(); it++ )
 	{
-		switch ( it->second->getMobility() )
+		switch ( it->second->getCompType() )
 		{
-		case ogsChem::MOBILE:  //mobile
+		case ogsChem::AQ_PHASE_COMP:  //mobile
 			_I_mob++;
 			break;
-		case ogsChem::SORPTION: //immobile sorbed
+		case ogsChem::SORPTION_COMP: //immobile sorbed
 			_I_sorp++;
 			break;
-		case ogsChem::MINERAL: //immobile mineral
+		case ogsChem::MIN_PHASE_COMP: //immobile mineral
 			_I_min++;
 			break;
-		case ogsChem::KINETIC: //immobile kinetic (biomass)
+		case ogsChem::KIN_COMP: //immobile kinetic (biomass)
 			_I_kin++;
 			break;
 		default:
