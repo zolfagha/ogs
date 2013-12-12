@@ -566,6 +566,88 @@ void chemReductionGIA::EtaXi2Conc(ogsChem::LocalVector &local_eta,
 
 }
 
+//this function sets possible negative concentration values to zero.
+void chemReductionGIA::EtaXi2Conc_JH( ogsChem::LocalVector &local_eta,
+					ogsChem::LocalVector &local_eta_bar,
+					ogsChem::LocalVector &local_xi_Mob,
+					ogsChem::LocalVector &local_xi_Sorp_tilde,
+					ogsChem::LocalVector &local_xi_Sorp_bar,
+					ogsChem::LocalVector &local_xi_Min_tilde,
+					ogsChem::LocalVector &local_xi_Min_bar,
+					ogsChem::LocalVector &local_xi_Kin,
+					ogsChem::LocalVector &local_xi_Kin_bar,
+					ogsChem::LocalVector &local_conc)
+{
+
+		ogsChem::LocalVector local_c_mob   		   = ogsChem::LocalVector::Zero(_I_mob);
+		ogsChem::LocalVector local_c_immob_non_min = ogsChem::LocalVector::Zero(_I_NMin_bar);
+		ogsChem::LocalVector local_c_immob         = ogsChem::LocalVector::Zero(_I_NMin_bar + _I_min);
+
+		local_c_mob = _mat_S1mob * local_xi_Mob + _mat_S1sorp_li * local_xi_Sorp_tilde +  _mat_S1sorp * local_xi_Sorp_bar + _mat_S1min * (local_xi_Min_tilde + local_xi_Min_bar)+ _mat_S1kin_ast * local_xi_Kin + _mat_S1_orth * local_eta;
+//		local_c_mob += _mat_S1mob 	  * local_xi_Mob;
+//		local_c_mob += _mat_S1sorp_li * local_xi_Sorp_tilde;
+//		local_c_mob += _mat_S1sorp 	  * local_xi_Sorp_bar;
+//		local_c_mob += _mat_S1min 	  * (local_xi_Min_tilde + local_xi_Min_bar);
+//		local_c_mob += _mat_S1kin_ast * local_xi_Kin;
+//		local_c_mob += _mat_S1_orth	  * local_eta;
+		local_conc.topRows(_I_mob )    = local_c_mob;
+
+		local_c_immob_non_min += _mat_S2sorp	* local_xi_Sorp_bar;
+		local_c_immob_non_min += _mat_S2kin_ast	* local_xi_Kin_bar;
+		local_c_immob.head(_I_NMin_bar) = local_c_immob_non_min;
+		local_c_immob += _mat_S2_orth	* local_eta_bar;
+		local_c_immob.tail(_I_min) =      local_xi_Min_bar;
+
+		local_conc.bottomRows(_I_NMin_bar + _I_min) = local_c_immob;
+
+    for (int i=0; i < local_conc.rows(); i++)    {
+        if ( local_conc(i) < 0.0 ){
+            local_conc(i) = 1.0e-99;
+        }
+
+    }
+    // end of testing
+
+}
+
+//this function does not set possible negative concentration values to zero.
+void chemReductionGIA::EtaXi2Conc_JH_NOCUTOFF( ogsChem::LocalVector &local_eta,
+					ogsChem::LocalVector &local_eta_bar,
+					ogsChem::LocalVector &local_xi_Mob,
+					ogsChem::LocalVector &local_xi_Sorp_tilde,
+					ogsChem::LocalVector &local_xi_Sorp_bar,
+					ogsChem::LocalVector &local_xi_Min_tilde,
+					ogsChem::LocalVector &local_xi_Min_bar,
+					ogsChem::LocalVector &local_xi_Kin,
+					ogsChem::LocalVector &local_xi_Kin_bar,
+					ogsChem::LocalVector &local_conc)
+{
+
+		ogsChem::LocalVector local_c_mob   		   = ogsChem::LocalVector::Zero(_I_mob);
+		ogsChem::LocalVector local_c_immob_non_min = ogsChem::LocalVector::Zero(_I_NMin_bar);
+		ogsChem::LocalVector local_c_immob         = ogsChem::LocalVector::Zero(_I_NMin_bar + _I_min);
+
+		local_c_mob = _mat_S1mob * local_xi_Mob + _mat_S1sorp_li * local_xi_Sorp_tilde +  _mat_S1sorp * local_xi_Sorp_bar + _mat_S1min * (local_xi_Min_tilde + local_xi_Min_bar)+ _mat_S1kin_ast * local_xi_Kin + _mat_S1_orth * local_eta;
+
+//		local_c_mob += _mat_S1mob 	  * local_xi_Mob;
+//		local_c_mob += _mat_S1sorp_li * local_xi_Sorp_tilde;
+//		local_c_mob += _mat_S1sorp 	  * local_xi_Sorp_bar;
+//		local_c_mob += _mat_S1min 	  * (local_xi_Min_tilde + local_xi_Min_bar);
+//		local_c_mob += _mat_S1kin_ast * local_xi_Kin;
+//		local_c_mob += _mat_S1_orth	  * local_eta;
+		local_conc.topRows(_I_mob )    = local_c_mob;
+
+		local_c_immob_non_min += _mat_S2sorp	* local_xi_Sorp_bar;
+		local_c_immob_non_min += _mat_S2kin_ast	* local_xi_Kin_bar;
+		local_c_immob.head(_I_NMin_bar) = local_c_immob_non_min;
+		local_c_immob += _mat_S2_orth	* local_eta_bar;
+		local_c_immob.tail(_I_min) =      local_xi_Min_bar;
+
+		local_conc.bottomRows(_I_NMin_bar + _I_min) = local_c_immob;
+
+}
+
+
 void chemReductionGIA::Calc_Kin_Rate(ogsChem::LocalVector &vec_conc_linear,
 									 ogsChem::LocalVector &vec_rates)
 {
