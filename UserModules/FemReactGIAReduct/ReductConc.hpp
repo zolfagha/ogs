@@ -572,6 +572,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 	//get the transformation matrices
 	MathLib::LocalMatrix _mat_c_mob_2_xi_mob     = _ReductionGIA->get_matrix_C2Xi();
 	MathLib::LocalMatrix _mat_c_immob_2_xi_immob = _ReductionGIA->get_matrix_Cbar2XiBar();
+	MathLib::LocalMatrix mat_S1_ast              = _ReductionGIA->get_mat_S1_ast();
 
 	// initialize the local vector
 	MathLib::LocalVector loc_eta;
@@ -625,6 +626,12 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 	
 	ogsChem::LocalVector  vec_xi_kin_rate  = ogsChem::LocalVector::Zero(_J_tot_kin);
 
+	MathLib::LocalVector local_xi_Mob       = MathLib::LocalVector::Zero(_n_xi_Mob);
+	MathLib::LocalVector local_xi_Sorp_bar  = MathLib::LocalVector::Zero(_n_xi_Sorp_bar);
+	MathLib::LocalVector local_xi_Min_bar   = MathLib::LocalVector::Zero(_n_xi_Min_bar);
+	MathLib::LocalVector local_xi_Kin_bar   = MathLib::LocalVector::Zero(_n_xi_Kin_bar);
+	MathLib::LocalVector optimalXi          = MathLib::LocalVector::Zero(mat_S1_ast.cols());
+
 	// signal, solving local ODEs of xi_immob
 	INFO("--Solving local problem for xi_local and concentrations:");
 
@@ -664,11 +671,38 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			}
 
 			// get concentration values based on current updated eta and xi values. 
-			this->_ReductionGIA->EtaXi2Conc(loc_eta, loc_etabar, loc_xi_global, loc_xi_local, loc_conc); 
+			//this->_ReductionGIA->EtaXi2Conc(loc_eta, loc_etabar, loc_xi_global, loc_xi_local, loc_conc);
+
 
 			// skip the boundary nodes
 			if ( ! this->_solution->isBCNode(node_idx) )
 			{
+
+
+				//update concentration vector using dual simplex aĺgorithm
+				calculate_node_concentration(local_xi_Mob,
+											 loc_XiSorpTilde,
+									         local_xi_Sorp_bar,
+									         loc_XiMinTilde,
+									         local_xi_Min_bar,
+									         loc_XiKin,
+									         local_xi_Kin_bar,
+									         loc_eta,
+									         loc_etabar,
+									         loc_xi_global,
+									         loc_xi_local,
+									         loc_conc,
+									         mat_S1_ast,
+									         optimalXi,
+									         node_idx);
+
+			//update the xi global value with the optimized values 4-Nov-2013
+			loc_xi_global.head( this->_n_xi_Sorp_tilde) 						 = loc_XiSorpTilde;
+			loc_xi_global.segment( this->_n_xi_Sorp_tilde,this->_n_xi_Min_tilde) = loc_XiMinTilde;
+			loc_xi_global.tail( this->_n_xi_Kin) 						   		 = loc_XiKin;
+
+
+
 
 			// need to record both old and new values of xi_kin
 		    // for ODE solver
@@ -736,6 +770,12 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 		    vec_conc_updated.segment(_I_mob + _I_sorp, _I_min) = vec_conc_Min;
 			vec_conc_updated.tail(_I_kin) = vec_conc_Kin;
 
+
+			//update the xi global value after with the optimized values 4-Nov-2013
+			for (i=0; i < _n_xi_global; i++)
+				_xi_global_cur[i]->setValue(node_idx, loc_xi_global[i]);
+			//end of updating xi global
+
 			// collect the xi_local_new
 			for (i=0; i < _n_xi_local; i++)
 				_xi_local_new[i]->setValue(node_idx, loc_xi_local_new[i]);
@@ -800,7 +840,265 @@ void FunctionReductConc<T1, T2>::copy_cur_xi_local_to_pre(void)
     }
 }
 
+template <class T1, class T2>
+void FunctionReductConc<T1, T2>::calculate_node_concentration(MathLib::LocalVector &local_xi_Mob,
+														MathLib::LocalVector &local_xi_Sorp_tilde,
+														MathLib::LocalVector &local_xi_Sorp_bar,
+														MathLib::LocalVector &local_xi_Min_tilde,
+														MathLib::LocalVector &local_xi_Min_bar,
+														MathLib::LocalVector &local_xi_Kin,
+														MathLib::LocalVector &local_xi_Kin_bar,
+														MathLib::LocalVector &local_eta,
+														MathLib::LocalVector &local_etabar,
+														MathLib::LocalVector &local_xi_global,
+														MathLib::LocalVector &local_xi_local,
+														MathLib::LocalVector &local_conc,
+														MathLib::LocalMatrix &mat_S1_ast,
+														MathLib::LocalVector &optimalXi,
+														size_t & node_idx)
+{
 
+	bool negative_concentration = false;
+
+	local_xi_Mob	  = local_xi_local.head(_n_xi_Mob);
+	local_xi_Sorp_bar = local_xi_local.segment(this->_n_xi_Mob,this->_n_xi_Sorp_bar);
+	local_xi_Min_bar  = local_xi_local.segment(this->_n_xi_Mob + this->_n_xi_Sorp_bar,this->_n_xi_Min_bar);
+	local_xi_Kin_bar  = local_xi_local.tail(this->_n_xi_Kin_bar);
+
+	local_xi_Sorp_tilde = local_xi_global.segment( 0,this->_n_xi_Sorp_tilde);
+	local_xi_Min_tilde  = local_xi_global.segment( this->_n_xi_Sorp_tilde,this->_n_xi_Min_tilde);
+	local_xi_Kin		= local_xi_global.segment( this->_n_xi_Sorp_tilde + this->_n_xi_Min_tilde + this->_n_xi_Sorp + this->_n_xi_Min,this->_n_xi_Kin);
+
+	optimalXi.head(_n_xi_Mob) 											         = local_xi_Mob;
+	optimalXi.segment(_n_xi_Mob, _n_xi_Sorp_tilde) 								 = local_xi_Sorp_tilde;
+	optimalXi.segment(_n_xi_Mob + _n_xi_Sorp_tilde, _n_xi_Min_tilde)			 = local_xi_Min_tilde;
+	optimalXi.segment(_n_xi_Mob + _n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Kin) = local_xi_Kin;
+
+	//concentration after updating eta. calculate concentration vector using JH version. 6.NOV.2013
+	this->_ReductionGIA->EtaXi2Conc_JH_NOCUTOFF(local_eta,
+									local_etabar,
+									local_xi_Mob,
+									local_xi_Sorp_tilde,
+									local_xi_Sorp_bar,
+									local_xi_Min_tilde,
+									local_xi_Min_bar,
+									local_xi_Kin,
+									local_xi_Kin_bar,
+									local_conc);
+
+	for(size_t i = 0; i < _I_mob; i++)
+	{
+		if(local_conc(i) < 0.0){
+			negative_concentration = true;
+		}
+	}
+
+	if(negative_concentration)
+	{
+		start_node_values_search(mat_S1_ast,
+				   	   	   	     optimalXi,
+				   	   	   	     local_xi_Mob,
+				   	   	   	     local_xi_Sorp_tilde,
+				   	   	   	     local_xi_Sorp_bar,
+				   	   	   	     local_xi_Min_tilde,
+				   	   	   	     local_xi_Min_bar,
+				   	   	   	     local_xi_Kin,
+				   	   	   	     local_xi_Kin_bar,
+				   	   	   	     local_eta,
+				   	   	   	     local_etabar,
+				   	   	   	     local_conc);
+
+		//RZ: debug 4 Nov, 2013; after optimization if there is negative concentration, cut them to zero.
+		//for(size_t i = 0; i < _I_mob; i++){
+	    for(size_t i = 0; i < _n_Comp; i++){  //dg 7Nov2013
+	    	if(local_conc(i) < 0.0)
+	    		local_conc(i) = 1.0E-99;}
+	}
+
+
+}
+/** RZ 02.11.2013:
+  * This function uses a dual simplex algorithm to optimize xi mobile (ximob, xisorp_tilde, ximin_tilde, xikin) values
+  * such that S*xi + B*eta = Concentration >= 0.0.
+  * The numerical algorithm is adopted from:
+  * Joachim Hoffmann (2005) Ein Entkopplungsverfahren fur Systeme von Transportreaktionsgleichungen
+  * in porosen Medien: Algorithmische Realisierung und Simulation realistischer 2D-Szenarien.
+  * and
+  * Joachim Hoffmann (2010) Reactive Transport and Mineral Dissolution /Precipitation in Porous Media:
+  * Efficient Solution Algorithms, Benchmark Computations and Existence of Global Solutions.
+  */
+template <class T1, class T2>
+void FunctionReductConc<T1, T2>::start_node_values_search( MathLib::LocalMatrix &mat_S1_ast,
+														   MathLib::LocalVector &optimalXi,
+														   MathLib::LocalVector &local_xi_Mob,
+														   MathLib::LocalVector &local_xi_Sorp_tilde,
+														   MathLib::LocalVector &local_xi_Sorp_bar,
+														   MathLib::LocalVector &local_xi_Min_tilde,
+														   MathLib::LocalVector &local_xi_Min_bar,
+														   MathLib::LocalVector &local_xi_Kin,
+														   MathLib::LocalVector &local_xi_Kin_bar,
+														   MathLib::LocalVector &local_eta,
+														   MathLib::LocalVector &local_etabar,
+														   MathLib::LocalVector &local_conc)
+		{
+			int m, n;
+	//m = _n_xi_Mob + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin;
+	//n = _I_mob;
+	m = mat_S1_ast.cols();
+	n = mat_S1_ast.rows();
+	MathLib::LocalMatrix Tableau  = MathLib::LocalMatrix::Zero(n +1, 2*m + n +1);
+	int B [n];
+	MathLib::LocalVector e        = MathLib::LocalVector::Ones(n);
+	MathLib::LocalVector Id_vec   = MathLib::LocalVector::Ones(2*m);
+	MathLib::LocalMatrix Id_mat   = MathLib::LocalMatrix::Identity(n,n);
+	MathLib::LocalVector Id_Jmob  = MathLib::LocalVector::Ones(_n_xi_Mob);
+
+	double eps	   = 2.0E-16;
+	double cmax    = local_conc(0);
+	double epsilon = 0.1;
+
+	for(int i = 0; i < n; i++)
+		 cmax = std::max(cmax, local_conc(i));
+
+	// construct tableau
+	local_conc.head(n) += eps * cmax * e;
+	Tableau.block(0, 0, 1, 2*m) = Id_vec.transpose();
+	Tableau.block(1, 0, n, m) = -1.0 * mat_S1_ast;
+	Tableau.block(1, m, n, m) = mat_S1_ast;
+	Tableau.block(1, 2*m, n, n) = Id_mat;
+	Tableau.block(1, 2*m+n, n, 1) = local_conc.head(n);
+
+	// modify xi mob first
+	Tableau.block(0, 0, 1, _n_xi_Mob) = epsilon * Id_Jmob.transpose();
+	Tableau.block(0, m, 1, _n_xi_Mob) = epsilon * Id_Jmob.transpose();
+
+	for(int i = 0; i < n; ++i)
+		B[i] = i + 2*m;
+
+	while(true)
+	{
+		int i;
+		for(i = 1; (i < n+1) && (Tableau(i, 2*m+n) >= 0); ++i)
+			;
+
+		if(i == n+1)
+			break;
+
+		int    s = -1;  // index of the column with the minimum ratio
+		double t = 1.7976931348623157E+308;
+
+		/*
+		 *  Determine the entering variable. For each negative coefficient in the pivot row, compute the negative of the ratio between the reduced cost in row 0
+		 *  and the structural coefficient in row r.
+		 */
+		for(int j=0; j < 2*m+n; ++j)  //check the feasibility of the solution
+		{
+			if(Tableau(i, j) < 0)
+			{
+				if(Tableau(0, j) / (-Tableau(i, j)) < t)
+				{
+					t = Tableau(0, j) / (-Tableau(i, j));
+					s = j;
+				}
+			}
+		}
+		//if there is no negative coefficient, Tableau(i,j) < 0, stop; there is no feasible solution.
+		if(s == -1)
+		{
+			std::cout << "No positive starting value on this node!" << std::endl;
+
+			//make sure there will be no negative concentrations.
+			for(double idx = 0; idx < _n_Comp; idx++)
+			{
+				if(local_conc(idx) < 0.0)
+					local_conc(idx) = 1.0E-99;
+			}
+
+			return;
+		}
+
+		double d = 1 / Tableau(i, s);
+
+		for(int j = 0;  j < 2*m+n+1; ++j)
+			Tableau(i, j) *= d;
+
+		for(int k = 0; k < i; ++k)
+		{
+			d = Tableau(k, s);
+			for(int j = 0; j < 2*m+n+1; ++j)
+				Tableau(k, j) -= Tableau(i, j) *d;
+		}
+
+		for(int k = i+1; k < n+1; ++k)
+		{
+			d = Tableau(k, s);
+			for(int j = 0; j < 2*m+n+1; ++j)
+				Tableau(k, j) -= Tableau(i, j) * d;
+		}
+
+		B[i-1] = s;
+	}  //end of while loop
+
+	for(int k = 0; k < n; ++k)
+	{
+		if(B[k] < m)
+			optimalXi(B[k]) += Tableau(k+1, 2*m+n);
+		else if(B[k] < 2*m)
+			optimalXi(B[k]-m) -= Tableau(k+1, 2*m+n);
+	}
+
+	calculate_concentration_using_optimal_xi(optimalXi,
+											local_xi_Mob,
+											local_xi_Sorp_tilde,
+											local_xi_Sorp_bar,
+											local_xi_Min_tilde,
+											local_xi_Min_bar,
+											local_xi_Kin,
+											local_xi_Kin_bar,
+											local_eta,
+											local_etabar,
+											local_conc);
+
+}
+
+
+template <class T1, class T2>
+void FunctionReductConc<T1, T2>::calculate_concentration_using_optimal_xi(MathLib::LocalVector &optimalXi,
+		   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	  MathLib::LocalVector &local_xi_Mob,
+		   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	  MathLib::LocalVector &local_xi_Sorp_tilde,
+		   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	  MathLib::LocalVector &local_xi_Sorp_bar,
+		   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	  MathLib::LocalVector &local_xi_Min_tilde,
+		   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	  MathLib::LocalVector &local_xi_Min_bar,
+		   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	  MathLib::LocalVector &local_xi_Kin,
+		   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	  MathLib::LocalVector &local_xi_Kin_bar,
+		   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	  MathLib::LocalVector &local_eta,
+		   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	  MathLib::LocalVector &local_etabar,
+		   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	  MathLib::LocalVector &local_conc)
+{
+
+	local_xi_Mob	    = optimalXi.head(_n_xi_Mob);
+	local_xi_Sorp_tilde = optimalXi.segment(_n_xi_Mob, _n_xi_Sorp_tilde);
+	local_xi_Min_tilde  = optimalXi.segment(_n_xi_Mob + _n_xi_Sorp_tilde, _n_xi_Min_tilde);
+	local_xi_Kin  		=  optimalXi.segment(_n_xi_Mob + _n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Kin);
+
+
+	this->_ReductionGIA->EtaXi2Conc_JH_NOCUTOFF(local_eta,
+									local_etabar,
+									local_xi_Mob,
+									local_xi_Sorp_tilde,
+									local_xi_Sorp_bar,
+									local_xi_Min_tilde,
+									local_xi_Min_bar,
+									local_xi_Kin,
+									local_xi_Kin_bar,
+									local_conc);
+
+}
+
+/** RZ 20.11.2013:
+  * This function update natural log K values of equilibrium reactions by
+  * incorporating ln activity coefficients of components and species.
+  */
 template <class T1, class T2>
 void FunctionReductConc<T1, T2>::update_lnK(void)
 {
@@ -861,21 +1159,21 @@ void FunctionReductConc<T1, T2>::update_lnK(void)
 			for (i=0; i < _n_xi_local; i++)
 				loc_xi_local[i] 	   = this->_xi_local_new[i]->getValue(node_idx);
 
-//			calculate_node_concentration(local_xi_Mob,
-//										 loc_XiSorpTilde,
-//								         local_xi_Sorp_bar,
-//								         loc_XiMinTilde,
-//								         local_xi_Min_bar,
-//								         loc_XiKin,
-//								         local_xi_Kin_bar,
-//								         loc_eta,
-//								         loc_etabar,
-//								         loc_xi_global,
-//								         loc_xi_local,
-//								         loc_conc,
-//								         mat_S1_ast,
-//								         optimalXi,
-//								         node_idx);  //update concentration vector using dual simplex aĺgorithm
+			calculate_node_concentration(local_xi_Mob,
+										 loc_XiSorpTilde,
+								         local_xi_Sorp_bar,
+								         loc_XiMinTilde,
+								         local_xi_Min_bar,
+								         loc_XiKin,
+								         local_xi_Kin_bar,
+								         loc_eta,
+								         loc_etabar,
+								         loc_xi_global,
+								         loc_xi_local,
+								         loc_conc,
+								         mat_S1_ast,
+								         optimalXi,
+								         node_idx);  //update concentration vector using dual simplex aĺgorithm
 
 			for (i = 0; i < _n_Comp; i++)
 				ln_conc(i)  = std::log(loc_conc(i));
