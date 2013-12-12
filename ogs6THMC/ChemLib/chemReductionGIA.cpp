@@ -11,13 +11,15 @@
  */
 #include "chemReductionGIA.h"
 #include "logog.hpp"
+#include "chemActivityModelUnity.h"
 
 namespace ogsChem
 {
 chemReductionGIA::chemReductionGIA(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & list_chemComp,
 		                           std::vector<ogsChem::chemReactionEq*>                & list_eq_reactions,
-		                           std::vector<ogsChem::chemReactionKin*>               & list_kin_reactions)
-: _list_eq_reactions(list_eq_reactions), _list_kin_reactions(list_kin_reactions)
+		                           std::vector<ogsChem::chemReactionKin*>               & list_kin_reactions,
+		                           ogsChem::chemActivityModelAbstract                  *a )
+: _list_eq_reactions(list_eq_reactions), _list_kin_reactions(list_kin_reactions), _activity_model(a)
 {
 	// by default, the class is not yet initialized
 	isInitialized = false;

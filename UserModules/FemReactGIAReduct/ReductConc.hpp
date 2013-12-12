@@ -847,11 +847,6 @@ void FunctionReductConc<T1, T2>::update_lnK(void)
              node_idx++ )
         {
 
-//        	for (i=0; i < _n_Comp; i++)
-//       			ln_conc(i)  = std::log(this->_concentrations[i]->getValue(node_idx));
-
-
-        	/////debug
 			// on each node, get the right start value
 			// get the right set of eta and xi
 			for (i=0; i < _n_eta; i++)
@@ -884,8 +879,6 @@ void FunctionReductConc<T1, T2>::update_lnK(void)
 
 			for (i = 0; i < _n_Comp; i++)
 				ln_conc(i)  = std::log(loc_conc(i));
-        	////end of debug
-
 
         	//call activity coefficients
         	activity_model->calc_activity_logC( ln_conc, ln_activity_coeff, ln_activity );

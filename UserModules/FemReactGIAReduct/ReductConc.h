@@ -326,6 +326,19 @@ public:
     void copy_cur_xi_global_to_pre(void); 
 
     void copy_cur_xi_local_to_pre(void);
+    /**
+      * convert nodal eta and xi values to concentrations
+      */
+	virtual void convert_eta_xi_to_conc(void);
+
+	virtual void update_lnK(void);
+
+	std::vector<MyNodalFunctionScalar*> & get_vec_lnK_Mob() {return _vec_lnK_Mob;}
+	std::vector<MyNodalFunctionScalar*> & get_vec_lnK_Sorp() {return _vec_lnK_Sorp;}
+	std::vector<MyNodalFunctionScalar*> & get_vec_lnK_Min() {return _vec_lnK_Min;}
+
+	void Perform_Extrapolation();
+
 
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
@@ -346,10 +359,6 @@ private:
 
 private:
 
-    /**
-      * convert nodal eta and xi values to concentrations
-      */ 
-	virtual void convert_eta_xi_to_conc(void); 
 
 	DiscreteLib::DofEquationIdTable* _dofManager;
 
@@ -516,6 +525,23 @@ private:
       * global reaction rate vector
       */
     std::vector<MyNodalFunctionScalar*> _global_vec_Rate;
+
+    /**
+      * global equilibrium reaction constant for mobile reactions
+      */
+    std::vector<MyNodalFunctionScalar*> _vec_lnK_Mob;
+
+    /**
+      * global equilibrium reaction constant for sorbed reaction
+      */
+    std::vector<MyNodalFunctionScalar*> _vec_lnK_Sorp;
+
+    /**
+      * global equilibrium reaction constant for mineral reactions
+      */
+    std::vector<MyNodalFunctionScalar*> _vec_lnK_Min;
+
+
 
     /**
       * global _drates_dxi vector
