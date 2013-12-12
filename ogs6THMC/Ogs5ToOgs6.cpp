@@ -689,13 +689,33 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             ogs6fem.m_KinReductScheme = mReductionKinScheme;
             mReductionKinScheme = NULL;
         }
-		// then the REDUCT_GIA mode
+		//  RZ:2.12.2013 then the REDUCT_GIA mode
         // else if ( ogs6fem.list_eq_reactions.size() > 0 ||  ogs6fem.list_kin_reactions.size() > 0)  //define a flag to indicate GIA method later.
 		else if ( HAVE_REACT_GIA )
         {  // initialize the full reduction scheme
+        	ogs5::CKinReactData* ogs5KinReactData = ogs5fem.KinReactData_vector[0];
             ogsChem::chemReductionGIA* mReductionGIAScheme;
-            mReductionGIAScheme = new ogsChem::chemReductionGIA( ogs6fem.map_ChemComp, ogs6fem.list_eq_reactions, ogs6fem.list_kin_reactions );
-            ogs6fem.m_GIA_ReductScheme = mReductionGIAScheme;
+            if ( ogs5KinReactData->activity_model == 1 ) // Debyl-Huekel
+            {
+                ogsChem::chemActivityModelAqDBH* mActivityModelAqDBH = new ogsChem::chemActivityModelAqDBH(ogs6fem.map_ChemComp);
+
+                mReductionGIAScheme = new ogsChem::chemReductionGIA(ogs6fem.map_ChemComp, ogs6fem.list_eq_reactions, ogs6fem.list_kin_reactions, mActivityModelAqDBH);
+                ogs6fem.m_GIA_ReductScheme = mReductionGIAScheme;
+
+            }
+            else if ( ogs5KinReactData->activity_model == 2 ) // Davies
+            {
+                ogsChem::chemActivityModelAqDVS* mActivityModelAqDVS = new ogsChem::chemActivityModelAqDVS(ogs6fem.map_ChemComp);
+                mReductionGIAScheme = new ogsChem::chemReductionGIA(ogs6fem.map_ChemComp, ogs6fem.list_eq_reactions, ogs6fem.list_kin_reactions, mActivityModelAqDVS);
+                ogs6fem.m_GIA_ReductScheme = mReductionGIAScheme;
+            }
+            else // by default, use the unity model
+            {
+                ogsChem::chemActivityModelUnity* mActivityModelUnity = new ogsChem::chemActivityModelUnity();
+                mReductionGIAScheme = new ogsChem::chemReductionGIA(ogs6fem.map_ChemComp, ogs6fem.list_eq_reactions, ogs6fem.list_kin_reactions, mActivityModelUnity);
+                ogs6fem.m_GIA_ReductScheme = mReductionGIAScheme;
+
+            }
             mReductionGIAScheme = NULL;
         }  // end of if else
     }  // end of if ( n_KinReactions > 0 )
