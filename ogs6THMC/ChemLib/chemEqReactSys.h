@@ -305,7 +305,7 @@ public:
             // form Jacobian matrix
             this->calc_Jacobi(x, total_mass, _vec_res); 
             // solving for increment
-            this->Min_solv( node_idx, _mat_Jacobi, _vec_res, dx );
+			this->solve_minimization(_mat_Jacobi, _vec_res, dx);
 
             // increment of unkowns
             this->increment_unknown( x, dx, x_new ); 
@@ -348,103 +348,71 @@ public:
         }
     }; 
 
-    /**
-      * solve the system J*dx = -b
-      *
-      * inputs are: 
-      *    - idx_node is the index of node
-      *    - J is Jacobi marix
-      *    - b is residual vector
-      * 
-      * if rank of J is equal to number of b and dx, 
-      * using direct solver provided by eigen
-      * if rank of J is smaller than number of b, 
-      * using minimization method
-      * delta_x is the returned result. 
-      */
-    void Min_solv(size_t      & idx_node, 
-                  LocalMatrix & J, 
-                  LocalVector & res, 
-                  LocalVector & delta_x)
-    {
-        size_t n_J_rows, r; 
-        size_t n_R_cols;
-        size_t n_V; 
-        ogsChem::LocalMatrix Q, R, P; 
-        ogsChem::LocalMatrix Q2, R2;
-        ogsChem::LocalMatrix B; 
-        ogsChem::LocalMatrix V, Vsize; 
-        ogsChem::LocalVector b, b2, z; 
-        ogsChem::LocalVector y1, y2, y; 
-    
-        b = -1.0 * res; 
-        n_J_rows = J.rows(); 
-    
-        Eigen::FullPivHouseholderQR<Eigen::MatrixXd> qr_decomp; 
+	/** HS 20131106: rewrite the minimization solve function
+	* This function is doing the job:
+	* Minimize norm(dx) on
+	* L(d) := { x belong to Real^n , norm(J*dx + b) = min{ norm(J*dx + b, y belong to Real^n }}
+	*
+	* The numerical algorithm is exactly following page 47 of the dissertation from
+	* Joachim Hoffmann (2010) Reactive Transport and Mineral Dissolution /Precipitation in Porous Media:
+	* Efficient Solution Algorithms, Benchmark Computations and Existence of Global Solutions.
+	* University of Erlangen-Nuernberg.
+	*
+	* It is an excellant solution of singular J problem!
+	*/
+	void solve_minimization(ogsChem::LocalMatrix & J, 
+		                    ogsChem::LocalVector & b,
+							ogsChem::LocalVector & dx)
+	{
+		// step 0: variable definition and initialization
+		int n_r, n_rows_M;
+		ogsChem::LocalMatrix Q, R, P, B, RB, V, M, tmp;
+		ogsChem::LocalVector z, y, y1, y2;
+		Eigen::FullPivHouseholderQR<Eigen::MatrixXd> qr_decomp;
+		y = ogsChem::LocalVector::Zero(dx.rows());
 
-        // perform the QR decompostion
-        qr_decomp.compute(J); 
+		// step 1: perform Housholder QR decomposition on J, 
+		// so that Q^T * J * P = { R  B }
+		//                       { 0  0 }
+		qr_decomp.compute(J);
+		Q = qr_decomp.matrixQ();
+		P = qr_decomp.colsPermutation();
+		n_r = qr_decomp.rank();
+		n_rows_M = J.cols() - n_r;
+		RB = Q.transpose() * J * P;
 
-        Q = qr_decomp.matrixQ(); 
+		if (n_r == J.cols())
+		{
+			// if n_rank == n_cols, directly solve
+			dx = qr_decomp.solve(-b);
+		}
+		else
+		{
+			// step 2: split R and B
+			R = RB.topLeftCorner(n_r, n_r);
+			B = RB.topRightCorner(n_r, RB.cols() - n_r);
 
-        // TO check, is this right?
-        R = qr_decomp.matrixQR(); 
-        // TO check, is this right?
-        P = qr_decomp.colsPermutation(); 
+			// step 3: if n_rank < n_cols, calculate V, z and y based on R and B. 
+			// solve R*V = B
+			qr_decomp.compute(R);
+			V = qr_decomp.solve(B);
+			// Rz = (Q^T *(-b))
+			// (I + V^TV)*y2 = V^T * z
+			M = ogsChem::LocalMatrix::Identity(n_rows_M, n_rows_M) + V.transpose() * V;
+			tmp = (Q.transpose() * (-1.0 * b)).topRows(n_r);
+			z = qr_decomp.solve(tmp);
+			y2 = M.fullPivHouseholderQr().solve(V.transpose() * z);
+			// y1 = z - V*y2
+			y1 = z - V * y2;
+			// formulate y
+			y.head(n_r) = y1;
+			y.tail(J.rows() - n_r) = y2;
+			// apply permuation
+			dx = P * y;
+		}
+		return;
+	}
 
-        // rank revealing
-        r = qr_decomp.rank(); 
-    
-        if ( r == n_J_rows )
-        {
-            // using the standard direct solver
-            delta_x = J.fullPivHouseholderQr().solve( b ); 
-        }  // end of if
-        else if ( r < n_J_rows )
-        {
-            // n_R_cols = size( R, 2); 
-            n_R_cols = R.cols(); 
-        
-            // R2 = R(1:r, 1:r);
-            R2 = R.topLeftCorner(r, r);
-        
-            // B  = R(1:r, r+1:n_R_cols);
-            B = R.topRightCorner(r, n_R_cols - r);
-        
-            // V = R2 \ B; 
-            V = R2.fullPivHouseholderQr().solve( B );
-        
-            // Vsize = V'*V;
-            Vsize = V.transpose() * V; 
-        
-            // n_V = size(Vsize,1);
-            n_V = Vsize.rows(); 
-        
-            // Q2 = Q.topLeftCorner(1:r, 1:r);
-            Q2 = Q.topLeftCorner(r, r);
-
-            // b2 = b(1:r, :);
-            b2 = b.head(r); 
-        
-            // z = R2 \ (Q2'*b2);
-            z = R2.fullPivHouseholderQr().solve( Q2.transpose() * b2 );
-
-            // y2 = (eye(n_V)+V'*V)\(V' * z);
-            ogsChem::LocalMatrix eye = ogsChem::LocalMatrix::Identity( n_V, n_V );
-            y2 = ( eye + V.transpose() * V ).fullPivHouseholderQr().solve( V.transpose()*z ); 
-    
-            // y1 = z - V*y2; 
-            y1 = z - V * y2; 
-
-            // y = [y1;y2];
-            y = LocalVector::Zero( y1.rows() + y2.rows() );
-            y.head( y1.rows() ) = y1;
-            y.tail( y2.rows() ) = y2;
-            // delta_x = P* y;
-            delta_x = P * y; 
-        }  // end of else if
-
-    }; 
 	
 private:
 	/**
