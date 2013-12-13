@@ -42,7 +42,10 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 														ogsChem::LocalVector & vec_etabar,
 														ogsChem::LocalVector & vec_xi_local,
 														ogsChem::LocalVector & vec_xi_global,
-														ogsChem::LocalVector & vec_xi_bar_kin_old)
+														ogsChem::LocalVector & vec_xi_bar_kin_old,
+														ogsChem::LocalVector & lnk_mob,
+														ogsChem::LocalVector & lnk_sorp,
+														ogsChem::LocalVector & lnk_min)
 {
     ogsChem::LocalVector x_new, vec_residual, vec_AI;
     ogsChem::LocalVector dx;

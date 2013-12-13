@@ -631,6 +631,9 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 	MathLib::LocalVector local_xi_Min_bar   = MathLib::LocalVector::Zero(_n_xi_Min_bar);
 	MathLib::LocalVector local_xi_Kin_bar   = MathLib::LocalVector::Zero(_n_xi_Kin_bar);
 	MathLib::LocalVector optimalXi          = MathLib::LocalVector::Zero(mat_S1_ast.cols());
+	MathLib::LocalVector lnk_mob            = MathLib::LocalVector::Zero(_n_xi_Mob);
+	MathLib::LocalVector lnk_sorp           = MathLib::LocalVector::Zero(_n_xi_Sorp);
+	MathLib::LocalVector lnk_min            = MathLib::LocalVector::Zero(_n_xi_Min);
 
 	// signal, solving local ODEs of xi_immob
 	INFO("--Solving local problem for xi_local and concentrations:");
@@ -669,6 +672,14 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 				loc_xi_local[i] 	   = this->_xi_local_new[i]->getValue(node_idx);
 				loc_xi_local_old_dt[i] = this->_xi_local_old[i]->getValue(node_idx);
 			}
+
+			//get the updated lnK values on each node.
+			for (i=0; i < _n_xi_Mob; i++)
+				lnk_mob[i] = this->_vec_lnK_Mob[i]->getValue(node_idx);
+			for (i=0; i < _n_xi_Sorp; i++)
+				lnk_sorp[i] = this->_vec_lnK_Sorp[i]->getValue(node_idx);
+			for (i=0; i < _n_xi_Min; i++)
+				lnk_min[i] = this->_vec_lnK_Min[i]->getValue(node_idx);
 
 			// get concentration values based on current updated eta and xi values. 
 			//this->_ReductionGIA->EtaXi2Conc(loc_eta, loc_etabar, loc_xi_global, loc_xi_local, loc_conc);
@@ -735,7 +746,10 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 														   loc_etabar, 
 														   loc_xi_local, 
 														   loc_xi_global, 
-														   loc_XiBarKin_old);
+														   loc_XiBarKin_old,
+														   lnk_mob,
+														   lnk_sorp,
+														   lnk_min);
 
 		    // convert the ln mobile conc to mobile conc
 			ln_conc_Mob  = vec_unknowns.head(_I_mob);

@@ -97,7 +97,10 @@ public:
 											  ogsChem::LocalVector & vec_etabar,
 											  ogsChem::LocalVector & vec_xi_local, 
 											  ogsChem::LocalVector & vec_xi_global, 
-											  ogsChem::LocalVector & vec_xi_bar_kin_old);
+											  ogsChem::LocalVector & vec_xi_bar_kin_old,
+											  ogsChem::LocalVector & lnk_mob,
+											  ogsChem::LocalVector & lnk_sorp,
+											  ogsChem::LocalVector & lnk_min);
 
     /**
       * solve the system J*dx = -b
