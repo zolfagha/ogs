@@ -412,81 +412,81 @@ void LocalProblem::Solv_Minimization(size_t      & idx_node,
                               ogsChem::LocalVector & res,
                               ogsChem::LocalVector & delta_x)
 {
-    size_t n_J_rows, r; 
+    size_t n_J_rows, r;
     size_t n_R_cols;
-    size_t n_V; 
-    ogsChem::LocalMatrix Q, R, P; 
+    size_t n_V;
+    ogsChem::LocalMatrix Q, R, P;
     ogsChem::LocalMatrix Q2, R2;
-    ogsChem::LocalMatrix B; 
-    ogsChem::LocalMatrix V, Vsize; 
-    ogsChem::LocalVector b, b2, z; 
-    ogsChem::LocalVector y1, y2, y; 
-    
-    b = -1.0 * res; 
-    n_J_rows = J.rows(); 
-    
-    Eigen::FullPivHouseholderQR<Eigen::MatrixXd> qr_decomp; 
+    ogsChem::LocalMatrix B;
+    ogsChem::LocalMatrix V, Vsize;
+    ogsChem::LocalVector b, b2, z;
+    ogsChem::LocalVector y1, y2, y;
+
+    b = -1.0 * res;
+    n_J_rows = J.rows();
+
+    Eigen::FullPivHouseholderQR<Eigen::MatrixXd> qr_decomp;
 
     // perform the QR decompostion
-    qr_decomp.compute(J); 
+    qr_decomp.compute(J);
 
-    Q = qr_decomp.matrixQ(); 
+    Q = qr_decomp.matrixQ();
 
     // TO check, is this right?
-    R = qr_decomp.matrixQR(); 
+    R = qr_decomp.matrixQR();
     // TO check, is this right?
-    P = qr_decomp.colsPermutation(); 
+    P = qr_decomp.colsPermutation();
 
     // rank revealing
-    r = qr_decomp.rank(); 
-    
+    r = qr_decomp.rank();
+
     if ( r == n_J_rows )
     {
         // using the standard direct solver
-        delta_x = J.fullPivHouseholderQr().solve( b ); 
+        delta_x = J.fullPivHouseholderQr().solve( b );
     }  // end of if
     else if ( r < n_J_rows )
     {
-        // n_R_cols = size( R, 2); 
-        n_R_cols = R.cols(); 
-        
+        // n_R_cols = size( R, 2);
+        n_R_cols = R.cols();
+
         // R2 = R(1:r, 1:r);
         R2 = R.topLeftCorner(r, r);
-        
+
         // B  = R(1:r, r+1:n_R_cols);
         B = R.topRightCorner(r, n_R_cols - r);
-        
-        // V = R2 \ B; 
+
+        // V = R2 \ B;
         V = R2.fullPivHouseholderQr().solve( B );
-        
+
         // Vsize = V'*V;
-        Vsize = V.transpose() * V; 
-        
+        Vsize = V.transpose() * V;
+
         // n_V = size(Vsize,1);
-        n_V = Vsize.rows(); 
-        
+        n_V = Vsize.rows();
+
         // Q2 = Q.topLeftCorner(1:r, 1:r);
         Q2 = Q.topLeftCorner(r, r);
 
         // b2 = b(1:r, :);
-        b2 = b.head(r); 
-        
+        b2 = b.head(r);
+
         // z = R2 \ (Q2'*b2);
         z = R2.fullPivHouseholderQr().solve( Q2.transpose() * b2 );
 
         // y2 = (eye(n_V)+V'*V)\(V' * z);
         ogsChem::LocalMatrix eye = ogsChem::LocalMatrix::Identity( n_V, n_V );
-        y2 = ( eye + V.transpose() * V ).fullPivHouseholderQr().solve( V.transpose()*z ); 
-    
-        // y1 = z - V*y2; 
-        y1 = z - V * y2; 
+        y2 = ( eye + V.transpose() * V ).fullPivHouseholderQr().solve( V.transpose()*z );
+
+        // y1 = z - V*y2;
+        y1 = z - V * y2;
 
         // y = [y1;y2];
         y = ogsChem::LocalVector::Zero( y1.rows() + y2.rows() );
         y.head( y1.rows() ) = y1;
         y.tail( y2.rows() ) = y2;
         // delta_x = P* y;
-        delta_x = P * y; 
+        delta_x = P * y;
     }  // end of else if
 
 }
@@ -935,5 +935,54 @@ void LocalProblem::reaction_rates(ogsChem::LocalVector & conc,
 		this->_list_kin_reactions[i]->calcReactionRate( conc );
 		vec_rateKin(i) = this->_list_kin_reactions[i]->getRate();
 	}
+}
+
+/*
+ * RZ: AI vector contains 1 and 0. 1 if mineral is present and 0 if absent.
+ */
+//calculate AI vector
+void LocalProblem::calculate_AI(ogsChem::LocalVector & vec_unknowns,
+								ogsChem::LocalVector & vec_AI)
+{
+    ogsChem::LocalVector ln_conc_Mob  = ogsChem::LocalVector::Zero(_I_mob);
+    ogsChem::LocalVector ln_conc_Sorp = ogsChem::LocalVector::Zero(_I_sorp);
+    ogsChem::LocalVector conc_Min_bar = ogsChem::LocalVector::Zero(_I_min);
+	ogsChem::LocalVector conc_Kin_bar = ogsChem::LocalVector::Zero(_I_kin);
+    //ogsChem::LocalMatrix mat_S1min_transposed;
+    //logConc_Mob = ogsChem::LocalVector::Zero(_I_mob);
+    ogsChem::LocalMatrix  mat_S1min_transposed = ogsChem::LocalMatrix::Zero(_mat_S1min.cols(),_mat_S1min.rows());
+    mat_S1min_transposed = _mat_S1min.transpose();
+
+
+    // take the first section which is basis concentration
+    ln_conc_Mob    = vec_unknowns.head( _I_mob   );
+    // take the sorp component concentrations
+	ln_conc_Sorp   = vec_unknowns.segment(_I_mob, _I_sorp);
+    // take the mineral part
+    conc_Min_bar   = vec_unknowns.segment(_I_mob + _I_sorp, _I_min );
+	// take the kinetic part
+    conc_Kin_bar   = vec_unknowns.tail(_I_kin);
+
+    double phi = 0.0;
+
+    for(size_t j =0; j < _I_min; j++)
+    {
+    	//		conc_Min_bar(j) = cal_cbarmin_by_constrain(j, ln_conc_Mob, ln_conc_NonMin_bar, conc_Min_bar);
+    	conc_Min_bar(i) = cal_cbarmin_by_constrain(i, ln_conc_Mob, ln_conc_Sorp, conc_Min_bar, conc_Kin_bar);
+
+    	phi  = -_logk_min(j) + mat_S1min_transposed.row(j) * ln_conc_Mob;
+
+    	// if mineral concentration  >= phi ; mineral is present; saturated case; precipitate the mineral.
+    	if(conc_Min_bar(j) > phi)  //RZ:9-Dec-13
+    	{
+    		vec_AI(j) = 1;
+    	}// end of if
+    	// if mineral concentration < phi : mineral is NOT present; under saturated case; dissolve the mineral
+    	else
+    	{
+    		vec_AI(j) = 0;
+    		conc_Min_bar(j) = 0.0;
+    	}// end of else
+    }
 }
 
