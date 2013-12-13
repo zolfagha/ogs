@@ -1,9 +1,6 @@
 GeoSys-OUT: Output ------------------------------------------------
 #OUTPUT // profile
  $NOD_VALUES
-  eta_0
-  eta_1
-  eta_2
   HEAD
   H+
   Ca2+
@@ -18,5 +15,6 @@ GeoSys-OUT: Output ------------------------------------------------
  $DAT_TYPE
   PVD
  $TIM_TYPE
-  STEPS 1
+  STEPS 5
 #STOP
+

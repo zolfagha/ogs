@@ -171,7 +171,8 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
                                SolutionLib::SolutionVector & residual_global)
 {
     const size_t nnodes = _dis_sys->getMesh()->getNumberOfNodes();
-    const double theta_water_content = 0.5;
+    //const double theta_water_content = 0.5;  //monod
+    const double theta_water_content = 0.32;  //calcite
     size_t j; 
     // current xi global
     MathLib::LocalVector loc_cur_xi_global, loc_cur_xi_Sorp_tilde, loc_cur_xi_Min_tilde,
@@ -280,7 +281,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             for(std::size_t i = 0; i < _n_xi_Min_tilde; i++)
             residual_global[_n_xi_global * node_idx + i] = res44[i];
 
-            if(_n_xi_Kin != 0){
+            if(_n_xi_Kin > 0){
             // calculate the nodal kinetic reaction rates
             _ReductionGIA->Calc_Kin_Rate_temp(loc_cur_xi_Mob,
                                          loc_cur_xi_Sorp,

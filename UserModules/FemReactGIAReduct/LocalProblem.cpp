@@ -83,7 +83,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
     iter = 0; 
 
     // now updating the saturation index and minerals
-    if(_n_xi_Min != 0)
+    if(_n_xi_Min > 0)
     {
     this->calculate_AI(x,vec_AI);
     this->update_minerals_conc_AI( x, vec_AI );
@@ -207,7 +207,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
         // line search begins
         j = 0; 
-        while ( j < max_iter )
+        while ( j < 30 )
         {
             // d1_norm = norm(res,inf);
             d1_norm = vec_residual.norm();
@@ -219,7 +219,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
             dx = dx * alpha;
             // increment of unknowns
             //this->increment_unknown( x, dx, x_new );
-            x_new = x_new + dx;  //RZ: essentail for convergency
+            x_new = x_new - dx;  //RZ: essentail for convergency
             // now updating the saturation index and minerals
             if(_n_xi_Min != 0)
 				this->update_minerals_conc_AI( x_new, vec_AI );
@@ -372,8 +372,8 @@ void LocalProblem::calc_Jacobian(double dt,
 							     ogsChem::LocalVector & vec_Xi_Kin_bar,
 							     ogsChem::LocalVector & vec_AI)
 {
-	//const double delta_xi = 1.0e-8;  //calcite example
-	const double delta_xi = 1.0e-6;    //monod2d
+	const double delta_xi = 1.0e-8;  //calcite example
+	//const double delta_xi = 1.0e-6;    //monod2d
     int i;
     ogsChem::LocalVector vec_x_incremented, vec_residual_incremented;
     vec_residual_incremented = vec_residual;

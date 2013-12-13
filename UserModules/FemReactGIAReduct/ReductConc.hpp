@@ -560,7 +560,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 {
 	size_t i, node_idx;
 	double t0 = 0.0;
-	double theta_water_content (0.5);  //monod2d example
+//	double theta_water_content (0.5);  //monod2d example
 
 
 	//pointer to the local problem
