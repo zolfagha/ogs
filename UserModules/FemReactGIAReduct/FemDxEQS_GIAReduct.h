@@ -545,7 +545,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
     // using minimization solver of the local problem.
 
     MathLib::LocalVector b 	= MathLib::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
-    //MathLib::LocalVector dx = MathLib::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
+    MathLib::LocalVector dx = MathLib::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
     MathLib::LocalMatrix x  = MathLib::LocalMatrix::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols(), _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
     std::size_t indx_dummy = 0;
     // solve the linear system
@@ -553,11 +553,12 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
     {
 	    b = mat_B.transpose() * mat_A_tilde * mat_C.col(i);
 
-	    // _solv_minimization->Solv_Minimization(indx_dummy, J_temp, b, dx);  // b is multiplied by -1 in this function.
-	    // x.col(i) = dx;
+	    //RZ: solving with minimization problem for numerical robustness,
+	     _solv_minimization->solve_minimization(J_temp, b, dx);  // b is multiplied by -1 in this function.
+	     x.col(i) = -1.0 * dx;
 
 	    // using the standard direct solver
-	    x.col(i) = J_temp.fullPivHouseholderQr().solve( b );
+	    //x.col(i) = J_temp.fullPivHouseholderQr().solve( b );
 
     }
 

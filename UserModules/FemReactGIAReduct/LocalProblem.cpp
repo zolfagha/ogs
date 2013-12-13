@@ -179,7 +179,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 #endif
 
     	// updating the saturation index and minerals
-        if(_n_xi_Min != 0)
+        if(_n_xi_Min > 0)
 		this->update_minerals_conc_AI( x_new, vec_AI );
 
 #ifdef _DEBUG
@@ -489,7 +489,7 @@ void LocalProblem::increment_unknown(ogsChem::LocalVector & x_old,
 		{
 			tmp_value = -1.33*delta_x(i) / x_old(i);
 			damp_factor = 1.0 / std::max(1.0, tmp_value );
-			x_new(i) = x_old(i) + damp_factor * delta_x(i); 
+			x_new(i) = x_old(i) + damp_factor * delta_x(i);
 		}
 	}
 
