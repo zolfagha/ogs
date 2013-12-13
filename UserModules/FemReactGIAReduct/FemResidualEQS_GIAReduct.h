@@ -530,12 +530,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
 			}
         } // end of loop over all sampling points
 
-        //// --------debugging--------------
-        //std::cout << "localDispersion Matrix" << std::endl;
-        //std::cout << localDispersion << std::endl;
-        //std::cout << "localAdvection Matrix" << std::endl;
-        //std::cout << localAdvection << std::endl;
-        //// --------end of debugging-------
 
         localK = localDispersion + localAdvection;
 		
@@ -560,13 +554,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
 
 		}
 
-        // --------debugging--------------
-        //std::cout << "localK Matrix" << std::endl;
-        //std::cout << localK << std::endl;
-        //std::cout << "localM Matrix" << std::endl;
-        //std::cout << localM << std::endl;
-        // --------end of debugging-------
-
         //MathLib::LocalVector node_indx = MathLib::LocalVector::Zero(_n_xi);
         std::size_t idx_xi, node_indx, val_idx;
 
@@ -582,12 +569,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
             }  // end of idx_xi
         }  // end of node_idx
 
-        // --------debugging--------------
-//        std::cout << "loc_cur_xi_global" << std::endl;
-//        std::cout << loc_cur_xi_global << std::endl;
-//        std::cout << "loc_pre_xi_global" << std::endl;
-//        std::cout << loc_pre_xi_global << std::endl;
-        // --------end of debugging-------
 
         loc_cur_xi_Sorp_tilde   = loc_cur_xi_global.head(_n_xi_Sorp_tilde*nnodes);
         loc_cur_xi_Min_tilde    = loc_cur_xi_global.segment(_n_xi_Sorp_tilde*nnodes, _n_xi_Min_tilde*nnodes);

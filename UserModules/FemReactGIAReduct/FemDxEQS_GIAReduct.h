@@ -358,7 +358,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             Unknown_vec.head(_n_xi_global) = loc_cur_xi_global;
             Unknown_vec.tail(_n_xi_local) = loc_cur_xi_local;
 
-            if(_n_xi_Kin != 0)
+            if(_n_xi_Kin > 0)
             {
             	for(std::size_t i = 0; i < n_xi_total ; i++ )
             	{
@@ -493,18 +493,10 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             }  // end of node based for loop
             node_indx_vec.clear();
 
-            //// --------debugging--------------
-            // std::ofstream globalJ_node ("globalJ_node.txt");
-            // eqsJacobian_global.printout(globalJ_node);
-            //// --------end of debugging-------
 
     // element based operation: add time and laplas terms
     AddMassLaplasTerms(delta_t, eqsJacobian_global);
 
-    //// --------debugging--------------
-    // std::ofstream globalJ ("globalJ.txt");
-    // eqsJacobian_global.printout(globalJ);
-    //// --------end of debugging-------
 
 
 }
@@ -613,7 +605,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 {
     const size_t n_ele = _msh->getNumberOfElements();
     std::size_t n_dim, mat_id; 
-    std::size_t i, j, xi_count, idx, idx_ml;
+    std::size_t i, j, xi_count, idx;
     double dt = delta_t.getTimeStepSize();
     double cmp_mol_diffusion;
     MeshLib::IElement *e; 
@@ -760,23 +752,4 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 	}  // end of for i over all elements
 }  // end of function AddMassLaplasTerms
 
-/*
-template <class T1, class T2, class T3>
-void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::cal_nodal_rate(ogsChem::LocalVector &xi,
-																  ogsChem::LocalVector &local_eta_bar,
-																  ogsChem::LocalVector &local_eta,
-																  ogsChem::LocalVector &vec_rate_new )
-{
-    // declare local temp variable
-	ogsChem::LocalVector local_xi_global = xi.head(_n_xi_global);
-	ogsChem::LocalVector local_xi_local = xi.tail(_n_xi_local);
-
-	_ReductionGIA->Calc_Kin_Rate(local_xi_local,
-		                         local_xi_global,
-								 local_eta,
-								 local_eta_bar,
-								 vec_rate_new);
-
-}
-*/
 
