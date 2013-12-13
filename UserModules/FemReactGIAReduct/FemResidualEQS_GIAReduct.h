@@ -348,7 +348,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
     const size_t n_max_connect_nodes = 20; 
     size_t nnodes; 
     double _theta(1.0);
-    size_t _n_xi_trans = this->_n_xi_Sorp + this->_n_xi_Min + this->_n_xi_Kin; 
+//    size_t _n_xi_trans = this->_n_xi_Sorp + this->_n_xi_Min + this->_n_xi_Kin;
     size_t i,j,k; 
 	MathLib::LocalMatrix rate_xi_sorp_gp, rate_xi_min_gp, rate_xi_kin_gp;
 	MathLib::LocalMatrix node_xi_sorp_rate_values;

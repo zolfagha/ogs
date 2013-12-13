@@ -61,7 +61,8 @@ public:
      	_n_xi_Sorp_bar_ld(_ReductionGIA->get_n_xi_Sorp_bar_ld()), _n_xi_Kin(_ReductionGIA->get_n_xi_Kin()), _n_xi_Min_bar(_ReductionGIA->get_n_xi_Min_bar()),
      	_n_xi_local(_ReductionGIA->get_n_xi_local()), _n_xi_global(_ReductionGIA->get_n_xi_global()),  _J_tot_kin(_ReductionGIA->get_n_xi_Kin_total()), _n_xi_Sorp_bar(_ReductionGIA->get_n_xi_Sorp_bar()),
      	_xi_local_new(userData->get_xi_local_new()), _eta(userData->get_eta()), _eta_bar(userData->get_eta_bar()),
-     	_global_vec_Rate(userData->get_global_vec_Rate()), _concentrations(userData->get_concentrations()),  _list_kin_reactions(_ReductionGIA->get_list_kin_reactions())
+     	_global_vec_Rate(userData->get_global_vec_Rate()), _concentrations(userData->get_concentrations()),  _list_kin_reactions(_ReductionGIA->get_list_kin_reactions()),
+     	_vec_lnK_Min(userData->get_vec_lnK_Min())
     {
     };
 
@@ -155,6 +156,8 @@ private:
 
     size_t _n_xi_global, _n_xi_Sorp_tilde, _n_xi_Min_tilde, _n_xi_Sorp, _n_xi_Min, _n_xi_Kin, _n_xi_local, _n_xi_Min_bar, _n_eta, _n_eta_bar, _n_xi_Mob, _n_xi_Kin_bar, _J_tot_kin, _n_xi_Sorp_bar;
     size_t _n_xi_Sorp_bar_li, _n_xi_Sorp_bar_ld, _n_Comp, _I_mob, _I_min, _I_sorp;
+
+    std::vector<MyNodalFunctionScalar*> & _vec_lnK_Min;
 };
 
 
@@ -260,6 +263,11 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     loc_cur_eta_bar         = MathLib::LocalVector::Zero( _n_eta_bar );
     vec_conc                = MathLib::LocalVector::Zero(_n_Comp);
 
+    MathLib::LocalVector local_xi_Mob       = MathLib::LocalVector::Zero(_n_xi_Mob);
+	MathLib::LocalVector local_xi_Sorp_bar  = MathLib::LocalVector::Zero(_n_xi_Sorp_bar);
+	MathLib::LocalVector local_xi_Min_bar   = MathLib::LocalVector::Zero(_n_xi_Min_bar);
+	MathLib::LocalVector local_xi_Kin_bar   = MathLib::LocalVector::Zero(_n_xi_Kin_bar);
+
     MathLib::LocalMatrix mat_vprime 	 = MathLib::LocalMatrix::Zero(_n_xi_local,_n_xi_global);
     MathLib::LocalMatrix Jacobian_local  = MathLib::LocalMatrix::Zero(_n_xi_global, _n_xi_global);
     MathLib::LocalVector vec_rate_old 	 = MathLib::LocalVector::Zero(_J_tot_kin);
@@ -297,6 +305,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     MathLib::LocalMatrix mat_S1_orth  = _ReductionGIA->get_mat_S1_orth();
     MathLib::LocalMatrix mat_S2_orth  = _ReductionGIA->get_mat_S2_orth();
 
+	MathLib::LocalVector lnk_min            = MathLib::LocalVector::Zero(_n_xi_Min);
+
     std::vector<size_t> node_indx_vec;
     for (i=0; i< _n_xi_global; i++)
         node_indx_vec.push_back(0); 
@@ -318,8 +328,28 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             for (i=0; i < _J_tot_kin; i++)
                 vec_rate_old[i] = _global_vec_Rate[i]->getValue(node_idx);
 
-            for (i=0; i < _n_Comp; i++)
-                vec_conc[i] = this->_concentrations[i]->getValue(node_idx);
+			for (i=0; i < _n_xi_Min; i++)
+				lnk_min[i] = this->_vec_lnK_Min[i]->getValue(node_idx);
+
+			local_xi_Mob	  = loc_cur_xi_local.head(_n_xi_Mob);
+			local_xi_Sorp_bar = loc_cur_xi_local.segment(this->_n_xi_Mob,this->_n_xi_Sorp_bar);
+			local_xi_Min_bar  = loc_cur_xi_local.segment(this->_n_xi_Mob + this->_n_xi_Sorp_bar,this->_n_xi_Min_bar);
+			local_xi_Kin_bar  = loc_cur_xi_local.tail(this->_n_xi_Kin_bar);
+
+//            for (i=0; i < _n_Comp; i++)
+//                vec_conc[i] = this->_concentrations[i]->getValue(node_idx);
+
+    		//calculate concentration vector using JH version. RZ: 6.Nov.2013
+    		this->_ReductionGIA->EtaXi2Conc_JH_NOCUTOFF(loc_cur_eta,
+    										   loc_cur_eta_bar,
+    										   local_xi_Mob,
+    										   loc_cur_xi_Sorp_tilde,
+    										   local_xi_Sorp_bar,
+    										   loc_cur_xi_Min_tilde,
+    										   local_xi_Min_bar,
+    										   loc_cur_xi_Kin,
+    										   local_xi_Kin_bar,
+    										   vec_conc);
 
 			tmp_vec_conc = vec_conc; // just initialize memory. 
 
@@ -516,7 +546,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 
 	for (i = 0; i < _n_xi_Min; i++)
 	{
-		if(conc_Min_bar(i) >= vec_phi(i)) {
+		if(conc_Min_bar(i) > vec_phi(i)) {
 			mat_S1minI.resize( mat_S1min.rows(), mat_S1minI.cols() + 1);
 			mat_S1minI.rightCols(1) = mat_S1min.col(i);
 		}
