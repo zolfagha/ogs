@@ -104,8 +104,6 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
     // evaluate the residual
 	this->calc_residual(dt, x, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin, vec_AI);
 
-    //save the update value of xi kin bar
-    //vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_eta_bar, _n_xi_Kin_bar) = _vec_XiBarKin;
     // evaluate norm of residual vector
     d_norm = vec_residual.norm();
 
@@ -118,38 +116,38 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
 	// save the previous values
 	x_new  =  x;
-
-    while (true)
-    {
-        #ifdef _DEBUG
-            // display the residual
-            // std::cout << "Iteration #" << iter << "||res|| = " << d_norm << "||delta_x|| = " << dx.norm() << std::endl;
-        #endif
-        // convergence criteria
-        if ( d_norm < iter_tol )
-        {
-            #ifdef _DEBUG
- //                std::cout << "Newton iteration successfully converged!\n";
-            #endif
-
-            break;  // break the loop
-        }
-        else if ( dx.norm() < rel_tol )
-        {
-            #ifdef _DEBUG
- //           std::cout << "Warning, Newton iteration stagnent on Node #" << node_idx << "! Exit the iteration!\n" ;
-            #endif
-
-            break;  // break the loop
-        }
-        else if ( iter > max_iter )
-        {
-            #ifdef _DEBUG
-//            std::cout << "ERROR! Node #" << node_idx  << "Newton iterationan does not converge! Simulation stops!\n";
-            #endif
-
-            return; // stop the program
-        }
+	while ((iter < max_iter) && (d_norm > iter_tol)){ //RZ: 4.12.2013
+//    while (true)
+//    {
+//        #ifdef _DEBUG
+//            // display the residual
+//            // std::cout << "Iteration #" << iter << "||res|| = " << d_norm << "||delta_x|| = " << dx.norm() << std::endl;
+//        #endif
+//        // convergence criteria
+//        if ( d_norm < iter_tol )
+//        {
+//            #ifdef _DEBUG
+// //                std::cout << "Newton iteration successfully converged!\n";
+//            #endif
+//
+//            break;  // break the loop
+//        }
+//        else if ( dx.norm() < rel_tol )
+//        {
+//            #ifdef _DEBUG
+// //           std::cout << "Warning, Newton iteration stagnent on Node #" << node_idx << "! Exit the iteration!\n" ;
+//            #endif
+//
+//            break;  // break the loop
+//        }
+//        else if ( iter > max_iter )
+//        {
+//            #ifdef _DEBUG
+////            std::cout << "ERROR! Node #" << node_idx  << "Newton iterationan does not converge! Simulation stops!\n";
+//            #endif
+//
+//            return; // stop the program
+//        }
         // form Jacobian matrix
 		this->calc_Jacobian(dt, x, vec_residual, _vec_XiBarKin, vec_AI);
 
