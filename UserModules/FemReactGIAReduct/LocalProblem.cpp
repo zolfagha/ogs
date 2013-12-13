@@ -307,7 +307,8 @@ void LocalProblem::calc_residual(double dt,
 								 ogsChem::LocalVector & vec_unknowns,
 								 ogsChem::LocalVector & vec_xi_Kin_bar_old, 
 								 ogsChem::LocalVector & vec_residual,
-								 ogsChem::LocalVector & vec_Xi_Kin_bar)
+								 ogsChem::LocalVector & vec_Xi_Kin_bar,
+								 ogsChem::LocalVector & vec_AI)
 {
 	ogsChem::LocalVector ln_conc_Mob, ln_conc_Sorp, conc_Mob, conc_Sorp, conc_Min_bar, conc_Kin_bar, conc_bar;
 	conc_Mob     = ogsChem::LocalVector::Zero(_I_mob);
@@ -342,7 +343,7 @@ void LocalProblem::calc_residual(double dt,
 		// Eq. 3.59
 		this->residual_xi_Min_tilde     (conc_Mob, conc_Sorp, conc_Min_bar, conc_Kin_bar, vec_residual);
 		// Eq. 3.62
-		this->residual_conc_Min			(ln_conc_Mob, conc_Min_bar, vec_residual);
+		this->residual_conc_Min			(ln_conc_Mob, conc_Min_bar, vec_residual, vec_AI);
     }
 	
     // Eq. 3.63
@@ -365,9 +366,9 @@ void LocalProblem::calc_residual(double dt,
 
 void LocalProblem::calc_Jacobian(double dt,
 								 ogsChem::LocalVector & vec_x,
-//							     ogsChem::LocalVector & vec_AI,
 							     ogsChem::LocalVector & vec_residual,
-							     ogsChem::LocalVector & vec_Xi_Kin_bar)
+							     ogsChem::LocalVector & vec_Xi_Kin_bar,
+							     ogsChem::LocalVector & vec_AI)
 {
 	//const double delta_xi = 1.0e-8;  //calcite example
 	const double delta_xi = 1.0e-6;    //monod2d
@@ -383,14 +384,14 @@ void LocalProblem::calc_Jacobian(double dt,
 		if (std::fabs(vec_x(i)) > 1.0e-16)
 		{
 			vec_x_incremented(i) += delta_xi * std::fabs(vec_x(i));
-			this->calc_residual(dt, vec_x_incremented, _vec_XiBarKin_old, vec_residual_incremented, vec_Xi_Kin_bar);
+			this->calc_residual(dt, vec_x_incremented, _vec_XiBarKin_old, vec_residual_incremented, vec_Xi_Kin_bar, vec_AI);
 			_mat_Jacobian.col(i) = (vec_residual_incremented - vec_residual) / (delta_xi * std::fabs(vec_x(i)));
 
 		}
 		else
 		{
 			vec_x_incremented(i) += delta_xi;
-			this->calc_residual(dt, vec_x_incremented, _vec_XiBarKin_old, vec_residual_incremented, vec_Xi_Kin_bar);
+			this->calc_residual(dt, vec_x_incremented, _vec_XiBarKin_old, vec_residual_incremented, vec_Xi_Kin_bar, vec_AI);
 			_mat_Jacobian.col(i) = (vec_residual_incremented - vec_residual ) / delta_xi;
 		}
 	}
@@ -752,7 +753,8 @@ void LocalProblem::residual_conc_Sorp(ogsChem::LocalVector & ln_conc_Mob,
 // Eq. 3.62
 void LocalProblem::residual_conc_Min(ogsChem::LocalVector & ln_conc_Mob,
 	     	 	 	 	 	 	 	 ogsChem::LocalVector & conc_Min_bar,
-	     	 	 	 	 	 	 	 ogsChem::LocalVector & vec_residual)
+	     	 	 	 	 	 	 	 ogsChem::LocalVector & vec_residual,
+	     	 	 	 	 	 	 	 ogsChem::LocalVector & vec_AI)
 {
 	size_t        i, idx;
 	double        phi(0.0);
@@ -765,7 +767,12 @@ void LocalProblem::residual_conc_Min(ogsChem::LocalVector & ln_conc_Mob,
 	for (i=0; i < _n_xi_Min; i++)
 	{
 		phi  = -_logk_min(i) + mat_S1minT.row(i) * ln_conc_Mob;
-		vec_residual(idx + i) 	= std::min(phi, conc_Min_bar(i));
+
+		if(vec_AI(i) == 1) //RZ: 3-Nov-13 Must be kept like this!
+			vec_residual(idx + i) 	= phi;
+		else
+			vec_residual(idx + i) 	= conc_Min_bar(i);
+	//	vec_residual(idx + i) 	= std::min(phi, conc_Min_bar(i));
 	}
 }
 

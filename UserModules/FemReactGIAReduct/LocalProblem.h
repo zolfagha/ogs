@@ -65,7 +65,8 @@ public:
                        ogsChem::LocalVector & vec_unknowns,
 					   ogsChem::LocalVector & vec_xi_Kin_bar_old,
 					   ogsChem::LocalVector & vec_residual,
-					   ogsChem::LocalVector & vec_Xi_Kin_bar);
+					   ogsChem::LocalVector & vec_Xi_Kin_bar,
+					   ogsChem::LocalVector & vec_AI);
     
     /**
       * calculate the Jacobi of the reaction system analytically using 
@@ -75,9 +76,9 @@ public:
       */
     void calc_Jacobian( double dt,
     					ogsChem::LocalVector & vec_unknowns,
-    //				 ogsChem::LocalVector & vec_AI,
-    				 ogsChem::LocalVector & vec_residual,
-    				 ogsChem::LocalVector & vec_Xi_Kin_bar);
+    					ogsChem::LocalVector & vec_residual,
+    					ogsChem::LocalVector & vec_Xi_Kin_bar,
+    					ogsChem::LocalVector & vec_AI);
 
     /**
       * solve the equilibrium reaction system 
@@ -293,9 +294,11 @@ private:
     								ogsChem::LocalVector & conc_NonMin_bar,
 			 	 	 	 	 	 	 ogsChem::LocalVector & vec_residual);
     // Eq. 3.62
-    void residual_conc_Min			(ogsChem::LocalVector & conc_Mob,
-								     ogsChem::LocalVector & vec_AI,
-								     ogsChem::LocalVector & vec_residual);
+    void residual_conc_Min			(ogsChem::LocalVector & ln_conc_Mob,
+    								 ogsChem::LocalVector & conc_Min_bar,
+								     ogsChem::LocalVector & vec_residual,
+								     ogsChem::LocalVector & vec_AI);
+
     // Eq. 3.63
 	void residual_Eta_bar           (ogsChem::LocalVector & conc_Sorp, 
                                      ogsChem::LocalVector & conc_Min_bar,
