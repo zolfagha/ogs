@@ -613,9 +613,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 {
     const size_t n_ele = _msh->getNumberOfElements();
     std::size_t n_dim, mat_id; 
-    std::size_t i, j, xi_count, idx;
-//    int idx_ml;
-//    double _theta(1.0);
+    std::size_t i, j, xi_count, idx, idx_ml;
     double dt = delta_t.getTimeStepSize();
     double cmp_mol_diffusion;
     MeshLib::IElement *e; 
@@ -693,17 +691,26 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 
 		localK = localDispersion + localAdvection;
 		
-		// disable mass lumping
 		/*
-		// mass lumping----------------------------
-		for ( idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
+		 * RZ: 20.10.2013: mass lumping is essential for global newton iteration to converge for equilibrium reactions.
+		 */
+		for (int idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
 		{
 		    double mass_lump_val;
 		    mass_lump_val = localM.row(idx_ml).sum();
 		    localM.row(idx_ml).setZero();
-		    localM(idx_ml, idx_ml) =  mass_lump_val;
+		    //localM(idx_ml, idx_ml) =  mass_lump_val;
+
+		    // Normalize localM => Id
+		    localM(idx_ml, idx_ml) =  mass_lump_val/mass_lump_val;
+
+		    // Normalize localK
+		    for(int idx_col = 0; idx_col < localK.cols(); idx_col++)
+		    {
+		    	localK(idx_ml, idx_col) = localK(idx_ml, idx_col)/mass_lump_val;
+		    }
+
 		}
-		*/
 
 		node_indx_vec.resize(ele_node_ids.size());
 		col_indx_vec.resize(ele_node_ids.size());

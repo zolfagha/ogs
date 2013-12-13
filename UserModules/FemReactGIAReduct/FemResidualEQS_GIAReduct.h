@@ -350,7 +350,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
     size_t nnodes; 
     double _theta(1.0);
 //    size_t _n_xi_trans = this->_n_xi_Sorp + this->_n_xi_Min + this->_n_xi_Kin;
-    size_t i,j,k; 
+    size_t i,j,k;
 	MathLib::LocalMatrix rate_xi_sorp_gp, rate_xi_min_gp, rate_xi_kin_gp;
 	MathLib::LocalMatrix node_xi_sorp_rate_values;
 	MathLib::LocalMatrix node_xi_min_rate_values;
@@ -539,17 +539,26 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
 
         localK = localDispersion + localAdvection;
 		
-		// disable mass lumping
 		/*
-        // mass lumping----------------------------
-        for (int idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
-        {
-            double mass_lump_val;
-            mass_lump_val = localM.row(idx_ml).sum();
-            localM.row(idx_ml).setZero();
-            localM(idx_ml, idx_ml) = mass_lump_val;
-        }
-		*/
+		 * RZ: 20.10.2013: mass lumping is essential for global newton iteration to converge for equilibrium reactions.
+		 */
+		for ( int idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
+		{
+		    double mass_lump_val;
+		    mass_lump_val = localM.row(idx_ml).sum();
+		    localM.row(idx_ml).setZero();
+		    //localM(idx_ml, idx_ml) =  mass_lump_val;
+
+		    // Normalize localM => Id
+		    localM(idx_ml, idx_ml) =  mass_lump_val/mass_lump_val;
+
+		    // Normalize localK
+		    for(int idx_col = 0; idx_col < localK.cols(); idx_col++)
+		    {
+		    	localK(idx_ml, idx_col) = localK(idx_ml, idx_col)/mass_lump_val;
+		    }
+
+		}
 
         // --------debugging--------------
         //std::cout << "localK Matrix" << std::endl;
