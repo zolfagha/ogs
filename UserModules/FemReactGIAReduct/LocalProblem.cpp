@@ -219,7 +219,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
             dx = dx * alpha;
             // increment of unknowns
             //this->increment_unknown( x, dx, x_new );
-            x_new = x_new - dx;  //RZ: essentail for convergency
+            x_new = x_new - dx;  //RZ: essential for convergency
             // now updating the saturation index and minerals
             if(_n_xi_Min > 0)
 				this->update_minerals_conc_AI( x_new, vec_AI );
