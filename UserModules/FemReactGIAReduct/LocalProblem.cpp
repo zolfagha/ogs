@@ -84,7 +84,10 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
     // now updating the saturation index and minerals
     if(_n_xi_Min != 0)
+    {
+    this->calculate_AI(x,vec_AI);
     this->update_minerals_conc_AI( x, vec_AI );
+    }
 
 #ifdef _DEBUG
 	// debugging--------------------------
@@ -99,7 +102,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 	if (_n_xi_Kin_bar > 0)
 		this->ODE_solver(dt, x, _vec_XiBarKin, _vec_XiBarKin_old);
     // evaluate the residual
-	this->calc_residual(dt, x, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin);
+	this->calc_residual(dt, x, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin, vec_AI);
 
     //save the update value of xi kin bar
     //vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_eta_bar, _n_xi_Kin_bar) = _vec_XiBarKin;
@@ -148,7 +151,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
             return; // stop the program
         }
         // form Jacobian matrix
-		this->calc_Jacobian(dt, x, vec_residual, _vec_XiBarKin);
+		this->calc_Jacobian(dt, x, vec_residual, _vec_XiBarKin, vec_AI);
 
 #ifdef _DEBUG
 	// debugging--------------------------
@@ -191,7 +194,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 		if (_n_xi_Kin_bar > 0)
 			this->ODE_solver(dt, x_new, _vec_XiBarKin, _vec_XiBarKin_old);
         // evaluate residual with x_new
-		this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin);
+		this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin, vec_AI);
 
 
 #ifdef _DEBUG
@@ -225,7 +228,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 			this->ODE_solver(dt, x_new, _vec_XiBarKin, _vec_XiBarKin_old);
 			// evaluate residual with x_new
 			if (_n_xi_Kin_bar > 0)
-				this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin);
+				this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin, vec_AI);
 
 		#ifdef _DEBUG
         	// std::cout << "vec_residual: \n";
