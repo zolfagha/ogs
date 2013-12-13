@@ -547,7 +547,6 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
     MathLib::LocalVector b 	= MathLib::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
     MathLib::LocalVector dx = MathLib::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
     MathLib::LocalMatrix x  = MathLib::LocalMatrix::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols(), _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
-    std::size_t indx_dummy = 0;
     // solve the linear system
     for(i = 0; i < _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin; i++)
     {
@@ -584,8 +583,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
     const size_t n_ele = _msh->getNumberOfElements();
     std::size_t n_dim, mat_id; 
     std::size_t i, j, xi_count, idx;
-    int idx_ml; 
-    double _theta(1.0);
+//    int idx_ml;
+//    double _theta(1.0);
     double dt = delta_t.getTimeStepSize();
     double cmp_mol_diffusion;
     MeshLib::IElement *e; 
@@ -622,7 +621,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 	    localDispersion.setZero(localK.rows(), localK.cols());
 	    localAdvection.setZero (localK.rows(), localK.cols());
 
-	    cmp_mol_diffusion = .0;
+	    cmp_mol_diffusion = 1.0E-9; //constant for all species.
 	    // _cmp->molecular_diffusion->eval(0, cmp_mol_diffusion);
 
 	    _q = _fe->getIntegrationMethod();
