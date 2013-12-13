@@ -221,13 +221,15 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
             //this->increment_unknown( x, dx, x_new );
             x_new = x_new - dx;  //RZ: essentail for convergency
             // now updating the saturation index and minerals
-            if(_n_xi_Min != 0)
+            if(_n_xi_Min > 0)
 				this->update_minerals_conc_AI( x_new, vec_AI );
+
             // update the value of xikinbar in the vector of unknowns(x_new)
-			this->ODE_solver(dt, x_new, _vec_XiBarKin, _vec_XiBarKin_old);
-			// evaluate residual with x_new
 			if (_n_xi_Kin_bar > 0)
-				this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin, vec_AI);
+			this->ODE_solver(dt, x_new, _vec_XiBarKin, _vec_XiBarKin_old);
+
+			// evaluate residual with x_new
+			this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin, vec_AI);
 
 		#ifdef _DEBUG
         	// std::cout << "vec_residual: \n";
