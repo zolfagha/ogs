@@ -525,6 +525,8 @@ void LocalProblem::update_minerals_conc_AI(ogsChem::LocalVector & vec_unknowns,
     	phi  = -_logk_min(i) + mat_S1min_transposed.row(i) * ln_conc_Mob;
 
 
+/* RZ: AI is evaluated once at the beginning of the local problem
+
     	// if mineral concentration  >= phi ; mineral is present; saturated case; precipitate the mineral.
     	if (conc_Min_bar(i) >= phi)
     	{
@@ -536,7 +538,7 @@ void LocalProblem::update_minerals_conc_AI(ogsChem::LocalVector & vec_unknowns,
     		vec_AI(i) = 0;
     		conc_Min_bar(i) = 0.0;
     	}// end of else
-
+*/
 
     	// if mineral is present, calculate mineral concentration
     	if	(vec_AI(i) == 1)
@@ -857,6 +859,8 @@ void LocalProblem::reaction_rates(ogsChem::LocalVector & conc,
 void LocalProblem::calculate_AI(ogsChem::LocalVector & vec_unknowns,
 								ogsChem::LocalVector & vec_AI)
 {
+    double phi = 0.0;
+    size_t idx, j;
     ogsChem::LocalVector ln_conc_Mob  = ogsChem::LocalVector::Zero(_I_mob);
     ogsChem::LocalVector ln_conc_Sorp = ogsChem::LocalVector::Zero(_I_sorp);
     ogsChem::LocalVector conc_Min_bar = ogsChem::LocalVector::Zero(_I_min);
@@ -876,12 +880,10 @@ void LocalProblem::calculate_AI(ogsChem::LocalVector & vec_unknowns,
 	// take the kinetic part
     conc_Kin_bar   = vec_unknowns.tail(_I_kin);
 
-    double phi = 0.0;
-
-    for(size_t j =0; j < _I_min; j++)
+    for(j =0; j < _I_min; j++)
     {
-    	//		conc_Min_bar(j) = cal_cbarmin_by_constrain(j, ln_conc_Mob, ln_conc_NonMin_bar, conc_Min_bar);
-    	conc_Min_bar(i) = cal_cbarmin_by_constrain(i, ln_conc_Mob, ln_conc_Sorp, conc_Min_bar, conc_Kin_bar);
+    	idx = _I_mob + _I_sorp + j;
+    	conc_Min_bar(j) = cal_cbarmin_by_constrain(j, ln_conc_Mob, ln_conc_Sorp, conc_Min_bar, conc_Kin_bar);
 
     	phi  = -_logk_min(j) + mat_S1min_transposed.row(j) * ln_conc_Mob;
 
@@ -895,6 +897,7 @@ void LocalProblem::calculate_AI(ogsChem::LocalVector & vec_unknowns,
     	{
     		vec_AI(j) = 0;
     		conc_Min_bar(j) = 0.0;
+    		vec_unknowns(idx) = conc_Min_bar(j);
     	}// end of else
     }
 }

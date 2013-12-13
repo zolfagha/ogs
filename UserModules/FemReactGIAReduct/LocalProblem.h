@@ -144,6 +144,13 @@ public:
     			    ogsChem::LocalVector & vec_Xi_Kin_bar, 
 					ogsChem::LocalVector & vec_Xi_Kin_bar_old);
 
+    /*
+     * RZ: AI vector contains 1 and 0. 1 if mineral is present and 0 if absent.
+     */
+    //calculate AI vector
+    void calculate_AI(ogsChem::LocalVector & vec_unknowns,
+    				  ogsChem::LocalVector & vec_AI);
+
 	ogsChem::LocalVector & get_vec_XiBarKin() { return _vec_XiBarKin;  };
 
 private:
