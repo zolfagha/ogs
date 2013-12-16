@@ -23,7 +23,8 @@ LocalProblem::LocalProblem(ogsChem::chemReductionGIA* ReductionGIA, MathLib::Ste
     , _mat_Ald(_ReductionGIA->get_matrix_Ald()),_mat_Ssorp(_ReductionGIA->get_matrix_Ssorp()), _mat_A2kin(_ReductionGIA->get_matrix_A2kin()), _mat_S1mob(_ReductionGIA->get_matrix_S1mob()),_mat_c_mob_2_eta_mob(_ReductionGIA->get_matrix_C2Eta())
     , _n_xi_Min_bar(_ReductionGIA->get_n_xi_Min_bar()), _mat_c_immob_2_eta_immob(_ReductionGIA->get_matrix_C2EtaBar()), _list_kin_reactions(_ReductionGIA->get_list_kin_reactions()), _J_tot_kin(_ReductionGIA->get_n_xi_Kin_total()), _n_xi_global(_ReductionGIA->get_n_xi_global())
 	, _n_xi_local(_ReductionGIA->get_n_xi_local())
-//	,_logk_mob(_ReductionGIA->get_logk_mob()), _logk_sorp(_ReductionGIA->get_logk_sorp()), _logk_min(_ReductionGIA->get_logk_min())
+	,_logk_mob(_ReductionGIA->get_logk_mob()), _logk_sorp(_ReductionGIA->get_logk_sorp()), _logk_min(_ReductionGIA->get_logk_min())
+	,_activity_model(ReductionGIA->get_activity_model()) //RZ: 16.12.2013
 
 {
 
@@ -57,9 +58,10 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
     const double alpha (0.5);
     double d_norm(0.0), d1_norm(0.0);
 
-    _logk_mob  = lnk_mob;
-    _logk_sorp = lnk_sorp;
-    _logk_min  = lnk_min;
+    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
+//    _logk_mob  = lnk_mob;
+//    _logk_sorp = lnk_sorp;
+//    _logk_min  = lnk_min;
 
 	// HS: the number of unknowns in the local problem equals
 	// to the number of chemical components
@@ -522,12 +524,23 @@ void LocalProblem::update_minerals_conc_AI(ogsChem::LocalVector & vec_unknowns,
 	// take the kinetic part
 	conc_Kin_bar   = vec_unknowns.tail(_I_kin); 
 
+    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
+    ogsChem::LocalVector ln_activity       = ogsChem::LocalVector::Zero( _n_Comp    );
+    ogsChem::LocalVector ln_activity_coeff = ogsChem::LocalVector::Zero( _n_Comp );
+    ogsChem::LocalVector ln_Conc 		   = ogsChem::LocalVector::Zero( _n_Comp );
+    ln_Conc.head(_I_mob) 		   		   = ln_conc_Mob;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
+    this->_activity_model->calc_activity_logC( ln_Conc, ln_activity_coeff, ln_activity );
+    //End 16.12.2013
+
 	// _AI = 1 if mineral is present and _AI = 0 if mineral is not present.
     for ( i=0; i < _I_min; i++ )
     {
 		idx = _I_mob + _I_sorp + i;
 
-    	phi  = -_logk_min(i) + mat_S1min_transposed.row(i) * ln_conc_Mob;
+    	//RZ: 16.12.2013
+    	phi  = -_logk_min(i) + mat_S1min_transposed.row(i) * ln_activity.head(_I_mob);  //RZ:2.12.2013 include activity model
+
+    	//phi  = -_logk_min(i) + mat_S1min_transposed.row(i) * ln_conc_Mob;
 
 
 /* RZ: AI is evaluated once at the beginning of the local problem
@@ -652,7 +665,18 @@ void LocalProblem::residual_conc_Mob(ogsChem::LocalVector & ln_conc_Mob,
 									 ogsChem::LocalVector & vec_residual)
 {
 
-	vec_residual.head(_n_xi_Mob) 	= - _logk_mob + _mat_S1mob.transpose() * ln_conc_Mob;
+    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
+    ogsChem::LocalVector ln_activity       = ogsChem::LocalVector::Zero( _n_Comp    );
+    ogsChem::LocalVector ln_activity_coeff = ogsChem::LocalVector::Zero( _n_Comp );
+    ogsChem::LocalVector ln_Conc 		   = ogsChem::LocalVector::Zero( _n_Comp );
+    ln_Conc.head(_I_mob) 		   		   = ln_conc_Mob;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
+    this->_activity_model->calc_activity_logC( ln_Conc, ln_activity_coeff, ln_activity );
+    //End 16.12.2013
+
+	//RZ: 16.12.2013
+	vec_residual.head(_n_xi_Mob) 	= - _logk_mob + _mat_S1mob.transpose() * ln_activity.head(_I_mob);
+
+	//vec_residual.head(_n_xi_Mob) 	= - _logk_mob + _mat_S1mob.transpose() * ln_conc_Mob;
 
 }
 
@@ -751,7 +775,16 @@ void LocalProblem::residual_conc_Sorp(ogsChem::LocalVector & ln_conc_Mob,
 	ln_conc_tmp.head(_I_mob)  = ln_conc_Mob ;
 	ln_conc_tmp.tail(_I_sorp) = ln_conc_Sorp;
 
-	vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde +_n_xi_Kin, _n_xi_Sorp)  = - _logk_sorp + _mat_Ssorp.transpose() * ln_conc_tmp;
+    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
+    ogsChem::LocalVector ln_activity       = ogsChem::LocalVector::Zero( _n_Comp    );
+    ogsChem::LocalVector ln_activity_coeff = ogsChem::LocalVector::Zero( _n_Comp );
+    ogsChem::LocalVector ln_Conc 		   = ogsChem::LocalVector::Zero( _n_Comp );
+    ln_Conc.head(_I_mob) 		   		   = ln_conc_Mob;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
+    this->_activity_model->calc_activity_logC( ln_Conc, ln_activity_coeff, ln_activity );
+    //End 16.12.2013
+    vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde +_n_xi_Kin, _n_xi_Sorp)  = - _logk_sorp + _mat_Ssorp.transpose() * ln_activity.head(_I_mob);
+
+	//vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde +_n_xi_Kin, _n_xi_Sorp)  = - _logk_sorp + _mat_Ssorp.transpose() * ln_conc_tmp;
 }
 
 // Eq. 3.62
@@ -768,9 +801,18 @@ void LocalProblem::residual_conc_Min(ogsChem::LocalVector & ln_conc_Mob,
 
 	mat_S1minT = _mat_S1min.transpose();
 
+    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
+    ogsChem::LocalVector ln_activity       = ogsChem::LocalVector::Zero( _n_Comp    );
+    ogsChem::LocalVector ln_activity_coeff = ogsChem::LocalVector::Zero( _n_Comp );
+    ogsChem::LocalVector ln_Conc 		   = ogsChem::LocalVector::Zero( _n_Comp );
+    ln_Conc.head(_I_mob) 		   		   = ln_conc_Mob;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
+    this->_activity_model->calc_activity_logC( ln_Conc, ln_activity_coeff, ln_activity );
+    //End 16.12.2013
+
 	for (i=0; i < _n_xi_Min; i++)
 	{
-		phi  = -_logk_min(i) + mat_S1minT.row(i) * ln_conc_Mob;
+		phi  = -_logk_min(i) + mat_S1minT.row(i) * ln_activity.head(_I_mob); //RZ: 16.12.2013
+		//phi  = -_logk_min(i) + mat_S1minT.row(i) * ln_conc_Mob;
 
 		if(vec_AI(i) == 1) //RZ: 3-Nov-13 Must be kept like this!
 			vec_residual(idx + i) 	= phi;
@@ -891,12 +933,24 @@ void LocalProblem::calculate_AI(ogsChem::LocalVector & vec_unknowns,
 	// take the kinetic part
     conc_Kin_bar   = vec_unknowns.tail(_I_kin);
 
+    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
+    ogsChem::LocalVector ln_activity       = ogsChem::LocalVector::Zero( _n_Comp    );
+    ogsChem::LocalVector ln_activity_coeff = ogsChem::LocalVector::Zero( _n_Comp );
+    ogsChem::LocalVector ln_Conc 		   = ogsChem::LocalVector::Zero( _n_Comp );
+    ln_Conc.head(_I_mob) 		   		   = ln_conc_Mob;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
+    this->_activity_model->calc_activity_logC( ln_Conc, ln_activity_coeff, ln_activity );
+    //End 16.12.2013
+
     for(j =0; j < _I_min; j++)
     {
     	idx = _I_mob + _I_sorp + j;
     	conc_Min_bar(j) = cal_cbarmin_by_constrain(j, ln_conc_Mob, ln_conc_Sorp, conc_Min_bar, conc_Kin_bar);
 
-    	phi  = -_logk_min(j) + mat_S1min_transposed.row(j) * ln_conc_Mob;
+    	//phi  = -_logk_min(j) + mat_S1min_transposed.row(j) * ln_conc_Mob;
+
+    	//RZ: 16.12.2013
+    	phi  = -_logk_min(j) + mat_S1min_transposed.row(j) * ln_activity.head(_I_mob);  //RZ:2.12.2013 include activity model
+
 
     	// if mineral concentration  >= phi ; mineral is present; saturated case; precipitate the mineral.
     	if(conc_Min_bar(j) > phi)  //RZ:9-Dec-13

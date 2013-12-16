@@ -62,7 +62,7 @@ public:
      	_n_xi_local(_ReductionGIA->get_n_xi_local()), _n_xi_global(_ReductionGIA->get_n_xi_global()),  _J_tot_kin(_ReductionGIA->get_n_xi_Kin_total()), _n_xi_Sorp_bar(_ReductionGIA->get_n_xi_Sorp_bar()),
      	_xi_local_new(userData->get_xi_local_new()), _eta(userData->get_eta()), _eta_bar(userData->get_eta_bar()),
      	_global_vec_Rate(userData->get_global_vec_Rate()), _concentrations(userData->get_concentrations()),  _list_kin_reactions(_ReductionGIA->get_list_kin_reactions()),
-     	_vec_lnK_Min(userData->get_vec_lnK_Min())
+     	_vec_lnK_Min(userData->get_vec_lnK_Min()), _activity_model(_ReductionGIA->get_activity_model())
     {
     };
 
@@ -158,6 +158,12 @@ private:
     size_t _n_xi_Sorp_bar_li, _n_xi_Sorp_bar_ld, _n_Comp, _I_mob, _I_min, _I_sorp;
 
     std::vector<MyNodalFunctionScalar*> & _vec_lnK_Min;
+
+    /**
+     * //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
+      * pointer to the activity model
+      */
+    ogsChem::chemActivityModelAbstract *_activity_model;
 };
 
 
@@ -211,8 +217,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
 
     size_t i, nnodes;
     nnodes = _msh->getNumberOfNodes();
-    const double theta_water_content(0.5);  //monod example
-    //const double theta_water_content(0.32); //calcite exmaple
+    //const double theta_water_content(0.5);  //monod example
+    const double theta_water_content(0.32); //calcite exmaple
     const double delta_xi = 1E-12;
     std::size_t n_xi_total = _n_xi_local + _n_xi_global;
     // _solv_minimization = new LocalProblem( _ReductionGIA);
@@ -329,8 +335,10 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             for (i=0; i < _J_tot_kin; i++)
                 vec_rate_old[i] = _global_vec_Rate[i]->getValue(node_idx);
 
-			for (i=0; i < _n_xi_Min; i++)
-				lnk_min[i] = this->_vec_lnK_Min[i]->getValue(node_idx);
+//            //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
+//			for (i=0; i < _n_xi_Min; i++)
+//				lnk_min[i] = this->_vec_lnK_Min[i]->getValue(node_idx);
+//			logk_min = lnk_min;
 
 			local_xi_Mob	  = loc_cur_xi_local.head(_n_xi_Mob);
 			local_xi_Sorp_bar = loc_cur_xi_local.segment(this->_n_xi_Mob,this->_n_xi_Sorp_bar);
@@ -521,6 +529,14 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 	MathLib::LocalMatrix  mat_A_tilde           = MathLib::LocalMatrix::Zero(_I_mob + _I_sorp, _I_mob + _I_sorp);
 	std::size_t i;
 
+    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
+    ogsChem::LocalVector ln_activity       = ogsChem::LocalVector::Zero( _n_Comp    );
+    ogsChem::LocalVector ln_activity_coeff = ogsChem::LocalVector::Zero( _n_Comp );
+    ogsChem::LocalVector ln_Conc 		   = ogsChem::LocalVector::Zero( _n_Comp );
+    ln_Conc.head(_I_mob) 		   		   = ln_conc_Mob;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
+    this->_activity_model->calc_activity_logC( ln_Conc, ln_activity_coeff, ln_activity );
+    //End 16.12.2013
+
 	for (i = 0; i < _I_mob + _I_sorp; i++)
 		mat_A_tilde(i,i) = 1.0 / vec_conc(i);
 
@@ -531,7 +547,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 		ln_conc_Mob(i)  = std::log(tmp_x);
 	}
 
-	vec_phi		  = - logk_min + mat_S1min.transpose() * ln_conc_Mob;
+	//vec_phi		  = - logk_min + mat_S1min.transpose() * ln_conc_Mob;
+	 vec_phi		  = - logk_min + mat_S1min.transpose() * ln_activity.head(_I_mob);	//RZ: 16.12.2013
 	conc_Min_bar  = vec_conc.tail(_I_min);
 
     mat_S1minI.setZero();
