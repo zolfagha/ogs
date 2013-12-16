@@ -40,7 +40,7 @@ public:
       * constructor
       */ 
     LinearTransportTimeODELocalAssemblerML(FemLib::LagrangeFeObjectContainer* feObjects)
-        : _feObjects(*feObjects), _vel(NULL)
+        : _feObjects(*feObjects), _vel(NULL), _q(NULL)
     {
         poro                 = MathLib::LocalMatrix::Zero(1,1); 
         d_poro               = MathLib::LocalMatrix::Zero(3,3);

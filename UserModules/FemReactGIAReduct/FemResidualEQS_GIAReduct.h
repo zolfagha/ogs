@@ -61,7 +61,19 @@ public:
     };
 
     ///
-    virtual ~TemplateTransientResidualFEMFunction_GIA_Reduct() {};
+    virtual ~TemplateTransientResidualFEMFunction_GIA_Reduct()
+    {
+        _vel       		= NULL;
+        _fe        		= NULL;
+        _q         		= NULL;
+        _dis_sys	   	= NULL;
+        _time_step 		= NULL;
+        _st				= NULL;
+        _u_n0			= NULL;
+        _dofManager		= NULL;
+        _ReductionGIA	= NULL;
+        _function_data	= NULL;
+    };
 
     void setVelocity(const NumLib::ITXFunction *vel)
     {
