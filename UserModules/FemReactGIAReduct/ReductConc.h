@@ -138,7 +138,14 @@ public:
 
     FunctionReductConc() 
         : Process("REACT_GIA_REDUCT", 1, 1),
-          _feObjects(0)
+          _feObjects(0),
+    	_non_linear_eqs(0),  //RZ
+    	_n_xi_global(0), _current_time_step(0),	myNRIterator(0),
+    	_solution(0), _n_xi_Kin_bar(0), _I_mob(0), _n_xi_Sorp_bar(0), _n_eta(0), _I_min(0), _non_linear_solution(0), _dofManager(0),
+    	_J_tot_kin(0), _n_eta_bar(0), _n_Comp(0), _n_xi_local(0), _vel(0), _n_xi_Sorp_bar_li(0), _n_xi_Sorp(0), _ReductionGIA(0),
+    	_I_sorp(0), _dis_sys(0), _nl_sol_dofManager(0), _n_xi_Sorp_tilde(0), myNSolverFactory(0),
+    	_n_xi_Mob(0), _non_linear_problem(0), _n_xi_Min_bar(0), _n_xi_Min_tilde(0), _n_xi_Min(0), _n_xi_Kin(0),
+    	_I_NMin_bar(0), _theta(0),_tim(0), _problem(0), _n_xi_Sorp_bar_ld(0),_msh_id(0)
     {
         // set default parameter name
 		ProcessLib::Process::setInputParameterName(Velocity, "Velocity");
