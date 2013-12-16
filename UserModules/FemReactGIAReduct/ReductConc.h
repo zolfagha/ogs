@@ -374,10 +374,6 @@ public:
 
 	virtual void update_lnK(void);
 
-	std::vector<MyNodalFunctionScalar*> & get_vec_lnK_Mob() {return _vec_lnK_Mob;}
-	std::vector<MyNodalFunctionScalar*> & get_vec_lnK_Sorp() {return _vec_lnK_Sorp;}
-	std::vector<MyNodalFunctionScalar*> & get_vec_lnK_Min() {return _vec_lnK_Min;}
-
 	void Perform_Extrapolation();
 
 
@@ -567,28 +563,10 @@ private:
       */
     std::vector<MyNodalFunctionScalar*> _global_vec_Rate;
 
-    /**
-      * global equilibrium reaction constant for mobile reactions
-      */
-    std::vector<MyNodalFunctionScalar*> _vec_lnK_Mob;
-
-    /**
-      * global equilibrium reaction constant for sorbed reaction
-      */
-    std::vector<MyNodalFunctionScalar*> _vec_lnK_Sorp;
-
-    /**
-      * global equilibrium reaction constant for mineral reactions
-      */
-    std::vector<MyNodalFunctionScalar*> _vec_lnK_Min;
-
-
-
-    /**
+	/**
       * global _drates_dxi vector
       */
     std::vector<MyNodalFunctionScalar*> _drates_dxi;
-
 
     /**
       * degree of freedom equation ID talbe for the nonlinear problem

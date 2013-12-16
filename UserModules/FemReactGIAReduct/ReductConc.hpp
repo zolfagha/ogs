@@ -125,27 +125,6 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options & option)
      	_global_vec_Rate.push_back(global_vec_Rate_tmp);
 	}
 
-    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
-//	// initialize the rates for xi_sorp, xi_min and xi_kin
-//	for (i = 0; i < _n_xi_Mob; i++)
-//	{
-//		MyNodalFunctionScalar* vec_lnK_Mob = new MyNodalFunctionScalar();
-//		vec_lnK_Mob->initialize(*dis, FemLib::PolynomialOrder::Linear, 0.0);
-//		_vec_lnK_Mob.push_back(vec_lnK_Mob);
-//	}
-//	for (i = 0; i < _n_xi_Sorp; i++)
-//	{
-//		MyNodalFunctionScalar* vec_lnK_Sorp = new MyNodalFunctionScalar();
-//		vec_lnK_Sorp->initialize(*dis, FemLib::PolynomialOrder::Linear, 0.0);
-//		_vec_lnK_Sorp.push_back(vec_lnK_Sorp);
-//	}
-//	for (i = 0; i < _n_xi_Min; i++)
-//	{
-//		MyNodalFunctionScalar* vec_lnK_Min = new MyNodalFunctionScalar();
-//		vec_lnK_Min->initialize(*dis, FemLib::PolynomialOrder::Linear, 0.0);
-//		_vec_lnK_Min.push_back(vec_lnK_Min);
-//	}
-
 	// initialize the rates for xi_sorp, xi_min and xi_kin
 	for (i = 0; i < _n_xi_Sorp; i++)
 	{
@@ -963,7 +942,8 @@ void FunctionReductConc<T1, T2>::start_node_values_search( MathLib::LocalMatrix 
 	m = mat_S1_ast.cols();
 	n = mat_S1_ast.rows();
 	MathLib::LocalMatrix Tableau  = MathLib::LocalMatrix::Zero(n +1, 2*m + n +1);
-	int B [n];
+	int* B;
+	B = new int[n]; 
 	MathLib::LocalVector e        = MathLib::LocalVector::Ones(n);
 	MathLib::LocalVector Id_vec   = MathLib::LocalVector::Ones(2*m);
 	MathLib::LocalMatrix Id_mat   = MathLib::LocalMatrix::Identity(n,n);
@@ -1074,7 +1054,7 @@ void FunctionReductConc<T1, T2>::start_node_values_search( MathLib::LocalMatrix 
 											local_eta,
 											local_etabar,
 											local_conc);
-
+	delete [] B; 
 }
 
 
@@ -1196,18 +1176,6 @@ void FunctionReductConc<T1, T2>::update_lnK(void)
 
         	//call activity coefficients
         	activity_model->calc_activity_logC( ln_conc, ln_activity_coeff, ln_activity );
-
-        	//set the new value of ln K into the global ln K vector
-			for (i=0; i < _n_xi_Mob; i++)
-				_vec_lnK_Mob[i]->setValue(node_idx, lnk_mob(i) - mat_S1mob_transposed.row(i) * ln_activity_coeff.head(_I_mob));
-
-			//set the new value of ln K into the global ln K vector
-			for (i=0; i < _n_xi_Sorp; i++)
-				_vec_lnK_Sorp[i]->setValue(node_idx, lnk_sorp(i) - mat_Ssorp_transposed.row(i) * ln_activity_coeff.head(_I_mob + _I_sorp));
-
-			//set the new value of ln K into the global ln K vector
-			for (i=0; i < _n_xi_Min; i++)
-				_vec_lnK_Min[i]->setValue(node_idx, lnk_min(i) - mat_S1min_transposed.row(i) * ln_activity_coeff.head(_I_mob));
 
 			//update the xi global and local values after with the optimized values 11.12.2013  //TODO: include xisorptilde and xikin
 			loc_xi_global.segment( this->_n_xi_Sorp_tilde,this->_n_xi_Min_tilde) = loc_XiMinTilde;
