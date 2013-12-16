@@ -21,9 +21,9 @@ LocalProblem::LocalProblem(ogsChem::chemReductionGIA* ReductionGIA, MathLib::Ste
     , _n_xi_Sorp(_ReductionGIA->get_n_xi_Sorp()), _n_xi_Min(_ReductionGIA->get_n_xi_Min()), _n_xi_Sorp_bar_li(_ReductionGIA->get_n_xi_Sorp_bar_li()), _n_xi_Sorp_bar_ld(_ReductionGIA->get_n_xi_Sorp_bar_ld()), _n_xi_Kin(_ReductionGIA->get_n_xi_Kin())
 	, _mat_c_mob_2_xi_mob(_ReductionGIA->get_matrix_C2Xi()), _mat_c_immob_2_xi_immob(_ReductionGIA->get_matrix_Cbar2XiBar()), _n_xi_Sorp_bar(_ReductionGIA->get_n_xi_Sorp_bar()), _mat_S1min (_ReductionGIA->get_matrix_S1min())
     , _mat_Ald(_ReductionGIA->get_matrix_Ald()),_mat_Ssorp(_ReductionGIA->get_matrix_Ssorp()), _mat_A2kin(_ReductionGIA->get_matrix_A2kin()), _mat_S1mob(_ReductionGIA->get_matrix_S1mob()),_mat_c_mob_2_eta_mob(_ReductionGIA->get_matrix_C2Eta())
-    , _logk_mob(_ReductionGIA->get_logk_mob()), _logk_sorp(_ReductionGIA->get_logk_sorp()), _logk_min(_ReductionGIA->get_logk_min()), _n_xi_Min_bar(_ReductionGIA->get_n_xi_Min_bar())
-    , _mat_c_immob_2_eta_immob(_ReductionGIA->get_matrix_C2EtaBar()), _list_kin_reactions(_ReductionGIA->get_list_kin_reactions()), _J_tot_kin(_ReductionGIA->get_n_xi_Kin_total()), _n_xi_global(_ReductionGIA->get_n_xi_global())
+    , _n_xi_Min_bar(_ReductionGIA->get_n_xi_Min_bar()), _mat_c_immob_2_eta_immob(_ReductionGIA->get_matrix_C2EtaBar()), _list_kin_reactions(_ReductionGIA->get_list_kin_reactions()), _J_tot_kin(_ReductionGIA->get_n_xi_Kin_total()), _n_xi_global(_ReductionGIA->get_n_xi_global())
 	, _n_xi_local(_ReductionGIA->get_n_xi_local())
+//	,_logk_mob(_ReductionGIA->get_logk_mob()), _logk_sorp(_ReductionGIA->get_logk_sorp()), _logk_min(_ReductionGIA->get_logk_min())
 
 {
 
@@ -42,7 +42,10 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 														ogsChem::LocalVector & vec_etabar,
 														ogsChem::LocalVector & vec_xi_local,
 														ogsChem::LocalVector & vec_xi_global,
-														ogsChem::LocalVector & vec_xi_bar_kin_old)
+														ogsChem::LocalVector & vec_xi_bar_kin_old,
+														ogsChem::LocalVector & lnk_mob,
+														ogsChem::LocalVector & lnk_sorp,
+														ogsChem::LocalVector & lnk_min)
 {
     ogsChem::LocalVector x_new, vec_residual, vec_AI;
     ogsChem::LocalVector dx;
@@ -53,6 +56,10 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
     size_t j, iter;
     const double alpha (0.5);
     double d_norm(0.0), d1_norm(0.0);
+
+    _logk_mob  = lnk_mob;
+    _logk_sorp = lnk_sorp;
+    _logk_min  = lnk_min;
 
 	// HS: the number of unknowns in the local problem equals
 	// to the number of chemical components
@@ -76,8 +83,11 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
     iter = 0; 
 
     // now updating the saturation index and minerals
-    if(_n_xi_Min != 0)
+    if(_n_xi_Min > 0)
+    {
+    this->calculate_AI(x,vec_AI);
     this->update_minerals_conc_AI( x, vec_AI );
+    }
 
 #ifdef _DEBUG
 	// debugging--------------------------
@@ -92,10 +102,8 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 	if (_n_xi_Kin_bar > 0)
 		this->ODE_solver(dt, x, _vec_XiBarKin, _vec_XiBarKin_old);
     // evaluate the residual
-	this->calc_residual(dt, x, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin);
+	this->calc_residual(dt, x, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin, vec_AI);
 
-    //save the update value of xi kin bar
-    //vec_tot_mass_constrain.segment(_n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_eta_bar, _n_xi_Kin_bar) = _vec_XiBarKin;
     // evaluate norm of residual vector
     d_norm = vec_residual.norm();
 
@@ -108,40 +116,40 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
 	// save the previous values
 	x_new  =  x;
-
-    while (true)
-    {
-        #ifdef _DEBUG
-            // display the residual
-            // std::cout << "Iteration #" << iter << "||res|| = " << d_norm << "||delta_x|| = " << dx.norm() << std::endl;
-        #endif
-        // convergence criteria
-        if ( d_norm < iter_tol )
-        {
-            #ifdef _DEBUG
- //                std::cout << "Newton iteration successfully converged!\n";
-            #endif
-
-            break;  // break the loop
-        }
-        else if ( dx.norm() < rel_tol )
-        {
-            #ifdef _DEBUG
- //           std::cout << "Warning, Newton iteration stagnent on Node #" << node_idx << "! Exit the iteration!\n" ;
-            #endif
-
-            break;  // break the loop
-        }
-        else if ( iter > max_iter )
-        {
-            #ifdef _DEBUG
-//            std::cout << "ERROR! Node #" << node_idx  << "Newton iterationan does not converge! Simulation stops!\n";
-            #endif
-
-            return; // stop the program
-        }
+	while ((iter < max_iter) && (d_norm > iter_tol)){ //RZ: 4.12.2013
+//    while (true)
+//    {
+//        #ifdef _DEBUG
+//            // display the residual
+//            // std::cout << "Iteration #" << iter << "||res|| = " << d_norm << "||delta_x|| = " << dx.norm() << std::endl;
+//        #endif
+//        // convergence criteria
+//        if ( d_norm < iter_tol )
+//        {
+//            #ifdef _DEBUG
+// //                std::cout << "Newton iteration successfully converged!\n";
+//            #endif
+//
+//            break;  // break the loop
+//        }
+//        else if ( dx.norm() < rel_tol )
+//        {
+//            #ifdef _DEBUG
+// //           std::cout << "Warning, Newton iteration stagnent on Node #" << node_idx << "! Exit the iteration!\n" ;
+//            #endif
+//
+//            break;  // break the loop
+//        }
+//        else if ( iter > max_iter )
+//        {
+//            #ifdef _DEBUG
+////            std::cout << "ERROR! Node #" << node_idx  << "Newton iterationan does not converge! Simulation stops!\n";
+//            #endif
+//
+//            return; // stop the program
+//        }
         // form Jacobian matrix
-		this->calc_Jacobian(dt, x, vec_residual, _vec_XiBarKin);
+		this->calc_Jacobian(dt, x, vec_residual, _vec_XiBarKin, vec_AI);
 
 #ifdef _DEBUG
 	// debugging--------------------------
@@ -171,7 +179,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 #endif
 
     	// updating the saturation index and minerals
-        if(_n_xi_Min != 0)
+        if(_n_xi_Min > 0)
 		this->update_minerals_conc_AI( x_new, vec_AI );
 
 #ifdef _DEBUG
@@ -184,7 +192,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 		if (_n_xi_Kin_bar > 0)
 			this->ODE_solver(dt, x_new, _vec_XiBarKin, _vec_XiBarKin_old);
         // evaluate residual with x_new
-		this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin);
+		this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin, vec_AI);
 
 
 #ifdef _DEBUG
@@ -199,7 +207,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
         // line search begins
         j = 0; 
-        while ( j < max_iter )
+        while ( j < 30 )
         {
             // d1_norm = norm(res,inf);
             d1_norm = vec_residual.norm();
@@ -210,15 +218,18 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
             // updating dx
             dx = dx * alpha;
             // increment of unknowns
-            this->increment_unknown( x, dx, x_new ); 
+            //this->increment_unknown( x, dx, x_new );
+            x_new = x_new - dx;  //RZ: essential for convergency
             // now updating the saturation index and minerals
-            if(_n_xi_Min != 0)
+            if(_n_xi_Min > 0)
 				this->update_minerals_conc_AI( x_new, vec_AI );
+
             // update the value of xikinbar in the vector of unknowns(x_new)
-			this->ODE_solver(dt, x_new, _vec_XiBarKin, _vec_XiBarKin_old);
-			// evaluate residual with x_new
 			if (_n_xi_Kin_bar > 0)
-				this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin);
+			this->ODE_solver(dt, x_new, _vec_XiBarKin, _vec_XiBarKin_old);
+
+			// evaluate residual with x_new
+			this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin, vec_AI);
 
 		#ifdef _DEBUG
         	// std::cout << "vec_residual: \n";
@@ -300,7 +311,8 @@ void LocalProblem::calc_residual(double dt,
 								 ogsChem::LocalVector & vec_unknowns,
 								 ogsChem::LocalVector & vec_xi_Kin_bar_old, 
 								 ogsChem::LocalVector & vec_residual,
-								 ogsChem::LocalVector & vec_Xi_Kin_bar)
+								 ogsChem::LocalVector & vec_Xi_Kin_bar,
+								 ogsChem::LocalVector & vec_AI)
 {
 	ogsChem::LocalVector ln_conc_Mob, ln_conc_Sorp, conc_Mob, conc_Sorp, conc_Min_bar, conc_Kin_bar, conc_bar;
 	conc_Mob     = ogsChem::LocalVector::Zero(_I_mob);
@@ -335,7 +347,7 @@ void LocalProblem::calc_residual(double dt,
 		// Eq. 3.59
 		this->residual_xi_Min_tilde     (conc_Mob, conc_Sorp, conc_Min_bar, conc_Kin_bar, vec_residual);
 		// Eq. 3.62
-		this->residual_conc_Min			(ln_conc_Mob, conc_Min_bar, vec_residual);
+		this->residual_conc_Min			(ln_conc_Mob, conc_Min_bar, vec_residual, vec_AI);
     }
 	
     // Eq. 3.63
@@ -358,12 +370,12 @@ void LocalProblem::calc_residual(double dt,
 
 void LocalProblem::calc_Jacobian(double dt,
 								 ogsChem::LocalVector & vec_x,
-//							     ogsChem::LocalVector & vec_AI,
 							     ogsChem::LocalVector & vec_residual,
-							     ogsChem::LocalVector & vec_Xi_Kin_bar)
+							     ogsChem::LocalVector & vec_Xi_Kin_bar,
+							     ogsChem::LocalVector & vec_AI)
 {
-	//const double delta_xi = 1.0e-8;  //calcite example
-	const double delta_xi = 1.0e-6;    //monod2d
+	const double delta_xi = 1.0e-8;  //calcite example
+	//const double delta_xi = 1.0e-6;    //monod2d
     int i;
     ogsChem::LocalVector vec_x_incremented, vec_residual_incremented;
     vec_residual_incremented = vec_residual;
@@ -376,14 +388,14 @@ void LocalProblem::calc_Jacobian(double dt,
 		if (std::fabs(vec_x(i)) > 1.0e-16)
 		{
 			vec_x_incremented(i) += delta_xi * std::fabs(vec_x(i));
-			this->calc_residual(dt, vec_x_incremented, _vec_XiBarKin_old, vec_residual_incremented, vec_Xi_Kin_bar);
+			this->calc_residual(dt, vec_x_incremented, _vec_XiBarKin_old, vec_residual_incremented, vec_Xi_Kin_bar, vec_AI);
 			_mat_Jacobian.col(i) = (vec_residual_incremented - vec_residual) / (delta_xi * std::fabs(vec_x(i)));
 
 		}
 		else
 		{
 			vec_x_incremented(i) += delta_xi;
-			this->calc_residual(dt, vec_x_incremented, _vec_XiBarKin_old, vec_residual_incremented, vec_Xi_Kin_bar);
+			this->calc_residual(dt, vec_x_incremented, _vec_XiBarKin_old, vec_residual_incremented, vec_Xi_Kin_bar, vec_AI);
 			_mat_Jacobian.col(i) = (vec_residual_incremented - vec_residual ) / delta_xi;
 		}
 	}
@@ -397,93 +409,6 @@ void LocalProblem::calc_Jacobian(double dt,
 	// end of debugging-------------------
 #endif
 }
-
-/* HS 20131106: diable the function and rewrite. */
-/*
-void LocalProblem::Solv_Minimization(size_t      & idx_node,
-                              ogsChem::LocalMatrix & J,
-                              ogsChem::LocalVector & res,
-                              ogsChem::LocalVector & delta_x)
-{
-    size_t n_J_rows, r; 
-    size_t n_R_cols;
-    size_t n_V; 
-    ogsChem::LocalMatrix Q, R, P; 
-    ogsChem::LocalMatrix Q2, R2;
-    ogsChem::LocalMatrix B; 
-    ogsChem::LocalMatrix V, Vsize; 
-    ogsChem::LocalVector b, b2, z; 
-    ogsChem::LocalVector y1, y2, y; 
-    
-    b = -1.0 * res; 
-    n_J_rows = J.rows(); 
-    
-    Eigen::FullPivHouseholderQR<Eigen::MatrixXd> qr_decomp; 
-
-    // perform the QR decompostion
-    qr_decomp.compute(J); 
-
-    Q = qr_decomp.matrixQ(); 
-
-    // TO check, is this right?
-    R = qr_decomp.matrixQR(); 
-    // TO check, is this right?
-    P = qr_decomp.colsPermutation(); 
-
-    // rank revealing
-    r = qr_decomp.rank(); 
-    
-    if ( r == n_J_rows )
-    {
-        // using the standard direct solver
-        delta_x = J.fullPivHouseholderQr().solve( b ); 
-    }  // end of if
-    else if ( r < n_J_rows )
-    {
-        // n_R_cols = size( R, 2); 
-        n_R_cols = R.cols(); 
-        
-        // R2 = R(1:r, 1:r);
-        R2 = R.topLeftCorner(r, r);
-        
-        // B  = R(1:r, r+1:n_R_cols);
-        B = R.topRightCorner(r, n_R_cols - r);
-        
-        // V = R2 \ B; 
-        V = R2.fullPivHouseholderQr().solve( B );
-        
-        // Vsize = V'*V;
-        Vsize = V.transpose() * V; 
-        
-        // n_V = size(Vsize,1);
-        n_V = Vsize.rows(); 
-        
-        // Q2 = Q.topLeftCorner(1:r, 1:r);
-        Q2 = Q.topLeftCorner(r, r);
-
-        // b2 = b(1:r, :);
-        b2 = b.head(r); 
-        
-        // z = R2 \ (Q2'*b2);
-        z = R2.fullPivHouseholderQr().solve( Q2.transpose() * b2 );
-
-        // y2 = (eye(n_V)+V'*V)\(V' * z);
-        ogsChem::LocalMatrix eye = ogsChem::LocalMatrix::Identity( n_V, n_V );
-        y2 = ( eye + V.transpose() * V ).fullPivHouseholderQr().solve( V.transpose()*z ); 
-    
-        // y1 = z - V*y2; 
-        y1 = z - V * y2; 
-
-        // y = [y1;y2];
-        y = ogsChem::LocalVector::Zero( y1.rows() + y2.rows() );
-        y.head( y1.rows() ) = y1;
-        y.tail( y2.rows() ) = y2;
-        // delta_x = P* y;
-        delta_x = P * y; 
-    }  // end of else if
-
-}
-*/
 
 /** HS 20131106: rewrite the minimization solve function
   * This function is doing the job: 
@@ -566,7 +491,7 @@ void LocalProblem::increment_unknown(ogsChem::LocalVector & x_old,
 		{
 			tmp_value = -1.33*delta_x(i) / x_old(i);
 			damp_factor = 1.0 / std::max(1.0, tmp_value );
-			x_new(i) = x_old(i) + damp_factor * delta_x(i); 
+			x_new(i) = x_old(i) + damp_factor * delta_x(i);
 		}
 	}
 
@@ -605,6 +530,8 @@ void LocalProblem::update_minerals_conc_AI(ogsChem::LocalVector & vec_unknowns,
     	phi  = -_logk_min(i) + mat_S1min_transposed.row(i) * ln_conc_Mob;
 
 
+/* RZ: AI is evaluated once at the beginning of the local problem
+
     	// if mineral concentration  >= phi ; mineral is present; saturated case; precipitate the mineral.
     	if (conc_Min_bar(i) >= phi)
     	{
@@ -616,7 +543,7 @@ void LocalProblem::update_minerals_conc_AI(ogsChem::LocalVector & vec_unknowns,
     		vec_AI(i) = 0;
     		conc_Min_bar(i) = 0.0;
     	}// end of else
-
+*/
 
     	// if mineral is present, calculate mineral concentration
     	if	(vec_AI(i) == 1)
@@ -830,7 +757,8 @@ void LocalProblem::residual_conc_Sorp(ogsChem::LocalVector & ln_conc_Mob,
 // Eq. 3.62
 void LocalProblem::residual_conc_Min(ogsChem::LocalVector & ln_conc_Mob,
 	     	 	 	 	 	 	 	 ogsChem::LocalVector & conc_Min_bar,
-	     	 	 	 	 	 	 	 ogsChem::LocalVector & vec_residual)
+	     	 	 	 	 	 	 	 ogsChem::LocalVector & vec_residual,
+	     	 	 	 	 	 	 	 ogsChem::LocalVector & vec_AI)
 {
 	size_t        i, idx;
 	double        phi(0.0);
@@ -843,7 +771,12 @@ void LocalProblem::residual_conc_Min(ogsChem::LocalVector & ln_conc_Mob,
 	for (i=0; i < _n_xi_Min; i++)
 	{
 		phi  = -_logk_min(i) + mat_S1minT.row(i) * ln_conc_Mob;
-		vec_residual(idx + i) 	= std::min(phi, conc_Min_bar(i));
+
+		if(vec_AI(i) == 1) //RZ: 3-Nov-13 Must be kept like this!
+			vec_residual(idx + i) 	= phi;
+		else
+			vec_residual(idx + i) 	= conc_Min_bar(i);
+	//	vec_residual(idx + i) 	= std::min(phi, conc_Min_bar(i));
 	}
 }
 
@@ -928,5 +861,55 @@ void LocalProblem::reaction_rates(ogsChem::LocalVector & conc,
 		this->_list_kin_reactions[i]->calcReactionRate( conc );
 		vec_rateKin(i) = this->_list_kin_reactions[i]->getRate();
 	}
+}
+
+/*
+ * RZ: AI vector contains 1 and 0. 1 if mineral is present and 0 if absent.
+ */
+//calculate AI vector
+void LocalProblem::calculate_AI(ogsChem::LocalVector & vec_unknowns,
+								ogsChem::LocalVector & vec_AI)
+{
+    double phi = 0.0;
+    size_t idx, j;
+    ogsChem::LocalVector ln_conc_Mob  = ogsChem::LocalVector::Zero(_I_mob);
+    ogsChem::LocalVector ln_conc_Sorp = ogsChem::LocalVector::Zero(_I_sorp);
+    ogsChem::LocalVector conc_Min_bar = ogsChem::LocalVector::Zero(_I_min);
+	ogsChem::LocalVector conc_Kin_bar = ogsChem::LocalVector::Zero(_I_kin);
+    //ogsChem::LocalMatrix mat_S1min_transposed;
+    //logConc_Mob = ogsChem::LocalVector::Zero(_I_mob);
+    ogsChem::LocalMatrix  mat_S1min_transposed = ogsChem::LocalMatrix::Zero(_mat_S1min.cols(),_mat_S1min.rows());
+    mat_S1min_transposed = _mat_S1min.transpose();
+
+
+    // take the first section which is basis concentration
+    ln_conc_Mob    = vec_unknowns.head( _I_mob   );
+    // take the sorp component concentrations
+	ln_conc_Sorp   = vec_unknowns.segment(_I_mob, _I_sorp);
+    // take the mineral part
+    conc_Min_bar   = vec_unknowns.segment(_I_mob + _I_sorp, _I_min );
+	// take the kinetic part
+    conc_Kin_bar   = vec_unknowns.tail(_I_kin);
+
+    for(j =0; j < _I_min; j++)
+    {
+    	idx = _I_mob + _I_sorp + j;
+    	conc_Min_bar(j) = cal_cbarmin_by_constrain(j, ln_conc_Mob, ln_conc_Sorp, conc_Min_bar, conc_Kin_bar);
+
+    	phi  = -_logk_min(j) + mat_S1min_transposed.row(j) * ln_conc_Mob;
+
+    	// if mineral concentration  >= phi ; mineral is present; saturated case; precipitate the mineral.
+    	if(conc_Min_bar(j) > phi)  //RZ:9-Dec-13
+    	{
+    		vec_AI(j) = 1;
+    	}// end of if
+    	// if mineral concentration < phi : mineral is NOT present; under saturated case; dissolve the mineral
+    	else
+    	{
+    		vec_AI(j) = 0;
+    		conc_Min_bar(j) = 0.0;
+    		vec_unknowns(idx) = conc_Min_bar(j);
+    	}// end of else
+    }
 }
 

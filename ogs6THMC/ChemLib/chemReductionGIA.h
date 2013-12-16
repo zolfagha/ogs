@@ -17,6 +17,7 @@
 #include "chemReactionEq.h"
 #include "chemcomp.h"
 #include "BaseLib/OrderedMap.h"
+#include "chemActivityModelUnity.h"
 
 namespace ogsChem
 {
@@ -29,7 +30,8 @@ public:
       */
 	chemReductionGIA(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & list_chemComp,
 		             std::vector<ogsChem::chemReactionEq*>                & list_eq_reactions,
-		             std::vector<ogsChem::chemReactionKin*>               & list_kin_reactions);
+		             std::vector<ogsChem::chemReactionKin*>               & list_kin_reactions,
+		             ogsChem::chemActivityModelAbstract                  *a );
 	
 	/**
       * destructor of the class
@@ -58,8 +60,14 @@ public:
 
 	/**
       * convert eta and xi vectors to concentration vector
-
+ */
 	void EtaXi2Conc(ogsChem::LocalVector &local_eta,
+					ogsChem::LocalVector &local_eta_bar,
+					ogsChem::LocalVector &local_xi_global,
+					ogsChem::LocalVector &local_xi_local,
+					ogsChem::LocalVector &local_conc);
+
+	void EtaXi2Conc_JH(ogsChem::LocalVector &local_eta,
 					ogsChem::LocalVector &local_eta_bar,
 					ogsChem::LocalVector &local_xi_Mob,
 					ogsChem::LocalVector &local_xi_Sorp_tilde,
@@ -69,12 +77,18 @@ public:
 					ogsChem::LocalVector &local_xi_Kin,
 					ogsChem::LocalVector &local_xi_Kin_bar,
 					ogsChem::LocalVector &local_conc);
- */
-	void EtaXi2Conc(ogsChem::LocalVector &local_eta,
+
+	void EtaXi2Conc_JH_NOCUTOFF(ogsChem::LocalVector &local_eta,
 					ogsChem::LocalVector &local_eta_bar,
-					ogsChem::LocalVector &local_xi_global,
-					ogsChem::LocalVector &local_xi_local,
+					ogsChem::LocalVector &local_xi_Mob,
+					ogsChem::LocalVector &local_xi_Sorp_tilde,
+					ogsChem::LocalVector &local_xi_Sorp_bar,
+					ogsChem::LocalVector &local_xi_Min_tilde,
+					ogsChem::LocalVector &local_xi_Min_bar,
+					ogsChem::LocalVector &local_xi_Kin,
+					ogsChem::LocalVector &local_xi_Kin_bar,
 					ogsChem::LocalVector &local_conc);
+
     /**
       * whether the reduction scheme has been initialized
       */
@@ -340,21 +354,35 @@ public:
       * get _mat_S2_orth
       */
 	LocalMatrix get_mat_S2_orth(void) {return _mat_S2_orth; };
+
+	/**
+      * get _activity_model
+      */
+	ogsChem::chemActivityModelAbstract * get_activity_model(void) {return _activity_model; };
+
+
+
 private:
 	/**
       * private flag indicating initialization
       */
 	bool isInitialized; 
 
-	/**
-      * a list of all kinetic / equilibrium reactions
-      */
-	std::vector<ogsChem::chemReactionKin*> & _list_kin_reactions;
 
 	/**
       * a list of all equilibrium reactions
       */
 	std::vector<ogsChem::chemReactionEq*> & _list_eq_reactions;
+
+	/**
+      * a list of all kinetic / equilibrium reactions
+      */
+	std::vector<ogsChem::chemReactionKin*> & _list_kin_reactions;
+
+    /**
+      * pointer to the activity model
+      */
+    ogsChem::chemActivityModelAbstract *_activity_model;
 
     /**
       * stoichiometric matrix S

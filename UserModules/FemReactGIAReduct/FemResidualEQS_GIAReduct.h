@@ -171,7 +171,8 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
                                SolutionLib::SolutionVector & residual_global)
 {
     const size_t nnodes = _dis_sys->getMesh()->getNumberOfNodes();
-    const double theta_water_content = 0.5;
+    const double theta_water_content = 0.5;  //monod
+    //const double theta_water_content = 0.32;  //calcite
     size_t j; 
     // current xi global
     MathLib::LocalVector loc_cur_xi_global, loc_cur_xi_Sorp_tilde, loc_cur_xi_Min_tilde,
@@ -280,7 +281,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             for(std::size_t i = 0; i < _n_xi_Min_tilde; i++)
             residual_global[_n_xi_global * node_idx + i] = res44[i];
 
-            if(_n_xi_Kin != 0){
+            if(_n_xi_Kin > 0){
             // calculate the nodal kinetic reaction rates
             _ReductionGIA->Calc_Kin_Rate_temp(loc_cur_xi_Mob,
                                          loc_cur_xi_Sorp,
@@ -348,8 +349,8 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
     const size_t n_max_connect_nodes = 20; 
     size_t nnodes; 
     double _theta(1.0);
-    size_t _n_xi_trans = this->_n_xi_Sorp + this->_n_xi_Min + this->_n_xi_Kin; 
-    size_t i,j,k; 
+//    size_t _n_xi_trans = this->_n_xi_Sorp + this->_n_xi_Min + this->_n_xi_Kin;
+    size_t i,j,k;
 	MathLib::LocalMatrix rate_xi_sorp_gp, rate_xi_min_gp, rate_xi_kin_gp;
 	MathLib::LocalMatrix node_xi_sorp_rate_values;
 	MathLib::LocalMatrix node_xi_min_rate_values;
@@ -468,7 +469,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
         localDispersion.setZero(localK.rows(), localK.cols());
         localAdvection.setZero (localK.rows(), localK.cols());
 
-        double cmp_mol_diffusion = .0;
+        double cmp_mol_diffusion = 1.0E-9; //constant for all species.
 
         _q = _fe->getIntegrationMethod();
         double gp_x[3], real_x[3];
@@ -529,33 +530,29 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
 			}
         } // end of loop over all sampling points
 
-        //// --------debugging--------------
-        //std::cout << "localDispersion Matrix" << std::endl;
-        //std::cout << localDispersion << std::endl;
-        //std::cout << "localAdvection Matrix" << std::endl;
-        //std::cout << localAdvection << std::endl;
-        //// --------end of debugging-------
 
         localK = localDispersion + localAdvection;
 		
-		// disable mass lumping
 		/*
-        // mass lumping----------------------------
-        for (int idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
-        {
-            double mass_lump_val;
-            mass_lump_val = localM.row(idx_ml).sum();
-            localM.row(idx_ml).setZero();
-            localM(idx_ml, idx_ml) = mass_lump_val;
-        }
-		*/
+		 * RZ: 20.10.2013: mass lumping is essential for global newton iteration to converge for equilibrium reactions.
+		 */
+		for ( int idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
+		{
+		    double mass_lump_val;
+		    mass_lump_val = localM.row(idx_ml).sum();
+		    localM.row(idx_ml).setZero();
+		    //localM(idx_ml, idx_ml) =  mass_lump_val;
 
-        // --------debugging--------------
-        //std::cout << "localK Matrix" << std::endl;
-        //std::cout << localK << std::endl;
-        //std::cout << "localM Matrix" << std::endl;
-        //std::cout << localM << std::endl;
-        // --------end of debugging-------
+		    // Normalize localM => Id
+		    localM(idx_ml, idx_ml) =  mass_lump_val/mass_lump_val;
+
+		    // Normalize localK
+		    for(int idx_col = 0; idx_col < localK.cols(); idx_col++)
+		    {
+		    	localK(idx_ml, idx_col) = localK(idx_ml, idx_col)/mass_lump_val;
+		    }
+
+		}
 
         //MathLib::LocalVector node_indx = MathLib::LocalVector::Zero(_n_xi);
         std::size_t idx_xi, node_indx, val_idx;
@@ -572,12 +569,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
             }  // end of idx_xi
         }  // end of node_idx
 
-        // --------debugging--------------
-//        std::cout << "loc_cur_xi_global" << std::endl;
-//        std::cout << loc_cur_xi_global << std::endl;
-//        std::cout << "loc_pre_xi_global" << std::endl;
-//        std::cout << loc_pre_xi_global << std::endl;
-        // --------end of debugging-------
 
         loc_cur_xi_Sorp_tilde   = loc_cur_xi_global.head(_n_xi_Sorp_tilde*nnodes);
         loc_cur_xi_Min_tilde    = loc_cur_xi_global.segment(_n_xi_Sorp_tilde*nnodes, _n_xi_Min_tilde*nnodes);
@@ -599,7 +590,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
                                   + _theta * localK * loc_cur_xi_Sorp.segment(j*nnodes, nnodes);
 
 			localRHS_xi_sorp = 1.0 / dt * localM * loc_pre_xi_Sorp_tilde.segment(j*nnodes, nnodes)
-                                  + (1.0 - _theta) * localK * loc_pre_xi_Sorp.segment(j*nnodes, nnodes);
+                                  - (1.0 - _theta) * localK * loc_pre_xi_Sorp.segment(j*nnodes, nnodes);
 			local_res_sorp = localLHS_xi_sorp - localRHS_xi_sorp - localF_xi_sorp.segment(nnodes*j, nnodes);
             for (k=0; k<nnodes; k++)
             {
@@ -612,7 +603,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
                                  + _theta * localK * loc_cur_xi_Min.segment(j*nnodes, nnodes);
 
 			localRHS_xi_min = 1.0 / dt * localM * loc_pre_xi_Min_tilde.segment(j*nnodes, nnodes)
-                                 + (1.0 - _theta) * localK * loc_pre_xi_Min.segment(j*nnodes, nnodes);
+                                 - (1.0 - _theta) * localK * loc_pre_xi_Min.segment(j*nnodes, nnodes);
 			local_res_min = localLHS_xi_min - localRHS_xi_min - localF_xi_min.segment(nnodes*j, nnodes);
 
             for (k=0; k<nnodes; k++)
@@ -625,7 +616,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
 			localLHS_xi_kin = 1.0 / dt * localM * loc_cur_xi_Kin.segment(j*nnodes, nnodes)
                                  + _theta * localK * loc_cur_xi_Kin.segment(j*nnodes, nnodes);
 			localRHS_xi_kin = 1.0 / dt * localM * loc_pre_xi_Kin.segment(j*nnodes, nnodes)
-                                 + (1.0 - _theta) * localK * loc_pre_xi_Kin.segment(j*nnodes, nnodes);
+                                 - (1.0 - _theta) * localK * loc_pre_xi_Kin.segment(j*nnodes, nnodes);
 			local_res_kin = localLHS_xi_kin - localRHS_xi_kin - localF_xi_kin.segment(nnodes*j, nnodes);
             for (k=0; k<nnodes; k++)
             {

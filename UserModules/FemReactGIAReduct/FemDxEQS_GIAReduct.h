@@ -61,7 +61,8 @@ public:
      	_n_xi_Sorp_bar_ld(_ReductionGIA->get_n_xi_Sorp_bar_ld()), _n_xi_Kin(_ReductionGIA->get_n_xi_Kin()), _n_xi_Min_bar(_ReductionGIA->get_n_xi_Min_bar()),
      	_n_xi_local(_ReductionGIA->get_n_xi_local()), _n_xi_global(_ReductionGIA->get_n_xi_global()),  _J_tot_kin(_ReductionGIA->get_n_xi_Kin_total()), _n_xi_Sorp_bar(_ReductionGIA->get_n_xi_Sorp_bar()),
      	_xi_local_new(userData->get_xi_local_new()), _eta(userData->get_eta()), _eta_bar(userData->get_eta_bar()),
-     	_global_vec_Rate(userData->get_global_vec_Rate()), _concentrations(userData->get_concentrations()),  _list_kin_reactions(_ReductionGIA->get_list_kin_reactions())
+     	_global_vec_Rate(userData->get_global_vec_Rate()), _concentrations(userData->get_concentrations()),  _list_kin_reactions(_ReductionGIA->get_list_kin_reactions()),
+     	_vec_lnK_Min(userData->get_vec_lnK_Min())
     {
     };
 
@@ -155,6 +156,8 @@ private:
 
     size_t _n_xi_global, _n_xi_Sorp_tilde, _n_xi_Min_tilde, _n_xi_Sorp, _n_xi_Min, _n_xi_Kin, _n_xi_local, _n_xi_Min_bar, _n_eta, _n_eta_bar, _n_xi_Mob, _n_xi_Kin_bar, _J_tot_kin, _n_xi_Sorp_bar;
     size_t _n_xi_Sorp_bar_li, _n_xi_Sorp_bar_ld, _n_Comp, _I_mob, _I_min, _I_sorp;
+
+    std::vector<MyNodalFunctionScalar*> & _vec_lnK_Min;
 };
 
 
@@ -208,7 +211,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
 
     size_t i, nnodes;
     nnodes = _msh->getNumberOfNodes();
-    const double theta_water_content(0.5);
+    const double theta_water_content(0.5);  //monod example
+    //const double theta_water_content(0.32); //calcite exmaple
     const double delta_xi = 1E-12;
     std::size_t n_xi_total = _n_xi_local + _n_xi_global;
     // _solv_minimization = new LocalProblem( _ReductionGIA);
@@ -260,6 +264,11 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     loc_cur_eta_bar         = MathLib::LocalVector::Zero( _n_eta_bar );
     vec_conc                = MathLib::LocalVector::Zero(_n_Comp);
 
+    MathLib::LocalVector local_xi_Mob       = MathLib::LocalVector::Zero(_n_xi_Mob);
+	MathLib::LocalVector local_xi_Sorp_bar  = MathLib::LocalVector::Zero(_n_xi_Sorp_bar);
+	MathLib::LocalVector local_xi_Min_bar   = MathLib::LocalVector::Zero(_n_xi_Min_bar);
+	MathLib::LocalVector local_xi_Kin_bar   = MathLib::LocalVector::Zero(_n_xi_Kin_bar);
+
     MathLib::LocalMatrix mat_vprime 	 = MathLib::LocalMatrix::Zero(_n_xi_local,_n_xi_global);
     MathLib::LocalMatrix Jacobian_local  = MathLib::LocalMatrix::Zero(_n_xi_global, _n_xi_global);
     MathLib::LocalVector vec_rate_old 	 = MathLib::LocalVector::Zero(_J_tot_kin);
@@ -297,6 +306,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     MathLib::LocalMatrix mat_S1_orth  = _ReductionGIA->get_mat_S1_orth();
     MathLib::LocalMatrix mat_S2_orth  = _ReductionGIA->get_mat_S2_orth();
 
+	MathLib::LocalVector lnk_min            = MathLib::LocalVector::Zero(_n_xi_Min);
+
     std::vector<size_t> node_indx_vec;
     for (i=0; i< _n_xi_global; i++)
         node_indx_vec.push_back(0); 
@@ -318,8 +329,28 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             for (i=0; i < _J_tot_kin; i++)
                 vec_rate_old[i] = _global_vec_Rate[i]->getValue(node_idx);
 
-            for (i=0; i < _n_Comp; i++)
-                vec_conc[i] = this->_concentrations[i]->getValue(node_idx);
+			for (i=0; i < _n_xi_Min; i++)
+				lnk_min[i] = this->_vec_lnK_Min[i]->getValue(node_idx);
+
+			local_xi_Mob	  = loc_cur_xi_local.head(_n_xi_Mob);
+			local_xi_Sorp_bar = loc_cur_xi_local.segment(this->_n_xi_Mob,this->_n_xi_Sorp_bar);
+			local_xi_Min_bar  = loc_cur_xi_local.segment(this->_n_xi_Mob + this->_n_xi_Sorp_bar,this->_n_xi_Min_bar);
+			local_xi_Kin_bar  = loc_cur_xi_local.tail(this->_n_xi_Kin_bar);
+
+//            for (i=0; i < _n_Comp; i++)
+//                vec_conc[i] = this->_concentrations[i]->getValue(node_idx);
+
+    		//calculate concentration vector using JH version. RZ: 6.Nov.2013
+    		this->_ReductionGIA->EtaXi2Conc_JH_NOCUTOFF(loc_cur_eta,
+    										   loc_cur_eta_bar,
+    										   local_xi_Mob,
+    										   loc_cur_xi_Sorp_tilde,
+    										   local_xi_Sorp_bar,
+    										   loc_cur_xi_Min_tilde,
+    										   local_xi_Min_bar,
+    										   loc_cur_xi_Kin,
+    										   local_xi_Kin_bar,
+    										   vec_conc);
 
 			tmp_vec_conc = vec_conc; // just initialize memory. 
 
@@ -327,7 +358,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             Unknown_vec.head(_n_xi_global) = loc_cur_xi_global;
             Unknown_vec.tail(_n_xi_local) = loc_cur_xi_local;
 
-            if(_n_xi_Kin != 0)
+            if(_n_xi_Kin > 0)
             {
             	for(std::size_t i = 0; i < n_xi_total ; i++ )
             	{
@@ -462,18 +493,10 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             }  // end of node based for loop
             node_indx_vec.clear();
 
-            //// --------debugging--------------
-            // std::ofstream globalJ_node ("globalJ_node.txt");
-            // eqsJacobian_global.printout(globalJ_node);
-            //// --------end of debugging-------
 
     // element based operation: add time and laplas terms
     AddMassLaplasTerms(delta_t, eqsJacobian_global);
 
-    //// --------debugging--------------
-    // std::ofstream globalJ ("globalJ.txt");
-    // eqsJacobian_global.printout(globalJ);
-    //// --------end of debugging-------
 
 
 }
@@ -516,7 +539,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 
 	for (i = 0; i < _n_xi_Min; i++)
 	{
-		if(conc_Min_bar(i) >= vec_phi(i)) {
+		if(conc_Min_bar(i) > vec_phi(i)) {
 			mat_S1minI.resize( mat_S1min.rows(), mat_S1minI.cols() + 1);
 			mat_S1minI.rightCols(1) = mat_S1min.col(i);
 		}
@@ -545,19 +568,19 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
     // using minimization solver of the local problem.
 
     MathLib::LocalVector b 	= MathLib::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
-    //MathLib::LocalVector dx = MathLib::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
+    MathLib::LocalVector dx = MathLib::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
     MathLib::LocalMatrix x  = MathLib::LocalMatrix::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols(), _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
-    std::size_t indx_dummy = 0;
     // solve the linear system
     for(i = 0; i < _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin; i++)
     {
 	    b = mat_B.transpose() * mat_A_tilde * mat_C.col(i);
 
-	    // _solv_minimization->Solv_Minimization(indx_dummy, J_temp, b, dx);  // b is multiplied by -1 in this function.
-	    // x.col(i) = dx;
+	    //RZ: solving with minimization problem for numerical robustness,
+	     _solv_minimization->solve_minimization(J_temp, b, dx);  // b is multiplied by -1 in this function.
+	     x.col(i) = -1.0 * dx;
 
 	    // using the standard direct solver
-	    x.col(i) = J_temp.fullPivHouseholderQr().solve( b );
+	    //x.col(i) = J_temp.fullPivHouseholderQr().solve( b );
 
     }
 
@@ -583,8 +606,6 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
     const size_t n_ele = _msh->getNumberOfElements();
     std::size_t n_dim, mat_id; 
     std::size_t i, j, xi_count, idx;
-    int idx_ml; 
-    double _theta(1.0);
     double dt = delta_t.getTimeStepSize();
     double cmp_mol_diffusion;
     MeshLib::IElement *e; 
@@ -621,7 +642,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 	    localDispersion.setZero(localK.rows(), localK.cols());
 	    localAdvection.setZero (localK.rows(), localK.cols());
 
-	    cmp_mol_diffusion = .0;
+	    cmp_mol_diffusion = 1.0E-9; //constant for all species.
 	    // _cmp->molecular_diffusion->eval(0, cmp_mol_diffusion);
 
 	    _q = _fe->getIntegrationMethod();
@@ -662,17 +683,26 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 
 		localK = localDispersion + localAdvection;
 		
-		// disable mass lumping
 		/*
-		// mass lumping----------------------------
-		for ( idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
+		 * RZ: 20.10.2013: mass lumping is essential for global newton iteration to converge for equilibrium reactions.
+		 */
+		for (int idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
 		{
 		    double mass_lump_val;
 		    mass_lump_val = localM.row(idx_ml).sum();
 		    localM.row(idx_ml).setZero();
-		    localM(idx_ml, idx_ml) =  mass_lump_val;
+		    //localM(idx_ml, idx_ml) =  mass_lump_val;
+
+		    // Normalize localM => Id
+		    localM(idx_ml, idx_ml) =  mass_lump_val/mass_lump_val;
+
+		    // Normalize localK
+		    for(int idx_col = 0; idx_col < localK.cols(); idx_col++)
+		    {
+		    	localK(idx_ml, idx_col) = localK(idx_ml, idx_col)/mass_lump_val;
+		    }
+
 		}
-		*/
 
 		node_indx_vec.resize(ele_node_ids.size());
 		col_indx_vec.resize(ele_node_ids.size());
@@ -722,23 +752,4 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 	}  // end of for i over all elements
 }  // end of function AddMassLaplasTerms
 
-/*
-template <class T1, class T2, class T3>
-void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::cal_nodal_rate(ogsChem::LocalVector &xi,
-																  ogsChem::LocalVector &local_eta_bar,
-																  ogsChem::LocalVector &local_eta,
-																  ogsChem::LocalVector &vec_rate_new )
-{
-    // declare local temp variable
-	ogsChem::LocalVector local_xi_global = xi.head(_n_xi_global);
-	ogsChem::LocalVector local_xi_local = xi.tail(_n_xi_local);
-
-	_ReductionGIA->Calc_Kin_Rate(local_xi_local,
-		                         local_xi_global,
-								 local_eta,
-								 local_eta_bar,
-								 vec_rate_new);
-
-}
-*/
 

@@ -434,6 +434,9 @@ int SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINE
 {
 	size_t i;
 
+	//update natural log reaction constants of equilibrium reactions.
+	_function_data->update_lnK();
+
 	// solving linear problems one after the other
 	for ( i=0; i < _lin_solutions.size(); i++)
 	{
@@ -447,7 +450,8 @@ int SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINE
 	}
 
 	//solve local problem
-	_function_data->calc_nodal_local_problem(t_n1.getTimeStepSize(), 1.0E-11, 1.0E-14, 50);  //temp disabled
+	//_function_data->calc_nodal_local_problem(t_n1.getTimeStepSize(), 1.0E-11, 1.0E-14, 50);  //temp disabled
+	_function_data->calc_nodal_local_problem(t_n1.getTimeStepSize(), 1.0E-12, 1.0E-25, 200);
 
 	// calculate the reaction rates on each node
 	// _function_data->update_node_GIA_reaction_rates();

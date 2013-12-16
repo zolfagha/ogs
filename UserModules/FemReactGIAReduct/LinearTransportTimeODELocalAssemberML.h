@@ -81,7 +81,7 @@ protected:
         localDispersion.setZero(localK.rows(), localK.cols());
         localAdvection.setZero (localK.rows(), localK.cols());
 
-        double cmp_mol_diffusion = .0;
+        double cmp_mol_diffusion = 1.0E-9; //constant for all species.
         // _cmp->molecular_diffusion->eval(0, cmp_mol_diffusion);
 
         _q = _fe->getIntegrationMethod();
@@ -126,17 +126,26 @@ protected:
 
         localK = localDispersion + localAdvection;
 
-		// disable mass lumping
 		/*
-        // mass lumping----------------------------
-        for (int idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
-        {
-            double mass_lump_val;
-            mass_lump_val = localM.row(idx_ml).sum();
-            localM.row(idx_ml).setZero();
-            localM(idx_ml, idx_ml) = mass_lump_val;
-        }
-		*/
+		 * RZ: 20.10.2013: mass lumping is essential for global newton iteration to converge for equilibrium reactions.
+		 */
+		for (int idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
+		{
+		    double mass_lump_val;
+		    mass_lump_val = localM.row(idx_ml).sum();
+		    localM.row(idx_ml).setZero();
+		    //localM(idx_ml, idx_ml) =  mass_lump_val;
+
+		    // Normalize localM => Id
+		    localM(idx_ml, idx_ml) =  mass_lump_val/mass_lump_val;
+
+		    // Normalize localK
+		    for(int idx_col = 0; idx_col < localK.cols(); idx_col++)
+		    {
+		    	localK(idx_ml, idx_col) = localK(idx_ml, idx_col)/mass_lump_val;
+		    }
+
+		}
     }
 
 private:
