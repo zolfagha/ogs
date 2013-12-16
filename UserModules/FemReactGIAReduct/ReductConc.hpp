@@ -453,18 +453,18 @@ void FunctionReductConc<T1, T2>::convert_eta_xi_to_conc(void)
 	// only when the reduction scheme is fully initialized
 	if ( this->_ReductionGIA->IsInitialized() )
 	{
-		// local vectors
-		LocalVector loc_eta;
-		LocalVector loc_eta_bar;
-		LocalVector loc_xi_global;
-		LocalVector loc_xi_local;
-		LocalVector loc_conc;
-		// allocate the memory for local vectors
-		loc_eta		     = LocalVector::Zero( _n_eta );
-		loc_eta_bar   	 = LocalVector::Zero( _n_eta_bar );
-		loc_xi_global    = LocalVector::Zero( _n_xi_global );
-		loc_xi_local     = LocalVector::Zero( _n_xi_local );
-		loc_conc         = LocalVector::Zero( _n_Comp );
+		MathLib::LocalVector local_eta   		=  MathLib::LocalVector::Zero( _n_eta );
+		MathLib::LocalVector local_eta_bar  	=  MathLib::LocalVector::Zero( _n_eta_bar );
+		MathLib::LocalVector local_xi_global    = MathLib::LocalVector::Zero( _n_xi_global );
+		MathLib::LocalVector local_xi_local     = MathLib::LocalVector::Zero( _n_xi_local );
+		MathLib::LocalVector local_conc         = MathLib::LocalVector::Zero( _n_Comp );
+		MathLib::LocalVector local_xi_Mob       = MathLib::LocalVector::Zero(_n_xi_Mob);
+		MathLib::LocalVector local_xi_Sorp_tilde= MathLib::LocalVector::Zero(_n_xi_Sorp_tilde);
+		MathLib::LocalVector local_xi_Sorp_bar  = MathLib::LocalVector::Zero(_n_xi_Sorp_bar);
+		MathLib::LocalVector local_xi_Min_tilde = MathLib::LocalVector::Zero(_n_xi_Min_tilde);
+		MathLib::LocalVector local_xi_Min_bar   = MathLib::LocalVector::Zero(_n_xi_Min_bar);
+		MathLib::LocalVector local_xi_Kin       = MathLib::LocalVector::Zero(_n_xi_Kin);
+		MathLib::LocalVector local_xi_Kin_bar   = MathLib::LocalVector::Zero(_n_xi_Kin_bar);
 
 		// for each nodes,
 		for (node_idx = _concentrations[0]->getDiscreteData()->getRangeBegin();
@@ -474,26 +474,38 @@ void FunctionReductConc<T1, T2>::convert_eta_xi_to_conc(void)
 			// put the local eta and xi into the global vector
 			// fill in eta_mob
 			for (i=0; i < _n_eta; i++)
-				loc_eta[i] = this->_eta[i]->getValue(node_idx);
+				local_eta[i] = this->_eta[i]->getValue(node_idx);
 			// fill in eta_immob
 			for (i=0; i < _n_eta_bar; i++)
-				loc_eta_bar[i] = this->_eta_bar[i]->getValue(node_idx);
+				local_eta_bar[i] = this->_eta_bar[i]->getValue(node_idx);
 			// fill in xi
-			// this->_xi->setNodalValues( &loc_xi, node_idx*n_xi, n_xi );
 			for (i=0; i < _n_xi_global; i++)
-				loc_xi_global[i] = this->_xi_global_cur[i]->getValue(node_idx); // take the current time step one
+				local_xi_global[i] = this->_xi_global_cur[i]->getValue(node_idx); // take the current time step one
 		    for (i=0; i < _n_xi_local; i++)
 				// using the xi_immob_new values
-                loc_xi_local[i] = this->_xi_local_new[i]->getValue(node_idx);
+                local_xi_local[i] = this->_xi_local_new[i]->getValue(node_idx);
 
-			// pass them to the transform function in the reductionKin class
-			// and that the loc_eta_mob, local_eta_immob and local_xi
-			this->_ReductionGIA->EtaXi2Conc(loc_eta, loc_eta_bar, loc_xi_global, loc_xi_local, loc_conc);
+			local_xi_Mob	  = local_xi_local.head(_n_xi_Mob);
+			local_xi_Sorp_bar = local_xi_local.segment(this->_n_xi_Mob,this->_n_xi_Sorp_bar);
+			local_xi_Min_bar  = local_xi_local.segment(this->_n_xi_Mob + this->_n_xi_Sorp_bar,this->_n_xi_Min_bar);
+			local_xi_Kin_bar  = local_xi_local.tail(this->_n_xi_Kin_bar);
+
+			local_xi_Sorp_tilde = local_xi_global.segment( 0,this->_n_xi_Sorp_tilde);
+			local_xi_Min_tilde  = local_xi_global.segment( this->_n_xi_Sorp_tilde,this->_n_xi_Min_tilde);
+			local_xi_Kin		= local_xi_global.segment( this->_n_xi_Sorp_tilde + this->_n_xi_Min_tilde + this->_n_xi_Sorp + this->_n_xi_Min,this->_n_xi_Kin);
+
+			//calculate concentration vector using JH version. 6NOV2013 best results.
+			this->_ReductionGIA->EtaXi2Conc_JH(local_eta, local_eta_bar, local_xi_Mob, local_xi_Sorp_tilde, local_xi_Sorp_bar, local_xi_Min_tilde, local_xi_Min_bar, local_xi_Kin, local_xi_Kin_bar,local_conc);
+
+
+//			// pass them to the transform function in the reductionKin class
+//			// and that the loc_eta_mob, local_eta_immob and local_xi
+//			this->_ReductionGIA->EtaXi2Conc(loc_eta, loc_eta_bar, loc_xi_global, loc_xi_local, loc_conc);
 
 			for (i=0; i < _n_Comp; i++)
 			{
 				// gather all the concentrations
-				_concentrations[i]->setValue(node_idx, loc_conc[i]);
+				_concentrations[i]->setValue(node_idx, local_conc[i]);
 			}  // end of for i
 		}  // end of for node_idx
 	}  // end of if _ReductionGIA
