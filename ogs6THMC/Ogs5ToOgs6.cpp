@@ -650,30 +650,30 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             if ( ogs5KinReactData->activity_model == 1 ) // Debyl-Huekel
             {
                 ogsChem::chemActivityModelAqDBH* mActivityModelAqDBH 
-                    = new ogsChem::chemActivityModelAqDBH(ogs6fem.map_ChemComp); 
+                            = new ogsChem::chemActivityModelAqDBH(ogs6fem.map_ChemComp); 
                 mEqReactSys = new ogsChem::chemEqReactSysActivity(ogs6fem.map_ChemComp, 
-                                                          ogs6fem.list_eq_reactions, 
-                                                          mActivityModelAqDBH); 
+                                                                  ogs6fem.list_eq_reactions, 
+                                                                  mActivityModelAqDBH); 
                 ogs6fem.m_EqReactSys = mEqReactSys; 
                 
             }
             else if ( ogs5KinReactData->activity_model == 2 ) // Davies
             {
                 ogsChem::chemActivityModelAqDVS* mActivityModelAqDVS 
-                    = new ogsChem::chemActivityModelAqDVS(ogs6fem.map_ChemComp); 
+                            = new ogsChem::chemActivityModelAqDVS(ogs6fem.map_ChemComp); 
                 mEqReactSys = new ogsChem::chemEqReactSysActivity(ogs6fem.map_ChemComp, 
-                                                          ogs6fem.list_eq_reactions, 
-                                                          mActivityModelAqDVS); 
+                                                                  ogs6fem.list_eq_reactions, 
+                                                                  mActivityModelAqDVS); 
                 ogs6fem.m_EqReactSys = mEqReactSys; 
                 
             }
             else // by default, use the unity model
             {
                 ogsChem::chemActivityModelUnity* mActivityModelUnity 
-                    = new ogsChem::chemActivityModelUnity();
+                            = new ogsChem::chemActivityModelUnity();
                 mEqReactSys = new ogsChem::chemEqReactSysActivity(ogs6fem.map_ChemComp, 
-                                                          ogs6fem.list_eq_reactions, 
-                                                          mActivityModelUnity); 
+                                                                  ogs6fem.list_eq_reactions, 
+                                                                  mActivityModelUnity); 
                 ogs6fem.m_EqReactSys = mEqReactSys; 
                 
             }
