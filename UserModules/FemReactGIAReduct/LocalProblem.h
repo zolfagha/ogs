@@ -65,7 +65,8 @@ public:
                        ogsChem::LocalVector & vec_unknowns,
 					   ogsChem::LocalVector & vec_xi_Kin_bar_old,
 					   ogsChem::LocalVector & vec_residual,
-					   ogsChem::LocalVector & vec_Xi_Kin_bar);
+					   ogsChem::LocalVector & vec_Xi_Kin_bar,
+					   ogsChem::LocalVector & vec_AI);
     
     /**
       * calculate the Jacobi of the reaction system analytically using 
@@ -75,9 +76,9 @@ public:
       */
     void calc_Jacobian( double dt,
     					ogsChem::LocalVector & vec_unknowns,
-    //				 ogsChem::LocalVector & vec_AI,
-    				 ogsChem::LocalVector & vec_residual,
-    				 ogsChem::LocalVector & vec_Xi_Kin_bar);
+    					ogsChem::LocalVector & vec_residual,
+    					ogsChem::LocalVector & vec_Xi_Kin_bar,
+    					ogsChem::LocalVector & vec_AI);
 
     /**
       * solve the equilibrium reaction system 
@@ -97,7 +98,10 @@ public:
 											  ogsChem::LocalVector & vec_etabar,
 											  ogsChem::LocalVector & vec_xi_local, 
 											  ogsChem::LocalVector & vec_xi_global, 
-											  ogsChem::LocalVector & vec_xi_bar_kin_old);
+											  ogsChem::LocalVector & vec_xi_bar_kin_old,
+											  ogsChem::LocalVector & lnk_mob,
+											  ogsChem::LocalVector & lnk_sorp,
+											  ogsChem::LocalVector & lnk_min);
 
     /**
       * solve the system J*dx = -b
@@ -140,6 +144,13 @@ public:
     			    ogsChem::LocalVector & vec_unknowns,
     			    ogsChem::LocalVector & vec_Xi_Kin_bar, 
 					ogsChem::LocalVector & vec_Xi_Kin_bar_old);
+
+    /*
+     * RZ: AI vector contains 1 and 0. 1 if mineral is present and 0 if absent.
+     */
+    //calculate AI vector
+    void calculate_AI(ogsChem::LocalVector & vec_unknowns,
+    				  ogsChem::LocalVector & vec_AI);
 
 	ogsChem::LocalVector & get_vec_XiBarKin() { return _vec_XiBarKin;  };
 
@@ -283,9 +294,11 @@ private:
     								ogsChem::LocalVector & conc_NonMin_bar,
 			 	 	 	 	 	 	 ogsChem::LocalVector & vec_residual);
     // Eq. 3.62
-    void residual_conc_Min			(ogsChem::LocalVector & conc_Mob,
-								     ogsChem::LocalVector & vec_AI,
-								     ogsChem::LocalVector & vec_residual);
+    void residual_conc_Min			(ogsChem::LocalVector & ln_conc_Mob,
+    								 ogsChem::LocalVector & conc_Min_bar,
+								     ogsChem::LocalVector & vec_residual,
+								     ogsChem::LocalVector & vec_AI);
+
     // Eq. 3.63
 	void residual_Eta_bar           (ogsChem::LocalVector & conc_Sorp, 
                                      ogsChem::LocalVector & conc_Min_bar,

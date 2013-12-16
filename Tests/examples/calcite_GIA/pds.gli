@@ -1,3 +1,4 @@
+GeoSys-BC: Boundary Conditions ------------------------------------------------
 #POINTS
 0  0.0   0.0 0.0 0.0 0.0 0.0 0.0 $NAME POINT0
 1  0.5   0.0 0.0 0.0 0.0 0.0 0.0 $NAME POINT1

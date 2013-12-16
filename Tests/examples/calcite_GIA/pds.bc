@@ -7,8 +7,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $GEO_TYPE
   POINT POINT0
  $DIS_TYPE
-  CONSTANT 0.13229
-  
+  CONSTANT 1.0E5
 #BOUNDARY_CONDITION
  $PCS_TYPE
   GROUNDWATER_FLOW
@@ -31,7 +30,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
 
 #BOUNDARY_CONDITION
  $PCS_TYPE
- REACT_GIA
+  REACT_GIA
  $PRIMARY_VARIABLE 
   Ca2+
  $GEO_TYPE
@@ -127,7 +126,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $GEO_TYPE
   POINT POINT0
  $DIS_TYPE
-  CONSTANT 3.9516e-12  
+  CONSTANT 3.9516e-12 
 
 #BOUNDARY_CONDITION
  $PCS_TYPE
@@ -141,3 +140,35 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
 
 #STOP
 
+
+
+#BOUNDARY_CONDITION
+ $PCS_TYPE
+  GROUNDWATER_FLOW
+ $PRIMARY_VARIABLE 
+  HEAD
+ $GEO_TYPE
+  POINT POINT0
+ $DIS_TYPE
+  CONSTANT 1.0
+  
+#BOUNDARY_CONDITION
+ $PCS_TYPE
+  GROUNDWATER_FLOW
+ $PRIMARY_VARIABLE 
+  HEAD
+ $GEO_TYPE
+  POINT POINT1
+ $DIS_TYPE
+  CONSTANT 0.0
+
+
+#BOUNDARY_CONDITION
+ $PCS_TYPE
+  REACT_GIA
+ $PRIMARY_VARIABLE 
+  H+
+ $GEO_TYPE
+  POINT POINT0
+ $DIS_TYPE
+  CONSTANT  1.e-07

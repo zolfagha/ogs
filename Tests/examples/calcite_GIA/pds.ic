@@ -7,7 +7,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
  $GEO_TYPE
   DOMAIN
  $DIS_TYPE
-  CONSTANT 1.0
+  CONSTANT 0.13
 
 #INITIAL_CONDITION
  $PCS_TYPE
@@ -37,7 +37,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
  $GEO_TYPE
   DOMAIN
  $DIS_TYPE
-  CONSTANT 2.010000000593e-010  //0.0
+  CONSTANT 2.010000000593e-010
 
 #INITIAL_CONDITION
  $PCS_TYPE
@@ -47,7 +47,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
  $GEO_TYPE
   DOMAIN
  $DIS_TYPE
-  CONSTANT 1.000000709057e-012  //0.0
+  CONSTANT 1.000000709057e-010
 
 #INITIAL_CONDITION
  $PCS_TYPE
@@ -117,7 +117,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
  $GEO_TYPE
   DOMAIN
  $DIS_TYPE
-  CONSTANT 2.070001572722e-004  //about the value from Gems (in mol/kg water)
+  CONSTANT 2.070001572722e-004 //about the value from Gems (in mol/kg water)
 
 #INITIAL_CONDITION
  $PCS_TYPE
