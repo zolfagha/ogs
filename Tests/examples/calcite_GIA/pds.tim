@@ -3,8 +3,8 @@ GeoSys-TIM: Timestepping ------------------------------------------------
  $PCS_TYPE
   GROUNDWATER_FLOW
  $TIME_STEPS
-   1    10.0
-   1    20990.0
+   1    20.0
+   1    20980.0
  $TIME_END
   21000.0
  $TIME_START
@@ -21,7 +21,7 @@ $TIME_CONTROL
  MAX_TIME_STEP
      240
  MIN_TIME_STEP
-     10.0
+     20.0
  ITER_TIMES_AND_MULTIPLYER
    4
    0    1.6
