@@ -69,7 +69,17 @@ public:
     ///
     virtual ~TemplateTransientDxFEMFunction_GIA_Reduct() 
     {
-        // delete _solv_minimization;
+        _vel       		= NULL;
+        _fe        		= NULL;
+        _q         		= NULL;
+        _msh	   		= NULL;
+        _linear_eqs 	= NULL;
+        _t_n1			= NULL;
+        _u_n0			= NULL;
+        _dofManager		= NULL;
+        _userData		= NULL;
+        _ReductionGIA	= NULL;
+        _solv_minimization	= NULL;
     };
 
     void setVelocity(const NumLib::ITXFunction *vel)
