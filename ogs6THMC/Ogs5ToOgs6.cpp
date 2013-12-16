@@ -642,7 +642,6 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 		}
 
         // first case the operator splitting mode
-        // if ( ogs6fem.list_eq_reactions.size() > 0 && ogs6fem.list_kin_reactions.size() == 0 )
 		if (HAVE_REACT_TRANS_OPS)
         {
             // initialize the activity model of the chemical system. 
@@ -681,7 +680,6 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             mEqReactSys = NULL; 
         }
         // then is the the KIN_GIA mode
-		// else if ( ogs6fem.list_eq_reactions.size() == 0 && ogs6fem.list_kin_reactions.size() > 0 )
 		else if ( HAVE_KIN_REACT_GIA )
         {   // initialize the kin-reduction scheme 
             ogsChem::chemReductionKin* mReductionKinScheme;
@@ -690,7 +688,6 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             mReductionKinScheme = NULL;
         }
 		//  RZ:2.12.2013 then the REDUCT_GIA mode
-        // else if ( ogs6fem.list_eq_reactions.size() > 0 ||  ogs6fem.list_kin_reactions.size() > 0)  //define a flag to indicate GIA method later.
 		else if ( HAVE_REACT_GIA )
         {  // initialize the full reduction scheme
         	ogs5::CKinReactData* ogs5KinReactData = ogs5fem.KinReactData_vector[0];
