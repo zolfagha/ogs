@@ -363,10 +363,10 @@ void chemReductionGIA::update_reductionScheme(void)
 	_mat_A2 = ( _mat_S2_ast.transpose() * _mat_S2_ast ).fullPivHouseholderQr().solve(_mat_S2_ast.transpose()) * _mat_S2 ;
 
 #ifdef _DEBUG
-//	std::cout << "A_1: "    << std::endl;
-//	std::cout << _mat_A1 << std::endl;
-//	std::cout << "A_2: "    << std::endl;
-//	std::cout << _mat_A2 << std::endl;
+	std::cout << "A_1: "    << std::endl;
+	std::cout << _mat_A1 << std::endl;
+	std::cout << "A_2: "    << std::endl;
+	std::cout << _mat_A2 << std::endl;
 #endif
 
 	//extract the A subspaces

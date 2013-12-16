@@ -642,7 +642,6 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 		}
 
         // first case the operator splitting mode
-        // if ( ogs6fem.list_eq_reactions.size() > 0 && ogs6fem.list_kin_reactions.size() == 0 )
 		if (HAVE_REACT_TRANS_OPS)
         {
             // initialize the activity model of the chemical system. 
@@ -651,37 +650,36 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             if ( ogs5KinReactData->activity_model == 1 ) // Debyl-Huekel
             {
                 ogsChem::chemActivityModelAqDBH* mActivityModelAqDBH 
-                    = new ogsChem::chemActivityModelAqDBH(ogs6fem.map_ChemComp); 
+                            = new ogsChem::chemActivityModelAqDBH(ogs6fem.map_ChemComp); 
                 mEqReactSys = new ogsChem::chemEqReactSysActivity(ogs6fem.map_ChemComp, 
-                                                          ogs6fem.list_eq_reactions, 
-                                                          mActivityModelAqDBH); 
+                                                                  ogs6fem.list_eq_reactions, 
+                                                                  mActivityModelAqDBH); 
                 ogs6fem.m_EqReactSys = mEqReactSys; 
                 
             }
             else if ( ogs5KinReactData->activity_model == 2 ) // Davies
             {
                 ogsChem::chemActivityModelAqDVS* mActivityModelAqDVS 
-                    = new ogsChem::chemActivityModelAqDVS(ogs6fem.map_ChemComp); 
+                            = new ogsChem::chemActivityModelAqDVS(ogs6fem.map_ChemComp); 
                 mEqReactSys = new ogsChem::chemEqReactSysActivity(ogs6fem.map_ChemComp, 
-                                                          ogs6fem.list_eq_reactions, 
-                                                          mActivityModelAqDVS); 
+                                                                  ogs6fem.list_eq_reactions, 
+                                                                  mActivityModelAqDVS); 
                 ogs6fem.m_EqReactSys = mEqReactSys; 
                 
             }
             else // by default, use the unity model
             {
                 ogsChem::chemActivityModelUnity* mActivityModelUnity 
-                    = new ogsChem::chemActivityModelUnity();
+                            = new ogsChem::chemActivityModelUnity();
                 mEqReactSys = new ogsChem::chemEqReactSysActivity(ogs6fem.map_ChemComp, 
-                                                          ogs6fem.list_eq_reactions, 
-                                                          mActivityModelUnity); 
+                                                                  ogs6fem.list_eq_reactions, 
+                                                                  mActivityModelUnity); 
                 ogs6fem.m_EqReactSys = mEqReactSys; 
                 
             }
             mEqReactSys = NULL; 
         }
         // then is the the KIN_GIA mode
-		// else if ( ogs6fem.list_eq_reactions.size() == 0 && ogs6fem.list_kin_reactions.size() > 0 )
 		else if ( HAVE_KIN_REACT_GIA )
         {   // initialize the kin-reduction scheme 
             ogsChem::chemReductionKin* mReductionKinScheme;
@@ -690,7 +688,6 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             mReductionKinScheme = NULL;
         }
 		//  RZ:2.12.2013 then the REDUCT_GIA mode
-        // else if ( ogs6fem.list_eq_reactions.size() > 0 ||  ogs6fem.list_kin_reactions.size() > 0)  //define a flag to indicate GIA method later.
 		else if ( HAVE_REACT_GIA )
         {  // initialize the full reduction scheme
         	ogs5::CKinReactData* ogs5KinReactData = ogs5fem.KinReactData_vector[0];
