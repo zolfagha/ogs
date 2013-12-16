@@ -229,6 +229,12 @@ private:
 	//TODO specify each
 	size_t _n_eta, _n_eta_bar, _n_xi_Sorp_tilde, _n_xi_Min_tilde, _n_xi_Sorp;
 
+	/**
+	 * //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
+	 *
+	  * pointer to the activity model
+	  */
+	ogsChem::chemActivityModelAbstract *_activity_model;
 
     /**
       * since jacobian matrix is unique we define it in the scope of the class

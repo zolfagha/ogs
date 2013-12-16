@@ -125,25 +125,26 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options & option)
      	_global_vec_Rate.push_back(global_vec_Rate_tmp);
 	}
 
-	// initialize the rates for xi_sorp, xi_min and xi_kin
-	for (i = 0; i < _n_xi_Mob; i++)
-	{
-		MyNodalFunctionScalar* vec_lnK_Mob = new MyNodalFunctionScalar();
-		vec_lnK_Mob->initialize(*dis, FemLib::PolynomialOrder::Linear, 0.0);
-		_vec_lnK_Mob.push_back(vec_lnK_Mob);
-	}
-	for (i = 0; i < _n_xi_Sorp; i++)
-	{
-		MyNodalFunctionScalar* vec_lnK_Sorp = new MyNodalFunctionScalar();
-		vec_lnK_Sorp->initialize(*dis, FemLib::PolynomialOrder::Linear, 0.0);
-		_vec_lnK_Sorp.push_back(vec_lnK_Sorp);
-	}
-	for (i = 0; i < _n_xi_Min; i++)
-	{
-		MyNodalFunctionScalar* vec_lnK_Min = new MyNodalFunctionScalar();
-		vec_lnK_Min->initialize(*dis, FemLib::PolynomialOrder::Linear, 0.0);
-		_vec_lnK_Min.push_back(vec_lnK_Min);
-	}
+    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
+//	// initialize the rates for xi_sorp, xi_min and xi_kin
+//	for (i = 0; i < _n_xi_Mob; i++)
+//	{
+//		MyNodalFunctionScalar* vec_lnK_Mob = new MyNodalFunctionScalar();
+//		vec_lnK_Mob->initialize(*dis, FemLib::PolynomialOrder::Linear, 0.0);
+//		_vec_lnK_Mob.push_back(vec_lnK_Mob);
+//	}
+//	for (i = 0; i < _n_xi_Sorp; i++)
+//	{
+//		MyNodalFunctionScalar* vec_lnK_Sorp = new MyNodalFunctionScalar();
+//		vec_lnK_Sorp->initialize(*dis, FemLib::PolynomialOrder::Linear, 0.0);
+//		_vec_lnK_Sorp.push_back(vec_lnK_Sorp);
+//	}
+//	for (i = 0; i < _n_xi_Min; i++)
+//	{
+//		MyNodalFunctionScalar* vec_lnK_Min = new MyNodalFunctionScalar();
+//		vec_lnK_Min->initialize(*dis, FemLib::PolynomialOrder::Linear, 0.0);
+//		_vec_lnK_Min.push_back(vec_lnK_Min);
+//	}
 
 	// initialize the rates for xi_sorp, xi_min and xi_kin
 	for (i = 0; i < _n_xi_Sorp; i++)
@@ -673,13 +674,14 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 				loc_xi_local_old_dt[i] = this->_xi_local_old[i]->getValue(node_idx);
 			}
 
-			//get the updated lnK values on each node.
-			for (i=0; i < _n_xi_Mob; i++)
-				lnk_mob[i] = this->_vec_lnK_Mob[i]->getValue(node_idx);
-			for (i=0; i < _n_xi_Sorp; i++)
-				lnk_sorp[i] = this->_vec_lnK_Sorp[i]->getValue(node_idx);
-			for (i=0; i < _n_xi_Min; i++)
-				lnk_min[i] = this->_vec_lnK_Min[i]->getValue(node_idx);
+			//RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
+//			//get the updated lnK values on each node.
+//			for (i=0; i < _n_xi_Mob; i++)
+//				lnk_mob[i] = this->_vec_lnK_Mob[i]->getValue(node_idx);
+//			for (i=0; i < _n_xi_Sorp; i++)
+//				lnk_sorp[i] = this->_vec_lnK_Sorp[i]->getValue(node_idx);
+//			for (i=0; i < _n_xi_Min; i++)
+//				lnk_min[i] = this->_vec_lnK_Min[i]->getValue(node_idx);
 
 			// get concentration values based on current updated eta and xi values. 
 			//this->_ReductionGIA->EtaXi2Conc(loc_eta, loc_etabar, loc_xi_global, loc_xi_local, loc_conc);
@@ -690,7 +692,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			{
 
 
-				//update concentration vector using dual simplex aĺgorithm
+				//RZ:update concentration vector using dual simplex algorithm
 				calculate_node_concentration(local_xi_Mob,
 											 loc_XiSorpTilde,
 									         local_xi_Sorp_bar,
@@ -1019,7 +1021,7 @@ void FunctionReductConc<T1, T2>::start_node_values_search( MathLib::LocalMatrix 
 		//if there is no negative coefficient, Tableau(i,j) < 0, stop; there is no feasible solution.
 		if(s == -1)
 		{
-			std::cout << "No positive starting value on this node!" << std::endl;
+//			std::cout << "No positive starting value on this node!" << std::endl;
 
 			//make sure there will be no negative concentrations.
 			for(double idx = 0; idx < _n_Comp; idx++)
