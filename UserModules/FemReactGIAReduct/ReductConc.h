@@ -156,6 +156,8 @@ public:
      */
     virtual ~FunctionReductConc()
     {
+    	BaseLib::releaseObject(_feObjects);
+    	BaseLib::releaseObject(_non_linear_eqs);
     	BaseLib::releaseObject(myNRIterator);
     	BaseLib::releaseObject(myNSolverFactory);
 
@@ -363,6 +365,9 @@ public:
 
 	FemLib::LagrangeFeObjectContainer* get_feObjects(){return _feObjects;}
 	NumLib::TimeStep const* getTimeStep() {return _current_time_step;}
+    /// get the time step function
+    /// @return Time step function
+    NumLib::ITimeStepFunction* getTimeStepFunction() const {return _tim;};  //RZ: 11.12.2013
     virtual void set_BC_conc_node_values(std::size_t node_idx, std::size_t i_var, double node_value);
     /**
       * convert nodal concentration values to eta and xi
