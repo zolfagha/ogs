@@ -305,7 +305,6 @@ void LocalProblem::ODE_solver(double dt,
     //vec_Xi_Kin_bar_new = _sbs->get_y();
     vec_Xi_Kin_bar = _sbs->get_y();
 
-
 }  // end of function ode solver
 
 
@@ -400,9 +399,7 @@ void LocalProblem::calc_Jacobian(double dt,
 			this->calc_residual(dt, vec_x_incremented, _vec_XiBarKin_old, vec_residual_incremented, vec_Xi_Kin_bar, vec_AI);
 			_mat_Jacobian.col(i) = (vec_residual_incremented - vec_residual ) / delta_xi;
 		}
-	}
-
-
+}
 
 #ifdef _DEBUG
 	// debugging--------------------------
@@ -418,7 +415,7 @@ void LocalProblem::calc_Jacobian(double dt,
   * L(d) := { x belong to Real^n , norm(J*dx + b) = min{ norm(J*dx + b, y belong to Real^n }}
   * 
   * The numerical algorithm is exactly following page 47 of the dissertation from
-  * Joachim Hoffmann (2010) Reactive Transport and Mineral Dissolution /Precipitation in Porous Media: 
+  * Joachim Hoffmann (2010) Reactive Transport and Mineral Dissolution/Precipitation in Porous Media: 
   * Efficient Solution Algorithms, Benchmark Computations and Existence of Global Solutions. 
   * University of Erlangen-Nuernberg.
   * 
@@ -478,8 +475,8 @@ return;
 }
 
 void LocalProblem::increment_unknown(ogsChem::LocalVector & x_old,
-                                       ogsChem::LocalVector & delta_x,
-                                       ogsChem::LocalVector & x_new)
+                                     ogsChem::LocalVector & delta_x,
+                                     ogsChem::LocalVector & x_new)
 {
     size_t i, n_unknowns;
 	double tmp_value, damp_factor; 
@@ -496,7 +493,6 @@ void LocalProblem::increment_unknown(ogsChem::LocalVector & x_old,
 			x_new(i) = x_old(i) + damp_factor * delta_x(i);
 		}
 	}
-
 }  // end of func increment_unknown
 
 

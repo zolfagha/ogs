@@ -566,6 +566,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
 
 		}
 
+
         //MathLib::LocalVector node_indx = MathLib::LocalVector::Zero(_n_xi);
         std::size_t idx_xi, node_indx, val_idx;
 
