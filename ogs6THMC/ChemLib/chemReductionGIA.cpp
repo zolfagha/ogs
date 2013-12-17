@@ -593,21 +593,26 @@ void chemReductionGIA::EtaXi2Conc_JH( ogsChem::LocalVector &local_eta,
 //		local_c_mob += _mat_S1_orth	  * local_eta;
 		local_conc.topRows(_I_mob )    = local_c_mob;
 
-//		local_c_immob_non_min += _mat_S2sorp	* local_xi_Sorp_bar;
-//		local_c_immob_non_min += _mat_S2kin_ast	* local_xi_Kin_bar;
-//		local_c_immob.head(_I_NMin_bar) = local_c_immob_non_min;
-//		local_c_immob += _mat_S2_orth	* local_eta_bar;
-//		local_c_immob.tail(_I_min) =      local_xi_Min_bar;
-		local_c_immob = _mat_S2_ast * local_xi_bar + _mat_S2_orth * local_eta_bar;
+		if (local_c_immob_non_min.size() > 0)
+		{
+			local_c_immob_non_min += _mat_S2sorp	* local_xi_Sorp_bar;
+			local_c_immob_non_min += _mat_S2kin_ast	* local_xi_Kin_bar;
+			local_c_immob_non_min += _mat_S2_orth	* local_eta_bar;
+		}
+		
+		local_c_immob.head(_I_NMin_bar) = local_c_immob_non_min;
+		local_c_immob.tail(_I_min)      = local_xi_Min_bar;
+		// local_c_immob = _mat_S2_ast * local_xi_bar + _mat_S2_orth * local_eta_bar;
 
 		local_conc.bottomRows(_I_NMin_bar + _I_min) = local_c_immob;
 
-    for (int i=0; i < local_conc.rows(); i++)    {
-        if ( local_conc(i) < 0.0 ){
-            local_conc(i) = 1.0e-99;
-        }
-
-    }
+        for (int i=0; i < local_conc.rows(); i++)
+		{
+			if ( local_conc(i) < 0.0 )
+			{
+				local_conc(i) = 1.0e-99;
+			}
+		}
     // end of testing
 
 }
