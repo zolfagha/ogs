@@ -58,11 +58,6 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
     const double alpha (0.5);
     double d_norm(0.0), d1_norm(0.0);
 
-    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
-//    _logk_mob  = lnk_mob;
-//    _logk_sorp = lnk_sorp;
-//    _logk_min  = lnk_min;
-
 	// HS: the number of unknowns in the local problem equals
 	// to the number of chemical components
     x_new          = ogsChem::LocalVector::Zero( _n_Comp );
@@ -87,18 +82,18 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
     // now updating the saturation index and minerals
     if(_n_xi_Min > 0)
     {
-    this->calculate_AI(x,vec_AI);
-    this->update_minerals_conc_AI( x, vec_AI );
+		// this->calculate_AI(x,vec_AI);
+		this->update_minerals_conc_AI(x, vec_AI); 
     }
 
-#ifdef _DEBUG
-	// debugging--------------------------
-    // std::cout << "x Vector: \n";
-    // std::cout << x << std::endl;
-	// std::cout << "vec_AI Vector: \n";
-    // std::cout << vec_AI << std::endl;
-	// end of debugging-------------------
-#endif
+	#ifdef _DEBUG
+		// debugging--------------------------
+		// std::cout << "x Vector: \n";
+		// std::cout << x << std::endl;
+		// std::cout << "vec_AI Vector: \n";
+		// std::cout << vec_AI << std::endl;
+		// end of debugging-------------------
+	#endif
 
 	// update the value of xikinbar in the vector of unknowns(x_new)
 	if (_n_xi_Kin_bar > 0)
@@ -109,87 +104,87 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
     // evaluate norm of residual vector
     d_norm = vec_residual.norm();
 
-#ifdef _DEBUG
-	// debugging--------------------------
-	// std::cout << "Residual Vector: \n";
-	// std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
+	#ifdef _DEBUG
+		// debugging--------------------------
+		// std::cout << "Residual Vector: \n";
+		// std::cout << vec_residual << std::endl;
+		// end of debugging-------------------
+	#endif
 
 	// save the previous values
 	x_new  =  x;
-	while ((iter < max_iter) && (d_norm > iter_tol)){ //RZ: 4.12.2013
-//    while (true)
-//    {
-//        #ifdef _DEBUG
-//            // display the residual
-//            // std::cout << "Iteration #" << iter << "||res|| = " << d_norm << "||delta_x|| = " << dx.norm() << std::endl;
-//        #endif
-//        // convergence criteria
-//        if ( d_norm < iter_tol )
-//        {
-//            #ifdef _DEBUG
-// //                std::cout << "Newton iteration successfully converged!\n";
-//            #endif
-//
-//            break;  // break the loop
-//        }
-//        else if ( dx.norm() < rel_tol )
-//        {
-//            #ifdef _DEBUG
-// //           std::cout << "Warning, Newton iteration stagnent on Node #" << node_idx << "! Exit the iteration!\n" ;
-//            #endif
-//
-//            break;  // break the loop
-//        }
-//        else if ( iter > max_iter )
-//        {
-//            #ifdef _DEBUG
-////            std::cout << "ERROR! Node #" << node_idx  << "Newton iterationan does not converge! Simulation stops!\n";
-//            #endif
-//
-//            return; // stop the program
-//        }
+    while (true)
+    {
+        #ifdef _DEBUG
+            // display the residual
+            // std::cout << "Iteration #" << iter << "||res|| = " << d_norm << "||delta_x|| = " << dx.norm() << std::endl;
+        #endif
+        // convergence criteria
+        if ( d_norm < iter_tol )
+        {
+            #ifdef _DEBUG
+                // std::cout << "Newton iteration successfully converged!\n";
+            #endif
+
+            break;  // break the loop
+        }
+        else if ( dx.norm() < rel_tol )
+        {
+            #ifdef _DEBUG
+                // std::cout << "Warning, Newton iteration stagnent on Node #" << node_idx << "! Exit the iteration!\n" ;
+            #endif
+
+            break;  // break the loop
+        }
+        else if ( iter > max_iter )
+        {
+            #ifdef _DEBUG
+            // std::cout << "ERROR! Node #" << node_idx  << "Newton iterationan does not converge! Simulation stops!\n";
+            #endif
+
+            return; // stop the program
+        }
         // form Jacobian matrix
 		this->calc_Jacobian(dt, x, vec_residual, _vec_XiBarKin, vec_AI);
 
-#ifdef _DEBUG
-	// debugging--------------------------
-	// std::cout << "_mat_Jacobian: \n";
-	// std::cout << _mat_Jacobian << std::endl;
-	// end of debugging-------------------
-#endif
+		#ifdef _DEBUG
+			// debugging--------------------------
+			// std::cout << "_mat_Jacobian: \n";
+			// std::cout << _mat_Jacobian << std::endl;
+			// end of debugging-------------------
+		#endif
 
         // solving for increment
         this->solve_minimization(_mat_Jacobian, vec_residual, dx );
 
-#ifdef _DEBUG
-	// debugging--------------------------
-	// std::cout << "dx Vector: \n";
-	// std::cout << dx << std::endl;
-	// end of debugging-------------------
-#endif
+		#ifdef _DEBUG
+			// debugging--------------------------
+			// std::cout << "dx Vector: \n";
+			// std::cout << dx << std::endl;
+			// end of debugging-------------------
+		#endif
 
-    // increment of unknowns
-    this->increment_unknown( x, dx, x_new ); 
+		// increment of unknowns
+		this->increment_unknown( x, dx, x_new ); 
 
-#ifdef _DEBUG
-	// debugging--------------------------
-	// std::cout << "x_new Vector: \n";
-	// std::cout << x_new << std::endl;
-	// end of debugging-------------------
-#endif
+		#ifdef _DEBUG
+			// debugging--------------------------
+			// std::cout << "x_new Vector: \n";
+			// std::cout << x_new << std::endl;
+			// end of debugging-------------------
+		#endif
 
     	// updating the saturation index and minerals
-        if(_n_xi_Min > 0)
-		this->update_minerals_conc_AI( x_new, vec_AI );
+		if (_n_xi_Min > 0)
+			// this->calculate_AI( x_new, vec_AI );
+			this->update_minerals_conc_AI(x_new, vec_AI); 
 
-#ifdef _DEBUG
-	// debugging--------------------------
-//	std::cout << "x_new: \n";
-//	std::cout << x_new << std::endl;
-	// end of debugging-------------------
-#endif
+		#ifdef _DEBUG
+			// debugging--------------------------
+		    // std::cout << "x_new: \n";
+		    // std::cout << x_new << std::endl;
+			// end of debugging-------------------
+		#endif
 		// update the value of xikinbar in the vector of unknowns(x_new)
 		if (_n_xi_Kin_bar > 0)
 			this->ODE_solver(dt, x_new, _vec_XiBarKin, _vec_XiBarKin_old);
@@ -197,15 +192,15 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 		this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin, vec_AI);
 
 
-#ifdef _DEBUG
-	// debugging--------------------------
-	// std::cout << "x_new Vector: \n";
-	// std::cout << x_new << std::endl;
+		#ifdef _DEBUG
+			// debugging--------------------------
+			// std::cout << "x_new Vector: \n";
+			// std::cout << x_new << std::endl;
 
-	// std::cout << "vec_residual: \n";
-	// std::cout << vec_residual << std::endl;
-	// end of debugging-------------------
-#endif
+			// std::cout << "vec_residual: \n";
+			// std::cout << vec_residual << std::endl;
+			// end of debugging-------------------
+		#endif
 
         // line search begins
         j = 0; 
@@ -220,15 +215,16 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
             // updating dx
             dx = dx * alpha;
             // increment of unknowns
-            //this->increment_unknown( x, dx, x_new );
-            x_new = x_new - dx;  //RZ: essential for convergency
+            this->increment_unknown( x, dx, x_new );
+
             // now updating the saturation index and minerals
-            if(_n_xi_Min > 0)
-				this->update_minerals_conc_AI( x_new, vec_AI );
+			if (_n_xi_Min > 0)
+				// this->calculate_AI( x_new, vec_AI );
+				this->update_minerals_conc_AI(x_new, vec_AI); 
 
             // update the value of xikinbar in the vector of unknowns(x_new)
 			if (_n_xi_Kin_bar > 0)
-			this->ODE_solver(dt, x_new, _vec_XiBarKin, _vec_XiBarKin_old);
+			    this->ODE_solver(dt, x_new, _vec_XiBarKin, _vec_XiBarKin_old);
 
 			// evaluate residual with x_new
 			this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin, vec_AI);
@@ -524,7 +520,8 @@ void LocalProblem::update_minerals_conc_AI(ogsChem::LocalVector & vec_unknowns,
     ogsChem::LocalVector ln_activity       = ogsChem::LocalVector::Zero( _n_Comp    );
     ogsChem::LocalVector ln_activity_coeff = ogsChem::LocalVector::Zero( _n_Comp );
     ogsChem::LocalVector ln_Conc 		   = ogsChem::LocalVector::Zero( _n_Comp );
-    ln_Conc.head(_I_mob) 		   		   = ln_conc_Mob;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
+    ln_Conc.head(_I_mob) 		   		   = ln_conc_Mob;  
+	ln_Conc.segment(_I_mob, _I_sorp)       = ln_conc_Sorp; 
     this->_activity_model->calc_activity_logC( ln_Conc, ln_activity_coeff, ln_activity );
     //End 16.12.2013
 
@@ -538,9 +535,6 @@ void LocalProblem::update_minerals_conc_AI(ogsChem::LocalVector & vec_unknowns,
 
     	//phi  = -_logk_min(i) + mat_S1min_transposed.row(i) * ln_conc_Mob;
 
-
-/* RZ: AI is evaluated once at the beginning of the local problem
-
     	// if mineral concentration  >= phi ; mineral is present; saturated case; precipitate the mineral.
     	if (conc_Min_bar(i) >= phi)
     	{
@@ -552,7 +546,6 @@ void LocalProblem::update_minerals_conc_AI(ogsChem::LocalVector & vec_unknowns,
     		vec_AI(i) = 0;
     		conc_Min_bar(i) = 0.0;
     	}// end of else
-*/
 
     	// if mineral is present, calculate mineral concentration
     	if	(vec_AI(i) == 1)
@@ -797,24 +790,18 @@ void LocalProblem::residual_conc_Min(ogsChem::LocalVector & ln_conc_Mob,
 
 	mat_S1minT = _mat_S1min.transpose();
 
-    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
+	// calculating the activities 
     ogsChem::LocalVector ln_activity       = ogsChem::LocalVector::Zero( _n_Comp    );
     ogsChem::LocalVector ln_activity_coeff = ogsChem::LocalVector::Zero( _n_Comp );
     ogsChem::LocalVector ln_Conc 		   = ogsChem::LocalVector::Zero( _n_Comp );
     ln_Conc.head(_I_mob) 		   		   = ln_conc_Mob;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
     this->_activity_model->calc_activity_logC( ln_Conc, ln_activity_coeff, ln_activity );
-    //End 16.12.2013
 
 	for (i=0; i < _n_xi_Min; i++)
 	{
-		phi  = -_logk_min(i) + mat_S1minT.row(i) * ln_activity.head(_I_mob); //RZ: 16.12.2013
-		//phi  = -_logk_min(i) + mat_S1minT.row(i) * ln_conc_Mob;
+		phi  = -_logk_min(i) + mat_S1minT.row(i) * ln_activity.head(_I_mob); 
 
-		if(vec_AI(i) == 1) //RZ: 3-Nov-13 Must be kept like this!
-			vec_residual(idx + i) 	= phi;
-		else
-			vec_residual(idx + i) 	= conc_Min_bar(i);
-	//	vec_residual(idx + i) 	= std::min(phi, conc_Min_bar(i));
+		vec_residual(idx + i) 	= std::min(phi, conc_Min_bar(i));
 	}
 }
 
@@ -901,65 +888,68 @@ void LocalProblem::reaction_rates(ogsChem::LocalVector & conc,
 	}
 }
 
-/*
- * RZ: AI vector contains 1 and 0. 1 if mineral is present and 0 if absent.
- */
-//calculate AI vector
-void LocalProblem::calculate_AI(ogsChem::LocalVector & vec_unknowns,
-								ogsChem::LocalVector & vec_AI)
-{
-    double phi = 0.0;
-    size_t idx, j;
-    ogsChem::LocalVector ln_conc_Mob  = ogsChem::LocalVector::Zero(_I_mob);
-    ogsChem::LocalVector ln_conc_Sorp = ogsChem::LocalVector::Zero(_I_sorp);
-    ogsChem::LocalVector conc_Min_bar = ogsChem::LocalVector::Zero(_I_min);
-	ogsChem::LocalVector conc_Kin_bar = ogsChem::LocalVector::Zero(_I_kin);
-    //ogsChem::LocalMatrix mat_S1min_transposed;
-    //logConc_Mob = ogsChem::LocalVector::Zero(_I_mob);
-    ogsChem::LocalMatrix  mat_S1min_transposed = ogsChem::LocalMatrix::Zero(_mat_S1min.cols(),_mat_S1min.rows());
-    mat_S1min_transposed = _mat_S1min.transpose();
 
 
-    // take the first section which is basis concentration
-    ln_conc_Mob    = vec_unknowns.head( _I_mob   );
-    // take the sorp component concentrations
-	ln_conc_Sorp   = vec_unknowns.segment(_I_mob, _I_sorp);
-    // take the mineral part
-    conc_Min_bar   = vec_unknowns.segment(_I_mob + _I_sorp, _I_min );
-	// take the kinetic part
-    conc_Kin_bar   = vec_unknowns.tail(_I_kin);
 
-    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
-    ogsChem::LocalVector ln_activity       = ogsChem::LocalVector::Zero( _n_Comp    );
-    ogsChem::LocalVector ln_activity_coeff = ogsChem::LocalVector::Zero( _n_Comp );
-    ogsChem::LocalVector ln_Conc 		   = ogsChem::LocalVector::Zero( _n_Comp );
-    ln_Conc.head(_I_mob) 		   		   = ln_conc_Mob;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
-    this->_activity_model->calc_activity_logC( ln_Conc, ln_activity_coeff, ln_activity );
-    //End 16.12.2013
-
-    for(j =0; j < _I_min; j++)
-    {
-    	idx = _I_mob + _I_sorp + j;
-    	conc_Min_bar(j) = cal_cbarmin_by_constrain(j, ln_conc_Mob, ln_conc_Sorp, conc_Min_bar, conc_Kin_bar);
-
-    	//phi  = -_logk_min(j) + mat_S1min_transposed.row(j) * ln_conc_Mob;
-
-    	//RZ: 16.12.2013
-    	phi  = -_logk_min(j) + mat_S1min_transposed.row(j) * ln_activity.head(_I_mob);  //RZ:2.12.2013 include activity model
-
-
-    	// if mineral concentration  >= phi ; mineral is present; saturated case; precipitate the mineral.
-    	if(conc_Min_bar(j) > phi)  //RZ:9-Dec-13
-    	{
-    		vec_AI(j) = 1;
-    	}// end of if
-    	// if mineral concentration < phi : mineral is NOT present; under saturated case; dissolve the mineral
-    	else
-    	{
-    		vec_AI(j) = 0;
-    		conc_Min_bar(j) = 0.0;
-    		vec_unknowns(idx) = conc_Min_bar(j);
-    	}// end of else
-    }
-}
+///*
+// * RZ: AI vector contains 1 and 0. 1 if mineral is present and 0 if absent.
+// */
+////calculate AI vector
+//void LocalProblem::calculate_AI(ogsChem::LocalVector & vec_unknowns,
+//								ogsChem::LocalVector & vec_AI)
+//{
+//    double phi = 0.0;
+//    size_t idx, j;
+//    ogsChem::LocalVector ln_conc_Mob  = ogsChem::LocalVector::Zero(_I_mob);
+//    ogsChem::LocalVector ln_conc_Sorp = ogsChem::LocalVector::Zero(_I_sorp);
+//    ogsChem::LocalVector conc_Min_bar = ogsChem::LocalVector::Zero(_I_min);
+//	ogsChem::LocalVector conc_Kin_bar = ogsChem::LocalVector::Zero(_I_kin);
+//    //ogsChem::LocalMatrix mat_S1min_transposed;
+//    //logConc_Mob = ogsChem::LocalVector::Zero(_I_mob);
+//    ogsChem::LocalMatrix  mat_S1min_transposed = ogsChem::LocalMatrix::Zero(_mat_S1min.cols(),_mat_S1min.rows());
+//    mat_S1min_transposed = _mat_S1min.transpose();
+//
+//
+//    // take the first section which is basis concentration
+//    ln_conc_Mob    = vec_unknowns.head( _I_mob   );
+//    // take the sorp component concentrations
+//	ln_conc_Sorp   = vec_unknowns.segment(_I_mob, _I_sorp);
+//    // take the mineral part
+//    conc_Min_bar   = vec_unknowns.segment(_I_mob + _I_sorp, _I_min );
+//	// take the kinetic part
+//    conc_Kin_bar   = vec_unknowns.tail(_I_kin);
+//
+//    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
+//    ogsChem::LocalVector ln_activity       = ogsChem::LocalVector::Zero( _n_Comp    );
+//    ogsChem::LocalVector ln_activity_coeff = ogsChem::LocalVector::Zero( _n_Comp );
+//    ogsChem::LocalVector ln_Conc 		   = ogsChem::LocalVector::Zero( _n_Comp );
+//    ln_Conc.head(_I_mob) 		   		   = ln_conc_Mob;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
+//    this->_activity_model->calc_activity_logC( ln_Conc, ln_activity_coeff, ln_activity );
+//    //End 16.12.2013
+//
+//    for(j =0; j < _I_min; j++)
+//    {
+//    	idx = _I_mob + _I_sorp + j;
+//    	conc_Min_bar(j) = cal_cbarmin_by_constrain(j, ln_conc_Mob, ln_conc_Sorp, conc_Min_bar, conc_Kin_bar);
+//
+//    	//phi  = -_logk_min(j) + mat_S1min_transposed.row(j) * ln_conc_Mob;
+//
+//    	//RZ: 16.12.2013
+//    	phi  = -_logk_min(j) + mat_S1min_transposed.row(j) * ln_activity.head(_I_mob);  //RZ:2.12.2013 include activity model
+//
+//
+//    	// if mineral concentration  >= phi ; mineral is present; saturated case; precipitate the mineral.
+//    	if(conc_Min_bar(j) > phi)  //RZ:9-Dec-13
+//    	{
+//    		vec_AI(j) = 1;
+//    	}// end of if
+//    	// if mineral concentration < phi : mineral is NOT present; under saturated case; dissolve the mineral
+//    	else
+//    	{
+//    		vec_AI(j) = 0;
+//    		conc_Min_bar(j) = 0.0;
+//    		vec_unknowns(idx) = conc_Min_bar(j);
+//    	}// end of else
+//    }
+//}
 
