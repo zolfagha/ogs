@@ -563,7 +563,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 
 	//vec_phi		  = - logk_min + mat_S1min.transpose() * ln_conc_Mob;
 	 vec_phi		  = - logk_min + mat_S1min.transpose() * ln_activity.head(_I_mob);	//RZ: 16.12.2013
-	conc_Min_bar  = vec_conc.tail(_I_min);
+	conc_Min_bar  	  = vec_conc.segment(_I_mob + _I_sorp, _I_min);
 
     mat_S1minI.setZero();
     mat_S1minA.setZero();
