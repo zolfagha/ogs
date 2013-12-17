@@ -30,9 +30,6 @@ LocalProblem::LocalProblem(ogsChem::chemReductionGIA* ReductionGIA, MathLib::Ste
 
 }
 
-//LocalProblem::~LocalProblem()
-//{}
-
 void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 														double dt,
 														const double iter_tol,
@@ -613,7 +610,7 @@ double LocalProblem::cal_cbarmin_by_constrain(size_t        idx_min,
 
 	conc_bar.head(_I_sorp) = conc_Sorp;
 	conc_bar.segment(_I_sorp, _I_min) = conc_Min_bar; 
-	conc_bar.tail(conc_Kin_bar.rows()) = conc_Kin_bar;
+	conc_bar.tail(conc_Kin_bar.rows()) = conc_Kin_bar;  //TODO: RZ: potential bug
 
     // xi_sorp_bar
     temp 			= _mat_c_immob_2_xi_immob * conc_bar;
@@ -779,10 +776,10 @@ void LocalProblem::residual_conc_Sorp(ogsChem::LocalVector & ln_conc_Mob,
     ogsChem::LocalVector ln_activity       = ogsChem::LocalVector::Zero( _n_Comp    );
     ogsChem::LocalVector ln_activity_coeff = ogsChem::LocalVector::Zero( _n_Comp );
     ogsChem::LocalVector ln_Conc 		   = ogsChem::LocalVector::Zero( _n_Comp );
-    ln_Conc.head(_I_mob) 		   		   = ln_conc_Mob;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
+    ln_Conc.head(_I_mob + _I_sorp) 		   = ln_conc_tmp;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
     this->_activity_model->calc_activity_logC( ln_Conc, ln_activity_coeff, ln_activity );
     //End 16.12.2013
-    vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde +_n_xi_Kin, _n_xi_Sorp)  = - _logk_sorp + _mat_Ssorp.transpose() * ln_activity.head(_I_mob);
+    vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde +_n_xi_Kin, _n_xi_Sorp)  = - _logk_sorp + _mat_Ssorp.transpose() * ln_activity.head(_I_mob + _I_sorp);
 
 	//vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde +_n_xi_Kin, _n_xi_Sorp)  = - _logk_sorp + _mat_Ssorp.transpose() * ln_conc_tmp;
 }
