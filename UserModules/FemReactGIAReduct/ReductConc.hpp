@@ -665,19 +665,6 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 				loc_xi_local_old_dt[i] = this->_xi_local_old[i]->getValue(node_idx);
 			}
 
-			//RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
-//			//get the updated lnK values on each node.
-//			for (i=0; i < _n_xi_Mob; i++)
-//				lnk_mob[i] = this->_vec_lnK_Mob[i]->getValue(node_idx);
-//			for (i=0; i < _n_xi_Sorp; i++)
-//				lnk_sorp[i] = this->_vec_lnK_Sorp[i]->getValue(node_idx);
-//			for (i=0; i < _n_xi_Min; i++)
-//				lnk_min[i] = this->_vec_lnK_Min[i]->getValue(node_idx);
-
-			// get concentration values based on current updated eta and xi values. 
-			//this->_ReductionGIA->EtaXi2Conc(loc_eta, loc_etabar, loc_xi_global, loc_xi_local, loc_conc);
-
-
 			// skip the boundary nodes
 			if ( ! this->_solution->isBCNode(node_idx) )
 			{
