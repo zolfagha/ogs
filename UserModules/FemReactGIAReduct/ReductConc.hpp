@@ -777,6 +777,15 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 		    vec_conc_updated.segment(_I_mob + _I_sorp, _I_min) = vec_conc_Min;
 			vec_conc_updated.tail(_I_kin) = vec_conc_Kin;
 
+			//RZ:DB
+			for(size_t w = 0; w < _I_min; w++)
+			{
+				if(vec_conc_Min(w) < 0.0)
+				{
+					std::cout << "negative mineral concentration after solving local problem! on node:"<< node_idx << std::endl;
+					std::cout << vec_conc_Min << std::endl;
+				}
+			}
 
 			//update the xi global value after with the optimized values 4-Nov-2013
 			for (i=0; i < _n_xi_global; i++)
