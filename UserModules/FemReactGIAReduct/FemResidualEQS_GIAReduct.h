@@ -280,61 +280,61 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             loc_cur_xi_Sorp_bar_li  = loc_cur_xi_Sorp_bar.topRows(_n_xi_Sorp_bar_li);
             loc_cur_xi_Sorp_bar_ld  = loc_cur_xi_Sorp_bar.bottomRows(_n_xi_Sorp_bar_ld);
 
-            // calculate node based AE (Eq. 3.43 and 3.44)
-            res43 = loc_cur_xi_Sorp_tilde - loc_cur_xi_Sorp + loc_cur_xi_Sorp_bar_li;
-            for(std::size_t i = 0; i < _n_xi_Sorp_tilde; i++)
-            residual_global[_n_xi_global * node_idx + i] = res43[i];
-
-            if(_n_xi_Sorp_bar_ld != 0)
-            	res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar + loc_cur_xi_Sorp_bar_ld;
-            else
+//            // calculate node based AE (Eq. 3.43 and 3.44)
+//            res43 = loc_cur_xi_Sorp_tilde - loc_cur_xi_Sorp + loc_cur_xi_Sorp_bar_li;
+//            for(std::size_t i = 0; i < _n_xi_Sorp_tilde; i++)
+//            	residual_global[_n_xi_global * node_idx + i] = res43[i];
+//
+//            if(_n_xi_Sorp_bar_ld != 0)
+//            	res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar + loc_cur_xi_Sorp_bar_ld;
+//            else
             	res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar;
 
             for(std::size_t i = 0; i < _n_xi_Min_tilde; i++)
-            residual_global[_n_xi_global * node_idx + i] = res44[i];
-
-            if(_n_xi_Kin > 0){
-            // calculate the nodal kinetic reaction rates
-            _ReductionGIA->Calc_Kin_Rate_temp(loc_cur_xi_Mob,
-                                         loc_cur_xi_Sorp,
-                                         loc_cur_xi_Sorp_tilde,
-                                         loc_cur_xi_Sorp_bar,
-                                         loc_cur_xi_Min,
-                                         loc_cur_xi_Min_tilde,
-                                         loc_cur_xi_Min_bar,
-                                         loc_cur_xi_Kin,
-                                         loc_cur_xi_Kin_bar,
-                                         loc_cur_eta,
-                                         loc_cur_eta_bar,
-                                         vec_Rate);
-
-            //_J_tot_kin  = vec_Rate.rows();
-            for (size_t i=0; i < _J_tot_kin; i++)
-                _global_vec_Rate[i]->setValue(node_idx, vec_Rate[i]);
-
-			// the rate term should not be multiplied with dt. 
-            res45 = theta_water_content * mat_Asorp * vec_Rate; 
-            res46 = theta_water_content * mat_Amin  * vec_Rate; 
-            res47 = theta_water_content * mat_A1kin * vec_Rate; 
-
-			// HS: the following part is disabled, 
-			// first we store them, and the integration of these values
-			// will be done in the assembly part. 
-			/*
-            for (j=0; j<_n_xi_Sorp_tilde; j++ )
-                residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + j] -= res45(j) ;
-            for (j=0; j<_n_xi_Min_tilde; j++ )
-                residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp_tilde + j] -= res46(j) ;
-            for (j=0; j<_n_xi_Kin; j++ )
-                residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp_tilde + _n_xi_Min_tilde + j] -= res47(j) ;
-		    */
-			for (j = 0; j < _n_xi_Sorp_tilde; j++)
-				this->_function_data->get_xi_sorp_rates()[j]->setValue( node_idx, res45(j));
-			for (j = 0; j < _n_xi_Min_tilde; j++)
-				this->_function_data->get_xi_min_rates()[j]->setValue(node_idx, res46(j)); 
-			for (j = 0; j < _n_xi_Kin; j++)
-				this->_function_data->get_xi_kin_rates()[j]->setValue(node_idx, res47(j));
-            }
+            	residual_global[_n_xi_global * node_idx + i] = res44[i];
+//
+//            if(_n_xi_Kin > 0){
+//            // calculate the nodal kinetic reaction rates
+//            _ReductionGIA->Calc_Kin_Rate_temp(loc_cur_xi_Mob,
+//                                         loc_cur_xi_Sorp,
+//                                         loc_cur_xi_Sorp_tilde,
+//                                         loc_cur_xi_Sorp_bar,
+//                                         loc_cur_xi_Min,
+//                                         loc_cur_xi_Min_tilde,
+//                                         loc_cur_xi_Min_bar,
+//                                         loc_cur_xi_Kin,
+//                                         loc_cur_xi_Kin_bar,
+//                                         loc_cur_eta,
+//                                         loc_cur_eta_bar,
+//                                         vec_Rate);
+//
+//            //_J_tot_kin  = vec_Rate.rows();
+//            for (size_t i=0; i < _J_tot_kin; i++)
+//                _global_vec_Rate[i]->setValue(node_idx, vec_Rate[i]);
+//
+//			// the rate term should not be multiplied with dt.
+//            res45 = theta_water_content * mat_Asorp * vec_Rate;
+//            res46 = theta_water_content * mat_Amin  * vec_Rate;
+//            res47 = theta_water_content * mat_A1kin * vec_Rate;
+//
+//			// HS: the following part is disabled,
+//			// first we store them, and the integration of these values
+//			// will be done in the assembly part.
+//			/*
+//            for (j=0; j<_n_xi_Sorp_tilde; j++ )
+//                residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + j] -= res45(j) ;
+//            for (j=0; j<_n_xi_Min_tilde; j++ )
+//                residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp_tilde + j] -= res46(j) ;
+//            for (j=0; j<_n_xi_Kin; j++ )
+//                residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp_tilde + _n_xi_Min_tilde + j] -= res47(j) ;
+//		    */
+//			for (j = 0; j < _n_xi_Sorp_tilde; j++)
+//				this->_function_data->get_xi_sorp_rates()[j]->setValue( node_idx, res45(j));
+//			for (j = 0; j < _n_xi_Min_tilde; j++)
+//				this->_function_data->get_xi_min_rates()[j]->setValue(node_idx, res46(j));
+//			for (j = 0; j < _n_xi_Kin; j++)
+//				this->_function_data->get_xi_kin_rates()[j]->setValue(node_idx, res47(j));
+//            }
      
     } // end of loop over all nodes. 
 
@@ -602,19 +602,19 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
 
         // LHS = (1/dt M + theta theta K) u1
         // RHS = (1/dt M - (1-theta) K) u0 + F
-        for ( j=0; j < _n_xi_Sorp_tilde; j++ )
-        {
-            localLHS_xi_sorp  = 1.0 / dt * localM * loc_cur_xi_Sorp_tilde.segment(j*nnodes, nnodes) 
-                                  + _theta * localK * loc_cur_xi_Sorp.segment(j*nnodes, nnodes);
-
-			localRHS_xi_sorp = 1.0 / dt * localM * loc_pre_xi_Sorp_tilde.segment(j*nnodes, nnodes)
-                                  - (1.0 - _theta) * localK * loc_pre_xi_Sorp.segment(j*nnodes, nnodes);
-			local_res_sorp = localLHS_xi_sorp - localRHS_xi_sorp - localF_xi_sorp.segment(nnodes*j, nnodes);
-            for (k=0; k<nnodes; k++)
-            {
-                residual_global[_n_xi_global * ele_node_ids[k] + _n_xi_Sorp_tilde + _n_xi_Min_tilde + j] += local_res_sorp(k) ;
-            }
-        }  // end of for j
+//        for ( j=0; j < _n_xi_Sorp_tilde; j++ )
+//        {
+//            localLHS_xi_sorp  = 1.0 / dt * localM * loc_cur_xi_Sorp_tilde.segment(j*nnodes, nnodes)
+//                                  + _theta * localK * loc_cur_xi_Sorp.segment(j*nnodes, nnodes);
+//
+//			localRHS_xi_sorp = 1.0 / dt * localM * loc_pre_xi_Sorp_tilde.segment(j*nnodes, nnodes)
+//                                  - (1.0 - _theta) * localK * loc_pre_xi_Sorp.segment(j*nnodes, nnodes);
+//			local_res_sorp = localLHS_xi_sorp - localRHS_xi_sorp - localF_xi_sorp.segment(nnodes*j, nnodes);
+//            for (k=0; k<nnodes; k++)
+//            {
+//                residual_global[_n_xi_global * ele_node_ids[k] + _n_xi_Sorp_tilde + _n_xi_Min_tilde + j] += local_res_sorp(k) ;
+//            }
+//        }  // end of for j
         for ( j=0; j <_n_xi_Min_tilde; j++ )
         {
 			localLHS_xi_min = 1.0 / dt * localM * loc_cur_xi_Min_tilde.segment(j*nnodes, nnodes)
@@ -629,17 +629,17 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
                 residual_global[_n_xi_global * ele_node_ids[k] + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + j] += local_res_min(k) ;
             }
         }  // end of for j
-        for ( j=0; j <_n_xi_Kin; j++ )
-        {
-			localLHS_xi_kin = 1.0 / dt * localM * loc_cur_xi_Kin.segment(j*nnodes, nnodes)
-                                 + _theta * localK * loc_cur_xi_Kin.segment(j*nnodes, nnodes);
-			localRHS_xi_kin = 1.0 / dt * localM * loc_pre_xi_Kin.segment(j*nnodes, nnodes)
-                                 - (1.0 - _theta) * localK * loc_pre_xi_Kin.segment(j*nnodes, nnodes);
-			local_res_kin = localLHS_xi_kin - localRHS_xi_kin - localF_xi_kin.segment(nnodes*j, nnodes);
-            for (k=0; k<nnodes; k++)
-            {
-                residual_global[_n_xi_global * ele_node_ids[k] + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + j] += local_res_kin(k) ;
-            }
-        }  // end of for j
+//        for ( j=0; j <_n_xi_Kin; j++ )
+//        {
+//			localLHS_xi_kin = 1.0 / dt * localM * loc_cur_xi_Kin.segment(j*nnodes, nnodes)
+//                                 + _theta * localK * loc_cur_xi_Kin.segment(j*nnodes, nnodes);
+//			localRHS_xi_kin = 1.0 / dt * localM * loc_pre_xi_Kin.segment(j*nnodes, nnodes)
+//                                 - (1.0 - _theta) * localK * loc_pre_xi_Kin.segment(j*nnodes, nnodes);
+//			local_res_kin = localLHS_xi_kin - localRHS_xi_kin - localF_xi_kin.segment(nnodes*j, nnodes);
+//            for (k=0; k<nnodes; k++)
+//            {
+//                residual_global[_n_xi_global * ele_node_ids[k] + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + j] += local_res_kin(k) ;
+//            }
+//        }  // end of for j
     }  // end of loop over all elements
 }
