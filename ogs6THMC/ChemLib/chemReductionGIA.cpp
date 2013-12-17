@@ -641,7 +641,7 @@ void chemReductionGIA::EtaXi2Conc_JH_NOCUTOFF( ogsChem::LocalVector &local_eta,
 		local_conc.topRows(_I_mob )     = local_c_mob;
 
 		// Eq. (3.40) of Hoffmann
-		if ( local_c_immob_non_min.size() > 0 )
+		if (_I_NMin_bar > 0)
 		{
 			local_c_immob_non_min += _mat_S2sorp	* local_xi_Sorp_bar;
 			local_c_immob_non_min += _mat_S2kin_ast	* local_xi_Kin_bar;
