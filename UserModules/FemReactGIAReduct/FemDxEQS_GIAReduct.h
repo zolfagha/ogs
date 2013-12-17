@@ -357,20 +357,20 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
 			loc_cur_xi_Min_tilde  = loc_cur_xi_global.segment( this->_n_xi_Sorp_tilde,this->_n_xi_Min_tilde);
 			loc_cur_xi_Kin		  = loc_cur_xi_global.segment( this->_n_xi_Sorp_tilde + this->_n_xi_Min_tilde + this->_n_xi_Sorp + this->_n_xi_Min,this->_n_xi_Kin);
 
-            for (i=0; i < _n_Comp; i++)
-                vec_conc[i] = this->_concentrations[i]->getValue(node_idx);
+//            for (i=0; i < _n_Comp; i++)
+//                vec_conc[i] = this->_concentrations[i]->getValue(node_idx);
 
-//    		//calculate concentration vector using JH version. RZ: 6.Nov.2013
-//    		this->_ReductionGIA->EtaXi2Conc_JH_NOCUTOFF(loc_cur_eta,
-//    										   loc_cur_eta_bar,
-//    										   local_xi_Mob,
-//    										   loc_cur_xi_Sorp_tilde,
-//    										   local_xi_Sorp_bar,
-//    										   loc_cur_xi_Min_tilde,
-//    										   local_xi_Min_bar,
-//    										   loc_cur_xi_Kin,
-//    										   local_xi_Kin_bar,
-//    										   vec_conc);
+    		//calculate concentration vector using JH version. RZ: 6.Nov.2013
+    		this->_ReductionGIA->EtaXi2Conc_JH_NOCUTOFF(loc_cur_eta,
+    										   loc_cur_eta_bar,
+    										   local_xi_Mob,
+    										   loc_cur_xi_Sorp_tilde,
+    										   local_xi_Sorp_bar,
+    										   loc_cur_xi_Min_tilde,
+    										   local_xi_Min_bar,
+    										   loc_cur_xi_Kin,
+    										   local_xi_Kin_bar,
+    										   vec_conc);
 
 //
 //			tmp_vec_conc = vec_conc; // just initialize memory.
@@ -491,12 +491,12 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             Jacobian_local = mat_p1F + mat_p2F * mat_vprime;
 
             // debugging--------------------------
-            // std::cout << "======================================== \n";
-            // std::cout << "mat_vprime: \n";
-            // std::cout << mat_vprime << std::endl;
-            // std::cout << "Jacobian_local: \n";
-            // std::cout << Jacobian_local << std::endl;
-            // std::cout << "======================================== \n";
+//             std::cout << "======================================== \n";
+//             std::cout << "mat_vprime: \n";
+//             std::cout << mat_vprime << std::endl;
+//             std::cout << "Jacobian_local: \n";
+//             std::cout << Jacobian_local << std::endl;
+//             std::cout << "======================================== \n";
             // end of debugging-------------------
 
             // construct global Jacobian matrix

@@ -137,6 +137,10 @@ private:
     FemLib::IFiniteElement* _fe;
     std::size_t _n_xi_global, _n_xi_Sorp_tilde, _n_xi_Min_tilde, _n_xi_Sorp, _n_xi_Min, _n_xi_Kin, _n_xi_local, _n_xi_Sorp_bar, _n_xi_Min_bar, _n_eta, _n_eta_bar, _n_xi_Mob, _n_xi_Kin_bar, _J_tot_kin
     			,_n_xi_Sorp_bar_li, _n_xi_Sorp_bar_ld;
+    /**
+      * pointer to the activity model
+      */
+    ogsChem::chemActivityModelAbstract *_activity_model;
 };
 
 
