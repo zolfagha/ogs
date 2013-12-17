@@ -543,14 +543,6 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 	MathLib::LocalMatrix  mat_A_tilde           = MathLib::LocalMatrix::Zero(_I_mob + _I_sorp, _I_mob + _I_sorp);
 	std::size_t i;
 
-    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
-    ogsChem::LocalVector ln_activity       = ogsChem::LocalVector::Zero( _n_Comp    );
-    ogsChem::LocalVector ln_activity_coeff = ogsChem::LocalVector::Zero( _n_Comp );
-    ogsChem::LocalVector ln_Conc 		   = ogsChem::LocalVector::Zero( _n_Comp );
-    ln_Conc.head(_I_mob) 		   		   = ln_conc_Mob;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
-    this->_activity_model->calc_activity_logC( ln_Conc, ln_activity_coeff, ln_activity );
-    //End 16.12.2013
-
 	for (i = 0; i < _I_mob + _I_sorp; i++)
 		mat_A_tilde(i,i) = 1.0 / vec_conc(i);
 
@@ -561,9 +553,19 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 		ln_conc_Mob(i)  = std::log(tmp_x);
 	}
 
+    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
+    ogsChem::LocalVector ln_activity       = ogsChem::LocalVector::Zero( _n_Comp    );
+    ogsChem::LocalVector ln_activity_coeff = ogsChem::LocalVector::Zero( _n_Comp );
+    ogsChem::LocalVector ln_Conc 		   = ogsChem::LocalVector::Zero( _n_Comp );
+    ln_Conc.head(_I_mob) 		   		   = ln_conc_Mob;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
+    this->_activity_model->calc_activity_logC( ln_Conc, ln_activity_coeff, ln_activity );
+
+
 	//vec_phi		  = - logk_min + mat_S1min.transpose() * ln_conc_Mob;
 	 vec_phi		  = - logk_min + mat_S1min.transpose() * ln_activity.head(_I_mob);	//RZ: 16.12.2013
-	conc_Min_bar  	  = vec_conc.segment(_I_mob + _I_sorp, _I_min);
+	conc_Min_bar  	  =   vec_conc.segment(_I_mob + _I_sorp, _I_min);
+    //End 16.12.2013
+
 
     mat_S1minI.setZero();
     mat_S1minA.setZero();
