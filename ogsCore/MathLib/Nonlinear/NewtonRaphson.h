@@ -67,13 +67,13 @@ public:
                 f_dx.eval(x_new, r, dx);
 				// x increment
                 x_new += dx;
-                // printout(itr_cnt, x_new, r, dx);
+                 printout(itr_cnt, x_new, r, dx);
 				// post processing
                 if (pre_post) 
 					pre_post->post_process(dx, x_new, f_residuals, f_dx);
 				// update residual
                 f_residuals.eval(x_new, r);
-                //printout(itr_cnt, x_new, r, dx);
+                printout(itr_cnt, x_new, r, dx);
                 if (convergence->check(&r, &dx, &x_new)) {
                     converged = true;
                     break;
@@ -157,7 +157,7 @@ private:
         std::cout << "r=(";
         for (size_t i=0; i<dx.size(); i++) std::cout << r[i] << " ";
         std::cout << std::endl;
-#if 0
+#if 1
         std::cout << "-> " << i <<": x=(";
         for (size_t i=0; i<x_new.size(); i++) std::cout << x_new[i] << " ";
         std::cout << "), r=(";
