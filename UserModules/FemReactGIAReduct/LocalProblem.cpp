@@ -55,11 +55,6 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
     const double alpha (0.5);
     double d_norm(0.0), d1_norm(0.0);
 
-    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
-//    _logk_mob  = lnk_mob;
-//    _logk_sorp = lnk_sorp;
-//    _logk_min  = lnk_min;
-
 	// HS: the number of unknowns in the local problem equals
 	// to the number of chemical components
     x_new          = ogsChem::LocalVector::Zero( _n_Comp );
