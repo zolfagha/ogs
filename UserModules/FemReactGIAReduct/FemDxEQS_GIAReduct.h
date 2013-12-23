@@ -343,11 +343,6 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             for (i=0; i < _J_tot_kin; i++)
                 vec_rate_old[i] = _global_vec_Rate[i]->getValue(node_idx);
 
-//            //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
-//			for (i=0; i < _n_xi_Min; i++)
-//				lnk_min[i] = this->_vec_lnK_Min[i]->getValue(node_idx);
-//			logk_min = lnk_min;
-
 			local_xi_Mob	  = loc_cur_xi_local.head(_n_xi_Mob);
 			local_xi_Sorp_bar = loc_cur_xi_local.segment(this->_n_xi_Mob,this->_n_xi_Sorp_bar);
 			local_xi_Min_bar  = loc_cur_xi_local.segment(this->_n_xi_Mob + this->_n_xi_Sorp_bar,this->_n_xi_Min_bar);
@@ -736,6 +731,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 		    }
 
 		}
+
 
 		node_indx_vec.resize(ele_node_ids.size());
 		col_indx_vec.resize(ele_node_ids.size());
