@@ -550,6 +550,11 @@ private:
 	  */
 	std::vector<MyNodalFunctionScalar*> _xi_kin_rates;
 
+	/**
+	  * index on each node, whether each mineral is present or not
+	  */
+	std::vector<ogsChem::LocalVector> _nodal_vec_AI;
+
     /**
       * nodal reaction rates
       */ 
