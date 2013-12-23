@@ -76,6 +76,13 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options & option)
     _n_xi_Kin_bar           = _ReductionGIA->get_n_xi_Kin_bar();
     _J_tot_kin 				= _ReductionGIA->get_n_xi_Kin_total();
 
+	// set the mineral index vectors
+	for (i = 0; i < msh->getNumberOfNodes(); i++)
+	{
+		ogsChem::LocalVector nodal_vec_AI = ogsChem::LocalVector::Zero(_I_min);
+		this->_nodal_vec_AI.push_back(nodal_vec_AI); 
+	}
+	
 	// set concentrations of all components as output
 	for ( i=0; i < _n_Comp; i++ )
 		this->setOutputParameterName( i, femData->map_ChemComp[i]->second->get_name() );
