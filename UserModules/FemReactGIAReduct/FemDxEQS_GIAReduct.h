@@ -513,9 +513,6 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
 
     // element based operation: add time and laplas terms
     AddMassLaplasTerms(delta_t, eqsJacobian_global);
-
-
-
 }
 
 
@@ -545,6 +542,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 	{
 		double tmp_x;
 		tmp_x    = vec_conc(i);
+		if (tmp_x < 0.0)
+			tmp_x = std::numeric_limits<double>::epsilon(); 
 		ln_conc_Mob(i)  = std::log(tmp_x);
 	}
 
