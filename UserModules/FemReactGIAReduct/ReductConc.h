@@ -186,7 +186,8 @@ public:
 		BaseLib::releaseObjectsInStdVector(_xi_sorp_rates);
 		BaseLib::releaseObjectsInStdVector(_xi_min_rates);
 		BaseLib::releaseObjectsInStdVector(_xi_kin_rates);
-			
+		BaseLib::releaseObjectsInStdVector(_nodal_vec_AI);
+
 		//BaseLib::releaseObjectsInStdVector(_current_time_step);
     	BaseLib::releaseObjectsInStdVector(_global_vec_Rate);
     	//BaseLib::releaseObjectsInStdVector(_local_ode_xi_immob_GIA);
