@@ -45,7 +45,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 														ogsChem::LocalVector & lnk_sorp,
 														ogsChem::LocalVector & lnk_min)
 {
-    ogsChem::LocalVector x_new, vec_residual, vec_AI;
+    ogsChem::LocalVector x_new, vec_residual;
     ogsChem::LocalVector dx;
 
     // TODO initialize water content and deltaT
