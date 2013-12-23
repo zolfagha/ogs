@@ -114,7 +114,8 @@ private:
     void GlobalJacobianAssembler(const NumLib::TimeStep & delta_t,
     							 const SolutionLib::SolutionVector & u_cur_xiglob,
     							 LinearSolverType & eqsJacobian_global);
-    void Vprime( MathLib::LocalVector & vec_conc,
+	void Vprime( std::size_t          & node_idx, 
+		         MathLib::LocalVector & vec_conc,
     			 MathLib::LocalVector & logk_min,
     			 MathLib::LocalMatrix & mat_S1min,
     			 MathLib::LocalMatrix & mat_S1mob,
@@ -480,7 +481,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             mat_p2F.block(_n_xi_Sorp_bar_li, _n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Min_bar, _n_xi_Min_bar)           = MathLib::LocalMatrix::Identity(_n_xi_Min_bar, _n_xi_Min_bar);
 
             // calculate vprime
-            Vprime(vec_conc, logk_min, mat_S1min, mat_S1mob, mat_S1sorp, mat_S1sorpli, mat_S1kin_ast, mat_S2sorp, mat_vprime);
+            Vprime(node_idx, vec_conc, logk_min, mat_S1min, mat_S1mob, mat_S1sorp, mat_S1sorpli, mat_S1kin_ast, mat_S2sorp, mat_vprime);
 
             // construct local Jacobian matrix
             Jacobian_local = mat_p1F + mat_p2F * mat_vprime;
@@ -517,7 +518,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
 
 
 template <class T1, class T2, class T3>
-void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::LocalVector & vec_conc,
+void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( std::size_t          & node_idx,
+	                                                              MathLib::LocalVector & vec_conc,
 																  MathLib::LocalVector & logk_min,
 																  MathLib::LocalMatrix & mat_S1min,
 																  MathLib::LocalMatrix & mat_S1mob,
@@ -533,11 +535,14 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 	MathLib::LocalMatrix  mat_S1minI            = MathLib::LocalMatrix::Zero(_I_mob,0);
 	MathLib::LocalMatrix  mat_S1minA            = MathLib::LocalMatrix::Zero(_I_mob,0);
 	MathLib::LocalMatrix  mat_A_tilde           = MathLib::LocalMatrix::Zero(_I_mob + _I_sorp, _I_mob + _I_sorp);
-	std::size_t i;
+	std::size_t i,j;
 
 	for (i = 0; i < _I_mob + _I_sorp; i++)
 		mat_A_tilde(i,i) = 1.0 / vec_conc(i);
 
+	// HS: 2013Dec23: using stored AI values directly. 
+	// ---------------------------------------------------------------------------------
+	/*
 	for (i = 0; i < _I_mob; i++)
 	{
 		double tmp_x;
@@ -566,13 +571,40 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 
 	for (i = 0; i < _n_xi_Min; i++)
 	{
-		if(conc_Min_bar(i) > vec_phi(i)) {
+		if(conc_Min_bar(i) > vec_phi(i)) 
+		{   // inactive mineral reactions
 			mat_S1minI.resize( mat_S1min.rows(), mat_S1minI.cols() + 1);
 			mat_S1minI.rightCols(1) = mat_S1min.col(i);
 		}
-		else {
+		else 
+		{   // active mineral reactions
 			mat_S1minA.resize( mat_S1min.rows(), mat_S1minA.cols() + 1);
 			mat_S1minA.rightCols(1) = mat_S1min.col(i);
+		}
+	}
+	*/
+	// ---------------------------------------------------------------------------------
+
+	// using AI directly. 
+	ogsChem::LocalVector local_vec_AI; 
+	local_vec_AI = this->_userData->get_nodal_vec_AI(node_idx);
+	std::size_t n_active_min, n_inactive_min; 
+	n_active_min   = (std::size_t) local_vec_AI.sum(); 
+	n_inactive_min = _I_min - n_active_min; 
+	mat_S1minA.resize(mat_S1min.rows(), n_active_min);
+	mat_S1minI.resize(mat_S1min.rows(), n_inactive_min);
+	i = 0; j = 0; 
+	for (int k = 0; k < _I_min; k++)
+	{
+		if (local_vec_AI(k) > 0)
+		{
+			mat_S1minA.col(i) = mat_S1min.col(k);
+			i++; 
+		}
+		else
+		{
+			mat_S1minI.col(j) = mat_S1min.col(k);
+			j++;
 		}
 	}
 
