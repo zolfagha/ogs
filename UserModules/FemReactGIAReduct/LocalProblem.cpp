@@ -43,7 +43,8 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 														ogsChem::LocalVector & vec_xi_bar_kin_old,
 														ogsChem::LocalVector & lnk_mob,
 														ogsChem::LocalVector & lnk_sorp,
-														ogsChem::LocalVector & lnk_min)
+														ogsChem::LocalVector & lnk_min, 
+														ogsChem::LocalVector & vec_AI)
 {
     ogsChem::LocalVector x_new, vec_residual;
     ogsChem::LocalVector dx;
@@ -61,8 +62,6 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 	dx             = ogsChem::LocalVector::Ones( _n_Comp );
 	_mat_Jacobian  = ogsChem::LocalMatrix::Zero( _n_Comp, _n_Comp);
 	vec_residual   = ogsChem::LocalVector::Zero( _n_Comp );
-    // initialize the _AI vector
-    vec_AI		   = ogsChem::LocalVector::Zero( _I_min );
 
 	// vec_tot_mass_constrain contains xi global and eta mobile which acts as a total mass constrain for the local problem.
 	_vec_eta            = vec_eta;
