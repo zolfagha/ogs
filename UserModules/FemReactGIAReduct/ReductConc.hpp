@@ -79,7 +79,8 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options & option)
 	// set the mineral index vectors
 	for (i = 0; i < msh->getNumberOfNodes(); i++)
 	{
-		ogsChem::LocalVector nodal_vec_AI = ogsChem::LocalVector::Zero(_I_min);
+		ogsChem::LocalVector* nodal_vec_AI = new ogsChem::LocalVector(_I_min);
+		nodal_vec_AI->setZero(); 
 		this->_nodal_vec_AI.push_back(nodal_vec_AI); 
 	}
 	
@@ -736,7 +737,8 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 														   loc_XiBarKin_old,
 														   lnk_mob,
 														   lnk_sorp,
-														   lnk_min);
+														   lnk_min, 
+														   *(this->_nodal_vec_AI[node_idx]));
 
 		    // convert the ln mobile conc to mobile conc
 			ln_conc_Mob  = vec_unknowns.head(_I_mob);

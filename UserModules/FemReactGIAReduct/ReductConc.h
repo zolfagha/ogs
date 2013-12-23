@@ -309,6 +309,13 @@ public:
 	void set_eta_node_values     	( std::size_t eta_idx,   MyNodalFunctionScalar* new_eta_node_values   );
 	void set_eta_bar_node_values    ( std::size_t eta_bar_idx, MyNodalFunctionScalar* new_eta_bar_node_values );
 	void set_xi_global_node_values  ( std::size_t xi_global_idx,    MyNodalFunctionScalar* new_xi_global_node_values    );
+
+	/**
+      * get and set function for _nodal_vec_AI
+	  */
+	void   set_nodal_AI_value(std::size_t node_index, std::size_t mineral_index, double AI_value) { *(_nodal_vec_AI[node_index])(mineral_index) = AI_value;  };
+	double get_nodal_AI_value(std::size_t node_index, std::size_t mineral_index){ return *(_nodal_vec_AI[node_index])(mineral_index); };
+	ogsChem::LocalVector& get_nodal_vec_AI(std::size_t node_index) { return *(_nodal_vec_AI[node_index]); };
     
     template <class T_X>
     void update_xi_global_cur_nodal_values  ( const T_X & x_new );
@@ -554,7 +561,7 @@ private:
 	/**
 	  * index on each node, whether each mineral is present or not
 	  */
-	std::vector<ogsChem::LocalVector> _nodal_vec_AI;
+	std::vector<ogsChem::LocalVector*> _nodal_vec_AI;
 
     /**
       * nodal reaction rates
