@@ -540,51 +540,6 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( std::size_t   
 	for (i = 0; i < _I_mob + _I_sorp; i++)
 		mat_A_tilde(i,i) = 1.0 / vec_conc(i);
 
-	// HS: 2013Dec23: using stored AI values directly. 
-	// ---------------------------------------------------------------------------------
-	/*
-	for (i = 0; i < _I_mob; i++)
-	{
-		double tmp_x;
-		tmp_x    = vec_conc(i);
-		if (tmp_x < 0.0)
-			tmp_x = std::numeric_limits<double>::epsilon(); 
-		ln_conc_Mob(i)  = std::log(tmp_x);
-	}
-
-    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
-    ogsChem::LocalVector ln_activity       = ogsChem::LocalVector::Zero( _n_Comp    );
-    ogsChem::LocalVector ln_activity_coeff = ogsChem::LocalVector::Zero( _n_Comp );
-    ogsChem::LocalVector ln_Conc 		   = ogsChem::LocalVector::Zero( _n_Comp );
-    ln_Conc.head(_I_mob) 		   		   = ln_conc_Mob;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
-    this->_activity_model->calc_activity_logC( ln_Conc, ln_activity_coeff, ln_activity );
-
-
-	//vec_phi		  = - logk_min + mat_S1min.transpose() * ln_conc_Mob;
-	 vec_phi		  = - logk_min + mat_S1min.transpose() * ln_activity.head(_I_mob);	//RZ: 16.12.2013
-	conc_Min_bar  	  =   vec_conc.segment(_I_mob + _I_sorp, _I_min);
-    //End 16.12.2013
-
-
-    mat_S1minI.setZero();
-    mat_S1minA.setZero();
-
-	for (i = 0; i < _n_xi_Min; i++)
-	{
-		if(conc_Min_bar(i) > vec_phi(i)) 
-		{   // inactive mineral reactions
-			mat_S1minI.resize( mat_S1min.rows(), mat_S1minI.cols() + 1);
-			mat_S1minI.rightCols(1) = mat_S1min.col(i);
-		}
-		else 
-		{   // active mineral reactions
-			mat_S1minA.resize( mat_S1min.rows(), mat_S1minA.cols() + 1);
-			mat_S1minA.rightCols(1) = mat_S1min.col(i);
-		}
-	}
-	*/
-	// ---------------------------------------------------------------------------------
-
 	// using AI directly. 
 	ogsChem::LocalVector local_vec_AI; 
 	local_vec_AI = this->_userData->get_nodal_vec_AI(node_idx);

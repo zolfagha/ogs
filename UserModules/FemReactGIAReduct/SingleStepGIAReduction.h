@@ -434,10 +434,6 @@ int SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINE
 {
 	size_t i;
 
-    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
-	//RZ:update natural log reaction constants of equilibrium reactions.
-	//_function_data->update_lnK();
-
 	// solving linear problems one after the other
 	for ( i=0; i < _lin_solutions.size(); i++)
 	{
@@ -457,7 +453,7 @@ int SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINE
 	// calculate the reaction rates on each node
 	// _function_data->update_node_GIA_reaction_rates();
 
-//	// solving the non-linear problem
+	// solving the non-linear problem
 	INFO("--Solving non-linear equations for xi:");
 	_nlin_solution->solveTimeStep( t_n1 );
 
