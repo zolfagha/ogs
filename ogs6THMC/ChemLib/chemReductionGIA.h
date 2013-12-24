@@ -235,6 +235,11 @@ public:
 	size_t get_n_xi_Kin_total(void) {return _J_tot_kin; };
 
 	/**
+	  * get _J_2_kin_ast
+	  */
+	size_t get_J_2_kin_ast(void) { return _J_2_kin_ast; };
+
+	/**
       * get the _mat_c_mob_2_xi_mob
       */
 	LocalMatrix get_matrix_C2Xi(void) {return _mat_c_mob_2_xi_mob; };
