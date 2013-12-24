@@ -163,6 +163,11 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
     // increment of unknowns
     this->increment_unknown( x, dx, x_new ); 
+	// ---------------------------------------------------------
+	// HS 2013Dec24: The following block looks unreasonable to me. 
+	// Using the original controlled increment function instead. 
+	// x_new = x + dx; 
+	// ---------------------------------------------------------
 
 #ifdef _DEBUG
 	// debugging--------------------------
@@ -211,8 +216,14 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
             // updating dx
             dx = dx * alpha;
             // increment of unknowns
-  //          this->increment_unknown( x, dx, x_new );
-            x_new = x_new - dx;  //RZ: essential for convergency
+            this->increment_unknown( x, dx, x_new );
+			// ---------------------------------------------------------
+            // HS 2013Dec24: The following block looks unreasonable to me. 
+			// Using the original controlled increment function instead. 
+			/*
+			x_new = x_new - dx;  //RZ: essential for convergency
+			*/
+			//----------------------------------------------------------
             // now updating the saturation index and minerals
             if(_n_xi_Min > 0)
 				this->update_minerals_conc_AI( x_new, vec_AI );
