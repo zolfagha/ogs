@@ -563,6 +563,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( std::size_t   
 		}
 	}
 
+	// HS 2313Dec24: rewritting the solving of vprime
+	/*
 	MathLib::LocalMatrix  mat_B = MathLib::LocalMatrix::Zero(_I_mob + _I_sorp, _n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
 	mat_B.block(0, 0, _I_mob, _n_xi_Mob)							  =  mat_S1mob;
 	mat_B.block(0, _n_xi_Mob, _I_mob, _n_xi_Sorp)					  =  mat_S1sorp;
@@ -610,6 +612,37 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( std::size_t   
 //	mat_vprime.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Kin_bar, _n_xi_Kin_bar) = cols_xi_kin;
 
 	mat_B.setZero();
+	*/
+
+	// solving of vprime
+	// exactly according to the paper
+	// Joachim Hoffmann, Serge Kraeutle, and Peter Knabner (2012) 
+	// A general reduction scheme for reactive transport in porous media. Comput. Geosci. 
+	// DOI: 10.1007/s10596-012-9304-4
+	// first set vprime matrix to zero 
+	mat_vprime.setZero(); 
+	// formulation of Q matrix according to eq. (64)
+	MathLib::LocalMatrix  mat_Q = MathLib::LocalMatrix::Zero(_I_mob + _I_sorp, _n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
+	mat_Q.block(0, 0, _I_mob, _n_xi_Mob) = mat_S1mob;
+	mat_Q.block(0, _n_xi_Mob, _I_mob, _n_xi_Sorp) = mat_S1sorp;
+	mat_Q.block(0, _n_xi_Mob + _n_xi_Sorp, mat_S1minI.rows(), mat_S1minI.cols()) = mat_S1minI;
+	mat_Q.block(_I_mob, _n_xi_Mob, _I_sorp, _n_xi_Sorp) = mat_S2sorp;
+
+	// formulation of C matrix according to eq. (71)
+	MathLib::LocalMatrix  mat_C = MathLib::LocalMatrix::Zero(_I_mob + _I_sorp, _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
+	mat_C.block(0, 0, _I_mob, _n_xi_Sorp_tilde) = -1.0 * mat_S1sorpli;
+	mat_C.block(0, _n_xi_Sorp_tilde, _I_mob, _n_xi_Min) = -1.0 * mat_S1min;
+	mat_C.block(0, _n_xi_Sorp_tilde + _n_xi_Min, _I_mob, _n_xi_Kin) = -1.0 * mat_S1kin_ast;
+
+	MathLib::LocalMatrix mat_LHS, mat_RHS, mat_U; 
+	// according to eq. (71)
+	mat_LHS = mat_Q.transpose() * mat_A_tilde * mat_Q; 
+	mat_RHS = mat_Q.transpose() * mat_A_tilde * mat_C; 
+	mat_U   = mat_LHS.fullPivHouseholderQr().solve(mat_RHS);
+
+	mat_vprime.topLeftCorner(mat_U.rows(),mat_U.cols()) = mat_U; 
+	std::size_t j2_kin_star = this->_ReductionGIA->get_J_2_kin_ast();
+	mat_vprime.bottomLeftCorner(j2_kin_star, j2_kin_star) = MathLib::LocalMatrix::Identity(j2_kin_star, j2_kin_star);
 }
 
 template <class T1, class T2, class T3>
