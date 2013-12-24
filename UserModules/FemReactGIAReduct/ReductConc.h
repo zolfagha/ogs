@@ -313,8 +313,8 @@ public:
 	/**
       * get and set function for _nodal_vec_AI
 	  */
-	void   set_nodal_AI_value(std::size_t node_index, std::size_t mineral_index, double AI_value) { *(_nodal_vec_AI[node_index])(mineral_index) = AI_value;  };
-	double get_nodal_AI_value(std::size_t node_index, std::size_t mineral_index){ return *(_nodal_vec_AI[node_index])(mineral_index); };
+	// void   set_nodal_AI_value(std::size_t node_index, std::size_t mineral_index, double AI_value) { *(_nodal_vec_AI[node_index])(mineral_index) = AI_value;  };
+	// double get_nodal_AI_value(std::size_t node_index, std::size_t mineral_index){ return *(_nodal_vec_AI[node_index])(mineral_index); };
 	ogsChem::LocalVector& get_nodal_vec_AI(std::size_t node_index) { return *(_nodal_vec_AI[node_index]); };
     
     template <class T_X>
