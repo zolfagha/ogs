@@ -119,6 +119,8 @@ struct LIS_option
             return TFQMR;
         if (str.compare("Orthomin")==0)
             return Orthomin;
+		if (str.compare("GMRES") == 0)
+			return GMRES;
 
         return INVALID;
     }
