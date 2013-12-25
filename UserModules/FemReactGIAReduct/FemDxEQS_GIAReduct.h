@@ -7,7 +7,7 @@
  *
  * \file FemDxEQS.h
  *
- * Created on 2013-08-016 by Reza Zolfaghari & Norihiro Watanabe
+ * Created on 2013-08-16 by Reza Zolfaghari & Norihiro Watanabe
  */
 
 #pragma once
@@ -132,17 +132,7 @@ private:
     			 ogsChem::LocalVector & DrateDxi);
     void AddMassLaplasTerms(const NumLib::TimeStep & delta_t,
     						LinearSolverType & eqsJacobian_global);
-	/*
-    void cal_nodal_rate(ogsChem::LocalVector &xi,
-    					ogsChem::LocalVector &local_eta_bar,
-    					ogsChem::LocalVector &local_eta,
-    					std::size_t & n_xi_Kin_total,
-    					ogsChem::LocalMatrix & mat_S1_ast,
-    					ogsChem::LocalMatrix & mat_S2_ast,
-    					ogsChem::LocalMatrix & mat_S1_orth,
-    					ogsChem::LocalMatrix & mat_S2_orth,
-    					ogsChem::LocalVector &vec_rate_new);
-	*/
+
 private:
     MeshLib::IMesh* _msh;
     DiscreteLib::DofEquationIdTable* _dofManager;
@@ -169,7 +159,7 @@ private:
     size_t _n_xi_Sorp_bar_li, _n_xi_Sorp_bar_ld, _n_Comp, _I_mob, _I_min, _I_sorp;
 
     /**
-     * //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
+      * RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
       * pointer to the activity model
       */
     ogsChem::chemActivityModelAbstract *_activity_model;
@@ -181,7 +171,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::eval(const SolutionLib
 {
     // input, output
     const NumLib::TimeStep &t_n1 = *this->_t_n1;
-   // const SolutionLib::SolutionVector* u_n = this->_u_n0;
+	// const SolutionLib::SolutionVector* u_n = this->_u_n0;
 
     _linear_eqs->initialize();
 
@@ -245,9 +235,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     // current xi global
     MathLib::LocalVector loc_cur_xi_global, loc_cur_xi_Sorp_tilde, loc_cur_xi_Min_tilde,
                          loc_cur_xi_Sorp, loc_cur_xi_Min, loc_cur_xi_Kin;
-    // previous xi global
-    //MathLib::LocalVector loc_pre_xi_global, loc_pre_xi_Sorp_tilde, loc_pre_xi_Min_tilde, loc_pre_xi_Sorp, loc_pre_xi_Min, loc_pre_xi_Kin;
-
+    
     // current xi local
 	MathLib::LocalVector loc_cur_xi_local, loc_cur_xi_Sorp_bar, loc_cur_xi_Min_bar, loc_cur_xi_Sorp_bar_li, loc_cur_xi_Sorp_bar_ld, tmp_xi_global, tmp_xi_local, tmp_vec_conc;
 
@@ -487,12 +475,12 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             Jacobian_local = mat_p1F + mat_p2F * mat_vprime;
 
             // debugging--------------------------
-//             std::cout << "======================================== \n";
-//             std::cout << "mat_vprime: \n";
-//             std::cout << mat_vprime << std::endl;
-//             std::cout << "Jacobian_local: \n";
-//             std::cout << Jacobian_local << std::endl;
-//             std::cout << "======================================== \n";
+            // std::cout << "======================================== \n";
+            // std::cout << "mat_vprime: \n";
+            // std::cout << mat_vprime << std::endl;
+            // std::cout << "Jacobian_local: \n";
+            // std::cout << Jacobian_local << std::endl;
+            // std::cout << "======================================== \n";
             // end of debugging-------------------
 
             // construct global Jacobian matrix
@@ -564,56 +552,6 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( std::size_t   
 	}
 
 	// HS 2313Dec24: rewritting the solving of vprime
-	/*
-	MathLib::LocalMatrix  mat_B = MathLib::LocalMatrix::Zero(_I_mob + _I_sorp, _n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
-	mat_B.block(0, 0, _I_mob, _n_xi_Mob)							  =  mat_S1mob;
-	mat_B.block(0, _n_xi_Mob, _I_mob, _n_xi_Sorp)					  =  mat_S1sorp;
-	mat_B.block(0, _n_xi_Mob + _n_xi_Sorp, mat_S1minI.rows(), mat_S1minI.cols()) =  mat_S1minI;
-	mat_B.block(_I_mob, _n_xi_Mob, _I_sorp, _n_xi_Sorp) 		  =  mat_S2sorp;
-
-	MathLib::LocalMatrix  mat_C = MathLib::LocalMatrix::Zero(_I_mob + _I_sorp, _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
-	mat_C.block(0, 0, _I_mob, _n_xi_Sorp_tilde)							  =  - 1.0 * mat_S1sorpli;
-	mat_C.block(0, _n_xi_Sorp_tilde, _I_mob, _n_xi_Min)					  =  - 1.0 * mat_S1min;
-	mat_C.block(0, _n_xi_Sorp_tilde + _n_xi_Min, _I_mob, _n_xi_Kin)		  =  - 1.0 * mat_S1kin_ast;
-
-	MathLib::LocalMatrix J_temp = MathLib::LocalMatrix::Zero( _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin,  _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
-	J_temp					    = mat_B.transpose() * mat_A_tilde * mat_B;
-
-	std::size_t sol_size 		= _n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols();
-
-    // using minimization solver of the local problem.
-
-    MathLib::LocalVector b 	= MathLib::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
-    MathLib::LocalVector dx = MathLib::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
-    MathLib::LocalMatrix x  = MathLib::LocalMatrix::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols(), _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
-    // solve the linear system
-    for(i = 0; i < _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin; i++)
-    {
-	    b = mat_B.transpose() * mat_A_tilde * mat_C.col(i);
-
-	    //RZ: solving with minimization problem for numerical robustness,
-	     _solv_minimization->solve_minimization(J_temp, b, dx);  // b is multiplied by -1 in this function.
-	     x.col(i) = -1.0 * dx;
-
-	    // using the standard direct solver
-	    //x.col(i) = J_temp.fullPivHouseholderQr().solve( b );
-
-    }
-
-//	MathLib::LocalMatrix cols_xi_sorp_tilde   = x.block(0, 0, sol_size, _n_xi_Sorp_tilde);
-//	mat_vprime.block(0, 0, sol_size, _n_xi_Sorp_tilde) = cols_xi_sorp_tilde;
-
-	MathLib::LocalMatrix cols_xi_min_tilde   = x.block(0, _n_xi_Sorp_tilde, sol_size, _n_xi_Min_tilde);
-	mat_vprime.block(0, _n_xi_Sorp_tilde, sol_size, _n_xi_Min_tilde ) = cols_xi_min_tilde;
-
-//	//MathLib::LocalMatrix cols_xi_kin  = x.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde, sol_size, _n_xi_Kin);  //RZ: wrong, matrix x contains xi mob,sorp,minI
-//	MathLib::LocalMatrix cols_xi_kin  = MathLib::LocalMatrix::Identity(_n_xi_Kin_bar, _n_xi_Kin_bar);
-//	//mat_vprime.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, sol_size, _n_xi_Kin) = cols_xi_kin;
-//	mat_vprime.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Kin_bar, _n_xi_Kin_bar) = cols_xi_kin;
-
-	mat_B.setZero();
-	*/
-
 	// solving of vprime
 	// exactly according to the paper
 	// Joachim Hoffmann, Serge Kraeutle, and Peter Knabner (2012) 
