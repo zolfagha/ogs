@@ -486,6 +486,8 @@ void LocalProblem::increment_unknown(ogsChem::LocalVector & x_old,
     size_t i, n_unknowns;
 	double tmp_value, damp_factor; 
 	n_unknowns = x_new.size(); 
+	const double alpha(1.33);
+	const double eps(std::numeric_limits<double>::epsilon());
 
 	for (i = 0; i < n_unknowns; i++)
 	{
@@ -493,7 +495,12 @@ void LocalProblem::increment_unknown(ogsChem::LocalVector & x_old,
 			x_new = x_old + delta_x;
 		else
 		{
-			tmp_value = -1.33*delta_x(i) / x_old(i);
+			// HS 2013Dec25: adding a safty control here
+			if (std::fabs(x_old(i)) < eps)
+				tmp_value = -1.0 * alpha * delta_x(i) / eps; 
+			else
+				tmp_value = -1.0 * alpha * delta_x(i) / x_old(i);
+
 			damp_factor = 1.0 / std::max(1.0, tmp_value );
 			x_new(i) = x_old(i) + damp_factor * delta_x(i);
 		}
