@@ -109,38 +109,35 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
 	// save the previous values
 	x_new  =  x;
-	while ((iter < max_iter) && (d_norm > iter_tol)){ //RZ: 4.12.2013
-//    while (true)
-//    {
-//        #ifdef _DEBUG
-//            // display the residual
-//            // std::cout << "Iteration #" << iter << "||res|| = " << d_norm << "||delta_x|| = " << dx.norm() << std::endl;
-//        #endif
-//        // convergence criteria
-//        if ( d_norm < iter_tol )
-//        {
-//            #ifdef _DEBUG
-// //                std::cout << "Newton iteration successfully converged!\n";
-//            #endif
-//
-//            break;  // break the loop
-//        }
-//        else if ( dx.norm() < rel_tol )
-//        {
-//            #ifdef _DEBUG
-// //           std::cout << "Warning, Newton iteration stagnent on Node #" << node_idx << "! Exit the iteration!\n" ;
-//            #endif
-//
-//            break;  // break the loop
-//        }
-//        else if ( iter > max_iter )
-//        {
-//            #ifdef _DEBUG
-////            std::cout << "ERROR! Node #" << node_idx  << "Newton iterationan does not converge! Simulation stops!\n";
-//            #endif
-//
-//            return; // stop the program
-//        }
+
+    while (true)
+    {
+        #ifdef _DEBUG
+            // display the residual
+            // std::cout << "Iteration #" << iter << "||res|| = " << d_norm << "||delta_x|| = " << dx.norm() << std::endl;
+        #endif
+        // convergence criteria
+        if ( d_norm < iter_tol )
+        {
+            #ifdef _DEBUG
+			    // std::cout << "Newton iteration successfully converged!\n";
+            #endif
+			break; 
+        }
+        else if ( dx.norm() < rel_tol )
+        {
+            #ifdef _DEBUG
+			    // std::cout << "Warning, Newton iteration stagnent on Node #" << node_idx << "! Exit the iteration!\n" ;
+            #endif
+            break; 
+        }
+        else if ( iter > max_iter )
+        {
+            #ifdef _DEBUG
+			    // std::cout << "ERROR! Node #" << node_idx  << "Newton iterationan does not converge! Simulation stops!\n";
+            #endif
+			return; // stop the program
+        }
         // form Jacobian matrix
 		this->calc_Jacobian(dt, x, vec_residual, _vec_XiBarKin, vec_AI);
 
@@ -660,13 +657,11 @@ void LocalProblem::cal_exp_conc_vec(size_t    		      idx_size,
 	double tmp_x;
 	std::size_t i;
 
-
 	for (i = 0; i < idx_size; i++)
 	{
 		tmp_x    	 = ln_conc(i);
 		Conc(i)  = std::exp(tmp_x);
 	}
-
 }
 
 // Eq. 3.55
@@ -821,7 +816,6 @@ void LocalProblem::residual_conc_Min(ogsChem::LocalVector & ln_conc_Mob,
 	for (i=0; i < _n_xi_Min; i++)
 	{
 		phi  = -_logk_min(i) + mat_S1minT.row(i) * ln_activity.head(_I_mob); //RZ: 16.12.2013
-		//phi  = -_logk_min(i) + mat_S1minT.row(i) * ln_conc_Mob;
 
 		if(vec_AI(i) == 1) //RZ: 3-Nov-13 Must be kept like this!
 			vec_residual(idx + i) 	= phi;
@@ -955,11 +949,8 @@ void LocalProblem::calculate_AI(ogsChem::LocalVector & vec_unknowns,
     	idx = _I_mob + _I_sorp + j;
     	conc_Min_bar(j) = cal_cbarmin_by_constrain(j, ln_conc_Mob, ln_conc_Sorp, conc_Min_bar, conc_Kin_bar);
 
-    	//phi  = -_logk_min(j) + mat_S1min_transposed.row(j) * ln_conc_Mob;
-
     	//RZ: 16.12.2013
     	phi  = -_logk_min(j) + mat_S1min_transposed.row(j) * ln_activity.head(_I_mob);  //RZ:2.12.2013 include activity model
-
 
     	// if mineral concentration  >= phi ; mineral is present; saturated case; precipitate the mineral.
     	if(conc_Min_bar(j) > phi)  //RZ:9-Dec-13

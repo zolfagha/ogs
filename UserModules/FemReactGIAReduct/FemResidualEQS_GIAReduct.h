@@ -120,7 +120,6 @@ private:
 
 private:
     MyDiscreteSystem *_dis_sys;
-//    UserLocalResidualAssembler *_local_assembler;
     DiscreteLib::DofEquationIdTable* _dofManager;
     const NumLib::TimeStep* _time_step;
     const SolutionLib::SolutionVector* _st;
