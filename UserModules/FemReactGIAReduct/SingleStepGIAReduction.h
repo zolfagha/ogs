@@ -348,6 +348,12 @@ SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
         }  // end of for i
     }  // end of for i_var
 
+	// HS 2014Jan02: 
+	// Since the boundary node values have been correctly set now, 
+	// we convert the concentrations to xi and eta again. 
+	// this will make sure both boundary and initial nodes get the right 
+	// eta and xi values. 
+	_function_data->convert_conc_to_eta_xi(); 
 
     // loop over all the boundary nodes, and
 	// transform these concentrations to eta and xi values
