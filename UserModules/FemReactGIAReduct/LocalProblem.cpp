@@ -549,24 +549,6 @@ void LocalProblem::update_minerals_conc_AI(ogsChem::LocalVector & vec_unknowns,
     	//RZ: 16.12.2013
     	phi  = -_logk_min(i) + mat_S1min_transposed.row(i) * ln_activity.head(_I_mob);  //RZ:2.12.2013 include activity model
 
-    	//phi  = -_logk_min(i) + mat_S1min_transposed.row(i) * ln_conc_Mob;
-
-
-/* RZ: AI is evaluated once at the beginning of the local problem
-
-    	// if mineral concentration  >= phi ; mineral is present; saturated case; precipitate the mineral.
-    	if (conc_Min_bar(i) >= phi)
-    	{
-    		vec_AI(i) = 1;
-    	}// end of if
-    	// if mineral concentration < phi : mineral is NOT present; under saturated case; dissolve the mineral
-    	else
-    	{
-    		vec_AI(i) = 0;
-    		conc_Min_bar(i) = 0.0;
-    	}// end of else
-*/
-
     	// if mineral is present, calculate mineral concentration
     	if	(vec_AI(i) == 1)
     	{
