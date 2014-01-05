@@ -693,20 +693,19 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 		node_indx_vec.resize(ele_node_ids.size());
 		col_indx_vec.resize(ele_node_ids.size());
                 
-//		for (xi_count = 0; xi_count < _n_xi_Sorp; xi_count++)
-//		{
-//
-//		    for( idx = 0; idx < ele_node_ids.size(); idx++)
-//		    {
-//		        node_indx_vec[idx] = ele_node_ids[idx] * _n_xi_global + _n_xi_Sorp_tilde + _n_xi_Min_tilde + xi_count;
-//		        col_indx_vec[idx]   = ele_node_ids[idx] * _n_xi_global + xi_count;
-//		    }
-//	        // add conductance matrix
-//	        eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, localK );
-//	        // add storage term
-//	        eqsJacobian_global.addAsub(node_indx_vec, col_indx_vec, 1.0 / dt * localM);
-//		}
+		for (xi_count = 0; xi_count < _n_xi_Sorp; xi_count++)
+		{
 
+		    for( idx = 0; idx < ele_node_ids.size(); idx++)
+		    {
+		        node_indx_vec[idx] = ele_node_ids[idx] * _n_xi_global + _n_xi_Sorp_tilde + _n_xi_Min_tilde + xi_count;
+		        col_indx_vec[idx]   = ele_node_ids[idx] * _n_xi_global + xi_count;
+		    }
+	        // add conductance matrix
+	        eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, localK );
+	        // add storage term
+	        eqsJacobian_global.addAsub(node_indx_vec, col_indx_vec, 1.0 / dt * localM);
+		}
 
 		for (xi_count = 0; xi_count < _n_xi_Min; xi_count++)
 		{
@@ -721,17 +720,18 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 	        eqsJacobian_global.addAsub(node_indx_vec, col_indx_vec, 1.0 / dt * localM);
 		}
 
-//		for (xi_count = 0; xi_count < _n_xi_Kin; xi_count++)
-//		{
-//
-//		    for( idx = 0; idx < ele_node_ids.size(); idx++)
-//		    {
-//		        node_indx_vec[idx]  = ele_node_ids[idx] * _n_xi_global + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + xi_count;
-//		    }
-//	        // add mass & conductance matrix
-//	        eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, 1.0 / dt * localM + localK );
-//
-//		}
+		for (xi_count = 0; xi_count < _n_xi_Kin; xi_count++)
+		{
+
+		    for( idx = 0; idx < ele_node_ids.size(); idx++)
+		    {
+		        node_indx_vec[idx]  = ele_node_ids[idx] * _n_xi_global + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + xi_count;
+		    }
+	        // add mass & conductance matrix
+	        eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, 1.0 / dt * localM + localK );
+
+		}
+
 		node_indx_vec.clear();
 		col_indx_vec.clear();
 
