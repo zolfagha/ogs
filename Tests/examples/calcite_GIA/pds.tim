@@ -25,9 +25,9 @@ $TIME_CONTROL
  ITER_TIMES_AND_MULTIPLYER
    4
    0    1.6
-   7    1.0
-   15   0.5
-   20   0.25  
+   3    1.0
+   5    0.5
+   7    0.25  
 #STOP
 
 

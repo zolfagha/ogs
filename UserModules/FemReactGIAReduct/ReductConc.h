@@ -186,11 +186,9 @@ public:
 		BaseLib::releaseObjectsInStdVector(_xi_sorp_rates);
 		BaseLib::releaseObjectsInStdVector(_xi_min_rates);
 		BaseLib::releaseObjectsInStdVector(_xi_kin_rates);
-			
-		//BaseLib::releaseObjectsInStdVector(_current_time_step);
+		BaseLib::releaseObjectsInStdVector(_nodal_vec_AI);
+
     	BaseLib::releaseObjectsInStdVector(_global_vec_Rate);
-    	//BaseLib::releaseObjectsInStdVector(_local_ode_xi_immob_GIA);
-    	//BaseLib::releaseObjectsInStdVector(_dis_sys);
     	BaseLib::releaseObject(_nl_sol_dofManager);
     	BaseLib::releaseObject(_feObjects);
     	BaseLib::releaseObject(_problem);
@@ -308,6 +306,11 @@ public:
 	void set_eta_node_values     	( std::size_t eta_idx,   MyNodalFunctionScalar* new_eta_node_values   );
 	void set_eta_bar_node_values    ( std::size_t eta_bar_idx, MyNodalFunctionScalar* new_eta_bar_node_values );
 	void set_xi_global_node_values  ( std::size_t xi_global_idx,    MyNodalFunctionScalar* new_xi_global_node_values    );
+
+	/**
+      * get function for _nodal_vec_AI
+	  */
+	ogsChem::LocalVector& get_nodal_vec_AI(std::size_t node_index) { return *(_nodal_vec_AI[node_index]); };
     
     template <class T_X>
     void update_xi_global_cur_nodal_values  ( const T_X & x_new );
@@ -521,16 +524,6 @@ private:
     std::vector<MyNodalFunctionScalar*> _xi_local_old;
 
     /**
-      * nodal concentration values
-      */
-   // std::vector<MyNodalFunctionScalar*>  _conc_glob;
-
-    /**
-      * new nodal concentration values
-      */
-    //std::vector<MyNodalFunctionScalar*>  _conc_glob_new;
-
-    /**
       * nodal xi_immobile values
       */ 
 	std::vector<MyNodalFunctionScalar*> _xi_local_new;
@@ -550,25 +543,10 @@ private:
 	  */
 	std::vector<MyNodalFunctionScalar*> _xi_kin_rates;
 
-    /**
-      * nodal reaction rates
-      */ 
-	//std::vector<MyNodalFunctionScalar*> _kin_rates;
-
-    /**
-      * derivative of nodal xi_mobile rates over xi_mobile
-      */ 
-	//std::vector<MyNodalFunctionScalar*> _xi_global_drates_dxi;
-
-    /**
-      * nodal xi_global reaction rates
-      */
-    //std::vector<MyNodalFunctionScalar*> _xi_global_rates;
-
-    /**
-      * nodal xi_local reaction rates
-      */ 
-    //std::vector<MyNodalFunctionScalar*> _xi_local_rates;
+	/**
+	  * index on each node, whether each mineral is present or not
+	  */
+	std::vector<ogsChem::LocalVector*> _nodal_vec_AI;
 
     /**
       * global reaction rate vector

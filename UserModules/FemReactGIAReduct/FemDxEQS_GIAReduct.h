@@ -7,7 +7,7 @@
  *
  * \file FemDxEQS.h
  *
- * Created on 2013-08-016 by Reza Zolfaghari & Norihiro Watanabe
+ * Created on 2013-08-16 by Reza Zolfaghari & Norihiro Watanabe
  */
 
 #pragma once
@@ -114,7 +114,8 @@ private:
     void GlobalJacobianAssembler(const NumLib::TimeStep & delta_t,
     							 const SolutionLib::SolutionVector & u_cur_xiglob,
     							 LinearSolverType & eqsJacobian_global);
-    void Vprime( MathLib::LocalVector & vec_conc,
+	void Vprime( std::size_t          & node_idx, 
+		         MathLib::LocalVector & vec_conc,
     			 MathLib::LocalVector & logk_min,
     			 MathLib::LocalMatrix & mat_S1min,
     			 MathLib::LocalMatrix & mat_S1mob,
@@ -131,17 +132,7 @@ private:
     			 ogsChem::LocalVector & DrateDxi);
     void AddMassLaplasTerms(const NumLib::TimeStep & delta_t,
     						LinearSolverType & eqsJacobian_global);
-	/*
-    void cal_nodal_rate(ogsChem::LocalVector &xi,
-    					ogsChem::LocalVector &local_eta_bar,
-    					ogsChem::LocalVector &local_eta,
-    					std::size_t & n_xi_Kin_total,
-    					ogsChem::LocalMatrix & mat_S1_ast,
-    					ogsChem::LocalMatrix & mat_S2_ast,
-    					ogsChem::LocalMatrix & mat_S1_orth,
-    					ogsChem::LocalMatrix & mat_S2_orth,
-    					ogsChem::LocalVector &vec_rate_new);
-	*/
+
 private:
     MeshLib::IMesh* _msh;
     DiscreteLib::DofEquationIdTable* _dofManager;
@@ -168,7 +159,7 @@ private:
     size_t _n_xi_Sorp_bar_li, _n_xi_Sorp_bar_ld, _n_Comp, _I_mob, _I_min, _I_sorp;
 
     /**
-     * //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
+      * RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
       * pointer to the activity model
       */
     ogsChem::chemActivityModelAbstract *_activity_model;
@@ -180,7 +171,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::eval(const SolutionLib
 {
     // input, output
     const NumLib::TimeStep &t_n1 = *this->_t_n1;
-   // const SolutionLib::SolutionVector* u_n = this->_u_n0;
+	// const SolutionLib::SolutionVector* u_n = this->_u_n0;
 
     _linear_eqs->initialize();
 
@@ -244,9 +235,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     // current xi global
     MathLib::LocalVector loc_cur_xi_global, loc_cur_xi_Sorp_tilde, loc_cur_xi_Min_tilde,
                          loc_cur_xi_Sorp, loc_cur_xi_Min, loc_cur_xi_Kin;
-    // previous xi global
-    //MathLib::LocalVector loc_pre_xi_global, loc_pre_xi_Sorp_tilde, loc_pre_xi_Min_tilde, loc_pre_xi_Sorp, loc_pre_xi_Min, loc_pre_xi_Kin;
-
+    
     // current xi local
 	MathLib::LocalVector loc_cur_xi_local, loc_cur_xi_Sorp_bar, loc_cur_xi_Min_bar, loc_cur_xi_Sorp_bar_li, loc_cur_xi_Sorp_bar_ld, tmp_xi_global, tmp_xi_local, tmp_vec_conc;
 
@@ -342,11 +331,6 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
 
             for (i=0; i < _J_tot_kin; i++)
                 vec_rate_old[i] = _global_vec_Rate[i]->getValue(node_idx);
-
-//            //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
-//			for (i=0; i < _n_xi_Min; i++)
-//				lnk_min[i] = this->_vec_lnK_Min[i]->getValue(node_idx);
-//			logk_min = lnk_min;
 
 			local_xi_Mob	  = loc_cur_xi_local.head(_n_xi_Mob);
 			local_xi_Sorp_bar = loc_cur_xi_local.segment(this->_n_xi_Mob,this->_n_xi_Sorp_bar);
@@ -485,18 +469,18 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             mat_p2F.block(_n_xi_Sorp_bar_li, _n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Min_bar, _n_xi_Min_bar)           = MathLib::LocalMatrix::Identity(_n_xi_Min_bar, _n_xi_Min_bar);
 
             // calculate vprime
-            Vprime(vec_conc, logk_min, mat_S1min, mat_S1mob, mat_S1sorp, mat_S1sorpli, mat_S1kin_ast, mat_S2sorp, mat_vprime);
+            Vprime(node_idx, vec_conc, logk_min, mat_S1min, mat_S1mob, mat_S1sorp, mat_S1sorpli, mat_S1kin_ast, mat_S2sorp, mat_vprime);
 
             // construct local Jacobian matrix
             Jacobian_local = mat_p1F + mat_p2F * mat_vprime;
 
             // debugging--------------------------
-//             std::cout << "======================================== \n";
-//             std::cout << "mat_vprime: \n";
-//             std::cout << mat_vprime << std::endl;
-//             std::cout << "Jacobian_local: \n";
-//             std::cout << Jacobian_local << std::endl;
-//             std::cout << "======================================== \n";
+            // std::cout << "======================================== \n";
+            // std::cout << "mat_vprime: \n";
+            // std::cout << mat_vprime << std::endl;
+            // std::cout << "Jacobian_local: \n";
+            // std::cout << Jacobian_local << std::endl;
+            // std::cout << "======================================== \n";
             // end of debugging-------------------
 
             // construct global Jacobian matrix
@@ -518,14 +502,12 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
 
     // element based operation: add time and laplas terms
     AddMassLaplasTerms(delta_t, eqsJacobian_global);
-
-
-
 }
 
 
 template <class T1, class T2, class T3>
-void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::LocalVector & vec_conc,
+void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( std::size_t          & node_idx,
+	                                                              MathLib::LocalVector & vec_conc,
 																  MathLib::LocalVector & logk_min,
 																  MathLib::LocalMatrix & mat_S1min,
 																  MathLib::LocalMatrix & mat_S1mob,
@@ -541,94 +523,64 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( MathLib::Local
 	MathLib::LocalMatrix  mat_S1minI            = MathLib::LocalMatrix::Zero(_I_mob,0);
 	MathLib::LocalMatrix  mat_S1minA            = MathLib::LocalMatrix::Zero(_I_mob,0);
 	MathLib::LocalMatrix  mat_A_tilde           = MathLib::LocalMatrix::Zero(_I_mob + _I_sorp, _I_mob + _I_sorp);
-	std::size_t i;
+	std::size_t i,j;
 
 	for (i = 0; i < _I_mob + _I_sorp; i++)
 		mat_A_tilde(i,i) = 1.0 / vec_conc(i);
 
-	for (i = 0; i < _I_mob; i++)
+	// using AI directly. 
+	ogsChem::LocalVector local_vec_AI; 
+	local_vec_AI = this->_userData->get_nodal_vec_AI(node_idx);
+	std::size_t n_active_min, n_inactive_min; 
+	n_active_min   = (std::size_t) local_vec_AI.sum(); 
+	n_inactive_min = _I_min - n_active_min; 
+	mat_S1minA.resize(mat_S1min.rows(), n_active_min);
+	mat_S1minI.resize(mat_S1min.rows(), n_inactive_min);
+	i = 0; j = 0; 
+	for (int k = 0; k < _I_min; k++)
 	{
-		double tmp_x;
-		tmp_x    = vec_conc(i);
-		ln_conc_Mob(i)  = std::log(tmp_x);
-	}
-
-    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
-    ogsChem::LocalVector ln_activity       = ogsChem::LocalVector::Zero( _n_Comp    );
-    ogsChem::LocalVector ln_activity_coeff = ogsChem::LocalVector::Zero( _n_Comp );
-    ogsChem::LocalVector ln_Conc 		   = ogsChem::LocalVector::Zero( _n_Comp );
-    ln_Conc.head(_I_mob) 		   		   = ln_conc_Mob;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
-    this->_activity_model->calc_activity_logC( ln_Conc, ln_activity_coeff, ln_activity );
-
-
-	//vec_phi		  = - logk_min + mat_S1min.transpose() * ln_conc_Mob;
-	 vec_phi		  = - logk_min + mat_S1min.transpose() * ln_activity.head(_I_mob);	//RZ: 16.12.2013
-	conc_Min_bar  	  =   vec_conc.segment(_I_mob + _I_sorp, _I_min);
-    //End 16.12.2013
-
-
-    mat_S1minI.setZero();
-    mat_S1minA.setZero();
-
-	for (i = 0; i < _n_xi_Min; i++)
-	{
-		if(conc_Min_bar(i) > vec_phi(i)) {
-			mat_S1minI.resize( mat_S1min.rows(), mat_S1minI.cols() + 1);
-			mat_S1minI.rightCols(1) = mat_S1min.col(i);
+		if (local_vec_AI(k) > 0)
+		{
+			mat_S1minA.col(i) = mat_S1min.col(k);
+			i++; 
 		}
-		else {
-			mat_S1minA.resize( mat_S1min.rows(), mat_S1minA.cols() + 1);
-			mat_S1minA.rightCols(1) = mat_S1min.col(i);
+		else
+		{
+			mat_S1minI.col(j) = mat_S1min.col(k);
+			j++;
 		}
 	}
 
-	MathLib::LocalMatrix  mat_B = MathLib::LocalMatrix::Zero(_I_mob + _I_sorp, _n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
-	mat_B.block(0, 0, _I_mob, _n_xi_Mob)							  =  mat_S1mob;
-	mat_B.block(0, _n_xi_Mob, _I_mob, _n_xi_Sorp)					  =  mat_S1sorp;
-	mat_B.block(0, _n_xi_Mob + _n_xi_Sorp, mat_S1minI.rows(), mat_S1minI.cols()) =  mat_S1minI;
-	mat_B.block(_I_mob, _n_xi_Mob, _I_sorp, _n_xi_Sorp) 		  =  mat_S2sorp;
+	// HS 2313Dec24: rewritting the solving of vprime
+	// solving of vprime
+	// exactly according to the paper
+	// Joachim Hoffmann, Serge Kraeutle, and Peter Knabner (2012) 
+	// A general reduction scheme for reactive transport in porous media. Comput. Geosci. 
+	// DOI: 10.1007/s10596-012-9304-4
+	// first set vprime matrix to zero 
+	mat_vprime.setZero(); 
+	// formulation of Q matrix according to eq. (64)
+	MathLib::LocalMatrix  mat_Q = MathLib::LocalMatrix::Zero(_I_mob + _I_sorp, _n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
+	mat_Q.block(0, 0, _I_mob, _n_xi_Mob) = mat_S1mob;
+	mat_Q.block(0, _n_xi_Mob, _I_mob, _n_xi_Sorp) = mat_S1sorp;
+	mat_Q.block(0, _n_xi_Mob + _n_xi_Sorp, mat_S1minI.rows(), mat_S1minI.cols()) = mat_S1minI;
+	mat_Q.block(_I_mob, _n_xi_Mob, _I_sorp, _n_xi_Sorp) = mat_S2sorp;
 
+	// formulation of C matrix according to eq. (71)
 	MathLib::LocalMatrix  mat_C = MathLib::LocalMatrix::Zero(_I_mob + _I_sorp, _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
-	mat_C.block(0, 0, _I_mob, _n_xi_Sorp_tilde)							  =  - 1.0 * mat_S1sorpli;
-	mat_C.block(0, _n_xi_Sorp_tilde, _I_mob, _n_xi_Min)					  =  - 1.0 * mat_S1min;
-	mat_C.block(0, _n_xi_Sorp_tilde + _n_xi_Min, _I_mob, _n_xi_Kin)		  =  - 1.0 * mat_S1kin_ast;
+	mat_C.block(0, 0, _I_mob, _n_xi_Sorp_tilde) = -1.0 * mat_S1sorpli;
+	mat_C.block(0, _n_xi_Sorp_tilde, _I_mob, _n_xi_Min) = -1.0 * mat_S1min;
+	mat_C.block(0, _n_xi_Sorp_tilde + _n_xi_Min, _I_mob, _n_xi_Kin) = -1.0 * mat_S1kin_ast;
 
-	MathLib::LocalMatrix J_temp = MathLib::LocalMatrix::Zero( _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin,  _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
-	J_temp					    = mat_B.transpose() * mat_A_tilde * mat_B;
+	MathLib::LocalMatrix mat_LHS, mat_RHS, mat_U; 
+	// according to eq. (71)
+	mat_LHS = mat_Q.transpose() * mat_A_tilde * mat_Q; 
+	mat_RHS = mat_Q.transpose() * mat_A_tilde * mat_C; 
+	mat_U   = mat_LHS.fullPivHouseholderQr().solve(mat_RHS);
 
-	std::size_t sol_size 		= _n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols();
-
-    // using minimization solver of the local problem.
-
-    MathLib::LocalVector b 	= MathLib::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
-    MathLib::LocalVector dx = MathLib::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols());
-    MathLib::LocalMatrix x  = MathLib::LocalMatrix::Zero(_n_xi_Mob + _n_xi_Sorp + mat_S1minI.cols(), _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin);
-    // solve the linear system
-    for(i = 0; i < _n_xi_Sorp_tilde + _n_xi_Min + _n_xi_Kin; i++)
-    {
-	    b = mat_B.transpose() * mat_A_tilde * mat_C.col(i);
-
-	    //RZ: solving with minimization problem for numerical robustness,
-	     _solv_minimization->solve_minimization(J_temp, b, dx);  // b is multiplied by -1 in this function.
-	     x.col(i) = -1.0 * dx;
-
-	    // using the standard direct solver
-	    //x.col(i) = J_temp.fullPivHouseholderQr().solve( b );
-
-    }
-
-//	MathLib::LocalMatrix cols_xi_sorp_tilde   = x.block(0, 0, sol_size, _n_xi_Sorp_tilde);
-//	mat_vprime.block(0, 0, sol_size, _n_xi_Sorp_tilde) = cols_xi_sorp_tilde;
-
-	MathLib::LocalMatrix cols_xi_min_tilde   = x.block(0, _n_xi_Sorp_tilde, sol_size, _n_xi_Min_tilde);
-	mat_vprime.block(0, _n_xi_Sorp_tilde, sol_size, _n_xi_Min_tilde ) = cols_xi_min_tilde;
-
-//	//MathLib::LocalMatrix cols_xi_kin  = x.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde, sol_size, _n_xi_Kin);  //RZ: wrong, matrix x contains xi mob,sorp,minI
-//	MathLib::LocalMatrix cols_xi_kin  = MathLib::LocalMatrix::Identity(_n_xi_Kin_bar, _n_xi_Kin_bar);
-//	//mat_vprime.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, sol_size, _n_xi_Kin) = cols_xi_kin;
-//	mat_vprime.block(0, _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min, _n_xi_Kin_bar, _n_xi_Kin_bar) = cols_xi_kin;
-
-	mat_B.setZero();
+	mat_vprime.topLeftCorner(mat_U.rows(),mat_U.cols()) = mat_U; 
+	std::size_t j2_kin_star = this->_ReductionGIA->get_J_2_kin_ast();
+	mat_vprime.bottomLeftCorner(j2_kin_star, j2_kin_star) = MathLib::LocalMatrix::Identity(j2_kin_star, j2_kin_star);
 }
 
 template <class T1, class T2, class T3>
@@ -737,23 +689,23 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 
 		}
 
+
 		node_indx_vec.resize(ele_node_ids.size());
 		col_indx_vec.resize(ele_node_ids.size());
                 
-//		for (xi_count = 0; xi_count < _n_xi_Sorp; xi_count++)
-//		{
-//
-//		    for( idx = 0; idx < ele_node_ids.size(); idx++)
-//		    {
-//		        node_indx_vec[idx] = ele_node_ids[idx] * _n_xi_global + _n_xi_Sorp_tilde + _n_xi_Min_tilde + xi_count;
-//		        col_indx_vec[idx]   = ele_node_ids[idx] * _n_xi_global + xi_count;
-//		    }
-//	        // add conductance matrix
-//	        eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, localK );
-//	        // add storage term
-//	        eqsJacobian_global.addAsub(node_indx_vec, col_indx_vec, 1.0 / dt * localM);
-//		}
+		for (xi_count = 0; xi_count < _n_xi_Sorp; xi_count++)
+		{
 
+		    for( idx = 0; idx < ele_node_ids.size(); idx++)
+		    {
+		        node_indx_vec[idx] = ele_node_ids[idx] * _n_xi_global + _n_xi_Sorp_tilde + _n_xi_Min_tilde + xi_count;
+		        col_indx_vec[idx]   = ele_node_ids[idx] * _n_xi_global + xi_count;
+		    }
+	        // add conductance matrix
+	        eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, localK );
+	        // add storage term
+	        eqsJacobian_global.addAsub(node_indx_vec, col_indx_vec, 1.0 / dt * localM);
+		}
 
 		for (xi_count = 0; xi_count < _n_xi_Min; xi_count++)
 		{
@@ -768,17 +720,18 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 	        eqsJacobian_global.addAsub(node_indx_vec, col_indx_vec, 1.0 / dt * localM);
 		}
 
-//		for (xi_count = 0; xi_count < _n_xi_Kin; xi_count++)
-//		{
-//
-//		    for( idx = 0; idx < ele_node_ids.size(); idx++)
-//		    {
-//		        node_indx_vec[idx]  = ele_node_ids[idx] * _n_xi_global + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + xi_count;
-//		    }
-//	        // add mass & conductance matrix
-//	        eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, 1.0 / dt * localM + localK );
-//
-//		}
+		for (xi_count = 0; xi_count < _n_xi_Kin; xi_count++)
+		{
+
+		    for( idx = 0; idx < ele_node_ids.size(); idx++)
+		    {
+		        node_indx_vec[idx]  = ele_node_ids[idx] * _n_xi_global + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp + _n_xi_Min + xi_count;
+		    }
+	        // add mass & conductance matrix
+	        eqsJacobian_global.addAsub(node_indx_vec, node_indx_vec, 1.0 / dt * localM + localK );
+
+		}
+
 		node_indx_vec.clear();
 		col_indx_vec.clear();
 

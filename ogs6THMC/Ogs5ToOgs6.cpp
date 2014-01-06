@@ -226,6 +226,9 @@ std::string convertLinearSolverType(int ls_method)
     case 805:
         ls_sol_type = "PARDISO";
         break;
+	case 9:
+		ls_sol_type = "GMRES";
+		break;
     default:
         break;
     } 

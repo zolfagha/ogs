@@ -67,13 +67,13 @@ public:
                 f_dx.eval(x_new, r, dx);
 				// x increment
                 x_new += dx;
-                 printout(itr_cnt, x_new, r, dx);
+                // printout(itr_cnt, x_new, r, dx);
 				// post processing
                 if (pre_post) 
 					pre_post->post_process(dx, x_new, f_residuals, f_dx);
 				// update residual
                 f_residuals.eval(x_new, r);
-                printout(itr_cnt, x_new, r, dx);
+                // printout(itr_cnt, x_new, r, dx);
                 if (convergence->check(&r, &dx, &x_new)) {
                     converged = true;
                     break;

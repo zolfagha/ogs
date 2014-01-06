@@ -348,6 +348,12 @@ SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
         }  // end of for i
     }  // end of for i_var
 
+	// HS 2014Jan02: 
+	// Since the boundary node values have been correctly set now, 
+	// we convert the concentrations to xi and eta again. 
+	// this will make sure both boundary and initial nodes get the right 
+	// eta and xi values. 
+	_function_data->convert_conc_to_eta_xi(); 
 
     // loop over all the boundary nodes, and
 	// transform these concentrations to eta and xi values
@@ -434,10 +440,6 @@ int SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINE
 {
 	size_t i;
 
-    //RZ: 16.12.2013 disable incorporating activity coefficients into reaction constant k and using activities instead of concentrations directly in LMA.
-	//RZ:update natural log reaction constants of equilibrium reactions.
-	//_function_data->update_lnK();
-
 	// solving linear problems one after the other
 	for ( i=0; i < _lin_solutions.size(); i++)
 	{
@@ -451,13 +453,12 @@ int SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINE
 	}
 
 	//solve local problem
-	//_function_data->calc_nodal_local_problem(t_n1.getTimeStepSize(), 1.0E-11, 1.0E-14, 50);  //RZ: tmp disabled
-	_function_data->calc_nodal_local_problem(t_n1.getTimeStepSize(), 1.0E-12, 1.0E-25, 200);  //RZ
+	_function_data->calc_nodal_local_problem(t_n1.getTimeStepSize(), 1.0E-11, 1.0E-14, 50);  //RZ: tmp disabled
 
 	// calculate the reaction rates on each node
 	// _function_data->update_node_GIA_reaction_rates();
 
-//	// solving the non-linear problem
+	// solving the non-linear problem
 	INFO("--Solving non-linear equations for xi:");
 	_nlin_solution->solveTimeStep( t_n1 );
 
