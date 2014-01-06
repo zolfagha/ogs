@@ -25,14 +25,17 @@ $TIME_CONTROL
  ITER_TIMES_AND_MULTIPLYER
    4
    0    1.6
-   3    1.0
-   5    0.5
-   7    0.25  
+   7    1.0
+   15   0.5
+   35   0.25     
 #STOP
 
 
-
-
+   4
+   0    1.6
+   3    1.0
+   5    0.5
+   7    0.25  
 
 #TIME_STEPPING
  $PCS_TYPE
