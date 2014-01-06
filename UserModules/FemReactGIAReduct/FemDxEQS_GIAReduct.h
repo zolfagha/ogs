@@ -532,8 +532,14 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( std::size_t   
 	ogsChem::LocalVector local_vec_AI; 
 	local_vec_AI = this->_userData->get_nodal_vec_AI(node_idx);
 	std::size_t n_active_min, n_inactive_min; 
-	n_active_min   = (std::size_t) local_vec_AI.sum(); 
-	n_inactive_min = _I_min - n_active_min; 
+	// HS 2014Jan06: This bug is found by RZ
+	// Notice that, if a mineral is present, then its AI index = 1. 
+	// In this case, the corresponding mineral reaction is inactive! 
+	// Vice versa. If a mineral is dissolved, i.e. its AI index = 0, 
+	// then its corresponding mineral reaction is active. 
+	// Hence, the number of inactive mineral reactions is equal to the sum of AI index vector. 
+	n_inactive_min = (std::size_t) local_vec_AI.sum();
+	n_active_min = _I_min - n_inactive_min;
 	mat_S1minA.resize(mat_S1min.rows(), n_active_min);
 	mat_S1minI.resize(mat_S1min.rows(), n_inactive_min);
 	i = 0; j = 0; 
@@ -541,12 +547,14 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( std::size_t   
 	{
 		if (local_vec_AI(k) > 0)
 		{
-			mat_S1minA.col(i) = mat_S1min.col(k);
+			// RZ caught the bug. The following line is correct now. Reason please see the above comments. 
+			mat_S1minI.col(i) = mat_S1min.col(k);
 			i++; 
 		}
 		else
 		{
-			mat_S1minI.col(j) = mat_S1min.col(k);
+			// RZ caught the bug. The following line is correct now. Reason please see the above comments. 
+			mat_S1minA.col(j) = mat_S1min.col(k);
 			j++;
 		}
 	}
