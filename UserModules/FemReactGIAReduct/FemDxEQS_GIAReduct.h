@@ -79,7 +79,6 @@ public:
         _dofManager		= NULL;
         _userData		= NULL;
         _ReductionGIA	= NULL;
-        _solv_minimization	= NULL;
     };
 
     void setVelocity(const NumLib::ITXFunction *vel)
@@ -149,11 +148,6 @@ private:
     FemLib::IFiniteElement* _fe;
     NumLib::ITXFunction* _vel;
     //SolutionLib::FemDirichletBC *bc1;
-
-    /**
-      * pointer to the local problem class.
-      */
-    LocalProblem* _solv_minimization;
 
     size_t _n_xi_global, _n_xi_Sorp_tilde, _n_xi_Min_tilde, _n_xi_Sorp, _n_xi_Min, _n_xi_Kin, _n_xi_local, _n_xi_Min_bar, _n_eta, _n_eta_bar, _n_xi_Mob, _n_xi_Kin_bar, _J_tot_kin, _n_xi_Sorp_bar;
     size_t _n_xi_Sorp_bar_li, _n_xi_Sorp_bar_ld, _n_Comp, _I_mob, _I_min, _I_sorp;
