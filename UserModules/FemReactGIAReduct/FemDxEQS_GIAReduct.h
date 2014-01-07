@@ -79,7 +79,6 @@ public:
         _dofManager		= NULL;
         _userData		= NULL;
         _ReductionGIA	= NULL;
-        _solv_minimization	= NULL;
     };
 
     void setVelocity(const NumLib::ITXFunction *vel)
@@ -150,11 +149,6 @@ private:
     NumLib::ITXFunction* _vel;
     //SolutionLib::FemDirichletBC *bc1;
 
-    /**
-      * pointer to the local problem class.
-      */
-    LocalProblem* _solv_minimization;
-
     size_t _n_xi_global, _n_xi_Sorp_tilde, _n_xi_Min_tilde, _n_xi_Sorp, _n_xi_Min, _n_xi_Kin, _n_xi_local, _n_xi_Min_bar, _n_eta, _n_eta_bar, _n_xi_Mob, _n_xi_Kin_bar, _J_tot_kin, _n_xi_Sorp_bar;
     size_t _n_xi_Sorp_bar_li, _n_xi_Sorp_bar_ld, _n_Comp, _I_mob, _I_min, _I_sorp;
 
@@ -163,6 +157,8 @@ private:
       * pointer to the activity model
       */
     ogsChem::chemActivityModelAbstract *_activity_model;
+
+	void solve_minimization(ogsChem::LocalMatrix & LHS, ogsChem::LocalMatrix & RHS, ogsChem::LocalMatrix & x);
 };
 
 
@@ -532,8 +528,14 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( std::size_t   
 	ogsChem::LocalVector local_vec_AI; 
 	local_vec_AI = this->_userData->get_nodal_vec_AI(node_idx);
 	std::size_t n_active_min, n_inactive_min; 
-	n_active_min   = (std::size_t) local_vec_AI.sum(); 
-	n_inactive_min = _I_min - n_active_min; 
+	// HS 2014Jan06: This bug is found by RZ
+	// Notice that, if a mineral is present, then its AI index = 1. 
+	// In this case, the corresponding mineral reaction is inactive! 
+	// Vice versa. If a mineral is dissolved, i.e. its AI index = 0, 
+	// then its corresponding mineral reaction is active. 
+	// Hence, the number of inactive mineral reactions is equal to the sum of AI index vector. 
+	n_inactive_min = (std::size_t) local_vec_AI.sum();
+	n_active_min = _I_min - n_inactive_min;
 	mat_S1minA.resize(mat_S1min.rows(), n_active_min);
 	mat_S1minI.resize(mat_S1min.rows(), n_inactive_min);
 	i = 0; j = 0; 
@@ -541,12 +543,14 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( std::size_t   
 	{
 		if (local_vec_AI(k) > 0)
 		{
-			mat_S1minA.col(i) = mat_S1min.col(k);
+			// RZ caught the bug. The following line is correct now. Reason please see the above comments. 
+			mat_S1minI.col(i) = mat_S1min.col(k);
 			i++; 
 		}
 		else
 		{
-			mat_S1minI.col(j) = mat_S1min.col(k);
+			// RZ caught the bug. The following line is correct now. Reason please see the above comments. 
+			mat_S1minA.col(j) = mat_S1min.col(k);
 			j++;
 		}
 	}
@@ -576,7 +580,11 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( std::size_t   
 	// according to eq. (71)
 	mat_LHS = mat_Q.transpose() * mat_A_tilde * mat_Q; 
 	mat_RHS = mat_Q.transpose() * mat_A_tilde * mat_C; 
-	mat_U   = mat_LHS.fullPivHouseholderQr().solve(mat_RHS);
+
+	// applying direct solve
+	// mat_U   = mat_LHS.fullPivHouseholderQr().solve(mat_RHS);
+	// or using minimization solve
+	solve_minimization(mat_LHS, mat_RHS, mat_U); 
 
 	mat_vprime.topLeftCorner(mat_U.rows(),mat_U.cols()) = mat_U; 
 	std::size_t j2_kin_star = this->_ReductionGIA->get_J_2_kin_ast();
@@ -738,4 +746,57 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 	}  // end of for i over all elements
 }  // end of function AddMassLaplasTerms
 
+template <class T1, class T2, class T3>
+void TemplateTransientDxFEMFunction_GIA_Reduct<T1, T2, T3>
+     ::solve_minimization(ogsChem::LocalMatrix & LHS,
+	                      ogsChem::LocalMatrix & RHS,
+						  ogsChem::LocalMatrix & x)
+{
+	// step 0: variable definition and initialization
+	int n_r, n_rows_M;
+	ogsChem::LocalMatrix Q, R, P, B, RB, V, M, tmp;
+	ogsChem::LocalMatrix z, y, y1, y2;
+	Eigen::FullPivHouseholderQR<Eigen::MatrixXd> qr_decomp;
+	
+	// step 1: perform Housholder QR decomposition on J, 
+	// so that Q^T * J * P = { R  B }
+	//                       { 0  0 }
+	qr_decomp.compute(LHS);
+	Q = qr_decomp.matrixQ();
+	P = qr_decomp.colsPermutation();
+	y = ogsChem::LocalMatrix::Zero(LHS.rows(), RHS.cols());
+	n_r = qr_decomp.rank();
+	n_rows_M = LHS.cols() - n_r;
+	RB = Q.transpose() * LHS * P;
 
+	if (n_r == LHS.cols())
+	{
+		// if n_rank == n_cols, directly solve
+		x = qr_decomp.solve(RHS);
+	}
+	else
+	{
+		// step 2: split R and B
+		R = RB.topLeftCorner(n_r, n_r);
+		B = RB.topRightCorner(n_r, RB.cols() - n_r);
+
+		// step 3: if n_rank < n_cols, calculate V, z and y based on R and B. 
+		// solve R*V = B
+		qr_decomp.compute(R);
+		V = qr_decomp.solve(B);
+		// Rz = (Q^T *(b))
+		// (I + V^TV)*y2 = V^T * z
+		M = ogsChem::LocalMatrix::Identity(n_rows_M, n_rows_M) + V.transpose() * V;
+		tmp = (Q.transpose() * RHS).topRows(n_r);
+		z = qr_decomp.solve(tmp);
+		y2 = M.fullPivHouseholderQr().solve(V.transpose() * z);
+		// y1 = z - V*y2
+		y1 = z - V * y2;
+		// formulate y
+		y.topRows(n_r) = y1;
+		y.bottomRows(LHS.rows() - n_r) = y2;
+		// apply permuation
+		x = P * y;
+	}
+	return;
+}

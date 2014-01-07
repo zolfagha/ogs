@@ -4,22 +4,22 @@ GeoSys-TIM: Timestepping ------------------------------------------------
   GROUNDWATER_FLOW
  $TIME_STEPS
    1    120.0
-   1    9880.0
+   1    8639880.0
  $TIME_END
-  10000.0
+  8640000.0
  $TIME_START
   0.0
 #TIME_STEPPING
  $PCS_TYPE
   REACT_GIA
  $TIME_END
-  10000.0
+  8640000.0
  $TIME_START
   0.0
 $TIME_CONTROL
    NEWTON_ADAPTIVE
  MAX_TIME_STEP
-     86400
+     8640
  MIN_TIME_STEP
      120.0
  ITER_TIMES_AND_MULTIPLYER
