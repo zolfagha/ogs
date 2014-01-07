@@ -157,6 +157,8 @@ private:
       * pointer to the activity model
       */
     ogsChem::chemActivityModelAbstract *_activity_model;
+
+	void solve_minimization(ogsChem::LocalMatrix & LHS, ogsChem::LocalMatrix & RHS, ogsChem::LocalMatrix & x);
 };
 
 
@@ -578,7 +580,11 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( std::size_t   
 	// according to eq. (71)
 	mat_LHS = mat_Q.transpose() * mat_A_tilde * mat_Q; 
 	mat_RHS = mat_Q.transpose() * mat_A_tilde * mat_C; 
-	mat_U   = mat_LHS.fullPivHouseholderQr().solve(mat_RHS);
+
+	// applying direct solve
+	// mat_U   = mat_LHS.fullPivHouseholderQr().solve(mat_RHS);
+	// or using minimization solve
+	solve_minimization(mat_LHS, mat_RHS, mat_U); 
 
 	mat_vprime.topLeftCorner(mat_U.rows(),mat_U.cols()) = mat_U; 
 	std::size_t j2_kin_star = this->_ReductionGIA->get_J_2_kin_ast();
@@ -740,4 +746,57 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 	}  // end of for i over all elements
 }  // end of function AddMassLaplasTerms
 
+template <class T1, class T2, class T3>
+void TemplateTransientDxFEMFunction_GIA_Reduct<T1, T2, T3>
+     ::solve_minimization(ogsChem::LocalMatrix & LHS,
+	                      ogsChem::LocalMatrix & RHS,
+						  ogsChem::LocalMatrix & x)
+{
+	// step 0: variable definition and initialization
+	int n_r, n_rows_M;
+	ogsChem::LocalMatrix Q, R, P, B, RB, V, M, tmp;
+	ogsChem::LocalMatrix z, y, y1, y2;
+	Eigen::FullPivHouseholderQR<Eigen::MatrixXd> qr_decomp;
+	
+	// step 1: perform Housholder QR decomposition on J, 
+	// so that Q^T * J * P = { R  B }
+	//                       { 0  0 }
+	qr_decomp.compute(LHS);
+	Q = qr_decomp.matrixQ();
+	P = qr_decomp.colsPermutation();
+	y = ogsChem::LocalMatrix::Zero(LHS.rows(), RHS.cols());
+	n_r = qr_decomp.rank();
+	n_rows_M = LHS.cols() - n_r;
+	RB = Q.transpose() * LHS * P;
 
+	if (n_r == LHS.cols())
+	{
+		// if n_rank == n_cols, directly solve
+		x = qr_decomp.solve(RHS);
+	}
+	else
+	{
+		// step 2: split R and B
+		R = RB.topLeftCorner(n_r, n_r);
+		B = RB.topRightCorner(n_r, RB.cols() - n_r);
+
+		// step 3: if n_rank < n_cols, calculate V, z and y based on R and B. 
+		// solve R*V = B
+		qr_decomp.compute(R);
+		V = qr_decomp.solve(B);
+		// Rz = (Q^T *(b))
+		// (I + V^TV)*y2 = V^T * z
+		M = ogsChem::LocalMatrix::Identity(n_rows_M, n_rows_M) + V.transpose() * V;
+		tmp = (Q.transpose() * RHS).topRows(n_r);
+		z = qr_decomp.solve(tmp);
+		y2 = M.fullPivHouseholderQr().solve(V.transpose() * z);
+		// y1 = z - V*y2
+		y1 = z - V * y2;
+		// formulate y
+		y.topRows(n_r) = y1;
+		y.bottomRows(LHS.rows() - n_r) = y2;
+		// apply permuation
+		x = P * y;
+	}
+	return;
+}
