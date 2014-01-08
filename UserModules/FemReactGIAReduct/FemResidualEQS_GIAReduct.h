@@ -147,11 +147,9 @@ template <class T_DIS_SYS, class T_USER_FUNCTION_DATA>
 void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_DATA>::eval(const SolutionLib::SolutionVector &u_n1, SolutionLib::SolutionVector &r)
 {
     // input, output
-    const SolutionLib::SolutionVector *u_n = this->_u_n0;
     size_t msh_id = _dis_sys->getMesh()->getID();
 
     // assembly
-    MeshLib::IMesh* msh = _dis_sys->getMesh();
     r = .0;
     //node based operations
 	// calculate the global residual
