@@ -517,7 +517,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( std::size_t   
 	local_vec_AI = this->_userData->get_nodal_vec_AI(node_idx);
 	std::size_t n_active_min, n_inactive_min; 
 
-	// RZ: Notice that, if a mineral is present, then its AI index = 1.
+	// RZ 06.01.2014: Notice that, if a mineral is present, then its AI index = 1.
 	// In this case, the corresponding mineral reaction is inactive! 
 	// Vice versa. If a mineral is dissolved, i.e. its AI index = 0, 
 	// then its corresponding mineral reaction is active. 
