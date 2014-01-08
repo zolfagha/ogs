@@ -332,9 +332,6 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
 			loc_cur_xi_Min_tilde  = loc_cur_xi_global.segment( this->_n_xi_Sorp_tilde,this->_n_xi_Min_tilde);
 			loc_cur_xi_Kin		  = loc_cur_xi_global.segment( this->_n_xi_Sorp_tilde + this->_n_xi_Min_tilde + this->_n_xi_Sorp + this->_n_xi_Min,this->_n_xi_Kin);
 
-//            for (i=0; i < _n_Comp; i++)
-//                vec_conc[i] = this->_concentrations[i]->getValue(node_idx);
-
     		//calculate concentration vector using JH version. RZ: 6.Nov.2013
     		this->_ReductionGIA->EtaXi2Conc_JH_NOCUTOFF(loc_cur_eta,
     										   loc_cur_eta_bar,
@@ -520,8 +517,8 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( std::size_t   
 	ogsChem::LocalVector local_vec_AI; 
 	local_vec_AI = this->_userData->get_nodal_vec_AI(node_idx);
 	std::size_t n_active_min, n_inactive_min; 
-	// HS 2014Jan06: This bug is found by RZ
-	// Notice that, if a mineral is present, then its AI index = 1. 
+
+	// RZ: Notice that, if a mineral is present, then its AI index = 1.
 	// In this case, the corresponding mineral reaction is inactive! 
 	// Vice versa. If a mineral is dissolved, i.e. its AI index = 0, 
 	// then its corresponding mineral reaction is active. 
@@ -535,13 +532,11 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( std::size_t   
 	{
 		if (local_vec_AI(k) > 0)
 		{
-			// RZ caught the bug. The following line is correct now. Reason please see the above comments. 
 			mat_S1minI.col(i) = mat_S1min.col(k);
 			i++; 
 		}
 		else
 		{
-			// RZ caught the bug. The following line is correct now. Reason please see the above comments. 
 			mat_S1minA.col(j) = mat_S1min.col(k);
 			j++;
 		}
@@ -627,7 +622,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 	    localDispersion.setZero(localK.rows(), localK.cols());
 	    localAdvection.setZero (localK.rows(), localK.cols());
 
-	    cmp_mol_diffusion = 1.0E-9; //constant for all species.
+	    cmp_mol_diffusion = 1.0E-9; //RZ: constant for all species.
 	    // _cmp->molecular_diffusion->eval(0, cmp_mol_diffusion);
 
 	    _q = _fe->getIntegrationMethod();
