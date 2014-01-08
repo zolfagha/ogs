@@ -50,7 +50,7 @@ public:
     		                                        DiscreteLib::DofEquationIdTable* dofManager,
     		                                        T_USER_FUNCTION_DATA* function_data)
         : _dis_sys(sys), _dofManager(dofManager),
-          _time_step(0), _u_n0(0), _st(0), _list_var(list_var), _function_data(function_data), _ReductionGIA(function_data->getReductionGIA()),
+          _time_step(0), _st(0), _u_n0(0), _list_var(list_var), _function_data(function_data), _ReductionGIA(function_data->getReductionGIA()),
           _n_xi_Kin_bar(_ReductionGIA->get_n_xi_Kin_bar()), _n_xi_Mob(_ReductionGIA->get_n_xi_Mob()), _n_eta(_ReductionGIA->get_n_eta()), _n_eta_bar(_ReductionGIA->get_n_eta_bar()),
           _n_xi_Sorp_tilde(_ReductionGIA->get_n_xi_Sorp_tilde()), _n_xi_Min_tilde(_ReductionGIA->get_n_xi_Min_tilde()), _n_xi_Sorp(_ReductionGIA->get_n_xi_Sorp()), _n_xi_Min(_ReductionGIA->get_n_xi_Min()),
           _n_xi_Kin(_ReductionGIA->get_n_xi_Kin()),_n_xi_Min_bar(_ReductionGIA->get_n_xi_Min_bar()), _n_xi_local(_ReductionGIA->get_n_xi_local()), _n_xi_global(_ReductionGIA->get_n_xi_global()),
@@ -147,11 +147,9 @@ template <class T_DIS_SYS, class T_USER_FUNCTION_DATA>
 void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_DATA>::eval(const SolutionLib::SolutionVector &u_n1, SolutionLib::SolutionVector &r)
 {
     // input, output
-    const SolutionLib::SolutionVector *u_n = this->_u_n0;
     size_t msh_id = _dis_sys->getMesh()->getID();
 
     // assembly
-    MeshLib::IMesh* msh = _dis_sys->getMesh();
     r = .0;
     //node based operations
 	// calculate the global residual
@@ -283,14 +281,14 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             loc_cur_xi_Sorp_bar_li  = loc_cur_xi_Sorp_bar.topRows(_n_xi_Sorp_bar_li);
             loc_cur_xi_Sorp_bar_ld  = loc_cur_xi_Sorp_bar.bottomRows(_n_xi_Sorp_bar_ld);
 
-//            // calculate node based AE (Eq. 3.43 and 3.44)
-//            res43 = loc_cur_xi_Sorp_tilde - loc_cur_xi_Sorp + loc_cur_xi_Sorp_bar_li;
-//            for(std::size_t i = 0; i < _n_xi_Sorp_tilde; i++)
-//            	residual_global[_n_xi_global * node_idx + i] = res43[i];
-//
-//            if(_n_xi_Sorp_bar_ld != 0)
-//            	res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar + loc_cur_xi_Sorp_bar_ld;
-//            else
+            // calculate node based AE (Eq. 3.43 and 3.44)
+            res43 = loc_cur_xi_Sorp_tilde - loc_cur_xi_Sorp + loc_cur_xi_Sorp_bar_li;
+            for(std::size_t i = 0; i < _n_xi_Sorp_tilde; i++)
+            	residual_global[_n_xi_global * node_idx + i] = res43[i];
+
+            if(_n_xi_Sorp_bar_ld > 0)
+            	res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar + loc_cur_xi_Sorp_bar_ld;
+            else
             	res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar;
 
             for(std::size_t i = 0; i < _n_xi_Min_tilde; i++)
@@ -320,17 +318,9 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             res46 = theta_water_content * mat_Amin  * vec_Rate;
             res47 = theta_water_content * mat_A1kin * vec_Rate;
 
-			// HS: the following part is disabled,
-			// first we store them, and the integration of these values
+			// HS:first we store them, and the integration of these values
 			// will be done in the assembly part.
-			/*
-            for (j=0; j<_n_xi_Sorp_tilde; j++ )
-                residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + j] -= res45(j) ;
-            for (j=0; j<_n_xi_Min_tilde; j++ )
-                residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp_tilde + j] -= res46(j) ;
-            for (j=0; j<_n_xi_Kin; j++ )
-                residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp_tilde + _n_xi_Min_tilde + j] -= res47(j) ;
-		    */
+
 			for (j = 0; j < _n_xi_Sorp_tilde; j++)
 				this->_function_data->get_xi_sorp_rates()[j]->setValue( node_idx, res45(j));
 			for (j = 0; j < _n_xi_Min_tilde; j++)
@@ -487,7 +477,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
         localDispersion.setZero(localK.rows(), localK.cols());
         localAdvection.setZero (localK.rows(), localK.cols());
 
-        double cmp_mol_diffusion = 1.0E-9; //constant for all species.
+        double cmp_mol_diffusion = 1.0E-9; //RZ: constant for all species.
 
         _q = _fe->getIntegrationMethod();
         double gp_x[3], real_x[3];

@@ -43,7 +43,6 @@ public:
     	_user_data.update_xi_global_cur_nodal_values( x_new );
 
     	// call the local problem
-    	//_user_data.calc_nodal_local_problem(_user_data.getTimeStep()->getTimeStepSize(), 1.0E-11, 1.0E-14, 50);
     	_user_data.calc_nodal_local_problem(_user_data.getTimeStep()->getTimeStepSize(), 1.0E-12, 1.0E-20, 150);
     };
 
