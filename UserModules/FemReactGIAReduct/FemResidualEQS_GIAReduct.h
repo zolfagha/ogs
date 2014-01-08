@@ -477,7 +477,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
         localDispersion.setZero(localK.rows(), localK.cols());
         localAdvection.setZero (localK.rows(), localK.cols());
 
-        double cmp_mol_diffusion = 1.0E-9; //constant for all species.
+        double cmp_mol_diffusion = 1.0E-9; //RZ: constant for all species.
 
         _q = _fe->getIntegrationMethod();
         double gp_x[3], real_x[3];

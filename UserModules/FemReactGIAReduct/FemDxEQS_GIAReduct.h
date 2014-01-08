@@ -274,7 +274,6 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     mat_p1Ftrans = MathLib::LocalMatrix::Zero(_n_xi_global, _n_xi_global);
     mat_p1F     = MathLib::LocalMatrix::Zero(_n_xi_global, _n_xi_global);
     mat_p2F     = MathLib::LocalMatrix::Zero(_n_xi_global, _n_xi_local);
-    double dt = delta_t.getTimeStepSize();
 
     logk_min 		   =  _ReductionGIA->get_logk_min();
     mat_S1min 		   =  _ReductionGIA->get_matrix_S1min();
@@ -570,7 +569,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( std::size_t   
 
 	// applying direct solve
 	//mat_U   = mat_LHS.fullPivHouseholderQr().solve(mat_RHS);
-	// or using minimization solve.
+	// or RZ: using minimization solve.
 	solve_minimization(mat_LHS, mat_RHS, mat_U);
 
 	mat_vprime.topLeftCorner(mat_U.rows(),mat_U.cols()) = mat_U; 
