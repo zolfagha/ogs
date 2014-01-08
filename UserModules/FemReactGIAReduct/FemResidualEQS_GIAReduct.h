@@ -50,7 +50,7 @@ public:
     		                                        DiscreteLib::DofEquationIdTable* dofManager,
     		                                        T_USER_FUNCTION_DATA* function_data)
         : _dis_sys(sys), _dofManager(dofManager),
-          _time_step(0), _u_n0(0), _st(0), _list_var(list_var), _function_data(function_data), _ReductionGIA(function_data->getReductionGIA()),
+          _time_step(0), _st(0), _u_n0(0), _list_var(list_var), _function_data(function_data), _ReductionGIA(function_data->getReductionGIA()),
           _n_xi_Kin_bar(_ReductionGIA->get_n_xi_Kin_bar()), _n_xi_Mob(_ReductionGIA->get_n_xi_Mob()), _n_eta(_ReductionGIA->get_n_eta()), _n_eta_bar(_ReductionGIA->get_n_eta_bar()),
           _n_xi_Sorp_tilde(_ReductionGIA->get_n_xi_Sorp_tilde()), _n_xi_Min_tilde(_ReductionGIA->get_n_xi_Min_tilde()), _n_xi_Sorp(_ReductionGIA->get_n_xi_Sorp()), _n_xi_Min(_ReductionGIA->get_n_xi_Min()),
           _n_xi_Kin(_ReductionGIA->get_n_xi_Kin()),_n_xi_Min_bar(_ReductionGIA->get_n_xi_Min_bar()), _n_xi_local(_ReductionGIA->get_n_xi_local()), _n_xi_global(_ReductionGIA->get_n_xi_global()),
