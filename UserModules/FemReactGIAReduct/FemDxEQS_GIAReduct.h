@@ -528,7 +528,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( std::size_t   
 	mat_S1minA.resize(mat_S1min.rows(), n_active_min);
 	mat_S1minI.resize(mat_S1min.rows(), n_inactive_min);
 	i = 0; j = 0; 
-	for (int k = 0; k < _I_min; k++)
+	for (size_t k = 0; k < _I_min; k++)
 	{
 		if (local_vec_AI(k) > 0)
 		{
