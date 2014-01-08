@@ -318,17 +318,9 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             res46 = theta_water_content * mat_Amin  * vec_Rate;
             res47 = theta_water_content * mat_A1kin * vec_Rate;
 
-			// HS: the following part is disabled,
-			// first we store them, and the integration of these values
+			// HS:first we store them, and the integration of these values
 			// will be done in the assembly part.
-			/*
-            for (j=0; j<_n_xi_Sorp_tilde; j++ )
-                residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + j] -= res45(j) ;
-            for (j=0; j<_n_xi_Min_tilde; j++ )
-                residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp_tilde + j] -= res46(j) ;
-            for (j=0; j<_n_xi_Kin; j++ )
-                residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp_tilde + _n_xi_Min_tilde + j] -= res47(j) ;
-		    */
+
 			for (j = 0; j < _n_xi_Sorp_tilde; j++)
 				this->_function_data->get_xi_sorp_rates()[j]->setValue( node_idx, res45(j));
 			for (j = 0; j < _n_xi_Min_tilde; j++)
