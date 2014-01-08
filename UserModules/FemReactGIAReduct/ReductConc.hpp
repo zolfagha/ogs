@@ -502,13 +502,8 @@ void FunctionReductConc<T1, T2>::convert_eta_xi_to_conc(void)
 			local_xi_Min_tilde  = local_xi_global.segment( this->_n_xi_Sorp_tilde,this->_n_xi_Min_tilde);
 			local_xi_Kin		= local_xi_global.segment( this->_n_xi_Sorp_tilde + this->_n_xi_Min_tilde + this->_n_xi_Sorp + this->_n_xi_Min,this->_n_xi_Kin);
 
-			//calculate concentration vector using JH version. 6NOV2013 best results.
+			//calculate concentration vector using JH version. RZ: 6NOV2013 best results.
 			this->_ReductionGIA->EtaXi2Conc_JH(local_eta, local_eta_bar, local_xi_Mob, local_xi_Sorp_tilde, local_xi_Sorp_bar, local_xi_Min_tilde, local_xi_Min_bar, local_xi_Kin, local_xi_Kin_bar,local_conc);
-
-
-//			// pass them to the transform function in the reductionKin class
-//			// and that the loc_eta_mob, local_eta_immob and local_xi
-//			this->_ReductionGIA->EtaXi2Conc(loc_eta, loc_eta_bar, loc_xi_global, loc_xi_local, loc_conc);
 
 			for (i=0; i < _n_Comp; i++)
 			{
@@ -560,11 +555,8 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 {
 	size_t i, node_idx;
 	double t0 = 0.0;
-//	double theta_water_content (0.5);  //monod2d example
-
 
 	//pointer to the local problem
-   // LocalProblem* _local_ode_xi_immob_GIA;
     _local_ode_xi_immob_GIA = new Local_ODE_Xi_immob_GIA( _ReductionGIA);
 
     MathLib::LocalMatrix mat_A2kin = _ReductionGIA->get_matrix_A2kin();
@@ -640,7 +632,6 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 
 
     //  initialize the ODE using the StepperBulischStoer class
-    //MathLib::StepperBulischStoer<Local_ODE_Xi_immob_GIA>* _sbs
 	_sbs   = new MathLib::StepperBulischStoer<Local_ODE_Xi_immob_GIA>(loc_XiBarKin,
         															vec_xi_kin_rate,
         															t0,
@@ -649,7 +640,6 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
         															true);
 
 	//pointer to the local problem
-    //LocalProblem* pSolve;
 	_pSolve = new LocalProblem( _ReductionGIA, _sbs, _local_ode_xi_immob_GIA);
 
 	// loop over all the nodes
@@ -807,10 +797,6 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 
         }  // end of else if
 	}  // end of for node_idx
-
-    //delete _pSolve; done in the header file
-   // delete _sbs; done in the header file
-
 }
 
 template <class T1, class T2>
