@@ -569,9 +569,9 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( std::size_t   
 	mat_RHS = mat_Q.transpose() * mat_A_tilde * mat_C; 
 
 	// applying direct solve
-	// mat_U   = mat_LHS.fullPivHouseholderQr().solve(mat_RHS);
-	// or using minimization solve
-	solve_minimization(mat_LHS, mat_RHS, mat_U); 
+	//mat_U   = mat_LHS.fullPivHouseholderQr().solve(mat_RHS);
+	// or using minimization solve.
+	solve_minimization(mat_LHS, mat_RHS, mat_U);
 
 	mat_vprime.topLeftCorner(mat_U.rows(),mat_U.cols()) = mat_U; 
 	std::size_t j2_kin_star = this->_ReductionGIA->get_J_2_kin_ast();

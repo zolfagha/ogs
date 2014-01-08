@@ -181,9 +181,11 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
             // updating dx
             dx = dx * alpha;
 
-            //RZ: correct increment 06Jan2014
             // increment of unknowns
-            x_new = x_new - dx;
+            this->increment_unknown( x, dx, x_new );
+            //RZ08Jan2014: this increment slightly decrease the overall simulation time.
+            //x_new = x_new - dx;
+
             // now updating the saturation index and minerals
             if(_n_xi_Min > 0)
 				this->update_minerals_conc_AI( x_new, vec_AI );
