@@ -281,14 +281,14 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             loc_cur_xi_Sorp_bar_li  = loc_cur_xi_Sorp_bar.topRows(_n_xi_Sorp_bar_li);
             loc_cur_xi_Sorp_bar_ld  = loc_cur_xi_Sorp_bar.bottomRows(_n_xi_Sorp_bar_ld);
 
-//            // calculate node based AE (Eq. 3.43 and 3.44)
-//            res43 = loc_cur_xi_Sorp_tilde - loc_cur_xi_Sorp + loc_cur_xi_Sorp_bar_li;
-//            for(std::size_t i = 0; i < _n_xi_Sorp_tilde; i++)
-//            	residual_global[_n_xi_global * node_idx + i] = res43[i];
-//
-//            if(_n_xi_Sorp_bar_ld != 0)
-//            	res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar + loc_cur_xi_Sorp_bar_ld;
-//            else
+            // calculate node based AE (Eq. 3.43 and 3.44)
+            res43 = loc_cur_xi_Sorp_tilde - loc_cur_xi_Sorp + loc_cur_xi_Sorp_bar_li;
+            for(std::size_t i = 0; i < _n_xi_Sorp_tilde; i++)
+            	residual_global[_n_xi_global * node_idx + i] = res43[i];
+
+            if(_n_xi_Sorp_bar_ld > 0)
+            	res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar + loc_cur_xi_Sorp_bar_ld;
+            else
             	res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar;
 
             for(std::size_t i = 0; i < _n_xi_Min_tilde; i++)
