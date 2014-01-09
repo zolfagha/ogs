@@ -33,7 +33,6 @@ LocalProblem::LocalProblem(ogsChem::chemReductionGIA* ReductionGIA, MathLib::Ste
 void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 														double dt,
 														const double iter_tol,
-														const double rel_tol,
 														const double max_iter, 
 														ogsChem::LocalVector & x,
 														ogsChem::LocalVector & vec_eta,
@@ -59,7 +58,8 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 	// HS: the number of unknowns in the local problem equals
 	// to the number of chemical components
     x_new          = ogsChem::LocalVector::Zero( _n_Comp );
-	dx             = ogsChem::LocalVector::Ones( _n_Comp );
+	//dx             = ogsChem::LocalVector::Ones( _n_Comp );
+    dx             = ogsChem::LocalVector::Zero( _n_Comp );
 	_mat_Jacobian  = ogsChem::LocalMatrix::Zero( _n_Comp, _n_Comp);
 	vec_residual   = ogsChem::LocalVector::Zero( _n_Comp );
 
@@ -98,7 +98,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 	this->calc_residual(dt, x, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin, vec_AI);
 
     // evaluate norm of residual vector
-    d_norm = vec_residual.norm();
+	 d_norm = vec_residual.norm();
 
 #ifdef _DEBUG
 	// debugging--------------------------
@@ -171,6 +171,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
         // line search begins
         j = 0; 
         while ( j < 30 )
+        //while ( j < 6 )
         {
             // d1_norm = norm(res,inf);
             d1_norm = vec_residual.norm();
