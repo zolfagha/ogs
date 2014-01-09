@@ -333,25 +333,6 @@ public:
       */
 	void calc_nodal_local_problem(double dt, const double iter_tol, const double rel_tol, const double max_iter);
 
-	/**
-      * calculate node based residual of global problem
-      */
-	void GlobalResidualAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, SolutionLib::SolutionVector & residual_global);
-
-	void assembly(	const NumLib::TimeStep & delta_t, const std::size_t _n_xi, const SolutionLib::SolutionVector & u_cur_xiglob,
-					SolutionLib::SolutionVector & residual_global, std::size_t switchOn);
-
-	void GlobalJacobianAssembler(const NumLib::TimeStep & delta_t, const SolutionLib::SolutionVector & u_cur_xiglob, SolutionLib::SolutionVector & Jacobian_global);
-
-	void NumDiff(std::size_t & col,
-			 	 ogsChem::LocalVector & delta_xi,
-			 	 ogsChem::LocalVector & f,
-			 	ogsChem::LocalVector & f_old,
-			 	 ogsChem::LocalVector & unknown,
-			 	 ogsChem::LocalVector & DrateDxi);
-	void Vprime (MathLib::LocalVector & vec_conc,
-				  MathLib::LocalMatrix & mat_vprime);
-
 	ogsChem::chemReductionGIA* getReductionGIA(){return _ReductionGIA;}
 
 	std::vector<MyNodalFunctionScalar*> & get_xi_global_cur() {return _xi_global_cur;}

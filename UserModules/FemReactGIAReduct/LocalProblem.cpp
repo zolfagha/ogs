@@ -126,9 +126,9 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
 #ifdef _DEBUG
 	// debugging--------------------------
-	// std::cout << "dx Vector: \n";
-	// std::cout << dx << std::endl;
-	// end of debugging-------------------
+  	// std::cout << "dx Vector: \n";
+    // std::cout << dx << std::endl;
+    // end of debugging-------------------
 #endif
 
     // increment of unknowns
