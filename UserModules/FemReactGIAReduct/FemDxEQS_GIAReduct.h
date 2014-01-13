@@ -362,7 +362,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
             Unknown_vec.head(_n_xi_global) = loc_cur_xi_global;
             Unknown_vec.tail(_n_xi_local) = loc_cur_xi_local;
 
-            if(this->_J_tot_kin > 0)
+            if(_n_xi_Kin > 0)
             {
             	for(std::size_t i = 0; i < n_xi_total ; i++ )
             	{
