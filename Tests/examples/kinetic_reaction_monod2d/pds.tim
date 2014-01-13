@@ -19,7 +19,7 @@ GeoSys-TIM: Timestepping ------------------------------------------------
 $TIME_CONTROL
    NEWTON_ADAPTIVE
  MAX_TIME_STEP
-     8640
+     86400
  MIN_TIME_STEP
      120.0
  ITER_TIMES_AND_MULTIPLYER

@@ -91,7 +91,6 @@ public:
 	void solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
                                               double dt,
 											  const double iter_tol,
-											  const double rel_tol,
 											  const double max_iter,
 											  ogsChem::LocalVector & x,
 											  ogsChem::LocalVector & vec_eta,
