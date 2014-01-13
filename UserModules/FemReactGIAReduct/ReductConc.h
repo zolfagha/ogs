@@ -331,7 +331,7 @@ public:
 	/**
       * calculate nodal local problem
       */
-	void calc_nodal_local_problem(double dt, const double iter_tol, const double max_iter);
+	void calc_nodal_local_problem(double dt, const double iter_tol, const double rel_tol, const double max_iter);
 
 	ogsChem::chemReductionGIA* getReductionGIA(){return _ReductionGIA;}
 

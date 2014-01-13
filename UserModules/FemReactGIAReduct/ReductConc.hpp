@@ -551,7 +551,7 @@ void FunctionReductConc<T1, T2>::update_xi_global_cur_nodal_values( const T_X & 
 
 
 template <class T1, class T2>
-void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const double iter_tol, const double max_iter)
+void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const double iter_tol, const double rel_tol, const double max_iter)
 {
 	size_t i, node_idx;
 	double t0 = 0.0;
@@ -717,6 +717,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			_pSolve->solve_LocalProblem_Newton_LineSearch( node_idx, 
 				                                           dt, 
 														   iter_tol, 
+														   rel_tol, 
 														   max_iter, 
 														   vec_unknowns, 
 														   loc_eta, 
@@ -762,15 +763,15 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 		    vec_conc_updated.segment(_I_mob + _I_sorp, _I_min) = vec_conc_Min;
 			vec_conc_updated.tail(_I_kin) = vec_conc_Kin;
 
-//			//RZ:DB
-//			for(size_t w = 0; w < _I_min; w++)
-//			{
-//				if(vec_conc_Min(w) < 0.0)
-//				{
-//					std::cout << "negative mineral concentration after solving local problem! on node:"<< node_idx << std::endl;
-//					std::cout << vec_conc_Min << std::endl;
-//				}
-//			}
+			//RZ:DB
+			for(size_t w = 0; w < _I_min; w++)
+			{
+				if(vec_conc_Min(w) < 0.0)
+				{
+					std::cout << "negative mineral concentration after solving local problem! on node:"<< node_idx << std::endl;
+					std::cout << vec_conc_Min << std::endl;
+				}
+			}
 
 			//update the xi global value after with the optimized values 4-Nov-2013
 			for (i=0; i < _n_xi_global; i++)
