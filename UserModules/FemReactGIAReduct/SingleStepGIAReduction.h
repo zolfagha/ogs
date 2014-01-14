@@ -422,9 +422,6 @@ SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
 
 	}
 
-    // _function_data->convert_conc_to_eta_xi();
-
-
 };
 
 template <
@@ -453,7 +450,7 @@ int SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINE
 	}
 
 	//solve local problem
-	_function_data->calc_nodal_local_problem(t_n1.getTimeStepSize(), 1.0E-12, 1.0E-25, 200);
+	_function_data->calc_nodal_local_problem(t_n1.getTimeStepSize(), 1.0E-12, 1.0E-16, 50);
 	// calculate the reaction rates on each node
 	// _function_data->update_node_GIA_reaction_rates();
 
