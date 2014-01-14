@@ -109,7 +109,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
 	// save the previous values
 	x_new  =  x;
-	while ((iter < max_iter) && (d_norm > iter_tol)){ //RZ: 4.12.2013
+	while ((iter < max_iter) && (d_norm > iter_tol) && (dx.norm() > rel_tol )){ //RZ: 4.12.2013 // HS 2014Jan14
 
         // form Jacobian matrix
 		this->calc_Jacobian(dt, x, vec_residual, _vec_XiBarKin, vec_AI);
