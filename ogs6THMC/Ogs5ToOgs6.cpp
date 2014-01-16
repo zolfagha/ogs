@@ -534,7 +534,7 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 		
     }  // end of for ogs5fem.pcs_vector.size()
 
-	// HS: add kinetic reactions
+	// HS: add chemical reactions
 	size_t n_KinReactions, n_Compound; 
 	n_KinReactions = ogs5fem.KinReact_vector.size(); 
 	if ( n_KinReactions > 0 ) {  // only create the "optKRC" option when there are kinetic reactions defined. 
