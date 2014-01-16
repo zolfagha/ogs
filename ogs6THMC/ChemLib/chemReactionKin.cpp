@@ -273,9 +273,10 @@ void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::
         }  // end of for i
 
 	}  // end of if KRC_reaction
-	else if ( KRC_reaction->getType() == "UserExp" )
+	else if ( KRC_reaction->getType() == "USER_EXP" )
 	{
 		// user defined rate expression. 
+		this->_kinReactType = ogsChem::UserExp; 
 
 		// TODO: converting the information
 	

@@ -1543,18 +1543,15 @@ int CKinReact::CheckReactionDataConsistency(std::vector<CKinBlob*> & KinBlob_vec
 	}
 	// check type
 	if (type.compare("monod") != 0)
-	{
-		if (type.compare("exchange") != 0)
-			if (type.compare("NAPLdissolution") != 0)
-			{
-                if (type.compare("MOB_EQ_REACT") != 0)
-                    if (type.compare("SORP_EQ_REACT") != 0)
-                        if (type.compare("MIN_EQ_REACT") != 0)
-                        {
-                            ok = 0;
-                            cout << "Unknown reaction type" << endl;
-                        }
-			}
+	if (type.compare("exchange") != 0)
+	if (type.compare("NAPLdissolution") != 0)
+    if (type.compare("MOB_EQ_REACT") != 0)
+    if (type.compare("SORP_EQ_REACT") != 0)
+    if (type.compare("MIN_EQ_REACT") != 0)
+	if (type.compare("USER_EXP") != 0)
+    {
+		ok = 0;
+		cout << "Unknown reaction type" << endl;
 	}
 
 	/* Check Monod-, Inhibition and Production terms */

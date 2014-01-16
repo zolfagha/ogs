@@ -17,7 +17,7 @@ GeoSys Kinetic Reactions
  $NAME
    oxidation_oxygen ;
  $TYPE
-   UserExp;
+   USER_EXP;
  $EQUATION
   1 CH2O + 1 O2 =  1 CO2 + 1 H2O ; 
  $USER_EXPRESSION
@@ -27,7 +27,7 @@ GeoSys Kinetic Reactions
  $NAME
    oxidation_nitrate ;
  $TYPE
-   UserExp;
+   USER_EXP;
  $EQUATION
   5 CH2O + 4 O2 =  2 N2 + 4 HCO3- + 1 H2CO3 + 2 H2O ; 
  $USER_EXPRESSION
@@ -37,8 +37,10 @@ GeoSys Kinetic Reactions
  $NAME
    oxidation_sulfate ;
  $TYPE
-   UserExp;
+   USER_EXP;
  $EQUATION
   2 CH2O + 1 SO42- =  2 HCO3- + 1 H2S ; 
  $USER_EXPRESSION
   <TO enter something>  
+  
+#STOP
