@@ -13,6 +13,8 @@
 #include "chemReactionKin.h"
 #include "logog.hpp"
 
+// using namespace mu; 
+
 namespace ogsChem
 {
 
@@ -24,10 +26,14 @@ chemReactionKin::chemReactionKin()
 	_rate_constant_order = 1.0; 
 	_idx_bacteria = 0;
     _decay_rate = 0.0; 
+	
+	_userExp_parser = NULL; 
 }
 
 chemReactionKin::~chemReactionKin(void)
 {
+	if (_userExp_parser != NULL)
+		delete _userExp_parser; 
 }
 
 void chemReactionKin::readReactionStr(std::string & /*reaction_str*/)
@@ -281,9 +287,15 @@ void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::
 		// reading the user defined kinetic rate expression. 
 		this->_user_rate_Exp = KRC_reaction->userExp; 
 
-		// TODO initialize the muParser library. 
+		if (this->_user_rate_Exp.size() > 0)
+		{
+			// initialize the muParser library. 
+			_userExp_parser = new mu::Parser;
 
-		// TODO: making a test evaluation of the expression
+			// define the variables
+
+			// TODO: making a test evaluation of the expression
+		}
 	
 	}
 	else

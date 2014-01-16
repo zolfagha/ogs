@@ -12,9 +12,12 @@
 #include "chemReaction.h"
 #include "ogsFileIO/FemIO/ogs5/rf_kinreact.h"
 #include "BaseLib/OrderedMap.h" 
+#include "muParser.h"
 
 #ifndef CHEM_REACTION_KIN_H
 #define CHEM_REACTION_KIN_H
+
+using namespace mu; 
 
 namespace ogsChem
 {
@@ -94,6 +97,11 @@ private:
 	  * string defined by the user regarding the kinetic rate expression
 	  */
 	std::string _user_rate_Exp; 
+
+	/**
+	  * parser library handler
+	  */
+	mu::Parser* _userExp_parser;
 
 	/**
       * a vector of monod rate components
