@@ -1426,6 +1426,15 @@ bool CKinReact::Read(std::ifstream* rfd_file)
 			in.clear();
 		}
 
+		//....................................................................
+		// subkeyword found
+		if (line_string.find("$USER_EXPRESSION") != string::npos)
+		{
+			in.str(readNonBlankLineFromInputStream(*rfd_file));
+			in >> userExp;
+			in.clear();
+		}
+
 		// HS, 09.2012 disable this part, to be moved...
 		/*
 		//....................................................................
