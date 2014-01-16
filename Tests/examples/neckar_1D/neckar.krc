@@ -1,0 +1,44 @@
+GeoSys Kinetic Reactions
+#KINREACTIONDATA      
+ $SOLVER_TYPE
+	1                ; Solver type
+ $RELATIVE_ERROR	
+	1.e-6		 ; rel. Error
+ $MIN_TIMESTEP	
+	1.e-6		; min Timestep
+ $INITIAL_TIMESTEP	
+	1.e-4       ; init Timestep
+ $BACTERIACAPACITY
+  100.0
+ $NO_REACTIONS
+   POLYLINE PLY_BC_LEFT
+
+#REACTION ; 
+ $NAME
+   oxidation_oxygen ;
+ $TYPE
+   UserExp;
+ $EQUATION
+  1 CH2O + 1 O2 =  1 CO2 + 1 H2O ; 
+ $USER_EXPRESSION
+  <TO enter something>
+
+#REACTION ; 
+ $NAME
+   oxidation_nitrate ;
+ $TYPE
+   UserExp;
+ $EQUATION
+  5 CH2O + 4 O2 =  2 N2 + 4 HCO3- + 1 H2CO3 + 2 H2O ; 
+ $USER_EXPRESSION
+  <TO enter something>
+
+#REACTION ; 
+ $NAME
+   oxidation_sulfate ;
+ $TYPE
+   UserExp;
+ $EQUATION
+  2 CH2O + 1 SO42- =  2 HCO3- + 1 H2S ; 
+ $USER_EXPRESSION
+  <TO enter something>  
