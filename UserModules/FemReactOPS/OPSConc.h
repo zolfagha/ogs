@@ -236,10 +236,15 @@ public:
     };
 
 	/**
-      * calculate nodal equilibrium reaction system
+      * calculate nodal chemistry system
       */
-	void calc_nodal_eq_react_sys(double dt);
-	
+	void calc_nodal_react_sys(double dt);
+
+	/**
+	  * calculate nodal equilibrium reaction system
+	  */
+	void calc_nodal_kin_react_sys(double dt);
+
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
 

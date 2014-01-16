@@ -347,7 +347,7 @@ int SingleStepReactOPS<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_P
         _function_data->set_concentrations( i, _lin_solutions[i]->getCurrentSolution(0) ); 
 	}
 	// calcuate the equilibrium reaction system on each node
-	_function_data->calc_nodal_eq_react_sys(0.0); // to be switched on later
+	_function_data->calc_nodal_eq_react_sys(0.0); 
 
     return 0;
 }

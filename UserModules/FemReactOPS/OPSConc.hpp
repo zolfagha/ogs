@@ -58,7 +58,7 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
 		this->setOutputParameterName( i, femData->map_ChemComp[i]->second->get_name() ); 
 
     // adding variables into the linear problem
-	// for the linear transport problem, variables are c_mob
+	// for the linear transport problem, variables are c_mobha
 	for ( i=0; i < _n_Comp_mob ; i++ )
 	{
     	// set up problem
@@ -190,7 +190,7 @@ void FunctionOPSConc<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 }
 
 template <class T1, class T2>
-void FunctionOPSConc<T1, T2>::calc_nodal_eq_react_sys(double /*dt*/)
+void FunctionOPSConc<T1, T2>::calc_nodal_react_sys(double dt)
 {
     size_t i, node_idx, err_node_count; 
     size_t result = 1; 
@@ -200,7 +200,7 @@ void FunctionOPSConc<T1, T2>::calc_nodal_eq_react_sys(double /*dt*/)
 	loc_conc = LocalVector::Zero( _n_Comp ); 
 
 	// signal, solving local equilibrium reaction system
-	INFO("--Solving local equilibrium reaction system...");
+	INFO("--Solving local chemical reaction system...");
 
     // clear the counter
     err_node_count = 0; 
@@ -225,10 +225,14 @@ void FunctionOPSConc<T1, T2>::calc_nodal_eq_react_sys(double /*dt*/)
                                                            1.0e-12,
                                                            50 ); 
         	// if the iteration converged. 
-            if ( result == 0 )
-                // collect the solved concentrations
-    			for (i=0; i < _n_Comp; i++) 
-    				this->_concentrations[i]->setValue(node_idx, loc_conc[i]); 
+			if (result == 0)
+			{
+				// TODO: solving kinetic reactions. 
+                
+				// collect the solved concentrations
+				for (i = 0; i < _n_Comp; i++)
+					this->_concentrations[i]->setValue(node_idx, loc_conc[i]);
+			}
             else 
                 err_node_count++; 
 		} // end of if
@@ -249,3 +253,4 @@ void FunctionOPSConc<T1, T2>::calc_nodal_eq_react_sys(double /*dt*/)
         INFO("--Solution of chemical system failed on %i nodes...", err_node_count);
     }
 }
+

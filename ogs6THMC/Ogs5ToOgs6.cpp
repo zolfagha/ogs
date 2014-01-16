@@ -578,7 +578,7 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
 			mChemComp = NULL; 
 		}
 
-		// adding the kinetic reactions one after another
+		// adding the reactions one after another
 		for ( size_t i=0; i < n_KinReactions ; i++ )
 		{
 			// add reactions one after another
