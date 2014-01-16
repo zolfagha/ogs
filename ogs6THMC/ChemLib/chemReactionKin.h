@@ -91,6 +91,11 @@ private:
     double _decay_rate; 
 
 	/**
+	  * string defined by the user regarding the kinetic rate expression
+	  */
+	std::string _user_rate_Exp; 
+
+	/**
       * a vector of monod rate components
       */
 	std::vector<size_t> _vec_Monod_Comps_Idx; 
