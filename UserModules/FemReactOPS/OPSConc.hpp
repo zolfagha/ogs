@@ -139,7 +139,7 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
     // set up solution
     _solution = new MyReactOPSSolution(dis, _problem, this, _linear_problems, _linear_solutions);
     // run equilibrium reactions on each node that is not on boundary
-    this->calc_nodal_eq_react_sys( 0.0 ); 
+	this->calc_nodal_react_sys(0.0);
 
     // set initial output parameter
 	for (i=0; i<_concentrations.size(); i++) {
