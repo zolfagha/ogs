@@ -278,7 +278,12 @@ void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::
 		// user defined rate expression. 
 		this->_kinReactType = ogsChem::UserExp; 
 
-		// TODO: converting the information
+		// reading the user defined kinetic rate expression. 
+		this->_user_rate_Exp = KRC_reaction->userExp; 
+
+		// TODO initialize the muParser library. 
+
+		// TODO: making a test evaluation of the expression
 	
 	}
 	else
