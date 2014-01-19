@@ -17,8 +17,6 @@
 #ifndef CHEM_REACTION_KIN_H
 #define CHEM_REACTION_KIN_H
 
-using namespace mu; 
-
 namespace ogsChem
 {
 
