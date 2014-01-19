@@ -18,6 +18,7 @@ INCLUDE_DIRECTORIES(
         ../external/logog/include
         ../external/Eigen
         ../external/tinyxml2
+        ../external/muparser/include
         ../ogsCore
         ../ogsNumerics
         ../ogsFileIO
