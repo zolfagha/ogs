@@ -61,6 +61,10 @@ public:
         BaseLib::releaseObject(_sbs);
     };
 
+    /**
+      * whether the reduction scheme has been initialized
+      */
+    bool IsInitialized(void) { return isInitialized; };
 
     /**
       * solve the kinetic reaction system
