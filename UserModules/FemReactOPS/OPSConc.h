@@ -147,6 +147,8 @@ public:
         BaseLib::releaseObject(_problem); 
         BaseLib::releaseObjectsInStdVector(_linear_problems);
         BaseLib::releaseObjectsInStdVector(_concentrations);
+        BaseLib::releaseObject(_local_eq_react_sys); 
+        BaseLib::releaseObject(_local_kin_react_sys); 
     };
 
     /**
@@ -282,7 +284,12 @@ private:
       * the local equilibrium reactions system
       */ 
 	ogsChem::chemEqReactSysActivity*                   _local_eq_react_sys; 
-	
+
+    /**
+      * the local kinetic reactions system
+      */
+    ogsChem::chemKinReactSys*                          _local_kin_react_sys;
+
 	/**
       * reactive transport operator splitting problem
       */ 
