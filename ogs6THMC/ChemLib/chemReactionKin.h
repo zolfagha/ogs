@@ -44,6 +44,11 @@ public:
       */
 	double calcReactionRateMonodSum(ogsChem::LocalVector & vec_Comp_Conc); 
 
+    /**
+      * calculate the reaction rate with user defined rate expression
+      */
+    double calcReactionRateUserExp(ogsChem::LocalVector & vec_Comp_Conc);
+
 	/**
       * return the rate of current reaction. 
       */
@@ -100,6 +105,11 @@ private:
 	  * parser library handler
 	  */
 	mu::Parser* _userExp_parser;
+
+    /**
+      * flag whether the parser library has bee successfully initialized
+      */
+    bool _flag_parser_initialized;
 
 	/**
       * a vector of monod rate components

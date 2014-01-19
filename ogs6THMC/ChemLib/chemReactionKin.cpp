@@ -28,6 +28,7 @@ chemReactionKin::chemReactionKin()
     _decay_rate = 0.0; 
 	
 	_userExp_parser = NULL; 
+    _flag_parser_initialized = false; 
 }
 
 chemReactionKin::~chemReactionKin(void)
@@ -46,8 +47,10 @@ void chemReactionKin::calcReactionRate(ogsChem::LocalVector & vec_Comp_Conc)
 {
 	if ( this->_kinReactType == ogsChem::Monod )
 		this->_rate = calcReactionRateMonod(vec_Comp_Conc); 
-    else if ( this->_kinReactType == ogsChem::MonodSum )
+    else if (this->_kinReactType == ogsChem::MonodSum)
         this->_rate = calcReactionRateMonodSum(vec_Comp_Conc);
+    else if (this->_kinReactType == ogsChem::UserExp)
+        this->_rate = calcReactionRateUserExp(vec_Comp_Conc); 
     else
         this->_rate = 0.0; 	
     // debugging, set rate to zero
@@ -118,6 +121,24 @@ double chemReactionKin::calcReactionRateMonodSum(ogsChem::LocalVector & vec_Comp
 	return rate; 
 }
 
+
+double chemReactionKin::calcReactionRateUserExp(ogsChem::LocalVector & vec_Comp_Conc)
+{
+    double rate = 0.0;
+
+    // safety control
+    if ( _flag_parser_initialized )
+    {
+        // successfully initialized
+        // TODO: evaluate the expression
+    }
+    else
+    {
+        // not initialized
+        // TODO: sending an error msg. 
+    }
+
+}
 
 void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & list_chemComp, 
                                       ogs5::CKinReact* KRC_reaction)
