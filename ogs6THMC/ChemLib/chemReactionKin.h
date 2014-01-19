@@ -145,6 +145,13 @@ private:
       * a vector of inhibition components' order
       */
 	std::vector<double> _vec_Inhibition_Comps_order; 
+
+    /**
+      * a vector of local concentration values.
+      * this is kept here so that the user defined reactions will
+      * find the corresponding component concentration at the same location. 
+      */
+    ogsChem::LocalVector  _vec_loc_Comp_Conc; 
 };
 
 }  // end of namespace

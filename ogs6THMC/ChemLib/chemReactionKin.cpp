@@ -130,6 +130,8 @@ double chemReactionKin::calcReactionRateUserExp(ogsChem::LocalVector & vec_Comp_
     if ( _flag_parser_initialized )
     {
         // successfully initialized
+        // first read the concentrations to local vector
+        _vec_loc_Comp_Conc = vec_Comp_Conc; 
         // TODO: evaluate the expression
     }
     else
