@@ -18,6 +18,7 @@
 #include "BaseLib/OrderedMap.h"
 #include "chemActivityModelUnity.h"
 #include "UserModules/FemReactOPS/Local_ODE_KinReact.h"
+#include "UserModules/FemReactGIAReduct/StepperBulischStoer.h"
 
 namespace ogsChem
 {
@@ -35,10 +36,20 @@ public:
                       _I(map_chemComp.size()), _J_kin(list_kin_reactions.size()),
                       _activity_model(a)
     {
+        double t0 = 0.0;
+
         _p_local_ODE = new Local_ODE_KinReact(list_kin_reactions);
-        if (_I > 0 && _J_kin > 0 && _p_local_ODE)
+
+        _vec_Comp_Conc = ogsChem::LocalVector::Zero(_I); 
+
+        _vec_xi_kin_rate = ogsChem::LocalVector::Zero(_J_kin); 
+
+        _sbs = new MathLib::StepperBulischStoer<Local_ODE_KinReact>(_vec_Comp_Conc, _vec_xi_kin_rate,
+                                                                    t0, 1.0e-12, 1.0e-12, true);
+
+        if (_I > 0 && _J_kin > 0 && _p_local_ODE && _sbs)
             isInitialized = true; 
-    
+
     };
 
     /**
@@ -46,9 +57,8 @@ public:
       */
     ~chemKinReactSys(void)
     {
-        if (_p_local_ODE)
-            delete _p_local_ODE; 
-    
+        BaseLib::releaseObject(_p_local_ODE);
+        BaseLib::releaseObject(_sbs);
     };
 
 
@@ -98,6 +108,15 @@ private:
       * pointer to the Local_ODE_KinReact
       */
     Local_ODE_KinReact* _p_local_ODE; 
+
+    /**
+      * pointer to the ODE solver StepperBulischStoer
+      */
+    MathLib::StepperBulischStoer<Local_ODE_KinReact>* _sbs;
+
+    ogsChem::LocalVector _vec_Comp_Conc; 
+
+    ogsChem::LocalVector _vec_xi_kin_rate; 
 
 };
 
