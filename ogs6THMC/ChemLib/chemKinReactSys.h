@@ -79,7 +79,18 @@ public:
                       double dt, 
                       double max_iter)
     {
-        
+        // getting the initial rate evaluation. 
+        if (_vec_xi_kin_rate.rows() > 0)
+            _vec_xi_kin_rate = (*_p_local_ODE)(dt, vec_conc);
+
+        //_sbs->set_y(Xi_Kin_bar);
+        _sbs->set_y(vec_conc);
+        _sbs->set_dydx(_vec_xi_kin_rate);
+
+        // solve the local ODE problem for xi kin bar
+        _sbs->step(dt, _p_local_ODE);
+        //vec_Xi_Kin_bar_new = _sbs->get_y();
+        vec_conc = _sbs->get_y();
     }; 
 
 private:
