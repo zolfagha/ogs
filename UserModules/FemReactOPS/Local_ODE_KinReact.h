@@ -23,11 +23,9 @@ public:
     /**
     * constructor
     */
-    Local_ODE_KinReact(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp,
-                       std::vector<ogsChem::chemReactionKin*>               & list_kin_reactions)
+    Local_ODE_KinReact(std::vector<ogsChem::chemReactionKin*> & list_kin_reactions)
                        : _list_kin_reactions(list_kin_reactions)
     {
-        _I = map_chemComp.size(); 
         _J_kin = _list_kin_reactions.size();
 
         _vec_dxi_immob_dt_new = ogsChem::LocalVector::Zero(_J_kin); 
@@ -66,9 +64,9 @@ private:
     std::vector<ogsChem::chemReactionKin*> & _list_kin_reactions; 
 
     /**
-      * number of components and number of kinetic reactions
+      * number of kinetic reactions
       */
-    std::size_t _I, _J_kin; 
+    std::size_t _J_kin; 
 };
 
 #endif
