@@ -17,6 +17,7 @@
 #include "chemReactionKin.h"
 #include "BaseLib/OrderedMap.h"
 #include "chemActivityModelUnity.h"
+#include "UserModules/FemReactOPS/Local_ODE_KinReact.h"
 
 namespace ogsChem
 {
@@ -34,7 +35,8 @@ public:
                       _I(map_chemComp.size()), _J_kin(list_kin_reactions.size()),
                       _activity_model(a)
     {
-        if (_I > 0 && _J_kin > 0)
+        _p_local_ODE = new Local_ODE_KinReact(list_kin_reactions);
+        if (_I > 0 && _J_kin > 0 && _p_local_ODE)
             isInitialized = true; 
     
     };
@@ -43,7 +45,11 @@ public:
       * destructor of the class
       */
     ~chemKinReactSys(void)
-    {};
+    {
+        if (_p_local_ODE)
+            delete _p_local_ODE; 
+    
+    };
 
 
     /**
@@ -87,6 +93,11 @@ private:
       * _I is the number of components and _J_kin is the number of kinetic reactions
       */
     size_t _I, _J_kin;
+
+    /**
+      * pointer to the Local_ODE_KinReact
+      */
+    Local_ODE_KinReact* _p_local_ODE; 
 
 };
 
