@@ -6,11 +6,11 @@ GeoSys-OUT: Output ------------------------------------------------
   O2
   CO2
   H2O
-  NO3-
+  NO3n
   N2
-  HCO3-
+  HCO3n
   H2CO3
-  SO42-
+  SO4nn
   H2S
  $GEO_TYPE
   DOMAIN

@@ -21,7 +21,7 @@ GeoSys Kinetic Reactions
  $EQUATION
   1 CH2O + 1 O2 =  1 CO2 + 1 H2O ; 
  $USER_EXPRESSION
-  <TO enter something>
+  -1.0
 
 #REACTION ; 
  $NAME
@@ -29,9 +29,9 @@ GeoSys Kinetic Reactions
  $TYPE
    USER_EXP;
  $EQUATION
-  5 CH2O + 4 O2 =  2 N2 + 4 HCO3- + 1 H2CO3 + 2 H2O ; 
+  5 CH2O + 4 O2 =  2 N2 + 4 HCO3n + 1 H2CO3 + 2 H2O ; 
  $USER_EXPRESSION
-  <TO enter something>
+  1.0 * mO2 
 
 #REACTION ; 
  $NAME
@@ -39,8 +39,8 @@ GeoSys Kinetic Reactions
  $TYPE
    USER_EXP;
  $EQUATION
-  2 CH2O + 1 SO42- =  2 HCO3- + 1 H2S ; 
+  2 CH2O + 1 SO4nn =  2 HCO3n + 1 H2S ; 
  $USER_EXPRESSION
-  <TO enter something>  
+  1.0 + mSO4nn  
   
 #STOP

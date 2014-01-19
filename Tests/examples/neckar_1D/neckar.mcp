@@ -1,6 +1,6 @@
 #COMPONENT_PROPERTIES  ; comp1
  $NAME
-  NO3- ;
+  NO3n ;
  $MOBILE
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
@@ -8,7 +8,7 @@
 
 #COMPONENT_PROPERTIES  ; comp2
  $NAME
-  SO42- ;
+  SO4nn ;
  $MOBILE
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
@@ -56,7 +56,7 @@
   
 #COMPONENT_PROPERTIES  ; comp8
  $NAME
-  HCO3- ;
+  HCO3n ;
  $MOBILE
   1; MOBILE-Flag: 0=imMOBILEe, 1=MOBILEe/transported
  $DIFFUSION
