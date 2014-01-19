@@ -34,7 +34,7 @@ add_library( muparser
 )
 set_target_properties(muparser PROPERTIES DEBUG_POSTFIX "d")
 # add_executable( test-muparser src/muParserTest.cpp )
-# target_link_libraries( test-muparser muparser ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries( muparser ${CMAKE_THREAD_LIBS_INIT})
 # add_test( NAME test-harness COMMAND test-muparser )
 install(TARGETS muparser ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 install(DIRECTORY include/ DESTINATION "${CMAKE_INSTALL_PREFIX}/include/muparser"
