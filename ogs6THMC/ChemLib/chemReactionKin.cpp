@@ -139,7 +139,9 @@ double chemReactionKin::calcReactionRateUserExp(ogsChem::LocalVector & vec_Comp_
     else
     {
         // not initialized
-        // TODO: sending an error msg. 
+        // sending an error msg. 
+        ERR("The user defined kinetic rate expression was not properly initialized! Exitting...");
+        exit(1); 
     }
     return rate; 
 }
@@ -318,21 +320,34 @@ void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::
 		{
 			// initialize the muParser library. 
 			_userExp_parser = new mu::Parser;
-            // set the rate expression
-            _userExp_parser->SetExpr( this->_user_rate_Exp ); 
-			// loop over each component
-            for (i = 0; i < _vecComponents.size(); i++)
+            try
             {
-                // define the variables
-                std::string str_comp_conc_name; 
-                str_comp_conc_name = "m" + _vecComponents[i]->get_name(); 
-                // also fix the location of concentrations of each component
-                _userExp_parser->DefineVar(str_comp_conc_name, &(_vec_loc_Comp_Conc(_vecComponents[i]->getIndex())));
+                // set the rate expression
+                _userExp_parser->SetExpr(this->_user_rate_Exp);
+                // loop over each component
+                for (i = 0; i < _vecComponents.size(); i++)
+                {
+                    // define the variables
+                    std::string str_comp_conc_name;
+                    str_comp_conc_name = "m" + _vecComponents[i]->get_name();
+                    // also fix the location of concentrations of each component
+                    _userExp_parser->DefineVar(str_comp_conc_name, &(_vec_loc_Comp_Conc(_vecComponents[i]->getIndex())));
+                }
+                // making a test evaluation of the expression and print out
+                double tmp_rate;
+                tmp_rate = _userExp_parser->Eval();
+                INFO("Test evaluation of user defined KinReact rate: %e. ", tmp_rate);
+                this->_flag_parser_initialized = true;
             }
-			// making a test evaluation of the expression and print out
-            double tmp_rate; 
-            tmp_rate = _userExp_parser->Eval();
-            INFO("Test evaluation of user defined KinReact rate: %e. ", tmp_rate);
+            catch (mu::Parser::exception_type &e)
+            {
+                std::cout << "Message:  " << e.GetMsg() << "\n";
+                std::cout << "Formula:  " << e.GetExpr() << "\n";
+                std::cout << "Token:    " << e.GetToken() << "\n";
+                std::cout << "Position: " << e.GetPos() << "\n";
+                std::cout << "Errc:     " << e.GetCode() << "\n";
+                _flag_parser_initialized = false; 
+            }
 		}
 	
 	}
