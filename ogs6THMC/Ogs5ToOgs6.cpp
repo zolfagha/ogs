@@ -32,6 +32,8 @@
 #include "ChemLib/chemActivityModelAqDBH.h"
 #include "ChemLib/chemActivityModelAqDVS.h"
 #include "ChemLib/chemActivityModelUnity.h"
+#include "ChemLib/chemEqReactSys.h"
+#include "ChemLib/chemKinReactSys.h"
 
 using namespace ogs5;
 
@@ -650,6 +652,7 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
             // initialize the activity model of the chemical system. 
             ogs5::CKinReactData* ogs5KinReactData = ogs5fem.KinReactData_vector[0]; 
             ogsChem::chemEqReactSysActivity* mEqReactSys; 
+            ogsChem::chemKinReactSys* mKinReactSys; 
             if ( ogs5KinReactData->activity_model == 1 ) // Debyl-Huekel
             {
                 ogsChem::chemActivityModelAqDBH* mActivityModelAqDBH 
@@ -657,7 +660,11 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
                 mEqReactSys = new ogsChem::chemEqReactSysActivity(ogs6fem.map_ChemComp, 
                                                                   ogs6fem.list_eq_reactions, 
                                                                   mActivityModelAqDBH); 
-                ogs6fem.m_EqReactSys = mEqReactSys; 
+                mKinReactSys = new ogsChem::chemKinReactSys(ogs6fem.map_ChemComp,
+                                                            ogs6fem.list_kin_reactions,
+                                                            mActivityModelAqDBH);
+                ogs6fem.m_EqReactSys = mEqReactSys;
+                ogs6fem.m_KinReactSys = mKinReactSys;
                 
             }
             else if ( ogs5KinReactData->activity_model == 2 ) // Davies
@@ -667,7 +674,11 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
                 mEqReactSys = new ogsChem::chemEqReactSysActivity(ogs6fem.map_ChemComp, 
                                                                   ogs6fem.list_eq_reactions, 
                                                                   mActivityModelAqDVS); 
+                mKinReactSys = new ogsChem::chemKinReactSys(ogs6fem.map_ChemComp,
+                                                            ogs6fem.list_kin_reactions,
+                                                            mActivityModelAqDVS);
                 ogs6fem.m_EqReactSys = mEqReactSys; 
+                ogs6fem.m_KinReactSys = mKinReactSys;
                 
             }
             else // by default, use the unity model
@@ -677,10 +688,15 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
                 mEqReactSys = new ogsChem::chemEqReactSysActivity(ogs6fem.map_ChemComp, 
                                                                   ogs6fem.list_eq_reactions, 
                                                                   mActivityModelUnity); 
+                mKinReactSys = new ogsChem::chemKinReactSys(ogs6fem.map_ChemComp,
+                                                            ogs6fem.list_kin_reactions,
+                                                            mActivityModelUnity); 
                 ogs6fem.m_EqReactSys = mEqReactSys; 
+                ogs6fem.m_KinReactSys = mKinReactSys; 
                 
             }
             mEqReactSys = NULL; 
+            mKinReactSys = NULL; 
         }
         // then is the the KIN_GIA mode
 		else if ( HAVE_KIN_REACT_GIA )
