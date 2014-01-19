@@ -29,6 +29,7 @@ chemReactionKin::chemReactionKin()
 	
 	_userExp_parser = NULL; 
     _flag_parser_initialized = false; 
+
 }
 
 chemReactionKin::~chemReactionKin(void)
@@ -132,14 +133,15 @@ double chemReactionKin::calcReactionRateUserExp(ogsChem::LocalVector & vec_Comp_
         // successfully initialized
         // first read the concentrations to local vector
         _vec_loc_Comp_Conc = vec_Comp_Conc; 
-        // TODO: evaluate the expression
+        // evaluate the expression
+        rate = this->_userExp_parser->Eval(); 
     }
     else
     {
         // not initialized
         // TODO: sending an error msg. 
     }
-
+    return rate; 
 }
 
 void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & list_chemComp, 
@@ -166,6 +168,8 @@ void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::
 
     // copy the stoichiometric vector 
 	_vecStoi = KRC_reaction->stochmet;
+    // initialize the local concentration vector to all ones
+    _vec_loc_Comp_Conc = ogsChem::LocalVector::Ones(list_chemComp.size());
 
 	// read the rate parameters
 	if ( KRC_reaction->getType() == "monod" )
@@ -314,10 +318,21 @@ void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::
 		{
 			// initialize the muParser library. 
 			_userExp_parser = new mu::Parser;
-
-			// define the variables
-
-			// TODO: making a test evaluation of the expression
+            // set the rate expression
+            _userExp_parser->SetExpr( this->_user_rate_Exp ); 
+			// loop over each component
+            for (i = 0; i < _vecComponents.size(); i++)
+            {
+                // define the variables
+                std::string str_comp_conc_name; 
+                str_comp_conc_name = "m" + _vecComponents[i]->get_name(); 
+                // also fix the location of concentrations of each component
+                _userExp_parser->DefineVar(str_comp_conc_name, &(_vec_loc_Comp_Conc(_vecComponents[i]->getIndex())));
+            }
+			// making a test evaluation of the expression and print out
+            double tmp_rate; 
+            tmp_rate = _userExp_parser->Eval();
+            INFO("Test evaluation of user defined KinReact rate: %e. ", tmp_rate);
 		}
 	
 	}
