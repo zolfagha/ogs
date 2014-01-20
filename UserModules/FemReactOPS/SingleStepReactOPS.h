@@ -309,7 +309,7 @@ SingleStepReactOPS<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBL
 				{
 					my_bc = _bc_info.begin(); 
 					ConcNodeInfo* bc_node = new ConcNodeInfo( node_id, 
-                                                              this->_problem->getEqReactSys()->get_n_Comp(), 
+						                                      this->_function_data->get_n_Comp(),
                                                               this->_problem->getEqReactSys() ); 
 					bc_node->set_comp_conc( i_var, node_value ); 
 					_bc_info.insert( my_bc, std::pair<size_t, ConcNodeInfo*>(node_id, bc_node) ); 
