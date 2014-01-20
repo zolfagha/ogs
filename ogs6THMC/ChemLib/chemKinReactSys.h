@@ -40,13 +40,15 @@ public:
 
 		countComp(map_chemComp); 
 
-        _p_local_ODE = new Local_ODE_KinReact(list_kin_reactions);
+        buildStoi(map_chemComp, list_kin_reactions);
+
+        _p_local_ODE = new Local_ODE_KinReact(map_chemComp, list_kin_reactions, _matStoi_kin);
 
         _vec_Comp_Conc = ogsChem::LocalVector::Zero(_I); 
 
-        _vec_xi_kin_rate = ogsChem::LocalVector::Zero(_J_kin); 
+        _vec_conc_rate = ogsChem::LocalVector::Zero(_J_kin);
 
-        _sbs = new MathLib::StepperBulischStoer<Local_ODE_KinReact>(_vec_Comp_Conc, _vec_xi_kin_rate,
+        _sbs = new MathLib::StepperBulischStoer<Local_ODE_KinReact>(_vec_Comp_Conc, _vec_conc_rate,
                                                                     t0, 1.0e-12, 1.0e-12, true);
 
         if (_I > 0 && _J_kin > 0 && _p_local_ODE && _sbs)
@@ -86,12 +88,12 @@ public:
                       double max_iter)
     {
         // getting the initial rate evaluation. 
-        if (_vec_xi_kin_rate.rows() > 0)
-            _vec_xi_kin_rate = (*_p_local_ODE)(dt, vec_conc);
+        if (_vec_conc_rate.rows() > 0)
+            _vec_conc_rate = (*_p_local_ODE)(dt, vec_conc);
 
         //_sbs->set_y(Xi_Kin_bar);
         _sbs->set_y(vec_conc);
-        _sbs->set_dydx(_vec_xi_kin_rate);
+        _sbs->set_dydx(_vec_conc_rate);
 
         // solve the local ODE problem for xi kin bar
         _sbs->step(dt, _p_local_ODE);
@@ -140,6 +142,54 @@ private:
 		_I = _I_mob + _I_sec_sorp + _I_sec_min;
 	};
 
+    void buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp, 
+                   std::vector<ogsChem::chemReactionKin*>               & list_kin_reactions)
+    {
+        size_t i, j, tmp_idx;
+        double tmp_stoi;
+        std::string tmp_str;
+        BaseLib::OrderedMap<std::string, ogsChem::ChemComp*>::iterator tmp_Comp;
+
+        // size info
+        _I = map_chemComp.size(); 
+        _J_kin = list_kin_reactions.size();
+
+        // creat the memory for Stoi matrix
+        _matStoi_kin = LocalMatrix::Zero(_I, _J_kin);
+
+        // based on the reactions, fill in the stoi matrix
+        // loop over all kinetic reactions
+        for (j = 0; j < list_kin_reactions.size(); j++)
+        {	// for each reaction
+            // find each participating components
+            for (i = 0; i < list_kin_reactions[j]->get_vecCompNames().size(); i++){
+                tmp_str = list_kin_reactions[j]->get_vecCompNames()[i];
+                tmp_Comp = map_chemComp.find(tmp_str);
+                tmp_idx = tmp_Comp->second->getIndex();
+                if (list_kin_reactions[j]->get_vecStoi().size() > 2)
+                {
+                    // normal reactions
+                    tmp_stoi = list_kin_reactions[j]->get_vecStoi()[i];
+                    // and put them into Stoi matrix
+                    _matStoi_kin(tmp_idx, j) = tmp_stoi;
+                }
+                else  // this is a basis component
+                {
+                    _matStoi_kin(tmp_idx, j) = 1.0;
+                }
+
+            }  // end of for i
+        }  // end of for j
+
+#ifdef _DEBUG
+        // debugging--------------------------
+        // std::cout << "Stoichiometric Matrix S: " << std::endl;
+        // std::cout << _matStoi_kin << std::endl;
+        // end of debugging-------------------
+#endif
+    }
+
+
     /**
       * private flag indicating initialization
       */
@@ -174,7 +224,9 @@ private:
 
     ogsChem::LocalVector _vec_Comp_Conc; 
 
-    ogsChem::LocalVector _vec_xi_kin_rate; 
+    ogsChem::LocalVector _vec_conc_rate;
+
+    ogsChem::LocalMatrix _matStoi_kin; 
 
 };
 
