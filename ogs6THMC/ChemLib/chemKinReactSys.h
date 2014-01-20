@@ -97,6 +97,8 @@ public:
         _sbs->step(dt, _p_local_ODE);
         //vec_Xi_Kin_bar_new = _sbs->get_y();
         vec_conc = _sbs->get_y();
+		// successfully run. 
+		result = 0; 
     }; 
 
 

@@ -234,18 +234,19 @@ void FunctionOPSConc<T1, T2>::calc_nodal_react_sys(double dt)
 		                                                       1.0e-10, 
                                                                1.0e-12,
                                                                50 ); 
+
+			// solving kinetic reactions. 
+			if (this->_local_kin_react_sys->get_n_Kin_React() > 0)
+				this->_local_kin_react_sys->solve_KinSys(loc_conc,
+				                                         result,
+				                                         node_idx,
+				                                         1.0e-12,
+				                                         1.0e-12,
+				                                         dt,
+				                                         50); 
         	// if the iteration converged. 
 			if (result == 0)
 			{
-				// solving kinetic reactions. 
-				if (this->_local_kin_react_sys->get_n_Kin_React() > 0)
-					this->_local_kin_react_sys->solve_KinSys(loc_conc,
-					                                         result,
-					                                         node_idx,
-					                                         1.0e-12,
-					                                         1.0e-12,
-					                                         dt,
-					                                         50); 
 				// collect the solved concentrations
 				for (i = 0; i < _n_Comp; i++)
 					this->_concentrations[i]->setValue(node_idx, loc_conc[i]);
