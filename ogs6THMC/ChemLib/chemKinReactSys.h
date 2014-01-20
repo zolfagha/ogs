@@ -38,6 +38,8 @@ public:
     {
         double t0 = 0.0;
 
+		countComp(map_chemComp); 
+
         _p_local_ODE = new Local_ODE_KinReact(list_kin_reactions);
 
         _vec_Comp_Conc = ogsChem::LocalVector::Zero(_I); 
@@ -100,7 +102,41 @@ public:
 
 	std::size_t get_n_Kin_React(void) { return _J_kin;  };
 
+	std::size_t get_n_Comp(void) { return _I; }; 
+
+	std::size_t get_n_Comp_mob(void) { return _I_mob + _I_sec_mob;  }
+
 private:
+
+	void countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp)
+	{
+		_I_mob = 0;
+		_I_sec_mob = 0;
+		_I_sec_sorp = 0;
+		_I_sec_min = 0;
+
+		BaseLib::OrderedMap<std::string, ogsChem::ChemComp*>::iterator it;
+		for (it = map_chemComp.begin(); it != map_chemComp.end(); it++)
+		{
+			switch (it->second->getCompType())
+			{
+			case ogsChem::AQ_PHASE_COMP:
+				_I_mob++;
+				break;
+			case ogsChem::SORPTION_COMP:
+				_I_sec_sorp++;
+				break;
+			case ogsChem::MIN_PHASE_COMP:
+				_I_sec_min++;
+				break;
+			default:
+				_I_sec_min++;
+				break;
+			}
+		}
+
+		_I = _I_mob + _I_sec_sorp + _I_sec_min;
+	};
 
     /**
       * private flag indicating initialization
@@ -120,7 +156,9 @@ private:
     /**
       * _I is the number of components and _J_kin is the number of kinetic reactions
       */
-    size_t _I, _J_kin;
+    size_t _I, _I_mob, _J_kin;
+
+	size_t _I_sec_mob, _I_sec_sorp, _I_sec_min; 
 
     /**
       * pointer to the Local_ODE_KinReact
