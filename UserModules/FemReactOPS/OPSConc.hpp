@@ -38,9 +38,9 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
     _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
 
-	// get the transformation class instance here
-    this->_local_eq_react_sys = femData->m_EqReactSys; 
-    this->_local_kin_react_sys = femData->m_KinReactSys; 
+	// initialize the equilibrium reaction system
+	_local_eq_react_sys = femData->m_EqReactSys;
+	_local_kin_react_sys = femData->m_KinReactSys;
 
     // make sure the reduction scheme is already initialized. 
     if (!(this->_local_eq_react_sys->IsInitialized()) && !(this->_local_kin_react_sys->IsInitialized()))
@@ -119,9 +119,7 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
 		linear_solver->setOption(*optNum);
 		this->_linear_solutions.push_back( linear_solution ); 
 	}
-    // initialize the equilibrium reaction system
-    _local_eq_react_sys = femData->m_EqReactSys; 
-    _local_kin_react_sys = femData->m_KinReactSys; 
+
 	// reactive transport problem with OPS
 	_problem = new MyReactOPSProblemType( dis, _local_eq_react_sys ); 
     _problem->setTimeSteppingFunction(*tim);  // applying the same time stepping function for all linear problems
