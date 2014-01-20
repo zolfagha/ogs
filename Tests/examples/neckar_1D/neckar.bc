@@ -15,7 +15,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   CH2O
  $GEO_TYPE
-  DOMAIN
+  POINT POINT0
  $DIS_TYPE
   CONSTANT  1.0e-12
 
@@ -25,7 +25,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   O2
  $GEO_TYPE
-  DOMAIN
+  POINT POINT0
  $DIS_TYPE
   CONSTANT  3.0e-4
 
@@ -35,7 +35,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   CO2
  $GEO_TYPE
-  DOMAIN
+  POINT POINT0
  $DIS_TYPE
   CONSTANT 1.0e-12
 
@@ -45,7 +45,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   H2O
  $GEO_TYPE
-  DOMAIN
+  POINT POINT0
  $DIS_TYPE
   CONSTANT 1.0
   
@@ -55,7 +55,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   NO3n
  $GEO_TYPE
-  DOMAIN
+  POINT POINT0
  $DIS_TYPE
   CONSTANT 4.8e-4
 
@@ -65,7 +65,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   N2
  $GEO_TYPE
-  DOMAIN
+  POINT POINT0
  $DIS_TYPE
   CONSTANT 1.0e-12
 
@@ -75,7 +75,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   HCO3n
  $GEO_TYPE
-  DOMAIN
+  POINT POINT0
  $DIS_TYPE
   CONSTANT 1.0e-12
 
@@ -85,7 +85,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   H2CO3
  $GEO_TYPE
-  DOMAIN
+  POINT POINT0
  $DIS_TYPE
   CONSTANT 1.0e-12  
 
@@ -95,7 +95,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   SO4nn
  $GEO_TYPE
-  DOMAIN
+  POINT POINT0
  $DIS_TYPE
   CONSTANT 4.8e-4  
   
@@ -105,7 +105,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $PRIMARY_VARIABLE 
   H2S
  $GEO_TYPE
-  DOMAIN
+  POINT POINT0
  $DIS_TYPE
   CONSTANT 1.0e-12    
 
