@@ -52,8 +52,16 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
 	}
 
     // first get the number of components
-    _n_Comp     = this->_local_eq_react_sys->get_n_Comp(); 
-    _n_Comp_mob = this->_local_eq_react_sys->get_n_Comp_mob(); 
+	if (this->_local_eq_react_sys->get_n_Eq_React() > 0)
+	{
+		_n_Comp = this->_local_eq_react_sys->get_n_Comp();
+		_n_Comp_mob = this->_local_eq_react_sys->get_n_Comp_mob();
+	}
+	else if (this->_local_kin_react_sys->get_n_Kin_React() > 0)
+	{
+		_n_Comp = this->_local_kin_react_sys->get_n_Comp();
+		_n_Comp_mob = this->_local_kin_react_sys->get_n_Comp_mob(); 
+	}
 
 	// set concentrations of all components as output
 	for ( i=0; i < _n_Comp; i++ )

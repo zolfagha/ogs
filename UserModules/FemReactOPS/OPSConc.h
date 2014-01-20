@@ -247,6 +247,11 @@ public:
 	  */
 	void calc_nodal_kin_react_sys(double dt);
 
+	/**
+	  * return the number of chemical components
+	  */
+	std::size_t get_n_Comp(void) { return _n_Comp; };
+
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
 
