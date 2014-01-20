@@ -97,6 +97,9 @@ public:
         vec_conc = _sbs->get_y();
     }; 
 
+
+	std::size_t get_n_Kin_React(void) { return _J_kin;  };
+
 private:
 
     /**
