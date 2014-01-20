@@ -85,6 +85,11 @@ public:
       */
 	size_t get_n_Comp_mob(void) {return _I_mob; }; 
 
+	/**
+	  * get the number of equilibrium reactions
+	  */
+	size_t get_n_Eq_React(void) { return _J; };
+
     /**
       * calculate the total mass using 
       * the concentration vector of basis, and
