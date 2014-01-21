@@ -2264,6 +2264,7 @@ CKinReactData::CKinReactData(void)
 	debugoutflag = false;
 
 	concentrationmatrix = NULL;
+	activity_model = 0; 
 }
 
 /**************************************************************************
