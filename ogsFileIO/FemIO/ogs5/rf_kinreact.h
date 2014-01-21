@@ -167,6 +167,7 @@ public:
 	std::vector <double> ex_param;
 	int exSurfaceID;
 	std::string exType;                   /* sorption type: linear, langmuir, exchange */
+	std::string userExp;                  /* user defined kinetic rate expression      */
 
 	//#ds NAPLdissolution data
 	std::string blob_name;                /* name of blob-class */

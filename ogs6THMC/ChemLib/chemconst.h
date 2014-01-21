@@ -72,6 +72,7 @@ namespace ogsChem
 		Monod,             /* - monod reaction */ 
 		// DoubleMonodDecay,  /* - double monod reaction with decay term */ 
         MonodSum,          /* - sum of monod rate terms */
+		UserExp,           /* - user defined rate expression */
 		NoType             /* - uninitialized type */ 
 	}; 
 

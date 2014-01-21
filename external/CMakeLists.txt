@@ -15,3 +15,5 @@ ENDIF()
 
 ADD_SUBDIRECTORY(gtest)
 
+ADD_SUBDIRECTORY(muparser)
+

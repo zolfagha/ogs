@@ -12,6 +12,7 @@
 #include "chemReaction.h"
 #include "ogsFileIO/FemIO/ogs5/rf_kinreact.h"
 #include "BaseLib/OrderedMap.h" 
+#include "muParser.h"
 
 #ifndef CHEM_REACTION_KIN_H
 #define CHEM_REACTION_KIN_H
@@ -42,6 +43,11 @@ public:
       * calculate the reaction rate with sum of monod kinetic rates
       */
 	double calcReactionRateMonodSum(ogsChem::LocalVector & vec_Comp_Conc); 
+
+    /**
+      * calculate the reaction rate with user defined rate expression
+      */
+    double calcReactionRateUserExp(ogsChem::LocalVector & vec_Comp_Conc);
 
 	/**
       * return the rate of current reaction. 
@@ -91,6 +97,21 @@ private:
     double _decay_rate; 
 
 	/**
+	  * string defined by the user regarding the kinetic rate expression
+	  */
+	std::string _user_rate_Exp; 
+
+	/**
+	  * parser library handler
+	  */
+	mu::Parser* _userExp_parser;
+
+    /**
+      * flag whether the parser library has bee successfully initialized
+      */
+    bool _flag_parser_initialized;
+
+	/**
       * a vector of monod rate components
       */
 	std::vector<size_t> _vec_Monod_Comps_Idx; 
@@ -124,6 +145,13 @@ private:
       * a vector of inhibition components' order
       */
 	std::vector<double> _vec_Inhibition_Comps_order; 
+
+    /**
+      * a vector of local concentration values.
+      * this is kept here so that the user defined reactions will
+      * find the corresponding component concentration at the same location. 
+      */
+    ogsChem::LocalVector  _vec_loc_Comp_Conc; 
 };
 
 }  // end of namespace

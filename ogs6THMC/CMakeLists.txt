@@ -83,6 +83,7 @@ target_link_libraries( ogs6THMC
     ogsNumerics
     ogsFileIO
     tinyxml2
+    muparser
 )
 
 SET_TARGET_PROPERTIES(ogs6THMC PROPERTIES LINKER_LANGUAGE CXX)
@@ -97,6 +98,7 @@ INCLUDE_DIRECTORIES(
         ../external/logog/include
         ../external/Eigen
         ../external/tinyxml2
+		../external/muparser/include
 )
 
 IF(USE_EXTERNAL_LIS)

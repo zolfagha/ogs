@@ -13,6 +13,8 @@
 #include "chemReactionKin.h"
 #include "logog.hpp"
 
+// using namespace mu; 
+
 namespace ogsChem
 {
 
@@ -24,10 +26,16 @@ chemReactionKin::chemReactionKin()
 	_rate_constant_order = 1.0; 
 	_idx_bacteria = 0;
     _decay_rate = 0.0; 
+	
+	_userExp_parser = NULL; 
+    _flag_parser_initialized = false; 
+
 }
 
 chemReactionKin::~chemReactionKin(void)
 {
+	if (_userExp_parser != NULL)
+		delete _userExp_parser; 
 }
 
 void chemReactionKin::readReactionStr(std::string & /*reaction_str*/)
@@ -40,8 +48,10 @@ void chemReactionKin::calcReactionRate(ogsChem::LocalVector & vec_Comp_Conc)
 {
 	if ( this->_kinReactType == ogsChem::Monod )
 		this->_rate = calcReactionRateMonod(vec_Comp_Conc); 
-    else if ( this->_kinReactType == ogsChem::MonodSum )
+    else if (this->_kinReactType == ogsChem::MonodSum)
         this->_rate = calcReactionRateMonodSum(vec_Comp_Conc);
+    else if (this->_kinReactType == ogsChem::UserExp)
+        this->_rate = calcReactionRateUserExp(vec_Comp_Conc); 
     else
         this->_rate = 0.0; 	
     // debugging, set rate to zero
@@ -113,6 +123,29 @@ double chemReactionKin::calcReactionRateMonodSum(ogsChem::LocalVector & vec_Comp
 }
 
 
+double chemReactionKin::calcReactionRateUserExp(ogsChem::LocalVector & vec_Comp_Conc)
+{
+    double rate = 0.0;
+
+    // safety control
+    if ( _flag_parser_initialized )
+    {
+        // successfully initialized
+        // first read the concentrations to local vector
+        _vec_loc_Comp_Conc = vec_Comp_Conc; 
+        // evaluate the expression
+        rate = this->_userExp_parser->Eval(); 
+    }
+    else
+    {
+        // not initialized
+        // sending an error msg. 
+        ERR("The user defined kinetic rate expression was not properly initialized! Exitting...");
+        exit(1); 
+    }
+    return rate; 
+}
+
 void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & list_chemComp, 
                                       ogs5::CKinReact* KRC_reaction)
 {
@@ -137,6 +170,8 @@ void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::
 
     // copy the stoichiometric vector 
 	_vecStoi = KRC_reaction->stochmet;
+    // initialize the local concentration vector to all ones
+    _vec_loc_Comp_Conc = ogsChem::LocalVector::Ones(list_chemComp.size());
 
 	// read the rate parameters
 	if ( KRC_reaction->getType() == "monod" )
@@ -273,6 +308,49 @@ void chemReactionKin::readReactionKRC(BaseLib::OrderedMap<std::string, ogsChem::
         }  // end of for i
 
 	}  // end of if KRC_reaction
+	else if ( KRC_reaction->getType() == "USER_EXP" )
+	{
+		// user defined rate expression. 
+		this->_kinReactType = ogsChem::UserExp; 
+
+		// reading the user defined kinetic rate expression. 
+		this->_user_rate_Exp = KRC_reaction->userExp; 
+
+		if (this->_user_rate_Exp.size() > 0)
+		{
+			// initialize the muParser library. 
+			_userExp_parser = new mu::Parser;
+            try
+            {
+                // set the rate expression
+                _userExp_parser->SetExpr(this->_user_rate_Exp);
+                // loop over each component
+                for (i = 0; i < _vecComponents.size(); i++)
+                {
+                    // define the variables
+                    std::string str_comp_conc_name;
+                    str_comp_conc_name = "m" + _vecComponents[i]->get_name();
+                    // also fix the location of concentrations of each component
+                    _userExp_parser->DefineVar(str_comp_conc_name, &(_vec_loc_Comp_Conc(_vecComponents[i]->getIndex())));
+                }
+                // making a test evaluation of the expression and print out
+                double tmp_rate;
+                tmp_rate = _userExp_parser->Eval();
+                INFO("Test evaluation of user defined KinReact rate: %e. ", tmp_rate);
+                this->_flag_parser_initialized = true;
+            }
+            catch (mu::Parser::exception_type &e)
+            {
+                std::cout << "Message:  " << e.GetMsg() << "\n";
+                std::cout << "Formula:  " << e.GetExpr() << "\n";
+                std::cout << "Token:    " << e.GetToken() << "\n";
+                std::cout << "Position: " << e.GetPos() << "\n";
+                std::cout << "Errc:     " << e.GetCode() << "\n";
+                _flag_parser_initialized = false; 
+            }
+		}
+	
+	}
 	else
 	{
 		this->_kinReactType = ogsChem::NoType; 

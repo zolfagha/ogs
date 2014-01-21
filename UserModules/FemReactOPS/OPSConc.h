@@ -147,6 +147,8 @@ public:
         BaseLib::releaseObject(_problem); 
         BaseLib::releaseObjectsInStdVector(_linear_problems);
         BaseLib::releaseObjectsInStdVector(_concentrations);
+        BaseLib::releaseObject(_local_eq_react_sys); 
+        BaseLib::releaseObject(_local_kin_react_sys); 
     };
 
     /**
@@ -236,10 +238,25 @@ public:
     };
 
 	/**
-      * calculate nodal equilibrium reaction system
+	  * set boundary node values to the concentration vector
+	  */
+	void set_BC_conc_node_values(std::size_t node_idx, std::size_t i_var, double node_value); 
+
+	/**
+      * calculate nodal chemistry system
       */
-	void calc_nodal_eq_react_sys(double dt);
-	
+	void calc_nodal_react_sys(double dt);
+
+	/**
+	  * calculate nodal equilibrium reaction system
+	  */
+	void calc_nodal_kin_react_sys(double dt);
+
+	/**
+	  * return the number of chemical components
+	  */
+	std::size_t get_n_Comp(void) { return _n_Comp; };
+
 protected:
     virtual void initializeTimeStep(const NumLib::TimeStep &time);
 
@@ -277,7 +294,12 @@ private:
       * the local equilibrium reactions system
       */ 
 	ogsChem::chemEqReactSysActivity*                   _local_eq_react_sys; 
-	
+
+    /**
+      * the local kinetic reactions system
+      */
+    ogsChem::chemKinReactSys*                          _local_kin_react_sys;
+
 	/**
       * reactive transport operator splitting problem
       */ 

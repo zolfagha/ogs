@@ -38,10 +38,12 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
     dis = DiscreteLib::DiscreteSystemContainerPerMesh::getInstance()->createObject<MyDiscreteSystem>(msh);
     _feObjects = new FemLib::LagrangeFeObjectContainer(msh);
 
-	// get the transformation class instance here
-    this->_local_eq_react_sys = femData->m_EqReactSys; 
+	// initialize the equilibrium reaction system
+	_local_eq_react_sys = femData->m_EqReactSys;
+	_local_kin_react_sys = femData->m_KinReactSys;
+
     // make sure the reduction scheme is already initialized. 
-    if ( !(this->_local_eq_react_sys->IsInitialized()) ) 
+    if (!(this->_local_eq_react_sys->IsInitialized()) && !(this->_local_kin_react_sys->IsInitialized()))
 	{
 		// error msg
 	    ERR("While initialize the OPS Reactive Transport Process, the chemEqReactSysActivity class has not been correctly initialized! ");
@@ -49,72 +51,28 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
 		exit(1);
 	}
 
-    // first get the number of components
-    _n_Comp     = this->_local_eq_react_sys->get_n_Comp(); 
-    _n_Comp_mob = this->_local_eq_react_sys->get_n_Comp_mob(); 
+    // getting the number of components
+	if (this->_local_eq_react_sys->get_n_Eq_React() > 0)
+	{
+		_n_Comp = this->_local_eq_react_sys->get_n_Comp();
+		_n_Comp_mob = this->_local_eq_react_sys->get_n_Comp_mob();
+	}
+	else if (this->_local_kin_react_sys->get_n_Kin_React() > 0)
+	{
+		_n_Comp = this->_local_kin_react_sys->get_n_Comp();
+		_n_Comp_mob = this->_local_kin_react_sys->get_n_Comp_mob(); 
+	}
 
 	// set concentrations of all components as output
 	for ( i=0; i < _n_Comp; i++ )
 		this->setOutputParameterName( i, femData->map_ChemComp[i]->second->get_name() ); 
 
-    // adding variables into the linear problem
-	// for the linear transport problem, variables are c_mob
-	for ( i=0; i < _n_Comp_mob ; i++ )
-	{
-    	// set up problem
-    	MyLinearTransportProblemType*  linear_problem     = new MyLinearTransportProblemType(dis);
-        
-        // linear assemblers
-        MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_feObjects);
-        MyLinearResidualAssemblerType* linear_r_assembler = new MyLinearResidualAssemblerType(_feObjects);
-        MyLinearJacobianAssemblerType* linear_j_eqs = new MyLinearJacobianAssemblerType(_feObjects);
-
-		MyLinearEquationType* linear_eqs = linear_problem->createEquation();
-		linear_eqs->initialize(linear_assembler, linear_r_assembler, linear_j_eqs);
-		linear_problem->setTimeSteppingFunction(*tim);
-		
-		// set up variables
-		// in this case, the variables are concentrations of all mobile chemical components 
-		MyVariableConc* comp_conc = linear_problem->addVariable( femData->map_ChemComp[i]->second->get_name() );
-        FemVariableBuilder var_builder;
-        var_builder.doit(femData->map_ChemComp[i]->second->get_name(), option, msh, femData->geo, femData->geo_unique_name, _feObjects, comp_conc);
-		_linear_problems.push_back(linear_problem); 
-	}
-	    
-	// creating memory space in the linear_problem to store IC and BC
-	MyNodalFunctionScalar* tmp_conc; 
-	for (i=0; i < _n_Comp_mob; i++)
-	{
-		SolutionLib::FemIC* femIC = _linear_problems[i]->getVariable(0)->getIC();
-	    tmp_conc = new MyNodalFunctionScalar();
-		if ( femIC )
-		{
-			// FemIC vector is not empty
-			tmp_conc->initialize(*dis, _linear_problems[i]->getVariable(0)->getCurrentOrder(), 0.0);
-			femIC->setup(*tmp_conc);
-		}
-		else
-		{
-			// FemIC vector is empty
-			// initialize the vector with zeros
-			tmp_conc->initialize(*dis, _linear_problems[i]->getVariable(0)->getCurrentOrder(), 0.0);
-		}	
-	}
-    // set up linear solutions
-	for ( i=0; i < _n_Comp_mob; i++ )
-	{
-		MyLinearSolutionType* linear_solution = new MyLinearSolutionType( dis, this->_linear_problems[i] ); 
-		MyLinearSolver* linear_solver = linear_solution->getLinearEquationSolver();
-		const BaseLib::Options* optNum = option.getSubGroup("Numerics");
-		linear_solver->setOption(*optNum);
-		this->_linear_solutions.push_back( linear_solution ); 
-	}
-    // initialize the equilibrium reaction system
-    _local_eq_react_sys = femData->m_EqReactSys; 
 	// reactive transport problem with OPS
 	_problem = new MyReactOPSProblemType( dis, _local_eq_react_sys ); 
     _problem->setTimeSteppingFunction(*tim);  // applying the same time stepping function for all linear problems
+
     // creating concentrations vector
+	MyNodalFunctionScalar* tmp_conc;
     for ( i=0; i < _n_Comp; i++ )
 	{
         MyVariableConc* comp = _problem->addVariable( femData->map_ChemComp[i]->second->get_name() );
@@ -136,19 +94,59 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
 		}	
         _concentrations.push_back( tmp_conc ); 
     }
-    // set up solution
-    _solution = new MyReactOPSSolution(dis, _problem, this, _linear_problems, _linear_solutions);
-    // run equilibrium reactions on each node that is not on boundary
-    this->calc_nodal_eq_react_sys( 0.0 ); 
 
-    // set initial output parameter
-	for (i=0; i<_concentrations.size(); i++) {
+
+	// adding variables into the linear problem
+	// for the linear transport problem, variables are c_mobha
+	for (i = 0; i < _n_Comp_mob; i++)
+	{
+		// set up problem
+		MyLinearTransportProblemType*  linear_problem = new MyLinearTransportProblemType(dis);
+
+		// linear assemblers
+		MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_feObjects);
+		MyLinearResidualAssemblerType* linear_r_assembler = new MyLinearResidualAssemblerType(_feObjects);
+		MyLinearJacobianAssemblerType* linear_j_eqs = new MyLinearJacobianAssemblerType(_feObjects);
+
+		MyLinearEquationType* linear_eqs = linear_problem->createEquation();
+		linear_eqs->initialize(linear_assembler, linear_r_assembler, linear_j_eqs);
+		linear_problem->setTimeSteppingFunction(*tim);
+
+		// set up variables
+		// in this case, the variables are concentrations of all mobile chemical components 
+		MyVariableConc* comp_conc = linear_problem->addVariable(femData->map_ChemComp[i]->second->get_name());
+		_linear_problems.push_back(linear_problem);
+	}
+
+	// set IC for linear transport components
+	for (i = 0; i < _n_Comp_mob; i++)
+	{
+		SolutionLib::FemIC* linear_femIC = new SolutionLib::FemIC(msh);
+		linear_femIC->addDistribution(femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>(_concentrations[i]->getDiscreteData()));
+		_linear_problems[i]->getVariable(0)->setIC(linear_femIC);  
+	}
+
+	// set up linear solutions
+	for (i = 0; i < _n_Comp_mob; i++)
+	{
+		MyLinearSolutionType* linear_solution = new MyLinearSolutionType(dis, this->_linear_problems[i]);
+		MyLinearSolver* linear_solver = linear_solution->getLinearEquationSolver();
+		const BaseLib::Options* optNum = option.getSubGroup("Numerics");
+		linear_solver->setOption(*optNum);
+		this->_linear_solutions.push_back(linear_solution);
+	}
+
+	// set up solution
+	_solution = new MyReactOPSSolution(dis, _problem, this, _linear_problems, _linear_solutions);
+
+	// run equilibrium reactions on each node that is not on boundary
+	this->calc_nodal_react_sys(0.0);
+
+	// set initial output parameter
+	for (i = 0; i<_concentrations.size(); i++) {
 		OutputVariableInfo var1(this->getOutputParameterName(i), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
-        femData->outController.setOutput(var1.name, var1);
-    }
-
-//    linear_solver = NULL;
-//    optNum = NULL;
+		femData->outController.setOutput(var1.name, var1);
+	}
 
     return true;
 }
@@ -190,7 +188,13 @@ void FunctionOPSConc<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 }
 
 template <class T1, class T2>
-void FunctionOPSConc<T1, T2>::calc_nodal_eq_react_sys(double /*dt*/)
+void FunctionOPSConc<T1, T2>::set_BC_conc_node_values(std::size_t node_idx, std::size_t i_var, double node_value)
+{
+	_concentrations[i_var]->setValue(node_idx, node_value);
+}
+
+template <class T1, class T2>
+void FunctionOPSConc<T1, T2>::calc_nodal_react_sys(double dt)
 {
     size_t i, node_idx, err_node_count; 
     size_t result = 1; 
@@ -200,7 +204,7 @@ void FunctionOPSConc<T1, T2>::calc_nodal_eq_react_sys(double /*dt*/)
 	loc_conc = LocalVector::Zero( _n_Comp ); 
 
 	// signal, solving local equilibrium reaction system
-	INFO("--Solving local equilibrium reaction system...");
+	INFO("--Solving local chemical reaction system...");
 
     // clear the counter
     err_node_count = 0; 
@@ -218,17 +222,30 @@ void FunctionOPSConc<T1, T2>::calc_nodal_eq_react_sys(double /*dt*/)
 				loc_conc[i] = this->_concentrations[i]->getValue(node_idx); 
 
 			// solve the local equilibrium system
-            this->_local_eq_react_sys->solve_EqSys_Newton( loc_conc, 
-                                                           result, 
-                                                           node_idx, 
-		                                                   1.0e-10, 
-                                                           1.0e-12,
-                                                           50 ); 
+			if (this->_local_eq_react_sys->get_n_Eq_React() > 0 )
+				this->_local_eq_react_sys->solve_EqSys_Newton( loc_conc, 
+                                                               result, 
+                                                               node_idx, 
+		                                                       1.0e-10, 
+                                                               1.0e-12,
+                                                               50 ); 
+
+			// solving kinetic reactions. 
+			if (this->_local_kin_react_sys->get_n_Kin_React() > 0)
+				this->_local_kin_react_sys->solve_KinSys(loc_conc,
+				                                         result,
+				                                         node_idx,
+				                                         1.0e-12,
+				                                         1.0e-12,
+				                                         dt,
+				                                         50); 
         	// if the iteration converged. 
-            if ( result == 0 )
-                // collect the solved concentrations
-    			for (i=0; i < _n_Comp; i++) 
-    				this->_concentrations[i]->setValue(node_idx, loc_conc[i]); 
+			if (result == 0)
+			{
+				// collect the solved concentrations
+				for (i = 0; i < _n_Comp; i++)
+					this->_concentrations[i]->setValue(node_idx, loc_conc[i]);
+			}
             else 
                 err_node_count++; 
 		} // end of if
@@ -249,3 +266,4 @@ void FunctionOPSConc<T1, T2>::calc_nodal_eq_react_sys(double /*dt*/)
         INFO("--Solution of chemical system failed on %i nodes...", err_node_count);
     }
 }
+

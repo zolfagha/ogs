@@ -61,7 +61,7 @@ private:
 	MathLib::LocalVector _Comp_Conc; 
 
     /**
-      * pointer to the ReductionKin class
+      * pointer to the equilibrium reaction class
       */ 
 	ogsChem::chemEqReactSysActivity* _EqReactSys;
 }; 

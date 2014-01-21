@@ -313,7 +313,7 @@
 #endif
 
 // min und max
-#define Max(A,B) ((A) > (B) ? (A) : (B))
+// #define Max(A,B) ((A) > (B) ? (A) : (B))
 
 /*
    #ifndef min

@@ -562,24 +562,24 @@ private:
 	    _I_sec_min = 0; 
 
 	    BaseLib::OrderedMap<std::string, ogsChem::ChemComp*>::iterator it; 
-	    for( it = map_chemComp.begin(); it != map_chemComp.end(); it++ )
-	    {
-		    switch ( it->second->getMobility() )
-		    {
-		    case ogsChem::MOBILE: 
-			    _I_mob++; 
-			    break;
-		    case ogsChem::SORPTION: 
-			    _I_sec_sorp++;
-			    break;
-		    case ogsChem::MINERAL: 
-			    _I_sec_min++;
-			    break;
-		    default:
-			    _I_sec_min++;
-			    break; 
-		    }
-	    }
+        for (it = map_chemComp.begin(); it != map_chemComp.end(); it++)
+        {
+            switch (it->second->getCompType())
+            {
+            case ogsChem::AQ_PHASE_COMP:
+                _I_mob++;
+                break;
+            case ogsChem::SORPTION_COMP:
+                _I_sec_sorp++;
+                break;
+            case ogsChem::MIN_PHASE_COMP:
+                _I_sec_min++;
+                break;
+            default:
+                _I_sec_min++;
+                break;
+            }
+        }
 
         _I = _I_mob + _I_sec_sorp + _I_sec_min;
     }; 

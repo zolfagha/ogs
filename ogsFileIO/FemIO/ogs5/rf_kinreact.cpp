@@ -1426,6 +1426,14 @@ bool CKinReact::Read(std::ifstream* rfd_file)
 			in.clear();
 		}
 
+		//....................................................................
+		// subkeyword found
+		if (line_string.find("$USER_EXPRESSION") != string::npos)
+		{
+			rfd_file->getline(line, MAX_ZEILE);
+			userExp = line; 
+		}
+
 		// HS, 09.2012 disable this part, to be moved...
 		/*
 		//....................................................................
@@ -1535,18 +1543,15 @@ int CKinReact::CheckReactionDataConsistency(std::vector<CKinBlob*> & KinBlob_vec
 	}
 	// check type
 	if (type.compare("monod") != 0)
-	{
-		if (type.compare("exchange") != 0)
-			if (type.compare("NAPLdissolution") != 0)
-			{
-                if (type.compare("MOB_EQ_REACT") != 0)
-                    if (type.compare("SORP_EQ_REACT") != 0)
-                        if (type.compare("MIN_EQ_REACT") != 0)
-                        {
-                            ok = 0;
-                            cout << "Unknown reaction type" << endl;
-                        }
-			}
+	if (type.compare("exchange") != 0)
+	if (type.compare("NAPLdissolution") != 0)
+    if (type.compare("MOB_EQ_REACT") != 0)
+    if (type.compare("SORP_EQ_REACT") != 0)
+    if (type.compare("MIN_EQ_REACT") != 0)
+	if (type.compare("USER_EXP") != 0)
+    {
+		ok = 0;
+		cout << "Unknown reaction type" << endl;
 	}
 
 	/* Check Monod-, Inhibition and Production terms */
@@ -2259,6 +2264,7 @@ CKinReactData::CKinReactData(void)
 	debugoutflag = false;
 
 	concentrationmatrix = NULL;
+	activity_model = 0; 
 }
 
 /**************************************************************************
