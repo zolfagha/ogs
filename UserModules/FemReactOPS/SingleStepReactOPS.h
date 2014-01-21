@@ -314,10 +314,43 @@ SingleStepReactOPS<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINEAR_PROBL
 					bc_node->set_comp_conc( i_var, node_value ); 
 					_bc_info.insert( my_bc, std::pair<size_t, ConcNodeInfo*>(node_id, bc_node) ); 
 				}  // end of if else
+
+				// set BC concentration values
+				_function_data->set_BC_conc_node_values(node_id, i_var, node_value);
 	        }  // end of for j
         }  // end of for i
     }  // end of for i_var
 
+
+	// loop over all the boundary nodes, and
+	// transform these concentrations to eta and xi values
+	std::map<size_t, ConcNodeInfo*>::iterator bc_node_it;
+	std::vector<size_t> vec_bc_node_idx;
+	std::vector<std::vector<double>> vec_node_conc_values;
+
+	for (i = 0; i < _linear_problem.size(); i++)
+	{
+		std::vector<double> vec_conc;
+		vec_node_conc_values.push_back(vec_conc);
+	}
+
+	for (bc_node_it = _bc_info.begin(); bc_node_it != _bc_info.end(); bc_node_it++)
+	{
+		size_t node_idx = bc_node_it->second->get_node_id();
+		vec_bc_node_idx.push_back(node_idx);
+
+		for (i = 0; i < _linear_problem.size(); i++)
+		{
+			double conc_value = bc_node_it->second->get_comp_conc(i);
+			vec_node_conc_values[i].push_back(conc_value);
+		}
+	}
+
+	// imposing BC for eta
+	for (i = 0; i < _linear_problem.size(); i++)
+	{
+		_linear_problem[i]->getVariable(0)->addDirichletBC(new SolutionLib::FemDirichletBC(vec_bc_node_idx, vec_node_conc_values[i]));
+	}
 
 };
 
