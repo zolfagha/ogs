@@ -26,13 +26,13 @@ class StepperBase
 public:
     StepperBase(MathLib::LocalVector &yy, 
 		        MathLib::LocalVector &dydxx, 
-                double               &xx,
+                double               xx,
 				const double         atoll, 
 				const double         rtoll, 
 				bool                 dens)
     : x(xx), xold(.0), y(yy), dydx(dydxx), atol(atoll), rtol(rtoll), dense(dens), hdid(.0), hnext(.0), EPS(.0), n(y.size()), neqn(n), yout(n), yerr(n) {};
 
-	double                &x; 
+	double                x; 
 	double                xold; 
 	MathLib::LocalVector  &y; 
 	MathLib::LocalVector  &dydx; 
