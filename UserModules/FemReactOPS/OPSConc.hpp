@@ -51,7 +51,7 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
 		exit(1);
 	}
 
-    // first get the number of components
+    // getting the number of components
 	if (this->_local_eq_react_sys->get_n_Eq_React() > 0)
 	{
 		_n_Comp = this->_local_eq_react_sys->get_n_Comp();
@@ -67,63 +67,24 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
 	for ( i=0; i < _n_Comp; i++ )
 		this->setOutputParameterName( i, femData->map_ChemComp[i]->second->get_name() ); 
 
-    // adding variables into the linear problem
-	// for the linear transport problem, variables are c_mobha
-	for ( i=0; i < _n_Comp_mob ; i++ )
-	{
-    	// set up problem
-    	MyLinearTransportProblemType*  linear_problem     = new MyLinearTransportProblemType(dis);
-        
-        // linear assemblers
-        MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_feObjects);
-        MyLinearResidualAssemblerType* linear_r_assembler = new MyLinearResidualAssemblerType(_feObjects);
-        MyLinearJacobianAssemblerType* linear_j_eqs = new MyLinearJacobianAssemblerType(_feObjects);
-
-		MyLinearEquationType* linear_eqs = linear_problem->createEquation();
-		linear_eqs->initialize(linear_assembler, linear_r_assembler, linear_j_eqs);
-		linear_problem->setTimeSteppingFunction(*tim);
-		
-		// set up variables
-		// in this case, the variables are concentrations of all mobile chemical components 
-		MyVariableConc* comp_conc = linear_problem->addVariable( femData->map_ChemComp[i]->second->get_name() );
-        FemVariableBuilder var_builder;
-        var_builder.doit(femData->map_ChemComp[i]->second->get_name(), option, msh, femData->geo, femData->geo_unique_name, _feObjects, comp_conc);
-		_linear_problems.push_back(linear_problem); 
-	}
-	    
-	// creating memory space in the linear_problem to store IC and BC
-	MyNodalFunctionScalar* tmp_conc; 
-	for (i=0; i < _n_Comp_mob; i++)
-	{
-		SolutionLib::FemIC* femIC = _linear_problems[i]->getVariable(0)->getIC();
-	    tmp_conc = new MyNodalFunctionScalar();
-		if ( femIC )
-		{
-			// FemIC vector is not empty
-			tmp_conc->initialize(*dis, _linear_problems[i]->getVariable(0)->getCurrentOrder(), 0.0);
-			femIC->setup(*tmp_conc);
-		}
-		else
-		{
-			// FemIC vector is empty
-			// initialize the vector with zeros
-			tmp_conc->initialize(*dis, _linear_problems[i]->getVariable(0)->getCurrentOrder(), 0.0);
-		}	
-	}
-    // set up linear solutions
-	for ( i=0; i < _n_Comp_mob; i++ )
-	{
-		MyLinearSolutionType* linear_solution = new MyLinearSolutionType( dis, this->_linear_problems[i] ); 
-		MyLinearSolver* linear_solver = linear_solution->getLinearEquationSolver();
-		const BaseLib::Options* optNum = option.getSubGroup("Numerics");
-		linear_solver->setOption(*optNum);
-		this->_linear_solutions.push_back( linear_solution ); 
-	}
-
 	// reactive transport problem with OPS
 	_problem = new MyReactOPSProblemType( dis, _local_eq_react_sys ); 
     _problem->setTimeSteppingFunction(*tim);  // applying the same time stepping function for all linear problems
+
+	/*
+	// add variables to the ReactTransOPS problem class
+	// variables are the concentrations of all chemical components
+	// add all concentrations to discretized memory space
+	for (i = 0; i < _n_Comp; i++)
+	{
+		MyVariableConc* comp_conc = _problem->addVariable(femData->map_ChemComp[i]->second->get_name());
+		FemVariableBuilder var_builder;
+		var_builder.doit(femData->map_ChemComp[i]->second->get_name(), option, msh, femData->geo, femData->geo_unique_name, _feObjects, comp_conc);
+	}
+	*/
+
     // creating concentrations vector
+	MyNodalFunctionScalar* tmp_conc;
     for ( i=0; i < _n_Comp; i++ )
 	{
         MyVariableConc* comp = _problem->addVariable( femData->map_ChemComp[i]->second->get_name() );
@@ -145,19 +106,61 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
 		}	
         _concentrations.push_back( tmp_conc ); 
     }
-    // set up solution
-    _solution = new MyReactOPSSolution(dis, _problem, this, _linear_problems, _linear_solutions);
-    // run equilibrium reactions on each node that is not on boundary
+
+
+	// adding variables into the linear problem
+	// for the linear transport problem, variables are c_mobha
+	for (i = 0; i < _n_Comp_mob; i++)
+	{
+		// set up problem
+		MyLinearTransportProblemType*  linear_problem = new MyLinearTransportProblemType(dis);
+
+		// linear assemblers
+		MyLinearAssemblerType* linear_assembler = new MyLinearAssemblerType(_feObjects);
+		MyLinearResidualAssemblerType* linear_r_assembler = new MyLinearResidualAssemblerType(_feObjects);
+		MyLinearJacobianAssemblerType* linear_j_eqs = new MyLinearJacobianAssemblerType(_feObjects);
+
+		MyLinearEquationType* linear_eqs = linear_problem->createEquation();
+		linear_eqs->initialize(linear_assembler, linear_r_assembler, linear_j_eqs);
+		linear_problem->setTimeSteppingFunction(*tim);
+
+		// set up variables
+		// in this case, the variables are concentrations of all mobile chemical components 
+		MyVariableConc* comp_conc = linear_problem->addVariable(femData->map_ChemComp[i]->second->get_name());
+		_linear_problems.push_back(linear_problem);
+	}
+
+	// set IC for linear transport components
+	for (i = 0; i < _n_Comp_mob; i++)
+	{
+		SolutionLib::FemIC* linear_femIC = new SolutionLib::FemIC(msh);
+		linear_femIC->addDistribution(femData->geo->getDomainObj(), new NumLib::TXFunctionDirect<double>(_concentrations[i]->getDiscreteData()));
+		_linear_problems[i]->getVariable(0)->setIC(linear_femIC);  
+	}
+
+	// set up linear solutions
+	for (i = 0; i < _n_Comp_mob; i++)
+	{
+		MyLinearSolutionType* linear_solution = new MyLinearSolutionType(dis, this->_linear_problems[i]);
+		MyLinearSolver* linear_solver = linear_solution->getLinearEquationSolver();
+		const BaseLib::Options* optNum = option.getSubGroup("Numerics");
+		linear_solver->setOption(*optNum);
+		this->_linear_solutions.push_back(linear_solution);
+	}
+
+	// set up solution
+	_solution = new MyReactOPSSolution(dis, _problem, this, _linear_problems, _linear_solutions);
+
+	// run equilibrium reactions on each node that is not on boundary
 	this->calc_nodal_react_sys(0.0);
 
-    // set initial output parameter
-	for (i=0; i<_concentrations.size(); i++) {
+	// set initial output parameter
+	for (i = 0; i<_concentrations.size(); i++) {
 		OutputVariableInfo var1(this->getOutputParameterName(i), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
-        femData->outController.setOutput(var1.name, var1);
-    }
-
-//    linear_solver = NULL;
-//    optNum = NULL;
+		femData->outController.setOutput(var1.name, var1);
+	}
+	
+	delete tmp_conc; 
 
     return true;
 }

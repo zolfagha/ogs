@@ -197,7 +197,8 @@ bool VtuWriter::writePointData(std::fstream &fin,
             }
             MathLib::LocalMatrix v;
             for (size_t j = 0; j < msh.getNumberOfNodes(); j++) {
-                pt_data.f->eval(NumLib::TXPosition(NumLib::TXPosition::Node, j, msh.getNodeCoordinatesRef(j)->getData()), v);
+				NumLib::TXPosition pos(NumLib::TXPosition::Node, j, msh.getNodeCoordinatesRef(j)->getData());
+                pt_data.f->eval(pos, v);
                 if (!_useBinary) {
                     if (v.array().size()>=(int)pt_data.nr_of_components) {
                         for (size_t k=0; k<pt_data.nr_of_components; k++)

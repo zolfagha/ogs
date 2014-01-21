@@ -14,7 +14,7 @@
 #define LOCAL_ODE_KIN_REACT_H
 
 #include "ChemLib/chemcomp.h"
-#include "ChemLib/chemReactionKin.h""
+#include "ChemLib/chemReactionKin.h"
 
 class Local_ODE_KinReact
 {
