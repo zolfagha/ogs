@@ -238,6 +238,11 @@ public:
     };
 
 	/**
+	  * set boundary node values to the concentration vector
+	  */
+	void set_BC_conc_node_values(std::size_t node_idx, std::size_t i_var, double node_value); 
+
+	/**
       * calculate nodal chemistry system
       */
 	void calc_nodal_react_sys(double dt);

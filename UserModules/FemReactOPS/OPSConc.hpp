@@ -188,6 +188,12 @@ void FunctionOPSConc<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 }
 
 template <class T1, class T2>
+void FunctionOPSConc<T1, T2>::set_BC_conc_node_values(std::size_t node_idx, std::size_t i_var, double node_value)
+{
+	_concentrations[i_var]->setValue(node_idx, node_value);
+}
+
+template <class T1, class T2>
 void FunctionOPSConc<T1, T2>::calc_nodal_react_sys(double dt)
 {
     size_t i, node_idx, err_node_count; 
