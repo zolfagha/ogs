@@ -71,18 +71,6 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
 	_problem = new MyReactOPSProblemType( dis, _local_eq_react_sys ); 
     _problem->setTimeSteppingFunction(*tim);  // applying the same time stepping function for all linear problems
 
-	/*
-	// add variables to the ReactTransOPS problem class
-	// variables are the concentrations of all chemical components
-	// add all concentrations to discretized memory space
-	for (i = 0; i < _n_Comp; i++)
-	{
-		MyVariableConc* comp_conc = _problem->addVariable(femData->map_ChemComp[i]->second->get_name());
-		FemVariableBuilder var_builder;
-		var_builder.doit(femData->map_ChemComp[i]->second->get_name(), option, msh, femData->geo, femData->geo_unique_name, _feObjects, comp_conc);
-	}
-	*/
-
     // creating concentrations vector
 	MyNodalFunctionScalar* tmp_conc;
     for ( i=0; i < _n_Comp; i++ )
@@ -159,8 +147,6 @@ bool FunctionOPSConc<T1,T2>::initialize(const BaseLib::Options &option)
 		OutputVariableInfo var1(this->getOutputParameterName(i), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
 		femData->outController.setOutput(var1.name, var1);
 	}
-	
-	delete tmp_conc; 
 
     return true;
 }
