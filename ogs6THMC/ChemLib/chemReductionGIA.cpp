@@ -254,8 +254,11 @@ void chemReductionGIA::update_reductionScheme(void)
     	Eigen::FullPivLU<LocalMatrix> lu_decomp_S2kin(_mat_S2kin);
     	_mat_S2kin_ast = lu_decomp_S2kin.image(_mat_S2kin);
 
-		_J_1_kin_ast = _mat_S1kin_ast.cols();  //J1kin_ast = J2kin_ast
-		_J_2_kin_ast = _mat_S2kin_ast.cols(); 
+		// adding saftey control
+		if ( _mat_S1kin_ast.rows() > 0 )
+			_J_1_kin_ast = _mat_S1kin_ast.cols(); 
+		if ( _mat_S2kin_ast.rows() > 0 )
+			_J_2_kin_ast = _mat_S2kin_ast.cols(); 
     }
 
 	// creat the memory for Stoi matrix
@@ -266,13 +269,16 @@ void chemReductionGIA::update_reductionScheme(void)
     _mat_S1_ast.block(0,0,_I_mob,_Jmob) 							= _mat_S1mob;
     _mat_S1_ast.block(0,_Jmob,_I_mob,_Jsorp_li) 					= _mat_S1sorp_li;
     _mat_S1_ast.block(0,_Jmob + _Jsorp_li,_I_mob,_Jmin) 			= _mat_S1min;
-	_mat_S1_ast.block(0, _Jmob + _Jsorp_li + _Jmin, _I_mob, _J_1_kin_ast) = _mat_S1kin_ast;
+	// adding saftety control
+	if (_J_1_kin_ast > 0)
+		_mat_S1_ast.block(0, _Jmob + _Jsorp_li + _Jmin, _I_mob, _J_1_kin_ast) = _mat_S1kin_ast;
 
     _mat_S2_ast.block(0,0,_I_sorp,_Jsorp) 						  = _mat_S2sorp;
 	// HS, this is probably wrong, acoording to Eq. 3.8 of Hoffmann. 
     // _mat_S2_ast.block(0,_Jsorp, _I_min ,_Jmin) 		   	  = _mat_S2min;
 	_mat_S2_ast.block(_I_sorp, _Jsorp, _Jmin, _Jmin) = ogsChem::LocalMatrix::Identity(_Jmin, _Jmin);
-	_mat_S2_ast.block(0, _Jsorp + _Jmin, _I_kin, _J_2_kin_ast) = _mat_S2kin_ast;
+	if (_J_2_kin_ast > 0)
+		_mat_S2_ast.block(0, _Jsorp + _Jmin, _mat_S2kin_ast.rows(), _J_2_kin_ast) = _mat_S2kin_ast;
 
     //the location of these matrices should not be changed. Cut the zero parts
 	_mat_S2sorp = _mat_S2sorp.topRows(_I_sorp);
@@ -333,8 +339,11 @@ void chemReductionGIA::update_reductionScheme(void)
 	//_li and _ast is max num of linearly independent columns
     _Jsorp_li = _mat_Ssorp_li.cols();
     _Jsorp_ld = _mat_Ssorp_ld.cols();
-    _J_1_kin_ast = _mat_S1kin_ast.cols();
-	_J_2_kin_ast = _mat_S2kin_ast.cols();
+	// adding saftey control
+	if (_mat_S1kin_ast.rows() > 0)
+		_J_1_kin_ast = _mat_S1kin_ast.cols();
+	if (_mat_S2kin_ast.rows() > 0)
+		_J_2_kin_ast = _mat_S2kin_ast.cols();
     _J_tot_li = _Jmob + _Jsorp_li + _Jmin + _J_1_kin_ast;
 
 	//known
