@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<VTKFile type="Collection" version="0.1" byte_order="LittleEndian" compressor="vtkZLibDataCompressor">
+  <Collection>
+    <DataSet timestep="0.000000000000e+000" group="" part="0" file="neckar_0.vtu"/>
+    <DataSet timestep="1.587300000000e+005" group="" part="0" file="neckar_1.vtu"/>
+    <DataSet timestep="3.174600000000e+005" group="" part="0" file="neckar_2.vtu"/>
+    <DataSet timestep="4.761900000000e+005" group="" part="0" file="neckar_3.vtu"/>
+    <DataSet timestep="6.349200000000e+005" group="" part="0" file="neckar_4.vtu"/>
+    <DataSet timestep="7.936500000000e+005" group="" part="0" file="neckar_5.vtu"/>
+  </Collection>
+</VTKFile>
