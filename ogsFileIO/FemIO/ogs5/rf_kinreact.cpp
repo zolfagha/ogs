@@ -1194,6 +1194,8 @@ bool CKinReact::Read(std::ifstream* rfd_file)
 		{
 			in.str(readNonBlankLineFromInputStream(*rfd_file));
 			in >> eq_const_k;
+			if (line_string.find("$EQ_CONSTANT_LOG10") != string::npos )
+				eq_const_k = std::pow(10.0, eq_const_k); 
 			in.clear();
 		}
 		//....................................................................
