@@ -1007,7 +1007,7 @@ void FunctionReductConc<T1, T2>::start_node_values_search( MathLib::LocalMatrix 
 //			std::cout << "No positive starting value on this node!" << std::endl;
 
 			//make sure there will be no negative concentrations.
-			for(double idx = 0; idx < _n_Comp; idx++)
+			for(size_t idx = 0; idx < _n_Comp; idx++)
 			{
 				if(local_conc(idx) < 0.0)
 					local_conc(idx) = 1.0E-99;
