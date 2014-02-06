@@ -442,15 +442,15 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
 
 
 
-        MathLib::LocalMatrix localM = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
-        MathLib::LocalMatrix localK = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
+		MathLib::LocalMatrix localM = MathLib::LocalMatrix::Zero(nnodes, nnodes);
+		MathLib::LocalMatrix localK = MathLib::LocalMatrix::Zero(nnodes, nnodes);
 		
-		MathLib::LocalVector localF_xi_sorp = MathLib::LocalVector::Zero(ele_node_ids.size() * _n_xi_Sorp );
-		MathLib::LocalVector localF_xi_min  = MathLib::LocalVector::Zero(ele_node_ids.size() * _n_xi_Min );
-		MathLib::LocalVector localF_xi_kin  = MathLib::LocalVector::Zero(ele_node_ids.size() * _n_xi_Kin );
+		MathLib::LocalVector localF_xi_sorp = MathLib::LocalVector::Zero(nnodes * _n_xi_Sorp);
+		MathLib::LocalVector localF_xi_min = MathLib::LocalVector::Zero(nnodes * _n_xi_Min);
+		MathLib::LocalVector localF_xi_kin = MathLib::LocalVector::Zero(nnodes * _n_xi_Kin);
 
-        MathLib::LocalMatrix localDispersion = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
-        MathLib::LocalMatrix localAdvection = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
+		MathLib::LocalMatrix localDispersion = MathLib::LocalMatrix::Zero(nnodes, nnodes);
+		MathLib::LocalMatrix localAdvection = MathLib::LocalMatrix::Zero(nnodes, nnodes);
 
         MathLib::LocalMatrix dispersion_diffusion;
         MathLib::LocalMatrix d_poro = MathLib::LocalMatrix::Zero(3,3);
@@ -458,15 +458,15 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
         NumLib::ITXFunction::DataType v;
 
         //Local RHS, LHS and residual
-        localLHS_xi_sorp  = MathLib::LocalVector::Zero(ele_node_ids.size());
-        localRHS_xi_sorp  = MathLib::LocalVector::Zero(ele_node_ids.size());
-        localLHS_xi_min   = MathLib::LocalVector::Zero(ele_node_ids.size());
-        localRHS_xi_min   = MathLib::LocalVector::Zero(ele_node_ids.size());
-        localLHS_xi_kin   = MathLib::LocalVector::Zero(ele_node_ids.size());
-        localRHS_xi_kin   = MathLib::LocalVector::Zero(ele_node_ids.size());
-        local_res_sorp    = MathLib::LocalVector::Zero(ele_node_ids.size());
-        local_res_min     = MathLib::LocalVector::Zero(ele_node_ids.size());
-        local_res_kin     = MathLib::LocalVector::Zero(ele_node_ids.size());
+		localLHS_xi_sorp = MathLib::LocalVector::Zero(nnodes);
+		localRHS_xi_sorp = MathLib::LocalVector::Zero(nnodes);
+		localLHS_xi_min = MathLib::LocalVector::Zero(nnodes);
+		localRHS_xi_min = MathLib::LocalVector::Zero(nnodes);
+		localLHS_xi_kin = MathLib::LocalVector::Zero(nnodes);
+		localRHS_xi_kin = MathLib::LocalVector::Zero(nnodes);
+		local_res_sorp = MathLib::LocalVector::Zero(nnodes);
+		local_res_min = MathLib::LocalVector::Zero(nnodes);
+		local_res_kin = MathLib::LocalVector::Zero(nnodes);
 
 
         //assembleODE(time, e, local_u_n1, local_u_n, M, K, F);
