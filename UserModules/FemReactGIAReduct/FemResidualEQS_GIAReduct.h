@@ -352,7 +352,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
     //MyLinearSolver* linear_solver = this->_non_linear_solution->getLinearEquationSolver();
     MeshLib::IMesh* msh = _dis_sys->getMesh();
     const size_t n_ele = msh->getNumberOfElements();
-    const size_t n_max_connect_nodes = 20; 
     size_t nnodes; 
     double _theta(1.0);
 //    size_t _n_xi_trans = this->_n_xi_Sorp + this->_n_xi_Min + this->_n_xi_Kin;
@@ -392,22 +391,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
     loc_vec_Rate  = MathLib::LocalVector::Zero( _J_tot_kin );
     vec_Rate_temp = MathLib::LocalVector::Zero( _J_tot_kin );
 
-    // initialize the local vector
-    //current xi global
-    loc_cur_xi_global               = MathLib::LocalVector::Zero( _n_xi_global * n_max_connect_nodes );
-    loc_cur_xi_Sorp_tilde           = MathLib::LocalVector::Zero( _n_xi_Sorp_tilde * n_max_connect_nodes  );
-    loc_cur_xi_Min_tilde            = MathLib::LocalVector::Zero( _n_xi_Min_tilde * n_max_connect_nodes  );
-    loc_cur_xi_Sorp                 = MathLib::LocalVector::Zero( _n_xi_Sorp * n_max_connect_nodes );
-    loc_cur_xi_Min                  = MathLib::LocalVector::Zero( _n_xi_Min * n_max_connect_nodes );
-    loc_cur_xi_Kin                  = MathLib::LocalVector::Zero( _n_xi_Kin * n_max_connect_nodes );
-    //previous xi global
-    loc_pre_xi_global               = MathLib::LocalVector::Zero( _n_xi_global * n_max_connect_nodes  );
-    loc_pre_xi_Sorp_tilde           = MathLib::LocalVector::Zero( _n_xi_Sorp_tilde * n_max_connect_nodes  );
-    loc_pre_xi_Min_tilde            = MathLib::LocalVector::Zero( _n_xi_Min_tilde * n_max_connect_nodes  );
-    loc_pre_xi_Sorp                 = MathLib::LocalVector::Zero( _n_xi_Sorp * n_max_connect_nodes );
-    loc_pre_xi_Min                  = MathLib::LocalVector::Zero( _n_xi_Min * n_max_connect_nodes );
-    loc_pre_xi_Kin                  = MathLib::LocalVector::Zero( _n_xi_Kin * n_max_connect_nodes );
-
     double dt = delta_t.getTimeStepSize();
 
     for ( i=0; i<n_ele; i++)
@@ -419,6 +402,23 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
         e->getNodeIDList(e->getMaximumOrder(), ele_node_ids);
         // number of connecting nodes
         nnodes = ele_node_ids.size(); 
+
+		// initialize the local vector------------------------------------------------
+		// current xi global
+		loc_cur_xi_global = MathLib::LocalVector::Zero(_n_xi_global * nnodes);
+		loc_cur_xi_Sorp_tilde = MathLib::LocalVector::Zero(_n_xi_Sorp_tilde * nnodes);
+		loc_cur_xi_Min_tilde = MathLib::LocalVector::Zero(_n_xi_Min_tilde * nnodes);
+		loc_cur_xi_Sorp = MathLib::LocalVector::Zero(_n_xi_Sorp * nnodes);
+		loc_cur_xi_Min = MathLib::LocalVector::Zero(_n_xi_Min * nnodes);
+		loc_cur_xi_Kin = MathLib::LocalVector::Zero(_n_xi_Kin * nnodes);
+		//previous xi global
+		loc_pre_xi_global = MathLib::LocalVector::Zero(_n_xi_global * nnodes);
+		loc_pre_xi_Sorp_tilde = MathLib::LocalVector::Zero(_n_xi_Sorp_tilde * nnodes);
+		loc_pre_xi_Min_tilde = MathLib::LocalVector::Zero(_n_xi_Min_tilde * nnodes);
+		loc_pre_xi_Sorp = MathLib::LocalVector::Zero(_n_xi_Sorp * nnodes);
+		loc_pre_xi_Min = MathLib::LocalVector::Zero(_n_xi_Min * nnodes);
+		loc_pre_xi_Kin = MathLib::LocalVector::Zero(_n_xi_Kin * nnodes);
+		// ----------------------------------------------------------------------------
 
 		node_xi_sorp_rate_values = MathLib::LocalMatrix::Zero(nnodes, _n_xi_Sorp); 
 		node_xi_min_rate_values  = MathLib::LocalMatrix::Zero(nnodes, _n_xi_Min);
