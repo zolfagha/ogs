@@ -1,7 +1,7 @@
 GeoSys-PCS: Processes ------------------------------------------------
 #PROCESS
  $PCS_TYPE
-  LIQUID_FLOW
+  GROUNDWATER_FLOW
  $NUM_TYPE
    NEW  
 

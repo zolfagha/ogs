@@ -11,7 +11,7 @@ GeoSys-MMP  Material Medium Properties ------------------------------------
  $STORAGE
   1  0.0  
  $PERMEABILITY_TENSOR
-  ISOTROPIC   1.0e-012 
+  ISOTROPIC   1.0e-5
  $MASS_DISPERSION
   1  5.  0.
  $DENSITY
