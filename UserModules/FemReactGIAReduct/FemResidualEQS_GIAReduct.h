@@ -185,8 +185,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
 {
     const size_t nnodes = _dis_sys->getMesh()->getNumberOfNodes();
 	const double theta_water_content(1.0);  // HS: testing, will be removed. 
-    // const double theta_water_content = 0.5;  //monod
-    //const double theta_water_content = 0.32;  //calcite
+
     size_t j; 
     // current xi global
     MathLib::LocalVector loc_cur_xi_global, loc_cur_xi_Sorp_tilde, loc_cur_xi_Min_tilde,

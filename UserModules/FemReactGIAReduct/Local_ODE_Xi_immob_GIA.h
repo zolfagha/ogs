@@ -62,7 +62,7 @@ public:
       */ 
 	MathLib::LocalVector operator() (double /*time*/, MathLib::LocalVector vec_xi_kin_bar )
 	{
-		// double theta_water_content (0.5);  //monod2d example
+
 		const double theta_water_content(1.0);  // HS: testing, will be removed. 
 		MathLib::LocalMatrix mat_A2kin = _reductionGIA->get_matrix_A2kin();
 
