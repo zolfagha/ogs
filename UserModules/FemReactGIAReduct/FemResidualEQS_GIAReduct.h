@@ -408,6 +408,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
     loc_pre_xi_Min                  = MathLib::LocalVector::Zero( _n_xi_Min * n_max_connect_nodes );
     loc_pre_xi_Kin                  = MathLib::LocalVector::Zero( _n_xi_Kin * n_max_connect_nodes );
 
+    double dt = delta_t.getTimeStepSize();
 
     for ( i=0; i<n_ele; i++)
     {
@@ -439,7 +440,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
 
         //TODO get the water content and multiply it in LHS and RHS
 
-        double dt = delta_t.getTimeStepSize();
+
 
         MathLib::LocalMatrix localM = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
         MathLib::LocalMatrix localK = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
