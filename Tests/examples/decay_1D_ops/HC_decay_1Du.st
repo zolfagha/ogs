@@ -1,7 +1,7 @@
 GeoSys-ST: Source Terms ------------------------------------------------
 #SOURCE_TERM
  $PCS_TYPE
-  LIQUID_FLOW
+  GROUNDWATER_FLOW
  $PRIMARY_VARIABLE 
   PRESSURE1
  $GEO_TYPE

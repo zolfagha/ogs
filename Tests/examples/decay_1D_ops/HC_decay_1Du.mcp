@@ -2,10 +2,20 @@ GeoSys-CP: Component Properties ------------------------------------------------
 
 #COMPONENT_PROPERTIES  ; comp0
  $NAME
-  Decay ;
+  Tracer ;
  $MOBILE 
   1; MOBIL-Flag: 0=immobile, 1=mobile/transported
- $DECAY
-  1  2.0e-7   1.0  ;
+ 
+#COMPONENT_PROPERTIES  ; comp0
+ $NAME
+  Decay_Father ;
+ $MOBILE 
+  1; MOBIL-Flag: 0=immobile, 1=mobile/transported
+
+#COMPONENT_PROPERTIES  ; comp0
+ $NAME
+  Decay_Daughter ;
+ $MOBILE 
+  1; MOBIL-Flag: 0=immobile, 1=mobile/transported
 
 #STOP

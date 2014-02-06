@@ -7,7 +7,7 @@ GeoSys-PCS: Processes ------------------------------------------------
 
 #PROCESS
  $PCS_TYPE
-  MASS_TRANSPORT
+  REACT_TRANS_OPS
  $NUM_TYPE
    NEW   
 

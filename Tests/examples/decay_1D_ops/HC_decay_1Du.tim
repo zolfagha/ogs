@@ -1,7 +1,7 @@
 GeoSys-TIM: Timestepping ------------------------------------------------
 #TIME_STEPPING
  $PCS_TYPE
-  LIQUID_FLOW
+  GROUNDWATER_FLOW
  $TIME_STEPS
    100  86400.0
  $TIME_END
@@ -10,7 +10,7 @@ GeoSys-TIM: Timestepping ------------------------------------------------
   0.0
 #TIME_STEPPING
  $PCS_TYPE
-  MASS_TRANSPORT
+  REACT_TRANS_OPS
  $TIME_STEPS
    100  86400.0
  $TIME_END
