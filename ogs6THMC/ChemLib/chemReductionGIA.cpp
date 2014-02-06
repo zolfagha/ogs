@@ -107,18 +107,12 @@ void chemReductionGIA::buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 			tmp_str  = list_kin_reactions[j]->get_vecCompNames()[i];
 			tmp_Comp = map_chemComp.find(tmp_str);
 			tmp_idx  = tmp_Comp->second->getIndex();
-			if ( list_kin_reactions[j]->get_vecStoi().size() > 2 )
-			{
-				// normal reactions
-				tmp_stoi = list_kin_reactions[j]->get_vecStoi()[i];
-				// and put them into Stoi matrix
-				_matStoi(tmp_idx,j) = tmp_stoi;
-			}
-			else  // this is a basis component
-			{
-			    _matStoi(tmp_idx,j) = 1.0;
-			}
 
+			// for kinetic reactions, no basis species. 
+			// treat as normal reactions. 
+			tmp_stoi = list_kin_reactions[j]->get_vecStoi()[i];
+			// and put them into Stoi matrix
+			_matStoi(tmp_idx, j + list_eq_reactions.size()) = tmp_stoi;
 		}  // end of for i
 	}  // end of for j
 
