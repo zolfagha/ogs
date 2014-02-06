@@ -451,7 +451,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
 
         MathLib::LocalMatrix localDispersion = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
         MathLib::LocalMatrix localAdvection = MathLib::LocalMatrix::Zero(ele_node_ids.size(), ele_node_ids.size());
-        MathLib::LocalVector F = MathLib::LocalVector::Zero(ele_node_ids.size());
+
         MathLib::LocalMatrix dispersion_diffusion;
         MathLib::LocalMatrix d_poro = MathLib::LocalMatrix::Zero(3,3);
         MathLib::LocalMatrix poro(1,1);
