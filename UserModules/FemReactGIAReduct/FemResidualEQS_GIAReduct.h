@@ -287,12 +287,12 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             	residual_global[_n_xi_global * node_idx + i] = res43[i];
 
             if(_n_xi_Sorp_bar_ld > 0)
-            	res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar + loc_cur_xi_Sorp_bar_ld;
+            	res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar + loc_cur_xi_Sorp_bar_ld; // HS: ERROR! MISSING Ald here! 
             else
             	res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar;
 
             for(std::size_t i = 0; i < _n_xi_Min_tilde; i++)
-            	residual_global[_n_xi_global * node_idx + i] = res44[i];
+				residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + i] = res44[i];
 
             if(_n_xi_Kin > 0){
             // calculate the nodal kinetic reaction rates
