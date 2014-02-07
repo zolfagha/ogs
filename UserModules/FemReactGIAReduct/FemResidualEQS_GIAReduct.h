@@ -184,7 +184,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
                                SolutionLib::SolutionVector & residual_global)
 {
     const size_t nnodes = _dis_sys->getMesh()->getNumberOfNodes();
-	const double theta_water_content(1.0);  // HS: testing, will be removed. 
 
     size_t j; 
     // current xi global
@@ -314,9 +313,14 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
                 _global_vec_Rate[i]->setValue(node_idx, vec_Rate[i]);
 
 			// the rate term should not be multiplied with dt.
-            res45 = theta_water_content * mat_Asorp * vec_Rate;
-            res46 = theta_water_content * mat_Amin  * vec_Rate;
-            res47 = theta_water_content * mat_A1kin * vec_Rate;
+            // res45 = theta_water_content * mat_Asorp * vec_Rate;
+            // res46 = theta_water_content * mat_Amin  * vec_Rate;
+            // res47 = theta_water_content * mat_A1kin * vec_Rate;
+			// HS: notice that we do not multiply the theta_water_content here. 
+			// instead, we multiply porosity directly at the assembly function. 
+			res45 = mat_Asorp * vec_Rate;
+			res46 = mat_Amin  * vec_Rate;
+			res47 = mat_A1kin * vec_Rate;
 
 			// HS:first we store them, and the integration of these values
 			// will be done in the assembly part.
@@ -518,26 +522,26 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
             _fe->integrateDWxDN(j, dispersion_diffusion, localDispersion);
             _fe->integrateWxDN(j, v2, localAdvection);
 
-			MathLib::LocalMatrix * Np = _fe->getBasisFunction(); 
+			MathLib::LocalMatrix & Np = *_fe->getBasisFunction(); 
 			if(_n_xi_Kin > 0)
 			{
 				// loop over all xi_sorp
 				for (k = 0; k < _n_xi_Sorp; k++)
 				{
-					rate_xi_sorp_gp = (*Np) * node_xi_sorp_rate_values.col(k);
-					localF_xi_sorp.segment(nnodes*k, nnodes).noalias() += (*Np).transpose() * rate_xi_sorp_gp * _fe->getDetJ() * _q->getWeight(j);
+					rate_xi_sorp_gp = poro(0,0) * Np * node_xi_sorp_rate_values.col(k);
+					localF_xi_sorp.segment(nnodes*k, nnodes).noalias() += Np.transpose() * rate_xi_sorp_gp * _fe->getDetJ() * _q->getWeight(j);
 				}
 				// loop over all xi_min
 				for (k = 0; k < _n_xi_Min; k++)
 				{
-					rate_xi_min_gp = (*Np) * node_xi_min_rate_values.col(k);
-					localF_xi_min.segment(nnodes*k, nnodes).noalias() += (*Np).transpose() * rate_xi_min_gp * _fe->getDetJ() * _q->getWeight(j);
+					rate_xi_min_gp = poro(0,0) * Np * node_xi_min_rate_values.col(k);
+					localF_xi_min.segment(nnodes*k, nnodes).noalias() += Np.transpose() * rate_xi_min_gp * _fe->getDetJ() * _q->getWeight(j);
 				}
 				// loop over all xi_kin
 				for (k = 0; k < _n_xi_Kin; k++)
 				{
-					rate_xi_kin_gp = (*Np) * node_xi_kin_rate_values.col(k);
-					localF_xi_kin.segment(nnodes*k, nnodes).noalias() += (*Np).transpose() * rate_xi_kin_gp * _fe->getDetJ() * _q->getWeight(j);
+					rate_xi_kin_gp = poro(0,0) * Np * node_xi_kin_rate_values.col(k);
+					localF_xi_kin.segment(nnodes*k, nnodes).noalias() += Np.transpose() * rate_xi_kin_gp * _fe->getDetJ() * _q->getWeight(j);
 				}
 			}
         } // end of loop over all sampling points
