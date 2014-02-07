@@ -164,7 +164,7 @@ public:
                     // HS, disable now and try using basis function -----------
                     // d_rate(0,0) = vec_drates_dxi_value.mean(); 
                     // --------------------------------------------------------
-                    d_rate = Np * vec_drates_dxi_value; 
+					d_rate = poro(0, 0) * Np * vec_drates_dxi_value;
 					fe->integrateWxN(j, d_rate, mat_dR);
 					
                     // plugging mat_dR to the corresponding Jacobian matrix position

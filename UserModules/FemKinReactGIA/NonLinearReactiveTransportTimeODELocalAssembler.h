@@ -140,7 +140,7 @@ protected:
          	for (k=0; k<n_xi_mob; k++)
             {
                 // localF 
-                rate_xi_mob_gp = Np * node_xi_mob_rate_values.col(k); 
+				rate_xi_mob_gp = poro(0, 0) * Np * node_xi_mob_rate_values.col(k);
                 // right hand side xi_mob rates
                 localF.segment(n_nodes*k,n_nodes).noalias() += Np.transpose() * rate_xi_mob_gp * fe->getDetJ() * q->getWeight(j);
             }
