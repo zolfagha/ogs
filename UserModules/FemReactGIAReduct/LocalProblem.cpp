@@ -368,6 +368,9 @@ void LocalProblem::calc_Jacobian(double dt,
 	// std::cout << _mat_Jacobian << std::endl;
 	// end of debugging-------------------
 #endif
+//	// end of debugging-------------------
+//#endif
+
 }
 
 /** HS 20131106: rewrite the minimization solve function

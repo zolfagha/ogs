@@ -11,7 +11,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   C1
  $GEO_TYPE
@@ -21,7 +21,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   C2
  $GEO_TYPE
@@ -31,7 +31,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   C3
  $GEO_TYPE
@@ -41,7 +41,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   C4
  $GEO_TYPE
@@ -51,7 +51,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
 
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   C5
  $GEO_TYPE
@@ -61,7 +61,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
 
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   X1
  $GEO_TYPE
@@ -71,7 +71,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
 
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   X2
  $GEO_TYPE
@@ -81,7 +81,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   X3
  $GEO_TYPE
@@ -91,7 +91,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
 
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   X4
  $GEO_TYPE
@@ -101,7 +101,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   S
  $GEO_TYPE
@@ -111,7 +111,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   CS1
  $GEO_TYPE
@@ -121,7 +121,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   CS2
  $GEO_TYPE
@@ -131,7 +131,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
 
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   C1
  $GEO_TYPE
@@ -141,7 +141,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   C2
  $GEO_TYPE
@@ -151,7 +151,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   C3
  $GEO_TYPE
@@ -161,7 +161,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   C4
  $GEO_TYPE
@@ -171,7 +171,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
 
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   C5
  $GEO_TYPE
@@ -181,7 +181,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
 
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   X1
  $GEO_TYPE
@@ -191,7 +191,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
 
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   X2
  $GEO_TYPE
@@ -201,7 +201,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   X3
  $GEO_TYPE
@@ -211,7 +211,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
 
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   X4
  $GEO_TYPE
@@ -221,7 +221,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   S
  $GEO_TYPE
@@ -231,7 +231,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   CS1
  $GEO_TYPE
@@ -241,7 +241,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   CS2
  $GEO_TYPE
@@ -251,7 +251,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   C1
  $GEO_TYPE
@@ -261,7 +261,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   C2
  $GEO_TYPE
@@ -271,7 +271,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   C3
  $GEO_TYPE
@@ -281,7 +281,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   C4
  $GEO_TYPE
@@ -291,7 +291,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
 
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   C5
  $GEO_TYPE
@@ -301,7 +301,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
 
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   X1
  $GEO_TYPE
@@ -311,7 +311,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
 
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   X2
  $GEO_TYPE
@@ -321,7 +321,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   X3
  $GEO_TYPE
@@ -331,7 +331,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
 
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   X4
  $GEO_TYPE
@@ -341,7 +341,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   S
  $GEO_TYPE
@@ -351,7 +351,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   CS1
  $GEO_TYPE
@@ -361,7 +361,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   
 #INITIAL_CONDITION
  $PCS_TYPE
-  REACT_GIA_REDUCT
+  REACT_GIA
  $PRIMARY_VARIABLE 
   CS2
  $GEO_TYPE

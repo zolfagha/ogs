@@ -13,7 +13,7 @@
                 <in>HEAD</in>
                 <out>VELOCITY</out>
             </M>
-            <M name="REACT_GIA_REDUCT" type="REACT_GIA_REDUCT">
+            <M name="REACT_GIA" type="REACT_GIA">
                 <in>VELOCITY</in>
                 <out>Tracer</out>
             </M>

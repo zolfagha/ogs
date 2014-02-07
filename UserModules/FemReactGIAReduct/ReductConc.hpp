@@ -12,6 +12,7 @@
 
 #include <functional>
 #include "logog.hpp"
+#include <limits>
 
 #include "MathLib/DataType.h"
 #include "DiscreteLib/Utils/DiscreteSystemContainerPerMesh.h"
@@ -713,6 +714,11 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			vec_unknowns.segment(_I_mob + _I_sorp, _I_min) = vec_conc_Min;  // linear scale
 			vec_unknowns.tail(_I_kin) = vec_conc_Kin;  // linear scale
 
+			//RZ:DB
+		    for(size_t ij = 0; ij < _n_Comp; ij++) //dg 7Nov2013
+		    	if(vec_unknowns(ij) != vec_unknowns(ij))
+		    		std::cout << "NaN before solving local problem! on node:"<< node_idx << std::endl;
+//		    std::cout <<"loc_conc" << loc_conc << std::endl;
 			// solve the local problem
 			_pSolve->solve_LocalProblem_Newton_LineSearch( node_idx, 
 				                                           dt, 
@@ -763,13 +769,14 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 		    vec_conc_updated.segment(_I_mob + _I_sorp, _I_min) = vec_conc_Min;
 			vec_conc_updated.tail(_I_kin) = vec_conc_Kin;
 
+//			std::cout <<"vec_conc_updated" << vec_conc_updated << std::endl;
 			//RZ:DB
-			for(size_t w = 0; w < _I_min; w++)
+			for(size_t w = 0; w < _I_mob + _I_sorp; w++)
 			{
-				if(vec_conc_Min(w) < 0.0)
+				if(vec_conc_updated(w) < 0.0 ||  vec_conc_updated(w) != vec_conc_updated(w))
 				{
-					std::cout << "negative mineral concentration after solving local problem! on node:"<< node_idx << std::endl;
-					std::cout << vec_conc_Min << std::endl;
+					std::cout << "negative concentration after solving local problem! on node:"<< node_idx << std::endl;
+					std::cout << vec_conc_updated << std::endl;
 				}
 			}
 
@@ -884,7 +891,8 @@ void FunctionReductConc<T1, T2>::calculate_node_concentration(MathLib::LocalVect
 									local_xi_Kin_bar,
 									local_conc);
 
-	for(size_t i = 0; i < _I_mob; i++)
+	//for(size_t i = 0; i < _I_mob; i++)
+	for(size_t i = 0; i < _n_Comp; i++)  //RZ: 4.feb2014
 	{
 		if(local_conc(i) < 0.0){
 			negative_concentration = true;
@@ -909,7 +917,7 @@ void FunctionReductConc<T1, T2>::calculate_node_concentration(MathLib::LocalVect
 		//RZ: debug 4 Nov, 2013; after optimization if there is negative concentration, cut them to zero.
 		//for(size_t i = 0; i < _I_mob; i++){
 	    for(size_t i = 0; i < _n_Comp; i++){  //dg 7Nov2013
-	    	if(local_conc(i) < 0.0)
+	    	if(local_conc(i) <= 0.0)
 	    		local_conc(i) = 1.0E-99;}
 	}
 
@@ -1004,7 +1012,7 @@ void FunctionReductConc<T1, T2>::start_node_values_search( MathLib::LocalMatrix 
 		//if there is no negative coefficient, Tableau(i,j) < 0, stop; there is no feasible solution.
 		if(s == -1)
 		{
-//			std::cout << "No positive starting value on this node!" << std::endl;
+			std::cout << "No positive starting value on this node!" << std::endl;
 
 			//make sure there will be no negative concentrations.
 			for(size_t idx = 0; idx < _n_Comp; idx++)

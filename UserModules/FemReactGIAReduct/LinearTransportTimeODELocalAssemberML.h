@@ -81,7 +81,7 @@ protected:
         localDispersion.setZero(localK.rows(), localK.cols());
         localAdvection.setZero (localK.rows(), localK.cols());
 
-        double cmp_mol_diffusion = 1.0E-9; //constant for all species.
+        double cmp_mol_diffusion = 5.56E-9; //constant for all species.
         // _cmp->molecular_diffusion->eval(0, cmp_mol_diffusion);
 
         _q = _fe->getIntegrationMethod();
@@ -124,6 +124,8 @@ protected:
             _fe->integrateWxDN(j, v2, localAdvection);
         }
 
+        //localAdvection.setZero(); //switch off advection
+		//localDispersion.setZero(); // switch off dispersion
         localK = localDispersion + localAdvection;
 
 		/*

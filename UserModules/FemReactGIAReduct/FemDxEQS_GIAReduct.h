@@ -672,6 +672,9 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 		    _fe->integrateWxDN(j, v2, localAdvection);
 		}  // end of for loop over j
 
+        //localAdvection.setZero(); //switch off advection
+		 //localDispersion.setZero(); // switch off dispersion
+
 		localK = localDispersion + localAdvection;
 		
 		/*

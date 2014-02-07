@@ -8,6 +8,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
   POINT POINT0
  $DIS_TYPE
   CONSTANT 0.13229
+
 #BOUNDARY_CONDITION
  $PCS_TYPE
   GROUNDWATER_FLOW
