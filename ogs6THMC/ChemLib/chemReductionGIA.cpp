@@ -204,8 +204,10 @@ void chemReductionGIA::update_reductionScheme(void)
     	_mat_S2sorp = _mat_S2sorp_li; // if _Jsorp_ld = 0
 
     	// construct the global _mat_Ssorp matrix, right parts contains the linearly independent and left part contains the linearly dependent reactions.
-    	_matrix_Ssorp.leftCols(_Jsorp_li)  = _mat_Ssorp_li;
-    	_matrix_Ssorp.rightCols(_Jsorp_ld) = _mat_Ssorp_ld;
+        if (_Jsorp_li > 0)
+            _matrix_Ssorp.leftCols(_Jsorp_li)  = _mat_Ssorp_li;
+        if (_Jsorp_ld > 0)
+            _matrix_Ssorp.rightCols(_Jsorp_ld) = _mat_Ssorp_ld;
 
 
     	if( _mat_Ssorp_ld.cols())
