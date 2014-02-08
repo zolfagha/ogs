@@ -10,7 +10,7 @@ GeoSys-OUT: Output ------------------------------------------------
  $DAT_TYPE
   PVD
  $TIM_TYPE
-  STEPS 1
+  STEPS 10
 #STOP
 
 
