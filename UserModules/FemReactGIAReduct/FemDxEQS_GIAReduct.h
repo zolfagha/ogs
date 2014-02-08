@@ -214,7 +214,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     std::size_t n_xi_total = _n_xi_local + _n_xi_global;
 
     double real_x[3];
-    MeshLib::IMesh* msh = _dis_sys->getMesh();
+    // MeshLib::IMesh* msh = _dis_sys->getMesh();
 
     MathLib::LocalVector Unknown_vec 	 = MathLib::LocalVector::Zero(n_xi_total);
     MathLib::LocalMatrix DrateDxi    	 = MathLib::LocalMatrix::Zero(_J_tot_kin, n_xi_total);
