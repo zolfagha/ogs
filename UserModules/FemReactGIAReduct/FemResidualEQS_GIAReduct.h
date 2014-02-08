@@ -551,12 +551,10 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
 		
 		/*
 		 * RZ: 20.10.2013: mass lumping is essential for global newton iteration to converge for equilibrium reactions.
-		 * HS: 07.02.2014: First, the following mass lumping part missed the localF vector, the effective reaction rate
+		 * HS: 07.02.2014: The following mass lumping part missed the localF vector, the effective reaction rate
 		 *                 will be much smaller (factor 10 smaller in my test case). 
-		 *                 Second, we do not need mass lumping for many cases.
-		 *                 Therefore I disable it for now.
+		 *                 Therefore I fixed it for now.
 		 */
-		/*
 		for ( int idx_ml=0; idx_ml < localM.rows(); idx_ml++ )
 		{
 		    double mass_lump_val;
@@ -573,8 +571,14 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
 		    	localK(idx_ml, idx_col) = localK(idx_ml, idx_col)/mass_lump_val;
 		    }
 
+            // Normalize localF vector
+            for ( k = 0; k < _n_xi_Sorp; k++)
+                localF_xi_sorp(idx_ml * _n_xi_Sorp + k) /= mass_lump_val; 
+            for ( k = 0; k < _n_xi_Min; k++)
+                localF_xi_min(idx_ml * _n_xi_Min + k) /= mass_lump_val;
+            for ( k = 0; k < _n_xi_Kin; k++)
+                localF_xi_kin(idx_ml * _n_xi_Kin + k) /= mass_lump_val;
 		}
-		*/
 
         //MathLib::LocalVector node_indx = MathLib::LocalVector::Zero(_n_xi);
         std::size_t idx_xi, node_indx, val_idx;
