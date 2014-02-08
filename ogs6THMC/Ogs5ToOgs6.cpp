@@ -564,8 +564,10 @@ bool convert(const Ogs5FemData &ogs5fem, Ogs6FemData &ogs6fem, BaseLib::Options 
                 mChemComp->set_compTyps(ogsChem::BASIS_COMP);
             else if ( ogs6fem.list_compound[i]->comp_type.find("AQ_PHASE_COMP") == 0 )
                 mChemComp->set_compTyps(ogsChem::AQ_PHASE_COMP);
-            else if ( ogs6fem.list_compound[i]->comp_type.find("GAS_PHASE_COMP") == 0 )
+            else if ( ogs6fem.list_compound[i]->comp_type.find("GAS_PHASE_COMP") == 0)
                 mChemComp->set_compTyps(ogsChem::GAS_PHASE_COMP);
+            else if ( ogs6fem.list_compound[i]->comp_type.find("SORPTION_COMP") == 0)
+                mChemComp->set_compTyps(ogsChem::SORPTION_COMP); 
             else if ( ogs6fem.list_compound[i]->comp_type.find("MIN_PHASE_COMP") == 0 )
                 mChemComp->set_compTyps(ogsChem::MIN_PHASE_COMP);
             else if ( ogs6fem.list_compound[i]->comp_type.find("SS_PHASE_COMP") == 0 )
