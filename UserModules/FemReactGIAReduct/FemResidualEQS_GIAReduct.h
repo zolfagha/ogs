@@ -312,10 +312,6 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             for (size_t i=0; i < _J_tot_kin; i++)
                 _global_vec_Rate[i]->setValue(node_idx, vec_Rate[i]);
 
-			// the rate term should not be multiplied with dt.
-            // res45 = theta_water_content * mat_Asorp * vec_Rate;
-            // res46 = theta_water_content * mat_Amin  * vec_Rate;
-            // res47 = theta_water_content * mat_A1kin * vec_Rate;
 			// HS: notice that we do not multiply the theta_water_content here. 
 			// instead, we multiply porosity directly at the assembly function. 
 			res45 = mat_Asorp * vec_Rate;
