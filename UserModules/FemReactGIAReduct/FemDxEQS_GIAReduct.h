@@ -207,11 +207,14 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
 
     size_t i, nnodes;
     nnodes = _msh->getNumberOfNodes();
-	const double theta_water_content(1.0);  // HS: testing, will be removed. 
+    // HS: initialize to 1.0, later will be updated upon nodal values. 
+	const double theta_water_content(1.0); 
 
     const double delta_xi = 1E-12;
     std::size_t n_xi_total = _n_xi_local + _n_xi_global;
-    // _solv_minimization = new LocalProblem( _ReductionGIA);
+
+    double real_x[3];
+    MeshLib::IMesh* msh = _dis_sys->getMesh();
 
     MathLib::LocalVector Unknown_vec 	 = MathLib::LocalVector::Zero(n_xi_total);
     MathLib::LocalMatrix DrateDxi    	 = MathLib::LocalMatrix::Zero(_J_tot_kin, n_xi_total);
@@ -308,6 +311,15 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     // loop over all the nodes
     for (size_t node_idx=0; node_idx < nnodes; node_idx++ )
     {
+        // get the nodal water content
+        // find the location of the node, 
+        // and evaluate the porosity at this location
+        // use it as water content for this node. 
+        /* TODO, TODO
+        MeshLib::Node *node = msh->getnode(node_idx); 
+        NumLib::TXPosition node_pos(NumLib::TXPosition::Node, node->getNodeID(), real_x);
+        */
+
             // on each node, get the right start value
             // get the right set of xis
             for (i=0; i < _n_xi_global; i++)
