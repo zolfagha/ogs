@@ -591,6 +591,8 @@ void LocalProblem::cal_ln_conc_vec(size_t                 idx_size,
 	for (i = 0; i < idx_size; i++)
 	{
 		tmp_x    = conc_Mob(i);
+        if (std::abs(tmp_x) < std::numeric_limits<double>::epsilon())
+            tmp_x = std::numeric_limits<double>::epsilon();
 		ln_conc_Mob(i)  = std::log(tmp_x);
 	}
 
