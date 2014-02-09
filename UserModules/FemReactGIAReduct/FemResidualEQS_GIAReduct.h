@@ -293,7 +293,8 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             for(std::size_t i = 0; i < _n_xi_Min_tilde; i++)
 				residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + i] = res44[i];
 
-            if(_n_xi_Kin > 0){
+            // if(_n_xi_Kin > 0){
+            if ( _J_tot_kin > 0){
             // calculate the nodal kinetic reaction rates
             _ReductionGIA->Calc_Kin_Rate_temp(loc_cur_xi_Mob,
                                          loc_cur_xi_Sorp,
@@ -327,7 +328,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
 				this->_function_data->get_xi_min_rates()[j]->setValue(node_idx, res46(j));
 			for (j = 0; j < _n_xi_Kin; j++)
 				this->_function_data->get_xi_kin_rates()[j]->setValue(node_idx, res47(j));
-            }
+            } // end of if _J_tot_kin
      
     } // end of loop over all nodes. 
 
@@ -519,27 +520,26 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct
             _fe->integrateWxDN(j, v2, localAdvection);
 
 			MathLib::LocalMatrix & Np = *_fe->getBasisFunction(); 
-			if(_n_xi_Kin > 0)
+
+            // loop over all xi_sorp
+			for (k = 0; k < _n_xi_Sorp; k++)
 			{
-				// loop over all xi_sorp
-				for (k = 0; k < _n_xi_Sorp; k++)
-				{
-					rate_xi_sorp_gp = poro(0,0) * Np * node_xi_sorp_rate_values.col(k);
-					localF_xi_sorp.segment(nnodes*k, nnodes).noalias() += Np.transpose() * rate_xi_sorp_gp * _fe->getDetJ() * _q->getWeight(j);
-				}
-				// loop over all xi_min
-				for (k = 0; k < _n_xi_Min; k++)
-				{
-					rate_xi_min_gp = poro(0,0) * Np * node_xi_min_rate_values.col(k);
-					localF_xi_min.segment(nnodes*k, nnodes).noalias() += Np.transpose() * rate_xi_min_gp * _fe->getDetJ() * _q->getWeight(j);
-				}
-				// loop over all xi_kin
-				for (k = 0; k < _n_xi_Kin; k++)
-				{
-					rate_xi_kin_gp = poro(0,0) * Np * node_xi_kin_rate_values.col(k);
-					localF_xi_kin.segment(nnodes*k, nnodes).noalias() += Np.transpose() * rate_xi_kin_gp * _fe->getDetJ() * _q->getWeight(j);
-				}
+				rate_xi_sorp_gp = poro(0,0) * Np * node_xi_sorp_rate_values.col(k);
+				localF_xi_sorp.segment(nnodes*k, nnodes).noalias() += Np.transpose() * rate_xi_sorp_gp * _fe->getDetJ() * _q->getWeight(j);
 			}
+            // loop over all xi_min
+			for (k = 0; k < _n_xi_Min; k++)
+			{
+				rate_xi_min_gp = poro(0,0) * Np * node_xi_min_rate_values.col(k);
+				localF_xi_min.segment(nnodes*k, nnodes).noalias() += Np.transpose() * rate_xi_min_gp * _fe->getDetJ() * _q->getWeight(j);
+			}
+			// loop over all xi_kin
+			for (k = 0; k < _n_xi_Kin; k++)
+			{
+				rate_xi_kin_gp = poro(0,0) * Np * node_xi_kin_rate_values.col(k);
+				localF_xi_kin.segment(nnodes*k, nnodes).noalias() += Np.transpose() * rate_xi_kin_gp * _fe->getDetJ() * _q->getWeight(j);
+			}
+
         } // end of loop over all sampling points
 
 
