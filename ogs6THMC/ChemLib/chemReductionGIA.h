@@ -143,6 +143,21 @@ public:
 	  */
 	size_t get_n_Comp_kin(void) {return _I_kin; };
 
+    /**
+      * get the number of mobile reactions
+      */
+    size_t get_J_mob(void) { return _Jmob; };
+
+    /**
+      * get the number of sorption reactions
+      */
+    size_t get_J_sorp(void) { return _Jsorp; };
+
+    /**
+      * get the number of mineral reactions
+      */
+    size_t get_J_min(void) { return _Jmin; };
+
 	/**
       * get the length of eta_mob
       */

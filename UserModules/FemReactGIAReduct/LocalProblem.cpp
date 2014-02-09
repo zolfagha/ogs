@@ -16,7 +16,8 @@
 
 LocalProblem::LocalProblem(ogsChem::chemReductionGIA* ReductionGIA, MathLib::StepperBulischStoer<Local_ODE_Xi_immob_GIA>* sbs, Local_ODE_Xi_immob_GIA* local_ode_xi_immob_GIA)
 : _n_Comp(ReductionGIA->get_n_Comp()), _ReductionGIA(ReductionGIA), _sbs(sbs), _local_ode_xi_immob_GIA(local_ode_xi_immob_GIA), _I_mob(_ReductionGIA->get_n_Comp_mob()), _I_sorp(_ReductionGIA->get_n_Comp_sorb()), _I_min(_ReductionGIA->get_n_Comp_min()), _I_kin(_ReductionGIA->get_n_Comp_kin())
-	, _n_xi_Kin_bar(_ReductionGIA->get_n_xi_Kin_bar())
+    , _J_mob(_ReductionGIA->get_J_mob()), _J_sorp(_ReductionGIA->get_J_sorp()), _J_min(_ReductionGIA->get_J_min())
+    , _n_xi_Kin_bar(_ReductionGIA->get_n_xi_Kin_bar())
 	, _n_xi_Mob(_ReductionGIA->get_n_xi_Mob()), _n_eta(_ReductionGIA->get_n_eta()), _n_eta_bar(_ReductionGIA->get_n_eta_bar()), _n_xi_Sorp_tilde(_ReductionGIA->get_n_xi_Sorp_tilde()), _n_xi_Min_tilde(_ReductionGIA->get_n_xi_Min_tilde())
     , _n_xi_Sorp(_ReductionGIA->get_n_xi_Sorp()), _n_xi_Min(_ReductionGIA->get_n_xi_Min()), _n_xi_Sorp_bar_li(_ReductionGIA->get_n_xi_Sorp_bar_li()), _n_xi_Sorp_bar_ld(_ReductionGIA->get_n_xi_Sorp_bar_ld()), _n_xi_Kin(_ReductionGIA->get_n_xi_Kin())
 	, _mat_c_mob_2_xi_mob(_ReductionGIA->get_matrix_C2Xi()), _mat_c_immob_2_xi_immob(_ReductionGIA->get_matrix_Cbar2XiBar()), _n_xi_Sorp_bar(_ReductionGIA->get_n_xi_Sorp_bar()), _mat_S1min (_ReductionGIA->get_matrix_S1min())
@@ -672,7 +673,9 @@ void LocalProblem::residual_xi_Sorp_tilde(ogsChem::LocalVector & conc_Mob,
 
 	vec_XiSorp        = _mat_c_mob_2_xi_mob * conc_Mob;
 	vec_XiSorpBarLI   = _mat_c_immob_2_xi_immob * conc_bar;
-	vec_residual.segment(_n_xi_Mob + _n_eta, _n_xi_Sorp_tilde) = - _vec_XiSorpTilde + vec_XiSorp.segment(_n_xi_Mob,_n_xi_Sorp_bar_li ) - vec_XiSorpBarLI.segment(0,_n_xi_Sorp_bar_li);
+    // HS 09.02.2014: The index of vec_residual was wrong in the next line. 
+	// vec_residual.segment(_n_xi_Mob + _n_eta, _n_xi_Sorp_tilde) = - _vec_XiSorpTilde + vec_XiSorp.segment(_n_xi_Mob,_n_xi_Sorp_bar_li ) - vec_XiSorpBarLI.segment(0,_n_xi_Sorp_bar_li);
+    vec_residual.segment(_J_mob + _n_eta, _n_xi_Sorp_tilde) = -_vec_XiSorpTilde + vec_XiSorp.segment(_n_xi_Mob, _n_xi_Sorp_bar_li) - vec_XiSorpBarLI.segment(0, _n_xi_Sorp_bar_li);
 }
 
 // Eq. 3.59

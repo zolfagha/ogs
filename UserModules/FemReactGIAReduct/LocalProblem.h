@@ -211,6 +211,11 @@ private:
       */
 	size_t _I_mob, _I_sorp, _I_min, _I_kin;
 
+    /**
+      * number of mobile, sorption and mineral reactions
+      */
+    size_t _J_mob, _J_sorp, _J_min; 
+
 	/**
 	 * number of species
 	 */
