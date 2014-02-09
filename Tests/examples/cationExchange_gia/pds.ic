@@ -87,7 +87,7 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
  $GEO_TYPE
   DOMAIN
  $DIS_TYPE
-  CONSTANT 0.0011
+  CONSTANT 1e-30
 
 #STOP
 
