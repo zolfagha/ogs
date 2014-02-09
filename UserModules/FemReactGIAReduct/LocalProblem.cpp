@@ -703,9 +703,9 @@ void LocalProblem::residual_xi_Min_tilde(ogsChem::LocalVector & conc_Mob,
 	B = vec_XiMinBar.tail(_n_xi_Sorp_bar_ld);
 
 	if (B.rows() > 0)
-		vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde, _n_xi_Min_tilde) = -_vec_XiMinTilde + A - conc_Min_bar - (_mat_Ald * B);
+        vec_residual.segment(_J_mob + _n_eta + _n_xi_Sorp_tilde, _n_xi_Min_tilde) = -_vec_XiMinTilde + A - conc_Min_bar - (_mat_Ald * B);
 	else
-		vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde, _n_xi_Min_tilde) = -_vec_XiMinTilde + A - conc_Min_bar; 
+        vec_residual.segment(_J_mob + _n_eta + _n_xi_Sorp_tilde, _n_xi_Min_tilde) = -_vec_XiMinTilde + A - conc_Min_bar;
 }
 
 // Eq. 3.60
@@ -714,7 +714,7 @@ void LocalProblem::residual_xi_Kin(ogsChem::LocalVector & conc_Mob,
 {
 	ogsChem::LocalVector conc_tmp  = ogsChem::LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
 	conc_tmp        = _mat_c_mob_2_xi_mob * conc_Mob;
-	vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde , _n_xi_Kin)   = - _vec_Xikin + conc_tmp.segment(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min, _n_xi_Kin);
+    vec_residual.segment(_J_mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde, _n_xi_Kin) = -_vec_Xikin + conc_tmp.segment(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min, _n_xi_Kin);
 }
 
 // Eq. 3.61
@@ -735,9 +735,7 @@ void LocalProblem::residual_conc_Sorp(ogsChem::LocalVector & ln_conc_Mob,
     ln_Conc.head(_I_mob + _I_sorp) 		   = ln_conc_tmp;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
     this->_activity_model->calc_activity_logC( ln_Conc, ln_activity_coeff, ln_activity );
     //End 16.12.2013
-    vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde +_n_xi_Kin, _n_xi_Sorp)  = - _logk_sorp + _mat_Ssorp.transpose() * ln_activity.head(_I_mob + _I_sorp);
-
-	//vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde +_n_xi_Kin, _n_xi_Sorp)  = - _logk_sorp + _mat_Ssorp.transpose() * ln_conc_tmp;
+    vec_residual.segment(_J_mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde +_n_xi_Kin, _n_xi_Sorp)  = - _logk_sorp + _mat_Ssorp.transpose() * ln_activity.head(_I_mob + _I_sorp);
 }
 
 // Eq. 3.62
@@ -787,7 +785,7 @@ void LocalProblem::residual_Eta_bar(ogsChem::LocalVector & conc_Sorp,
 	conc_bar.tail(_I_kin) = conc_Kin_bar;
 
 	// etabar acts as a constrain
-	vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde +  _n_xi_Kin + _n_xi_Sorp + _n_xi_Min, _n_eta_bar) 	  = - _vec_etabar + (_mat_c_immob_2_eta_immob * conc_bar);
+    vec_residual.segment(_J_mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_xi_Sorp + _n_xi_Min, _n_eta_bar) = -_vec_etabar + (_mat_c_immob_2_eta_immob * conc_bar);
 }
 
 // Eq. 3.64
@@ -806,7 +804,7 @@ void LocalProblem::residual_xi_KinBar_Eq(ogsChem::LocalVector & conc_Sorp,
 
 	conc_tmp     = _mat_c_immob_2_xi_immob * conc_bar;
 
-	vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde +  _n_xi_Kin + _n_xi_Sorp + _n_xi_Min + _n_eta_bar, _n_xi_Kin_bar)  =
+    vec_residual.segment(_J_mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_xi_Sorp + _n_xi_Min + _n_eta_bar, _n_xi_Kin_bar) =
 			- _vec_XiBarKin + conc_tmp.tail(_n_xi_Kin_bar);
 }
 
