@@ -44,7 +44,7 @@ GeoSys Reactions
  $EQUATION
    0.5 Ca + 1 X = 0.5 CaX2;  
  $EQ_CONSTANT
- 6.309573445           ; K values
+ 2,5118864315095801110850320677993           ; K values
  
 #STOP
 
