@@ -296,28 +296,22 @@ void LocalProblem::calc_residual(double dt,
 	conc_Kin_bar = vec_unknowns.tail(_I_kin); 
 
 	// Eq. 3.55
-	this->residual_conc_Mob         (ln_conc_Mob, vec_residual);
+	this->residual_conc_Mob (ln_conc_Mob, vec_residual);
     // Eq. 3.56
-    this->residual_Eta				(conc_Mob, vec_residual);
-
+    this->residual_Eta (conc_Mob, vec_residual);
+	// Eq. 3.57 - 58
     if(_n_xi_Sorp > 0)
-    {
-		// Eq. 3.57 - 58
-		this->residual_xi_Sorp_tilde	(conc_Mob, conc_Sorp, conc_Min_bar, conc_Kin_bar, vec_residual);
-		// Eq. 3.61
-		this->residual_conc_Sorp		(ln_conc_Mob, ln_conc_Sorp, vec_residual);
-    }
-    
+		this->residual_xi_Sorp_tilde(conc_Mob, conc_Sorp, conc_Min_bar, conc_Kin_bar, vec_residual);
+	// Eq. 3.59
 	if(_n_xi_Min > 0)
-    {
-		// Eq. 3.59
-		this->residual_xi_Min_tilde     (conc_Mob, conc_Sorp, conc_Min_bar, conc_Kin_bar, vec_residual);
-		// Eq. 3.62
-		this->residual_conc_Min			(ln_conc_Mob, conc_Min_bar, vec_residual, vec_AI);
-    }
-	
-    // Eq. 3.63
-	this->residual_Eta_bar              (conc_Sorp, conc_Min_bar, conc_Kin_bar, vec_residual);
+		this->residual_xi_Min_tilde(conc_Mob, conc_Sorp, conc_Min_bar, conc_Kin_bar, vec_residual);
+    // Eq. 3.61
+	if (_J_sorp > 0)
+		this->residual_conc_Sorp(ln_conc_Mob, ln_conc_Sorp, vec_residual);	
+	// Eq. 3.62
+	this->residual_conc_Min(ln_conc_Mob, conc_Min_bar, vec_residual, vec_AI);
+	// Eq. 3.63
+	this->residual_Eta_bar(conc_Sorp, conc_Min_bar, conc_Kin_bar, vec_residual);
 
     if(_n_xi_Kin != 0)
     {
