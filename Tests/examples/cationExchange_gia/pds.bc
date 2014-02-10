@@ -79,6 +79,9 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
  $DIS_TYPE
   CONSTANT 1E-30
 
+#STOP
+
+
 #BOUNDARY_CONDITION
  $PCS_TYPE
   REACT_GIA
@@ -88,9 +91,7 @@ GeoSys-BC: Boundary Conditions ------------------------------------------------
   POINT POINT0
  $DIS_TYPE
   CONSTANT 1E-30
-#STOP
-
-
+  
 2.000000228
 
 

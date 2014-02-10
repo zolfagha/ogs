@@ -9,7 +9,6 @@ GeoSys-OUT: Output ------------------------------------------------
   CaX2
   NaX
   KX
-  X
  $ELE_VALUES
   VELOCITY
  $GEO_TYPE
@@ -17,7 +16,7 @@ GeoSys-OUT: Output ------------------------------------------------
  $DAT_TYPE
   PVD
  $TIM_TYPE
-  STEPS 1
+  STEPS 10
 #STOP
 
 

@@ -22,9 +22,45 @@ GeoSys Reactions
  $TYPE
    SORP_EQ_REACT;
  $EQUATION
+   1 K + 1 NaX = 1 KX + 1 Na; 
+ $EQ_CONSTANT_LOG10
+  0.7           ; K values
+ 
+#REACTION ; 
+ $NAME
+   R2 ;
+ $TYPE
+   SORP_EQ_REACT;
+ $EQUATION
+   1 Ca + 2 NaX = 1 CaX2 + 2 Na;  
+ $EQ_CONSTANT_LOG10
+  0.8           ; K values
+ 
+#STOP
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#REACTION ; 
+ $NAME
+   R1 ;
+ $TYPE
+   SORP_EQ_REACT;
+ $EQUATION
    1 Na + 1 X = 1 NaX; 
- $EQ_CONSTANT
- 1.0           ; K values
+ $EQ_CONSTANT_LOG10
+ 0.0           ; K values
  
 #REACTION ; 
  $NAME
@@ -33,8 +69,8 @@ GeoSys Reactions
    SORP_EQ_REACT;
  $EQUATION
    1 K + 1 X = 1 KX;  
- $EQ_CONSTANT
- 5.011872336           ; K values
+ $EQ_CONSTANT_LOG10
+ 0.7           ; K values
  
 #REACTION ; 
  $NAME
@@ -43,11 +79,8 @@ GeoSys Reactions
    SORP_EQ_REACT;
  $EQUATION
    0.5 Ca + 1 X = 0.5 CaX2;  
- $EQ_CONSTANT
- 2,5118864315095801110850320677993           ; K values
- 
-#STOP
-
+ $EQ_CONSTANT_LOG10
+ 0.4           ; K values
 
 
 #REACTION ; 

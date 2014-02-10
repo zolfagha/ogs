@@ -79,6 +79,9 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
  $DIS_TYPE
   CONSTANT 5.507e-4
 
+#STOP
+
+
 #INITIAL_CONDITION
  $PCS_TYPE
   REACT_GIA
@@ -88,9 +91,6 @@ GeoSys-IC  Initial Conditions ------------------------------------------------
   DOMAIN
  $DIS_TYPE
   CONSTANT 1e-30
-
-#STOP
-
 
 #INITIAL_CONDITION
  $PCS_TYPE
