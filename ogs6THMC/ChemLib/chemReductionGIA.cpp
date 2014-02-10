@@ -183,16 +183,23 @@ void chemReductionGIA::update_reductionScheme(void)
     	//_mat_Ssorp_li = _mat_Ssorp_ast;
     	//Linear_Indep =[];
     	//Linear_Dep   =[];
-    	for (j= 0; j < _Jsorp; j++)
-    	{
-    		for (i=0; i< _I_tot; i++)
-    		{
-    			if (_mat_Ssorp_li(i,j) != _mat_Ssorp(i,j))
-    			{
-    				_mat_Ssorp_ld (i,j) = _mat_Ssorp(i,j);
-    			}
-    		}
-    	}
+		// create memory for _mat_Ssorp_ld
+		_mat_Ssorp_ld = LocalMatrix::Zero(_I_tot, _Jsorp - _mat_Ssorp_li.cols()); 
+
+		if (_mat_Ssorp_ld.cols() > 0)
+		{
+			// TODO HS: 10.02.2014: This part is not correct. 
+			for (j = 0; j < _Jsorp; j++)
+			{
+				for (i = 0; i < _I_tot; i++)
+				{
+					if (_mat_Ssorp_li(i, j) != _mat_Ssorp(i, j))
+					{
+						_mat_Ssorp_ld(i, j) = _mat_Ssorp(i, j);
+					}
+				}
+			}
+		}
 
     	_mat_S1sorp_li.setZero();   //clean the allocated memory
     	_mat_S1sorp_li = _mat_Ssorp_li.topRows(_I_mob);
