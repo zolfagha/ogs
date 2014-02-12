@@ -669,6 +669,12 @@ void chemReductionGIA::EtaXi2Conc_JH_NOCUTOFF( ogsChem::LocalVector &local_eta,
 
 		local_conc.bottomRows(_I_NMin_bar + _I_min) = local_c_immob;
 
+//	    for (int i=0; i < local_conc.rows(); i++)  //RZ 4Feb2014 a safty control to avoid absolute zero values.
+//	    {
+//	        if ( local_conc(i) <= 0.0 )
+//	            local_conc(i) = 1.0e-90;
+//	    }
+
 }
 
 

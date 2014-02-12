@@ -450,7 +450,7 @@ int SingleStepGIAReduction<T_USER_FUNCTION_DATA, T_USER_FEM_PROBLEM, T_USER_LINE
 	}
 
 	//solve local problem
-	_function_data->calc_nodal_local_problem(t_n1.getTimeStepSize(), 1.0E-12, 1.0E-16, 50);
+	_function_data->calc_nodal_local_problem(t_n1.getTimeStepSize(), 1.0E-12, 1.0E-20, 200);
 	// calculate the reaction rates on each node
 	// _function_data->update_node_GIA_reaction_rates();
 
