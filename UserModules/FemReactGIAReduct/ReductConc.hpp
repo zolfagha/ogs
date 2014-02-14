@@ -685,11 +685,11 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 									         mat_S1_ast,
 									         optimalXi,
 									         node_idx);
-
+			//RZ: 14Feb2014 cation exchange benchmkar is not converging if xi global is modified here. TODO: Do the cut off for xi global in a seperate function.
 			//update the xi global value with the optimized values 4-Nov-2013
-			loc_xi_global.head( this->_n_xi_Sorp_tilde) 						 = loc_XiSorpTilde;
-			loc_xi_global.segment( this->_n_xi_Sorp_tilde,this->_n_xi_Min_tilde) = loc_XiMinTilde;
-			loc_xi_global.tail( this->_n_xi_Kin) 						   		 = loc_XiKin;
+//			loc_xi_global.head( this->_n_xi_Sorp_tilde) 						 = loc_XiSorpTilde;
+//			loc_xi_global.segment( this->_n_xi_Sorp_tilde,this->_n_xi_Min_tilde) = loc_XiMinTilde;
+//			loc_xi_global.tail( this->_n_xi_Kin) 						   		 = loc_XiKin;
 
 
 
@@ -780,10 +780,12 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 //				}
 //			}
 
-			//update the xi global value after with the optimized values 4-Nov-2013
-			for (i=0; i < _n_xi_global; i++)
-				_xi_global_cur[i]->setValue(node_idx, loc_xi_global[i]);
-			//end of updating xi global
+
+			//RZ: 14Feb2014 cation exchange benchmkar is not converging if xi global is modified here. TODO: Do the cut off for xi global in a seperate function.
+//			//update the xi global value after with the optimized values 4-Nov-2013
+//			for (i=0; i < _n_xi_global; i++)
+//				_xi_global_cur[i]->setValue(node_idx, loc_xi_global[i]);
+//			//end of updating xi global
 
 			// collect the xi_local_new
 			for (i=0; i < _n_xi_local; i++)
