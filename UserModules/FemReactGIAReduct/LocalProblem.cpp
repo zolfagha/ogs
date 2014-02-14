@@ -731,8 +731,18 @@ void LocalProblem::residual_conc_Sorp(ogsChem::LocalVector & ln_conc_Mob,
     ogsChem::LocalVector ln_activity       = ogsChem::LocalVector::Zero( _n_Comp    );
     ogsChem::LocalVector ln_activity_coeff = ogsChem::LocalVector::Zero( _n_Comp );
     ogsChem::LocalVector ln_Conc 		   = ogsChem::LocalVector::Zero( _n_Comp );
-    ln_Conc.head(_I_mob + _I_sorp) 		   = ln_conc_tmp;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
+    //RZ 14Feb2014 temp disable to calculate cation exchange benchmark.
+    //ln_Conc.head(_I_mob + _I_sorp) 		   = ln_conc_tmp;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
+    //this->_activity_model->calc_activity_logC( ln_Conc, ln_activity_coeff, ln_activity );
+
+    //RZ 13Feb14 a quick and dirty way of implementing Gapon convention for calculating activity of sorbed species for cation exchange benchmark.
+    //TODO: implement the different conventions directly in the activity models later.
+    ln_Conc.head(_I_mob ) 		   = ln_conc_Mob;  // the log concentrations of immobile nonmineral and linear conc of minerals are also included but not used.
     this->_activity_model->calc_activity_logC( ln_Conc, ln_activity_coeff, ln_activity );
+    for(size_t i = 0; i < _I_sorp; i++){  //dg 14Feb2014 for sorption reaction
+    	ln_activity(_I_mob +i) = ln_conc_Sorp(i) + 6.812445099;} //ln(0.0011)
+    //End of RZ 13Feb14 a quick and dirty way of implementing Gapon convention for calculating activity of sorbed species for cation exchange benchmark.
+
     //End 16.12.2013
     vec_residual.segment(_J_mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde +_n_xi_Kin, _n_xi_Sorp)  = - _logk_sorp + _mat_Ssorp.transpose() * ln_activity.head(_I_mob + _I_sorp);
 }
