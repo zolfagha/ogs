@@ -70,7 +70,7 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 	_vec_XiSorpTilde    = vec_xi_global.head(_n_xi_Sorp_tilde);
 	_vec_XiMinTilde     = vec_xi_global.segment(_n_xi_Sorp_tilde, _n_xi_Min_tilde);
 	_vec_Xikin          = vec_xi_global.tail(_n_xi_Kin);
-	_vec_XiBarKin       = vec_xi_local.tail(_n_xi_Kin_bar);
+	//_vec_XiBarKin       = vec_xi_local.tail(_n_xi_Kin_bar);
 	_vec_XiBarKin_old   = vec_xi_bar_kin_old;
 
     // start solving the system
@@ -93,10 +93,11 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 #endif
 
 	// update the value of xikinbar in the vector of unknowns(x_new)
-	if (_n_xi_Kin_bar > 0)
-		this->ODE_solver(dt, x, _vec_XiBarKin, _vec_XiBarKin_old);
+	//if (_n_xi_Kin_bar > 0)
+	//	this->ODE_solver(dt, x, _vec_XiBarKin, _vec_XiBarKin_old);
     // evaluate the residual
-	this->calc_residual(dt, x, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin, vec_AI);
+	//this->calc_residual(dt, x, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin, vec_AI);
+    this->calc_residual(dt, x, _vec_XiBarKin_old, vec_residual, vec_AI);
 
     // evaluate norm of residual vector
     d_norm = vec_residual.norm();
@@ -113,7 +114,8 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 	while ((iter < max_iter) && (d_norm > iter_tol) && (dx.norm() > rel_tol )){ //RZ: 4.12.2013 // HS 2014Jan14
 
         // form Jacobian matrix
-		this->calc_Jacobian(dt, x, vec_residual, _vec_XiBarKin, vec_AI);
+		//this->calc_Jacobian(dt, x, vec_residual, _vec_XiBarKin, vec_AI);
+		this->calc_Jacobian(dt, x, vec_residual, vec_AI);
 
 #ifdef _DEBUG
 	// debugging--------------------------
@@ -153,10 +155,11 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 	// end of debugging-------------------
 #endif
 		// update the value of xikinbar in the vector of unknowns(x_new)
-		if (_n_xi_Kin_bar > 0)
-			this->ODE_solver(dt, x_new, _vec_XiBarKin, _vec_XiBarKin_old);
+		//if (_n_xi_Kin_bar > 0)
+		//	this->ODE_solver(dt, x_new, _vec_XiBarKin, _vec_XiBarKin_old);
         // evaluate residual with x_new
-		this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin, vec_AI);
+		//this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin, vec_AI);
+        this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, vec_AI);
 
 
 #ifdef _DEBUG
@@ -192,11 +195,12 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 				this->update_minerals_conc_AI( x_new, vec_AI );
 
             // update the value of xikinbar in the vector of unknowns(x_new)
-			if (_n_xi_Kin_bar > 0)
-			this->ODE_solver(dt, x_new, _vec_XiBarKin, _vec_XiBarKin_old);
+			//if (_n_xi_Kin_bar > 0)
+			//this->ODE_solver(dt, x_new, _vec_XiBarKin, _vec_XiBarKin_old);
 
 			// evaluate residual with x_new
-			this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin, vec_AI);
+			//this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, _vec_XiBarKin, vec_AI);
+            this->calc_residual(dt, x_new, _vec_XiBarKin_old, vec_residual, vec_AI);
 
 		#ifdef _DEBUG
         	// std::cout << "vec_residual: \n";
