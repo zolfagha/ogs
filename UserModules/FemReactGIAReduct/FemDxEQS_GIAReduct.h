@@ -354,10 +354,6 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::GlobalJacobianAssemble
     										   loc_cur_xi_Kin,
     										   local_xi_Kin_bar,
     										   vec_conc);
-//    	    for(size_t idx = 0; idx < _n_Comp; idx++){  //dg 7Nov2013
-//    	    	if(vec_conc(idx) <= 0.0)
-//    	    		vec_conc(idx) = 1.0E-90;}
-
 
 			tmp_vec_conc = vec_conc; // just initialize memory.
 
@@ -674,9 +670,6 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 		    _fe->integrateDWxDN(j, dispersion_diffusion, localDispersion);
 		    _fe->integrateWxDN(j, v2, localAdvection);
 		}  // end of for loop over j
-
-        //localAdvection.setZero(); //switch off advection
-		 //localDispersion.setZero(); // switch off dispersion
 
 		localK = localDispersion + localAdvection;
 		
