@@ -594,7 +594,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 	loc_XiKin					= LocalVector::Zero( _n_xi_Kin);
 	loc_XiBarKin				= LocalVector::Zero( _n_xi_Kin_bar);
 	loc_XiBarKin_old			= LocalVector::Zero( _n_xi_Kin_bar);
-	vec_unknowns				= LocalVector::Zero(_n_Comp ); 
+	vec_unknowns				= LocalVector::Zero(_n_Comp + _n_xi_Kin_bar);
 
 	vec_conc            		= LocalVector::Zero(_n_Comp);
 	vec_conc_Mob                = LocalVector::Zero(_I_mob);
@@ -688,9 +688,12 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			//RZ: 14Feb2014 cation exchange benchmkar is not converging if xi global is modified here. TODO: Do the cut off for xi global in a seperate function.
 			//update the xi global value with the optimized values 4-Nov-2013
 //			loc_xi_global.head( this->_n_xi_Sorp_tilde) 						 = loc_XiSorpTilde;
-//			loc_xi_global.segment( this->_n_xi_Sorp_tilde,this->_n_xi_Min_tilde) = loc_XiMinTilde;
+			loc_xi_global.segment( this->_n_xi_Sorp_tilde,this->_n_xi_Min_tilde) = loc_XiMinTilde;
 //			loc_xi_global.tail( this->_n_xi_Kin) 						   		 = loc_XiKin;
 
+		    for(i = 0; i < _I_sorp; i++){  //dg 14Feb2014 for sorption reaction
+		    	if(loc_conc(_I_mob + i) <= 0.0)
+		    		loc_conc(_I_mob +i) = 1.0E-99;}
 
 
 
@@ -712,7 +715,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			vec_unknowns.head(_I_mob) = ln_conc_Mob;  // ln scale
 			vec_unknowns.segment(_I_mob, _I_sorp) = ln_conc_Sorp;  // ln scale
 			vec_unknowns.segment(_I_mob + _I_sorp, _I_min) = vec_conc_Min;  // linear scale
-			vec_unknowns.tail(_I_kin) = vec_conc_Kin;  // linear scale
+			vec_unknowns.segment(_I_mob + _I_sorp + _I_min, _I_kin) = loc_XiBarKin;  // linear scale
 
 			//RZ:DB
 //		    for(size_t ij = 0; ij < _n_Comp; ij++) //dg 7Nov2013
@@ -740,14 +743,14 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			ln_conc_Mob  = vec_unknowns.head(_I_mob);
 			ln_conc_Sorp = vec_unknowns.segment(_I_mob, _I_sorp); 
 			vec_conc_Min = vec_unknowns.segment(_I_mob + _I_sorp, _I_min); 
-			vec_conc_Kin = vec_unknowns.tail(_I_kin); 
+			vec_conc_Kin = vec_unknowns.segment(_I_mob + _I_sorp + _I_min, _I_kin);
 			_pSolve->cal_exp_conc_vec(_I_mob, ln_conc_Mob, vec_conc_Mob);
 			_pSolve->cal_exp_conc_vec(_I_sorp, ln_conc_Sorp, vec_conc_Sorp);
 
 			vec_conc.head(_I_mob) = vec_conc_Mob; 
 			vec_conc.segment(_I_mob, _I_sorp) = vec_conc_Sorp; 
 			vec_conc.segment(_I_mob + _I_sorp, _I_min) = vec_conc_Min; 
-			vec_conc.tail(_I_kin) = vec_conc_Kin; 			
+			vec_conc.segment(_I_mob + _I_sorp + _I_min, _I_kin) = vec_conc_Kin;
 
 			loc_xi_mobile     = _mat_c_mob_2_xi_mob * vec_conc_Mob;
 		    vec_xi_mob        =  loc_xi_mobile.head(_n_xi_Mob);
@@ -756,7 +759,8 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 		    vec_XiSorpBar     = loc_xi_immobile.head(_n_xi_Sorp_bar);
 			vec_XiMinBar      = loc_xi_immobile.segment(_n_xi_Sorp_bar, _n_xi_Min_bar); 
 			// directly take the value from ODE solution. 
-			vec_XiBarKin      = _pSolve->get_vec_XiBarKin();
+			//vec_XiBarKin      = _pSolve->get_vec_XiBarKin();
+			vec_XiBarKin      = vec_conc.tail(_n_xi_Kin_bar);
 
 			// update the xi_local value. 
 		    loc_xi_local_new.head   (_n_xi_Mob) 								 = vec_xi_mob;
@@ -780,12 +784,10 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 //				}
 //			}
 
-
-			//RZ: 14Feb2014 cation exchange benchmkar is not converging if xi global is modified here. TODO: Do the cut off for xi global in a seperate function.
-//			//update the xi global value after with the optimized values 4-Nov-2013
-//			for (i=0; i < _n_xi_global; i++)
-//				_xi_global_cur[i]->setValue(node_idx, loc_xi_global[i]);
-//			//end of updating xi global
+			//update the xi global value after with the optimized values 4-Nov-2013
+			for (i=0; i < _n_xi_global; i++)
+				_xi_global_cur[i]->setValue(node_idx, loc_xi_global[i]);
+			//end of updating xi global
 
 			// collect the xi_local_new
 			for (i=0; i < _n_xi_local; i++)
