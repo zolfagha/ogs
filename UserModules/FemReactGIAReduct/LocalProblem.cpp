@@ -340,14 +340,18 @@ void LocalProblem::calc_residual(double dt,
 
 }  // end of function calc_residual
 
+//void LocalProblem::calc_Jacobian(double dt,
+//								 ogsChem::LocalVector & vec_x,
+//							     ogsChem::LocalVector & vec_residual,
+//							     ogsChem::LocalVector & vec_Xi_Kin_bar,
+//							     ogsChem::LocalVector & vec_AI)
 void LocalProblem::calc_Jacobian(double dt,
 								 ogsChem::LocalVector & vec_x,
 							     ogsChem::LocalVector & vec_residual,
-							     ogsChem::LocalVector & vec_Xi_Kin_bar,
 							     ogsChem::LocalVector & vec_AI)
 {
-	const double delta_xi = 1.0e-8;  //calcite example
-	//const double delta_xi = 1.0e-6;    //monod2d
+	//const double delta_xi = 1.0e-8;  //calcite example
+	const double delta_xi = 1.0e-6;    //monod2d
     int i;
     ogsChem::LocalVector vec_x_incremented, vec_residual_incremented;
     vec_residual_incremented = vec_residual;
@@ -360,14 +364,14 @@ void LocalProblem::calc_Jacobian(double dt,
 		if (std::fabs(vec_x(i)) > 1.0e-16)
 		{
 			vec_x_incremented(i) += delta_xi * std::fabs(vec_x(i));
-			this->calc_residual(dt, vec_x_incremented, _vec_XiBarKin_old, vec_residual_incremented, vec_Xi_Kin_bar, vec_AI);
+			this->calc_residual(dt, vec_x_incremented, _vec_XiBarKin_old, vec_residual_incremented, vec_AI);
 			_mat_Jacobian.col(i) = (vec_residual_incremented - vec_residual) / (delta_xi * std::fabs(vec_x(i)));
 
 		}
 		else
 		{
 			vec_x_incremented(i) += delta_xi;
-			this->calc_residual(dt, vec_x_incremented, _vec_XiBarKin_old, vec_residual_incremented, vec_Xi_Kin_bar, vec_AI);
+			this->calc_residual(dt, vec_x_incremented, _vec_XiBarKin_old, vec_residual_incremented, vec_AI);
 			_mat_Jacobian.col(i) = (vec_residual_incremented - vec_residual ) / delta_xi;
 		}
 	}
