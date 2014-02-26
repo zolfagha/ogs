@@ -817,6 +817,7 @@ void LocalProblem::residual_Eta_bar(ogsChem::LocalVector & conc_Sorp,
 void LocalProblem::residual_xi_KinBar_Eq(ogsChem::LocalVector & conc_Sorp,
 										 ogsChem::LocalVector & conc_Min_bar,
 										 ogsChem::LocalVector & conc_Kin_bar,
+										 ogsChem::LocalVector & Xi_Kin_bar,
 										 ogsChem::LocalVector & vec_residual)
 {
 
@@ -830,7 +831,7 @@ void LocalProblem::residual_xi_KinBar_Eq(ogsChem::LocalVector & conc_Sorp,
 	conc_tmp     = _mat_c_immob_2_xi_immob * conc_bar;
 
     vec_residual.segment(_J_mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_xi_Sorp + _n_xi_Min + _n_eta_bar, _n_xi_Kin_bar) =
-			- _vec_XiBarKin + conc_tmp.tail(_n_xi_Kin_bar);
+			- Xi_Kin_bar + conc_tmp.tail(_n_xi_Kin_bar);
 }
 
 // HS disabled. 
