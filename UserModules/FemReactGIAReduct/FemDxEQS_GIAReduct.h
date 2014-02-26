@@ -632,7 +632,7 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>
 	    localDispersion.setZero(localK.rows(), localK.cols());
 	    localAdvection.setZero (localK.rows(), localK.cols());
 
-	    cmp_mol_diffusion = 1.0E-9; //RZ: constant for all species.
+	    cmp_mol_diffusion = 0.0E-9; //RZ: constant for all species.
 	    // _cmp->molecular_diffusion->eval(0, cmp_mol_diffusion);
 
 	    _q = _fe->getIntegrationMethod();
