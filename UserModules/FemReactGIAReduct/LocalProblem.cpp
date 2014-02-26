@@ -277,18 +277,24 @@ void LocalProblem::ODE_solver(double dt,
 }  // end of function ode solver
 
 
+//void LocalProblem::calc_residual(double dt,
+//								 ogsChem::LocalVector & vec_unknowns,
+//								 ogsChem::LocalVector & vec_xi_Kin_bar_old,
+//								 ogsChem::LocalVector & vec_residual,
+//								 ogsChem::LocalVector & vec_Xi_Kin_bar,
+//								 ogsChem::LocalVector & vec_AI)
 void LocalProblem::calc_residual(double dt,
 								 ogsChem::LocalVector & vec_unknowns,
 								 ogsChem::LocalVector & vec_xi_Kin_bar_old, 
 								 ogsChem::LocalVector & vec_residual,
-								 ogsChem::LocalVector & vec_Xi_Kin_bar,
 								 ogsChem::LocalVector & vec_AI)
 {
-	ogsChem::LocalVector ln_conc_Mob, ln_conc_Sorp, conc_Mob, conc_Sorp, conc_Min_bar, conc_Kin_bar, conc_bar;
+	ogsChem::LocalVector ln_conc_Mob, ln_conc_Sorp, conc_Mob, conc_Sorp, conc_Min_bar, conc_Kin_bar, conc_bar, Xi_Kin_bar;
 	conc_Mob     = ogsChem::LocalVector::Zero(_I_mob);
 	conc_Sorp    = ogsChem::LocalVector::Zero(_I_sorp);
 	conc_Min_bar = ogsChem::LocalVector::Zero(_I_min);
 	conc_Kin_bar = ogsChem::LocalVector::Zero(_I_kin);
+	Xi_Kin_bar   = ogsChem::LocalVector::Zero( _n_xi_Kin_bar);
 
 	ln_conc_Mob = vec_unknowns.head(_I_mob);
 	ln_conc_Sorp = vec_unknowns.segment(_I_mob, _I_sorp);
@@ -297,8 +303,9 @@ void LocalProblem::calc_residual(double dt,
 	// convert the ln sorp conc to sorp conc
 	this->cal_exp_conc_vec(_I_sorp, ln_conc_Sorp, conc_Sorp);
 	conc_Min_bar = vec_unknowns.segment(_I_mob + _I_sorp, _I_min);
-	conc_Kin_bar = vec_unknowns.tail(_I_kin); 
-
+	//conc_Kin_bar = vec_unknowns.tail(_I_kin);
+	conc_Kin_bar = vec_unknowns.segment(_I_mob + _I_sorp + _I_min, _I_kin);
+	Xi_Kin_bar   =  vec_unknowns.tail(_n_xi_Kin_bar);
 	// Eq. 3.55
 	this->residual_conc_Mob (ln_conc_Mob, vec_residual);
     // Eq. 3.56
@@ -323,11 +330,12 @@ void LocalProblem::calc_residual(double dt,
     	this->residual_xi_Kin			(conc_Mob, vec_residual);
 
 		// Eq. 3.64
-    	this->residual_xi_KinBar_Eq		(conc_Sorp, conc_Min_bar, conc_Kin_bar, vec_residual); //RZ: solve xi kin bar using ode solver after solving local problem.
+    	//this->residual_xi_KinBar_Eq		(conc_Sorp, conc_Min_bar, conc_Kin_bar, vec_residual); //RZ: solve xi kin bar using ode solver after solving local problem.
+    	this->residual_xi_KinBar_Eq		(conc_Sorp, conc_Min_bar, conc_Kin_bar, Xi_Kin_bar, vec_residual);
     	
 		// Eq. 3.65
 		// RZ: solve xi kin bar using ode solver after solving local problem.
-    	//this->residual_xi_KinBar_Kin	(dt,conc_Mob, conc_NonMin_bar, conc_Min_bar, Xi_Kin_bar, vec_residual);  
+    	this->residual_xi_KinBar_Kin	(dt,conc_Mob, conc_Sorp, conc_Kin_bar, conc_Min_bar, Xi_Kin_bar, vec_residual);
     }
 
 }  // end of function calc_residual
