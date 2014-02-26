@@ -59,10 +59,10 @@ void LocalProblem::solve_LocalProblem_Newton_LineSearch(std::size_t & node_idx,
 
 	// HS: the number of unknowns in the local problem equals
 	// to the number of chemical components
-    x_new          = ogsChem::LocalVector::Zero( _n_Comp );
-	dx             = ogsChem::LocalVector::Ones( _n_Comp );
-	_mat_Jacobian  = ogsChem::LocalMatrix::Zero( _n_Comp, _n_Comp);
-	vec_residual   = ogsChem::LocalVector::Zero( _n_Comp );
+    x_new          = ogsChem::LocalVector::Zero( _n_Comp + _n_xi_Kin_bar);
+	dx             = ogsChem::LocalVector::Ones( _n_Comp + _n_xi_Kin_bar);
+	_mat_Jacobian  = ogsChem::LocalMatrix::Zero( _n_Comp + _n_xi_Kin_bar, _n_Comp +_n_xi_Kin_bar);
+	vec_residual   = ogsChem::LocalVector::Zero( _n_Comp + _n_xi_Kin_bar);
 
 	// vec_tot_mass_constrain contains xi global and eta mobile which acts as a total mass constrain for the local problem.
 	_vec_eta            = vec_eta;
