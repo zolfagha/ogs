@@ -836,28 +836,32 @@ void LocalProblem::residual_xi_KinBar_Eq(ogsChem::LocalVector & conc_Sorp,
 
 // HS disabled. 
 /*
+ * RZ enabled. using first order backward Euler instead of ODE solver.
+ */
 // Eq. 3.65
-void LocalProblem::residual_xi_KinBar_Kin(double deltaT,
-										  ogsChem::LocalVector & conc_Mob,
-										  ogsChem::LocalVector & conc_NonMin_bar,
-										  ogsChem::LocalVector & conc_Min_bar,
-										  ogsChem::LocalVector & Xi_Kin_bar,
-										  ogsChem::LocalVector & vec_residual)
+void LocalProblem::residual_xi_KinBar_Kin( double deltaT,
+										   ogsChem::LocalVector & conc_Mob,
+										   ogsChem::LocalVector & conc_Sorp,
+										   ogsChem::LocalVector & conc_Kin_bar,
+										   ogsChem::LocalVector & conc_Min_bar,
+										   ogsChem::LocalVector & Xi_Kin_bar,
+										   ogsChem::LocalVector & vec_residual)
 {
-	ogsChem::LocalVector  conc 		   = ogsChem::LocalVector::Zero(_n_Comp);
+	ogsChem::LocalVector  vec_conc 		   = ogsChem::LocalVector::Zero(_n_Comp);
 	ogsChem::LocalVector  vec_rateKin  = ogsChem::LocalVector::Zero(_J_tot_kin);
 	ogsChem::LocalVector  temp_vec1    = ogsChem::LocalVector::Zero(_n_xi_Kin_bar);
 	ogsChem::LocalVector  temp_vec2    = ogsChem::LocalVector::Zero(_n_xi_Kin_bar);
 	ogsChem::LocalVector  temp_vec3    = ogsChem::LocalVector::Zero(_n_xi_Kin_bar);
 
 	//TODO get theta_water_content
-	double theta_water_content (0.5);  //monod2d example
+	double theta_water_content (1.0);  //RZ keep it one always. //monod2d example
 
-	conc.head	(_I_mob)  					 = conc_Mob;
-	conc.segment(_I_mob, _I_NMin_bar) 		 = conc_NonMin_bar;
-	conc.tail	(_n_xi_Min_bar) 			 = conc_Min_bar;
+	vec_conc.head(_I_mob) = conc_Mob;
+	vec_conc.segment(_I_mob, _I_sorp) = conc_Sorp;
+	vec_conc.segment(_I_mob + _I_sorp, _I_min) = conc_Min_bar;
+	vec_conc.tail(_I_kin) = conc_Kin_bar;
 
-	this->reaction_rates(conc, vec_rateKin);
+	this->reaction_rates(vec_conc, vec_rateKin);
 
 	temp_vec1 = ((theta_water_content * Xi_Kin_bar - theta_water_content * _vec_XiBarKin_old) / deltaT);
 	temp_vec2 = (theta_water_content * _mat_A2kin * vec_rateKin);
@@ -865,7 +869,7 @@ void LocalProblem::residual_xi_KinBar_Kin(double deltaT,
 	vec_residual.segment(_n_xi_Mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde +  _n_xi_Kin + _n_xi_Sorp + _n_xi_Min + _n_eta_bar + _n_xi_Kin_bar, _n_xi_Kin_bar) = temp_vec3;
 
 }
-*/
+
 
 //problem specific reaction rates
 void LocalProblem::reaction_rates(ogsChem::LocalVector & conc,
