@@ -61,11 +61,16 @@ public:
 	  *  output:4) vec_residual is the calculated residual values;
 	  *         5) vec_Xi_Kin_bar is the xi_Kin_bar values after the ODE calculation. 
       */
+//    void calc_residual(double dt,
+//                       ogsChem::LocalVector & vec_unknowns,
+//					   ogsChem::LocalVector & vec_xi_Kin_bar_old,
+//					   ogsChem::LocalVector & vec_residual,
+//					   ogsChem::LocalVector & vec_Xi_Kin_bar,
+//					   ogsChem::LocalVector & vec_AI);
     void calc_residual(double dt, 
                        ogsChem::LocalVector & vec_unknowns,
 					   ogsChem::LocalVector & vec_xi_Kin_bar_old,
 					   ogsChem::LocalVector & vec_residual,
-					   ogsChem::LocalVector & vec_Xi_Kin_bar,
 					   ogsChem::LocalVector & vec_AI);
     
     /**
@@ -74,10 +79,15 @@ public:
       * the total concentration constrain of the basis species, 
       * and an already calculated residual vector
       */
+//    void calc_Jacobian( double dt,
+//    					ogsChem::LocalVector & vec_unknowns,
+//    					ogsChem::LocalVector & vec_residual,
+//    					ogsChem::LocalVector & vec_Xi_Kin_bar,
+//    					ogsChem::LocalVector & vec_AI);
+
     void calc_Jacobian( double dt,
     					ogsChem::LocalVector & vec_unknowns,
     					ogsChem::LocalVector & vec_residual,
-    					ogsChem::LocalVector & vec_Xi_Kin_bar,
     					ogsChem::LocalVector & vec_AI);
 
     /**
@@ -320,19 +330,22 @@ private:
 	void residual_xi_KinBar_Eq      (ogsChem::LocalVector & conc_Sorp,
                                      ogsChem::LocalVector & conc_Min_bar,
 									 ogsChem::LocalVector & conc_Kin_bar,
+									 ogsChem::LocalVector & Xi_Kin_bar,  //RZ
 									 ogsChem::LocalVector & vec_residual);
 
 	// HS: using ODE for kinetic part.
 	// therefore disable that
 	/*
+	 * RZ: using 1st oder backward euler.
+	 */
     // Eq. 3.65
     void residual_xi_KinBar_Kin	(   double deltaT,
     								ogsChem::LocalVector & conc_Mob,
-    								ogsChem::LocalVector & conc_NonMin_bar,
+    								ogsChem::LocalVector & conc_Sorp,
+    								ogsChem::LocalVector & conc_Kin_bar,
     								 ogsChem::LocalVector & conc_Min_bar,
     								 ogsChem::LocalVector & Xi_Kin_bar,
     								 ogsChem::LocalVector & vec_residual);
-	*/
 
 };
 
