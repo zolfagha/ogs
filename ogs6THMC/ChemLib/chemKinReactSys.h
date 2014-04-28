@@ -133,13 +133,16 @@ private:
 			case ogsChem::MIN_PHASE_COMP:
 				_I_sec_min++;
 				break;
+			case ogsChem::KIN_PHASE_COMP: //RZ 25April2014 immobile kinetic species
+				_I_kin++;
+				break;
 			default:
 				_I_sec_min++;
 				break;
 			}
 		}
 
-		_I = _I_mob + _I_sec_sorp + _I_sec_min;
+		_I = _I_mob + _I_sec_sorp + _I_sec_min + _I_kin; 	//RZ 25April2014 _I_kin is added
 	};
 
     void buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemComp*> & map_chemComp, 
@@ -205,7 +208,7 @@ private:
       */
     size_t _I, _I_mob, _J_kin;
 
-	size_t _I_sec_mob, _I_sec_sorp, _I_sec_min; 
+	size_t _I_sec_mob, _I_sec_sorp, _I_sec_min, _I_kin;
 
     /**
       * pointer to the Local_ODE_KinReact
