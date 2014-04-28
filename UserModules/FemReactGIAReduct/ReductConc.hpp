@@ -718,7 +718,8 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			vec_unknowns.head(_I_mob) = ln_conc_Mob;  // ln scale
 			vec_unknowns.segment(_I_mob, _I_sorp) = ln_conc_Sorp;  // ln scale
 			vec_unknowns.segment(_I_mob + _I_sorp, _I_min) = vec_conc_Min;  // linear scale
-			vec_unknowns.segment(_I_mob + _I_sorp + _I_min, _I_kin) = loc_XiBarKin;  // linear scale
+			vec_unknowns.segment(_I_mob + _I_sorp + _I_min, _I_kin) = ln_conc_Kin;  // ln scale
+			vec_unknowns.segment(_I_mob + _I_sorp + _I_min + _I_kin, _I_kin) = loc_XiBarKin;  // linear scale
 
 			//RZ:DB
 //		    for(size_t ij = 0; ij < _n_Comp; ij++) //dg 7Nov2013
