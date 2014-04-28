@@ -212,6 +212,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
     // initialize the local vector
     //current xi global
     loc_cur_xi_global               = MathLib::LocalVector::Zero( _n_xi_global );
+    loc_pre_xi_global               = MathLib::LocalVector::Zero( _n_xi_global );
     loc_cur_xi_Sorp_tilde           = MathLib::LocalVector::Zero( _n_xi_Sorp_tilde );
     loc_cur_xi_Min_tilde            = MathLib::LocalVector::Zero( _n_xi_Min_tilde );
     loc_cur_xi_Sorp                 = MathLib::LocalVector::Zero( _n_xi_Sorp);
@@ -220,6 +221,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
 
     //current xi local
     loc_cur_xi_local                = MathLib::LocalVector::Zero( _n_xi_local );
+    MathLib::LocalVector loc_pre_xi_local                = MathLib::LocalVector::Zero( _n_xi_local );
     loc_cur_xi_Sorp_bar             = MathLib::LocalVector::Zero( _n_xi_Sorp_bar );
     loc_cur_xi_Min_bar              = MathLib::LocalVector::Zero( _n_xi_Min_bar );
     loc_cur_xi_Sorp_bar_li          = MathLib::LocalVector::Zero(_n_xi_Sorp_bar_li );
