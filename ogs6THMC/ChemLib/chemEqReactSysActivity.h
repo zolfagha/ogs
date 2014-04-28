@@ -537,7 +537,7 @@ private:
 		    case ogsChem::AQ_PHASE_COMP: 
 			    _I_mob++; 
 			    break;
-		    case ogsChem::SORPTION_COMP: 
+		    case ogsChem::SORP_PHASE_COMP:
 			    _I_sec_sorp++;
 			    break;
 		    case ogsChem::MIN_PHASE_COMP: 
