@@ -580,7 +580,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 	MathLib::LocalVector vec_conc_Mob, vec_conc_Sorp, vec_conc_Min, vec_conc_Kin, vec_conc_updated;
 	// HS: notice that only concentrations of mob and sorp components 
 	// will be converted to ln scale. 
-	MathLib::LocalVector ln_conc_Mob, ln_conc_Sorp; 
+	MathLib::LocalVector ln_conc_Mob, ln_conc_Sorp, ln_conc_Kin;
 
 	// initialize the local vector
 	loc_eta        				= LocalVector::Zero( _n_eta );
@@ -605,6 +605,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 
 	ln_conc_Mob                 = LocalVector::Zero(_I_mob);
 	ln_conc_Sorp                = LocalVector::Zero(_I_sorp);
+	ln_conc_Kin                = LocalVector::Zero(_I_kin);
 
 	loc_xi_mobile		= LocalVector::Zero(_n_xi_Mob + _n_xi_Sorp + _n_xi_Min + _n_xi_Kin);
 	loc_xi_immobile     = LocalVector::Zero(_n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
@@ -708,6 +709,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			vec_conc_Kin     = loc_conc.tail(_I_kin); 
 			ln_conc_Mob.setZero();
 			ln_conc_Sorp.setZero(); 
+			ln_conc_Kin.setZero();
 		    // convert the ln mobile conc to mobile conc
 			_pSolve->cal_ln_conc_vec(_I_mob,  vec_conc_Mob,  ln_conc_Mob);
 			_pSolve->cal_ln_conc_vec(_I_sorp, vec_conc_Sorp, ln_conc_Sorp);
