@@ -902,7 +902,7 @@ void LocalProblem::reaction_rates(ogsChem::LocalVector & conc,
 void LocalProblem::calculate_AI(ogsChem::LocalVector & vec_unknowns,
 								ogsChem::LocalVector & vec_AI)
 {
-    double phi = 0.0;
+    double cbarmin (0.0), phi(0.0);
     size_t idx, j;
     ogsChem::LocalVector ln_conc_Mob  = ogsChem::LocalVector::Zero(_I_mob);
     ogsChem::LocalVector ln_conc_Sorp = ogsChem::LocalVector::Zero(_I_sorp);
@@ -934,13 +934,15 @@ void LocalProblem::calculate_AI(ogsChem::LocalVector & vec_unknowns,
     for(j =0; j < _I_min; j++)
     {
     	idx = _I_mob + _I_sorp + j;
-    	conc_Min_bar(j) = cal_cbarmin_by_constrain(j, ln_conc_Mob, ln_conc_Sorp, conc_Min_bar, conc_Kin_bar);
+    	//conc_Min_bar(j) = cal_cbarmin_by_constrain(j, ln_conc_Mob, ln_conc_Sorp, conc_Min_bar, conc_Kin_bar);
+    	cbarmin = cal_cbarmin_by_constrain(j, ln_conc_Mob, ln_conc_Sorp, conc_Min_bar, conc_Kin_bar); //RZ:16April2014
 
     	//RZ: 16.12.2013
     	phi  = -_logk_min(j) + mat_S1min_transposed.row(j) * ln_activity.head(_I_mob);  //RZ:2.12.2013 include activity model
 
     	// if mineral concentration  >= phi ; mineral is present; saturated case; precipitate the mineral.
-    	if(conc_Min_bar(j) > phi)  //RZ:9-Dec-13
+    	//if(conc_Min_bar(j) > phi)  //RZ:9-Dec-13
+    	if(cbarmin > phi)  //RZ:16April2014
     	{
     		vec_AI(j) = 1;
     	}// end of if
@@ -948,9 +950,11 @@ void LocalProblem::calculate_AI(ogsChem::LocalVector & vec_unknowns,
     	else
     	{
     		vec_AI(j) = 0;
-    		conc_Min_bar(j) = 0.0;
-    		vec_unknowns(idx) = conc_Min_bar(j);
+    		cbarmin  = 0.0;
+//    		conc_Min_bar(j) = 0.0;
+//    		vec_unknowns(idx) = conc_Min_bar(j);
     	}// end of else
+    	vec_unknowns(idx) = cbarmin; //RZ:16April2014
     }
 }
 
