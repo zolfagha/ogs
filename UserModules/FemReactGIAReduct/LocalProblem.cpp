@@ -289,7 +289,7 @@ void LocalProblem::calc_residual(double dt,
 								 ogsChem::LocalVector & vec_residual,
 								 ogsChem::LocalVector & vec_AI)
 {
-	ogsChem::LocalVector ln_conc_Mob, ln_conc_Sorp, conc_Mob, conc_Sorp, conc_Min_bar, conc_Kin_bar, conc_bar, Xi_Kin_bar;
+	ogsChem::LocalVector ln_conc_Mob, ln_conc_Sorp, conc_Mob, conc_Sorp, conc_Min_bar, conc_Kin_bar, conc_bar, Xi_Kin_bar, ln_conc_Kin;
 	conc_Mob     = ogsChem::LocalVector::Zero(_I_mob);
 	conc_Sorp    = ogsChem::LocalVector::Zero(_I_sorp);
 	conc_Min_bar = ogsChem::LocalVector::Zero(_I_min);
@@ -298,13 +298,17 @@ void LocalProblem::calc_residual(double dt,
 
 	ln_conc_Mob = vec_unknowns.head(_I_mob);
 	ln_conc_Sorp = vec_unknowns.segment(_I_mob, _I_sorp);
+	ln_conc_Kin  = vec_unknowns.segment(_I_mob + _I_sorp + _I_min, _I_kin); //RZ 24April2014
 	// convert the ln mobile conc to mobile conc
 	this->cal_exp_conc_vec(_I_mob, ln_conc_Mob, conc_Mob);
 	// convert the ln sorp conc to sorp conc
 	this->cal_exp_conc_vec(_I_sorp, ln_conc_Sorp, conc_Sorp);
+	// convert the ln kin conc to kin conc
+	this->cal_exp_conc_vec(_I_kin, ln_conc_Kin, conc_Kin_bar); //RZ 24April2014
+
 	conc_Min_bar = vec_unknowns.segment(_I_mob + _I_sorp, _I_min);
 	//conc_Kin_bar = vec_unknowns.tail(_I_kin);
-	conc_Kin_bar = vec_unknowns.segment(_I_mob + _I_sorp + _I_min, _I_kin);
+	//conc_Kin_bar = vec_unknowns.segment(_I_mob + _I_sorp + _I_min, _I_kin); //RZ 24April2014 deactiveate
 	Xi_Kin_bar   =  vec_unknowns.tail(_n_xi_Kin_bar);
 	// Eq. 3.55
 	this->residual_conc_Mob (ln_conc_Mob, vec_residual);
