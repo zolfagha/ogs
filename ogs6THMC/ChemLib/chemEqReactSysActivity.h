@@ -634,7 +634,9 @@ private:
         // number of basis components
         _I_basis = _I - _I_second; 
         // number of secondary mobile components
-        _I_sec_mob = _I_mob - _I_basis; 
+        //_I_sec_mob = _I_mob - _I_basis;
+        //_I_sec_mob = _I_basis - _I_mob;
+        _I_sec_mob = 0; 										//RZ 23April2014 temprarly set to zero for neckar example. (we can ignore the water from the system since its activity is known [=1]).
         // organize which components are basis
         // and which are secondary
         _matStoi = _matStoi_input.topRows( _I_basis ).transpose(); 
