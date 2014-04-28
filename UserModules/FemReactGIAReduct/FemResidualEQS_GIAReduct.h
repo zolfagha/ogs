@@ -255,10 +255,14 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             // on each node, get the right start value
             // get the right set of xis
 
-            for (size_t i=0; i < _n_xi_global; i++)
+            for (size_t i=0; i < _n_xi_global; i++){
                 loc_cur_xi_global[i] = u_cur_xiglob[node_idx * _n_xi_global + i];
-            for (size_t i=0; i < _n_xi_local; i++)
+                loc_pre_xi_global[i] = this->_xi_global_pre[i]->getValue(node_idx);
+            }
+            for (size_t i=0; i < _n_xi_local; i++){
                 loc_cur_xi_local[i] = _xi_local_new[i]->getValue(node_idx);
+                loc_pre_xi_local[i] = _xi_local_old[i]->getValue(node_idx);
+            }
             for (size_t i=0; i < _n_eta; i++)
                 loc_cur_eta[i] = _eta[i]->getValue(node_idx);
             // fill in eta_immob
@@ -273,6 +277,9 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             loc_cur_xi_Min          = loc_cur_xi_global.segment( _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Min);
             loc_cur_xi_Kin          = loc_cur_xi_global.tail(_n_xi_Kin);
 
+            loc_pre_xi_Min_tilde    = loc_pre_xi_global.segment(_n_xi_Sorp_tilde, _n_xi_Min_tilde);
+            loc_pre_xi_Min          = loc_pre_xi_global.segment( _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Sorp, _n_xi_Min);
+            loc_pre_xi_Min_bar      = loc_pre_xi_local.segment( _n_xi_Mob + _n_xi_Sorp_bar, _n_xi_Min_bar);
             // current xi local
             loc_cur_xi_Mob          = loc_cur_xi_local.head(_n_xi_Mob);
             loc_cur_xi_Sorp_bar     = loc_cur_xi_local.segment(_n_xi_Mob, _n_xi_Sorp_bar);
@@ -289,8 +296,11 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
 
             if(_n_xi_Sorp_bar_ld > 0)
             	res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar + loc_cur_xi_Sorp_bar_ld; // HS: ERROR! MISSING Ald here! 
-            else
-            	res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar;
+            else{
+            	//res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar;
+            	//RZ 14April2014 Correcting for Delta xis.
+            	res44 = (loc_cur_xi_Min_tilde - loc_pre_xi_Min_tilde) - (loc_cur_xi_Min - loc_pre_xi_Min) + (loc_cur_xi_Min_bar - loc_pre_xi_Min_bar);
+            }
 
             for(std::size_t i = 0; i < _n_xi_Min_tilde; i++)
 				residual_global[_n_xi_global * node_idx + _n_xi_Sorp_tilde + i] = res44[i];
