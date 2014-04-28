@@ -338,6 +338,7 @@ public:
 	std::vector<MyNodalFunctionScalar*> & get_xi_global_cur() {return _xi_global_cur;}
     std::vector<MyNodalFunctionScalar*> & get_xi_global_pre() {return _xi_global_pre;}
 	std::vector<MyNodalFunctionScalar*> & get_xi_local_new() {return _xi_local_new;}
+	std::vector<MyNodalFunctionScalar*> & get_xi_local_old() {return _xi_local_old;}
 	std::vector<MyNodalFunctionScalar*> & get_eta() {return _eta;}
 	std::vector<MyNodalFunctionScalar*> & get_eta_bar() {return _eta_bar;}
 	std::vector<MyNodalFunctionScalar*> & get_global_vec_Rate() {return _global_vec_Rate; }
