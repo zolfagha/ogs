@@ -492,7 +492,7 @@ void LocalProblem::update_minerals_conc_AI(ogsChem::LocalVector & vec_unknowns,
 									       ogsChem::LocalVector & vec_AI)
 {
     size_t i, idx; 
-    double  phi(0.0);
+    double  cbarmin (0.0), phi(0.0);
     ogsChem::LocalVector ln_conc_Mob  = ogsChem::LocalVector::Zero(_I_mob);
     ogsChem::LocalVector ln_conc_Sorp = ogsChem::LocalVector::Zero(_I_sorp);
     ogsChem::LocalVector conc_Min_bar = ogsChem::LocalVector::Zero(_I_min);
@@ -527,33 +527,39 @@ void LocalProblem::update_minerals_conc_AI(ogsChem::LocalVector & vec_unknowns,
 
     	//RZ: 16.12.2013
     	phi  = -_logk_min(i) + mat_S1min_transposed.row(i) * ln_activity.head(_I_mob);  //RZ:2.12.2013 include activity model
+		cbarmin = conc_Min_bar(i);
 
     	// if mineral is present, calculate mineral concentration
     	if	(vec_AI(i) == 1)
     	{
     		// update mineral concentration
-			conc_Min_bar(i) = cal_cbarmin_by_constrain(i, ln_conc_Mob, ln_conc_Sorp, conc_Min_bar, conc_Kin_bar);
-    		vec_unknowns(idx) = conc_Min_bar(i);
+//			conc_Min_bar(i) = cal_cbarmin_by_constrain(i, ln_conc_Mob, ln_conc_Sorp, conc_Min_bar, conc_Kin_bar);
+//    		vec_unknowns(idx) = conc_Min_bar(i);
+    		cbarmin = cal_cbarmin_by_constrain(i, ln_conc_Mob, ln_conc_Sorp, conc_Min_bar, conc_Kin_bar);
     	}  // end of if
 
-    	if (phi > conc_Min_bar(i))
+//    	if (phi > conc_Min_bar(i))
+    	if (phi > cbarmin)
     	{
     		vec_AI(i) = 0;
-    		conc_Min_bar(i) = 0.0;
-    		vec_unknowns(idx) = conc_Min_bar(i);
+//    		conc_Min_bar(i) = 0.0;
+//    		vec_unknowns(idx) = conc_Min_bar(i);
+    		cbarmin = 0.0;
     	} // end of if
     	else
     	{
     		if(vec_AI(i) == 0)
     		{
-				conc_Min_bar(i) = cal_cbarmin_by_constrain(i, ln_conc_Mob, ln_conc_Sorp, conc_Min_bar, conc_Kin_bar);
-    			vec_unknowns(idx) = conc_Min_bar(i);
+//				conc_Min_bar(i) = cal_cbarmin_by_constrain(i, ln_conc_Mob, ln_conc_Sorp, conc_Min_bar, conc_Kin_bar);
+//    			vec_unknowns(idx) = conc_Min_bar(i);
+    			cbarmin = cal_cbarmin_by_constrain(i, ln_conc_Mob, ln_conc_Sorp, conc_Min_bar, conc_Kin_bar);
     		} // end of if
 
     		vec_AI(i) = 1;
 
     	} // end of else
 
+    	vec_unknowns(idx) = cbarmin;  //RZ april2014
     }  // end of for loop
 
 }  // end of function update_minerals
