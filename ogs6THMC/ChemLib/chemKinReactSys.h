@@ -118,6 +118,7 @@ private:
 		_I_sec_mob = 0;
 		_I_sec_sorp = 0;
 		_I_sec_min = 0;
+		_I_kin = 0;
 
 		BaseLib::OrderedMap<std::string, ogsChem::ChemComp*>::iterator it;
 		for (it = map_chemComp.begin(); it != map_chemComp.end(); it++)
@@ -127,7 +128,7 @@ private:
 			case ogsChem::AQ_PHASE_COMP:
 				_I_mob++;
 				break;
-			case ogsChem::SORPTION_COMP:
+			case ogsChem::SORP_PHASE_COMP:
 				_I_sec_sorp++;
 				break;
 			case ogsChem::MIN_PHASE_COMP:

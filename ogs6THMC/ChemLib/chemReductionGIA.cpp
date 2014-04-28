@@ -430,13 +430,13 @@ void chemReductionGIA::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 		case ogsChem::AQ_PHASE_COMP:  //mobile
 			_I_mob++;
 			break;
-		case ogsChem::SORPTION_COMP: //immobile sorbed
+		case ogsChem::SORP_PHASE_COMP: //immobile sorbed
 			_I_sorp++;
 			break;
 		case ogsChem::MIN_PHASE_COMP: //immobile mineral
 			_I_min++;
 			break;
-		case ogsChem::KIN_COMP: //immobile kinetic (biomass)
+		case ogsChem::KIN_PHASE_COMP: //immobile kinetic (biomass)
 			_I_kin++;
 			break;
 		default:

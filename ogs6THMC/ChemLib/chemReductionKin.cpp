@@ -188,13 +188,13 @@ void chemReductionKin::countComp(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 		case ogsChem::AQ_PHASE_COMP: 
 			_I_mob++; 
 			break;
-		case ogsChem::SORPTION_COMP: 
+		case ogsChem::SORP_PHASE_COMP:
 			_I_sorp++;
 			break;
 		case ogsChem::MIN_PHASE_COMP: 
 			_I_min++;
 			break;
-		// case ogsChem::KIN_COMP:
+		// case ogsChem::KIN_PHASE_COMP:
 		// 	_I_kin++; 
 		// 	break; 
 		default:
