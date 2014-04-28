@@ -721,6 +721,8 @@ private:
         for ( i=0; i < _I_sec_min; i++ )
         {
             idx = _I_basis + _I_sec_mob + _I_sec_sorp + i; 
+            cbarmin = c_sec_min(i);  //RZ: 17April2014: cbarmin should be set to mineral current mineral concentration.
+
             if ( _AI(i) == 1 )
             {
                 cbarmin = cal_cbarmin_by_total_mass(i, c_basis, c_second, mass_constrain);
