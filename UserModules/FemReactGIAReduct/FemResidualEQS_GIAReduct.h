@@ -130,7 +130,7 @@ private:
     //TODO pass via constructor
     ogsChem::chemReductionGIA* _ReductionGIA;
     // std::map<size_t, ReductionGIANodeInfo*>* _bc_info;
-    std::vector<MyNodalFunctionScalar*> &_xi_global_pre, &_xi_local_new, &_eta, &_eta_bar, &_global_vec_Rate;
+    std::vector<MyNodalFunctionScalar*> &_xi_global_pre, &_xi_local_new, &_eta, &_eta_bar, &_global_vec_Rate, &_xi_local_old;
     NumLib::ITXFunction* _vel;
     FemLib::IFemNumericalIntegration* _q;
     FemLib::IFiniteElement* _fe;
@@ -192,7 +192,7 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
                          //global_cur_xi_Sorp_tilde, global_cur_xi_Min_tilde,
                          //global_cur_xi_Sorp, global_cur_xi_Min, global_cur_xi_Kin;
     // previous xi global
-    MathLib::LocalVector loc_pre_xi_global, loc_pre_xi_Sorp_tilde, loc_pre_xi_Min_tilde, loc_pre_xi_Sorp, loc_pre_xi_Min, loc_pre_xi_Kin;
+    MathLib::LocalVector loc_pre_xi_global, loc_pre_xi_Sorp_tilde, loc_pre_xi_Min_tilde, loc_pre_xi_Sorp, loc_pre_xi_Min, loc_pre_xi_Kin, loc_pre_xi_Min_bar;
                          //global_pre_xi_Sorp_tilde, global_pre_xi_Min_tilde, global_pre_xi_Sorp, global_pre_xi_Min, global_pre_xi_Kin;
 
     // current xi local
