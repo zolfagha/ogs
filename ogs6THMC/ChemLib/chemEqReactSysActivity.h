@@ -335,7 +335,8 @@ public:
 
             // line search begins
             j = 0; 
-            while ( j < max_iter )
+           // while ( j < max_iter )
+            while ( j < 30 ) //RZ 17April2014: we do NOT need to perform so many iterations here! it should pushes the R1 < R0 in less than 30 (should be 10) iterations.
             {
                 // d1_norm = norm(res,inf);
                 d1_norm = _vec_res.norm(); 
