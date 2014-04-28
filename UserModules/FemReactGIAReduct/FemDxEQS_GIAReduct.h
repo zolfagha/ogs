@@ -583,7 +583,21 @@ void TemplateTransientDxFEMFunction_GIA_Reduct<T1,T2,T3>::Vprime( std::size_t   
 	// or RZ: using minimization solve.
 	solve_minimization(mat_LHS, mat_RHS, mat_U);
 
-	mat_vprime.topLeftCorner(mat_U.rows(),mat_U.cols()) = mat_U; 
+	//mat_vprime.topLeftCorner(mat_U.rows(),mat_U.cols()) = mat_U;
+
+	//RZ 10Apr2014: Rearrange the active and inactive rows of the original matrix (Dxiglob(xiloc)) after solving the linear system with minimization function.
+	size_t m = 0;
+	for (size_t kk = 0; kk < _I_min; kk++)
+	{
+		if (local_vec_AI(kk) > 0){
+			mat_vprime.block(_n_xi_Mob + _n_xi_Sorp + kk, 0, 1, mat_U.cols()) = mat_U.block(_n_xi_Mob + _n_xi_Sorp + m, 0, 1, mat_U.cols());
+			m++;
+			//std::cout << "mat_U: \n";
+			//std::cout << mat_U << std::endl;
+			//std::cout << "mat_vprime: \n";
+			//std::cout << mat_vprime << std::endl;
+		}
+	}
 	std::size_t j2_kin_star = this->_ReductionGIA->get_J_2_kin_ast();
 	mat_vprime.bottomLeftCorner(j2_kin_star, j2_kin_star) = MathLib::LocalMatrix::Identity(j2_kin_star, j2_kin_star);
 }
