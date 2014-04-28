@@ -56,7 +56,7 @@ public:
           _n_xi_Kin(_ReductionGIA->get_n_xi_Kin()),_n_xi_Min_bar(_ReductionGIA->get_n_xi_Min_bar()), _n_xi_local(_ReductionGIA->get_n_xi_local()), _n_xi_global(_ReductionGIA->get_n_xi_global()),
           _n_xi_Sorp_bar(_ReductionGIA->get_n_xi_Sorp_bar()), _J_tot_kin(_ReductionGIA->get_n_xi_Kin_total()), _n_xi_Sorp_bar_li(_ReductionGIA->get_n_xi_Sorp_bar_li()), _n_xi_Sorp_bar_ld(_ReductionGIA->get_n_xi_Sorp_bar_ld()),
           _xi_global_pre(function_data->get_xi_global_pre()), _xi_local_new(function_data->get_xi_local_new()), _eta(function_data->get_eta()), _eta_bar(function_data->get_eta_bar()),
-          _global_vec_Rate(function_data->get_global_vec_Rate())
+          _global_vec_Rate(function_data->get_global_vec_Rate()), _xi_local_old(function_data->get_xi_local_old())
     {
     };
 
