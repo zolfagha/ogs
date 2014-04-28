@@ -747,9 +747,12 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			ln_conc_Mob  = vec_unknowns.head(_I_mob);
 			ln_conc_Sorp = vec_unknowns.segment(_I_mob, _I_sorp); 
 			vec_conc_Min = vec_unknowns.segment(_I_mob + _I_sorp, _I_min); 
-			vec_conc_Kin = vec_unknowns.segment(_I_mob + _I_sorp + _I_min, _I_kin);
+			//vec_conc_Kin = vec_unknowns.segment(_I_mob + _I_sorp + _I_min, _I_kin);
+			ln_conc_Kin = vec_unknowns.segment(_I_mob + _I_sorp + _I_min, _I_kin); //RZ 24April2014
+
 			_pSolve->cal_exp_conc_vec(_I_mob, ln_conc_Mob, vec_conc_Mob);
 			_pSolve->cal_exp_conc_vec(_I_sorp, ln_conc_Sorp, vec_conc_Sorp);
+			_pSolve->cal_exp_conc_vec(_I_kin, ln_conc_Kin, vec_conc_Kin); //RZ 24April2014
 
 			vec_conc.head(_I_mob) = vec_conc_Mob; 
 			vec_conc.segment(_I_mob, _I_sorp) = vec_conc_Sorp; 
