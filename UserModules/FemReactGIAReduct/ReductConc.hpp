@@ -713,6 +713,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 		    // convert the ln mobile conc to mobile conc
 			_pSolve->cal_ln_conc_vec(_I_mob,  vec_conc_Mob,  ln_conc_Mob);
 			_pSolve->cal_ln_conc_vec(_I_sorp, vec_conc_Sorp, ln_conc_Sorp);
+			_pSolve->cal_ln_conc_vec(_I_kin, vec_conc_Kin, ln_conc_Kin);
 			// now writting into the unknown vector. 
 			vec_unknowns.head(_I_mob) = ln_conc_Mob;  // ln scale
 			vec_unknowns.segment(_I_mob, _I_sorp) = ln_conc_Sorp;  // ln scale
