@@ -689,7 +689,7 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			//update the xi global value with the optimized values 4-Nov-2013
 //			loc_xi_global.head( this->_n_xi_Sorp_tilde) 						 = loc_XiSorpTilde;
 			loc_xi_global.segment( this->_n_xi_Sorp_tilde,this->_n_xi_Min_tilde) = loc_XiMinTilde;
-//			loc_xi_global.tail( this->_n_xi_Kin) 						   		 = loc_XiKin;
+			loc_xi_global.tail( this->_n_xi_Kin) 						   		 = loc_XiKin;	//RZ 24April2014
 
 		    for(i = 0; i < _I_sorp; i++){  //dg 14Feb2014 for sorption reaction
 		    	if(loc_conc(_I_mob + i) <= 0.0)
