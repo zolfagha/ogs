@@ -547,7 +547,7 @@ private:
 		    }
 	    }
 
-        _I = _I_mob + _I_sec_sorp + _I_sec_min;
+        _I = _I_mob + _I_sec_sorp + _I_sec_min + _I_kin; //RZ 25April2014 _I_kin is added but it is not participating in equilibrium reactions
     }; 
 
     /**
