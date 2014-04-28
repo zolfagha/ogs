@@ -297,8 +297,8 @@ void TemplateTransientResidualFEMFunction_GIA_Reduct<T_DIS_SYS, T_USER_FUNCTION_
             if(_n_xi_Sorp_bar_ld > 0)
             	res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar + loc_cur_xi_Sorp_bar_ld; // HS: ERROR! MISSING Ald here! 
             else{
-            	//res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar;
-            	//RZ 14April2014 Correcting for Delta xis.
+            	///res44 = loc_cur_xi_Min_tilde - loc_cur_xi_Min + loc_cur_xi_Min_bar;
+            	///RZ 14April2014 Correcting for Delta xis.
             	res44 = (loc_cur_xi_Min_tilde - loc_pre_xi_Min_tilde) - (loc_cur_xi_Min - loc_pre_xi_Min) + (loc_cur_xi_Min_bar - loc_pre_xi_Min_bar);
             }
 
