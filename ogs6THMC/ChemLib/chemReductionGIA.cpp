@@ -47,7 +47,17 @@ void chemReductionGIA::buildStoi(BaseLib::OrderedMap<std::string, ogsChem::ChemC
 	double tmp_stoi;
 	std::string tmp_str;
 	BaseLib::OrderedMap<std::string, ogsChem::ChemComp*>::iterator tmp_Comp;
-
+/*
+ * RZ 29April2014: IMPORTANT NOTE: Concentration of components should be ordered in MCP file such that vec_conc have the following shape:
+ * vec_concentrtion = [ C_mob
+ * 						Cbar_sorp
+ * 						Cbar_kin
+ * 						Cbar_min];
+ * Stoichiometry matrix of the immobile section would be (linearly independent):
+ * Mat_S2_ast = [S2sorp		0 		0
+ * 				 0			0		S2kin_ast
+ * 				 0			Imin	0];
+ */
     // zero the number of different equilibrium reactions
     _Jmob  	   = 0;
     _Jsorp 	   = 0;
@@ -277,7 +287,20 @@ void chemReductionGIA::update_reductionScheme(void)
 		_mat_S1_ast.block(0, _Jmob + _Jsorp_li + _Jmin, _I_mob, _J_1_kin_ast) = _mat_S1kin_ast;
 
     _mat_S2_ast.block(0,0,_I_sorp,_Jsorp) 						  = _mat_S2sorp;
-	// HS, this is probably wrong, acoording to Eq. 3.8 of Hoffmann. 
+    /*
+     * 29April2014 RZ:
+     * 1) _mat_S2min is identity.
+     * 2) The concentration of immobile sorbed species are followed by immobile kinetic ones and finally minerals. Accordingly _mat_S2_ast matrix is corrected.
+     * vec_concentrtion = [ C_mob
+     * 						Cbar_sorp
+     * 						Cbar_kin
+     * 						Cbar_min];
+     * Stoichiometry matrix of the immobile section would be (linearly independent):
+     * Mat_S2_ast = [S2sorp		0 		0
+     * 				 0			0		S2kin_ast
+     * 				 0			Imin	0];
+     */
+	// HS, this is probably wrong, acoording to Eq. 3.8 of Hoffmann.
     // _mat_S2_ast.block(0,_Jsorp, _I_min ,_Jmin) 		   	  = _mat_S2min;
 	_mat_S2_ast.block(_I_sorp, _Jsorp, _Jmin, _Jmin) = ogsChem::LocalMatrix::Identity(_Jmin, _Jmin);
 	if (_J_2_kin_ast > 0)
