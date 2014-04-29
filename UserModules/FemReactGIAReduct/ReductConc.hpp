@@ -702,11 +702,23 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 		    // for ODE solver
 			loc_XiBarKin     = loc_xi_local.tail(_n_xi_Kin_bar);
 			loc_XiBarKin_old = loc_xi_local_old_dt.tail(_n_xi_Kin_bar);
-
+			/* RZ 29April2014
+		     * vec_concentrtion = [ C_mob
+		     * 						Cbar_sorp
+		     * 						Cbar_kin
+		     * 						Cbar_min];
+		     * Stoichiometry matrix of the immobile section would be (linearly independent):
+		     * Mat_S2_ast = [S2sorp		0 		0
+		     * 				 0			0		S2kin_ast
+		     * 				 0			Imin	0];
+		     */
 			vec_conc_Mob     = loc_conc.head(_I_mob); 
 			vec_conc_Sorp    = loc_conc.segment(_I_mob, _I_sorp); 
-			vec_conc_Min     = loc_conc.segment(_I_mob + _I_sorp, _I_min);
-			vec_conc_Kin     = loc_conc.tail(_I_kin); 
+			vec_conc_Kin     = loc_conc.segment(_I_mob + _I_sorp, _I_kin);
+			vec_conc_Min     = loc_conc.tail(_I_min);
+			//vec_conc_Min     = loc_conc.segment(_I_mob + _I_sorp, _I_min);
+			//vec_conc_Kin     = loc_conc.tail(_I_kin);
+
 			ln_conc_Mob.setZero();
 			ln_conc_Sorp.setZero(); 
 			ln_conc_Kin.setZero();
