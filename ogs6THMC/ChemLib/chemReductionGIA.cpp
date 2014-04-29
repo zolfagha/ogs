@@ -302,9 +302,11 @@ void chemReductionGIA::update_reductionScheme(void)
      */
 	// HS, this is probably wrong, acoording to Eq. 3.8 of Hoffmann.
     // _mat_S2_ast.block(0,_Jsorp, _I_min ,_Jmin) 		   	  = _mat_S2min;
-	_mat_S2_ast.block(_I_sorp, _Jsorp, _Jmin, _Jmin) = ogsChem::LocalMatrix::Identity(_Jmin, _Jmin);
+	//_mat_S2_ast.block(_I_sorp, _Jsorp, _Jmin, _Jmin) = ogsChem::LocalMatrix::Identity(_Jmin, _Jmin);
+    _mat_S2_ast.block(_I_sorp + _mat_S2kin_ast.rows(), _Jsorp, _Jmin, _Jmin) = ogsChem::LocalMatrix::Identity(_Jmin, _Jmin);
 	if (_J_2_kin_ast > 0)
-		_mat_S2_ast.block(0, _Jsorp + _Jmin, _mat_S2kin_ast.rows(), _J_2_kin_ast) = _mat_S2kin_ast;
+		_mat_S2_ast.block(_I_sorp, _Jsorp + _Jmin, _mat_S2kin_ast.rows(), _J_2_kin_ast) = _mat_S2kin_ast;
+		//_mat_S2_ast.block(0, _Jsorp + _Jmin, _mat_S2kin_ast.rows(), _J_2_kin_ast) = _mat_S2kin_ast;
 
     //the location of these matrices should not be changed. Cut the zero parts
 	_mat_S2sorp = _mat_S2sorp.topRows(_I_sorp);
