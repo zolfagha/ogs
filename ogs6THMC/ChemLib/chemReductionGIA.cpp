@@ -308,9 +308,10 @@ void chemReductionGIA::update_reductionScheme(void)
 		_mat_S2_ast.block(_I_sorp, _Jsorp + _Jmin, _mat_S2kin_ast.rows(), _J_2_kin_ast) = _mat_S2kin_ast;
 		//_mat_S2_ast.block(0, _Jsorp + _Jmin, _mat_S2kin_ast.rows(), _J_2_kin_ast) = _mat_S2kin_ast;
 
+	//RZ: we have already calculated these matrices. No need to re-invent the wheel.
     //the location of these matrices should not be changed. Cut the zero parts
-	_mat_S2sorp = _mat_S2sorp.topRows(_I_sorp);
-	_mat_S2kin_ast = _mat_S2kin_ast.topRows(_I_kin);
+	//_mat_S2sorp = _mat_S2sorp.topRows(_I_sorp);
+	//_mat_S2kin_ast = _mat_S2kin_ast.topRows(_I_kin);
 
 #ifdef _DEBUG
     std::cout << "_mat_S1: "    << std::endl;
