@@ -766,10 +766,23 @@ void FunctionReductConc<T1, T2>::calc_nodal_local_problem(double dt, const doubl
 			_pSolve->cal_exp_conc_vec(_I_sorp, ln_conc_Sorp, vec_conc_Sorp);
 			_pSolve->cal_exp_conc_vec(_I_kin, ln_conc_Kin, vec_conc_Kin); //RZ 24April2014
 
+			/* RZ 29April2014
+		     * vec_concentrtion = [ C_mob
+		     * 						Cbar_sorp
+		     * 						Cbar_kin
+		     * 						Cbar_min];
+		     * Stoichiometry matrix of the immobile section would be (linearly independent):
+		     * Mat_S2_ast = [S2sorp		0 		0
+		     * 				 0			0		S2kin_ast
+		     * 				 0			Imin	0];
+		     */
+
 			vec_conc.head(_I_mob) = vec_conc_Mob; 
 			vec_conc.segment(_I_mob, _I_sorp) = vec_conc_Sorp; 
-			vec_conc.segment(_I_mob + _I_sorp, _I_min) = vec_conc_Min; 
-			vec_conc.segment(_I_mob + _I_sorp + _I_min, _I_kin) = vec_conc_Kin;
+			vec_conc.segment(_I_mob + _I_sorp, _I_kin) = vec_conc_Kin;
+			vec_conc.segment(_I_mob + _I_sorp + _I_kin, _I_min) = vec_conc_Min;
+			//vec_conc.segment(_I_mob + _I_sorp, _I_min) = vec_conc_Min;
+			//vec_conc.segment(_I_mob + _I_sorp + _I_min, _I_kin) = vec_conc_Kin;
 
 			loc_xi_mobile     = _mat_c_mob_2_xi_mob * vec_conc_Mob;
 		    vec_xi_mob        =  loc_xi_mobile.head(_n_xi_Mob);
