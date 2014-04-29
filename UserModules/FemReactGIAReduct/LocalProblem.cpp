@@ -587,9 +587,21 @@ double LocalProblem::cal_cbarmin_by_constrain(size_t        idx_min,
     // convert the ln nonmineral immobile conc to nonmineral immobile conc
 	this->cal_exp_conc_vec(_I_sorp, ln_conc_Sorp, conc_Sorp);
 
+	/* RZ 29April2014
+     * vec_concentrtion = [ C_mob
+     * 						Cbar_sorp
+     * 						Cbar_kin
+     * 						Cbar_min];
+     * Stoichiometry matrix of the immobile section would be (linearly independent):
+     * Mat_S2_ast = [S2sorp		0 		0
+     * 				 0			0		S2kin_ast
+     * 				 0			Imin	0];
+     */
 	conc_bar.head(_I_sorp) = conc_Sorp;
-	conc_bar.segment(_I_sorp, _I_min) = conc_Min_bar; 
-	conc_bar.tail(conc_Kin_bar.rows()) = conc_Kin_bar;  //TODO: RZ: potential bug
+	conc_bar.segment(_I_sorp, conc_Kin_bar.rows()) = conc_Kin_bar;
+	conc_bar.tail(_I_min) = conc_Min_bar;
+//	conc_bar.segment(_I_sorp, _I_min) = conc_Min_bar;
+//	conc_bar.tail(conc_Kin_bar.rows()) = conc_Kin_bar;  //TODO: RZ: potential bug
 
     // xi_sorp_bar
     temp 			= _mat_c_immob_2_xi_immob * conc_bar;
@@ -692,9 +704,21 @@ void LocalProblem::residual_xi_Sorp_tilde(ogsChem::LocalVector & conc_Mob,
 	ogsChem::LocalVector vec_XiSorpBarLI = ogsChem::LocalVector::Zero(_n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
 	ogsChem::LocalVector conc_bar        = ogsChem::LocalVector::Zero(_I_sorp + _I_min + _I_kin);
 
+	/* RZ 29April2014
+     * vec_concentrtion = [ C_mob
+     * 						Cbar_sorp
+     * 						Cbar_kin
+     * 						Cbar_min];
+     * Stoichiometry matrix of the immobile section would be (linearly independent):
+     * Mat_S2_ast = [S2sorp		0 		0
+     * 				 0			0		S2kin_ast
+     * 				 0			Imin	0];
+     */
 	conc_bar.head(_I_sorp) = conc_Sorp;
-	conc_bar.segment(_I_sorp, _I_min) = conc_Min_bar; 
-	conc_bar.tail(_I_kin) = conc_Kin_bar;
+	conc_bar.segment(_I_sorp, _I_kin) = conc_Kin_bar;
+	conc_bar.tail(_I_min) = conc_Min_bar;
+//	conc_bar.segment(_I_sorp, _I_min) = conc_Min_bar;
+//	conc_bar.tail(_I_kin) = conc_Kin_bar;
 
 	vec_XiSorp        = _mat_c_mob_2_xi_mob * conc_Mob;
 	vec_XiSorpBarLI   = _mat_c_immob_2_xi_immob * conc_bar;
@@ -716,9 +740,21 @@ void LocalProblem::residual_xi_Min_tilde(ogsChem::LocalVector & conc_Mob,
 	ogsChem::LocalVector A 				= ogsChem::LocalVector::Zero(_n_xi_Min);
 	ogsChem::LocalVector B 				= ogsChem::LocalVector::Zero(_n_xi_Sorp_bar_ld);
 
+	/* RZ 29April2014
+     * vec_concentrtion = [ C_mob
+     * 						Cbar_sorp
+     * 						Cbar_kin
+     * 						Cbar_min];
+     * Stoichiometry matrix of the immobile section would be (linearly independent):
+     * Mat_S2_ast = [S2sorp		0 		0
+     * 				 0			0		S2kin_ast
+     * 				 0			Imin	0];
+     */
 	conc_bar.head(_I_sorp) = conc_Sorp;
-	conc_bar.segment(_I_sorp, _I_min) = conc_Min_bar;
-	conc_bar.tail(_I_kin) = conc_Kin_bar;
+	conc_bar.segment(_I_sorp, _I_kin) = conc_Kin_bar;
+	conc_bar.tail(_I_min) = conc_Min_bar;
+//	conc_bar.segment(_I_sorp, _I_min) = conc_Min_bar;
+//	conc_bar.tail(_I_kin) = conc_Kin_bar;
 
 	vec_XiMin        = _mat_c_mob_2_xi_mob * conc_Mob;
 	vec_XiMinBar     = _mat_c_immob_2_xi_immob * conc_bar;
@@ -815,9 +851,21 @@ void LocalProblem::residual_Eta_bar(ogsChem::LocalVector & conc_Sorp,
 {
 	ogsChem::LocalVector conc_bar  = ogsChem::LocalVector::Zero(_I_sorp + _I_min + _I_kin);
 
+	/* RZ 29April2014
+     * vec_concentrtion = [ C_mob
+     * 						Cbar_sorp
+     * 						Cbar_kin
+     * 						Cbar_min];
+     * Stoichiometry matrix of the immobile section would be (linearly independent):
+     * Mat_S2_ast = [S2sorp		0 		0
+     * 				 0			0		S2kin_ast
+     * 				 0			Imin	0];
+     */
 	conc_bar.head(_I_sorp) = conc_Sorp;
-	conc_bar.segment(_I_sorp, _I_min) = conc_Min_bar; 
-	conc_bar.tail(_I_kin) = conc_Kin_bar;
+	conc_bar.segment(_I_sorp, _I_kin) = conc_Kin_bar;
+	conc_bar.tail(_I_min) = conc_Min_bar;
+//	conc_bar.segment(_I_sorp, _I_min) = conc_Min_bar;
+//	conc_bar.tail(_I_kin) = conc_Kin_bar;
 
 	// etabar acts as a constrain
     vec_residual.segment(_J_mob + _n_eta + _n_xi_Sorp_tilde + _n_xi_Min_tilde + _n_xi_Kin + _n_xi_Sorp + _n_xi_Min, _n_eta_bar) = -_vec_etabar + (_mat_c_immob_2_eta_immob * conc_bar);
@@ -834,9 +882,21 @@ void LocalProblem::residual_xi_KinBar_Eq(ogsChem::LocalVector & conc_Sorp,
 	ogsChem::LocalVector   conc_tmp  = ogsChem::LocalVector::Zero(_n_xi_Sorp_bar + _n_xi_Min_bar + _n_xi_Kin_bar);
 	ogsChem::LocalVector   conc_bar = ogsChem::LocalVector::Zero(_I_sorp + _I_min + _I_kin);
 
+	/* RZ 29April2014
+     * vec_concentrtion = [ C_mob
+     * 						Cbar_sorp
+     * 						Cbar_kin
+     * 						Cbar_min];
+     * Stoichiometry matrix of the immobile section would be (linearly independent):
+     * Mat_S2_ast = [S2sorp		0 		0
+     * 				 0			0		S2kin_ast
+     * 				 0			Imin	0];
+     */
 	conc_bar.head(_I_sorp)   = conc_Sorp;
-	conc_bar.segment(_I_sorp, _I_min) = conc_Min_bar;
-	conc_bar.tail(_I_kin)    = conc_Kin_bar;
+	conc_bar.segment(_I_sorp, _I_kin) = conc_Kin_bar;
+	conc_bar.tail(_I_min) = conc_Min_bar;
+//	conc_bar.segment(_I_sorp, _I_min) = conc_Min_bar;
+//	conc_bar.tail(_I_kin)    = conc_Kin_bar;
 
 	conc_tmp     = _mat_c_immob_2_xi_immob * conc_bar;
 
