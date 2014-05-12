@@ -19,6 +19,25 @@
 #include "DiscreteLib/Core/IDiscreteVector.h"
 #include "NumLib/Function/ITXDiscreteFunction.h"
 
+namespace MathLib
+{
+
+inline double norm_max(DiscreteLib::IDiscreteVector<MathLib::LocalMatrix> &v, size_t n)
+{
+    double u_max = .0;
+    for (size_t i=0; i<n; i++)
+        u_max = std::max(u_max, v[i].array().abs().maxCoeff());
+    return u_max;
+};
+
+inline double norm_max(DiscreteLib::IDiscreteVector<MathLib::LocalVector> &v, size_t n)
+{
+    double u_max = .0;
+    for (size_t i=0; i<n; i++)
+        u_max = std::max(u_max, v[i].array().abs().maxCoeff());
+    return u_max;
+};
+}
 
 namespace NumLib
 {
@@ -105,6 +124,51 @@ public:
             double val_diff_max = .0; // val_diff.max
             for (size_t j=0; j<val_diff.size(); j++) {
                 val_diff_max = std::max(val_diff_max, val_diff[j].array().abs().maxCoeff());
+            }
+            mnorm = std::max(mnorm, val_diff_max);
+        }
+
+        return mnorm;
+    }
+
+};
+
+template <>
+class NormOfDiscreteDataFunction<MathLib::TemplateVectorX<double> >
+{
+public:
+	typedef double Tvalue;
+    typedef NumLib::ITXDiscreteFunction<MathLib::TemplateVectorX<Tvalue> > MyDiscreteData;
+
+    NormOfDiscreteDataFunction() {};
+
+    ~NormOfDiscreteDataFunction() {};
+
+    double operator()(const MyDiscreteData &ref1, const MyDiscreteData &ref2) const
+    {
+        const DiscreteLib::IDiscreteVector<MathLib::TemplateVectorX<Tvalue> >* vec1 = ref1.getDiscreteData();
+        const DiscreteLib::IDiscreteVector<MathLib::TemplateVectorX<Tvalue> >* vec2 = ref2.getDiscreteData();
+        const size_t n = vec1->size();
+        if (n!=vec2->size()) {
+            WARN("***Warning in NormOfDiscreteDataFunction::norm(): size of two vectors is not same.");
+            return .0;
+        }
+
+        double mnorm = .0;
+        for (size_t i=0; i<n; ++i) {
+            const MathLib::TemplateVectorX<Tvalue> &val1 = (*vec1)[i];
+            const MathLib::TemplateVectorX<Tvalue> &val2 = (*vec2)[i];
+            const size_t n_gp = val1.size();
+            if (n_gp!=val2.size() || n_gp==0) {
+                WARN("***Warning in NormOfDiscreteDataFunction::norm(): size of two vectors is not same.");
+                return .0;
+            }
+            MathLib::TemplateVectorX<Tvalue> val_diff = val1 - val2;
+
+//            val_diff = std::abs(val_diff);
+            double val_diff_max = .0; // val_diff.max
+            for (size_t j=0; j<val_diff.size(); j++) {
+                val_diff_max = std::max(val_diff_max, std::abs(val_diff[j]));
             }
             mnorm = std::max(mnorm, val_diff_max);
         }
