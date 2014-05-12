@@ -16,10 +16,12 @@
 
 #include "FemLib/Tools/LagrangeFeObjectContainer.h"
 #include "NumLib/Function/TXFunction.h"
+#include "NumLib/Function/TXNestedFunction.h"
 #include "NumLib/TimeStepping/TimeStepFunction.h"
 #include "NumLib/TimeStepping/TimeStepFunctionNewtonAdaptive.h"
 #include "MaterialLib/Fluid.h"
 #include "MaterialLib/Fracture.h"
+#include "MaterialLib/Permeability.h"
 #include "SolutionLib/Fem/FemDirichletBC.h"
 #include "SolutionLib/Fem/FemNeumannBC.h"
 #include "GeoProcessBuilder.h"
@@ -119,8 +121,21 @@ void convertPorousMediumProperty(const Ogs5FemData &ogs5fem, const CMediumProper
         pm.permeability = new NumLib::TXFunctionConstant(mmp.permeability_tensor[0]);
     }
 
+    pm.porosity_model = mmp.porosity_model;
     if (mmp.porosity_model==1) {
         pm.porosity = new NumLib::TXFunctionConstant(mmp.porosity_model_values[0]);
+    } else if (mmp.porosity_model==2) {
+        pm.porosity = new NumLib::TXFunctionConstant(mmp.porosity_model_values[0]);
+    }
+
+    //pm.permeability_porosity_model = mmp.permeability_porosity_model;
+    if (mmp.permeability_porosity_model>0) {
+        MaterialLib::IPorosityHydraulicConductivityModel* model = NULL;
+        if (mmp.permeability_porosity_model==1) {
+        	model = new MaterialLib::PorosityHydraulicConductivityModel1(mmp.porosity_model_values[0], mmp.permeability_tensor[0]);
+        }
+        delete pm.hydraulic_conductivity;
+        pm.hydraulic_conductivity = new NumLib::TXNestedFunction<NumLib::ITXFunction,MaterialLib::IPorosityHydraulicConductivityModel>(&pm.porosity, model);
     }
 
     if (mmp.storage_model==1) {

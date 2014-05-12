@@ -31,6 +31,8 @@ struct PorousMedia : public IMedium
 {
     NumLib::ITXFunction* hydraulic_conductivity;
     NumLib::ITXFunction* permeability;
+    unsigned porosity_model;
+    //unsigned permeability_porosity_model;
     NumLib::ITXFunction* porosity;
     NumLib::ITXFunction* storage;
     NumLib::ITXFunction* geo_area;
@@ -62,6 +64,8 @@ struct PorousMedia : public IMedium
                 dispersivity_long,
                 dispersivity_trans
                 );
+        porosity_model = 0;
+        //permeability_porosity_model = 0;
         capp_sat_model = 0;
         minimum_relative_permeability = .0;
     }
