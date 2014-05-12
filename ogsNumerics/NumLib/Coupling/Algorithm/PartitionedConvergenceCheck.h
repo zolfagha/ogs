@@ -33,14 +33,14 @@ public:
 
     virtual ~PartitionedConvergenceCheck() {};
 
-    virtual bool isConverged(UnnamedParameterSet& vars_prev, UnnamedParameterSet& vars_current, double eps, double &v_diff)
+    virtual bool isConverged(const std::vector<unsigned> &vec_var_id, UnnamedParameterSet& vars_prev, UnnamedParameterSet& vars_current, double eps, double &v_diff)
     {
         bool is_converged = true;
         for (size_t i=0; i<_list_subproblems->size(); i++) {
             T_PROBLEM* prob = (*_list_subproblems)[i];
             IConvergenceCheck* check = prob->getConvergenceChecker();
             double temp_diff = .0;
-            bool is_this_converged = check->isConverged(vars_prev, vars_current, eps, temp_diff);
+            bool is_this_converged = check->isConverged(vec_var_id, vars_prev, vars_current, eps, temp_diff);
             v_diff = std::max(temp_diff, v_diff);
             if (!is_this_converged) {
                 is_converged = false;

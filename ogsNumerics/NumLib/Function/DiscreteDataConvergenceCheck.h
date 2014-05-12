@@ -13,6 +13,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "MathLib/Vector.h"
 #include "NumLib/Function/NormOfDiscreteDataFunction.h"
@@ -21,6 +22,17 @@
 
 namespace NumLib
 {
+
+struct DiscreteDataType
+{
+	enum type
+	{
+		NodalScalar,
+		NodalVector,
+		IntegrationPointScalar,
+		IntegrationPointVector
+	};
+};
 
 /**
  * \brief Convergence check for iterative calculation of discrete data
@@ -36,19 +48,21 @@ public:
     virtual ~DiscreteDataConvergenceCheck() {};
 
     ///
-    virtual bool isConverged(NumLib::UnnamedParameterSet& vars_prev, NumLib::UnnamedParameterSet& vars_current, double eps, double &v_diff)
+    virtual bool isConverged(const std::vector<unsigned> &vec_var_id, NumLib::UnnamedParameterSet& vars_prev, NumLib::UnnamedParameterSet& vars_current, double eps, double &v_diff)
     {
-
-        for (size_t i=0; i<vars_prev.size(); i++) {
+        if (_vec_value_type.size()!=vec_var_id.size())
+        	return true;
+        for (size_t ii=0; ii<vec_var_id.size(); ii++) {
+        	size_t i = vec_var_id[ii];
             v_diff = .0;
-            bool isScalar = (vars_prev.getName(i).compare("h")==0 || vars_prev.getName(i).compare("c")==0);
-            bool isIntegrationPointVector = (vars_prev.getName(i).compare("v")==0);
-
-            if (isScalar) {
-                v_diff = calculateDifference<double>(vars_prev, vars_current, i);
-            } else if (isIntegrationPointVector) {
-                v_diff = calculateDifference<MathLib::TemplateVectorX<MathLib::LocalVector> >(vars_prev, vars_current, i);
-            }
+			if (_vec_value_type[ii]==DiscreteDataType::NodalScalar)
+				v_diff = calculateDifference<double>(vars_prev, vars_current, i);
+			else if (_vec_value_type[ii]==DiscreteDataType::NodalVector)
+				v_diff = calculateDifference<MathLib::LocalVector>(vars_prev, vars_current, i);
+			else if (_vec_value_type[ii]==DiscreteDataType::IntegrationPointScalar)
+				v_diff = calculateDifference<MathLib::TemplateVectorX<double> >(vars_prev, vars_current, i);
+			else if (_vec_value_type[ii]==DiscreteDataType::IntegrationPointVector)
+				v_diff = calculateDifference<MathLib::TemplateVectorX<MathLib::LocalVector> >(vars_prev, vars_current, i);
 
             if (v_diff>eps) {
                 return false;
@@ -66,6 +80,11 @@ public:
         NumLib::NormOfDiscreteDataFunction<T> _norm;
         return _norm(*f_fem_prev, *f_fem_cur);
     }
+
+    void addValueType(DiscreteDataType::type t) { _vec_value_type.push_back(t);}
+
+private:
+    std::vector<DiscreteDataType::type> _vec_value_type;
 };
 
 }
