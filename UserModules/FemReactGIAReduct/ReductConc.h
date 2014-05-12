@@ -58,6 +58,7 @@ public:
     // memory for discretized concentration vector
     typedef typename FemLib::FemNodalFunctionVector<MyDiscreteSystem>::type MyNodalFunctionVector;
 	typedef typename FemLib::FemNodalFunctionScalar<MyDiscreteSystem>::type MyNodalFunctionScalar;
+    typedef typename FemLib::FEMIntegrationPointFunctionScalar<MyDiscreteSystem>::type MyIntegrationPointFunctionScalar;
 
     // local assembler
 	// for the linear systems, use the same settings as Mass_Transport
@@ -145,10 +146,11 @@ public:
     	_J_tot_kin(0), _n_eta_bar(0), _n_Comp(0), _n_xi_local(0), _vel(0), _n_xi_Sorp_bar_li(0), _n_xi_Sorp(0), _ReductionGIA(0),
     	_I_sorp(0), _dis_sys(0), _nl_sol_dofManager(0), _n_xi_Sorp_tilde(0), myNSolverFactory(0),
     	_n_xi_Mob(0), _non_linear_problem(0), _n_xi_Min_bar(0), _n_xi_Min_tilde(0), _n_xi_Min(0), _n_xi_Kin(0),
-    	_theta(0),_tim(0), _problem(0), _n_xi_Sorp_bar_ld(0),_msh_id(0)
+    	_theta(0),_tim(0), _problem(0), _n_xi_Sorp_bar_ld(0),_msh_id(0), _is_porosity_dynamic(false), _porosity(NULL)
     {
         // set default parameter name
 		ProcessLib::Process::setInputParameterName(Velocity, "Velocity");
+        _checker.addValueType(NumLib::DiscreteDataType::NodalScalar);
     };
 	
     /**
@@ -226,8 +228,12 @@ public:
         initializeTimeStep(time);
         getSolution()->solveTimeStep(time);
         updateOutputParameter(time);
+        if (_is_porosity_dynamic)
+            updatePorosity();
         return 0;
     }
+
+	void updatePorosity();
 
     /**
 	  * function to suggest the next time step
@@ -479,6 +485,7 @@ private:
       * including all components in the MCP data structure
       */
 	std::vector<MyNodalFunctionScalar*> _concentrations;
+	std::vector<MyNodalFunctionScalar*> _concentrations0;
 
     /**
       * nodal eta_mobile values
@@ -560,6 +567,10 @@ private:
 	//TODO no need to make them member variables
 	std::size_t _n_xi_Mob, _n_xi_Sorp_tilde,_n_xi_Sorp, _n_xi_Sorp_bar, _n_xi_Sorp_bar_li, _n_xi_Sorp_bar_ld, _n_xi_Min, _n_xi_Min_tilde, _n_xi_Min_bar, _n_xi_Kin, _n_xi_Kin_bar, _I_mob, _I_sorp, _I_min, _I_kin, _J_tot_kin;
     std::size_t _n_Comp;
+
+    // porosity distribution
+    bool _is_porosity_dynamic;
+    MyIntegrationPointFunctionScalar* _porosity;
 }; 
 
 #include "ReductConc.hpp"

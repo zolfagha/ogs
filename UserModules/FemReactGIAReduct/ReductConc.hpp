@@ -230,6 +230,7 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options & option)
 			tmp_conc->initialize(*dis, _problem->getVariable(i)->getCurrentOrder(), 1E-50);  //RZ: avoid zero. 
 		}
 		_concentrations.push_back( tmp_conc );
+		_concentrations0.push_back( tmp_conc->clone() );
 	}
 
 	// convert IC _concentrations to eta and xi
@@ -250,6 +251,39 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options & option)
 		_non_linear_problem->getVariable(i)->setIC( xi_global_ic );
 	}
 
+	// set up dynamic porosity
+	assert(!Ogs6FemData::getInstance()->list_pm.empty());
+	_is_porosity_dynamic = (Ogs6FemData::getInstance()->list_pm[0]->porosity_model==2);
+	if (_is_porosity_dynamic) {
+		INFO("-> use dynamic porosity");
+		std::vector<MaterialLib::PorousMedia*>& vec_pm = Ogs6FemData::getInstance()->list_pm;
+		if (vec_pm.size()>1) {
+			throw "Dynamic porosity is not supported for multiple material groups";
+		}
+		MyIntegrationPointFunctionScalar *f_porosity = new MyIntegrationPointFunctionScalar();
+		f_porosity->initialize(dis);
+		// set initial porosity
+		for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
+			const MeshLib::IElement* e = msh->getElement(i_e);
+			MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[e->getGroupID()];
+			NumLib::TXPosition pos(NumLib::TXPosition::Element, i_e);
+			double porosity0 = 0.;
+			pm->porosity->eval(pos, porosity0);
+
+			FemLib::IFiniteElement *fe = _feObjects->getFeObject(*e);
+			const size_t n_gp = fe->getIntegrationMethod()->getNumberOfSamplingPoints();
+			f_porosity->setNumberOfIntegationPoints(i_e, n_gp);
+			for (size_t ip=0; ip<n_gp; ip++) {
+				f_porosity->setIntegrationPointValue(i_e, ip, porosity0);
+			}
+		}
+		for (size_t i=0; i<vec_pm.size(); i++) {
+			MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[i];
+			delete pm->porosity;
+			pm->porosity = f_porosity;
+		}
+		_porosity = f_porosity;
+	}
 
     // set up linear solution
 	for ( i=0; i < _n_eta; i++ )
@@ -281,6 +315,12 @@ bool FunctionReductConc<T1,T2>::initialize(const BaseLib::Options & option)
     _solution = new MyGIAReductionSolution(dis, _problem, this, _linear_problems, _linear_solutions, _non_linear_problem, _non_linear_solution);
 
     this->setOutput(Concentrations, _solution->getCurrentSolution(0));
+
+    //--------------------------------------------------------------------------
+    // set up data for output
+    //--------------------------------------------------------------------------
+    NumLib::TimeStep dummyTS;
+    output(dummyTS);
 
 
 #ifdef _DEBUG
@@ -334,6 +374,55 @@ void FunctionReductConc<T1, T2>::initializeTimeStep(const NumLib::TimeStep & tim
 	// set velocity for nonlinear problem as well
 	_non_linear_solution->getResidualFunction()->setVelocity(vel);
     _non_linear_solution->getDxFunction()->setVelocity(vel);
+
+    // update previous time step value
+	for (size_t i=0; i < _n_Comp; i++)
+		*_concentrations0[i] = *_concentrations[i];
+
+}
+
+template <class T1, class T2>
+void FunctionReductConc<T1, T2>::updatePorosity()
+{
+	assert(_is_porosity_dynamic);
+
+    Ogs6FemData* femData = Ogs6FemData::getInstance();
+    MeshLib::IMesh* msh = femData->list_mesh[_msh_id];
+    unsigned compID = 10;
+    MyNodalFunctionScalar* some_concentration = _concentrations[compID];
+    MyNodalFunctionScalar* some_concentration0 = _concentrations0[compID];
+
+    for (size_t i_e=0; i_e<msh->getNumberOfElements(); i_e++) {
+        const MeshLib::IElement* e = msh->getElement(i_e);
+        FemLib::IFiniteElement *fe = _feObjects->getFeObject(*e);
+        MathLib::LocalVector local_c(e->getNumberOfNodes());
+        MathLib::LocalVector local_c0(e->getNumberOfNodes());
+        for (size_t j=0; j<e->getNumberOfNodes(); j++) {
+            local_c[j] = some_concentration->getValue(e->getNodeID(j));
+            local_c0[j] = some_concentration0->getValue(e->getNodeID(j));
+        }
+        FemLib::IFemNumericalIntegration *integral = fe->getIntegrationMethod();
+        const size_t n_gp = integral->getNumberOfSamplingPoints();
+        MaterialLib::PorousMedia* pm = Ogs6FemData::getInstance()->list_pm[e->getGroupID()];
+        MyIntegrationPointFunctionScalar* f_porosity = (MyIntegrationPointFunctionScalar*)pm->porosity;
+        //f_porosity->setNumberOfIntegationPoints(i_e, n_gp);
+        double r[3] = {};
+        for (size_t ip=0; ip<n_gp; ip++) {
+            integral->getSamplingPoint(ip, r);
+            fe->computeBasisFunctions(r);
+            // concentration
+            double gpC = 0;
+            for (size_t j=0; j<e->getNumberOfNodes(); j++)
+                gpC += (*fe->getBasisFunction())(0, j) * local_c[j];
+            double gpC0 = 0;
+            for (size_t j=0; j<e->getNumberOfNodes(); j++)
+                gpC0 += (*fe->getBasisFunction())(0, j) * local_c0[j];
+            // calculate new porosity
+            double gp_porosity0 = f_porosity->getIntegrationPointValues(i_e)[ip];
+            double gp_porosity = gp_porosity0 * std::min(std::abs(gpC/gpC0), 1.0); //TODO
+            f_porosity->setIntegrationPointValue(i_e, ip, gp_porosity);
+        }
+    }
 }
 
 template <class T1, class T2>
@@ -341,6 +430,7 @@ void FunctionReductConc<T1, T2>::updateOutputParameter(const NumLib::TimeStep &/
 { 
    // convert eta and xi back to concentrations
     convert_eta_xi_to_conc();
+    this->setOutput(Concentrations, _solution->getCurrentSolution(0));
 }
 
 template <class T1, class T2>
@@ -356,6 +446,11 @@ void FunctionReductConc<T1, T2>::output(const NumLib::TimeStep &/*time*/)
 		OutputVariableInfo var1(this->getOutputParameterName(i), _msh_id, OutputVariableInfo::Node, OutputVariableInfo::Real, 1, _concentrations[i]);
         femData->outController.setOutput(var1.name, var1);
     }
+
+	if (_is_porosity_dynamic) {
+		OutputVariableInfo varPorosity("POROSITY", _msh_id, OutputVariableInfo::Element, OutputVariableInfo::Real, 1, _porosity);
+		femData->outController.setOutput(varPorosity.name, varPorosity);
+	}
 
 #ifdef _DEBUG
     // -----------debugging, output eta and xi----------------------
