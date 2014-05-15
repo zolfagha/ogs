@@ -80,6 +80,7 @@ public:
         double v_diff = .0;
         UnnamedParameterSet prev_parameter_table;
         do {
+        	v_diff = .0;
             //prev_parameter_table.assign(parameter_table);
             parameter_table.move(prev_parameter_table);
 
@@ -109,9 +110,18 @@ public:
                 is_converged = true;
                 for (size_t i=0; i<n_subproblems; i++) {
                     ICoupledSystem *problem = list_coupled_problems[i];
+                    std::vector<unsigned> vec_var_id;
+                    const size_t n_vars = prev_parameter_table.size();
+                    for (size_t j=0; j<n_vars; j++) {
+                        const ParameterProblemMappingTable::PairSysVarId &v = mapping._map_paraId2subproblem[j];
+                        const ICoupledSystem *tmp_problem = v.first;
+                        if (tmp_problem==problem) {
+                        	vec_var_id.push_back(j);
+                        }
+                    }
                     IConvergenceCheck* checker = problem->getConvergenceChecker();
                     double temp_diff = .0;
-                    bool is_this_converged = checker->isConverged(prev_parameter_table, parameter_table, getEpsilon(), temp_diff);
+                    bool is_this_converged = checker->isConverged(vec_var_id, prev_parameter_table, parameter_table, getEpsilon(), temp_diff);
                     v_diff = std::max(temp_diff, v_diff);
                     if (!is_this_converged) is_converged = false;
                 }

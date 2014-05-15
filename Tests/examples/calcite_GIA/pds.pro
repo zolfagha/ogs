@@ -1,7 +1,12 @@
 <?xml version="1.0"?>
 <ogs6>
+<processParameters>
+	<GROUNDWATER_FLOW TimeGroupID="0"/>
+	<HEAD_TO_ELEMENT_VELOCITY TimeGroupID="0"/>
+    <REACT_GIA TimeGroupID="0"/>
+</processParameters>
 <coupling>
-    <P algorithm="Serial" convergence="FemFunctionConvergenceCheck" max_itr="1" epsilon="1e-4">
+    <P algorithm="Serial" convergence="FemFunctionConvergenceCheck" max_itr="15" epsilon="1e-4">
         <out>HEAD</out>
         <out>VELOCITY</out>
         <out>Tracer</out>

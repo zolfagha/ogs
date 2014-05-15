@@ -1298,7 +1298,7 @@ std::ios::pos_type CMediumProperties::Read(std::ifstream* mmp_file)
                 break;
             case 1:       // k=const
                 in >> permeability_porosity_model_values[0];
-                mmp_file->ignore(MAX_ZEILE,'\n');
+                //mmp_file->ignore(MAX_ZEILE,'\n');
                 break;
             case 2:       // Model from Ming Lian
                 in >> permeability_porosity_model_values[0];

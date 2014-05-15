@@ -52,11 +52,12 @@ protected:
             q->getSamplingPoint(j, gp_x);
             fe->computeBasisFunctions(gp_x);
             fe->getRealCoordinates(real_x);
+            NumLib::TXPosition pos(NumLib::TXPosition::IntegrationPoint, e.getID(), j, real_x);
 
             LocalMatrix k;
-            pm->hydraulic_conductivity->eval(real_x, k);
+            pm->hydraulic_conductivity->eval(pos, k);
             LocalMatrix s;
-            pm->storage->eval(real_x, s);
+            pm->storage->eval(pos, s);
 
             fe->integrateWxN(j, s, localM);
             fe->integrateDWxDN(j, k, localK);

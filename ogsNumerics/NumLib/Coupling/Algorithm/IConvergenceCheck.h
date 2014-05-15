@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <vector>
 #include "NumLib/IOSystem/UnnamedParameterSet.h"
 
 namespace NumLib
@@ -25,7 +26,7 @@ class IConvergenceCheck
 public:
     virtual ~IConvergenceCheck() {};
 
-    virtual bool isConverged(UnnamedParameterSet& vars_prev, UnnamedParameterSet& vars_current, double eps, double &v_diff) = 0;
+    virtual bool isConverged(const std::vector<unsigned> &vec_var_id, UnnamedParameterSet& vars_prev, UnnamedParameterSet& vars_current, double eps, double &v_diff) = 0;
 };
 
 } //end

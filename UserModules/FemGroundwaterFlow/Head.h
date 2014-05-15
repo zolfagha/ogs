@@ -83,6 +83,7 @@ public:
     {
         // set default parameter name
         ProcessLib::AbstractTransientProcess::setOutputParameterName(Head, "Head");
+        _checker.addValueType(NumLib::DiscreteDataType::NodalScalar);
     };
 
     ///

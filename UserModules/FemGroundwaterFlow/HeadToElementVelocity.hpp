@@ -116,7 +116,7 @@ int FunctionHeadToElementVelocity<T>::solveTimeStep(const NumLib::TimeStep &/*ti
             fe->getRealCoordinates(xx);
 
             // calculate material parameter at this integration point
-            NumLib::TXPosition pos(NumLib::TXPosition::Element, e->getID(), &xx[0]);
+            NumLib::TXPosition pos(NumLib::TXPosition::IntegrationPoint, e->getID(), ip, &xx[0]);
             double k;
             pm->hydraulic_conductivity->eval(pos, k);
             MathLib::LocalMatrix local_k = MathLib::LocalMatrix::Identity(e->getDimension(), e->getDimension());

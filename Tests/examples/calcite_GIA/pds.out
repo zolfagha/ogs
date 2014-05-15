@@ -10,6 +10,8 @@ GeoSys-OUT: Output ------------------------------------------------
   HCO3-
   Calcite
   Dolomite(dis)
+ $ELE_VALUES
+  POROSITY
  $GEO_TYPE
   DOMAIN
  $DAT_TYPE
